@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<fieldset id="mybooks">
+    <legend>已订阅</legend>
+    {% set hasitem = [] %}
+    {% for book in books %}
+    {% if book.builtin and nickname in book.users %}
+    <div class="book">
+        <div class="titleRow">{{book.title}}</div>
+        <div class="cornerControls">
+            <a href="/unsubscribe/{{book.key().id()}}" class="actionButton">退订</a>
+        </div>
+        <div class="summaryRow">{{book.description}}</div>
+    </div>
+    {% do hasitem.append(1) %}
+    {% endif %}
+    {% endfor %}
+    {% if not hasitem %}
+    <p style="font-size:0.8em;color:grey;">暂时没有已订阅的书籍</p>
+    {% endif %}
+</fieldset>
+{% if ownfeeds %}
+<p></p>
+<fieldset id="ownfeeds">
+    <legend>自定义RSS</legend>
+    {% for feed in ownfeeds %}
+    <div class="book">
+        <div class="titleRow">{{feed.title}}</div>
+        <div class="cornerControls">
+            <a href="/delfeed/{{feed.key().id()}}" class="actionButton">删除</a>
+        </div>
+        <div class="summaryRow">{{feed.url}}</div>
+    </div>
+    {% endfor %}
+    <form action="" method="POST">
+    <div class="book">
+        <div class="titleRow">
+            <input type="text" name="t" placeholder="标题" />
+        </div>
+        <div class="cornerControls">
+            <input type="submit" value="添加" class="actionButton" />
+        </div>
+        <div class="summaryRow">
+            <input type="text" name="url" style="width:100%;"  placeholder="URL" />
+        </div>
+        {% if tips %}<p style="color:red;font-size:0.7em;">{{tips}}</p>{% endif %}
+    </div>
+    </form>
+</fieldset>
+{% endif %}
+<p></p>
+<fieldset id="books">
+    <legend>未订阅</legend>
+    {% set hasitem2 = [] %}
+    {% for book in books %}
+    {% if book.builtin and nickname not in book.users %}
+    <div class="book">
+        <div class="titleRow">{{book.title}}</div>
+        <div class="cornerControls">
+            <a href="/subscribe/{{book.key().id()}}" class="actionButton">订阅</a>
+        </div>
+        <div class="summaryRow">{{book.description}}</div>
+    </div>
+    {% do hasitem2.append(1) %}
+    {% endif %}
+    {% endfor %}
+    {% if not hasitem2 %}
+    <p style="font-size:0.8em;color:grey;">暂时没有未订阅的书籍</p>
+    {% endif %}
+</fieldset>
+{% endblock %}

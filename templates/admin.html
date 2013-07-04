@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block css %}
+<style type="text/css">
+.usrtb {
+background-color:#f0f0f0;
+border:1px dotted black;
+width:100%;
+border-collapse:collapse;
+}
+.usrtbhead {
+background-color:grey;
+color:white;
+}
+.usrrow .usrh {
+border:1px dotted grey;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<form id="chpwd" action="" method="POST">
+<fieldset id="fieldset_chpwd">
+    <legend>修改密码</legend>
+    {% if chpwdtips %}
+    <p style="color:red;font-size:0.8em;">{{chpwdtips}}</p>
+    {% endif %}
+    <table id="tb_chpwd">
+    <tr>
+        <td style="text-align:right;">原密码：</td>
+        <td><input type="password" name="op" id="orgpwd"></td>
+    </tr>
+    <tr>
+        <td style="text-align:right;">新密码：</td>
+        <td><input type="password" name="p1" id="newpwd1"></td>
+    </tr>
+    <tr>
+        <td style="text-align:right;">再次输入新密码：</td>
+        <td><input type="password" name="p2" id="newpwd2"></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td><input type="submit" value="Comfirm"></td>
+    </tr>
+    </table>
+</fieldset>
+</form>
+
+{% if nickname == 'admin' %}
+<form id="fmac" action="" method="POST">
+<fieldset id="fieldset_ac">
+    <legend>添加用户账号</legend>
+    {% if actips %}
+    <p style="color:red;font-size:0.8em;">{{actips}}</p>
+    {% endif %}
+    <table id="addcount">
+        <tr>
+            <td style="text-align:right;">用户名：</td>
+            <td><input type="text" name="u" id="username"></td>
+        </tr>
+        <tr>
+            <td style="text-align:right;">密码：</td>
+            <td><input type="text" name="up1" id="password"></td>
+        </tr>
+        <tr>
+            <td style="text-align:right;">再次输入密码：</td>
+            <td><input type="text" name="up2" id="password"></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><input type="submit" value="Add"></td>
+        </tr>
+    </table>
+    <p style="font-size:0.8em;color:grey;">因为GAE免费资源的有限，不建议添加很多用户账户。</p>
+</fieldset>
+</form>
+
+<fieldset id="fieldset_cm">
+    <legend>用户账号列表</legend>
+    <table id="tb_cm" class="usrtb">
+        <tr class="usrtbhead">
+        <th class="usrh">序号</th><th class="usrh">用户名</th>
+        <th class="usrh">使能发送</th>
+        <th class="usrh">-</th><th class="usrh">-</th>
+        </tr>
+        {% for u in users %}
+        <tr class="usrrow">
+        <th class="usrh">{{loop.index}}</th><th class="usrh">{{u.name}}</th>
+        <th class="usrh">{{u.enable_send}}</th>
+        <th class="usrh"><a href="/mgrpwd?u={{u.name}}">修改密码</a></th>
+        <th class="usrh"><a href="delaccount?u={{u.name}}">删除账户</a></th>
+        </tr>
+        {% endfor %}
+    </table>
+</fieldset>
+{% endif %}
+
+{% endblock %}

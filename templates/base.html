@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>{{title}} - Kindle's Ear</title>
+    <meta name="description" content="KindleEar is a service for Amazon Kindle owners that lets you aggregate feeds you chosen and have them delivered to your Kindle in a convenient, easy-to-navigate format." />
+    <link rel="stylesheet" href="/static/base.css" type="text/css" charset="utf-8"/>
+    {% block cssfiles %}{% endblock %}
+    {% block css %}{% endblock %}
+    {% block jsfiles %}{% endblock %}
+    {% block js %}{% endblock %}
+</head>
+{% block bodytag %}
+<body>
+{% endblock %}
+    <div id="header">
+        {% block header %}
+        <h1><a href="/">KindleEar<sup>&reg;</sup></a></h1>
+        {% if nickname %}
+          <a class="nav" href="/logout">退出</a>
+          <span style="color: #ccc;">&bull;</span>
+        <span>Hello, <a href="/admin"><strong>{{nickname}}</strong></a></span>
+        {% endif %}
+        <div class="clear"></div>
+        {% endblock %}
+    </div>
+    <div id="menubar">
+    {% block menubar %}
+    {% if nickname %}
+        <h2 id="categoryHeader"> 
+        {% if current == "my" %}
+        我的订阅
+        {% else %}
+        <a style="font-weight:normal;" href="/my">我的订阅</a>
+        {% endif %}
+        <span style="color: #ccc;">&bull;</span>
+        {% if current == "setting" %}
+        设置
+        {% else %}
+        <a style="font-weight:normal;" href="/setting">设置</a>
+        {% endif %}
+        <span style="color: #ccc;">&bull;</span>
+        {% if current == "logs" %}
+        投递日志
+        {% else %}
+        <a style="font-weight:normal;" href="/logs">投递日志</a>
+        {% endif %}
+        <span style="color: #ccc;">&bull;</span>
+        {% if current == "admin" %}
+        账户管理
+        {% else %}
+        <a style="font-weight:normal;" href="/admin">账户管理</a>
+        {% endif %}
+        <span style="color: #ccc;">&bull;</span>
+        {% if current == "feedback" %}
+        反馈
+        {% else %}
+        <a style="font-weight:normal;" href="/feedback">反馈</a>
+        {% endif %}
+        </h2>
+    {% else %}
+        <h2 style="text-align:center;padding:10px 0;"><a href="/login">请先登陆</a></h2>
+    {% endif %}
+    {% endblock %}
+    </div>
+    <div id="content">
+    {% block content %}
+    {% endblock %}
+    </div>
+    <div id="footer">
+        {% block footer %}
+        <div class="clear"></div>
+        2013 &copy; KindleEar | <a href="https://github.com/cdhigh/kindleear">Github page</a>
+        {% endblock %}
+    </div>
+</body>
+</html>

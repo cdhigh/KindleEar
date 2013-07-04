@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <p>KindleEar是一个将RSS订阅收集并制作成杂志MOBI格式发送至您的Kindle设备上的GAE托管应用网站，让新闻时评社论笑料随你走。</p>
+    <p>
+    1、此网站在GAE上仅使用Python在线生成MOBI。作者费了九牛二虎之力抽取了Calibre的MOBI生成模块用于在线生成杂志格式的MOBI。<br /><br />
+    2、此网站的应用代码定位为个人搭建自己的推送服务器，并且可以提供给三五好友同时使用，不开放注册，只能由管理员先添加账号然后告知朋友登录后使用。<br /><br />
+    3、使用 <a href="https://github.com/cdhigh/kindleear" rel="external">开源的KindleEar程序</a> 你可以在GAE服务器上下载包含图片的RSS订阅或网页到你的Kindle。杂志格式界面，优美排版精美方便阅读。<br /><br />
+    4、网站开发中，开发完成后开放全部代码，包括使用Python生成Mobi的模块。
+    </p>
+{% endblock %}

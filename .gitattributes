@@ -1,0 +1,4 @@
+# Disable LF normalization for all files
+* text=auto
+*.pyc -text
+*.py text

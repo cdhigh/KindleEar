@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{#
+{% block bodytag %}
+<body onload="gobackafter(5)">
+{% endblock %}
+#}
+
+{% block js %}
+<script type="text/javascript">
+function gobackafter(secs){
+ if(--secs > 0){
+    setTimeout("gobackafter(" + secs + ");", 1000);
+ }
+ else{
+    history.go(-1);
+ }
+}
+gobackafter(5);
+</script>
+{% endblock %}
+
+{% block menubar %}
+{% endblock %}
+
+{% block content %}
+    {% if tips %}
+    <p style="font-size:0.9em;">{{tips}}</p>
+    {% endif %}
+    <p>5秒钟后自动返回上一页... <a href="javascript:history.go(-1);">点击直接返回</a></p><br />
+{% endblock %}

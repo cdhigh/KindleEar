@@ -1,0 +1,11 @@
+cron:
+- description: add deliver task to queue
+  url: /deliver
+  schedule: every 1 hours
+  timezone: America/Sao_Paulo
+
+- description: remove old logs
+  url: /removelogs
+  schedule: every day 03:00
+  timezone: America/Sao_Paulo
+  

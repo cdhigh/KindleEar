@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if logs and logs.count() %}
+<em class="required">*</em> 只显示最后10条日志<br />
+<table class="logs_list" border="0" cellspacing="0" cellpadding="0">
+    <thead>
+    <tr>
+        <th>时间</th>
+        <th class="center">Book</th>
+        <th>附件大小</th>
+        <th>收件人</th>
+        <th class="center">状态</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for log in logs %}
+    <tr>
+        <td>{{ log.time }}</td>
+        <td class="center">{{ log.book }}</td>
+        {#<td>{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>#}
+        <td>{{ log.size }}</td>
+        <td>{{ log.to }}</td>
+        <td class="center">{% if log.status %}{{ log.status }}{% else %}ok{% endif %}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>还没有投递过</p>
+{% endif %}
+
+{% endblock %}

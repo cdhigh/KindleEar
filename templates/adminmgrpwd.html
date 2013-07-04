@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block menubar %}
+{% endblock %}
+{% block content %}
+    {% if tips %}
+    <p style="color:red;font-weight:bold;">{{tips}}</p>
+    {% endif %}
+    <form action="" method="POST">
+    <table id="mgrpwd">
+        <tr>
+            <td>Username: </td>
+            {% if username %}
+            <td><input type="text" name="u" id="username" value={{username}}></td>
+            {% else %}
+            <td><input type="text" name="u" id="username"></td>
+            {% endif %}
+        </tr>
+        <tr>
+            <td>New password: </td>
+            <td><input type="password" name="p1" id="password"></td>
+        </tr>
+        <tr>
+            <td>Comfirm new password: </td>
+            <td><input type="password" name="p2" id="password"></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><input type="submit" value="Comfirm"></td>
+        </tr>
+    </table>
+    </form>
+{% endblock %}

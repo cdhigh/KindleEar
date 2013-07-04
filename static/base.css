@@ -1,0 +1,264 @@
+body {
+    font-family: '微软雅黑',YaHeiConsolas,'Microsoft YaHei', 'Helvetica', 'Arial', sans-serif;
+    font-size: 100%;
+    max-width: 750px;
+    min-width: 300px;
+    margin:5px auto 0;
+    padding: 0 5px;
+    background-color: #f4f4f4;
+    position: relative;
+}
+
+input,select {
+    font-size: 100%;
+}
+
+a { color: #00c; text-decoration: underline; }
+a:visited { color: #00c; }
+
+.error {
+    color:red;
+}
+.success{
+    color:green;
+}
+.clear{
+    clear:both;
+}
+
+h2{
+    font-size:1.5em;
+}
+
+h2 a{
+    text-decoration:none;
+}
+
+.btn{
+    padding:2px 4px;
+}
+.required{
+    color:red;
+}
+
+#header{
+    border-bottom: 2px solid #444;
+}
+
+#header h1{
+    float:left;
+    width:45%;
+    margin:0;
+    font-size:160%;
+}
+
+#header h1 sup, sup.beta{
+    font-size:50%;
+    color:red;
+}
+
+#header h1 a{
+    color:#000;
+    text-decoration:none;
+}
+
+#header span,#header a.nav{
+    float:right;
+    font-size:18px;
+    text-align:right;
+    margin-left:4px;
+}
+
+.grey{
+    color: #555; 
+    font-size: 13px; 
+    margin-bottom: 20px;
+}
+
+#content{
+    margin:10px 0;
+}
+
+#set_frm fieldset{
+    background:#F8F8F8;
+    padding:20px;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    border-radius: 8px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #DDDDDD;
+    margin:15px 0
+}
+.save_btn{
+    text-align:center
+}
+.save_btn .btn{
+    padding:5px 10px;
+}
+.logs_list{
+    border-spacing: 0;
+    border-collapse: collapse;
+    background:#F8F8F8;
+    width:100%;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    border-radius: 8px;
+}
+.logs_list td,.logs_list th{
+    font-size: 13px;
+    padding:3px 10px;
+    border: 1px solid #e6e6e6;
+}
+
+.logs_list td{
+    line-height: 25px;
+    text-align: left;
+    padding-left: 10px;
+}
+.logs_list th{
+    font-weight: bold;
+    color: #333;
+    line-height: 25px;
+    text-align: left;
+    padding-left: 10px;
+}
+
+.logs_list .center{
+    text-align:center;
+}
+.logs_list strong{font-weight: bold;color:#005DA7;}
+.logs_list caption{
+    font-size: 16px;
+    text-align: left;
+    padding: 5px 10px;
+    border: 1px solid #e6e6e6;
+}
+
+#content {
+    min-height: 300px;
+}
+#footer{
+    margin-top:10px;
+    text-align: center;
+    border-top: 1px solid #444;
+}
+
+.bookmarklet {
+    display: inline-block;
+    font-family: 'Lucida Grande', Verdana, sans-serif;
+    font-weight: bold;
+    font-size: 11px;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+    color: #fff;
+    background-color: #626262;
+    border: 1px solid #626262;
+    padding: 0px 7px 1px 7px;
+    text-shadow: #3b3b3b 1px 1px 0px;
+    min-width: 62px;
+    text-align: center;
+    vertical-align: 2px;
+}
+a.bookmarket, a.bookmarklet:hover, a.bookmarklet:active, a.bookmarklet:visited { 
+    color: #fff; text-decoration: none; outline: none;
+}
+.bookmarklet:focus { outline: none; }
+
+a.inactive_bookmarklet, a.inactive_bookmarklet:hover, a.inactive_bookmarklet:active, a.inactive_bookmarklet:visited {
+    background-color: #f8f8f8;
+    border-color: #aaa;
+    color: #444;
+    text-shadow: none;
+}
+
+.bookmarklet:hover, .active_bookmarklet, a.inactive_bookmarklet:hover, a.active_bookmarklet:hover, a.active_bookmarklet:active, a.active_bookmarklet:visited {
+    background-color: #626262;                
+    border-color: #626262;
+    text-shadow: #3b3b3b 1px 1px 0px;
+    color: #fff;
+}
+
+table.tb_cm {
+    background-color:yellow;
+    border:1px dotted black;
+    width:80%;
+    border-collapse:collapse;
+}
+table.tb_cm tr.tb_cm_tr_th {
+    background-color:orange;
+    color:white;
+}
+#menubar {
+    text-align:center;
+}
+
+fieldset {
+-webkit-border-radius: 8px;
+-moz-border-radius: 8px;
+border-radius: 8px;
+padding: 3px 3px 3px 3px;
+}
+legend {
+  padding: 0.2em 0.5em;
+  border:1px solid green;
+  color:green;
+  font-size:80%;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+}
+.actionButton,
+.actionButton:visited,
+.actionButton:active {
+    font-family: 'Lucida Grande', Verdana, Helvetica, Arial, sans-serif;
+    display: inline-block;
+    padding: 5px 5px;
+    margin: 2px;
+    font-size: 11px;
+    text-align: center;
+    text-decoration: none;
+    color: #555;
+    background-color: #f8f8f8;
+    border: 1px solid #ccc;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.actionButton:hover {
+    text-decoration: none;
+}
+
+.book {
+    border:1px solid #ccc;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+    padding: 3px 3px 3px 3px;
+}
+.titleRow {
+    font-size:1.1em;
+    font-weight:bold;
+    margin-bottom:1px;
+    margin-top:1px;
+    float: left;
+    padding-top: 3px;
+    padding-left:3px;
+    width:200px;
+    clear:both;
+}
+.summaryRow {
+    font-size: 13px;
+    color: #555;
+    margin-top: 10px;
+    margin-left:6px;
+    padding-right:26px;
+    clear:both;
+}
+.cornerControls {
+    float: right;
+    text-align: right;
+    /*padding-top: 3px;*/
+}

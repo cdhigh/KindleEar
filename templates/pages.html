@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <title>{{ title }} ({{ time }})</title>
+    <style type="text/css">
+    body{
+        font-size: 1.1em;
+        margin:0 5px;
+    }
+    h1{
+        font-size:4em;
+        font-weight:bold;
+    }
+    h2 {
+        font-size: 1.2em;
+        font-weight: bold;
+        margin:0;
+    }
+    a {
+        color: inherit;
+        text-decoration: inherit;
+        cursor: default
+    }
+    a[href] {
+        color: blue;
+        text-decoration: underline;
+        cursor: pointer
+    }
+    p{
+        text-indent:1.5em;
+        line-height:1.3em;
+        margin-top:0;
+        margin-bottom:0;
+    }
+    .italic {
+        font-style: italic
+    }
+    .do_article_title{
+        line-height:1.5em;
+        page-break-before: always;
+    }
+    #cover{
+        text-align:center;
+    }
+    #toc{
+        page-break-before: always;
+    }
+    #content{
+        page-break-before: always;
+    }
+    .section_list{
+        page-break-before: always;
+    }
+    </style>
+    <guide>
+        <reference type="start" title="start" href="#content"></reference>
+        <reference type="toc" title="toc" href="#toc"></reference>
+        <reference type="text" title="cover" href="#cover"></reference>
+    </guide>
+</head>
+<body>
+    <div id="cover">
+        <a href="#content">Go straight to first item</a><br />
+        <h1 id="title">{{ title }}</h1>
+        {{ time }}<br />
+    </div>
+    <div id="toc">
+        <h2>Pages:</h2> 
+        <ol> 
+          {% for page in pages %}
+            <li><a href="#article_{{page.idx}}" id="toc_{{page.idx}} }}">{{page.title}}</a></li>
+          {% endfor %}
+        </ol> 
+    </div>
+    <div id="content">
+      {% for page in pages %}
+        <div id="article_{{page.idx}}" class="article">
+            <h2 class="do_article_title">
+              <a href="#toc_{{page.idx}}">{{page.title}}</a>
+            </h2>
+            <div>{{page.content}}</div>
+            <div> <a href="#toc_{{page.idx}}">[To table of content.]</a></div>
+        </div>
+      {% endfor %}
+    </div>
+</body>
+</html>

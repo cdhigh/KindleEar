@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block menubar %}
+{% endblock %}
+{% block content %}
+    {% if tips %}
+    <p style="color:red;font-weight:bold;">{{tips}}</p>
+    {% endif %}
+    <form action="" method="POST">
+    <table id="delaccount">
+        <tr>
+            <td>Username: </td>
+            {% if username %}
+            <td><input type="text" name="u" id="username" readonly="true" value={{username}}></td>
+            {% else %}
+            <td><input type="text" name="u" id="username"></td>
+            {% endif %}
+        </tr>
+        <tr>
+            <td></td>
+            <td><input type="submit" value="Delete it"></td>
+        </tr>
+    </table>
+    </form>
+{% endblock %}
