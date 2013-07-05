@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-SrcEmail = "akindleear@gmail.com"
-TIMEZONE = 8
-OWNFEEDS_TITLE = 'KindleEar'
+SrcEmail = "akindleear@gmail.com"  #邮件的发件人地址
+DEFAULT_COVER = "cv_default.jpg" #如果书籍没有封面，则使用此封面，留空则不添加封面
+TIMEZONE = 8 #管理员的时区
+OWNFEEDS_TITLE = 'KindleEar' #自定义RSS的默认标题，后续可以在网页上修改
 OWNFEEDS_DESC = 'RSS delivering from KindleEar'
 
 import os, datetime, logging, re, random, __builtin__, hashlib
@@ -31,7 +32,7 @@ from memcachestore import *
 from books import BookClasses, BookClass
 from books.base import BaseFeedBook
 
-__Version__ = "1.0"
+__Version__ = "1.1"
 __Author__ = "Arroz"
 
 log.setLevel(logging.INFO if IsRunInLocal else logging.WARN)
@@ -168,7 +169,7 @@ class BaseHandler:
             
     def SendToKindle(self, emails, title, booktype, attachment, tz=TIMEZONE):
         self.deliverlog(emails, title, len(attachment), tz=tz)
-        mail.send_mail(SrcEmail, emails, "Deliver", "GAE",
+        mail.send_mail(SrcEmail, emails, "KindleEar", "Deliver from KindlerEar",
                 attachments=[("%s(%s).%s"%(title,local_time('%Y-%m-%d-%H-%M',tz=tz),booktype), attachment),])
         
         
@@ -574,9 +575,10 @@ class Worker(BaseHandler):
         oeb.manifest.add(id, href, 'image/gif')
         oeb.guide.add('masthead', 'Masthead Image', href)
         
-        if book.coverfile:
-            id, href = oeb.manifest.generate('cover', book.coverfile)
-            item = oeb.manifest.add(id, href, MimeFromFilename(book.coverfile))
+        coverfile = book.coverfile if book.coverfile else DEFAULT_COVER
+        if coverfile:
+            id, href = oeb.manifest.generate('cover', coverfile)
+            item = oeb.manifest.add(id, href, MimeFromFilename(coverfile))
             oeb.guide.add('cover', 'Cover', href)
             oeb.metadata.add('cover', id)
             
