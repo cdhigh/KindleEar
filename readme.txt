@@ -1,4 +1,4 @@
-﻿一、这是一个运行在Google App Engine(GAE)上的Kindle个人推送服务器，生成排版精美的杂志模式MOBI格式自动每天推送至您的kindle，
+一、这是一个运行在Google App Engine(GAE)上的Kindle个人推送服务器，生成排版精美的杂志模式MOBI格式自动每天推送至您的kindle，
     此网站应用目前的功能有：
     1.支持类似calibre的recipe格式的自定义RSS收集，需要写代码，需要有一点点python基础
     2.自定义RSS，不需要python基础，直接输入RSS链接和标题即可自动推送
@@ -26,4 +26,4 @@
       app_name.appspot.com (app_name是你申请的application名字)
       开始您的个人推送服务了。
       注：初始用户为admin，密码为admin，建议登陆后及时修改密码。
-�
+
