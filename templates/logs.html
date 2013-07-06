@@ -6,21 +6,21 @@
 <table class="logs_list" border="0" cellspacing="0" cellpadding="0">
     <thead>
     <tr>
-        <th>时间</th>
-        <th class="center">Book</th>
-        <th>附件大小</th>
-        <th>收件人</th>
+        <th class="center">时间</th>
+        <th class="center">书籍标题</th>
+        <th class="center">附件大小</th>
+        <th class="center">收件人</th>
         <th class="center">状态</th>
     </tr>
     </thead>
     <tbody>
     {% for log in logs %}
     <tr>
-        <td>{{ log.time }}</td>
+        <td class="center">{{ log.time }}</td>
         <td class="center">{{ log.book }}</td>
-        {#<td>{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>#}
-        <td>{{ log.size }}</td>
-        <td>{{ log.to }}</td>
+        {#<td class="center">{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>#}
+        <td class="center">{{ log.size }}</td>
+        <td class="center">{{ log.to }}</td>
         <td class="center">{% if log.status %}{{ log.status }}{% else %}ok{% endif %}</td>
     </tr>
     {% endfor %}

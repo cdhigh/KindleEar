@@ -25,10 +25,10 @@ class Qiushibaike(WebpageBook):
     remove_attrs = []
     
     feeds = [
-            (u'8小时最热', r'http://www.qiushibaike.com'),
+            #(u'8小时最热', r'http://www.qiushibaike.com'),
             (u'24小时最热Page1', r'http://www.qiushibaike.com/hot'),
             (u'24小时最热Page2', r'http://www.qiushibaike.com/hot/page/2'),
-            (u'哈哈MX', r'http://www.haha.mx/'),
+            #(u'哈哈MX', r'http://www.haha.mx/'),
             (u'哈哈MX(24Hrs)Page1', r'http://www.haha.mx/good/day'),
             (u'哈哈MX(24Hrs)Page2', r'http://www.haha.mx/good/day/2'),
            ]

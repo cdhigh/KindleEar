@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-SrcEmail = "akindleear@gmail.com"  #邮件的发件人地址
-DEFAULT_COVER = "cv_default.jpg" #如果书籍没有封面，则使用此封面，留空则不添加封面
-TIMEZONE = 8 #管理员的时区
-OWNFEEDS_TITLE = 'KindleEar' #自定义RSS的默认标题，后续可以在网页上修改
-OWNFEEDS_DESC = 'RSS delivering from KindleEar'
+__Version__ = "1.2"
+__Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
 from collections import OrderedDict
@@ -26,14 +23,13 @@ from google.appengine.ext import db
 from google.appengine.api import taskqueue
 from google.appengine.api import memcache
 
+from config import *
+
 from makeoeb import *
 from memcachestore import *
 
 from books import BookClasses, BookClass
 from books.base import BaseFeedBook
-
-__Version__ = "1.1"
-__Author__ = "Arroz"
 
 log.setLevel(logging.INFO if IsRunInLocal else logging.WARN)
 
@@ -168,9 +164,17 @@ class BaseHandler:
             dl.put()
             
     def SendToKindle(self, emails, title, booktype, attachment, tz=TIMEZONE):
+        if PINYIN_FILENAME:
+            from calibre.ebooks.unihandecode.unidecoder import Unidecoder
+            decoder = Unidecoder()
+            filename = decoder.decode(title)
+        else:
+            filename = title
+        filename = "%s(%s).%s"%(filename,local_time('%Y-%m-%d_%H-%M',tz=tz),booktype)
+        
         self.deliverlog(emails, title, len(attachment), tz=tz)
         mail.send_mail(SrcEmail, emails, "KindleEar", "Deliver from KindlerEar",
-                attachments=[("%s(%s).%s"%(title,local_time('%Y-%m-%d-%H-%M',tz=tz),booktype), attachment),])
+                attachments=[(filename, attachment),])
         
         
 class Home(BaseHandler):
@@ -216,11 +220,11 @@ class Admin(BaseHandler):
         users=KeUser.all() if user.name == 'admin' else None
         if op is not None and p1 is not None and p2 is not None: #修改密码
             if user.passwd != hashlib.md5(op).hexdigest():
-                tips = "The Orginal password is wrong!"
+                tips = u"原密码错误！"
             elif p1 != p2:
-                tips = "The two passwords are different!"
+                tips = u"两次输入的新密码不匹配！"
             else:
-                tips = "Change password success!"
+                tips = u"密码修改成功！"
                 user.passwd = hashlib.md5(p1).hexdigest()
                 user.put()
             return jjenv.get_template('admin.html').render(nickname=session.username,
@@ -229,14 +233,14 @@ class Admin(BaseHandler):
             if user.name != 'admin':
                 raise web.seeother(r'/')
             elif not u:
-                tips = "Username is empty!"
+                tips = u"用户名为空！"
             elif up1 != up2:
-                tips = "The two passwords are different!"
-            elif KeUser.gql("where name='%s'"%u).count()>0:
-                tips = "The username is already exist!"
+                tips = u"两次输入的密码不匹配！"
+            elif KeUser.gql("where name='%s'" % u).count() > 0:
+                tips = u"用户名已经存在！"
             else:
                 ownfeeds = Book(title=OWNFEEDS_TITLE,description=OWNFEEDS_DESC,
-                    builtin=False)
+                    builtin=False,keep_image=True)
                 ownfeeds.put()
                 au = KeUser(name=u,passwd=hashlib.md5(up1).hexdigest())
                 au.kindle_email = ''
@@ -248,7 +252,7 @@ class Admin(BaseHandler):
                 au.ownfeeds = ownfeeds
                 au.put()
                 
-                tips = "Add a count success!"
+                tips = u"添加用户账号成功！"
             return jjenv.get_template('admin.html').render(nickname=session.username,
                 title="Admin",current='admin',user=user,users=users,actips=tips)
         else:
@@ -262,7 +266,7 @@ class Login(BaseHandler):
         u = KeUser.gql("where name='admin'").get()
         if not u:
             ownfeeds = Book(title=OWNFEEDS_TITLE,description=OWNFEEDS_DESC,
-                    builtin=False)
+                    builtin=False,keep_image=True)
             ownfeeds.put()
             au = KeUser(name='admin',passwd=hashlib.md5('admin').hexdigest())
             au.kindle_email = ''
@@ -273,9 +277,9 @@ class Login(BaseHandler):
             au.expires = None
             au.ownfeeds = ownfeeds
             au.put()
-            tips = "Please use admin/admin to login at first time."
+            tips = u"初次登陆请使用用户名'admin'/密码'admin'登陆。"
         else:
-            tips = "Please input username and password to login."
+            tips = u"请输入正确的用户名和密码登陆进入系统。"
         
         if session.login == 1:
             web.seeother(r'/')
@@ -285,28 +289,32 @@ class Login(BaseHandler):
     def POST(self):
         name, passwd = web.input().get('u'), web.input().get('p')
         if name.strip() == '':
-            tips = "The username is empty!"
+            tips = u"用户名为空！"
             return jjenv.get_template("login.html").render(nickname='',
                 title='Login',tips=tips)
-        elif len(name) > 15:
-            tips = "The username is too long!"
+        elif len(name) > 25:
+            tips = u"用户名限制为25个字符！"
             return jjenv.get_template("login.html").render(nickname='',
                 title='Login',tips=tips,username=name)
         elif '<' in name or '>' in name or '&' in name:
-            tips = "The username contains chars invalid!"
+            tips = u"用户名包含非法字符！"
             return jjenv.get_template("login.html").render(nickname='',
                 title='Login',tips=tips)
         
         pwdhash = hashlib.md5(passwd).hexdigest()
-        u = KeUser.gql("where name='%s' and passwd='%s'" % (name, pwdhash))
-        if u.count() > 0:
+        u = KeUser.gql("where name='%s' and passwd='%s'" % (name, pwdhash)).get()
+        if u:
             session.login = 1
             session.username = name
+            if u.expires: #用户自动续期
+                u.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
+                u.put()
             raise web.seeother(r'/')
         else:
-            tips = "The username is not exist or password is wrong!"
+            tips = u"用户名不存在或密码错误！"
             session.login = 0
             session.username = ''
+            session.kill()
             return jjenv.get_template("login.html").render(nickname='',
                 title='Login',tips=tips,username=name)
             
@@ -322,7 +330,7 @@ class AdminMgrPwd(BaseHandler):
     def GET(self):
         self.login_required('admin')
         name = web.input().get('u')
-        tips = "Please input the new password and confirm!"
+        tips = u"请输入新的密码并确认！"
         return jjenv.get_template("adminmgrpwd.html").render(nickname=session.username,
             title='Change password',tips=tips,username=name)
         
@@ -332,15 +340,15 @@ class AdminMgrPwd(BaseHandler):
         if name:
             u = KeUser.gql("where name=:1", name).get()
             if not u:
-                tips = "Username '%s' not found!"
+                tips = u"用户名'%s'不存在！" % name
             elif p1 != p2:
-                tips = "Passwords you input are diffrent!"
+                tips = u"两次输入的密码不相符！"
             else:
                 u.passwd = hashlib.md5(p1).hexdigest()
                 u.put()
-                tips = "Success!"
+                tips = u"密码修改成功！"
         else:
-            tips = "Username is empty!"
+            tips = u"用户名不能为空！"
             
         return jjenv.get_template("adminmgrpwd.html").render(nickname=session.username,
             title='Change password',tips=tips,username=name)
@@ -351,7 +359,7 @@ class DelAccount(BaseHandler):
         name = web.input().get('u')
         
         if session.username == 'admin' or (name and name == session.username):
-            tips = "Please confirm you will delete the account below!"
+            tips = u"请确认是否要删除此账号！"
             return jjenv.get_template("delaccount.html").render(nickname=session.username,
                 title='Delete account',tips=tips,username=name)
         else:
@@ -363,7 +371,7 @@ class DelAccount(BaseHandler):
         if name and (session.username == 'admin' or session.username == name):
             u = KeUser.gql("where name='%s'" % (name))
             if u.count() == 0:
-                tips = "Username '%s' not found!" % name
+                tips = u"用户名'%s'不存在！" % name
             else:
                 for eu in u:
                     ownfeeds = eu.ownfeeds
@@ -380,9 +388,9 @@ class DelAccount(BaseHandler):
                 if session.username == name:
                     raise web.seeother('/logout')
                 else:
-                    tips = "Success!"
+                    tips = u"删除成功！"
         else:
-            tips = "Username is empty or you don't have right to delete the account!"
+            tips = u"用户名为空或你没有权限删除此账号！"
         return jjenv.get_template("delaccount.html").render(nickname=session.username,
             title='Delete account',tips=tips,username=name)
 
@@ -399,7 +407,7 @@ class MySubscription(BaseHandler):
         title = web.input().get('t')
         url = web.input().get('url')
         if not title or not url:
-            return self.GET('title or url is empty!')
+            return self.GET(u'标题和URL都不能为空！')
         
         assert user.ownfeeds
         Feed(title=title,url=url,book=user.ownfeeds).put()
@@ -489,7 +497,7 @@ class Deliver(BaseHandler):
                         params={"id":book.key().id(), "type":user.book_type, 'emails':user.kindle_email})
                     sentcnt += 1
             return jjenv.get_template("autoback.html").render(nickname=session.username,
-                title='Delivering',tips='%d books put to queue!'%sentcnt)
+                title='Delivering',tips=u'%d本书籍已放入推送队列！'%sentcnt)
         
         #定时cron调用
         for book in books:
@@ -518,7 +526,7 @@ class Deliver(BaseHandler):
                 taskqueue.add(url='/worker', queue_name="deliverqueue1",method='GET',
                     params={"id":book.key().id(), "type":"epub", 'emails': emails})
         return jjenv.get_template("autoback.html").render(nickname=session.username,
-                title='Delivering',tips='%d books put to queue!'%sentcnt)
+                title='Delivering',tips=u'%d本书已经放入推送队列！'%sentcnt)
         
 class Worker(BaseHandler):
     def GET(self):

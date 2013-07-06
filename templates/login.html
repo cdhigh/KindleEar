@@ -8,13 +8,14 @@
 {% endblock %}
 
 {% block content %}
+    <pre><p> </p></pre>
     {% if tips %}
     <p style="color:red;font-size:0.8em;">{{tips}}</p>
     {% endif %}
     <form action="/login" method="POST">
     <table id="login">
         <tr>
-            <td>Username: </td>
+            <td style="text-align:right;">用户名：</td>
             {% if username %}
             <td><input type="text" name="u" id="username" value={{username}} /></td>
             {% else %}
@@ -22,15 +23,15 @@
             {% endif %}
         </tr>
         <tr>
-            <td>Password: </td>
+            <td style="text-align:right;">密码：</td>
             <td><input type="password" name="p" id="password" /></td>
         </tr>
         <tr>
             <td></td>
-            <td><input type="submit" value="LOGIN" onclick="javascript:return check();window.close();" target="_parent" /></td>
+            <td><input type="submit" value="确认登陆" onclick="javascript:return check();window.close();" target="_parent" /></td>
         </tr>
     </table>
     </form>
     <pre><p> </p><p> </p><p> </p></pre>
-    <p style="color:grey;font-size:0.7em;text-align:center;">本站不开放注册，需要管理员先添加账号然后才能使用对应账号登录使用相应服务。</p>
+    <p style="color:grey;font-size:0.8em;text-align:center;">本站不开放注册，需要管理员先添加账号然后才能使用对应账号登录使用相应服务。</p>
 {% endblock %}

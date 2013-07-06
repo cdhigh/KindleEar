@@ -21,7 +21,7 @@
     <fieldset id="kindle_fieldset">
         <legend>基本设置</legend>
         <p>
-            <label>Kindle E-mail("name"@free.kindle.com)<em class="required">*</em></label><br />
+            <label>Kindle E-mail("name"@free.kindle.com or @iduokan.com)<em class="required">*</em></label><br />
             <input type="text" name="kindle_email" style="width:240px" value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" />{% if success and not user.kindle_email %}<em style="color:red;font-size:80%">此项不能为空</em>{% endif %}
         </p>
         <p>

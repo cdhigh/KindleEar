@@ -20,7 +20,8 @@ class FolhaDeSaopaulo(BaseFeedBook):
     keep_only_tags = []
     remove_tags = []
     remove_ids = ['articleBy','ad-180x150-1','editing_controls']
-    remove_classes = ['adLabel','gallery']
+    remove_classes = ['adLabel','gallery','mediaIcons','hide','navigation',
+                'logo sprite','toolbar','breadcrumb']
     remove_attrs = []
     
     feeds = [
