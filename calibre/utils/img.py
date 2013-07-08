@@ -25,7 +25,7 @@ def identify_data(data):
     return (width, height, fmt)
     
     
-def rescale_image(data, maxsizeb=2*1024*1024, dimen=None, png2jpg=True):
+def rescale_image(data, maxsizeb=2*1024*1024, dimen=None, png2jpg=False):
     '''
     Convert image setting all transparent pixels to white and changing format
     to JPEG. Ensure the resultant image has a byte size less than
@@ -49,14 +49,14 @@ def rescale_image(data, maxsizeb=2*1024*1024, dimen=None, png2jpg=True):
         else:
             width = height = dimen
         img.thumbnail((width, height))
-        if fmt != 'JPEG' and fmt != 'GIF':
+        if png2jpg and fmt == 'PNG':
             fmt = 'JPEG'
         data = StringIO()
         img.save(data, fmt)
     elif width > 600 or height > 800:
         ratio = min(600.0/float(width), 800.0/float(height))
         img = img.resize((int(width*ratio), int(height*ratio)))
-        if fmt != 'JPEG' and fmt != 'GIF':
+        if png2jpg and fmt == 'PNG':
             fmt = 'JPEG'
         data = StringIO()
         img.save(data, fmt)
