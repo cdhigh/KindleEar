@@ -11,12 +11,14 @@ from lib.readability.readability import Document
 from urlopener import URLOpener
 import chardet
 
+from config import ALWAYS_CHAR_DETECT
+
 class AutoDecoder:
     def __init__(self):
         self.encoding = None
     def decode(self, content):
         result = content
-        if self.encoding: # 先使用上次的编码打开文件尝试
+        if not ALWAYS_CHAR_DETECT and self.encoding: # 先使用上次的编码打开文件尝试
             try:
                 result = content.decode(self.encoding)
             except UnicodeDecodeError: # 解码错误，使用自动检测编码
@@ -132,6 +134,9 @@ class BaseFeedBook:
     #------------------------------------------------------------
     # 下面的内容为类实现细节
     #------------------------------------------------------------
+    def __init__(self, log=None):
+        self.log = default_log if log is None else log
+        
     @classmethod
     def urljoin(self, base, url):
         #urlparse.urljoin()处理有..的链接有点问题，此函数修正此问题。
@@ -177,16 +182,22 @@ h1{font-weight:bold;}
         """ return list like [(section,title,url),..] """
         urls = []
         opener = URLOpener(self.host)
-        decoder = AutoDecoder()
+        prevsection = ''
         for section, url in self.feeds:
+            if section != prevsection or prevsection == '':
+                decoder = AutoDecoder() #每个RSS聚合都重新探测编码
+            prevsection = section
+            
             result = opener.open(url)
-            if result.status_code == 200:
+            if result.status_code == 200 and result.content:
                 if self.feed_encoding:
                     feed = feedparser.parse(result.content.decode(self.feed_encoding))
                 else:
                     feed = feedparser.parse(decoder.decode(result.content))
                 for e in feed['entries'][:self.max_articles_per_feed]:
                     urls.append((section,e.title,e.link))
+            else:
+                self.log.warn('fetch rss failed(err:%d):%s'%(result.status_code,url))
         return urls
         
     def Items(self):
@@ -197,11 +208,15 @@ h1{font-weight:bold;}
         """
         urls = self.ParseFeedUrls()
         cnt4debug = 0
-        decoder = AutoDecoder()
+        prevsection = ''
         for section, ftitle, url in urls:
+            if section != prevsection or prevsection == '':
+                decoder = AutoDecoder() #每个小节都重新探测编码
+            prevsection = section
+            
             cnt4debug += 1
-            if IsRunInLocal and cnt4debug > 1:
-                break
+            #if IsRunInLocal and cnt4debug > 1:
+            #    break
             
             fulltext = self.readability if self.fulltext_by_readability else self.fulltext
             
@@ -223,7 +238,7 @@ h1{font-weight:bold;}
         result = opener.open(url)
         status_code, content = result.status_code, result.content
         if status_code != 200 or not content:
-            logging.error('err(%d) to fetch %s.' % (status_code,url))
+            self.log.warn('fetch article failed(%d):%s.' % (status_code,url))
             return
             
         if self.page_encoding:
@@ -238,17 +253,19 @@ h1{font-weight:bold;}
         summary = doc.summary(html_partial=True)
         title = doc.short_title()
         title = self.processtitle(title)
-        html = self.FragToXhtml(summary, title, addtitleinbody=True)
+        if summary.startswith('<body'): #readability解析出错
+            html = content
+        else:
+            html = self.FragToXhtml(summary, title, addtitleinbody=True)
         
         #因为现在只剩文章内容了，使用BeautifulSoup也不会有什么性能问题
-        if self.keep_image:
-            soup = BeautifulSoup(html)
+        soup = BeautifulSoup(html)
+        self.soupbeforeimage(soup)
+        
+        for cmt in soup.findAll(text=lambda text:isinstance(text, Comment)):
+            cmt.extract
             
-            for cmt in soup.findAll(text=lambda text:isinstance(text, Comment)):
-                cmt.extract
-            
-            self.soupbeforeimage(soup)
-            
+        if self.keep_image:    
             for img in soup.findAll('img'):
                 imgurl = img['src']
                 if not imgurl.startswith('http') and not imgurl.startswith('www'):
@@ -265,8 +282,18 @@ h1{font-weight:bold;}
                             fnimg = "%d.%s" % (random.randint(10000,99999999), imgtype)
                         img['src'] = fnimg
                         yield (imgmime, imgurl, fnimg, imgcontent)
-                        
-        yield (title, None, None, html)
+                else:
+                    self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
+                    img.extract()
+        else:
+            for img in soup.findAll('img'):
+                img.extract()
+        
+        self.soupprocessex(soup)
+        content = soup.renderContents('utf-8').decode('utf-8')
+        soup = None
+        
+        yield (title, None, None, content)
         
     def fulltext(self, url, decoder):
         #因为图片文件占内存，为了节省内存，这个函数也做为生成器
@@ -276,7 +303,7 @@ h1{font-weight:bold;}
         result = opener.open(url)
         status_code, content = result.status_code, result.content
         if status_code != 200 or not content:
-            logging.error('err(%d) to fetch %s.' % (status_code,url))
+            self.log.warn('fetch article failed(%d):%s.' % (status_code,url))
             return
         
         if self.page_encoding:
@@ -290,7 +317,7 @@ h1{font-weight:bold;}
         try:
             title = soup.html.head.title.string
         except AttributeError:
-            logging.error('object soup invalid!(%s)'%url)
+            self.log.warn('object soup invalid!(%s)'%url)
             return
             
         title = self.processtitle(title)
@@ -366,6 +393,9 @@ h1{font-weight:bold;}
                             fnimg = "%d.%s" % (random.randint(10000,99999999), imgtype)
                         img['src'] = fnimg
                         yield (imgmime, imgurl, fnimg, imgcontent)
+                else:
+                    self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
+                    img.extract()
         else:
             for img in soup.findAll('img'):
                 img.extract()
@@ -392,7 +422,7 @@ class FulltextFeedBook(BaseFeedBook):
             result = opener.open(url)
             status_code, content = result.status_code, result.content
             if status_code != 200 and content:
-                logging.error('err(%d) to fetch %s.' % (status_code,url))
+                self.log.warn('fetch article failed(%d):%s.' % (status_code,url))
                 continue
             
             if self.feed_encoding:
@@ -408,9 +438,9 @@ class FulltextFeedBook(BaseFeedBook):
                 desc = self.postprocess(e.description)
                 desc = self.FragToXhtml(desc, e.title, self.feed_encoding)
                 
+                soup = BeautifulSoup(content)
+                self.soupbeforeimage(soup)
                 if self.keep_image:
-                    soup = BeautifulSoup(content)
-                    self.soupbeforeimage(soup)
                     for img in soup.findAll('img'):
                         imgurl = img['src']
                         if not imgurl.startswith('http') and not imgurl.startswith('www'):
@@ -427,9 +457,16 @@ class FulltextFeedBook(BaseFeedBook):
                                     fnimg = "%d.%s" % (random.randint(10000,99999999), imgtype)
                                 img['src'] = fnimg
                                 yield (imgmime, imgurl, fnimg, imgcontent)
+                        else:
+                            self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
+                            img.extract()
+                            
                     self.soupprocessex(soup)
                     desc = soup.renderContents('utf-8').decode('utf-8')
                     soup = None
+                else:
+                    for img in soup.findAll('img'):
+                        img.extract()
                 
                 if e.title not in itemsprocessed and desc:
                     itemsprocessed.append(e.title)
@@ -456,7 +493,7 @@ class WebpageBook(BaseFeedBook):
             result = opener.open(url)
             status_code, content = result.status_code, result.content
             if status_code != 200 or not content:
-                logging.error('err(%d) to fetch %s.' % (status_code,url))
+                self.log.warn('fetch article failed(%d):%s.' % (status_code,url))
                 continue
             
             if self.page_encoding:
@@ -470,7 +507,7 @@ class WebpageBook(BaseFeedBook):
             try:
                 title = soup.html.head.title.string
             except AttributeError:
-                logging.error('object soup invalid!(%s)'%url)
+                self.log.warn('object soup invalid!(%s)'%url)
                 continue
             
             title = self.processtitle(title)
@@ -544,6 +581,9 @@ class WebpageBook(BaseFeedBook):
                                 fnimg = "%d.%s" % (random.randint(10000,99999999), imgtype)
                             img['src'] = fnimg
                             yield (imgmime, imgurl, fnimg, imgcontent)
+                    else:
+                        self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
+                        img.extract()                
             else:
                 for img in soup.findAll('img'):
                     img.extract()

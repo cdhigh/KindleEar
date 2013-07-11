@@ -86,8 +86,7 @@ class TAGX(object): # {{{
 
 # }}}
 
-# Index Entries {{{
-
+# Index Entries {{{    
 class IndexEntry(object):
 
     TAG_VALUES = {
@@ -128,7 +127,7 @@ class IndexEntry(object):
         return ('IndexEntry(offset=%r, depth=%r, length=%r, index=%r,'
                 ' parent_index=%r)')%(self.offset, self.depth, self.length,
                         self.index, self.parent_index)
-
+    
     @dynamic_property
     def size(self):
         def fget(self): return self.length
@@ -179,13 +178,18 @@ class IndexEntry(object):
                     bm = TAGX.BITMASKS[tag]
                     flags |= bm
             buf.write(bytes(bytearray([flags])))
-
+        
         for tag in self.tag_nums:
             attr = self.attr_for_tag(tag)
             val = getattr(self, attr)
             if isinstance(val, int):
                 val = [val]
             for x in val:
+                if int(x) < 0:
+                    z = ''
+                    for y in val:
+                        z += " " + str(y)
+                    raise NExec('a:%s x:%d z:%s' % (attr,int(x),z))
                 buf.write(encint(x))
 
         if self.control_byte_count == 2:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.2.1"
+__Version__ = "1.3"
 __Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
@@ -9,10 +9,7 @@ from collections import OrderedDict
 
 # for debug
 IsRunInLocal = ("localhost" == os.environ.get('SERVER_NAME', None))
-if IsRunInLocal:
-    log = logging.getLogger("mobi")
-else:
-    log = logging.getLogger()
+log = logging.getLogger()
 __builtin__.__dict__['default_log'] = log
 __builtin__.__dict__['IsRunInLocal'] = IsRunInLocal
 
@@ -30,6 +27,9 @@ from memcachestore import *
 
 from books import BookClasses, BookClass
 from books.base import BaseFeedBook
+
+#reload(sys)
+#sys.setdefaultencoding('utf-8')
 
 log.setLevel(logging.INFO if IsRunInLocal else logging.WARN)
 
@@ -158,24 +158,30 @@ class BaseHandler:
         for email in emails:
             user = KeUser.gql("where kindle_email = :1", email).get()
             name = user.name if user else ''
+            timezone = user.timezone if user else tz
             dl = DeliverLog(username=name, to=email, size=size,
-               time=local_time(tz=tz), datetime=datetime.datetime.utcnow(),
+               time=local_time(tz=timezone), datetime=datetime.datetime.utcnow(),
                book=book, status=status)
             dl.put()
             
     def SendToKindle(self, emails, title, booktype, attachment, tz=TIMEZONE):
-        if PINYIN_FILENAME:
+        if not isinstance(emails, list):
+            emails = [emails,]
+            
+        if PINYIN_FILENAME: # 将中文文件名转换为拼音
             from calibre.ebooks.unihandecode.unidecoder import Unidecoder
             decoder = Unidecoder()
-            filename = decoder.decode(title)
+            basename = decoder.decode(title)
         else:
-            filename = title
-        filename = "%s(%s).%s"%(filename,local_time('%Y-%m-%d_%H-%M',tz=tz),booktype)
+            basename = title
         
-        self.deliverlog(emails, title, len(attachment), tz=tz)
-        mail.send_mail(SrcEmail, emails, "KindleEar", "Deliver from KindlerEar",
+        for email in emails:
+            user = KeUser.gql("where kindle_email = :1", email).get()
+            tz = user.timezone if user else TIMEZONE
+            filename = "%s(%s).%s"%(basename,local_time('%Y-%m-%d_%H-%M',tz=tz),booktype)
+            mail.send_mail(SrcEmail, email, "KindleEar", "Deliver from KindlerEar",
                 attachments=[(filename, attachment),])
-        
+            self.deliverlog(email, title, len(attachment), tz=tz)
         
 class Home(BaseHandler):
     def GET(self):
@@ -557,12 +563,13 @@ class Worker(BaseHandler):
             book.title = bk.title
             book.description = bk.description
             book.language = bk.language
-            book.feed_encoding = bk.feed_encoding
-            book.page_encoding = bk.page_encoding
+            #book.feed_encoding = bk.feed_encoding
+            #book.page_encoding = bk.page_encoding
             book.mastheadfile = bk.mastheadfile
             book.coverfile = bk.coverfile
             book.keep_image = bk.keep_image
             book.fulltext_by_readability = True
+            book.feeds = []
             for feed in feeds:
                 book.feeds.append((feed.title, feed.url))
         
@@ -589,34 +596,42 @@ class Worker(BaseHandler):
             item = oeb.manifest.add(id, href, MimeFromFilename(coverfile))
             oeb.guide.add('cover', 'Cover', href)
             oeb.metadata.add('cover', id)
-            
-        pages, idx = [], 0
+        
+        itemcnt = 0
         sections = OrderedDict()
         # 对于html文件，变量名字自文档
-        # 对于图片文件，catalog为图片mime,url为原始链接,title为文件名,content为二进制内容
+        # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
         for section, url, title, content in book.Items():
+            if not section or not title or not content:
+                continue
+            
             if section.startswith(r'image/'):
                 id, href = oeb.manifest.generate(id='img', href=title)
                 item = oeb.manifest.add(id, href, section, data=content)
             else:
-                id, href = oeb.manifest.generate(id='feed', href='feed%d.htm'%idx)
+                id, href = oeb.manifest.generate(id='feed', href='feed%d.htm'%itemcnt)
                 item = oeb.manifest.add(id, href, 'text/html', data=content)
                 oeb.spine.add(item, True)
-                sections.setdefault(section, []).append((title, item))
-            idx += 1
-            
-        if idx > 0: # 建立TOC，杂志模式需要为两层目录结构
+                sections.setdefault(section, [])
+                sections[section].append((title, item))
+                itemcnt += 1
+                
+        if itemcnt > 0: # 建立TOC，杂志模式需要为两层目录结构
             for sec in sections.keys():
                 sectoc = oeb.toc.add(sec, sections[sec][0][1].href)
                 for title, a in sections[sec]:
                     sectoc.add(title, a.href)
             
+            #mail.send_mail(SrcEmail, "chsqyuan@hotmail.com", "ZIP", "KindlerEar",
+            #    attachments=[("ker%s.doc"%local_time('%Y-%m-%d_%H-%M',tz=-3), str(zo.getvalue())),])
+                
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()
             o.convert(oeb, oIO, opts, log)
             self.SendToKindle(emails, book.title, booktype, str(oIO.getvalue()))
             return "%s(%s).%s Sent!<br />"%(book.title,local_time(),booktype)
         else:
+            self.deliverlog(emails, book.title, 0, status='nonews')
             return "No new feeds.<br />"
         
         
