@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.3"
+__Version__ = "1.3.1"
 __Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
 from collections import OrderedDict
 
 # for debug
-IsRunInLocal = ("localhost" == os.environ.get('SERVER_NAME', None))
+IsRunInLocal = (os.environ.get('SERVER_NAME', None)=="localhost")
 log = logging.getLogger()
 __builtin__.__dict__['default_log'] = log
 __builtin__.__dict__['IsRunInLocal'] = IsRunInLocal
@@ -569,7 +569,6 @@ class Worker(BaseHandler):
             book.coverfile = bk.coverfile
             book.keep_image = bk.keep_image
             book.fulltext_by_readability = True
-            book.feeds = []
             for feed in feeds:
                 book.feeds.append((feed.title, feed.url))
         
@@ -585,10 +584,11 @@ class Worker(BaseHandler):
         oeb.container = ServerContainer(log)
         
         #guide
-        mhfile = book.mastheadfile if book.mastheadfile else 'mh_default.gif'    
-        id, href = oeb.manifest.generate('masthead', mhfile) # size:600*60
-        oeb.manifest.add(id, href, 'image/gif')
-        oeb.guide.add('masthead', 'Masthead Image', href)
+        mhfile = book.mastheadfile if book.mastheadfile else DEFAULT_MASTHEAD
+        if mhfile:
+            id, href = oeb.manifest.generate('masthead', mhfile) # size:600*60
+            oeb.manifest.add(id, href, 'image/gif')
+            oeb.guide.add('masthead', 'Masthead Image', href)
         
         coverfile = book.coverfile if book.coverfile else DEFAULT_COVER
         if coverfile:
@@ -622,9 +622,6 @@ class Worker(BaseHandler):
                 for title, a in sections[sec]:
                     sectoc.add(title, a.href)
             
-            #mail.send_mail(SrcEmail, "chsqyuan@hotmail.com", "ZIP", "KindlerEar",
-            #    attachments=[("ker%s.doc"%local_time('%Y-%m-%d_%H-%M',tz=-3), str(zo.getvalue())),])
-                
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()
             o.convert(oeb, oIO, opts, log)
@@ -633,7 +630,6 @@ class Worker(BaseHandler):
         else:
             self.deliverlog(emails, book.title, 0, status='nonews')
             return "No new feeds.<br />"
-        
         
 class Mylogs(BaseHandler):
     def GET(self):

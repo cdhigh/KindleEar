@@ -1,17 +1,22 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+"""
+电子书基类，每本投递到kindle的书籍抽象为这里的一个类
+
+"""
 
 import os, re, urllib, urlparse, random, imghdr, logging
 from urllib2 import *
+import chardet
 from google.appengine.api import urlfetch
 
 from lib.BeautifulSoup import BeautifulSoup, Tag, Comment
 from lib import feedparser
 from lib.readability.readability import Document
 from urlopener import URLOpener
-import chardet
+from asyncurlfetch import AsyncURLFetchManager
 
-from config import ALWAYS_CHAR_DETECT
+from config import ALWAYS_CHAR_DETECT, USE_ASYNC_URLFETCH
 
 class AutoDecoder:
     def __init__(self):
@@ -207,46 +212,85 @@ h1{font-weight:bold;}
         对于图片，mime,url,filename,content
         """
         urls = self.ParseFeedUrls()
-        cnt4debug = 0
+        fulltext = self.readability if self.fulltext_by_readability else self.fulltext
         prevsection = ''
-        for section, ftitle, url in urls:
-            if section != prevsection or prevsection == '':
-                decoder = AutoDecoder() #每个小节都重新探测编码
-            prevsection = section
+        if USE_ASYNC_URLFETCH:
+            rpcs = []
+            async = AsyncURLFetchManager()
+            for section, ftitle, url in urls:
+                rpcs.append((section,ftitle,url,async.fetch_async(url)))
             
-            cnt4debug += 1
-            #if IsRunInLocal and cnt4debug > 1:
-            #    break
-            
-            fulltext = self.readability if self.fulltext_by_readability else self.fulltext
-            
-            #如果是图片，title则是mime
-            for title, imgurl, imgfn, content in fulltext(url, decoder):
-                if title.startswith(r'image/'): #图片
-                    yield (title, imgurl, imgfn, content)
-                else:
-                    if not title:
-                        title = ftitle
-                    content =  self.postprocess(content)
-                    assert content
-                    yield (section, url, title, content)
-            
-    def readability(self, url, decoder):
-        #使用readability-lxml处理全文信息
-        #因为图片文件占内存，为了节省内存，这个函数也做为生成器
+            for section, ftitle, url, rpc in rpcs:
+                if section != prevsection or prevsection == '':
+                    decoder = AutoDecoder() #每个小节都重新探测编码
+                    prevsection = section
+                try:
+                    resp = rpc.get_result()
+                    status_code, content = resp.status_code, resp.content
+                    if status_code != 200 or not content:
+                        self.log.warn('async fetch article failed(%d):%s.' % (status_code,url))
+                        continue
+                        
+                    if self.page_encoding:
+                        article = content.decode(self.page_encoding)
+                    else:
+                        article = decoder.decode(content)
+                    
+                    #如果是图片，title则是mime
+                    for title, imgurl, imgfn, content in fulltext(article):
+                        if title.startswith(r'image/'): #图片
+                            yield (title, imgurl, imgfn, content)
+                        else:
+                            if not title:
+                                title = ftitle
+                            content =  self.postprocess(content)
+                            assert content
+                            yield (section, url, title, content)
+                    
+                except urlfetch.DownloadError,e:
+                    self.log.warn('%s:%s.' % (str(e),url))
+        else:
+            for section, ftitle, url in urls:
+                if section != prevsection or prevsection == '':
+                    decoder = AutoDecoder() #每个小节都重新探测编码
+                    prevsection = section
+                
+                article = self.fetcharticle(url, decoder)
+                if not article:
+                    continue
+                
+                #如果是图片，title则是mime
+                for title, imgurl, imgfn, content in fulltext(article):
+                    if title.startswith(r'image/'): #图片
+                        yield (title, imgurl, imgfn, content)
+                    else:
+                        if not title:
+                            title = ftitle
+                        content =  self.postprocess(content)
+                        assert content
+                        yield (section, url, title, content)
+    
+    def fetcharticle(self, url, decoder):
+        #获取一篇文章
+        if self.fulltext_by_instapaper and not self.fulltext_by_readability:
+            url = "http://www.instapaper.com/m?u=%s" % self.url_unescape(url)
+        
         opener = URLOpener(self.host)
         result = opener.open(url)
         status_code, content = result.status_code, result.content
         if status_code != 200 or not content:
             self.log.warn('fetch article failed(%d):%s.' % (status_code,url))
-            return
-            
-        if self.page_encoding:
-            content = content.decode(self.page_encoding)
-        else:
-            content = decoder.decode(content)
+            return None
         
-        content = self.preprocess(content)
+        if self.page_encoding:
+            return content.decode(self.page_encoding)
+        else:
+            return decoder.decode(content)
+        
+    def readability(self, article):
+        #使用readability-lxml处理全文信息
+        #因为图片文件占内存，为了节省内存，这个函数也做为生成器
+        content = self.preprocess(article)
         
         # 提取正文
         doc = Document(content)
@@ -265,7 +309,8 @@ h1{font-weight:bold;}
         for cmt in soup.findAll(text=lambda text:isinstance(text, Comment)):
             cmt.extract
             
-        if self.keep_image:    
+        if self.keep_image:
+            opener = URLOpener(self.host)
             for img in soup.findAll('img'):
                 imgurl = img['src']
                 if not imgurl.startswith('http') and not imgurl.startswith('www'):
@@ -295,23 +340,9 @@ h1{font-weight:bold;}
         
         yield (title, None, None, content)
         
-    def fulltext(self, url, decoder):
+    def fulltext(self, article):
         #因为图片文件占内存，为了节省内存，这个函数也做为生成器
-        if self.fulltext_by_instapaper:
-            url = "http://www.instapaper.com/m?u=%s" % self.url_unescape(url)
-        opener = URLOpener(self.host)
-        result = opener.open(url)
-        status_code, content = result.status_code, result.content
-        if status_code != 200 or not content:
-            self.log.warn('fetch article failed(%d):%s.' % (status_code,url))
-            return
-        
-        if self.page_encoding:
-            content = content.decode(self.page_encoding)
-        else:
-            content = decoder.decode(content)
-        
-        content = self.preprocess(content)
+        content = self.preprocess(article)
         soup = BeautifulSoup(content)
         
         try:
@@ -376,6 +407,7 @@ h1{font-weight:bold;}
             cmt.extract
         
         if self.keep_image:
+            opener = URLOpener(self.host)
             self.soupbeforeimage(soup)
             for img in soup.findAll('img'):
                 imgurl = img['src']

@@ -25,7 +25,8 @@ def identify_data(data):
     return (width, height, fmt)
     
     
-def rescale_image(data, maxsizeb=2*1024*1024, dimen=None, png2jpg=False):
+def rescale_image(data, maxsizeb=2*1024*1024, dimen=None, 
+                png2jpg=False, graying=True):
     '''
     Convert image setting all transparent pixels to white and changing format
     to JPEG. Ensure the resultant image has a byte size less than
@@ -42,7 +43,9 @@ def rescale_image(data, maxsizeb=2*1024*1024, dimen=None, png2jpg=False):
     img = Image.open(data)
     width, height = img.size
     fmt = img.format
-    
+    if graying:
+        img = img.convert("L")
+        
     if dimen is not None:
         if hasattr(dimen, '__len__'):
             width, height = dimen
@@ -72,7 +75,7 @@ def mobify_image(data):
 
     if fmt == 'png':
         if not isinstance(data, StringIO):
-            data = StringIO(data)        
+            data = StringIO(data)
         im = Image.open(data)
         data = StringIO()
         im.save(data, 'GIF')

@@ -37,9 +37,12 @@ class Resources(object):
     def process_image(self, data):
         if not self.process_images:
             return data
-        return (mobify_image(data) if self.opts.mobi_keep_original_images else
-                rescale_image(data))
-
+        if self.opts.mobi_keep_original_images:
+            return mobify_image(data)
+        else:
+            return rescale_image(data, png2jpg=self.opts.image_png_to_jpg,
+                            graying=self.opts.graying_image))
+        
     def add_resources(self, add_fonts):
         oeb = self.oeb
         oeb.logger.info('Serializing resources...')
