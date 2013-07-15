@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.3.2"
+__Version__ = "1.3.3"
 __Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
@@ -185,7 +185,8 @@ class BaseHandler:
         
 class Home(BaseHandler):
     def GET(self):
-        return jjenv.get_template('home.html').render(nickname=session.username,title="Home")
+        return jjenv.get_template('home.html').render(nickname=session.username,
+            title="Home",version=__Version__)
 
 class Setting(BaseHandler):
     def GET(self, success=False):
@@ -312,7 +313,7 @@ class Login(BaseHandler):
         if u:
             session.login = 1
             session.username = name
-            if u.expires: #用户自动续期
+            if u.expires: #用户登陆后自动续期
                 u.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
                 u.put()
             raise web.seeother(r'/')

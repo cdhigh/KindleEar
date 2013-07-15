@@ -233,9 +233,9 @@ legend {
 
 .book {
     border:1px solid #ccc;
-    -webkit-border-radius: 8px;
-    -moz-border-radius: 8px;
-    border-radius: 8px;
+    -webkit-border-radius: 9px;
+    -moz-border-radius: 9px;
+    border-radius: 9px;
     padding: 3px 3px 3px 3px;
 }
 .titleRow {
