@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.3.1"
+__Version__ = "1.3.2"
 __Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
@@ -89,7 +89,7 @@ class Book(db.Model):
     keep_image = db.BooleanProperty()
     
     def feeds(self):
-        return Feed.gql('where book = :1', self.key())
+        return Feed.all().filter('book = ', self.key())
 
 class KeUser(db.Model): # kindleEar User
     name = db.StringProperty(required=True)
@@ -120,12 +120,12 @@ class DeliverLog(db.Model):
     
 def StoreBookToDb():
     for book in BookClasses():  #添加内置书籍
-        b = Book.gql("where title = '%s'" % book.title)
-        if b.count() == 0:
+        b = Book.all().filter("title = ", book.title).get()
+        if not b:
             b = Book(title=book.title,description=book.description,builtin=True)
             b.put()
     
-    for bk in Book.gql('where builtin=:1',True): #clean
+    for bk in Book.all().filter('builtin = ', True): #clean
         found = False
         for book in BookClasses():
             if book.title == bk.title:
@@ -147,7 +147,7 @@ class BaseHandler:
     
     def getcurrentuser(self):
         self.login_required()
-        u = KeUser.gql("where name='%s'" % session.username).get()
+        u = KeUser.all().filter("name = ", session.username).get()
         if not u:
             raise web.seeother(r'/')
         return u
@@ -156,7 +156,7 @@ class BaseHandler:
         if not isinstance(emails, list):
             emails = [emails,]
         for email in emails:
-            user = KeUser.gql("where kindle_email = :1", email).get()
+            user = KeUser.all().filter("kindle_email = ", email).get()
             name = user.name if user else ''
             timezone = user.timezone if user else tz
             dl = DeliverLog(username=name, to=email, size=size,
@@ -176,7 +176,7 @@ class BaseHandler:
             basename = title
         
         for email in emails:
-            user = KeUser.gql("where kindle_email = :1", email).get()
+            user = KeUser.all().filter("kindle_email = ", email).get()
             tz = user.timezone if user else TIMEZONE
             filename = "%s(%s).%s"%(basename,local_time('%Y-%m-%d_%H-%M',tz=tz),booktype)
             mail.send_mail(SrcEmail, email, "KindleEar", "Deliver from KindlerEar",
@@ -242,7 +242,7 @@ class Admin(BaseHandler):
                 tips = u"用户名为空！"
             elif up1 != up2:
                 tips = u"两次输入的密码不匹配！"
-            elif KeUser.gql("where name='%s'" % u).count() > 0:
+            elif KeUser.all().filter("name = ", u).get():
                 tips = u"用户名已经存在！"
             else:
                 ownfeeds = Book(title=OWNFEEDS_TITLE,description=OWNFEEDS_DESC,
@@ -269,7 +269,7 @@ class Login(BaseHandler):
         # 第一次登陆时如果没有管理员帐号，
         # 则增加一个管理员帐号admin，密码admin，后续可以修改密码
         tips = ''
-        u = KeUser.gql("where name='admin'").get()
+        u = KeUser.all().filter("name = ", 'admin').get()
         if not u:
             ownfeeds = Book(title=OWNFEEDS_TITLE,description=OWNFEEDS_DESC,
                     builtin=False,keep_image=True)
@@ -308,7 +308,7 @@ class Login(BaseHandler):
                 title='Login',tips=tips)
         
         pwdhash = hashlib.md5(passwd).hexdigest()
-        u = KeUser.gql("where name='%s' and passwd='%s'" % (name, pwdhash)).get()
+        u = KeUser.all().filter("name = ", name).filter("passwd = ", pwdhash).get()
         if u:
             session.login = 1
             session.username = name
@@ -344,7 +344,7 @@ class AdminMgrPwd(BaseHandler):
         self.login_required('admin')
         name, p1, p2 = web.input().get('u'),web.input().get('p1'),web.input().get('p2')
         if name:
-            u = KeUser.gql("where name=:1", name).get()
+            u = KeUser.all().filter("name = ", name).get()
             if not u:
                 tips = u"用户名'%s'不存在！" % name
             elif p1 != p2:
@@ -375,15 +375,14 @@ class DelAccount(BaseHandler):
         self.login_required()
         name = web.input().get('u')
         if name and (session.username == 'admin' or session.username == name):
-            u = KeUser.gql("where name='%s'" % (name))
-            if u.count() == 0:
+            u = KeUser.all().filter("name = ", name).get()
+            if not u:
                 tips = u"用户名'%s'不存在！" % name
             else:
-                for eu in u:
-                    ownfeeds = eu.ownfeeds
-                    if ownfeeds:
-                        ownfeeds.delete()
-                    eu.delete()
+                ownfeeds = u.ownfeeds
+                if ownfeeds:
+                    ownfeeds.delete()
+                u.delete()
                 
                 # 要删掉数据库中订阅记录
                 for book in Book.all():
@@ -406,7 +405,8 @@ class MySubscription(BaseHandler):
         user = self.getcurrentuser()
         ownfeeds = user.ownfeeds.feeds() if user and user.ownfeeds else None
         return jjenv.get_template("my.html").render(nickname=session.username,current='my',
-                title='My subscription',books=Book.all(),ownfeeds=ownfeeds,tips=tips)
+                title='My subscription',books=Book.all().filter("builtin = ",True),
+                ownfeeds=ownfeeds,tips=tips)
     
     def POST(self): # 添加自定义RSS
         user = self.getcurrentuser()
@@ -449,7 +449,7 @@ class Unsubscribe(BaseHandler):
             return "the id is invalid!<br />"
             
         bk = Book.all().ancestor(db.Key.from_path("Book", id)).get()
-        #bk = Book.gql("where title = :1", title).get()
+        #bk = Book.all().filter("title = ", title).get()
         if not bk:
             return "the book(%d) not exist!<br />" % id
         
@@ -480,7 +480,7 @@ class Renew(BaseHandler):
         name = web.input().get('u')
         if (name and name != 'admin'
             and (session.username == 'admin' or name == session.username)):
-            user = KeUser.gql("where name = :1", name).get()
+            user = KeUser.all().filter("name = ", name).get()
             if user:
                 user.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
                 user.put()
@@ -497,7 +497,7 @@ class Deliver(BaseHandler):
             for book in books:
                 if username not in book.users:
                     continue
-                user = KeUser.gql("where name = :1", username).get()
+                user = KeUser.all().filter("name = ", username).get()
                 if user and user.kindle_email:
                     taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
                         params={"id":book.key().id(), "type":user.book_type, 'emails':user.kindle_email})
@@ -513,7 +513,7 @@ class Deliver(BaseHandler):
             mobiemails = []
             epubemails = []
             for u in book.users:
-                user = KeUser.gql("where enable_send = :1 and name = :2", True, u).get()
+                user = KeUser.all().filter("enable_send = ",True).filter("name = ", u).get()
                 if user:
                     h = int(local_time("%H", user.timezone)) + 1
                     h = h - 24 if h > 24 else h
@@ -634,10 +634,7 @@ class Worker(BaseHandler):
 class Mylogs(BaseHandler):
     def GET(self):
         user = self.getcurrentuser()
-        if user.name == 'admin':
-            logs = DeliverLog.gql("where username = '%s' ORDER BY time DESC limit 10" % 'admin')
-        else:
-            logs = DeliverLog.gql("where username = '%s' ORDER BY time DESC limit 10" % user.name)
+        logs = DeliverLog.all().filter("username = ", 'admin').order('-time').fetch(limit=10)
         return jjenv.get_template("logs.html").render(nickname=session.username,
             title='Deliver log', current='logs', logs=logs)
     

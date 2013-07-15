@@ -5,7 +5,7 @@
     <legend>已订阅</legend>
     {% set hasitem = [] %}
     {% for book in books %}
-    {% if book.builtin and nickname in book.users %}
+    {% if nickname in book.users %}
     <div class="book">
         <div class="titleRow">{{book.title}}</div>
         <div class="cornerControls">
@@ -54,7 +54,7 @@
     <legend>未订阅</legend>
     {% set hasitem2 = [] %}
     {% for book in books %}
-    {% if book.builtin and nickname not in book.users %}
+    {% if nickname not in book.users %}
     <div class="book">
         <div class="titleRow">{{book.title}}</div>
         <div class="cornerControls">

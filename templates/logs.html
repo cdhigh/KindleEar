@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% if logs and logs.count() %}
+{% if logs %}
 <em class="required">*</em> 只显示最后10条日志<br />
 <table class="logs_list" border="0" cellspacing="0" cellpadding="0">
     <thead>
