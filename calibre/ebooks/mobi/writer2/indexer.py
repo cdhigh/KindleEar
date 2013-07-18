@@ -185,11 +185,6 @@ class IndexEntry(object):
             if isinstance(val, int):
                 val = [val]
             for x in val:
-                if int(x) < 0:
-                    z = ''
-                    for y in val:
-                        z += " " + str(y)
-                    raise NExec('a:%s x:%d z:%s' % (attr,int(x),z))
                 buf.write(encint(x))
 
         if self.control_byte_count == 2:

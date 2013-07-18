@@ -24,6 +24,7 @@
       比如：c:\python27\python.exe appcfg.py update c:\kindleear
       依次输入邮箱和密码，等结束后就可以打开域名：
       app_name.appspot.com (app_name是你申请的application名字)
+      比如作者的网站域名为：kindleear.appspot.com
       开始您的个人推送服务了。
       注：初始用户为admin，密码为admin，建议登陆后及时修改密码。
 

@@ -18,8 +18,8 @@
     <tr>
         <td class="center">{{ log.time }}</td>
         <td class="center">{{ log.book }}</td>
-        {#<td class="center">{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>#}
-        <td class="center">{{ log.size }}</td>
+        <td class="center">{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>
+        {#<td class="center">{{ log.size }}</td>#}
         <td class="center">{{ log.to }}</td>
         <td class="center">{% if log.status %}{{ log.status }}{% else %}ok{% endif %}</td>
     </tr>

@@ -138,11 +138,13 @@ def build_exth(metadata, prefer_author_sort=False, is_periodical=False,
             nrecs += 1
 
     # Add a publication date entry
+    datestr = None
     if metadata['date']:
         datestr = str(metadata['date'][0])
     elif metadata['timestamp']:
         datestr = str(metadata['timestamp'][0])
-    else:
+    
+    if not datestr:
         raise ValueError("missing date or timestamp")
 
     datestr = bytes(datestr)

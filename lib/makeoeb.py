@@ -20,22 +20,40 @@ from calibre.utils.bytestringio import byteStringIO
 from calibre.ebooks.oeb.base import OEBBook
 from calibre.ebooks.conversion.preprocess import HTMLPreProcessor
 
+def MimeFromFilename(f):
+    #从文件名生成MIME
+    f = f.lower()
+    if f.endswith('.gif') or f.endswith('.png'):
+        return r"image/"+f[-1:-4]
+    elif f.endswith('.jpg') or f.endswith('.jpeg'):
+        return r"image/jpeg"
+    else:
+        return ''
+
 #传递给Mobi/epub模块的参数设置
 class OptionValues(object):
     pass
 
-class FsContainer(object):
-    """An empty container.
-    For use with book formats which do not support container-like access.
-    """
-    def __init__(self, dir=None, log=None):
+class ServerContainer(object):
+    def __init__(self, log=None):
         self.log = log
-        self.dir = dir
     def read(self, path):
-        print(path)
-        f = open(os.path.join(self.dir, path), "rb")
-        d = f.read()
-        f.close()
+        path = path.lower()
+        #所有的图片文件都放在images目录下
+        if path.endswith("jpg") or path.endswith("png") or path.endswith("gif"):
+            if not path.startswith(r'images/'):
+                path = os.path.join("images", path)
+        d  = ''
+        f = None
+        try:
+            f = open(path, "rb")
+            d = f.read()
+        except:
+            pass
+        finally:
+            if f:
+                f.close()
+        
         return d
     def write(self, path):
         return None

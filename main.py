@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.3.3"
+__Version__ = "1.3.4"
 __Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
@@ -22,9 +22,8 @@ from google.appengine.api import memcache
 
 from config import *
 
-from makeoeb import *
-from memcachestore import *
-
+from lib.makeoeb import *
+from lib.memcachestore import MemcacheStore
 from books import BookClasses, BookClass
 from books.base import BaseFeedBook
 
@@ -35,44 +34,6 @@ log.setLevel(logging.INFO if IsRunInLocal else logging.WARN)
 
 def local_time(fmt = "%Y-%m-%d %H:%M", tz=TIMEZONE):
     return (datetime.datetime.utcnow()+datetime.timedelta(hours=tz)).strftime(fmt)
-
-def MimeFromFilename(f):
-    #从文件名生成MIME
-    f = f.lower()
-    if f.endswith('.gif') or f.endswith('.png'):
-        return r"image/"+f[-1:-4]
-    elif f.endswith('.jpg') or f.endswith('.jpeg'):
-        return r"image/jpeg"
-    else:
-        return ''
-        
-class ServerContainer(object):
-    def __init__(self, log=None):
-        self.log = log
-    def read(self, path):
-        path = path.lower()
-        #所有的图片文件都放在images目录下
-        if path.endswith("jpg") or path.endswith("png") or path.endswith("gif"):
-            if not path.startswith(r'images/'):
-                path = os.path.join("images", path)
-        d  = ''
-        f = None
-        try:
-            f = open(path, "rb")
-            d = f.read()
-        except:
-            pass
-        finally:
-            if f:
-                f.close()
-        
-        return d
-    def write(self, path):
-        return None
-    def exists(self, path):
-        return False
-    def namelist(self):
-        return []
 
 #--------------db models----------------
 class Book(db.Model):
@@ -137,6 +98,7 @@ def StoreBookToDb():
 StoreBookToDb()
 
 class BaseHandler:
+    " URL请求处理类的基类，实现一些共同的工具函数 "
     @classmethod
     def logined(self):
         return True if session.login == 1 else False
@@ -259,7 +221,7 @@ class Admin(BaseHandler):
                 au.ownfeeds = ownfeeds
                 au.put()
                 
-                tips = u"添加用户账号成功！"
+                tips = u"添加用户账号成功！ "
             return jjenv.get_template('admin.html').render(nickname=session.username,
                 title="Admin",current='admin',user=user,users=users,actips=tips)
         else:
@@ -284,9 +246,9 @@ class Login(BaseHandler):
             au.expires = None
             au.ownfeeds = ownfeeds
             au.put()
-            tips = u"初次登陆请使用用户名'admin'/密码'admin'登陆。"
+            tips = u"初次登陆请使用用户名'admin'/密码'admin'登陆。 "
         else:
-            tips = u"请输入正确的用户名和密码登陆进入系统。"
+            tips = u"请输入正确的用户名和密码登陆进入系统。 "
         
         if session.login == 1:
             web.seeother(r'/')
@@ -296,15 +258,15 @@ class Login(BaseHandler):
     def POST(self):
         name, passwd = web.input().get('u'), web.input().get('p')
         if name.strip() == '':
-            tips = u"用户名为空！"
+            tips = u"用户名为空！ "
             return jjenv.get_template("login.html").render(nickname='',
                 title='Login',tips=tips)
         elif len(name) > 25:
-            tips = u"用户名限制为25个字符！"
+            tips = u"用户名限制为25个字符！ "
             return jjenv.get_template("login.html").render(nickname='',
                 title='Login',tips=tips,username=name)
         elif '<' in name or '>' in name or '&' in name:
-            tips = u"用户名包含非法字符！"
+            tips = u"用户名包含非法字符！ "
             return jjenv.get_template("login.html").render(nickname='',
                 title='Login',tips=tips)
         
@@ -318,7 +280,7 @@ class Login(BaseHandler):
                 u.put()
             raise web.seeother(r'/')
         else:
-            tips = u"用户名不存在或密码错误！"
+            tips = u"用户名不存在或密码错误！ "
             session.login = 0
             session.username = ''
             session.kill()
@@ -337,7 +299,7 @@ class AdminMgrPwd(BaseHandler):
     def GET(self):
         self.login_required('admin')
         name = web.input().get('u')
-        tips = u"请输入新的密码并确认！"
+        tips = u"请输入新的密码并确认！ "
         return jjenv.get_template("adminmgrpwd.html").render(nickname=session.username,
             title='Change password',tips=tips,username=name)
         
@@ -349,13 +311,13 @@ class AdminMgrPwd(BaseHandler):
             if not u:
                 tips = u"用户名'%s'不存在！" % name
             elif p1 != p2:
-                tips = u"两次输入的密码不相符！"
+                tips = u"两次输入的密码不相符！ "
             else:
                 u.passwd = hashlib.md5(p1).hexdigest()
                 u.put()
-                tips = u"密码修改成功！"
+                tips = u"密码修改成功！ "
         else:
-            tips = u"用户名不能为空！"
+            tips = u"用户名不能为空！ "
             
         return jjenv.get_template("adminmgrpwd.html").render(nickname=session.username,
             title='Change password',tips=tips,username=name)
@@ -366,7 +328,7 @@ class DelAccount(BaseHandler):
         name = web.input().get('u')
         
         if session.username == 'admin' or (name and name == session.username):
-            tips = u"请确认是否要删除此账号！"
+            tips = u"请确认是否要删除此账号！ "
             return jjenv.get_template("delaccount.html").render(nickname=session.username,
                 title='Delete account',tips=tips,username=name)
         else:
@@ -414,7 +376,7 @@ class MySubscription(BaseHandler):
         title = web.input().get('t')
         url = web.input().get('url')
         if not title or not url:
-            return self.GET(u'标题和URL都不能为空！')
+            return self.GET(u"标题和URL都不能为空！")
         
         assert user.ownfeeds
         Feed(title=title,url=url,book=user.ownfeeds).put()
@@ -504,7 +466,7 @@ class Deliver(BaseHandler):
                         params={"id":book.key().id(), "type":user.book_type, 'emails':user.kindle_email})
                     sentcnt += 1
             return jjenv.get_template("autoback.html").render(nickname=session.username,
-                title='Delivering',tips=u'%d本书籍已放入推送队列！'%sentcnt)
+                title='Delivering',tips=u"%d本书籍已放入推送队列！"%sentcnt)
         
         #定时cron调用
         for book in books:
@@ -533,7 +495,7 @@ class Deliver(BaseHandler):
                 taskqueue.add(url='/worker', queue_name="deliverqueue1",method='GET',
                     params={"id":book.key().id(), "type":"epub", 'emails': emails})
         return jjenv.get_template("autoback.html").render(nickname=session.username,
-                title='Delivering',tips=u'%d本书已经放入推送队列！'%sentcnt)
+                title='Delivering',tips=u"%d本书已经放入推送队列！"%sentcnt)
         
 class Worker(BaseHandler):
     def GET(self):
@@ -654,17 +616,35 @@ class RemoveLogs(BaseHandler):
         
         return "%s lines log removed.<br />" % c
 
-class FeedBack(BaseHandler):
-    def GET(self):
-        return jjenv.get_template("feedback.html").render(nickname=session.username,
-            title='Feedback',current='feedback')
-        
+#class FeedBack(BaseHandler):
+#    def GET(self):
+#        return jjenv.get_template("feedback.html").render(nickname=session.username,
+#            title='Feedback',current='feedback')
+
 class Test(BaseHandler):
     def GET(self):
         s = ''
         for d in os.environ:
             s += "<pre><p>" + str(d).rjust(28) + " | " + str(os.environ[d]) + "</p></pre>"
         return s
+
+def fix_filesizeformat(value, binary=False):
+    " bugfix for do_filesizeformat of jinja2 "
+    bytes = float(value)
+    base = binary and 1024 or 1000
+    prefixes = [
+        (binary and 'KiB' or 'kB'),(binary and 'MiB' or 'MB'),
+        (binary and 'GiB' or 'GB'),(binary and 'TiB' or 'TB'),
+        (binary and 'PiB' or 'PB'),(binary and 'EiB' or 'EB'),
+        (binary and 'ZiB' or 'ZB'),(binary and 'YiB' or 'YB'),]
+    if bytes < base:
+        return '1 Byte' if bytes == 1 else '%d Bytes' % bytes
+    else:
+        for i, prefix in enumerate(prefixes):
+            unit = base ** (i + 2)
+            if bytes < unit:
+                return '%.1f %s' % ((base * bytes / unit), prefix)
+        return '%.1f %s' % ((base * bytes / unit), prefix)        
 
 urls = (
   r"/", "Home",
@@ -683,8 +663,8 @@ urls = (
   "/worker", "Worker",
   "/logs", "Mylogs",
   "/removelogs", "RemoveLogs",
-  "/feedback", "FeedBack",
   "/test", "Test",
+  #"/feedback", "FeedBack",
 )
 
 app = web.application(urls, globals())
@@ -692,4 +672,6 @@ store = MemcacheStore(memcache)
 session = web.session.Session(app, store, initializer={'username':'','login':0})
 jjenv = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'),
                             extensions=["jinja2.ext.do",])
+jjenv.filters['filesizeformat'] = fix_filesizeformat
+
 app = app.wsgifunc()

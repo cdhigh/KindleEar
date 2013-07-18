@@ -14,12 +14,15 @@ OWNFEEDS_DESC = 'RSS delivering from KindleEar'
 PINYIN_FILENAME = False # True则发送邮件的文件名转换为拼音（如果是汉字的话）
 
 #True则每篇文章都自动检测编码，这会减慢一些处理速度，但是一般不会导致乱码
-#False则先使用上一篇文章的编码进行解码，如果失败再检测此文章编码，一般来说
-#不会导致乱码，并且处理性能好很多，如果有部分文章出现乱码，则需要设置此选项为True
+#False则先使用上一篇文章的编码进行解码，如果失败再检测此文章编码，
+#因为每个RSS源的第一篇文章都强制检测一次编码，一般来说不会导致乱码，
+#并且处理性能好很多，如果有部分文章出现乱码，则需要设置此选项为True
+#否则还是推荐设置为False
 ALWAYS_CHAR_DETECT = False
 
 #是否使用异步方式获取RSS文章，好处是效率比较高，可以在GAE的限额10分钟内处理
 #更多的RSS订阅源，缺点就是没有了失败重试和重定向COOKIE处理功能。
+#而且如果你的RSS订阅源的文章很多很大，则很容易超过22MB/min的Urlfeth免费限额。
 #如果有部分RSS出现Too many redirects异常，则建议设置为False
 #如果你的RSS订阅源不多，GAE的Logs内没有DeadlineExceededError异常，也建议设置为False
 USE_ASYNC_URLFETCH = True

@@ -402,7 +402,7 @@ class Chunker(object):
     def dump(self, orig_dumps):
         import tempfile, shutil, os
         tdir = os.path.join(tempfile.gettempdir(), 'skeleton')
-        self.log.info('Skeletons dumped to:', tdir)
+        self.log.info('Skeletons dumped to:%s' % tdir)
         if os.path.exists(tdir):
             shutil.rmtree(tdir)
         orig = os.path.join(tdir, 'orig')

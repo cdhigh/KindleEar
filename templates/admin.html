@@ -9,11 +9,11 @@ width:100%;
 border-collapse:collapse;
 }
 .usrtbhead {
-background-color:grey;
+background-color:#b0b0b0;
 color:white;
 }
 .usrrow .usrh {
-border:1px dotted grey;
+border:1px dotted #c0c0c0;
 }
 </style>
 {% endblock %}
@@ -81,14 +81,14 @@ border:1px dotted grey;
         <tr class="usrtbhead">
         <th class="usrh">序号</th><th class="usrh">用户名</th>
         <th class="usrh">使能发送</th>
-        <th class="usrh">-</th><th class="usrh">-</th>
+        <th class="usrh" colspan="2">命令</th>
         </tr>
         {% for u in users %}
         <tr class="usrrow">
         <th class="usrh">{{loop.index}}</th><th class="usrh">{{u.name}}</th>
         <th class="usrh">{{u.enable_send}}</th>
-        <th class="usrh"><a href="/mgrpwd?u={{u.name}}">修改密码</a></th>
-        <th class="usrh"><a href="delaccount?u={{u.name}}">删除账户</a></th>
+        <th class="usrh"><a href="/mgrpwd?u={{u.name}}" class="actionButton">修改密码</a></th>
+        <th class="usrh"><a href="delaccount?u={{u.name}}" class="actionButton">删除账户</a></th>
         </tr>
         {% endfor %}
     </table>

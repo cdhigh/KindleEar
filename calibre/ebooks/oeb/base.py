@@ -866,7 +866,8 @@ class Manifest(object):
             return data
 
         def _parse_txt(self, data):
-            return self._parse_xhtml(u"<html><head></head><body><p>" + data + u"</p></body></html>")
+            return self._parse_xhtml(u"<html><head><title>Unknown</title></head><body><p>"
+                    + data + u"</p></body></html>")
 
         def _parse_css(self, data):
             from cssutils import CSSParser, log, resolveImports

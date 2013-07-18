@@ -10,7 +10,7 @@ import locale, sys, os, re
 
 # Default translation is NOOP
 import __builtin__
-__builtin__.__dict__['_'] = lambda s: unicode(s)
+__builtin__.__dict__['_'] = lambda s: s #unicode(s)
 __builtin__.__dict__['__'] = lambda s: s
 __builtin__.__dict__['P'] = lambda s: s
 __builtin__.__dict__['I'] = lambda s: s

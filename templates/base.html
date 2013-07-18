@@ -15,7 +15,7 @@
 {% endblock %}
     <div id="header">
         {% block header %}
-        <h1><a href="/">KindleEar<sup>&reg;</sup></a></h1>
+        <h1><a href="/">KindleEar<sup>&#9728;</sup></a></h1>
         {% if nickname %}
           <a class="nav" href="/logout">退出</a>
           <span style="color: #ccc;">&bull;</span>
@@ -51,12 +51,12 @@
         {% else %}
         <a style="font-weight:normal;" href="/admin">账户管理</a>
         {% endif %}
-        <span style="color: #ccc;">&bull;</span>
+        {#<span style="color: #ccc;">&bull;</span>
         {% if current == "feedback" %}
         反馈
         {% else %}
         <a style="font-weight:normal;" href="/feedback">反馈</a>
-        {% endif %}
+        {% endif %}#}
         </h2>
     {% else %}
         <h2 style="text-align:center;padding:10px 0;"><a href="/login">请先登陆</a></h2>

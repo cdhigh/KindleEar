@@ -35,98 +35,80 @@ css_to_xpath = HTMLTranslator().css_to_xpath
 default_html_css = b"""
 @namespace url(http://www.w3.org/1999/xhtml);
 @namespace svg url(http://www.w3.org/2000/svg);
-
 /* blocks */
-
 html, div, map, dt, isindex, form {
   display: block;
 }
-
 body {
   display: block;
 }
-
 p, dl, multicol {
   display: block;
   margin: 1em 0;
 }
-
 dd {
   display: block;
   margin-left: 40px;
 }
-
 blockquote {
   display: block;
   margin: 1em;
 }
-
 address {
   display: block;
   font-style: italic;
 }
-
 center {
   display: block;
   text-align: center;
 }
-
 blockquote[type=cite] {
   display: block;
   margin: 1em 0em;
   border-color: blue;
   border-width: thin;
 }
-
 span[_moz_quote=true] {
   color: blue;
 }
-
 pre[_moz_quote=true] {
   color: blue;
 }
-
 h1 {
   display: block;
   font-size: 2em;
   font-weight: bold;
   margin: .67em 0;
 }
-
 h2 {
   display: block;
   font-size: 1.5em;
   font-weight: bold;
   margin: .83em 0;
 }
-
 h3 {
   display: block;
   font-size: 1.17em;
   font-weight: bold;
   margin: 1em 0;
 }
-
 h4 {
   display: block;
   font-weight: bold;
   margin: 1.33em 0;
 }
-
 h5 {
   display: block;
   font-size: 0.83em;
   font-weight: bold;
   margin: 1.67em 0;
 }
-
 h6 {
   display: block;
   font-size: 0.67em;
   font-weight: bold;
   margin: 2.33em 0;
 }
-
 listing {
   display: block;
   font-family: monospace;
@@ -134,16 +116,13 @@ listing {
   white-space: pre;
   margin: 1em 0;
 }
-
 xmp, pre, plaintext {
   display: block;
   font-family: monospace;
   white-space: pre;
   margin: 1em 0;
 }
-
 /* tables */
-
 table {
   display: table;
   border-spacing: 2px;
@@ -152,159 +131,125 @@ table {
   margin-bottom: 0;
   text-indent: 0;
 }
-
 table[align="left"] {
   float: left;
 }
-
 table[align="right"] {
   float: right;
 }
-
 table[rules]:not([rules="none"]) {
   border-collapse: collapse;
-}
-   
+}  
 /* caption inherits from table not table-outer */  
 caption {
   display: table-caption;
   text-align: center;
 }
-
 table[align="center"] > caption {
   margin-left: auto;
   margin-right: auto;
 }
-
 table[align="center"] > caption[align="left"] {
   margin-right: 0;
 }
-
 table[align="center"] > caption[align="right"] {
   margin-left: 0;
 }
-
 tr {
   display: table-row;
   vertical-align: inherit;
 }
-
 col {
   display: table-column;
 }
-
 colgroup {
   display: table-column-group;
 }
-
 tbody {
   display: table-row-group;
   vertical-align: middle;
 }
-
 thead {
   display: table-header-group;
   vertical-align: middle;
 }
-
 tfoot {
   display: table-footer-group;
   vertical-align: middle;
 }
-
 /* for XHTML tables without tbody */
 table > tr {
   vertical-align: middle;
 }
-
 td { 
   display: table-cell;
   vertical-align: inherit;
   text-align: inherit; 
   padding: 1px;
 }
-
 th {
   display: table-cell;
   vertical-align: inherit;
   font-weight: bold;
   padding: 1px;
 }
-
 /* inlines */
-
 b, strong {
   /* ADE doesn't support bolder with embedded fonts */
   font-weight: bold;
 }
-
 i, cite, em, var, dfn {
   font-style: italic;
 }
-
 tt, code, kbd, samp {
   font-family: monospace;
 }
-
 u, ins {
   text-decoration: underline;
 }
-
 s, strike, del {
   text-decoration: line-through;
 }
-
 blink {
   text-decoration: blink;
 }
-
 big {
   font-size: larger;
 }
-
 small {
   font-size: smaller;
 }
-
 sub {
   vertical-align: sub;
   font-size: smaller;
   line-height: normal;
 }
-
 sup {
   vertical-align: super;
   font-size: smaller;
   line-height: normal;
 }
-
 nobr {
   white-space: nowrap;
 }
-
 /* titles */
 abbr[title], acronym[title] {
   border-bottom: dotted 1px;
 }
-
 /* lists */
-
 ul, menu, dir {
   display: block;
   list-style-type: disc;
   margin: 1em 0;
 }
-
 ol {
   display: block;
   list-style-type: decimal;
   margin: 1em 0;
 }
-
 li {
   display: list-item;
 }
-
 /* nested lists have no top/bottom margins */
 ul ul,   ul ol,   ul dir,   ul menu,   ul dl,
 ol ul,   ol ol,   ol dir,   ol menu,   ol dl,
@@ -314,14 +259,12 @@ dl ul,   dl ol,   dl dir,   dl menu,   dl dl {
   margin-top: 0;
   margin-bottom: 0;
 }
-
 /* 2 deep unordered lists use a circle */
 ol ul,   ul ul,   menu ul,   dir ul,
 ol menu, ul menu, menu menu, dir menu,
 ol dir,  ul dir,  menu dir,  dir dir {
   list-style-type: circle;
 }
-
 /* 3 deep (or more) unordered lists use a square */
 ol ol ul,     ol ul ul,     ol menu ul,     ol dir ul,
 ol ol menu,   ol ul menu,   ol menu menu,   ol dir menu,
@@ -337,10 +280,7 @@ dir ol menu,  dir ul menu,  dir menu menu,  dir dir menu,
 dir ol dir,   dir ul dir,   dir menu dir,   dir dir dir {
   list-style-type: square;
 }
-
-
 /* leafs */
-
 /* <hr> noshade and color attributes are handled completely by
  * the nsHTMLHRElement attribute mapping code
  */
@@ -351,50 +291,40 @@ hr {
   margin: 0.5em auto 0.5em auto;
   color: gray;
 }
-
 hr[size="1"] {
   border-style: solid none none none;
 }
-
 img[usemap], object[usemap] {
   color: blue;
 }
-
 frameset {
   display: block ! important;
   position: static ! important;
   float: none ! important;
   border: none ! important;
 }
-
 frame {
   border: none ! important;
 }
-
 iframe {
   border: 2px inset;
 }
-
 noframes {
   display: none;
 }
-
 spacer {
   position: static ! important;
   float: none ! important;
 }
-
 /* hidden elements */
 area, base, basefont, head, meta, script, style, title,
 noembed, param, link {
    display: none;
 }
-
 /* Explicit line-breaks are blocks, sure... */
 br {
   display: block;
 }
-
 /* Images, embedded object, and SVG size defaults */
 img, object, svg|svg {
     width: auto;

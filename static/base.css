@@ -229,6 +229,8 @@ legend {
 
 .actionButton:hover {
     text-decoration: none;
+    /*background-color: #448;*/
+    border-color: #448;
 }
 
 .book {

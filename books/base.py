@@ -13,8 +13,8 @@ from google.appengine.api import urlfetch
 from lib.BeautifulSoup import BeautifulSoup, Tag, Comment
 from lib import feedparser
 from lib.readability.readability import Document
-from urlopener import URLOpener
-from asyncurlfetch import AsyncURLFetchManager
+from lib.urlopener import URLOpener
+from lib.asyncurlfetch import AsyncURLFetchManager
 
 from config import ALWAYS_CHAR_DETECT, USE_ASYNC_URLFETCH
 
@@ -187,12 +187,10 @@ h1{font-weight:bold;}
         """ return list like [(section,title,url),..] """
         urls = []
         opener = URLOpener(self.host)
-        prevsection = ''
         for section, url in self.feeds:
-            if section != prevsection or prevsection == '':
-                decoder = AutoDecoder() #每个RSS聚合都重新探测编码
-            prevsection = section
+            decoder = AutoDecoder() #每个RSS聚合都重新探测编码
             
+            urladded = [] # 防止部分RSS产生重复文章
             result = opener.open(url)
             if result.status_code == 200 and result.content:
                 if self.feed_encoding:
@@ -200,9 +198,12 @@ h1{font-weight:bold;}
                 else:
                     feed = feedparser.parse(decoder.decode(result.content))
                 for e in feed['entries'][:self.max_articles_per_feed]:
-                    urls.append((section,e.title,e.link))
+                    url = e.link
+                    if url not in urladded:
+                        urls.append((section, e.title, url))
+                        urladded.append(url)
             else:
-                self.log.warn('fetch rss failed(err:%d):%s'%(result.status_code,url))
+                self.log.warn('fetch rss failed(%d):%s'%(result.status_code,url))
         return urls
         
     def Items(self):
@@ -212,44 +213,46 @@ h1{font-weight:bold;}
         对于图片，mime,url,filename,content
         """
         urls = self.ParseFeedUrls()
-        fulltext = self.readability if self.fulltext_by_readability else self.fulltext
+        readability = self.readability if self.fulltext_by_readability else self.readability_by_soup
         prevsection = ''
         if USE_ASYNC_URLFETCH:
             rpcs = []
             async = AsyncURLFetchManager()
-            for section, ftitle, url in urls:
-                rpcs.append((section,ftitle,url,async.fetch_async(url)))
+            for section, ftitle, url in urls: #启动异步Fetch
+                rpcs.append((section, ftitle,url, async.fetch_async(url)))
             
             for section, ftitle, url, rpc in rpcs:
                 if section != prevsection or prevsection == '':
                     decoder = AutoDecoder() #每个小节都重新探测编码
                     prevsection = section
+                    
                 try:
                     resp = rpc.get_result()
-                    status_code, content = resp.status_code, resp.content
-                    if status_code != 200 or not content:
-                        self.log.warn('async fetch article failed(%d):%s.' % (status_code,url))
-                        continue
-                        
-                    if self.page_encoding:
-                        article = content.decode(self.page_encoding)
+                except urlfetch.DownloadError, e:
+                    self.log.warn('%s:%s.' % (str(e), url))
+                    continue
+                    
+                status_code, content = resp.status_code, resp.content
+                if status_code != 200 or not content:
+                    self.log.warn('async fetch article failed(%d):%s.' % (status_code,url))
+                    continue
+                
+                if self.page_encoding:
+                    article = content.decode(self.page_encoding)
+                else:
+                    article = decoder.decode(content)
+                
+                #如果是图片，title则是mime
+                for title, imgurl, imgfn, content in readability(article,url):
+                    if title.startswith(r'image/'): #图片
+                        yield (title, imgurl, imgfn, content)
                     else:
-                        article = decoder.decode(content)
-                    
-                    #如果是图片，title则是mime
-                    for title, imgurl, imgfn, content in fulltext(article):
-                        if title.startswith(r'image/'): #图片
-                            yield (title, imgurl, imgfn, content)
-                        else:
-                            if not title:
-                                title = ftitle
-                            content =  self.postprocess(content)
-                            assert content
-                            yield (section, url, title, content)
-                    
-                except urlfetch.DownloadError,e:
-                    self.log.warn('%s:%s.' % (str(e),url))
-        else:
+                        if not title:
+                            title = ftitle
+                        content =  self.postprocess(content)
+                        assert content
+                        yield (section, url, title, content)
+        else: #同步UrlFetch方式
             for section, ftitle, url in urls:
                 if section != prevsection or prevsection == '':
                     decoder = AutoDecoder() #每个小节都重新探测编码
@@ -260,7 +263,7 @@ h1{font-weight:bold;}
                     continue
                 
                 #如果是图片，title则是mime
-                for title, imgurl, imgfn, content in fulltext(article):
+                for title, imgurl, imgfn, content in readability(article,url):
                     if title.startswith(r'image/'): #图片
                         yield (title, imgurl, imgfn, content)
                     else:
@@ -271,7 +274,7 @@ h1{font-weight:bold;}
                         yield (section, url, title, content)
     
     def fetcharticle(self, url, decoder):
-        #获取一篇文章
+        #使用同步方式获取一篇文章
         if self.fulltext_by_instapaper and not self.fulltext_by_readability:
             url = "http://www.instapaper.com/m?u=%s" % self.url_unescape(url)
         
@@ -287,7 +290,7 @@ h1{font-weight:bold;}
         else:
             return decoder.decode(content)
         
-    def readability(self, article):
+    def readability(self, article, url):
         #使用readability-lxml处理全文信息
         #因为图片文件占内存，为了节省内存，这个函数也做为生成器
         content = self.preprocess(article)
@@ -340,7 +343,7 @@ h1{font-weight:bold;}
         
         yield (title, None, None, content)
         
-    def fulltext(self, article):
+    def readability_by_soup(self, article, url):
         #因为图片文件占内存，为了节省内存，这个函数也做为生成器
         content = self.preprocess(article)
         soup = BeautifulSoup(content)
@@ -470,7 +473,7 @@ class FulltextFeedBook(BaseFeedBook):
                 desc = self.postprocess(e.description)
                 desc = self.FragToXhtml(desc, e.title, self.feed_encoding)
                 
-                soup = BeautifulSoup(content)
+                soup = BeautifulSoup(desc)
                 self.soupbeforeimage(soup)
                 if self.keep_image:
                     for img in soup.findAll('img'):
@@ -492,18 +495,18 @@ class FulltextFeedBook(BaseFeedBook):
                         else:
                             self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
                             img.extract()
-                            
-                    self.soupprocessex(soup)
-                    desc = soup.renderContents('utf-8').decode('utf-8')
-                    soup = None
                 else:
                     for img in soup.findAll('img'):
                         img.extract()
+                        
+                self.soupprocessex(soup)
+                desc = soup.renderContents('utf-8').decode('utf-8')
+                soup = None
+                desc =  self.postprocess(desc)
                 
                 if e.title not in itemsprocessed and desc:
                     itemsprocessed.append(e.title)
                     yield (section, e.link, e.title, desc)
-
 
 class WebpageBook(BaseFeedBook):
     fulltext_by_readability = False

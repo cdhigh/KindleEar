@@ -1,26 +1,47 @@
 {% extends "base.html" %}
-
+{% block css %}
+<style type="text/css">
+#fs_login{
+    background:#F8F8F8;
+    padding:20px;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    border-radius: 8px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #DDDDDD;
+    margin:15px 0;
+}
+#tips{
+    color:red;
+    font-size:0.8em;
+    text-align:center;
+}
+#login{
+    margin:0px auto;
+}
+#note{
+    color:grey;
+    font-size:0.8em;
+    text-align:center;
+}
+</style>
+{% endblock %}
 {% block bodytag %}
 <body onload="document.getElementById('username').focus();">
 {% endblock %}
-
 {% block menubar %}
 {% endblock %}
-
 {% block content %}
-    <pre><p> </p></pre>
+    <fieldset id="fs_login">
     {% if tips %}
-    <p style="color:red;font-size:0.8em;">{{tips}}</p>
+    <p id="tips">{{tips}}</p>
     {% endif %}
     <form action="/login" method="POST">
     <table id="login">
         <tr>
             <td style="text-align:right;">用户名：</td>
-            {% if username %}
-            <td><input type="text" name="u" id="username" value={{username}} /></td>
-            {% else %}
-            <td><input type="text" name="u" id="username" /></td>
-            {% endif %}
+            <td><input type="text" name="u" id="username" {% if username %}value="{{username}}"{% endif %} /></td>
         </tr>
         <tr>
             <td style="text-align:right;">密码：</td>
@@ -32,6 +53,7 @@
         </tr>
     </table>
     </form>
-    <pre><p> </p><p> </p><p> </p></pre>
-    <p style="color:grey;font-size:0.8em;text-align:center;">本站不开放注册，需要管理员先添加账号然后才能使用对应账号登录使用相应服务。</p>
+    </fieldset>
+    <pre><p> </p></pre>
+    <p id="note">本站不开放注册，需要管理员先添加账号然后才能使用对应账号登录使用相应服务。</p>
 {% endblock %}
