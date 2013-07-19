@@ -170,8 +170,16 @@ class EPUBOutput:
                 raw = etree.tostring(root, pretty_print=True,encoding='utf-8', xml_declaration=True)
                 epub.writestr('OEBPS/%s' % href, raw)
         
+        from calibre.ebooks.oeb.base import OEB_RASTER_IMAGES
         for item in oeb.manifest:
-            epub.writestr('OEBPS/%s' % item.href, str(item), compress_type=compress)
+            if item.media_type in OEB_RASTER_IMAGES:
+                if self.opts.process_images or self.opts.graying_image:
+                    img = rescale_image(str(item), graying=self.opts.graying_image)
+                    epub.writestr('OEBPS/%s' % item.href, img, compress_type=compress)
+                else:
+                    epub.writestr('OEBPS/%s' % item.href, str(item), compress_type=compress)
+            else:
+                epub.writestr('OEBPS/%s' % item.href, str(item), compress_type=compress)
 
     def workaround_ade_quirks(self):
         """

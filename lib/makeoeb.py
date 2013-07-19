@@ -24,7 +24,7 @@ def MimeFromFilename(f):
     #从文件名生成MIME
     f = f.lower()
     if f.endswith('.gif') or f.endswith('.png'):
-        return r"image/"+f[-1:-4]
+        return r"image/"+f[-3:]
     elif f.endswith('.jpg') or f.endswith('.jpeg'):
         return r"image/jpeg"
     else:
@@ -43,13 +43,12 @@ class ServerContainer(object):
         if path.endswith("jpg") or path.endswith("png") or path.endswith("gif"):
             if not path.startswith(r'images/'):
                 path = os.path.join("images", path)
-        d  = ''
-        f = None
+        d,f  = '',None
         try:
             f = open(path, "rb")
             d = f.read()
-        except:
-            pass
+        except Exception,e:
+            self.log.warn('read file %s failed:%s'%(path,str(e)))
         finally:
             if f:
                 f.close()
@@ -63,7 +62,7 @@ class ServerContainer(object):
         return []
 
 def CreateOeb(log, path_or_stream, opts, encoding='utf-8'):
-    """创建一个空的OEB书籍"""
+    """创建一个空的OEB书籍 """
     html_preprocessor = HTMLPreProcessor(log, opts)
     if not encoding:
         encoding = None

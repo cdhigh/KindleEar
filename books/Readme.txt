@@ -37,4 +37,5 @@
      已经有全文信息了，这种RSS最有良心，则继承FulltextFeedBook。
      如果你感兴趣的网站不提供RSS订阅，则可以继承WebpageBook直接连接网页提取信息。
    ★子类能定制的参数都在BaseFeedBook类的定义中，注释很详细。
+   ★处理HTML的BeautifulSoup为4.x版本。
    

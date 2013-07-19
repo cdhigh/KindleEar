@@ -26,3 +26,9 @@ ALWAYS_CHAR_DETECT = False
 #如果有部分RSS出现Too many redirects异常，则建议设置为False
 #如果你的RSS订阅源不多，GAE的Logs内没有DeadlineExceededError异常，也建议设置为False
 USE_ASYNC_URLFETCH = True
+
+#是否生成TOC的文章内容预览，如果使用非触摸版Kindle，没意义，因为看不到
+#对于kindle touch和kindle paperwhite可以考虑，不过因为需要额外的处理，效率低一点
+#如果没有必要可以关闭。
+GENERATE_TOC_DESC = True
+TOC_DESC_WORD_LIMIT = 150  # 内容预览（摘要）字数限制

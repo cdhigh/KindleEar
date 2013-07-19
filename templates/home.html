@@ -17,10 +17,13 @@ li{
 {% endblock %}
 {% block content %}
     {#<a href="/static/mainscr.gif"><img src="/static/mainscr.gif" class="scrimg" /></a>#}
-    <p>KindleEar是一个将RSS订阅制作成带图杂志mobi格式发送至Kindle上的应用网站。<br /><br /></p>
+    <p>KindleEar是一个将RSS订阅制作成<a href="/static/periodical.gif" target="_blank" style="text-decoration:none;">带图杂志mobi格式</a>
+        发送至Kindle上的应用网站。<br /><br /></p>
     <ul>
-    <li>作者提取了Calibre的mobi模块用于通过Python在线生成mobi格式文件，不依赖Amazon的kindlegen工具，杂志格式书籍排版精美，跳转方便，阅读体验更好。<br /><br /></li>
-    <li>使用本站 <a href="https://github.com/cdhigh/kindleear" rel="external">开源的KindleEar程序</a>，你可以在GAE上搭建自己的推送服务器，下载包含图片的RSS订阅或网页推送到你的Kindle，并支持多账号，可以提供给三五好友同时使用。<br /><br /></li>
+    <li>作者提取了Calibre的mobi模块用于通过Python在线生成mobi格式文件，不依赖Amazon的kindlegen工具，
+        杂志格式书籍排版精美，跳转方便，阅读体验更好。<br /><br /></li>
+    <li>使用本站 <a href="https://github.com/cdhigh/kindleear" target="_blank" style="text-decoration:none;">开源的KindleEar程序</a>
+        ，你可以在GAE上搭建自己的推送服务器，下载包含图片的RSS订阅或网页推送到你的Kindle，并支持多账号，可以提供给三五好友同时使用。<br /><br /></li>
     <li>当前运行版本：{{version}}<br /></li>
     </ul>
 {% endblock %}

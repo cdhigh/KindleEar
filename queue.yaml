@@ -4,8 +4,8 @@ queue:
   rate: 5/m
   bucket_size: 5
   retry_parameters:
-    task_retry_limit: 2
-    task_age_limit: 10m
+    task_retry_limit: 3
+    task_age_limit: 5m
     min_backoff_seconds: 60
     max_backoff_seconds: 600
     max_doublings: 4

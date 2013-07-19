@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 import re
-from base import WebpageBook, Tag
+from base import WebpageBook
 
 def getBook():
     return Qiushibaike
@@ -39,28 +39,28 @@ class Qiushibaike(WebpageBook):
         return title.replace(u'——分享所有好笑的事情', u'')
         
     def soupbeforeimage(self, soup):
-        for img in list(soup.findAll('img')): #HAHA.MX切换为大图链接
+        for img in list(soup.find_all('img')): #HAHA.MX切换为大图链接
             src = img['src']
             if src.find(r'/small/') > 0:
                 img['src'] = src.replace(r'/small/', r'/big/')
         
     def soupprocessex(self, soup):
-        for article in soup.findAll("a", attrs={"href":re.compile(r'^/article')}):
-            p = Tag(soup, "p", [('style', 'color:grey;text-decoration:underline;')])
-            p.insert(0,article.string)
-            article.replaceWith(p)
+        for article in soup.find_all("a", attrs={"href":re.compile(r'^/article')}):
+            p = soup.new_tag("p", style='color:grey;text-decoration:underline;')
+            p.string = article.string
+            article.replace_with(p)
         
         first = True
-        for detail in soup.findAll("div", attrs={"class":"detail"}):
-            hr = Tag(soup, "hr")
+        for detail in soup.find_all("div", attrs={"class":"detail"}):
             if not first:
-                detail.insert(0,hr)
+                hr = soup.new_tag("hr")
+                detail.insert(0, hr)
             first = False
         
         first = True
-        for item in soup.findAll("div", attrs={"class":"block joke-item"}):
-            hr = Tag(soup, "hr")
+        for item in soup.find_all("div", attrs={"class":"block joke-item"}):
             if not first:
-                item.insert(0,hr)
+                hr = soup.new_tag("hr")
+                item.insert(0, hr)
             first = False
-            
+

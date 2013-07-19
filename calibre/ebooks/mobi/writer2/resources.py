@@ -75,14 +75,14 @@ class Resources(object):
                 continue
             try:
                 data = self.process_image(item.data)
-            except:
-                self.log.warn('Bad image file %r' % item.href)
+            except Exception,e:
+                self.log.warn('Bad image file %r : %s' % (item.href,str(e)))
                 continue
             else:
                 if mh_href and item.href == mh_href:
                     self.records[0] = data
                     continue
-
+                
                 self.image_indices.add(len(self.records))
                 self.records.append(data)
                 self.item_map[item.href] = index

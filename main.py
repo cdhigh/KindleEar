@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.3.4"
+__Version__ = "1.3.5"
 __Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
@@ -528,8 +528,8 @@ class Worker(BaseHandler):
             book.language = bk.language
             #book.feed_encoding = bk.feed_encoding
             #book.page_encoding = bk.page_encoding
-            book.mastheadfile = bk.mastheadfile
-            book.coverfile = bk.coverfile
+            #book.mastheadfile = bk.mastheadfile
+            #book.coverfile = bk.coverfile
             book.keep_image = bk.keep_image
             book.fulltext_by_readability = True
             for feed in feeds:
@@ -547,13 +547,13 @@ class Worker(BaseHandler):
         oeb.container = ServerContainer(log)
         
         #guide
-        mhfile = book.mastheadfile if book.mastheadfile else DEFAULT_MASTHEAD
+        mhfile = book.mastheadfile
         if mhfile:
             id, href = oeb.manifest.generate('masthead', mhfile) # size:600*60
-            oeb.manifest.add(id, href, 'image/gif')
+            oeb.manifest.add(id, href, MimeFromFilename(mhfile))
             oeb.guide.add('masthead', 'Masthead Image', href)
         
-        coverfile = book.coverfile if book.coverfile else DEFAULT_COVER
+        coverfile = book.coverfile
         if coverfile:
             id, href = oeb.manifest.generate('cover', coverfile)
             item = oeb.manifest.add(id, href, MimeFromFilename(coverfile))
@@ -564,7 +564,7 @@ class Worker(BaseHandler):
         sections = OrderedDict()
         # 对于html文件，变量名字自文档
         # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
-        for section, url, title, content in book.Items():
+        for section, url, title, content, brief in book.Items():
             if not section or not title or not content:
                 continue
             
@@ -576,23 +576,27 @@ class Worker(BaseHandler):
                 item = oeb.manifest.add(id, href, 'text/html', data=content)
                 oeb.spine.add(item, True)
                 sections.setdefault(section, [])
-                sections[section].append((title, item))
+                sections[section].append((title, item, brief))
                 itemcnt += 1
                 
         if itemcnt > 0: # 建立TOC，杂志模式需要为两层目录结构
             for sec in sections.keys():
                 sectoc = oeb.toc.add(sec, sections[sec][0][1].href)
-                for title, a in sections[sec]:
-                    sectoc.add(title, a.href)
+                for title, a, brief in sections[sec]:
+                    sectoc.add(title, a.href, description=brief if brief else None)
             
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()
             o.convert(oeb, oIO, opts, log)
             self.SendToKindle(emails, book.title, booktype, str(oIO.getvalue()))
-            return "%s(%s).%s Sent!<br />"%(book.title,local_time(),booktype)
+            rs = "%s(%s).%s Sent!"%(book.title,local_time(),booktype)
+            log.info(rs)
+            return rs
         else:
             self.deliverlog(emails, book.title, 0, status='nonews')
-            return "No new feeds.<br />"
+            rs = "No new feeds."
+            log.info(rs)
+            return rs
         
 class Mylogs(BaseHandler):
     def GET(self):

@@ -10,13 +10,18 @@ from urllib2 import *
 import chardet
 from google.appengine.api import urlfetch
 
-from lib.BeautifulSoup import BeautifulSoup, Tag, Comment
+from bs4 import BeautifulSoup, Comment
 from lib import feedparser
-from lib.readability.readability import Document
+from lib.readability import readability
 from lib.urlopener import URLOpener
 from lib.asyncurlfetch import AsyncURLFetchManager
 
-from config import ALWAYS_CHAR_DETECT, USE_ASYNC_URLFETCH
+from config import (DEFAULT_MASTHEAD,
+                    DEFAULT_COVER,
+                    ALWAYS_CHAR_DETECT,
+                    USE_ASYNC_URLFETCH,
+                    GENERATE_TOC_DESC,
+                    TOC_DESC_WORD_LIMIT)
 
 class AutoDecoder:
     def __init__(self):
@@ -61,9 +66,9 @@ class BaseFeedBook:
     # 题图文件名，格式：gif(600*60)，所有图片文件存放在images/下面，文件名不需要images/前缀
     # 如果不提供此图片，软件使用PIL生成一个，但是因为GAE不能使用ImageFont组件
     # 所以字体很小，而且不支持中文标题，使用中文会出错
-    mastheadfile = ''
+    mastheadfile = DEFAULT_MASTHEAD
     
-    coverfile = '' #封面图片文件
+    coverfile = DEFAULT_COVER #封面图片文件
     
     keep_image = True #生成的MOBI是否需要图片
     
@@ -92,7 +97,7 @@ class BaseFeedBook:
     
     # 内置的几个必须删除的标签，不建议子类修改
     insta_remove_tags = ['script','object','video','embed','iframe','noscript']
-    insta_remove_attrs = ['title','width','height','onclick','onload']
+    insta_remove_attrs = ['title','width','height','onclick','onload','id','class']
     insta_remove_classes = []
     insta_remove_ids = ['controlbar_container','left_buttons','right_buttons','title_label',]
     
@@ -152,13 +157,13 @@ class BaseFeedBook:
 
     def FragToXhtml(self, content, title, htmlencoding='utf-8', addtitleinbody=False):
         #将HTML片段嵌入完整的XHTML框架中
-        frame = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+        frame = u"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head><meta http-equiv="Content-Type" content="text/html; charset=%s">
 <title>%s</title>
 <style type="text/css">
-p{text-indent:2em;}
-h1{font-weight:bold;}
+    p{text-indent:2em;}
+    h1{font-weight:bold;}
 </style>
 </head><body>
 %s
@@ -168,8 +173,9 @@ h1{font-weight:bold;}
         if content.find('<html') > 0:
             return content
         else:
-            t = "<h1>%s</h1>" % title if addtitleinbody else ""
-            htmlencoding = htmlencoding if htmlencoding else 'utf-8'
+            t = u"<h1>%s</h1>" % title if addtitleinbody else ""
+            if not htmlencoding:
+                htmlencoding = 'utf-8'
             return frame % (htmlencoding, title, t, content)
     
     def FetchTitle(self, content, default=' '):
@@ -243,15 +249,15 @@ h1{font-weight:bold;}
                     article = decoder.decode(content)
                 
                 #如果是图片，title则是mime
-                for title, imgurl, imgfn, content in readability(article,url):
+                for title, imgurl, imgfn, content, brief in readability(article,url):
                     if title.startswith(r'image/'): #图片
-                        yield (title, imgurl, imgfn, content)
+                        yield (title, imgurl, imgfn, content, brief)
                     else:
                         if not title:
                             title = ftitle
                         content =  self.postprocess(content)
                         assert content
-                        yield (section, url, title, content)
+                        yield (section, url, title, content, brief)
         else: #同步UrlFetch方式
             for section, ftitle, url in urls:
                 if section != prevsection or prevsection == '':
@@ -263,15 +269,15 @@ h1{font-weight:bold;}
                     continue
                 
                 #如果是图片，title则是mime
-                for title, imgurl, imgfn, content in readability(article,url):
+                for title, imgurl, imgfn, content, brief in readability(article,url):
                     if title.startswith(r'image/'): #图片
-                        yield (title, imgurl, imgfn, content)
+                        yield (title, imgurl, imgfn, content, brief)
                     else:
                         if not title:
                             title = ftitle
                         content =  self.postprocess(content)
                         assert content
-                        yield (section, url, title, content)
+                        yield (section, url, title, content, brief)
     
     def fetcharticle(self, url, decoder):
         #使用同步方式获取一篇文章
@@ -296,7 +302,7 @@ h1{font-weight:bold;}
         content = self.preprocess(article)
         
         # 提取正文
-        doc = Document(content)
+        doc = readability.Document(content)
         summary = doc.summary(html_partial=True)
         title = doc.short_title()
         title = self.processtitle(title)
@@ -304,17 +310,21 @@ h1{font-weight:bold;}
             html = content
         else:
             html = self.FragToXhtml(summary, title, addtitleinbody=True)
+            assert type(html) is unicode
         
         #因为现在只剩文章内容了，使用BeautifulSoup也不会有什么性能问题
-        soup = BeautifulSoup(html)
+        soup = BeautifulSoup(html, "lxml")
         self.soupbeforeimage(soup)
         
-        for cmt in soup.findAll(text=lambda text:isinstance(text, Comment)):
-            cmt.extract
-            
+        for attr in ['id','class']:
+            for tag in soup.find_all(attrs={attr:True}):
+                del tag[attr]
+        for cmt in soup.find_all(text=lambda text:isinstance(text, Comment)):
+            cmt.extract()
+        
         if self.keep_image:
             opener = URLOpener(self.host)
-            for img in soup.findAll('img'):
+            for img in soup.find_all('img'):
                 imgurl = img['src']
                 if not imgurl.startswith('http') and not imgurl.startswith('www'):
                     imgurl = self.urljoin(url, imgurl)
@@ -324,29 +334,38 @@ h1{font-weight:bold;}
                     imgtype = imghdr.what(None, imgcontent)
                     if imgtype:
                         imgmime = r"image/" + imgtype
-                        if imgtype == 'jpeg':
-                            fnimg = "%d.jpg" % random.randint(10000,99999999)
-                        else:
-                            fnimg = "%d.%s" % (random.randint(10000,99999999), imgtype)
+                        fnimg = "%d.%s" % (random.randint(10000,99999999), 'jpg' if imgtype=='jpeg' else imgtype)
                         img['src'] = fnimg
-                        yield (imgmime, imgurl, fnimg, imgcontent)
+                        yield (imgmime, imgurl, fnimg, imgcontent, None)
                 else:
                     self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
-                    img.extract()
+                    img.decompose()
         else:
-            for img in soup.findAll('img'):
-                img.extract()
+            for img in soup.find_all('img'):
+                img.decompose()
         
         self.soupprocessex(soup)
-        content = soup.renderContents('utf-8').decode('utf-8')
+        content = unicode(soup)
+        
+        #提取文章内容的前面一部分做为摘要
+        brief = u''
+        if GENERATE_TOC_DESC:
+            body = soup.find('body')
+            for h1 in body.find_all('h1'): # 去掉H1，避免和标题重复
+                h1.decompose()
+            for s in body.stripped_strings:
+                brief += unicode(s) + u' '
+                if len(brief) >= TOC_DESC_WORD_LIMIT:
+                    brief = brief[:TOC_DESC_WORD_LIMIT]
+                    break
         soup = None
         
-        yield (title, None, None, content)
+        yield (title, None, None, content, brief)
         
     def readability_by_soup(self, article, url):
         #因为图片文件占内存，为了节省内存，这个函数也做为生成器
         content = self.preprocess(article)
-        soup = BeautifulSoup(content)
+        soup = BeautifulSoup(content, "lxml")
         
         try:
             title = soup.html.head.title.string
@@ -358,14 +377,14 @@ h1{font-weight:bold;}
         soup.html.head.title.string = title
         
         if self.keep_only_tags:
-            body = Tag(soup, 'body')
+            body = soup.new_tag('body')
             try:
                 if isinstance(self.keep_only_tags, dict):
                     self.keep_only_tags = [self.keep_only_tags]
                 for spec in self.keep_only_tags:
-                    for tag in soup.find('body').findAll(**spec):
+                    for tag in soup.find('body').find_all(**spec):
                         body.insert(len(body.contents), tag)
-                soup.find('body').replaceWith(body)
+                soup.find('body').replace_with(body)
             except AttributeError: # soup has no body element
                 pass
         
@@ -374,7 +393,7 @@ h1{font-weight:bold;}
                 after = getattr(tag, next)
                 while after is not None:
                     ns = getattr(tag, next)
-                    after.extract()
+                    after.decompose()
                     after = ns
                 tag = tag.parent
         
@@ -382,37 +401,37 @@ h1{font-weight:bold;}
             rt = [self.remove_tags_after] if isinstance(self.remove_tags_after, dict) else self.remove_tags_after
             for spec in rt:
                 tag = soup.find(**spec)
-                remove_beyond(tag, 'nextSibling')
+                remove_beyond(tag, 'next_sibling')
         
         if self.remove_tags_before:
             tag = soup.find(**self.remove_tags_before)
-            remove_beyond(tag, 'previousSibling')
+            remove_beyond(tag, 'previous_sibling')
         
         remove_tags = self.insta_remove_tags + self.remove_tags
         remove_ids = self.insta_remove_ids + self.remove_ids
         remove_classes = self.insta_remove_classes + self.remove_classes
         remove_attrs = self.insta_remove_attrs + self.remove_attrs
         
-        for tag in soup.findAll(remove_tags):
-            tag.extract()
+        for tag in soup.find_all(remove_tags):
+            tag.decompose()
         for id in remove_ids:
-            for tag in soup.findAll(attrs={"id":id}):
-                tag.extract()
+            for tag in soup.find_all(attrs={"id":id}):
+                tag.decompose()
         for cls in remove_classes:
-            for tag in soup.findAll(attrs={"class":cls}):
-                tag.extract()
+            for tag in soup.find_all(attrs={"class":cls}):
+                tag.decompose()
         for attr in remove_attrs:
-            for tag in soup.findAll(attrs={attr:True}):
+            for tag in soup.find_all(attrs={attr:True}):
                 del tag[attr]
-        for tag in soup.findAll(attrs={"type":"text/css"}):
-            tag.extract()
-        for cmt in soup.findAll(text=lambda text:isinstance(text, Comment)):
-            cmt.extract
+        for tag in soup.find_all(attrs={"type":"text/css"}):
+            tag.decompose()
+        for cmt in soup.find_all(text=lambda text:isinstance(text, Comment)):
+            cmt.extract()
         
         if self.keep_image:
             opener = URLOpener(self.host)
             self.soupbeforeimage(soup)
-            for img in soup.findAll('img'):
+            for img in soup.find_all('img'):
                 imgurl = img['src']
                 if not imgurl.startswith('http') and not imgurl.startswith('www'):
                     imgurl = self.urljoin(url, imgurl)
@@ -422,24 +441,33 @@ h1{font-weight:bold;}
                     imgtype = imghdr.what(None, imgcontent)
                     if imgtype:
                         imgmime = r"image/" + imgtype
-                        if imgtype == 'jpeg':
-                            fnimg = "%d.jpg" % random.randint(10000,99999999)
-                        else:
-                            fnimg = "%d.%s" % (random.randint(10000,99999999), imgtype)
+                        fnimg = "%d.%s" % (random.randint(10000,99999999), 'jpg' if imgtype=='jpeg' else imgtype)
                         img['src'] = fnimg
-                        yield (imgmime, imgurl, fnimg, imgcontent)
+                        yield (imgmime, imgurl, fnimg, imgcontent, None)
                 else:
                     self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
-                    img.extract()
+                    img.decompose()
         else:
-            for img in soup.findAll('img'):
-                img.extract()
+            for img in soup.find_all('img'):
+                img.decompose()
         
         self.soupprocessex(soup)
-        content = soup.renderContents('utf-8').decode('utf-8')
+        content = unicode(soup)
+        
+        #提取文章内容的前面一部分做为摘要
+        brief = u''
+        if GENERATE_TOC_DESC:
+            body = soup.find('body')
+            for h1 in body.find_all('h1'): # 去掉H1，避免和标题重复
+                h1.decompose()
+            for s in body.stripped_strings:
+                brief += unicode(s) + u' '
+                if len(brief) >= TOC_DESC_WORD_LIMIT:
+                    brief = brief[:TOC_DESC_WORD_LIMIT]
+                    break
         soup = None
         
-        yield (title, None, None, content)
+        yield (title, None, None, content, brief)
         
 class FulltextFeedBook(BaseFeedBook):
     # 在Feed中就有全文的RSS订阅
@@ -471,12 +499,12 @@ class FulltextFeedBook(BaseFeedBook):
             for e in feed['entries']:
                 # 全文RSS中如果有广告或其他不需要的内容，可以在postprocess去掉
                 desc = self.postprocess(e.description)
-                desc = self.FragToXhtml(desc, e.title, self.feed_encoding)
+                desc = self.FragToXhtml(desc, e.title, self.feed_encoding, addtitleinbody=True)
                 
-                soup = BeautifulSoup(desc)
+                soup = BeautifulSoup(desc, "lxml")
                 self.soupbeforeimage(soup)
                 if self.keep_image:
-                    for img in soup.findAll('img'):
+                    for img in soup.find_all('img'):
                         imgurl = img['src']
                         if not imgurl.startswith('http') and not imgurl.startswith('www'):
                             imgurl = self.urljoin(url, imgurl)
@@ -486,27 +514,37 @@ class FulltextFeedBook(BaseFeedBook):
                             imgtype = imghdr.what(None, imgcontent)
                             if imgtype:
                                 imgmime = r"image/" + imgtype
-                                if imgtype == 'jpeg':
-                                    fnimg = "%d.jpg" % random.randint(10000,99999999)
-                                else:
-                                    fnimg = "%d.%s" % (random.randint(10000,99999999), imgtype)
+                                fnimg = "%d.%s" % (random.randint(10000,99999999), 'jpg' if imgtype=='jpeg' else imgtype)
                                 img['src'] = fnimg
-                                yield (imgmime, imgurl, fnimg, imgcontent)
+                                yield (imgmime, imgurl, fnimg, imgcontent, None)
                         else:
                             self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
-                            img.extract()
+                            img.decompose()
                 else:
-                    for img in soup.findAll('img'):
-                        img.extract()
-                        
+                    for img in soup.find_all('img'):
+                        img.decompose()
+                
                 self.soupprocessex(soup)
-                desc = soup.renderContents('utf-8').decode('utf-8')
+                desc = unicode(soup)
+                
+                #提取文章内容的前面一部分做为摘要
+                brief = u''
+                if GENERATE_TOC_DESC:
+                    body = soup.find('body')
+                    for h1 in body.find_all('h1'): # 去掉H1，避免和标题重复
+                        h1.decompose()
+                    for s in body.stripped_strings:
+                        brief += unicode(s) + u' '
+                        if len(brief) >= TOC_DESC_WORD_LIMIT:
+                            brief = brief[:TOC_DESC_WORD_LIMIT]
+                            break
                 soup = None
+                
                 desc =  self.postprocess(desc)
                 
                 if e.title not in itemsprocessed and desc:
                     itemsprocessed.append(e.title)
-                    yield (section, e.link, e.title, desc)
+                    yield (section, e.link, e.title, desc, brief)
 
 class WebpageBook(BaseFeedBook):
     fulltext_by_readability = False
@@ -537,7 +575,7 @@ class WebpageBook(BaseFeedBook):
                 content = decoder.decode(content)
             
             content =  self.preprocess(content)
-            soup = BeautifulSoup(content)
+            soup = BeautifulSoup(content, "lxml")
             
             try:
                 title = soup.html.head.title.string
@@ -548,23 +586,23 @@ class WebpageBook(BaseFeedBook):
             title = self.processtitle(title)
             
             if self.keep_only_tags:
-                body = Tag(soup, 'body')
+                body = soup.new_tag('body')
                 try:
                     if isinstance(self.keep_only_tags, dict):
                         self.keep_only_tags = [self.keep_only_tags]
                     for spec in self.keep_only_tags:
-                        for tag in soup.find('body').findAll(**spec):
+                        for tag in soup.find('body').find_all(**spec):
                             body.insert(len(body.contents), tag)
-                    soup.find('body').replaceWith(body)
+                    soup.find('body').replace_with(body)
                 except AttributeError: # soup has no body element
                     pass
             
-            def remove_beyond(tag, next): # 鍐呭祵鍑芥暟
+            def remove_beyond(tag, next):
                 while tag is not None and getattr(tag, 'name', None) != 'body':
                     after = getattr(tag, next)
                     while after is not None:
                         ns = getattr(tag, next)
-                        after.extract()
+                        after.decompose()
                         after = ns
                     tag = tag.parent
             
@@ -572,35 +610,35 @@ class WebpageBook(BaseFeedBook):
                 rt = [self.remove_tags_after] if isinstance(self.remove_tags_after, dict) else self.remove_tags_after
                 for spec in rt:
                     tag = soup.find(**spec)
-                    remove_beyond(tag, 'nextSibling')
+                    remove_beyond(tag, 'next_sibling')
             
             if self.remove_tags_before:
                 tag = soup.find(**self.remove_tags_before)
-                remove_beyond(tag, 'previousSibling')
+                remove_beyond(tag, 'previous_sibling')
             
             remove_tags = self.insta_remove_tags + self.remove_tags
             remove_ids = self.insta_remove_ids + self.remove_ids
             remove_classes = self.insta_remove_classes + self.remove_classes
             remove_attrs = self.insta_remove_attrs + self.remove_attrs
-            for tag in soup.findAll(remove_tags):
-                tag.extract()
+            for tag in soup.find_all(remove_tags):
+                tag.decompose()
             for id in remove_ids:
-                for tag in soup.findAll(attrs={"id":id}):
-                    tag.extract()
+                for tag in soup.find_all(attrs={"id":id}):
+                    tag.decompose()
             for cls in remove_classes:
-                for tag in soup.findAll(attrs={"class":cls}):
-                    tag.extract()
+                for tag in soup.find_all(attrs={"class":cls}):
+                    tag.decompose()
             for attr in remove_attrs:
-                for tag in soup.findAll(attrs={attr:True}):
+                for tag in soup.find_all(attrs={attr:True}):
                     del tag[attr]
-            for tag in soup.findAll(attrs={"type":"text/css"}):
-                tag.extract()
-            for cmt in soup.findAll(text=lambda text:isinstance(text, Comment)):
-                cmt.extract
+            for tag in soup.find_all(attrs={"type":"text/css"}):
+                tag.decompose()
+            for cmt in soup.find_all(text=lambda text:isinstance(text, Comment)):
+                cmt.extract()
             
             if self.keep_image:
                 self.soupbeforeimage(soup)
-                for img in soup.findAll('img'):
+                for img in soup.find_all('img'):
                     imgurl = img['src']
                     if not imgurl.startswith('http') and not imgurl.startswith('www'):
                         imgurl = self.urljoin(url, imgurl)
@@ -610,22 +648,32 @@ class WebpageBook(BaseFeedBook):
                         imgtype = imghdr.what(None, imgcontent)
                         if imgtype:
                             imgmime = r"image/" + imgtype
-                            if imgtype == 'jpeg':
-                                fnimg = "%d.jpg" % random.randint(10000,99999999)
-                            else:
-                                fnimg = "%d.%s" % (random.randint(10000,99999999), imgtype)
+                            fnimg = "%d.%s" % (random.randint(10000,99999999), 'jpg' if imgtype=='jpeg' else imgtype)
                             img['src'] = fnimg
-                            yield (imgmime, imgurl, fnimg, imgcontent)
+                            yield (imgmime, imgurl, fnimg, imgcontent, None)
                     else:
                         self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
-                        img.extract()                
+                        img.decompose()                
             else:
-                for img in soup.findAll('img'):
-                    img.extract()
+                for img in soup.find_all('img'):
+                    img.decompose()
             
             self.soupprocessex(soup)
-            content = soup.renderContents('utf-8').decode('utf-8')
+            content = unicode(soup)
+            
+            #提取文章内容的前面一部分做为摘要
+            brief = u''
+            if GENERATE_TOC_DESC:
+                body = soup.find('body')
+                for h1 in body.find_all('h1'): # 去掉H1，避免和标题重复
+                    h1.decompose()
+                for s in body.stripped_strings:
+                    brief += unicode(s) + u' '
+                    if len(brief) >= TOC_DESC_WORD_LIMIT:
+                        brief = brief[:TOC_DESC_WORD_LIMIT]
+                        break
             soup = None
+            
             content =  self.postprocess(content)
-            yield (section, url, title, content)
+            yield (section, url, title, content, brief)
         

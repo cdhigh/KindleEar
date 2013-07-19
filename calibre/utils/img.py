@@ -43,7 +43,7 @@ def rescale_image(data, maxsizeb=2*1024*1024, dimen=None,
     img = Image.open(data)
     width, height = img.size
     fmt = img.format
-    if graying:
+    if graying and img.mode != "L":
         img = img.convert("L")
         
     if dimen is not None:
@@ -66,7 +66,10 @@ def rescale_image(data, maxsizeb=2*1024*1024, dimen=None,
     elif png2jpg and fmt == 'PNG':
         data = StringIO()
         img.save(data, 'JPEG')
-        
+    else:
+        data = StringIO()
+        img.save(data, fmt)
+    
     return data.getvalue()
 
 def mobify_image(data):

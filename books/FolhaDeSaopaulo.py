@@ -14,6 +14,7 @@ class FolhaDeSaopaulo(BaseFeedBook):
     feed_encoding = "ISO-8859-1"
     page_encoding = "ISO-8859-1"
     mastheadfile = "mh_folha.gif"
+    coverfile =  'cv_folha.jpg'
     fulltext_by_readability = False
     fulltext_by_instapaper = False
     host = r'http://www.folha.uol.com.br/'
