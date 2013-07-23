@@ -51,12 +51,12 @@
         {% else %}
         <a style="font-weight:normal;" href="/admin">账户管理</a>
         {% endif %}
-        {#<span style="color: #ccc;">&bull;</span>
-        {% if current == "feedback" %}
-        反馈
+        <span style="color: #ccc;">&bull;</span>
+        {% if current == "advsetting" %}
+        高级设置
         {% else %}
-        <a style="font-weight:normal;" href="/feedback">反馈</a>
-        {% endif %}#}
+        <a style="font-weight:normal;" href="/advsetting">高级设置</a>
+        {% endif %}
         </h2>
     {% else %}
         <h2 style="text-align:center;padding:10px 0;"><a href="/login">请先登陆</a></h2>
@@ -71,7 +71,7 @@
         {% block footer %}
         <div class="clear"></div>
         2013 &copy; KindleEar&nbsp;&nbsp;|&nbsp;&nbsp;
-        <a href="/static/periodical.gif" target="_blank" style="text-decoration:none;">Periodical</a>
+        <a href="/static/faq.html" target="_blank" style="text-decoration:none;">FAQ</a>
         &nbsp;&nbsp;|&nbsp;&nbsp;
         <a href="https://github.com/cdhigh/kindleear" target="_blank" style="text-decoration:none;">Github page</a>
         &nbsp;&nbsp;|&nbsp;&nbsp;

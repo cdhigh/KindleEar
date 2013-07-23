@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.3.5"
+__Version__ = "1.4"
 __Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
@@ -63,11 +63,12 @@ class KeUser(db.Model): # kindleEar User
     last_delivered = db.DateTimeProperty()
     expires = db.DateTimeProperty()
     ownfeeds = db.ReferenceProperty(Book) # 每个用户都有自己的自定义RSS
-        
+    
 class Feed(db.Model):
     book = db.ReferenceProperty(Book)
     title = db.StringProperty()
     url = db.StringProperty()
+    isfulltext = db.BooleanProperty()
     
 class DeliverLog(db.Model):
     username = db.StringProperty()
@@ -79,6 +80,9 @@ class DeliverLog(db.Model):
     book = db.StringProperty()
     status = db.StringProperty()
     
+class UrlFilter(db.Model):
+    url = db.StringProperty()
+
 def StoreBookToDb():
     for book in BookClasses():  #添加内置书籍
         b = Book.all().filter("title = ", book.title).get()
@@ -173,6 +177,29 @@ class Setting(BaseHandler):
         ownfeeds.put()
         
         raise web.seeother('')
+
+class AdvSetting(BaseHandler):
+    def GET(self):
+        user = self.getcurrentuser()
+        delurlid = web.input().get('delurlid')
+        if delurlid:
+            try:
+                delurlid = int(delurlid)
+            except:
+                pass
+            else:
+                flt = UrlFilter.all().ancestor(db.Key.from_path("UrlFilter", delurlid)).get()
+                if flt:
+                    flt.delete()
+        return jjenv.get_template('advsetting.html').render(nickname=session.username,
+            title="Advanced Setting",current='advsetting',user=user,urlfilters=UrlFilter.all())
+        
+    def POST(self):
+        user = self.getcurrentuser()
+        url = web.input().get('url')
+        if url:
+            UrlFilter(url=url).put()
+        raise web.seeother('/advsetting')
         
 class Admin(BaseHandler):
     # 账户管理页面
@@ -375,11 +402,12 @@ class MySubscription(BaseHandler):
         user = self.getcurrentuser()
         title = web.input().get('t')
         url = web.input().get('url')
+        isfulltext = bool(web.input().get('fulltext'))
         if not title or not url:
-            return self.GET(u"标题和URL都不能为空！")
+            return self.GET(u"标题和URL都不能为空！ ")
         
         assert user.ownfeeds
-        Feed(title=title,url=url,book=user.ownfeeds).put()
+        Feed(title=title,url=url,book=user.ownfeeds,isfulltext=isfulltext).put()
         raise web.seeother('/my')
         
 class Subscribe(BaseHandler):
@@ -532,8 +560,8 @@ class Worker(BaseHandler):
             #book.coverfile = bk.coverfile
             book.keep_image = bk.keep_image
             book.fulltext_by_readability = True
-            for feed in feeds:
-                book.feeds.append((feed.title, feed.url))
+            book.feeds = [(feed.title, feed.url, feed.isfulltext) for feed in feeds]
+            book.url_filters = [urlflt.url for urlflt in UrlFilter.all()]
         
         emails = emails.split(',')
         
@@ -661,6 +689,7 @@ urls = (
   "/unsubscribe/(.*)", "Unsubscribe",
   "/delfeed/(.*)", "DelFeed",
   "/setting", "Setting",
+  '/advsetting', 'AdvSetting',
   "/admin","Admin",
   "/renew", "Renew",
   "/deliver", "Deliver",

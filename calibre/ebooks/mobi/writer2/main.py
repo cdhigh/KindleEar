@@ -465,9 +465,9 @@ class MobiWriter(object):
         '''
         Write the PalmDB header
         '''
-        # modify by arroz, unicode() -> str()
-        title = ascii_filename(str(self.oeb.metadata.title[0])).replace(
-                ' ', '_')[:31]
+        # modify by arroz, src is unicode(self.oeb.metadata.title[0])
+        t = unicode(str(self.oeb.metadata.title[0]), "utf-8")
+        title = ascii_filename(t).replace(' ', '_')[:31]
         title = title + (b'\0' * (32 - len(title)))
         now = int(time.time())
         nrecords = len(self.records)

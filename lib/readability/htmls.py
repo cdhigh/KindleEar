@@ -59,7 +59,9 @@ def shorten_title(doc):
     title = doc.find('.//title')
     if title is None or len(title.text) == 0:
         return ''
-
+    
+    zhPattern = re.compile(u'[\u4e00-\u9fa5]+') # added by arroz, exp for chinese
+    
     title = orig = norm_title(title.text)
 
     candidates = set()
@@ -84,10 +86,20 @@ def shorten_title(doc):
         for delimiter in [' | ', ' - ', ' :: ', ' / ']:
             if delimiter in title:
                 parts = orig.split(delimiter)
-                if len(parts[0].split()) >= 4:
+                lp0 = parts[0].split()
+                if len(lp0) >= 4:
                     title = parts[0]
                     break
-                elif len(parts[-1].split()) >= 4:
+                # added by arroz, CJK?
+                elif zhPattern.search(parts[0]) and len(parts[0]) > 4:
+                    title = parts[0]
+                    break
+                lpl = parts[-1].split()
+                if len(lpl) >= 4:
+                    title = parts[-1]
+                    break
+                # added by arroz, CJK?
+                elif zhPattern.search(parts[-1]) and len(parts[-1]) > 4:
                     title = parts[-1]
                     break
         else:
@@ -97,8 +109,11 @@ def shorten_title(doc):
                     title = parts[-1]
                 else:
                     title = orig.split(': ', 1)[1]
-
-    if not 15 < len(title) < 150:
+    
+    if zhPattern.search(title):
+        if not 4 < len(title) < 100:
+            return orig
+    elif not 15 < len(title) < 150:
         return orig
 
     return title

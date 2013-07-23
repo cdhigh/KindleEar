@@ -11,8 +11,9 @@ performance, start the fetches which are fastest first.
  
 When you're ready to wait for the fetches to complete, call the wait() method.
 """
- 
+import re
 from google.appengine.api import urlfetch
+from config import CONNECTION_TIMEOUT
  
 MAX_SIMULTANEOUS_ASYNC_URLFETCH_REQUESTS = 10
  
@@ -21,7 +22,7 @@ class AsyncURLFetchManager(object):
         self.active_fetches = []
         self.pending_fetches = []
  
-    def fetch_async(self, url, deadline=10,
+    def fetch_async(self, url, deadline=CONNECTION_TIMEOUT,
                      callback=None, cb_args=[], cb_kwargs={},
                      **kwargs):
         """

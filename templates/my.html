@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% block content %}
 <fieldset id="mybooks">
     <legend>已订阅</legend>
@@ -26,17 +25,23 @@
     <legend>自定义RSS</legend>
     {% for feed in ownfeeds %}
     <div class="book">
-        <div class="titleRow">{{feed.title}}</div>
+        <div class="titleRow">{{feed.title}} {% if feed.isfulltext %}<img alt="全文RSS" src="static/fulltext.gif" border="0" />{% endif %}</div>
         <div class="cornerControls">
             <a href="/delfeed/{{feed.key().id()}}" class="actionButton">删除</a>
         </div>
-        <div class="summaryRow">{{feed.url}}</div>
+        <div class="summaryRow">
+            <a href="{{feed.url}}" target="_blank" style="text-decoration:none;color:grey;">
+            {{feed.url}}</a>
+        </div>
     </div>
     {% endfor %}
     <form action="" method="POST">
     <div class="book">
         <div class="titleRow">
-            <input type="text" name="t" placeholder="标题" />
+            <table><tr>
+            <td><input type="text" name="t" placeholder="标题" /></td>
+            <td><input type="checkbox" name="fulltext"/></td><td><img alt="全文RSS" src="static/fulltext.gif" border="0" /></td>
+            </tr></table>
         </div>
         <div class="cornerControls">
             <input type="submit" value="添加" class="actionButton" />

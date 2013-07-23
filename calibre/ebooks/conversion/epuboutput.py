@@ -7,6 +7,7 @@ __copyright__ = '2009, Kovid Goyal <kovid@kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
 import os, zipfile, re
+from calibre.utils.img import rescale_image
 
 block_level_tags = (
       'address',

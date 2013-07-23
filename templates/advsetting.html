@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block css %}
+<style type="text/css">
+.newfilter {
+    margin-bottom:5px;
+    margin-top:3px;
+    float: left;
+    padding-top: 3px;
+    padding-left:3px;
+    width:90%;
+    clear:left;
+    color: #555;
+    padding-right:6px;
+}
+#tburl{
+    border:1px dotted black;
+    cellspacing:0;
+    cellpadding:0;
+    width:100%;
+}
+.trodd{
+    background-color:#f0f0f0;
+}
+.treven{
+    background-color:#e5e5e5;
+}
+</style>
+{% endblock %}
+{% block content %}
+<p style="font-size:1em;color:red;text-align:center;">除非你很熟悉这些配置，否则不建议修改！</p>
+<fieldset id="urlfilter">
+    <legend>URL过滤</legend>
+    <p style="font-size:0.8em;color:grey;">在此列表中的URL将不会被下载，以便节省时间，仅适用于文章中的图片URL</p>
+    {% if urlfilters.count() %}
+    <table id="tburl">
+    {% for urlflt in urlfilters %}
+    <tr class="{{loop.cycle('trodd', 'treven')}}">
+        <td style="width:90%">{{urlflt.url}}</td>
+        <td style="text-align:right;"><a href="/advsetting?delurlid={{urlflt.key().id()}}" class="actionButton">删除</a></td>
+    </tr>
+    {% endfor %}
+    </table>
+    {% endif %}
+    <form action="" method="POST">
+    <div class="addfilter">
+        <div class="newfilter">
+            <input type="text" name="url" style="width:80%;" placeholder="请输入url或正则表达式" />
+        </div>
+        <div class="cornerControls">
+            <input type="submit" value="添加" class="actionButton" />
+        </div>
+    </div>
+    </form>
+</fieldset>
+{% endblock %}

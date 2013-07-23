@@ -4,10 +4,11 @@
 此类会自动处理redirect和cookie，同时增加了失败自动重试功能"""
 import urllib, urllib2, Cookie, urlparse
 from google.appengine.api import urlfetch
+from config import CONNECTION_TIMEOUT
 
 class URLOpener:
     def __init__(self, host=None, maxfetchcount=2, maxredirect=3, 
-                timeout=10, addreferer=False):
+                timeout=CONNECTION_TIMEOUT, addreferer=False):
         self.cookie = Cookie.SimpleCookie()
         self.maxFetchCount = maxfetchcount
         self.maxRedirect = maxredirect
