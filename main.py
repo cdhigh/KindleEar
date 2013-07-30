@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.4"
+__Version__ = "1.4.1"
 __Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
@@ -19,6 +19,7 @@ from google.appengine.api import mail
 from google.appengine.ext import db
 from google.appengine.api import taskqueue
 from google.appengine.api import memcache
+from google.appengine.runtime.apiproxy_errors import OverQuotaError
 
 from config import *
 
@@ -43,15 +44,25 @@ class Book(db.Model):
     builtin = db.BooleanProperty() # 内置书籍不可修改
     #====自定义书籍
     language = db.StringProperty()
-    feed_encoding = db.StringProperty()
-    page_encoding = db.StringProperty()
     mastheadfile = db.StringProperty() # GIF 600*60
     coverfile = db.StringProperty()
     keep_image = db.BooleanProperty()
     
+    #这两个属性只有自定义RSS才有意义
+    @property
     def feeds(self):
         return Feed.all().filter('book = ', self.key())
-
+    @property
+    def feedscount(self):
+        mkey = '%d.feedscount'%self.key().id()
+        mfc = memcache.get(mkey)
+        if mfc is not None:
+            return mfc
+        else:
+            fc = self.feeds.count()
+            memcache.add(mkey, fc, 86400)
+            return fc
+    
 class KeUser(db.Model): # kindleEar User
     name = db.StringProperty(required=True)
     passwd = db.StringProperty(required=True)
@@ -60,7 +71,6 @@ class KeUser(db.Model): # kindleEar User
     send_time = db.IntegerProperty()
     timezone = db.IntegerProperty()
     book_type = db.StringProperty()
-    last_delivered = db.DateTimeProperty()
     expires = db.DateTimeProperty()
     ownfeeds = db.ReferenceProperty(Book) # 每个用户都有自己的自定义RSS
     
@@ -85,19 +95,13 @@ class UrlFilter(db.Model):
 
 def StoreBookToDb():
     for book in BookClasses():  #添加内置书籍
+        if memcache.get(book.title): #使用memcache加速
+            continue
         b = Book.all().filter("title = ", book.title).get()
         if not b:
             b = Book(title=book.title,description=book.description,builtin=True)
             b.put()
-    
-    for bk in Book.all().filter('builtin = ', True): #clean
-        found = False
-        for book in BookClasses():
-            if book.title == bk.title:
-                found = True
-                break
-        if not found:
-            bk.delete()
+            memcache.add(book.title, book.description, 86400)
 
 StoreBookToDb()
 
@@ -125,10 +129,13 @@ class BaseHandler:
             user = KeUser.all().filter("kindle_email = ", email).get()
             name = user.name if user else ''
             timezone = user.timezone if user else tz
-            dl = DeliverLog(username=name, to=email, size=size,
-               time=local_time(tz=timezone), datetime=datetime.datetime.utcnow(),
-               book=book, status=status)
-            dl.put()
+            try:
+                dl = DeliverLog(username=name, to=email, size=size,
+                   time=local_time(tz=timezone), datetime=datetime.datetime.utcnow(),
+                   book=book, status=status)
+                dl.put()
+            except Exception as e:
+                self.log.warn('DeliverLog failed to save:%s',str(e))
             
     def SendToKindle(self, emails, title, booktype, attachment, tz=TIMEZONE):
         if not isinstance(emails, list):
@@ -145,10 +152,18 @@ class BaseHandler:
             user = KeUser.all().filter("kindle_email = ", email).get()
             tz = user.timezone if user else TIMEZONE
             filename = "%s(%s).%s"%(basename,local_time('%Y-%m-%d_%H-%M',tz=tz),booktype)
-            mail.send_mail(SrcEmail, email, "KindleEar", "Deliver from KindlerEar",
-                attachments=[(filename, attachment),])
-            self.deliverlog(email, title, len(attachment), tz=tz)
-        
+            try:
+                mail.send_mail(SrcEmail, email, "KindleEar", "Deliver from KindlerEar",
+                    attachments=[(filename, attachment),])
+            except OverQuotaError as e:
+                self.log.warn('overquota when sendmail to %s:%s', (email, str(e)))
+                self.deliverlog(email, title, len(attachment), tz=tz, status='over quota')
+            except Exception as e:
+                default_log.warn('sendmail to %s failed:%s', (email, str(e)))
+                self.deliverlog(email, title, len(attachment), tz=tz, status='send failed')
+            else:
+                self.deliverlog(email, title, len(attachment), tz=tz)
+     
 class Home(BaseHandler):
     def GET(self):
         return jjenv.get_template('home.html').render(nickname=session.username,
@@ -169,12 +184,12 @@ class Setting(BaseHandler):
         user.book_type = web.input().get('book_type')
         user.put()
         
-        ownfeeds = user.ownfeeds
-        ownfeeds.language = web.input().get("lng")
-        ownfeeds.title = web.input().get("rt")
-        ownfeeds.keep_image = bool(web.input().get("keepimage"))
-        ownfeeds.users = [user.name] if web.input().get("enablerss") else []
-        ownfeeds.put()
+        myfeeds = user.ownfeeds
+        myfeeds.language = web.input().get("lng")
+        myfeeds.title = web.input().get("rt")
+        myfeeds.keep_image = bool(web.input().get("keepimage"))
+        myfeeds.users = [user.name] if web.input().get("enablerss") else []
+        myfeeds.put()
         
         raise web.seeother('')
 
@@ -188,7 +203,7 @@ class AdvSetting(BaseHandler):
             except:
                 pass
             else:
-                flt = UrlFilter.all().ancestor(db.Key.from_path("UrlFilter", delurlid)).get()
+                flt = UrlFilter.get_by_id(delurlid)
                 if flt:
                     flt.delete()
         return jjenv.get_template('advsetting.html').render(nickname=session.username,
@@ -235,9 +250,9 @@ class Admin(BaseHandler):
             elif KeUser.all().filter("name = ", u).get():
                 tips = u"用户名已经存在！"
             else:
-                ownfeeds = Book(title=OWNFEEDS_TITLE,description=OWNFEEDS_DESC,
+                myfeeds = Book(title=MY_FEEDS_TITLE,description=MY_FEEDS_DESC,
                     builtin=False,keep_image=True)
-                ownfeeds.put()
+                myfeeds.put()
                 au = KeUser(name=u,passwd=hashlib.md5(up1).hexdigest())
                 au.kindle_email = ''
                 au.enable_send = False
@@ -245,7 +260,7 @@ class Admin(BaseHandler):
                 au.timezone = TIMEZONE
                 au.book_type = "mobi"
                 au.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
-                au.ownfeeds = ownfeeds
+                au.ownfeeds = myfeeds
                 au.put()
                 
                 tips = u"添加用户账号成功！ "
@@ -261,9 +276,9 @@ class Login(BaseHandler):
         tips = ''
         u = KeUser.all().filter("name = ", 'admin').get()
         if not u:
-            ownfeeds = Book(title=OWNFEEDS_TITLE,description=OWNFEEDS_DESC,
+            myfeeds = Book(title=MY_FEEDS_TITLE,description=MY_FEEDS_DESC,
                     builtin=False,keep_image=True)
-            ownfeeds.put()
+            myfeeds.put()
             au = KeUser(name='admin',passwd=hashlib.md5('admin').hexdigest())
             au.kindle_email = ''
             au.enable_send = False
@@ -271,7 +286,7 @@ class Login(BaseHandler):
             au.timezone = TIMEZONE
             au.book_type = "mobi"
             au.expires = None
-            au.ownfeeds = ownfeeds
+            au.ownfeeds = myfeeds
             au.put()
             tips = u"初次登陆请使用用户名'admin'/密码'admin'登陆。 "
         else:
@@ -369,9 +384,8 @@ class DelAccount(BaseHandler):
             if not u:
                 tips = u"用户名'%s'不存在！" % name
             else:
-                ownfeeds = u.ownfeeds
-                if ownfeeds:
-                    ownfeeds.delete()
+                if u.ownfeeds:
+                    u.ownfeeds.delete()
                 u.delete()
                 
                 # 要删掉数据库中订阅记录
@@ -393,10 +407,10 @@ class MySubscription(BaseHandler):
     # 管理我的订阅和杂志列表
     def GET(self, tips=None):
         user = self.getcurrentuser()
-        ownfeeds = user.ownfeeds.feeds() if user and user.ownfeeds else None
+        myfeeds = user.ownfeeds.feeds if user.ownfeeds else None
         return jjenv.get_template("my.html").render(nickname=session.username,current='my',
                 title='My subscription',books=Book.all().filter("builtin = ",True),
-                ownfeeds=ownfeeds,tips=tips)
+                myfeeds=myfeeds,tips=tips)
     
     def POST(self): # 添加自定义RSS
         user = self.getcurrentuser()
@@ -408,6 +422,7 @@ class MySubscription(BaseHandler):
         
         assert user.ownfeeds
         Feed(title=title,url=url,book=user.ownfeeds,isfulltext=isfulltext).put()
+        memcache.delete('%d.feedscount'%user.ownfeeds.key().id())
         raise web.seeother('/my')
         
 class Subscribe(BaseHandler):
@@ -420,7 +435,7 @@ class Subscribe(BaseHandler):
         except:
             return "the id is invalid!<br />"
         
-        bk = Book.all().ancestor(db.Key.from_path("Book", id)).get()
+        bk = Book.get_by_id(id)
         if not bk:
             return "the book(%d) not exist!<br />" % id
         
@@ -439,8 +454,7 @@ class Unsubscribe(BaseHandler):
         except:
             return "the id is invalid!<br />"
             
-        bk = Book.all().ancestor(db.Key.from_path("Book", id)).get()
-        #bk = Book.all().filter("title = ", title).get()
+        bk = Book.get_by_id(id)
         if not bk:
             return "the book(%d) not exist!<br />" % id
         
@@ -459,7 +473,7 @@ class DelFeed(BaseHandler):
         except:
             return "the id is invalid!<br />"
         
-        feed = Feed.all().ancestor(db.Key.from_path("Feed", id)).get()
+        feed = Feed.get_by_id(id)
         if feed:
             feed.delete()
         
@@ -482,8 +496,8 @@ class Renew(BaseHandler):
 class Deliver(BaseHandler):
     def GET(self):
         username = web.input().get('u')
-        sentcnt = 0
         books = Book.all()
+        sent = []
         if username: # 现在投递
             for book in books:
                 if username not in book.users:
@@ -492,28 +506,43 @@ class Deliver(BaseHandler):
                 if user and user.kindle_email:
                     taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
                         params={"id":book.key().id(), "type":user.book_type, 'emails':user.kindle_email})
-                    sentcnt += 1
+                    sent.append(book.title)
+            if len(sent):
+                tips = u"书籍 (%s) 已放入推送队列！" % u', '.join(sent)
+            else:
+                tips = u'没有需要推送的书籍！'
             return jjenv.get_template("autoback.html").render(nickname=session.username,
-                title='Delivering',tips=u"%d本书籍已放入推送队列！"%sentcnt)
+                title='Delivering',tips=tips)
         
         #定时cron调用
         for book in books:
             if not book.users: # 没有用户订阅此书
                 continue
             
-            mobiemails = []
-            epubemails = []
+            mobiemails, epubemails = [], []
             for u in book.users:
                 user = KeUser.all().filter("enable_send = ",True).filter("name = ", u).get()
                 if user:
                     h = int(local_time("%H", user.timezone)) + 1
                     h = h - 24 if h > 24 else h
                     if user.send_time == h and user.kindle_email:
-                        if user.book_type == "epub":
-                            epubemails.append(user.kindle_email)
+                        if book.builtin:
+                            bkcls = BookClass(book.title)
+                            if not bkcls:
+                                continue
+                            if bkcls.deliver_days: #按星期推送
+                                day = local_time('%A', user.timezone)
+                                days = bkcls.deliver_days if isinstance(bkcls.deliver_days,list) else [bkcls.deliver_days]
+                                if day in days:
+                                    lstemails = epubemails if user.book_type=='epub' else mobiemails
+                                    lstemails.append(user.kindle_email)
+                            else:
+                                lstemails = epubemails if user.book_type=='epub' else mobiemails
+                                lstemails.append(user.kindle_email)
                         else:
-                            mobiemails.append(user.kindle_email)
-                        sentcnt += 1
+                            lstemails = epubemails if user.book_type=='epub' else mobiemails
+                            lstemails.append(user.kindle_email)
+                        sent.append(book.title)
             if mobiemails:
                 emails = ','.join(mobiemails)
                 taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
@@ -522,22 +551,23 @@ class Deliver(BaseHandler):
                 emails = ','.join(epubemails)
                 taskqueue.add(url='/worker', queue_name="deliverqueue1",method='GET',
                     params={"id":book.key().id(), "type":"epub", 'emails': emails})
+        tips = u', '.join(sent)
         return jjenv.get_template("autoback.html").render(nickname=session.username,
-                title='Delivering',tips=u"%d本书已经放入推送队列！"%sentcnt)
+                title='Delivering',tips=u"书籍 (%s) 已经放入推送队列！" % tips)
         
 class Worker(BaseHandler):
     def GET(self):
-        id = web.input().get("id")
+        bookid = web.input().get("id")
         emails = web.input().get("emails")
         booktype = web.input().get("type", "mobi")
-        if not id or not emails:
+        if not bookid or not emails:
             return "No book to send!<br />"
         try:
-            id = int(id)
+            bookid = int(bookid)
         except:
             return "id of book is invalid!<br />"
             
-        bk = Book.all().ancestor(db.Key.from_path("Book", id)).get()
+        bk = Book.get_by_id(bookid)
         if not bk:
             return "Title of feeds not exist!<br />"
         
@@ -547,21 +577,17 @@ class Worker(BaseHandler):
                 return "the builtin book not exist!<br />"
             book = book()
         else: # 自定义RSS
-            feeds = bk.feeds()
-            if feeds.count() == 0:
+            if bk.feedscount == 0:
                 return "the book has no feed!<br />"
             book = BaseFeedBook()
             book.title = bk.title
             book.description = bk.description
             book.language = bk.language
-            #book.feed_encoding = bk.feed_encoding
-            #book.page_encoding = bk.page_encoding
-            #book.mastheadfile = bk.mastheadfile
-            #book.coverfile = bk.coverfile
             book.keep_image = bk.keep_image
             book.fulltext_by_readability = True
+            feeds = bk.feeds
             book.feeds = [(feed.title, feed.url, feed.isfulltext) for feed in feeds]
-            book.url_filters = [urlflt.url for urlflt in UrlFilter.all()]
+            book.url_filters = [flt.url for flt in UrlFilter.all()]
         
         emails = emails.split(',')
         
@@ -592,19 +618,19 @@ class Worker(BaseHandler):
         sections = OrderedDict()
         # 对于html文件，变量名字自文档
         # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
-        for section, url, title, content, brief in book.Items():
-            if not section or not title or not content:
+        for sec_or_media, url, title, content, brief in book.Items():
+            if not sec_or_media or not title or not content:
                 continue
             
-            if section.startswith(r'image/'):
+            if sec_or_media.startswith(r'image/'):
                 id, href = oeb.manifest.generate(id='img', href=title)
-                item = oeb.manifest.add(id, href, section, data=content)
+                item = oeb.manifest.add(id, href, sec_or_media, data=content)
             else:
                 id, href = oeb.manifest.generate(id='feed', href='feed%d.htm'%itemcnt)
                 item = oeb.manifest.add(id, href, 'text/html', data=content)
                 oeb.spine.add(item, True)
-                sections.setdefault(section, [])
-                sections[section].append((title, item, brief))
+                sections.setdefault(sec_or_media, [])
+                sections[sec_or_media].append((title, item, brief))
                 itemcnt += 1
                 
         if itemcnt > 0: # 建立TOC，杂志模式需要为两层目录结构
@@ -635,23 +661,31 @@ class Mylogs(BaseHandler):
     
 class RemoveLogs(BaseHandler):
     def GET(self):
+        #如果删除了内置书籍py文件，则在数据库中也清除，有最长一天的滞后问题不大
+        for bk in Book.all().filter('builtin = ', True):
+            found = False
+            for book in BookClasses():
+                if book.title == bk.title:
+                    found = True
+                    break
+            if not found:
+                for fd in bk.feeds:
+                    fd.delete()
+                bk.delete()
+        
+        # 停止过期用户的推送
+        for user in KeUser.all():
+            if user.expires and (user.expires < datetime.datetime.utcnow()):
+                user.enable_send = False
+                user.put()
+        
         query = DeliverLog.all()
         query.filter('datetime < ', datetime.datetime.utcnow() - datetime.timedelta(days=25))
         logs = query.fetch(1000)
         c = len(logs)
         db.delete(logs)
         
-        for user in KeUser.all():
-            if user.expires and (user.expires < datetime.datetime.utcnow()):
-                user.enable_send = False
-                user.put()
-        
         return "%s lines log removed.<br />" % c
-
-#class FeedBack(BaseHandler):
-#    def GET(self):
-#        return jjenv.get_template("feedback.html").render(nickname=session.username,
-#            title='Feedback',current='feedback')
 
 class Test(BaseHandler):
     def GET(self):
@@ -660,6 +694,12 @@ class Test(BaseHandler):
             s += "<pre><p>" + str(d).rjust(28) + " | " + str(os.environ[d]) + "</p></pre>"
         return s
 
+class DbViewer(BaseHandler):
+    def GET(self):
+        self.login_required()
+        return jjenv.get_template("dbviewer.html").render(nickname=session.username,
+            title='DbViewer',books=Book.all(),users=KeUser.all(),feeds=Feed.all().order('book'))
+        
 def fix_filesizeformat(value, binary=False):
     " bugfix for do_filesizeformat of jinja2 "
     bytes = float(value)
@@ -697,7 +737,7 @@ urls = (
   "/logs", "Mylogs",
   "/removelogs", "RemoveLogs",
   "/test", "Test",
-  #"/feedback", "FeedBack",
+  "/dbviewer","DbViewer",
 )
 
 app = web.application(urls, globals())
@@ -708,3 +748,5 @@ jjenv = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'),
 jjenv.filters['filesizeformat'] = fix_filesizeformat
 
 app = app.wsgifunc()
+
+web.config.debug=IsRunInLocal

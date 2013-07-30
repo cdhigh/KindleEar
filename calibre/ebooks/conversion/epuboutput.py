@@ -174,14 +174,24 @@ class EPUBOutput:
         from calibre.ebooks.oeb.base import OEB_RASTER_IMAGES
         for item in oeb.manifest:
             if item.media_type in OEB_RASTER_IMAGES:
-                if self.opts.process_images or self.opts.graying_image:
-                    img = rescale_image(str(item), graying=self.opts.graying_image)
-                    epub.writestr('OEBPS/%s' % item.href, img, compress_type=compress)
+                try:
+                    img = process_image(str(item))
+                except:
+                    self.log.warn('Bad image file %r.' % item.href)
                 else:
-                    epub.writestr('OEBPS/%s' % item.href, str(item), compress_type=compress)
+                    epub.writestr('OEBPS/%s' % item.href, img, compress_type=compress)
             else:
                 epub.writestr('OEBPS/%s' % item.href, str(item), compress_type=compress)
-
+    
+    def process_image(self, data):
+        if not self.opts.process_images or self.opts.process_images_immediately:
+            return data
+        if self.opts.mobi_keep_original_images:
+            return mobify_image(data)
+        else:
+            return rescale_image(data, png2jpg=self.opts.image_png_to_jpg,
+                            graying=self.opts.graying_image)
+    
     def workaround_ade_quirks(self):
         """
         Perform various markup transforms to get the output to render correctly

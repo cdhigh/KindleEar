@@ -2,7 +2,7 @@
 # vim:fileencoding=UTF-8:ts=4:sw=4:sta:et:sts=4:ai
 from __future__ import (unicode_literals, division, absolute_import,
                         print_function)
-from future_builtins import filter, map
+#from future_builtins import filter, map
 
 __license__   = 'GPL v3'
 __copyright__ = '2011, Kovid Goyal <kovid@kovidgoyal.net>'
@@ -63,8 +63,8 @@ class TAGX(object): # {{{
         '''
         TAGX block for the Primary index header of a periodical
         '''
-        list(map(self.add_tag, (1, 2, 3, 4, 5, 21, 22, 23, 0, 69, 70, 71, 72,
-            73, 0)))
+        map(self.add_tag, (1, 2, 3, 4, 5, 21, 22, 23, 0, 69, 70, 71, 72,
+            73, 0))
         return self.header(2) + bytes(self.byts)
 
     @property
@@ -72,7 +72,7 @@ class TAGX(object): # {{{
         '''
         TAGX block for the secondary index header of a periodical
         '''
-        list(map(self.add_tag, (11, 0)))
+        map(self.add_tag, (11, 0))
         return self.header(1) + bytes(self.byts)
 
     @property
@@ -80,7 +80,7 @@ class TAGX(object): # {{{
         '''
         TAGX block for the primary index header of a flat book
         '''
-        list(map(self.add_tag, (1, 2, 3, 4, 0)))
+        map(self.add_tag, (1, 2, 3, 4, 0))
         return self.header(1) + bytes(self.byts)
 
 
@@ -750,12 +750,12 @@ class Indexer(object): # {{{
         # Filter
         for i, x in list(enumerate(normalized_sections)):
             sec, normalized_articles = x
-            normalized_articles = list(filter(lambda x: x.length > 0,
-                normalized_articles))
+            normalized_articles = filter(lambda x: x.length > 0,
+                normalized_articles)
             normalized_sections[i] = (sec, normalized_articles)
 
-        normalized_sections = list(filter(lambda x: x[0].length > 0 and x[1],
-            normalized_sections))
+        normalized_sections = filter(lambda x: x[0].length > 0 and x[1],
+            normalized_sections)
 
         # Set indices
         i = 0

@@ -17,6 +17,8 @@ class URLOpener:
         self.timeout = timeout
     
     def open(self, url, data=None):
+        #如果启用缓存，建议全部使用命名参数
+        #cache标识是否将获取的内容缓存起来，仅支持命名参数
         method = urlfetch.GET if data is None else urlfetch.POST
         
         maxRedirect = self.maxRedirect
@@ -27,24 +29,39 @@ class URLOpener:
         
         response = resp()
         while url and (maxRedirect > 0):
-            for cnt in range(self.maxFetchCount):
+            cnt = 0
+            while cnt < self.maxFetchCount:
                 try:
                     response = urlfetch.fetch(url=url, payload=data, method=method,
                         headers=self._getHeaders(self.cookie,url),
-                        allow_truncated=False, follow_redirects=False, deadline=self.timeout)
+                        allow_truncated=False, follow_redirects=False, 
+                        deadline=self.timeout, validate_certificate=False)
                 except urlfetch.DeadlineExceededError:
                     if response.status_code == 555:
                         response.status_code = 504
-                    continue
+                    #cnt += 1
+                    break
                 except urlfetch.ResponseTooLargeError:
                     if response.status_code == 555:
                         response.status_code = 509
                     break
+                except urlfetch.SSLCertificateError:
+                    #有部分网站不支持HTTPS访问，对于这些网站，尝试切换http
+                    if url.startswith(r'https://'):
+                        url = url.replace(r'https://', r'http://')
+                        if response.status_code == 555:
+                            response.status_code = 452
+                        continue #这里不用自增变量
+                    else:
+                        if response.status_code == 555:
+                            response.status_code = 453
+                        break
                 except urlfetch.DownloadError:
                     if response.status_code == 555:
                         response.status_code = 450
-                    continue
-                except urlfetch.Error:
+                    cnt += 1
+                    break
+                except Exception:
                     if response.status_code == 555:
                         response.status_code = 451
                     break
@@ -64,7 +81,10 @@ class URLOpener:
             else:
                 url = urlnew
             maxRedirect -= 1
-            
+        
+        if maxRedirect <= 0:
+            default_log.warn('Too many redirections:%s'%url)
+        
         return response
         
     def _getHeaders(self, cookie, url):

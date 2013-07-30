@@ -11,7 +11,6 @@ sys.resources_location = r"."
 import calibre.startup
 import calibre.utils.resources
 
-#from calibre.utils.usrlogging import *
 from calibre.customize.profiles import KindleInput, KindleOutput
 from calibre.ebooks.oeb.base import TOC
 from calibre.ebooks.conversion.mobioutput import MOBIOutput
@@ -23,9 +22,9 @@ from calibre.ebooks.conversion.preprocess import HTMLPreProcessor
 def MimeFromFilename(f):
     #从文件名生成MIME
     f = f.lower()
-    if f.endswith('.gif') or f.endswith('.png'):
+    if f.endswith(('.gif','.png')):
         return r"image/"+f[-3:]
-    elif f.endswith('.jpg') or f.endswith('.jpeg'):
+    elif f.endswith(('.jpg','.jpeg')):
         return r"image/jpeg"
     else:
         return ''
@@ -40,8 +39,8 @@ class ServerContainer(object):
     def read(self, path):
         path = path.lower()
         #所有的图片文件都放在images目录下
-        if path.endswith("jpg") or path.endswith("png") or path.endswith("gif"):
-            if not path.startswith(r'images/'):
+        if path.endswith(("jpg","png","gif")):
+            if r'/' not in path:
                 path = os.path.join("images", path)
         d,f  = '',None
         try:
@@ -100,6 +99,9 @@ def getOpts():
     setattr(opts, "preserve_cover_aspect_ratio", True)
     setattr(opts, "epub_flatten", False)
     setattr(opts, "epub_dont_compress", True)
+    
+    #extra
+    setattr(opts, "process_images_immediately", True)
     
     return opts
     

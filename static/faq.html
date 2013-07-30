@@ -22,7 +22,7 @@
 	 <li>自定义RSS</li>
      <li>多账号管理，也就是支持多kindle</li>
      <li>带图的杂志格式MOBI</li>
-     <li>自动每天定时推送<li>
+     <li>自动每天定时推送</li>
 	</ul>
 	优点：
 	<ul>
@@ -60,7 +60,7 @@
     <li>没有打开"自定义RSS"的投递开关，此开关在设置网页的最下面。</li>
 	<li>没有在kindle邮箱的白名单中加入你的gmail地址:</li>
 		<ul><li>解决方案：登陆http://www.amazon.com/,增加白名单即可</li></ul>
-	<li>增加的RSS数目太多，根据网速和RSS类型不同，支持的RSS数量不同，但是必要要在10分钟内处理完成。
+	<li>增加的RSS数目太多，根据网速和RSS类型不同，支持的RSS数量不同，但是必须要在10分钟内处理完成。
 		<ul><li>一般来说十条以下的RSS是可以支持的，如果“全文RSS”多，则支持多一些，否则少一些。</li>
 		<li>请登录 <a href="https://appengine.google.com"> appengine </a>，选择对应的GAE程序，然后在logs栏目中查看是否有程序执行异常，如果有DeadlineExceededError，说明RSS过多，请减少一些，或分成两个账号推送。</li></ul>
 	</li>
@@ -72,19 +72,24 @@
 	<p class="answer">全文RSS就是在RSS的XML文件中已经给出了文章全文的RSS，使用浏览器打开RSS对应的链接，查看是否已经有全部的文章内容？如果是，则为全文RSS。如果仅给出文章摘要，则不是。</p>
 	<h2>全文RSS能否按照摘要RSS处理？反之是否可以？</h2>
 	<p class="answer">全文RSS当然可以按照摘要RSS处理，这样就忽略RSS链接中给出的文章内容，而直接到原链接中获取，只是时间要多花费不少，导致支持的RSS数量下降。如果是摘要RSS，则不能按全文RSS处理，否则会导致文章内容不全。</p>
-	<h2>URL过滤器功能如何使用？</h2>
+	<h2>如何按周订阅？</h2>
+	<p class="answer">有些RSS每周更新，这样每天推送同样的内容就蛋疼了点，碰到这种情况，请添加一个py文件，将参数deliver_days设置为你需要推送到星期（英文星期单词），注意deliver_days是一个列表，你也可以设置为几个单词，这样的话，其实也可以设置为什么时候不推送，比如周末不推送。</p>
+    <h2>URL过滤器功能如何使用？</h2>
 	<p class="answer">URL过滤器为高级功能，面向懂python正则表达式的同学，应用场景是这样的：有一些RSS的一部分固定的图像会一直下载不了，为了节省时间支持更多的RSS，则建议过滤这些图像URL，不再下载。URL过滤器支持正则表达式，请严格按python正则表达式的语法编写URL过滤器。</p>
-
-
-
-
+    <h2>部分RSS有敏感内容，被qiang屏蔽了怎么办？</h2>
+	<p class="answer">升级到1.5及以上版本，并且将被qiang的RSS的链接协议改为https。</p>
+    <h2>自定义书籍py文件，如何将封面/题图放到py同一目录？</h2>
+	<p class="answer">升级到1.5及以上版本，在封面/题图文件设置中有全路径信息即可，如下：<ul>
+	    <li>mastheadfile = 'books/xxxx.gif'</li>
+        <li>coverfile = 'books/xxxx.jpg'</li><ul></p>
+    
 
 
 	<pre><p> </p><p> </p></pre>
     <div id="footer">
         <div class="clear"></div>
         2013 &copy; KindleEar&nbsp;&nbsp;|&nbsp;&nbsp;
-        <a href="/static/faq.html" target="_blank" style="text-decoration:none;">FAQ</a>
+        <a href="https://kindleear.appspot.com/static/faq.html" target="_blank" style="text-decoration:none;">FAQ</a>
         &nbsp;&nbsp;|&nbsp;&nbsp;
         <a href="https://github.com/cdhigh/kindleear" target="_blank" style="text-decoration:none;">Github page</a>
         &nbsp;&nbsp;|&nbsp;&nbsp;

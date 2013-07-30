@@ -32,9 +32,7 @@
    因为calibre的recipe模块依赖挺多的，我时间不够，偷懒了，就不移植了，直接根据
    recipe的外形写了一个处理模块。
    ★根据RSS类型，从base模块中导入不同的书籍基类
-     from base import BaseFeedBook/FulltextFeedBook/WebpageBook
-     估计90%以上的RSS都是普通摘要RSS，则继承BaseFeedBook，还有少量在RSS的XML文件中
-     已经有全文信息了，这种RSS最有良心，则继承FulltextFeedBook。
+     from base import BaseFeedBook/WebpageBook
      如果你感兴趣的网站不提供RSS订阅，则可以继承WebpageBook直接连接网页提取信息。
    ★子类能定制的参数都在BaseFeedBook类的定义中，注释很详细。
    ★处理HTML的BeautifulSoup为4.x版本。

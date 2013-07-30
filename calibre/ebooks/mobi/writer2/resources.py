@@ -35,7 +35,7 @@ class Resources(object):
         self.add_resources(add_fonts)
 
     def process_image(self, data):
-        if not self.process_images:
+        if not self.process_images or self.opts.process_images_immediately:
             return data
         if self.opts.mobi_keep_original_images:
             return mobify_image(data)
@@ -73,6 +73,7 @@ class Resources(object):
         for item in self.oeb.manifest.values():
             if item.media_type not in OEB_RASTER_IMAGES:
                 continue
+            
             try:
                 data = self.process_image(item.data)
             except Exception,e:

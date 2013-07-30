@@ -8,13 +8,14 @@ DEFAULT_MASTHEAD = "mh_default.gif" #如果书籍没有题图，则使用此题�
 DEFAULT_COVER = "cv_default.jpg" #如果书籍没有封面，则使用此封面，留空则不添加封面
 TIMEZONE = 8 #默认时区
 
-OWNFEEDS_TITLE = 'KindleEar' #自定义RSS的默认标题，后续可以在网页上修改
-OWNFEEDS_DESC = 'RSS delivering from KindleEar'
+#自定义RSS的默认标题，后续可以在网页上修改，如果包含中文则需要在前面加u''
+MY_FEEDS_TITLE = u'KindleEar'
+MY_FEEDS_DESC = u'RSS delivering from KindleEar'
 
 #设置下载RSS和文章的超时时间，单位为秒，如果RSS很多，设置短一点有可能提高一些效率
 #但是也增加了下载超时的可能，超时则丢失超时的RSS或文章或图片，不会有更多的影响
 #(GAE默认为5秒)
-CONNECTION_TIMEOUT = 10
+CONNECTION_TIMEOUT = 20
 
 # True则发送邮件的文件名转换为拼音（如果是汉字的话）
 PINYIN_FILENAME = False
@@ -31,6 +32,7 @@ ALWAYS_CHAR_DETECT = False
 #而且如果你的RSS订阅源的文章很多很大，则很容易超过22MB/min的Urlfeth免费限额。
 #如果有部分RSS出现Too many redirects异常，则建议设置为False
 #如果你的RSS订阅源不多，GAE的Logs内没有DeadlineExceededError异常，也建议设置为False
+#因为除非你是付费账号，否则异步URLFETCH特别容易超过每分钟21MB的免费限额
 USE_ASYNC_URLFETCH = True
 
 #是否生成TOC的文章内容预览，如果使用非触摸版Kindle，没意义，因为看不到

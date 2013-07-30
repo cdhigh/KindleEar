@@ -19,11 +19,11 @@
     <p style="font-size:0.8em;color:grey;">暂时没有已订阅的书籍</p>
     {% endif %}
 </fieldset>
-{% if ownfeeds %}
+{% if myfeeds %}
 <p></p>
 <fieldset id="ownfeeds">
     <legend>自定义RSS</legend>
-    {% for feed in ownfeeds %}
+    {% for feed in myfeeds %}
     <div class="book">
         <div class="titleRow">{{feed.title}} {% if feed.isfulltext %}<img alt="全文RSS" src="static/fulltext.gif" border="0" />{% endif %}</div>
         <div class="cornerControls">

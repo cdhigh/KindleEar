@@ -9,14 +9,18 @@ import os, re, urllib, urlparse, random, imghdr, logging
 from urllib2 import *
 import chardet
 from google.appengine.api import urlfetch
+from google.appengine.runtime import apiproxy_errors
 
 from bs4 import BeautifulSoup, Comment
 from lib import feedparser
 from lib.readability import readability
 from lib.urlopener import URLOpener
-from lib.asyncurlfetch import AsyncURLFetchManager
+
+from calibre.utils.img import rescale_image, mobify_image
 
 from config import *
+
+MAX_ASYNC_REQUESTS = 5 #最大支持10，数值越大越容易出现流量越限异常
 
 class AutoDecoder:
     def __init__(self):
@@ -50,8 +54,10 @@ class BaseFeedBook:
     description           = ''
     publisher             = ''
     category              = ''
+    max_articles_per_feed = 30
     host                  = None # 有些网页的图像下载需要请求头里面包含Referer,使用此参数配置
-    max_articles_per_feed = 40
+    network_timeout       = None  # None则使用默认
+    fetch_img_via_ssl     = False # 当网页为https时，其图片是否也转换成https
     language = 'und' #最终书籍的语言定义，比如zh-cn,en等
     
     #下面这两个编码建议设置，如果留空，则使用自动探测解码，稍耗费CPU
@@ -66,6 +72,10 @@ class BaseFeedBook:
     coverfile = DEFAULT_COVER #封面图片文件
     
     keep_image = True #生成的MOBI是否需要图片
+    
+    #是否按星期投递，留空则每天投递，否则是一个星期字符串列表
+    #'Monday','Tuesday',...,'Sunday'，大小写敏感
+    deliver_days = []
     
     #设置是否使用readability-lxml(Yuri Baburov)自动处理网页
     #正常来说，大部分的网页，readability处理完后的效果都不错
@@ -147,6 +157,10 @@ class BaseFeedBook:
     def __init__(self, log=None):
         self.log = default_log if log is None else log
         self.compiled_urlfilters = []
+    
+    @property
+    def timeout(self):
+        return self.network_timeout if self.network_timeout else CONNECTION_TIMEOUT
         
     def isfiltered(self, url):
         if not self.url_filters:
@@ -209,7 +223,7 @@ class BaseFeedBook:
         for feed in self.feeds:
             section, url = feed[0], feed[1]
             isfulltext = feed[2] if len(feed) > 2 else False
-            timeout = CONNECTION_TIMEOUT+15 if isfulltext else CONNECTION_TIMEOUT
+            timeout = self.timeout+10 if isfulltext else self.timeout
             opener = URLOpener(self.host, timeout=timeout)
             result = opener.open(url)
             if result.status_code == 200 and result.content:
@@ -218,21 +232,26 @@ class BaseFeedBook:
                 else:
                     feed = feedparser.parse(AutoDecoder().decode(result.content))
                 
-                urladded = [] # 防止部分RSS产生重复文章
+                urladded = set() # 防止部分RSS产生重复文章
                 for e in feed['entries'][:self.max_articles_per_feed]:
-                    url = e.link
-                    if url not in urladded:
+                    #支持HTTPS
+                    urlfeed = e.link.replace('http://','https://') if url.startswith('https://') else e.link
+                    if urlfeed not in urladded:
+                        desc = None
                         if isfulltext:
-                            desc = e.content[0].value if hasattr(e, 'content') and e.content[0].value else e.summary
-                            urls.append((section, e.title, url, desc if desc else u'Has no summary, is it fulltext feed?'))
-                        else:
-                            urls.append((section, e.title, url, None))
-                        urladded.append(url)
+                            if hasattr(e, 'content') and e.content[0].value:
+                                desc = e.content[0].value
+                            elif hasattr(e, 'summary'):
+                                desc = e.summary
+                            else:
+                                self.log.warn('feed item invalid,link to webpage for article.(%s)'%e.title)
+                        urls.append((section, e.title, urlfeed, desc))
+                        urladded.add(urlfeed)
             else:
                 self.log.warn('fetch rss failed(%d):%s'%(result.status_code,url))
         return urls
         
-    def Items(self):
+    def Items(self, opts=None):
         """
         生成器，返回一个元组
         对于HTML：section,url,title,content
@@ -243,45 +262,62 @@ class BaseFeedBook:
         prevsection = ''
         decoder = AutoDecoder()
         if USE_ASYNC_URLFETCH:
-            async = AsyncURLFetchManager()
-            #对于非全文RSS文章启动异步Fetch
-            rpcs = {url:async.fetch_async(url) for _a,_b,url,desc in urls if not desc}
+            asyncurls = [(i,url) for i,(_a,_b,url,desc) in enumerate(urls) if not desc]
+            rpcs, i = [], 0
+            #先启动几个异步请求
+            while i < min(MAX_ASYNC_REQUESTS, len(asyncurls)):
+                rpc = urlfetch.create_rpc(deadline=self.timeout)
+                index,url = asyncurls.pop(0)
+                urlfetch.make_fetch_call(rpc, url, validate_certificate=False)
+                rpcs.append((index,rpc))
+                i += 1
             
             #为了效率起见，先处理全文RSS
+            #在处理全文RSS的时候，其他RSS在后台拼命下载中...
             for section, ftitle, url, desc in urls:
                 if not desc:
                     continue
                 
                 article = self.FragToXhtml(desc, ftitle)
                 #如果是图片，title则是mime
-                for title, imgurl, imgfn, content, brief in readability(article,url):
+                for title, imgurl, imgfn, content, brief in readability(article,url,opts):
                     if title.startswith(r'image/'): #图片
                         yield (title, imgurl, imgfn, content, brief)
                     else:
-                        if not title:
-                            title = ftitle
+                        if not title: title = ftitle
                         content =  self.postprocess(content)
                         yield (section, url, title, content, brief)
             
-            #再出来非全文RSS
-            for section, ftitle, url, desc in urls:
-                if desc:
-                    continue
-                    
+            #轮到摘要RSS了
+            while True:
+                if not rpcs:
+                    break
+                index, rpc = rpcs.pop(0)
+                section, ftitle, url, desc = urls[index]
                 if section != prevsection or prevsection == '':
                     decoder.encoding = '' #每个小节都重新探测编码
                     prevsection = section
                     
                 try:
-                    resp = rpcs[url].get_result()
-                except urlfetch.DownloadError, e:
+                    result = rpc.get_result()
+                except urlfetch.DownloadError as e:
                     self.log.warn(str(e))
                     continue
-                except Exception,e:
-                    self.log.warn('%s:%s.' % (str(e), url))
+                except apiproxy_errors.DeadlineExceededError:
+                    self.log.warn('timeout:%s' % url)
                     continue
+                except Exception as e:
+                    self.log.warn('%s:%s' % (type(e), url))
+                    continue
+                finally:
+                    #再启动一个新的异步URL请求
+                    if asyncurls:
+                        rpc = urlfetch.create_rpc(deadline=self.timeout)
+                        index, newurl = asyncurls.pop(0)
+                        urlfetch.make_fetch_call(rpc, newurl, validate_certificate=False)
+                        rpcs.append((index, rpc))
                 
-                status_code, content = resp.status_code, resp.content
+                status_code, content = result.status_code, result.content
                 if status_code != 200 or not content:
                     self.log.warn('async fetch article failed(%d):%s.' % (status_code,url))
                     continue
@@ -292,13 +328,12 @@ class BaseFeedBook:
                     article = decoder.decode(content)
                 
                 #如果是图片，title则是mime
-                for title, imgurl, imgfn, content, brief in readability(article,url):
+                for title, imgurl, imgfn, content, brief in readability(article,url,opts):
                     if title.startswith(r'image/'): #图片
                         yield (title, imgurl, imgfn, content, brief)
                     else:
-                        if not title:
-                            title = ftitle
-                        content =  self.postprocess(content)
+                        if not title: title = ftitle
+                        content = self.postprocess(content)
                         yield (section, url, title, content, brief)
         else: #同步UrlFetch方式
             for section, ftitle, url, desc in urls:
@@ -314,12 +349,11 @@ class BaseFeedBook:
                     article = self.FragToXhtml(desc, ftitle)
                 
                 #如果是图片，title则是mime
-                for title, imgurl, imgfn, content, brief in readability(article,url):
+                for title, imgurl, imgfn, content, brief in readability(article,url,opts):
                     if title.startswith(r'image/'): #图片
                         yield (title, imgurl, imgfn, content, brief)
                     else:
-                        if not title:
-                            title = ftitle
+                        if not title: title = ftitle
                         content =  self.postprocess(content)
                         yield (section, url, title, content, brief)
     
@@ -328,7 +362,7 @@ class BaseFeedBook:
         if self.fulltext_by_instapaper and not self.fulltext_by_readability:
             url = "http://www.instapaper.com/m?u=%s" % self.url_unescape(url)
         
-        opener = URLOpener(self.host)
+        opener = URLOpener(self.host, timeout=self.timeout)
         result = opener.open(url)
         status_code, content = result.status_code, result.content
         if status_code != 200 or not content:
@@ -340,7 +374,7 @@ class BaseFeedBook:
         else:
             return decoder.decode(content)
         
-    def readability(self, article, url):
+    def readability(self, article, url, opts=None):
         #使用readability-lxml处理全文信息
         #因为图片文件占内存，为了节省内存，这个函数也做为生成器
         content = self.preprocess(article)
@@ -350,10 +384,10 @@ class BaseFeedBook:
         summary = doc.summary(html_partial=True)
         title = doc.short_title()
         title = self.processtitle(title)
-        if summary.startswith('<body'): #readability解析出错
-            html = content
-        else:
-            html = self.FragToXhtml(summary, title, addtitleinbody=True)
+        #if summary.startswith('<body'): #readability解析出错
+        #    html = content
+        #else:
+        html = self.FragToXhtml(summary, title, addtitleinbody=True)
         
         #因为现在只剩文章内容了，使用BeautifulSoup也不会有什么性能问题
         soup = BeautifulSoup(html, "lxml")
@@ -366,17 +400,23 @@ class BaseFeedBook:
             cmt.extract()
         
         if self.keep_image:
-            opener = URLOpener(self.host)
-            for img in soup.find_all('img'):
+            opener = URLOpener(self.host, timeout=self.timeout)
+            for img in soup.find_all('img',attrs={'src':True}):
                 imgurl = img['src']
-                if not imgurl.startswith('http') and not imgurl.startswith('www'):
-                    imgurl = self.urljoin(url, imgurl)
+                if img.get('height') == '1' or img.get('width') == '1':
+                    self.log.warn('img size too small,take away it:%s' % imgurl)
+                    img.decompose()
+                    continue
+                if not imgurl.startswith('http'):
+                    imgurl = urlparse.urljoin(url, imgurl)
+                if self.fetch_img_via_ssl and url.startswith('https://'):
+                    imgurl = imgurl.replace('http://', 'https://')
                 if self.isfiltered(imgurl):
                     self.log.warn('img filtered:%s' % imgurl)
                     img.decompose()
                     continue
                 imgresult = opener.open(imgurl)
-                imgcontent = imgresult.content if imgresult.status_code == 200 else None
+                imgcontent = process_image(imgresult.content,opts) if imgresult.status_code==200 else None
                 if imgcontent:
                     imgtype = imghdr.what(None, imgcontent)
                     if imgtype:
@@ -409,7 +449,7 @@ class BaseFeedBook:
         
         yield (title, None, None, content, brief)
         
-    def readability_by_soup(self, article, url):
+    def readability_by_soup(self, article, url, opts=None):
         #因为图片文件占内存，为了节省内存，这个函数也做为生成器
         content = self.preprocess(article)
         soup = BeautifulSoup(content, "lxml")
@@ -476,18 +516,24 @@ class BaseFeedBook:
             cmt.extract()
         
         if self.keep_image:
-            opener = URLOpener(self.host)
+            opener = URLOpener(self.host, timeout=self.timeout)
             self.soupbeforeimage(soup)
-            for img in soup.find_all('img'):
+            for img in soup.find_all('img',attrs={'src':True}):
                 imgurl = img['src']
-                if not imgurl.startswith('http') and not imgurl.startswith('www'):
-                    imgurl = self.urljoin(url, imgurl)
+                if img.get('height') == '1' or img.get('width') == '1':
+                    self.log.warn('img size too small,take away it:%s' % imgurl)
+                    img.decompose()
+                    continue
+                if not imgurl.startswith('http'):
+                    imgurl = urlparse.urljoin(url, imgurl)
+                if self.fetch_img_via_ssl and url.startswith('https://'):
+                    imgurl = imgurl.replace('http://', 'https://')
                 if self.isfiltered(imgurl):
                     self.log.warn('img filtered:%s' % imgurl)
                     img.decompose()
                     continue
                 imgresult = opener.open(imgurl)
-                imgcontent = imgresult.content if imgresult.status_code == 200 else None
+                imgcontent = process_image(imgresult.content,opts) if imgresult.status_code==200 else None
                 if imgcontent:
                     imgtype = imghdr.what(None, imgcontent)
                     if imgtype:
@@ -523,94 +569,12 @@ class BaseFeedBook:
                     break
         soup = None
         
-        yield (title, None, None, content, brief)
-        
-class FulltextFeedBook(BaseFeedBook):
-    # 在Feed中就有全文的RSS订阅
-    def Items(self):
-        itemsprocessed = []
-        cnt4debug = 0
-        opener = URLOpener(self.host)
-        decoder = AutoDecoder()
-        for section, url in self.feeds:
-            content = None
-            cnt4debug += 1
-            if IsRunInLocal and cnt4debug > 1:
-                break
-            
-            result = opener.open(url)
-            status_code, content = result.status_code, result.content
-            if status_code != 200 and content:
-                self.log.warn('fetch article failed(%d):%s.' % (status_code,url))
-                continue
-            
-            if self.feed_encoding:
-                content = content.decode(self.feed_encoding)
-            else:
-                content = decoder.decode(content)
-            
-            content = self.preprocess(content)
-            
-            feed = feedparser.parse(content)
-            for e in feed['entries']:
-                # 全文RSS中如果有广告或其他不需要的内容，可以在postprocess去掉
-                desc = e.content[0].value if hasattr(e, 'content') and e.content[0].value else e.summary
-                desc = self.postprocess(desc if desc else u'Has no summary, is it fulltext feed?')
-                desc = self.FragToXhtml(desc, e.title, self.feed_encoding, addtitleinbody=True)
-                
-                soup = BeautifulSoup(desc, "lxml")
-                self.soupbeforeimage(soup)
-                if self.keep_image:
-                    for img in soup.find_all('img'):
-                        imgurl = img['src']
-                        if not imgurl.startswith('http') and not imgurl.startswith('www'):
-                            imgurl = self.urljoin(url, imgurl)
-                        if self.isfiltered(imgurl):
-                            self.log.warn('img filtered:%s' % imgurl)
-                            img.decompose()
-                            continue
-                        imgresult = opener.open(imgurl)
-                        imgcontent = imgresult.content if imgresult.status_code == 200 else None
-                        if imgcontent:
-                            imgtype = imghdr.what(None, imgcontent)
-                            if imgtype:
-                                imgmime = r"image/" + imgtype
-                                fnimg = "%d.%s" % (random.randint(10000,99999999), 'jpg' if imgtype=='jpeg' else imgtype)
-                                img['src'] = fnimg
-                                yield (imgmime, imgurl, fnimg, imgcontent, None)
-                        else:
-                            self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
-                            img.decompose()
-                else:
-                    for img in soup.find_all('img'):
-                        img.decompose()
-                
-                self.soupprocessex(soup)
-                desc = unicode(soup)
-                
-                #提取文章内容的前面一部分做为摘要
-                brief = u''
-                if GENERATE_TOC_DESC:
-                    body = soup.find('body')
-                    for h1 in body.find_all('h1'): # 去掉H1，避免和标题重复
-                        h1.decompose()
-                    for s in body.stripped_strings:
-                        brief += unicode(s) + u' '
-                        if len(brief) >= TOC_DESC_WORD_LIMIT:
-                            brief = brief[:TOC_DESC_WORD_LIMIT]
-                            break
-                soup = None
-                
-                desc =  self.postprocess(desc)
-                
-                if e.title not in itemsprocessed and desc:
-                    itemsprocessed.append(e.title)
-                    yield (section, e.link, e.title, desc, brief)
+        yield (title, None, None, content, brief)        
 
 class WebpageBook(BaseFeedBook):
     fulltext_by_readability = False
     # 直接在网页中获取信息
-    def Items(self):
+    def Items(self, opts=None):
         """
         生成器，返回一个元组
         对于HTML：section,url,title,content
@@ -618,12 +582,13 @@ class WebpageBook(BaseFeedBook):
         """
         cnt4debug = 0
         decoder = AutoDecoder()
+        timeout = self.timeout
         for section, url in self.feeds:
             cnt4debug += 1
             if IsRunInLocal and cnt4debug > 1:
                 break
             
-            opener = URLOpener(self.host)
+            opener = URLOpener(self.host, timeout=timeout)
             result = opener.open(url)
             status_code, content = result.status_code, result.content
             if status_code != 200 or not content:
@@ -699,16 +664,22 @@ class WebpageBook(BaseFeedBook):
             
             if self.keep_image:
                 self.soupbeforeimage(soup)
-                for img in soup.find_all('img'):
+                for img in soup.find_all('img',attrs={'src':True}):
                     imgurl = img['src']
-                    if not imgurl.startswith('http') and not imgurl.startswith('www'):
-                        imgurl = self.urljoin(url, imgurl)
+                    if img.get('height') == '1' or img.get('width') == '1':
+                        self.log.warn('img size too small,take away it:%s' % imgurl)
+                        img.decompose()
+                        continue
+                    if not imgurl.startswith('http'):
+                        imgurl = urlparse.urljoin(url, imgurl)
+                    if self.fetch_img_via_ssl and url.startswith('https://'):
+                        imgurl = imgurl.replace('http://', 'https://')
                     if self.isfiltered(imgurl):
                         self.log.warn('img filtered:%s' % imgurl)
                         img.decompose()
                         continue
                     imgresult = opener.open(imgurl)
-                    imgcontent = imgresult.content if imgresult.status_code == 200 else None
+                    imgcontent = process_image(imgresult.content,opts) if imgresult.status_code==200 else None
                     if imgcontent:
                         imgtype = imghdr.what(None, imgcontent)
                         if imgtype:
@@ -741,4 +712,16 @@ class WebpageBook(BaseFeedBook):
             
             content =  self.postprocess(content)
             yield (section, url, title, content, brief)
-        
+
+
+def process_image(data, opts):
+    try:
+        if not opts or not opts.process_images or not opts.process_images_immediately:
+            return data
+        elif opts.mobi_keep_original_images:
+            return mobify_image(data)
+        else:
+            return rescale_image(data, png2jpg=opts.image_png_to_jpg,
+                            graying=opts.graying_image)
+    except Exception:
+        return None

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block css %}
+<style type="text/css">
+.odd{
+    background-color:#f0f0f0;
+}
+.even{
+    background-color:#e5e5e5;
+}
+</style>
+{% endblock %}
+{% block menubar %}
+{% endblock %}
+{% block content %}
+{% if books and books.count()>0 %}
+<p style="text-align:center;color:red;font-weight:bold;">BOOKS</p>
+<table border="1" cellspacing="0" cellpadding="0" align="center" width="100%">
+    <thead>
+    <tr>
+        <th class="center">ID</th>
+        <th class="center">标题</th>
+        <th class="center">用户列表</th>
+        <th class="center">内置</th>
+        <th class="center">语言</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in books %}
+    <tr class={{loop.cycle("odd","even")}}>
+        <td class="center">{{item.key().id()}}</td>
+        <td class="center">{{item.title}}</td>
+        <td class="center">{{item.users}}</td>
+        <td class="center">{{item.builtin}}</td>
+        <td class="center">{%if not item.builtin%}{{item.language}}{%else%}-{%endif%}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% if users and users.count()>0 %}
+<hr />
+<p style="text-align:center;color:red;font-weight:bold;">USERS</p>
+<table border="1" cellspacing="0" cellpadding="0" align="center" width="100%">
+    <thead>
+    <tr>
+        <th class="center">ID</th>
+        <th class="center">名字</th>
+        <th class="center">email</th>
+        <th class="center">推送</th>
+        <th class="center">书籍</th>
+        <th class="center">时区</th>
+        <th class="center">超期</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in users %}
+    <tr class={{loop.cycle("odd","even")}}>
+        <td class="center">{{item.key().id()}}</td>
+        <td class="center">{{item.name}}</td>
+        <td class="center">{{item.kindle_email}}</td>
+        <td class="center">{{item.enable_send}}</td>
+        <td class="center">{{item.book_type}}</td>
+        <td class="center">{{item.timezone}}</td>
+        <td class="center">{%if item.expires%}{{item.expires.strftime("%Y-%m-%d")}}
+            {%else%}-{%endif%}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% if feeds and feeds.count()>0 %}
+<hr />
+<p style="text-align:center;color:red;font-weight:bold;">FEEDS</p>
+<table border="1" cellspacing="0" cellpadding="0" align="center" width="100%">
+    <thead>
+    <tr>
+        <th class="center">ID</th>
+        <th class="center">书籍</th>
+        <th class="center">标题</th>
+        <th class="center">URL</th>
+        <th class="center">全文</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in feeds %}
+    <tr class={{loop.cycle("odd","even")}}>
+        <td class="center">{{item.key().id()}}</td>
+        <td class="center">{{item.book.title}}</td>
+        <td class="center">{{item.title}}</td>
+        <td class="center">{{item.url[:20]}}..</td>
+        <td class="center">{%if item.isfulltext%}<span style="color:red;">1</span>
+            {%else%}0{%endif%}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}

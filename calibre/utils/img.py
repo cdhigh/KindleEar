@@ -25,7 +25,7 @@ def identify_data(data):
     return (width, height, fmt)
     
     
-def rescale_image(data, maxsizeb=2*1024*1024, dimen=None, 
+def rescale_image(data, maxsizeb=4000000, dimen=None, 
                 png2jpg=False, graying=True):
     '''
     Convert image setting all transparent pixels to white and changing format
@@ -36,7 +36,7 @@ def rescale_image(data, maxsizeb=2*1024*1024, dimen=None,
     width=dimen, height=dimen or width, height = dimen (depending on the type
     of dimen)
 
-    Returns the image as a bytestring
+    Returns the image as a bytestring.
     '''
     if not isinstance(data, StringIO):
         data = StringIO(data)
