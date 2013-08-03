@@ -12,7 +12,7 @@
     color: #555;
     padding-right:6px;
 }
-#tburl{
+.tburl{
     border:1px dotted black;
     cellspacing:0;
     cellpadding:0;
@@ -32,7 +32,7 @@
     <legend>URL过滤</legend>
     <p style="font-size:0.8em;color:grey;">在此列表中的URL将不会被下载，以便节省时间，仅适用于文章中的图片URL</p>
     {% if urlfilters.count() %}
-    <table id="tburl">
+    <table class="tburl">
     {% for urlflt in urlfilters %}
     <tr class="{{loop.cycle('trodd', 'treven')}}">
         <td style="width:90%">{{urlflt.url}}</td>
@@ -45,6 +45,31 @@
     <div class="addfilter">
         <div class="newfilter">
             <input type="text" name="url" style="width:80%;" placeholder="请输入url或正则表达式" />
+        </div>
+        <div class="cornerControls">
+            <input type="submit" value="添加" class="actionButton" />
+        </div>
+    </div>
+    </form>
+</fieldset>
+<pre><p> </p></pre>
+<fieldset id="whitelist">
+    <legend>邮件白名单</legend>
+    <p style="font-size:0.8em;color:grey;">发送到xxx@<em>appid</em>.appspotmail.com的邮件将会被转发管理员的Kindle邮箱</p>
+    {% if whitelists.count() %}
+    <table class="tburl">
+    {% for lst in whitelists %}
+    <tr class="{{loop.cycle('trodd', 'treven')}}">
+        <td style="width:90%">{{lst.mail}}</td>
+        <td style="text-align:right;"><a href="/advsetting?delwlist={{lst.key().id()}}" class="actionButton">删除</a></td>
+    </tr>
+    {% endfor %}
+    </table>
+    {% endif %}
+    <form action="" method="POST">
+    <div class="addwhitelist">
+        <div class="newfilter">
+            <input type="text" name="wlist" style="width:80%;" placeholder="请输入邮件地址" />
         </div>
         <div class="cornerControls">
             <input type="submit" value="添加" class="actionButton" />

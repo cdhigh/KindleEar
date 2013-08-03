@@ -746,6 +746,9 @@ class Indexer(object): # {{{
                     art.length = normalized_articles[i+1].offset - art.offset
                 except:
                     art.length = sec.offset + sec.length - art.offset
+                    if art.length < 0:
+                        self.log.warn('len of article invalid, set to zero.')
+                        art.length = 0
 
         # Filter
         for i, x in list(enumerate(normalized_sections)):

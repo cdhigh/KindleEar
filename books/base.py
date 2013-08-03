@@ -218,7 +218,7 @@ class BaseFeedBook:
         return s
         
     def ParseFeedUrls(self):
-        """ return list like [(section,title,url),..] """
+        """ return list like [(section,title,url,desc),..] """
         urls = []
         for feed in self.feeds:
             section, url = feed[0], feed[1]
@@ -403,7 +403,8 @@ class BaseFeedBook:
             opener = URLOpener(self.host, timeout=self.timeout)
             for img in soup.find_all('img',attrs={'src':True}):
                 imgurl = img['src']
-                if img.get('height') == '1' or img.get('width') == '1':
+                if img.get('height') in ('1','2','3','4','5') \
+                    or img.get('width') in ('1','2','3','4','5'):
                     self.log.warn('img size too small,take away it:%s' % imgurl)
                     img.decompose()
                     continue
@@ -424,6 +425,8 @@ class BaseFeedBook:
                         fnimg = "%d.%s" % (random.randint(10000,99999999), 'jpg' if imgtype=='jpeg' else imgtype)
                         img['src'] = fnimg
                         yield (imgmime, imgurl, fnimg, imgcontent, None)
+                    else:
+                        img.decompose()
                 else:
                     self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
                     img.decompose()
@@ -520,7 +523,8 @@ class BaseFeedBook:
             self.soupbeforeimage(soup)
             for img in soup.find_all('img',attrs={'src':True}):
                 imgurl = img['src']
-                if img.get('height') == '1' or img.get('width') == '1':
+                if img.get('height') in ('1','2','3','4','5') \
+                    or img.get('width') in ('1','2','3','4','5'):
                     self.log.warn('img size too small,take away it:%s' % imgurl)
                     img.decompose()
                     continue
@@ -541,6 +545,8 @@ class BaseFeedBook:
                         fnimg = "%d.%s" % (random.randint(10000,99999999), 'jpg' if imgtype=='jpeg' else imgtype)
                         img['src'] = fnimg
                         yield (imgmime, imgurl, fnimg, imgcontent, None)
+                    else:
+                        img.decompose()
                 else:
                     self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
                     img.decompose()
@@ -666,7 +672,8 @@ class WebpageBook(BaseFeedBook):
                 self.soupbeforeimage(soup)
                 for img in soup.find_all('img',attrs={'src':True}):
                     imgurl = img['src']
-                    if img.get('height') == '1' or img.get('width') == '1':
+                    if img.get('height') in ('1','2','3','4','5') \
+                        or img.get('width') in ('1','2','3','4','5'):
                         self.log.warn('img size too small,take away it:%s' % imgurl)
                         img.decompose()
                         continue
@@ -687,6 +694,8 @@ class WebpageBook(BaseFeedBook):
                             fnimg = "%d.%s" % (random.randint(10000,99999999), 'jpg' if imgtype=='jpeg' else imgtype)
                             img['src'] = fnimg
                             yield (imgmime, imgurl, fnimg, imgcontent, None)
+                        else:
+                            img.decompose()
                     else:
                         self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
                         img.decompose()                

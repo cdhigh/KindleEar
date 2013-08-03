@@ -175,7 +175,7 @@ class EPUBOutput:
         for item in oeb.manifest:
             if item.media_type in OEB_RASTER_IMAGES:
                 try:
-                    img = process_image(str(item))
+                    img = self.process_image(str(item))
                 except:
                     self.log.warn('Bad image file %r.' % item.href)
                 else:

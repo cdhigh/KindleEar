@@ -18,7 +18,6 @@
     6.修改config.py中的这几个变量
       SrcEmail ：你申请GAE账号时的GMAIL邮箱
       TIMEZONE ：默认时区
-      OWNFEEDS_TITLE ：自定义RSS推送到kindle上显示的书籍名字
     7.转到GAE SDK安装目录（默认为：C:\Program Files\Google\google_appengine）
       执行CMD命令：c:\python27\python.exe appcfg.py update kindleear目录
       比如：c:\python27\python.exe appcfg.py update c:\kindleear
@@ -27,4 +26,8 @@
       比如作者的网站域名为：kindleear.appspot.com
       开始您的个人推送服务了。
       注：初始用户为admin，密码为admin，建议登陆后及时修改密码。
+    8.更详细一点的说明请参照FAQ。
 
+三、许可
+
+KindleEar is Licensed under the GPL license: http://www.gnu.org/licenses/gpl.html

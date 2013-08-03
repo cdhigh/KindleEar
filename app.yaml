@@ -13,7 +13,10 @@ libraries:
 
 - name: jinja2
   version: "latest"
-  
+
+inbound_services:
+- mail
+
 handlers:
 - url: /favicon.ico
   static_files: static/favicon.ico
@@ -22,6 +25,9 @@ handlers:
 
 - url: /static
   static_dir: static
+
+- url: /_ah/mail/.+
+  script: handlemail.appmail
 
 - url: /.*
   script: main.app

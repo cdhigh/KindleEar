@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.4.1"
+__Version__ = "1.5"
 __Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
@@ -93,6 +93,9 @@ class DeliverLog(db.Model):
 class UrlFilter(db.Model):
     url = db.StringProperty()
 
+class WhiteList(db.Model):
+    mail = db.StringProperty()
+
 def StoreBookToDb():
     for book in BookClasses():  #添加内置书籍
         if memcache.get(book.title): #使用memcache加速
@@ -111,10 +114,12 @@ class BaseHandler:
     def logined(self):
         return True if session.login == 1 else False
     
+    @classmethod
     def login_required(self, username=None):
         if (session.login == 0) or (username and username != session.username):
             raise web.seeother(r'/')
     
+    @classmethod
     def getcurrentuser(self):
         self.login_required()
         u = KeUser.all().filter("name = ", session.username).get()
@@ -122,6 +127,7 @@ class BaseHandler:
             raise web.seeother(r'/')
         return u
     
+    @classmethod
     def deliverlog(self, emails, book, size, status='ok', tz=TIMEZONE):
         if not isinstance(emails, list):
             emails = [emails,]
@@ -136,8 +142,9 @@ class BaseHandler:
                 dl.put()
             except Exception as e:
                 self.log.warn('DeliverLog failed to save:%s',str(e))
-            
-    def SendToKindle(self, emails, title, booktype, attachment, tz=TIMEZONE):
+    
+    @classmethod        
+    def SendToKindle(self, emails, title, booktype, attachment, tz=TIMEZONE, filewithtime=True):
         if not isinstance(emails, list):
             emails = [emails,]
             
@@ -151,7 +158,10 @@ class BaseHandler:
         for email in emails:
             user = KeUser.all().filter("kindle_email = ", email).get()
             tz = user.timezone if user else TIMEZONE
-            filename = "%s(%s).%s"%(basename,local_time('%Y-%m-%d_%H-%M',tz=tz),booktype)
+            if filewithtime:
+                filename = "%s(%s).%s"%(basename,local_time('%Y-%m-%d_%H-%M',tz=tz),booktype)
+            else:
+                filename = "%s.%s"%(basename,booktype)
             try:
                 mail.send_mail(SrcEmail, email, "KindleEar", "Deliver from KindlerEar",
                     attachments=[(filename, attachment),])
@@ -197,6 +207,7 @@ class AdvSetting(BaseHandler):
     def GET(self):
         user = self.getcurrentuser()
         delurlid = web.input().get('delurlid')
+        delwlist = web.input().get('delwlist')
         if delurlid:
             try:
                 delurlid = int(delurlid)
@@ -206,14 +217,27 @@ class AdvSetting(BaseHandler):
                 flt = UrlFilter.get_by_id(delurlid)
                 if flt:
                     flt.delete()
+        if delwlist:
+            try:
+                delwlist = int(delwlist)
+            except:
+                pass
+            else:
+                wlist = WhiteList.get_by_id(delwlist)
+                if wlist:
+                    wlist.delete()
         return jjenv.get_template('advsetting.html').render(nickname=session.username,
-            title="Advanced Setting",current='advsetting',user=user,urlfilters=UrlFilter.all())
+            title="Advanced Setting",current='advsetting',user=user,
+            urlfilters=UrlFilter.all(),whitelists=WhiteList.all())
         
     def POST(self):
         user = self.getcurrentuser()
         url = web.input().get('url')
         if url:
             UrlFilter(url=url).put()
+        wlist = web.input().get('wlist')
+        if wlist:
+            WhiteList(mail=wlist).put()
         raise web.seeother('/advsetting')
         
 class Admin(BaseHandler):
@@ -638,6 +662,9 @@ class Worker(BaseHandler):
                 sectoc = oeb.toc.add(sec, sections[sec][0][1].href)
                 for title, a, brief in sections[sec]:
                     sectoc.add(title, a.href, description=brief if brief else None)
+            
+            #TODO
+            oeb.toc.rationalize_play_orders()
             
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()
