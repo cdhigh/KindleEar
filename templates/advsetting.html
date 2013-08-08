@@ -27,16 +27,16 @@
 </style>
 {% endblock %}
 {% block content %}
-<p style="font-size:1em;color:red;text-align:center;">除非你很熟悉这些配置，否则不建议修改！</p>
+<p style="font-size:1em;color:red;text-align:center;">{{_("Please dont change these configures if you dont know what's mean!")}}</p>
 <fieldset id="urlfilter">
-    <legend>URL过滤</legend>
-    <p style="font-size:0.8em;color:grey;">在此列表中的URL将不会被下载，以便节省时间，仅适用于文章中的图片URL</p>
+    <legend>{{_("Url Filter")}}</legend>
+    <p style="font-size:0.8em;color:grey;">{{_("Urls in list would not be downloaded for saving of time.")}}</p>
     {% if urlfilters.count() %}
     <table class="tburl">
     {% for urlflt in urlfilters %}
     <tr class="{{loop.cycle('trodd', 'treven')}}">
-        <td style="width:90%">{{urlflt.url}}</td>
-        <td style="text-align:right;"><a href="/advsetting?delurlid={{urlflt.key().id()}}" class="actionButton">删除</a></td>
+        <td style="width:80%">{{urlflt.url}}</td>
+        <td style="text-align:right;"><a href="/advsetting?delurlid={{urlflt.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
     </tr>
     {% endfor %}
     </table>
@@ -44,24 +44,26 @@
     <form action="" method="POST">
     <div class="addfilter">
         <div class="newfilter">
-            <input type="text" name="url" style="width:80%;" placeholder="请输入url或正则表达式" />
+            <input type="text" name="url" style="width:80%;" placeholder="{{_("Please input regular expression")}}" />
         </div>
         <div class="cornerControls">
-            <input type="submit" value="添加" class="actionButton" />
+            <input type="submit" value="{{_("Add")}}" class="actionButton" />
         </div>
     </div>
     </form>
 </fieldset>
-<pre><p> </p></pre>
+{% if nickname == 'admin' %}
 <fieldset id="whitelist">
-    <legend>邮件白名单</legend>
-    <p style="font-size:0.8em;color:grey;">发送到xxx@<em>appid</em>.appspotmail.com的邮件将会被转发管理员的Kindle邮箱</p>
+    <legend>{{_("White List")}}</legend>
+    <p style="font-size:0.8em;color:grey;">
+        {{_("mail sent to xxx@<em>appid</em>.appspotmail.com will be transfered to admin's kindle.")}}
+    </p>
     {% if whitelists.count() %}
     <table class="tburl">
     {% for lst in whitelists %}
     <tr class="{{loop.cycle('trodd', 'treven')}}">
-        <td style="width:90%">{{lst.mail}}</td>
-        <td style="text-align:right;"><a href="/advsetting?delwlist={{lst.key().id()}}" class="actionButton">删除</a></td>
+        <td style="width:80%">{{lst.mail}}</td>
+        <td style="text-align:right;"><a href="/advsetting?delwlist={{lst.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
     </tr>
     {% endfor %}
     </table>
@@ -69,12 +71,13 @@
     <form action="" method="POST">
     <div class="addwhitelist">
         <div class="newfilter">
-            <input type="text" name="wlist" style="width:80%;" placeholder="请输入邮件地址" />
+            <input type="text" name="wlist" style="width:80%;" placeholder="{{_("Please input mail address")}}" />
         </div>
         <div class="cornerControls">
-            <input type="submit" value="添加" class="actionButton" />
+            <input type="submit" value="{{_("Add")}}" class="actionButton" />
         </div>
     </div>
     </form>
 </fieldset>
+{% endif %}
 {% endblock %}

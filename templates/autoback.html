@@ -27,5 +27,6 @@ gobackafter(5);
     {% if tips %}
     <p style="font-size:0.9em;">{{tips}}</p>
     {% endif %}
-    <p>5秒钟后自动返回上一页... <a href="javascript:history.go(-1);">点击直接返回</a></p><br />
+    <p>{{_("Auto back to previous page after 5 seconds")}}...</p>
+    <p><a href="javascript:history.go(-1);">{{_("Click to back")}}</a></p><br />
 {% endblock %}

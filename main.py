@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.5"
+__Version__ = "1.6"
 __Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
 from collections import OrderedDict
+import gettext
 
 # for debug
-IsRunInLocal = (os.environ.get('SERVER_NAME', None)=="localhost")
+IsRunInLocal = (os.environ.get('SERVER_SOFTWARE', '').startswith('Development'))
 log = logging.getLogger()
 __builtin__.__dict__['default_log'] = log
 __builtin__.__dict__['IsRunInLocal'] = IsRunInLocal
+
+gettext.install('lang', 'i18n', unicode=True)
 
 import web
 import jinja2
@@ -126,7 +129,14 @@ class BaseHandler:
         if not u:
             raise web.seeother(r'/')
         return u
+        
+    def browerlang(self):
+        lang = web.ctx.env.get('HTTP_ACCEPT_LANGUAGE', "zh-cn")
+        return "zh-cn" if lang.startswith("zh") else "en"
     
+    def set_lang(self):
+        set_lang(session.lang if session.lang else self.browerlang())
+        
     @classmethod
     def deliverlog(self, emails, book, size, status='ok', tz=TIMEZONE):
         if not isinstance(emails, list):
@@ -176,12 +186,14 @@ class BaseHandler:
      
 class Home(BaseHandler):
     def GET(self):
+        self.set_lang()
         return jjenv.get_template('home.html').render(nickname=session.username,
             title="Home",version=__Version__)
 
 class Setting(BaseHandler):
     def GET(self, success=False):
         user = self.getcurrentuser()
+        self.set_lang()
         return jjenv.get_template('setting.html').render(nickname=session.username,
             title="Setting",current='setting',user=user,mail_sender=SrcEmail,success=success)
     
@@ -206,6 +218,7 @@ class Setting(BaseHandler):
 class AdvSetting(BaseHandler):
     def GET(self):
         user = self.getcurrentuser()
+        self.set_lang()
         delurlid = web.input().get('delurlid')
         delwlist = web.input().get('delwlist')
         if delurlid:
@@ -244,50 +257,57 @@ class Admin(BaseHandler):
     # 账户管理页面
     def GET(self):
         user = self.getcurrentuser()
+        self.set_lang()
         users=KeUser.all() if user.name == 'admin' else None
         return jjenv.get_template('admin.html').render(nickname=session.username,
             title="Admin", current='admin', user=user, users=users)
     
     def POST(self):
+        self.set_lang()
         u,up1,up2 = web.input().get('u'),web.input().get('up1'),web.input().get('up2')
         op,p1,p2 = web.input().get('op'), web.input().get('p1'), web.input().get('p2')
         user = self.getcurrentuser()
         users=KeUser.all() if user.name == 'admin' else None
         if op is not None and p1 is not None and p2 is not None: #修改密码
-            if user.passwd != hashlib.md5(op).hexdigest():
-                tips = u"原密码错误！"
-            elif p1 != p2:
-                tips = u"两次输入的新密码不匹配！"
+            try:
+                pwd = hashlib.md5(op).hexdigest()
+                newpwd = hashlib.md5(p1).hexdigest()
+            except:
+                tips = _("The password includes non-ascii chars!")
             else:
-                tips = u"密码修改成功！"
-                user.passwd = hashlib.md5(p1).hexdigest()
-                user.put()
+                if user.passwd != pwd:
+                    tips = _("Old password is wrong!")
+                elif p1 != p2:
+                    tips = _("The new passwords are different!")
+                else:
+                    tips = _("Change password success!")
+                    user.passwd = newpwd
+                    user.put()
             return jjenv.get_template('admin.html').render(nickname=session.username,
                 title="Admin",current='admin',user=user,users=users,chpwdtips=tips)
         elif u is not None and up1 is not None and up2 is not None: #添加账户
             if user.name != 'admin':
                 raise web.seeother(r'/')
             elif not u:
-                tips = u"用户名为空！"
+                tips = _("Username is empty!")
             elif up1 != up2:
-                tips = u"两次输入的密码不匹配！"
+                tips = _("The new passwords are different!")
             elif KeUser.all().filter("name = ", u).get():
-                tips = u"用户名已经存在！"
+                tips = _("Already exist the username!")
             else:
-                myfeeds = Book(title=MY_FEEDS_TITLE,description=MY_FEEDS_DESC,
-                    builtin=False,keep_image=True)
-                myfeeds.put()
-                au = KeUser(name=u,passwd=hashlib.md5(up1).hexdigest())
-                au.kindle_email = ''
-                au.enable_send = False
-                au.send_time = 7
-                au.timezone = TIMEZONE
-                au.book_type = "mobi"
-                au.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
-                au.ownfeeds = myfeeds
-                au.put()
-                
-                tips = u"添加用户账号成功！ "
+                try:
+                    pwd = hashlib.md5(up1).hexdigest()
+                except:
+                    tips = _("The password includes non-ascii chars!")
+                else:
+                    myfeeds = Book(title=MY_FEEDS_TITLE,description=MY_FEEDS_DESC,
+                        builtin=False,keep_image=True)
+                    myfeeds.put()
+                    au = KeUser(name=u,passwd=pwd,kindle_email='',enable_send=False,
+                        send_time=7,timezone=TIMEZONE,book_type="mobi",ownfeeds = myfeeds)
+                    au.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
+                    au.put()
+                    tips = _("Add a account success!")
             return jjenv.get_template('admin.html').render(nickname=session.username,
                 title="Admin",current='admin',user=user,users=users,actips=tips)
         else:
@@ -295,6 +315,7 @@ class Admin(BaseHandler):
        
 class Login(BaseHandler):
     def GET(self):
+        self.set_lang()
         # 第一次登陆时如果没有管理员帐号，
         # 则增加一个管理员帐号admin，密码admin，后续可以修改密码
         tips = ''
@@ -312,9 +333,9 @@ class Login(BaseHandler):
             au.expires = None
             au.ownfeeds = myfeeds
             au.put()
-            tips = u"初次登陆请使用用户名'admin'/密码'admin'登陆。 "
+            tips = _("Please use admin/admin to login at first time.")
         else:
-            tips = u"请输入正确的用户名和密码登陆进入系统。 "
+            tips = _("Please input username and password.")
         
         if session.login == 1:
             web.seeother(r'/')
@@ -322,22 +343,26 @@ class Login(BaseHandler):
             return jjenv.get_template("login.html").render(nickname='',title='Login',tips=tips)
         
     def POST(self):
+        self.set_lang()
         name, passwd = web.input().get('u'), web.input().get('p')
         if name.strip() == '':
-            tips = u"用户名为空！ "
+            tips = _("Username is empty!")
             return jjenv.get_template("login.html").render(nickname='',
                 title='Login',tips=tips)
         elif len(name) > 25:
-            tips = u"用户名限制为25个字符！ "
+            tips = _("The len of username reached the limit of 25 chars!")
             return jjenv.get_template("login.html").render(nickname='',
                 title='Login',tips=tips,username=name)
         elif '<' in name or '>' in name or '&' in name:
-            tips = u"用户名包含非法字符！ "
+            tips = _("The username includes unsafe chars!")
             return jjenv.get_template("login.html").render(nickname='',
                 title='Login',tips=tips)
-        
-        pwdhash = hashlib.md5(passwd).hexdigest()
-        u = KeUser.all().filter("name = ", name).filter("passwd = ", pwdhash).get()
+        try:
+            pwdhash = hashlib.md5(passwd).hexdigest()
+        except:
+            u = None
+        else:
+            u = KeUser.all().filter("name = ", name).filter("passwd = ", pwdhash).get()
         if u:
             session.login = 1
             session.username = name
@@ -346,7 +371,7 @@ class Login(BaseHandler):
                 u.put()
             raise web.seeother(r'/')
         else:
-            tips = u"用户名不存在或密码错误！ "
+            tips = _("The username no exist or password is wrong!")
             session.login = 0
             session.username = ''
             session.kill()
@@ -362,39 +387,44 @@ class Logout(BaseHandler):
 
 class AdminMgrPwd(BaseHandler):
     # 管理员修改其他账户的密码
-    def GET(self):
+    def GET(self, name):
         self.login_required('admin')
-        name = web.input().get('u')
-        tips = u"请输入新的密码并确认！ "
+        self.set_lang()
+        tips = _("Please input new password to confirm!")
         return jjenv.get_template("adminmgrpwd.html").render(nickname=session.username,
             title='Change password',tips=tips,username=name)
         
     def POST(self):
         self.login_required('admin')
+        self.set_lang()
         name, p1, p2 = web.input().get('u'),web.input().get('p1'),web.input().get('p2')
         if name:
             u = KeUser.all().filter("name = ", name).get()
             if not u:
-                tips = u"用户名'%s'不存在！" % name
+                tips = _("The username '%s' not exist!") % name
             elif p1 != p2:
-                tips = u"两次输入的密码不相符！ "
+                tips = _("The new passwords are different!")
             else:
-                u.passwd = hashlib.md5(p1).hexdigest()
-                u.put()
-                tips = u"密码修改成功！ "
+                try:
+                    pwd = hashlib.md5(p1).hexdigest()
+                except:
+                    tips = _("The password includes non-ascii chars!")
+                else:
+                    u.passwd = pwd
+                    u.put()
+                    tips = _("Change password success!")
         else:
-            tips = u"用户名不能为空！ "
+            tips = _("Username is empty!")
             
         return jjenv.get_template("adminmgrpwd.html").render(nickname=session.username,
             title='Change password',tips=tips,username=name)
 
 class DelAccount(BaseHandler):
-    def GET(self):
+    def GET(self, name):
         self.login_required()
-        name = web.input().get('u')
-        
+        self.set_lang()
         if session.username == 'admin' or (name and name == session.username):
-            tips = u"请确认是否要删除此账号！ "
+            tips = _("Please confirm to delete the account!")
             return jjenv.get_template("delaccount.html").render(nickname=session.username,
                 title='Delete account',tips=tips,username=name)
         else:
@@ -402,11 +432,12 @@ class DelAccount(BaseHandler):
     
     def POST(self):
         self.login_required()
+        self.set_lang()
         name = web.input().get('u')
         if name and (session.username == 'admin' or session.username == name):
             u = KeUser.all().filter("name = ", name).get()
             if not u:
-                tips = u"用户名'%s'不存在！" % name
+                tips = _("The username '%s' not exist!") % name
             else:
                 if u.ownfeeds:
                     u.ownfeeds.delete()
@@ -421,9 +452,9 @@ class DelAccount(BaseHandler):
                 if session.username == name:
                     raise web.seeother('/logout')
                 else:
-                    tips = u"删除成功！"
+                    tips = _("Delete success!")
         else:
-            tips = u"用户名为空或你没有权限删除此账号！"
+            tips = _("The username is empty or you dont have right to delete it!")
         return jjenv.get_template("delaccount.html").render(nickname=session.username,
             title='Delete account',tips=tips,username=name)
 
@@ -431,6 +462,7 @@ class MySubscription(BaseHandler):
     # 管理我的订阅和杂志列表
     def GET(self, tips=None):
         user = self.getcurrentuser()
+        self.set_lang()
         myfeeds = user.ownfeeds.feeds if user.ownfeeds else None
         return jjenv.get_template("my.html").render(nickname=session.username,current='my',
                 title='My subscription',books=Book.all().filter("builtin = ",True),
@@ -442,7 +474,7 @@ class MySubscription(BaseHandler):
         url = web.input().get('url')
         isfulltext = bool(web.input().get('fulltext'))
         if not title or not url:
-            return self.GET(u"标题和URL都不能为空！ ")
+            return self.GET(_("Title or url is empty!"))
         
         assert user.ownfeeds
         Feed(title=title,url=url,book=user.ownfeeds,isfulltext=isfulltext).put()
@@ -504,9 +536,8 @@ class DelFeed(BaseHandler):
         raise web.seeother('/my')
         
 class Renew(BaseHandler):
-    def GET(self):
+    def GET(self, name):
         self.login_required()
-        name = web.input().get('u')
         if (name and name != 'admin'
             and (session.username == 'admin' or name == session.username)):
             user = KeUser.all().filter("name = ", name).get()
@@ -523,6 +554,7 @@ class Deliver(BaseHandler):
         books = Book.all()
         sent = []
         if username: # 现在投递
+            self.set_lang()
             for book in books:
                 if username not in book.users:
                     continue
@@ -532,9 +564,9 @@ class Deliver(BaseHandler):
                         params={"id":book.key().id(), "type":user.book_type, 'emails':user.kindle_email})
                     sent.append(book.title)
             if len(sent):
-                tips = u"书籍 (%s) 已放入推送队列！" % u', '.join(sent)
+                tips = _("Book(s) (%s) put to queue!") % u', '.join(sent)
             else:
-                tips = u'没有需要推送的书籍！'
+                tips = _("No book(s) to deliver!")
             return jjenv.get_template("autoback.html").render(nickname=session.username,
                 title='Delivering',tips=tips)
         
@@ -577,7 +609,7 @@ class Deliver(BaseHandler):
                     params={"id":book.key().id(), "type":"epub", 'emails': emails})
         tips = u', '.join(sent)
         return jjenv.get_template("autoback.html").render(nickname=session.username,
-                title='Delivering',tips=u"书籍 (%s) 已经放入推送队列！" % tips)
+                title='Delivering',tips=_("Book(s) (%s) put to queue!") % tips)
         
 class Worker(BaseHandler):
     def GET(self):
@@ -663,9 +695,6 @@ class Worker(BaseHandler):
                 for title, a, brief in sections[sec]:
                     sectoc.add(title, a.href, description=brief if brief else None)
             
-            #TODO
-            oeb.toc.rationalize_play_orders()
-            
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()
             o.convert(oeb, oIO, opts, log)
@@ -682,6 +711,7 @@ class Worker(BaseHandler):
 class Mylogs(BaseHandler):
     def GET(self):
         user = self.getcurrentuser()
+        self.set_lang()
         logs = DeliverLog.all().filter("username = ", 'admin').order('-time').fetch(limit=10)
         return jjenv.get_template("logs.html").render(nickname=session.username,
             title='Deliver log', current='logs', logs=logs)
@@ -714,6 +744,14 @@ class RemoveLogs(BaseHandler):
         
         return "%s lines log removed.<br />" % c
 
+class SetLang(BaseHandler):
+    def GET(self, lang):
+        if lang not in ('zh-cn', 'en'):
+            return "language invalid!"
+        session.lang = lang
+        self.set_lang()
+        raise web.seeother(r'/')
+        
 class Test(BaseHandler):
     def GET(self):
         s = ''
@@ -749,8 +787,8 @@ urls = (
   r"/", "Home",
   "/login", "Login",
   "/logout", "Logout",
-  "/mgrpwd", "AdminMgrPwd",
-  "/delaccount", "DelAccount",
+  "/mgrpwd/(.*)", "AdminMgrPwd",
+  "/delaccount/(.*)", "DelAccount",
   "/my", "MySubscription",
   "/subscribe/(.*)", "Subscribe",
   "/unsubscribe/(.*)", "Unsubscribe",
@@ -758,22 +796,29 @@ urls = (
   "/setting", "Setting",
   '/advsetting', 'AdvSetting',
   "/admin","Admin",
-  "/renew", "Renew",
+  "/renew/(.*)", "Renew",
   "/deliver", "Deliver",
   "/worker", "Worker",
   "/logs", "Mylogs",
   "/removelogs", "RemoveLogs",
+  "/setlang/(.*)", "SetLang",
   "/test", "Test",
   "/dbviewer","DbViewer",
 )
 
+def set_lang(lang):
+    """ 设置网页显示语言 """
+    tr = gettext.translation('lang', 'i18n', languages=[lang])
+    tr.install(True)
+    jjenv.install_gettext_translations(tr)
+    
 app = web.application(urls, globals())
 store = MemcacheStore(memcache)
-session = web.session.Session(app, store, initializer={'username':'','login':0})
+session = web.session.Session(app, store, initializer={'username':'','login':0,"lang":''})
 jjenv = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'),
-                            extensions=["jinja2.ext.do",])
+                            extensions=["jinja2.ext.do",'jinja2.ext.i18n'])
 jjenv.filters['filesizeformat'] = fix_filesizeformat
 
 app = app.wsgifunc()
 
-web.config.debug=IsRunInLocal
+web.config.debug = IsRunInLocal

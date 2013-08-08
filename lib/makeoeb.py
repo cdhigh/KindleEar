@@ -98,7 +98,7 @@ def getOpts():
     setattr(opts, "no_svg_cover", True)
     setattr(opts, "preserve_cover_aspect_ratio", True)
     setattr(opts, "epub_flatten", False)
-    setattr(opts, "epub_dont_compress", True)
+    setattr(opts, "epub_dont_compress", False)
     
     #extra
     setattr(opts, "process_images_immediately", True)

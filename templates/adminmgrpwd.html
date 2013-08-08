@@ -8,7 +8,7 @@
     <form action="" method="POST">
     <table id="mgrpwd">
         <tr>
-            <td>Username: </td>
+            <td style="text-align:right;">{{_("Username")}} : </td>
             {% if username %}
             <td><input type="text" name="u" id="username" value={{username}}></td>
             {% else %}
@@ -16,16 +16,16 @@
             {% endif %}
         </tr>
         <tr>
-            <td>New password: </td>
+            <td style="text-align:right;">{{_("New password")}} : </td>
             <td><input type="password" name="p1" id="password"></td>
         </tr>
         <tr>
-            <td>Comfirm new password: </td>
+            <td style="text-align:right;">{{_("Confirm password")}} : </td>
             <td><input type="password" name="p2" id="password"></td>
         </tr>
         <tr>
             <td></td>
-            <td><input type="submit" value="Comfirm"></td>
+            <td><input type="submit" value="{{_("Confirm Change")}}"></td>
         </tr>
     </table>
     </form>

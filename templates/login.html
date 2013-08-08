@@ -40,20 +40,20 @@
     <form action="/login" method="POST">
     <table id="login">
         <tr>
-            <td style="text-align:right;">用户名：</td>
+            <td style="text-align:right;">{{_("Username")}} : </td>
             <td><input type="text" name="u" id="username" {% if username %}value="{{username}}"{% endif %} /></td>
         </tr>
         <tr>
-            <td style="text-align:right;">密码：</td>
+            <td style="text-align:right;">{{_("Password")}} : </td>
             <td><input type="password" name="p" id="password" /></td>
         </tr>
         <tr>
             <td></td>
-            <td><input type="submit" value="确认登陆" onclick="javascript:return check();window.close();" target="_parent" /></td>
+            <td><input type="submit" value="{{_("Login")}}" onclick="javascript:return check();window.close();" target="_parent" /></td>
         </tr>
     </table>
     </form>
     </fieldset>
     <pre><p> </p></pre>
-    <p id="note">本站不开放注册，需要管理员先添加账号然后才能使用对应账号登录使用相应服务。</p>
+    <p id="note">{{_("The website dont allow register, you can ask owner open a account for you.")}}</p>
 {% endblock %}

@@ -1,4 +1,6 @@
-﻿一、这是一个运行在Google App Engine(GAE)上的Kindle个人推送服务器，生成排版精美的杂志模式MOBI格式自动每天推送至您的kindle，
+﻿Readme of english version refers to Readme_EN.txt
+
+一、这是一个运行在Google App Engine(GAE)上的Kindle个人推送服务器，生成排版精美的杂志模式MOBI格式自动每天推送至您的kindle，
     此网站应用目前的功能有：
     1.支持类似calibre的recipe格式的自定义RSS收集，需要写代码，需要有一点点python基础
     2.自定义RSS，不需要python基础，直接输入RSS链接和标题即可自动推送

@@ -17,7 +17,7 @@
         {% block header %}
         <h1><a href="/">KindleEar<sup>&#9728;</sup></a></h1>
         {% if nickname %}
-          <a class="nav" href="/logout">退出</a>
+          <a class="nav" href="/logout">{{_("Logout")}}</a>
           <span style="color: #ccc;">&bull;</span>
         <span>Hello, <a href="/admin"><strong>{{nickname}}</strong></a></span>
         {% endif %}
@@ -29,37 +29,37 @@
     {% if nickname %}
         <h2 id="categoryHeader"> 
         {% if current == "my" %}
-        我的订阅
+        {{_("Feeds")}}
         {% else %}
-        <a style="font-weight:normal;" href="/my">我的订阅</a>
+        <a style="font-weight:normal;" href="/my">{{_("Feeds")}}</a>
         {% endif %}
         <span style="color: #ccc;">&bull;</span>
         {% if current == "setting" %}
-        设置
+        {{_("Setting")}}
         {% else %}
-        <a style="font-weight:normal;" href="/setting">设置</a>
+        <a style="font-weight:normal;" href="/setting">{{_("Setting")}}</a>
         {% endif %}
         <span style="color: #ccc;">&bull;</span>
         {% if current == "logs" %}
-        投递日志
+        {{_("Logs")}}
         {% else %}
-        <a style="font-weight:normal;" href="/logs">投递日志</a>
+        <a style="font-weight:normal;" href="/logs">{{_("Logs")}}</a>
         {% endif %}
         <span style="color: #ccc;">&bull;</span>
         {% if current == "admin" %}
-        账户管理
+        {{_("Admin")}}
         {% else %}
-        <a style="font-weight:normal;" href="/admin">账户管理</a>
+        <a style="font-weight:normal;" href="/admin">{{_("Admin")}}</a>
         {% endif %}
         <span style="color: #ccc;">&bull;</span>
         {% if current == "advsetting" %}
-        高级设置
+        {{_("Advance")}}
         {% else %}
-        <a style="font-weight:normal;" href="/advsetting">高级设置</a>
+        <a style="font-weight:normal;" href="/advsetting">{{_("Advance")}}</a>
         {% endif %}
         </h2>
     {% else %}
-        <h2 style="text-align:center;padding:10px 0;"><a href="/login">请先登陆</a></h2>
+        <h2 style="text-align:center;padding:10px 0;"><a href="/login">{{_("Please Login")}}</a></h2>
     {% endif %}
     {% endblock %}
     </div>
@@ -76,6 +76,8 @@
         <a href="https://github.com/cdhigh/kindleear" target="_blank" style="text-decoration:none;">Github page</a>
         &nbsp;&nbsp;|&nbsp;&nbsp;
         <a href="http://appengine.google.com" target="_blank" style="text-decoration:none;">App Engine</a>
+        <div style="float:right;"><a href="/setlang/en"><img src="/static/us.gif" alt="EN" /></a>
+        <a href="/setlang/zh-cn"><img src="/static/cn.gif" alt="CN" /></a></div>
         <pre><p></p></pre>
         {% endblock %}
     </div>

@@ -1,0 +1,345 @@
+# KindleEar translation.
+# Copyright (C) 2013 Arroz
+# Arroz <akindleear@gmail.com>, 2013.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.6\n"
+"POT-Creation-Date: 2013-08-06 14:16+China Standard Time\n"
+"PO-Revision-Date: 2013-08-07 16:36+ZONE\n"
+"Last-Translator: Arroz <akindleear@gmail.com>\n"
+"Language-Team: Arroz <akindleear@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: utf-8\n"
+"Generated-By: pygettext.py 1.5\n"
+
+msgid "Old password is wrong!"
+msgstr "原密码错误！"
+
+msgid "The new passwords are different!"
+msgstr "两次输入的新密码不匹配！"
+
+msgid "Change password success!"
+msgstr "密码修改成功！"
+
+msgid "Username is empty!"
+msgstr "用户名为空！"
+
+msgid "Already exist the username!"
+msgstr "用户名已经存在！"
+
+msgid "Add a account success!"
+msgstr "添加用户账号成功！"
+
+msgid "Please use admin/admin to login at first time."
+msgstr "初次登陆请使用用户名'admin'/密码'admin'登陆。"
+
+msgid "Please input username and password."
+msgstr "请输入正确的用户名和密码。"
+
+msgid "The len of username reached the limit of 25 chars!"
+msgstr "用户名限制为25个字符！"
+
+msgid "The username includes unsafe chars!"
+msgstr "用户名包含非法字符！"
+
+msgid "The password includes non-ascii chars!"
+msgstr "密码包含非ASCII字符！"
+
+msgid "The username no exist or password is wrong!"
+msgstr "用户名不存在或密码错误！"
+
+msgid "Please input new password to confirm!"
+msgstr "请输入新的密码并确认！"
+
+msgid "The username '%s' not exist!"
+msgstr "用户名'%s'不存在！"
+
+msgid "Please confirm to delete the account!"
+msgstr "请确认是否要删除此账号！"
+
+msgid "Delete success!"
+msgstr "删除成功！"
+
+msgid "The username is empty or you dont have right to delete it!"
+msgstr "用户名为空或你没有权限删除此账号！"
+
+msgid "Title or url is empty!"
+msgstr "标题和URL都不能为空！"
+
+msgid "Book(s) (%s) put to queue!"
+msgstr "书籍 (%s) 已放入推送队列！"
+
+msgid "No book(s) to deliver!"
+msgstr "没有需要推送的书籍！"
+
+msgid "Logout"
+msgstr "退出"
+
+msgid "Feeds"
+msgstr "我的订阅"
+
+msgid "Setting"
+msgstr "设置"
+
+msgid "Logs"
+msgstr "投递日志"
+
+msgid "Admin"
+msgstr "账户管理"
+
+msgid "Advance"
+msgstr "高级设置"
+
+msgid "Please Login"
+msgstr "请先登陆"
+
+msgid "Change Password"
+msgstr "修改密码"
+
+msgid "Old password"
+msgstr "原密码"
+
+msgid "New password"
+msgstr "新密码"
+
+msgid "Confirm password"
+msgstr "确认密码"
+
+msgid "Confirm Change"
+msgstr "确认修改"
+
+msgid "Add Account"
+msgstr "添加用户账号"
+
+msgid "Username"
+msgstr "用户名"
+
+msgid "Password"
+msgstr "密码"
+
+msgid "Confirm password"
+msgstr "确认密码"
+
+msgid "Add"
+msgstr "添加"
+
+msgid "Note : No support many accounts for limit of free account of GAE."
+msgstr "因为GAE免费资源的有限，不建议添加很多用户账户。"
+
+msgid "Accounts"
+msgstr "用户账号列表"
+
+msgid "No."
+msgstr "序号"
+
+msgid "Enable"
+msgstr "使能发送"
+
+msgid "Operation"
+msgstr "命令"
+
+msgid "Change"
+msgstr "改密码"
+
+msgid "Delete"
+msgstr "删除"
+
+msgid "Please dont change these configures if you dont know what's mean!"
+msgstr "除非你很熟悉这些配置，否则不建议修改！"
+
+msgid "Url Filter"
+msgstr "URL过滤"
+
+msgid "Urls in list would not be downloaded for saving of time."
+msgstr "在此列表中的URL将不会被下载，以便节省时间，仅适用于文章中的图片URL"
+
+msgid "Please input regular expression"
+msgstr "请输入正则表达式"
+
+msgid "White List"
+msgstr "邮件白名单"
+
+msgid "mail sent to xxx@<em>appid</em>.appspotmail.com will be transfered to admin's kindle."
+msgstr "发送到xxx@<em>appid</em>.appspotmail.com的邮件正文将会被转发至管理员的Kindle邮箱"
+
+msgid "Please input mail address"
+msgstr "请输入邮件地址"
+
+msgid "Auto back to previous page after 5 seconds"
+msgstr "5秒钟后自动返回上一页"
+
+msgid "Click to back"
+msgstr "点击直接返回"
+
+msgid "KindleEar is a web application to aggregate rss for generating"
+msgstr "KindleEar是一个将RSS订阅制作成"
+
+msgid "periodical mobi file with images"
+msgstr "带图杂志mobi格式"
+
+msgid "and send it to your kindle automatically."
+msgstr "发送至Kindle上的应用网站。"
+
+msgid "Author modified and ported Calibre to generate mobi file in GAE without kindlegen tool of Amazon,"
+msgstr "作者提取了Calibre的mobi模块用于通过Python在线生成mobi格式文件，不依赖Amazon的kindlegen工具，"
+
+msgid "for periodical mobi file is a better format to represent news feeds."
+msgstr "杂志格式书籍排版精美，跳转方便，阅读体验更好。"
+
+msgid "With my"
+msgstr "使用本站"
+
+msgid "open source KindleEar application"
+msgstr "开源的KindleEar程序"
+
+msgid ", You can deploy your own server to push news feeds to your kindle dialy or share with your friends."
+msgstr "，你可以在GAE上搭建自己的推送服务器，下载包含图片的RSS订阅或网页推送到你的Kindle，并支持多账号，可以提供给三五好友同时使用。"
+
+msgid "Current version : "
+msgstr "当前运行版本："
+
+msgid "Login"
+msgstr "确认登陆"
+
+msgid "The website dont allow register, you can ask owner open a account for you."
+msgstr "本站不开放注册，需要管理员先添加账号然后才能使用对应账号登录使用相应服务。"
+
+msgid "Only display last 10 logs"
+msgstr "只显示最后10条日志"
+
+msgid "Time"
+msgstr "时间"
+
+msgid "Title"
+msgstr "书籍标题"
+
+msgid "Size"
+msgstr "附件大小"
+
+msgid "To"
+msgstr "收件人"
+
+msgid "Status"
+msgstr "状态"
+
+msgid "Has no log"
+msgstr "还没有投递过"
+
+msgid "Subscribed"
+msgstr "已订阅"
+
+msgid "Cancel"
+msgstr "退订"
+
+msgid "No have book subscribed"
+msgstr "暂时没有已订阅的书籍"
+
+msgid "Custom Rss"
+msgstr "自定义RSS"
+
+msgid "Fulltext"
+msgstr "全文RSS"
+
+msgid "Unsubscribed"
+msgstr "未订阅"
+
+msgid "Subscribe"
+msgstr "订阅"
+
+msgid "No have book unsubscrebed"
+msgstr "暂时没有未订阅的书籍"
+
+msgid "Your account will pause after"
+msgstr "你的投递将于"
+
+msgid ", Please login before expire."
+msgstr "自动停止，每次登陆后自动延期。"
+
+msgid "Delete Account"
+msgstr "删除此账户"
+
+msgid "Kindle E-mail is requied!"
+msgstr "Kindle E-mail必须填写！"
+
+msgid "Settings Saved!"
+msgstr "恭喜，保存成功！"
+
+msgid "Base Setting"
+msgstr "基本设置"
+
+msgid "The item is empty"
+msgstr "此项不能为空"
+
+msgid "Enable deliver"
+msgstr "使能自动定时投递"
+
+msgid "Timezone"
+msgstr "所在时区"
+
+msgid "Deliver time"
+msgstr "投递时间"
+
+msgid "Book format"
+msgstr "投递格式"
+
+msgid "Deliver now"
+msgstr "现在投递"
+
+msgid "Note: deliver will be executed after some minutes."
+msgstr "注意：投递需一段时间，更新内容越多所需时间越长"
+
+msgid "Custom Rss Setting"
+msgstr "自定义RSS设置"
+
+msgid "Language"
+msgstr "投递语言"
+
+msgid "Chinese"
+msgstr "中文"
+
+msgid "English"
+msgstr "英语"
+
+msgid "French"
+msgstr "法语"
+
+msgid "Spanish"
+msgstr "西班牙语"
+
+msgid "Portuguese"
+msgstr "葡萄牙语"
+
+msgid "German"
+msgstr "德语"
+
+msgid "Italian"
+msgstr "意大利语"
+
+msgid "Japanese"
+msgstr "日语"
+
+msgid "Russian"
+msgstr "俄语"
+
+msgid "Keep images"
+msgstr "保留文章图片"
+
+msgid "Enable deliver custom rss"
+msgstr "自动定时投递自定义RSS"
+
+msgid "This switch only effective when 'Enable deliver' is enabled."
+msgstr "此开关受制于'基本设置'的总开关，'总开关'使能，此选项才有效。"
+
+msgid "Save settings"
+msgstr "保存设置"
+
+msgid "Important: Please activate your kindle firstly, and goto"
+msgstr "注意：必须首先激活您的Kindle，同时请到亚马逊账户中心"
+
+msgid "Page and add"
+msgstr "页面将"
+
+msgid "to 'Your Kindle's approved email list'."
+msgstr "加入 'Your Kindle's approved email list'。"

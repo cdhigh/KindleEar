@@ -9,21 +9,18 @@ li{
     list-style:circle;
     color:#2d2d2d;
 }
-.scrimg{
-    width:200px;
-    float:left;
-}
 </style>
 {% endblock %}
 {% block content %}
-    {#<a href="/static/mainscr.gif"><img src="/static/mainscr.gif" class="scrimg" /></a>#}
-    <p>KindleEar是一个将RSS订阅制作成<a href="/static/periodical.gif" target="_blank" style="text-decoration:none;">带图杂志mobi格式</a>
-        发送至Kindle上的应用网站。<br /><br /></p>
+    <p>{{_("KindleEar is a web application to aggregate rss for generating")}}
+        <a href="/static/periodical.gif" target="_blank" style="text-decoration:none;"> {{_("periodical mobi file with images")}} </a>
+        {{_("and send it to your kindle automatically.")}}<br /><br /></p>
     <ul>
-    <li>作者提取了Calibre的mobi模块用于通过Python在线生成mobi格式文件，不依赖Amazon的kindlegen工具，
-        杂志格式书籍排版精美，跳转方便，阅读体验更好。<br /><br /></li>
-    <li>使用本站 <a href="https://github.com/cdhigh/kindleear" target="_blank" style="text-decoration:none;">开源的KindleEar程序</a>
-        ，你可以在GAE上搭建自己的推送服务器，下载包含图片的RSS订阅或网页推送到你的Kindle，并支持多账号，可以提供给三五好友同时使用。<br /><br /></li>
-    <li>当前运行版本：{{version}}<br /></li>
+    <li>{{_("Author modified and ported Calibre to generate mobi file in GAE without kindlegen tool of Amazon,")}}
+        {{_("for periodical mobi file is a better format to represent news feeds.")}}<br /><br /></li>
+    <li>{{_("With my")}} <a href="https://github.com/cdhigh/kindleear" target="_blank" style="text-decoration:none;">
+        {{_("open source KindleEar application")}}</a>
+        {{_(", You can deploy your own server to push news feeds to your kindle dialy or share with your friends.")}}<br /><br /></li>
+    <li>{{_("Current version : ")}}{{version}}<br /></li>
     </ul>
 {% endblock %}

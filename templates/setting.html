@@ -1,35 +1,33 @@
 {% extends "base.html" %}
-
 {% block content %}
 {% if user and user.expires %}
 <div class="grey">
-    你的投递将于 <strong id="expires">{{ user.expires.strftime("%Y-%m-%d") }}</strong> 自动停止，请点击 
-    <a href="/renew?u={{user.name}}" class="actionButton">免费续期</a>
-    <a href="/delaccount?u={{user.name}}">删除此账户</a>
+    {{_("Your account will pause after")}} <strong id="expires">{{ user.expires.strftime("%Y-%m-%d") }}</strong> {{_(", Please login before expire.")}} 
+    <a href="/delaccount/{{user.name}}">{{_("Delete Account")}}</a>
 </div>
 {% endif %}
-
 <form id="set_frm" action="" method="post">
     {% if success %}
     {% if user and not user.kindle_email %}
-    <strong class="error">Kindle E-mail必须填写！</strong>
+    <strong class="error">{{_("Kindle E-mail is requied!")}}</strong>
     {% else %}
-    <strong class="success">恭喜，保存成功！</strong>
+    <strong class="success">{{_("Settings Saved!")}}</strong>
     {% endif %}
     {% endif %}
     
     <fieldset id="kindle_fieldset">
-        <legend>基本设置</legend>
+        <legend>{{_("Base Setting")}}</legend>
         <p>
-            <label>Kindle E-mail("name"@free.kindle.com or @iduokan.com)<em class="required">*</em></label><br />
-            <input type="text" name="kindle_email" style="width:240px" value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" />{% if success and not user.kindle_email %}<em style="color:red;font-size:80%">此项不能为空</em>{% endif %}
+            <label>Kindle E-mail (name@free.kindle.com or @iduokan.com)<em class="required">*</em></label><br />
+            <input type="text" name="kindle_email" style="width:240px" value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" />
+            {% if success and not user.kindle_email %}<em style="color:red;font-size:80%">{{_("The item is empty")}}</em>{% endif %}
         </p>
         <p>
             <input type="checkbox" name="enable_send" {% if user and user.enable_send %}checked="1"{% endif %} />
-            <label>使能自动定时投递</label>
+            <label>{{_("Enable deliver")}}</label>
         </p>
         <p>
-            <label>所在时区<em class="required">*</em></label>
+            <label>{{_("Timezone")}}<em class="required">*</em></label>
             <select class="bool" name="timezone">
                 {% for i in range(-12, 0) %}
                 <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT%02.0f:00" % i }}</option>
@@ -41,7 +39,7 @@
             </select>
         </p>
         <p>
-            <label>投递时间<em class="required">*</em></label>
+            <label>{{_("Deliver time")}}<em class="required">*</em></label>
             <select class="bool" name="send_time">
                 {% for i in range(0, 24) %}
                 <option value="{{ i }}" {% if user.send_time|int == i %}selected="selected"{% endif %}>{{ "%02.0f:00" % i }}</option>
@@ -49,7 +47,7 @@
             </select>
         </p>
         <p>
-            <label>投递格式<em class="required">*</em></label>
+            <label>{{_("Book format")}}<em class="required">*</em></label>
             <select class="bool" name="book_type">
                 <option value="mobi" {% if user.book_type != 'epub' %}selected="selected"{% endif %}>mobi</option>
                 <option value="epub" {% if user.book_type == 'epub' %}selected="selected"{% endif %}>epub</option>
@@ -57,41 +55,46 @@
         </p>
         
         <p>
-            <a id="testlink" href="/deliver?u={{nickname}}">现在投递</a><strong id="testmsg" class="error"></strong> 注意：投递需一段时间，更新内容越多所需时间越长
+            <a id="testlink" href="/deliver?u={{nickname}}">{{_("Deliver now")}}</a>
+            <strong id="testmsg" class="error"></strong> {{_("Note: deliver will be executed after some minutes.")}}
         </p>        
     </fieldset>
     <p></p>
     <fieldset id="adv_fieldset">
-        <legend>自定义RSS设置</legend>
+        <legend>{{_("Custom Rss Setting")}}</legend>
         <p>
-            <label>投递标题<em class="required">*</em></label>
+            <label>{{_("Title")}}<em class="required">*</em></label>
             <input type="text" name="rt" style="width:240px" value="{% if user and user.ownfeeds %}{{ user.ownfeeds.title }}{% endif %}" />
         </p>
         <p>
-            <label>投递语言<em class="required">*</em></label>
+            <label>{{_("Language")}}<em class="required">*</em></label>
             <select class="bool" name="lng">
-                <option value="zh-cn" {% if not user.ownfeeds.language or user.ownfeeds.language=="zh-cn" %}selected="selected"{% endif %}>中文</option>
-                <option value="en-us" {% if user.ownfeeds.language=="en-us" %}selected="selected"{% endif %}>英语</option>
-                <option value="fr-fr" {% if user.ownfeeds.language=="fr-fr" %}selected="selected"{% endif %}>法语</option>
-                <option value="es-es" {% if user.ownfeeds.language=="es-es" %}selected="selected"{% endif %}>西班牙语</option>
-                <option value="pt-br" {% if user.ownfeeds.language=="pt-br" %}selected="selected"{% endif %}>葡萄牙语</option>
+                <option value="zh-cn" {% if not user.ownfeeds.language or user.ownfeeds.language=="zh-cn" %}selected="selected"{% endif %}>{{_("Chinese")}}</option>
+                <option value="en-us" {% if user.ownfeeds.language=="en-us" %}selected="selected"{% endif %}>{{_("English")}}</option>
+                <option value="fr-fr" {% if user.ownfeeds.language=="fr-fr" %}selected="selected"{% endif %}>{{_("French")}}</option>
+                <option value="es-es" {% if user.ownfeeds.language=="es-es" %}selected="selected"{% endif %}>{{_("Spanish")}}</option>
+                <option value="pt-br" {% if user.ownfeeds.language=="pt-br" %}selected="selected"{% endif %}>{{_("Portuguese")}}</option>
+                <option value="de-de" {% if user.ownfeeds.language=="de-de" %}selected="selected"{% endif %}>{{_("German")}}</option>
+                <option value="it-it" {% if user.ownfeeds.language=="it-it" %}selected="selected"{% endif %}>{{_("Italian")}}</option>
+                <option value="ja-jp" {% if user.ownfeeds.language=="ja-jp" %}selected="selected"{% endif %}>{{_("Japanese")}}</option>
+                <option value="ru-ru" {% if user.ownfeeds.language=="ru-ru" %}selected="selected"{% endif %}>{{_("Russian")}}</option>
             </select>
         </p>
         <p>
             <input type="checkbox" name="keepimage" {% if user and user.ownfeeds.keep_image %}checked="1"{% endif %} />
-            <label>保留文章图片</label>
+            <label>{{_("Keep images")}}</label>
         </p>
         <p>
             <input type="checkbox" name="enablerss" {% if user and nickname in user.ownfeeds.users %}checked="1"{% endif %} />
-            <label>自动定时投递自定义RSS</label>
-            <p style="color:grey;font-size:0.7em;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;此开关受制于"基本设置"的总开关，“总开关”使能，此选项才有效。</P>
+            <label>{{_("Enable deliver custom rss")}}</label>
+            <p style="color:grey;font-size:0.7em;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{_("This switch only effective when 'Enable deliver' is enabled.")}}</P>
         </p>
     </fieldset>
     <p class="save_btn">
-        <input type="submit" class="btn" value="保存设置" />
+        <input type="submit" class="btn" value="{{_("Save settings")}}" />
     </p>
 </form>
 <p>
-注意：必须首先激活您的Kindle，同时请到亚马逊账户中心 <a href="https://www.amazon.com/gp/digital/fiona/manage" rel="external">Manage Your Kindle</a> 页面将 <strong>{{ mail_sender }}</strong> 加入 &quot;Your Kindle's approved email list&quot;
+{{_("Important: Please activate your kindle firstly, and goto")}} <a href="https://www.amazon.com/gp/digital/fiona/manage" rel="external">Manage Your Kindle</a> {{_("Page and add")}} <strong>{{ mail_sender }}</strong> {{_("to 'Your Kindle's approved email list'.")}}
 </p>
 {% endblock %}

@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 """
- ½«·¢Íùxxx@appid.appspotmail.comµÄÓÊ¼şÕıÎÄ£¨²»ÊÇ¸½¼ş£©×ª»»³É¸½¼ş
- ·¢ÍùadminµÄkindleÓÊÏä¡£ĞèÒªÔÚ°×Ãûµ¥ÖĞÔö¼ÓÔ´·¢¼şÈËµØÖ·¡£
+å°†å‘åˆ°xxx@appid.appspotmail.comçš„é‚®ä»¶æ­£æ–‡è½¬æˆé™„ä»¶å‘å¾€ç®¡ç†å‘˜çš„kindleé‚®ç®±ã€‚
 """
 from email.Header import decode_header
 from email.utils import parseaddr, collapse_rfc2231_value
@@ -20,17 +19,16 @@ def decode_subject(subject):
 
 class HandleMail(InboundMailHandler):
     def receive(self, message):
-        if hasattr(message, 'subject'):
-            subject = decode_subject(message.subject)
-        else:
-            subject = u"NoSubject"
         sender = parseaddr(message.sender)[1]
-        
-        #°×Ãûµ¥»úÖÆ
         if not WhiteList.all().filter('mail = ', sender).get():
             self.response.out.write("Spam mail!")
             return
         
+        if hasattr(message, 'subject'):
+            subject = decode_subject(message.subject)
+        else:
+            subject = u"NoSubject"
+            
         admin = KeUser.all().filter('name = ', 'admin').get()
         if not admin or not admin.kindle_email:
             self.response.out.write('No admin account or no email configured!')

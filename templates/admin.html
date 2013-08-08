@@ -21,26 +21,26 @@ border:1px dotted #c0c0c0;
 {% block content %}
 <form id="chpwd" action="" method="POST">
 <fieldset id="fieldset_chpwd">
-    <legend>修改密码</legend>
+    <legend>{{_("Change Password")}}</legend>
     {% if chpwdtips %}
     <p style="color:red;font-size:0.8em;">{{chpwdtips}}</p>
     {% endif %}
     <table id="tb_chpwd" align="center">
     <tr>
-        <td style="text-align:right;">原密码：</td>
+        <td style="text-align:right;">{{_("Old password")}} : </td>
         <td><input type="password" name="op" id="orgpwd"></td>
     </tr>
     <tr>
-        <td style="text-align:right;">新密码：</td>
+        <td style="text-align:right;">{{_("New password")}} : </td>
         <td><input type="password" name="p1" id="newpwd1"></td>
     </tr>
     <tr>
-        <td style="text-align:right;">确认密码：</td>
+        <td style="text-align:right;">{{_("Confirm password")}} : </td>
         <td><input type="password" name="p2" id="newpwd2"></td>
     </tr>
     <tr>
         <td></td>
-        <td><input type="submit" value="确认修改"></td>
+        <td><input type="submit" value="{{_("Confirm Change")}}"></td>
     </tr>
     </table>
 </fieldset>
@@ -49,46 +49,46 @@ border:1px dotted #c0c0c0;
 {% if nickname == 'admin' %}
 <form id="fmac" action="" method="POST">
 <fieldset id="fieldset_ac">
-    <legend>添加用户账号</legend>
+    <legend>{{_("Add Account")}}</legend>
     {% if actips %}
     <p style="color:red;font-size:0.8em;">{{actips}}</p>
     {% endif %}
     <table id="addcount" align="center">
         <tr>
-            <td style="text-align:right;">用户名：</td>
+            <td style="text-align:right;">{{_("Username")}} : </td>
             <td><input type="text" name="u" id="username"></td>
         </tr>
         <tr>
-            <td style="text-align:right;">密码：</td>
+            <td style="text-align:right;">{{_("Password")}} : </td>
             <td><input type="text" name="up1" id="password"></td>
         </tr>
         <tr>
-            <td style="text-align:right;">确认密码：</td>
+            <td style="text-align:right;">{{_("Confirm password")}} : </td>
             <td><input type="text" name="up2" id="password"></td>
         </tr>
         <tr>
             <td></td>
-            <td><input type="submit" value="确认添加"></td>
+            <td><input type="submit" value="{{_("Add")}}"></td>
         </tr>
     </table>
-    <p style="font-size:0.8em;color:grey;">因为GAE免费资源的有限，不建议添加很多用户账户。</p>
+    <p style="font-size:0.8em;color:grey;">{{_("Note : No support many accounts for limit of free account of GAE.")}}</p>
 </fieldset>
 </form>
 
 <fieldset id="fieldset_cm">
-    <legend>用户账号列表</legend>
+    <legend>{{_("Accounts")}}</legend>
     <table id="tb_cm" class="usrtb">
         <tr class="usrtbhead">
-        <th class="usrh">序号</th><th class="usrh">用户名</th>
-        <th class="usrh">使能发送</th>
-        <th class="usrh" colspan="2">命令</th>
+        <th class="usrh">{{_("No.")}}</th><th class="usrh">{{_("Username")}}</th>
+        <th class="usrh">{{_("Enable")}}</th>
+        <th class="usrh" colspan="2">{{_("Operation")}}</th>
         </tr>
         {% for u in users %}
         <tr class="usrrow">
         <th class="usrh">{{loop.index}}</th><th class="usrh">{{u.name}}</th>
         <th class="usrh">{{u.enable_send}}</th>
-        <th class="usrh"><a href="/mgrpwd?u={{u.name}}" class="actionButton">修改密码</a></th>
-        <th class="usrh"><a href="delaccount?u={{u.name}}" class="actionButton">删除账户</a></th>
+        <th class="usrh"><a href="/mgrpwd/{{u.name}}" class="actionButton">{{_("Change")}}</a></th>
+        <th class="usrh"><a href="delaccount/{{u.name}}" class="actionButton">{{_("Delete")}}</a></th>
         </tr>
         {% endfor %}
     </table>
