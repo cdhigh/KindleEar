@@ -13,16 +13,6 @@ from optparse import IndentedHelpFormatter
 
 from calibre.constants import (config_dir, CONFIG_DIR_MODE, __appname__,
         __version__, __author__)
-from calibre.utils.lock import ExclusiveFile
-from calibre.utils.config_base import (make_config_dir, Option, OptionValues,
-        OptionSet, ConfigInterface, Config, prefs, StringConfig, ConfigProxy,
-        read_raw_tweaks, read_tweaks, write_tweaks, tweaks, plugin_dir)
-
-if False:
-    # Make pyflakes happy
-    Config, ConfigProxy, Option, OptionValues, StringConfig
-    OptionSet, ConfigInterface, read_tweaks, write_tweaks
-    read_raw_tweaks, tweaks, plugin_dir, prefs
 
 def check_config_write_access():
     return os.access(config_dir, os.W_OK) and os.access(config_dir, os.X_OK)
@@ -35,7 +25,7 @@ class CustomHelpFormatter(IndentedHelpFormatter):
         if parts:
             parts[0] = colored(parts[0], fg='yellow', bold=True)
         usage = ' '.join(parts)
-        return colored(_('Usage'), fg='blue', bold=True) + ': ' + usage
+        return colored('Usage', fg='blue', bold=True) + ': ' + usage
 
     def format_heading(self, heading):
         from calibre.utils.terminal import colored
@@ -86,19 +76,13 @@ class OptionParser(_OptionParser):
 
         usage = textwrap.dedent(usage)
         if epilog is None:
-            epilog = _('Created by ')+colored(__author__, fg='cyan')
-        usage += '\n\n'+_('''Whenever you pass arguments to %prog that have spaces in them, '''
-                 '''enclose the arguments in quotation marks.''')+'\n'
+            epilog = 'Created by '
+        usage += '\n\n'
         _OptionParser.__init__(self, usage=usage, version=version, epilog=epilog,
                                formatter=CustomHelpFormatter(),
                                conflict_handler=conflict_handler, **kwds)
         self.gui_mode = gui_mode
-        if False:
-            # Translatable string from optparse
-            _("Options")
-            _("show this help message and exit")
-            _("show program's version number and exit")
-
+        
     def print_usage(self, file=None):
         from calibre.utils.terminal import ANSIStream
         s = ANSIStream(file)
@@ -183,169 +167,6 @@ class OptionParser(_OptionParser):
             args = [OptionGroup(self, *args, **kwargs)] + list(args[1:])
         return _OptionParser.add_option_group(self, *args, **kwargs)
 
-class DynamicConfig(dict):
-    '''
-    A replacement for QSettings that supports dynamic config keys.
-    Returns `None` if a config key is not found. Note that the config
-    data is stored in a non human readable pickle file, so only use this
-    class for preferences that you don't intend to have the users edit directly.
-    '''
-    def __init__(self, name='dynamic'):
-        dict.__init__(self, {})
-        self.name = name
-        self.defaults = {}
-        self.file_path = os.path.join(config_dir, name+'.pickle')
-        self.refresh()
-
-    def refresh(self):
-        d = {}
-        if os.path.exists(self.file_path):
-            with ExclusiveFile(self.file_path) as f:
-                raw = f.read()
-                try:
-                    d = cPickle.loads(raw) if raw.strip() else {}
-                except SystemError:
-                    pass
-                except:
-                    import traceback
-                    print 'Failed to unpickle stored object:'
-                    traceback.print_exc()
-                    d = {}
-        self.clear()
-        self.update(d)
-
-    def __getitem__(self, key):
-        try:
-            return dict.__getitem__(self, key)
-        except KeyError:
-            return self.defaults.get(key, None)
-
-    def get(self, key, default=None):
-        try:
-            return dict.__getitem__(self, key)
-        except KeyError:
-            return self.defaults.get(key, default)
-
-    def __setitem__(self, key, val):
-        dict.__setitem__(self, key, val)
-        self.commit()
-
-    def set(self, key, val):
-        self.__setitem__(key, val)
-
-    def commit(self):
-        if hasattr(self, 'file_path') and self.file_path:
-            if not os.path.exists(self.file_path):
-                make_config_dir()
-            with ExclusiveFile(self.file_path) as f:
-                raw = cPickle.dumps(self, -1)
-                f.seek(0)
-                f.truncate()
-                f.write(raw)
-
-dynamic = DynamicConfig()
-
-class XMLConfig(dict):
-
-    '''
-    Similar to :class:`DynamicConfig`, except that it uses an XML storage
-    backend instead of a pickle file.
-
-    See `http://docs.python.org/dev/library/plistlib.html`_ for the supported
-    data types.
-    '''
-
-    EXTENSION = '.plist'
-
-    def __init__(self, rel_path_to_cf_file):
-        dict.__init__(self)
-        self.no_commit = False
-        self.defaults = {}
-        self.file_path = os.path.join(config_dir,
-                *(rel_path_to_cf_file.split('/')))
-        self.file_path = os.path.abspath(self.file_path)
-        if not self.file_path.endswith(self.EXTENSION):
-            self.file_path += self.EXTENSION
-
-        self.refresh()
-
-    def raw_to_object(self, raw):
-        return plistlib.readPlistFromString(raw)
-
-    def to_raw(self):
-        return plistlib.writePlistToString(self)
-
-    def refresh(self):
-        d = {}
-        if os.path.exists(self.file_path):
-            with ExclusiveFile(self.file_path) as f:
-                raw = f.read()
-                try:
-                    d = self.raw_to_object(raw) if raw.strip() else {}
-                except SystemError:
-                    pass
-                except:
-                    import traceback
-                    traceback.print_exc()
-                    d = {}
-        self.clear()
-        self.update(d)
-
-    def __getitem__(self, key):
-        try:
-            ans = dict.__getitem__(self, key)
-            if isinstance(ans, plistlib.Data):
-                ans = ans.data
-            return ans
-        except KeyError:
-            return self.defaults.get(key, None)
-
-    def get(self, key, default=None):
-        try:
-            ans = dict.__getitem__(self, key)
-            if isinstance(ans, plistlib.Data):
-                ans = ans.data
-            return ans
-        except KeyError:
-            return self.defaults.get(key, default)
-
-    def __setitem__(self, key, val):
-        if isinstance(val, (bytes, str)):
-            val = plistlib.Data(val)
-        dict.__setitem__(self, key, val)
-        self.commit()
-
-    def set(self, key, val):
-        self.__setitem__(key, val)
-
-    def __delitem__(self, key):
-        try:
-            dict.__delitem__(self, key)
-        except KeyError:
-            pass  # ignore missing keys
-        else:
-            self.commit()
-
-    def commit(self):
-        if self.no_commit:
-            return
-        if hasattr(self, 'file_path') and self.file_path:
-            dpath = os.path.dirname(self.file_path)
-            if not os.path.exists(dpath):
-                os.makedirs(dpath, mode=CONFIG_DIR_MODE)
-            with ExclusiveFile(self.file_path) as f:
-                raw = self.to_raw()
-                f.seek(0)
-                f.truncate()
-                f.write(raw)
-
-    def __enter__(self):
-        self.no_commit = True
-
-    def __exit__(self, *args):
-        self.no_commit = False
-        self.commit()
-
 def to_json(obj):
     if isinstance(obj, bytearray):
         return {'__class__': 'bytearray',
@@ -364,45 +185,5 @@ def from_json(obj):
             from calibre.utils.date import parse_date
             return parse_date(obj['__value__'], assume_utc=True)
     return obj
-
-class JSONConfig(XMLConfig):
-
-    EXTENSION = '.json'
-
-    def raw_to_object(self, raw):
-        return json.loads(raw.decode('utf-8'), object_hook=from_json)
-
-    def to_raw(self):
-        return json.dumps(self, indent=2, default=to_json)
-
-    def __getitem__(self, key):
-        try:
-            return dict.__getitem__(self, key)
-        except KeyError:
-            return self.defaults[key]
-
-    def get(self, key, default=None):
-        try:
-            return dict.__getitem__(self, key)
-        except KeyError:
-            return self.defaults.get(key, default)
-
-    def __setitem__(self, key, val):
-        dict.__setitem__(self, key, val)
-        self.commit()
-
-class DevicePrefs:
-
-    def __init__(self, global_prefs):
-        self.global_prefs = global_prefs
-        self.overrides = {}
-
-    def set_overrides(self, **kwargs):
-        self.overrides = kwargs.copy()
-
-    def __getitem__(self, key):
-        return self.overrides.get(key, self.global_prefs[key])
-
-device_prefs = DevicePrefs(prefs)
 
 

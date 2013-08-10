@@ -3,29 +3,12 @@ __license__   = 'GPL v3'
 __copyright__ = '2008, Kovid Goyal <kovid@kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
-import sys, os, re, time, random, warnings
+import sys, os, re, time
 from functools import partial
 
-warnings.simplefilter('ignore', DeprecationWarning)
-from calibre.constants import (iswindows, isosx, islinux, isfrozen,
-        isbsd, preferred_encoding, __appname__, __version__, __author__,
-        win32event, win32api, winerror, fcntl,
-        filesystem_encoding, plugins, config_dir)
-
-if False and islinux and not getattr(sys, 'frozen', False):
-    # Imported before PyQt4 to workaround PyQt4 util-linux conflict discovered on gentoo
-    # See http://bugs.gentoo.org/show_bug.cgi?id=317557
-    # Importing uuid is slow so get rid of this at some point, maybe in a few
-    # years when even Debian has caught up
-    # Also remember to remove it from site.py in the binary builds
-    import uuid
-    uuid.uuid4()
-
-if False:
-    # Prevent pyflakes from complaining
-    winutil, winutilerror, __appname__, islinux, __version__
-    fcntl, win32event, isfrozen, __author__
-    winerror, win32api, isbsd, config_dir
+from calibre.constants import (iswindows, 
+        preferred_encoding, __appname__, __version__, __author__,
+        winerror, filesystem_encoding, plugins, config_dir)
 
 _mt_inited = False
 def _init_mimetypes():
@@ -91,10 +74,6 @@ def unicode_path(path, abs=False):
 def confirm_config_name(name):
     return name + '_again'
 
-_filename_sanitize = re.compile(r'[\xae\0\\|\?\*<":>\+/]')
-_filename_sanitize_unicode = frozenset([u'\\', u'|', u'?', u'*', u'<',
-    u'"', u':', u'>', u'+', u'/'] + list(map(unichr, xrange(32))))
-
 def sanitize_file_name(name, substitute='_', as_unicode=False):
     '''
     Sanitize the filename `name`. All invalid characters are replaced by `substitute`.
@@ -107,6 +86,8 @@ def sanitize_file_name(name, substitute='_', as_unicode=False):
     '''
     if isinstance(name, unicode):
         name = name.encode(filesystem_encoding, 'ignore')
+    _filename_sanitize = re.compile(r'[\xae\0\\|\?\*<":>\+/]')
+    
     one = _filename_sanitize.sub(substitute, name)
     one = re.sub(r'\s', ' ', one).strip()
     bname, ext = os.path.splitext(one)
@@ -133,6 +114,8 @@ def sanitize_file_name_unicode(name, substitute='_'):
     '''
     if isbytestring(name):
         return sanitize_file_name(name, substitute=substitute, as_unicode=True)
+    _filename_sanitize_unicode = frozenset([u'\\', u'|', u'?', u'*', u'<',
+        u'"', u':', u'>', u'+', u'/'] + list(map(unichr, xrange(32))))
     chars = [substitute if c in _filename_sanitize_unicode else c for c in
             name]
     one = u''.join(chars)
@@ -208,9 +191,6 @@ def prints(*args, **kwargs):
             file.write(bytes(sep))
     file.write(bytes(end))
 
-class CommandLineError(Exception):
-    pass
-
 def filename_to_utf8(name):
     '''Return C{name} encoded in utf8. Unhandled characters are replaced. '''
     if isinstance(name, unicode):
@@ -245,11 +225,11 @@ class CurrentDir(object):
 
 
 relpath = os.path.relpath
-_spat = re.compile(r'^the\s+|^a\s+|^an\s+', re.IGNORECASE)
 def english_sort(x, y):
     '''
     Comapare two english phrases ignoring starting prepositions.
     '''
+    _spat = re.compile(r'^the\s+|^a\s+|^an\s+', re.IGNORECASE)
     return cmp(_spat.sub('', x), _spat.sub('', y))
 
 def walk(dir):

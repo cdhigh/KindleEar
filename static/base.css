@@ -216,7 +216,7 @@ legend {
     display: inline-block;
     padding: 5px 5px;
     margin: 2px;
-    font-size: 11px;
+    font-size: 0.8em;
     text-align: center;
     text-decoration: none;
     color: #555;
@@ -263,4 +263,7 @@ legend {
     float: right;
     text-align: right;
     /*padding-top: 3px;*/
+}
+img{
+    border: 0px;
 }

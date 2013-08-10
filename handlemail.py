@@ -44,8 +44,8 @@ class HandleMail(InboundMailHandler):
         <title>%s</title></head><body>%s</body></html>"""
         html = html % (subject, allBodies)
         html = html.encode("utf-8")
-        BaseHandler.SendToKindle(admin.kindle_email,subject[:15],'html',
-            html,filewithtime=False)
+        BaseHandler.SendToKindle('admin', admin.kindle_email,subject[:15],'html',
+            html, admin.timezone, False)
         self.response.out.write('Done')
 
 appmail = webapp2.WSGIApplication([HandleMail.mapping()], debug=True)

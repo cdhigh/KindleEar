@@ -263,6 +263,9 @@ msgstr "删除此账户"
 msgid "Kindle E-mail is requied!"
 msgstr "Kindle E-mail必须填写！"
 
+msgid "Title is requied!"
+msgstr "书籍标题不能为空！"
+
 msgid "Settings Saved!"
 msgstr "恭喜，保存成功！"
 
@@ -275,19 +278,19 @@ msgstr "此项不能为空"
 msgid "Enable deliver"
 msgstr "使能自动定时投递"
 
-msgid "Timezone"
+msgid "Time zone"
 msgstr "所在时区"
 
 msgid "Deliver time"
 msgstr "投递时间"
 
-msgid "Book format"
+msgid "Book type"
 msgstr "投递格式"
 
 msgid "Deliver now"
 msgstr "现在投递"
 
-msgid "Note: deliver will be executed after some minutes."
+msgid "Note: task deliver will be executed after some minutes."
 msgstr "注意：投递需一段时间，更新内容越多所需时间越长"
 
 msgid "Custom Rss Setting"
@@ -343,3 +346,54 @@ msgstr "页面将"
 
 msgid "to 'Your Kindle's approved email list'."
 msgstr "加入 'Your Kindle's approved email list'。"
+
+msgid "Title format"
+msgstr "标题样式"
+
+msgid "Title Only"
+msgstr "仅标题"
+
+msgid "Title YYYY-MM-DD"
+msgstr "标题 年-月-日"
+
+msgid "Title MM-DD"
+msgstr "标题 月-日"
+
+msgid "Title MM/DD"
+msgstr "标题 月/日"
+
+msgid "Title DD/MM"
+msgstr "标题 日/月"
+
+msgid "Title MMM DD"
+msgstr "标题 英文月 日"
+
+msgid "Title Day, MMM DD"
+msgstr "标题 星期, 英文月 日"
+
+msgid "Oldest article"
+msgstr "最老文章"
+
+msgid "No limit"
+msgstr "不限制"
+
+msgid "1 Day"
+msgstr "一天"
+
+msgid "2 Days"
+msgstr "两天"
+
+msgid "3 Days"
+msgstr "三天"
+
+msgid "4 Days"
+msgstr "四天"
+
+msgid "5 Days"
+msgstr "五天"
+
+msgid "6 Days"
+msgstr "六天"
+
+msgid "7 Days"
+msgstr "一星期"

@@ -43,10 +43,10 @@ class Plugin(object): # {{{
     version        = (1, 0, 0)
 
     #: A short string describing what this plugin does
-    description    = _('Does absolutely nothing')
+    description    = 'Does absolutely nothing'
 
     #: The author of this plugin
-    author         = _('Unknown')
+    author         = 'Unknown'
 
     #: When more than one plugin exists for a filetype,
     #: the plugins are run in order of decreasing priority
@@ -64,7 +64,7 @@ class Plugin(object): # {{{
 
     #: The type of this plugin. Used for categorizing plugins in the
     #: GUI
-    type = _('Base')
+    type = 'Base'
 
     def __init__(self, plugin_path):
         self.plugin_path        = plugin_path
@@ -196,7 +196,7 @@ class FileTypePlugin(Plugin): # {{{
     #: on the final file produced by the conversion output plugin.
     on_postprocess = False
 
-    type = _('File type')
+    type = 'File type'
 
     def run(self, path_to_ebook):
         '''

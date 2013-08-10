@@ -1,18 +1,16 @@
 #!usr/bin/Python
 # -*- coding:utf-8 -*-
 #将News feed生成的HTML文件转换成内存中的OEB格式
-import os, sys,__builtin__, uuid, locale, codecs, logging, datetime
-from StringIO import StringIO
+import os, sys, uuid
 
-sys.extensions_location = r"."
-sys.resources_location = r"."
+#sys.extensions_location = r"."
+#sys.resources_location = r"."
 
 #这两个是必须先引入的，会有一些全局初始化
 import calibre.startup
 import calibre.utils.resources
 
 from calibre.customize.profiles import KindleInput, KindleOutput
-from calibre.ebooks.oeb.base import TOC
 from calibre.ebooks.conversion.mobioutput import MOBIOutput
 from calibre.ebooks.conversion.epuboutput import EPUBOutput
 from calibre.utils.bytestringio import byteStringIO
@@ -65,8 +63,7 @@ def CreateOeb(log, path_or_stream, opts, encoding='utf-8'):
     html_preprocessor = HTMLPreProcessor(log, opts)
     if not encoding:
         encoding = None
-    oeb = OEBBook(log, html_preprocessor, pretty_print=opts.pretty_print, input_encoding=encoding)
-    return oeb
+    return OEBBook(log, html_preprocessor, pretty_print=opts.pretty_print, input_encoding=encoding)
 
 def getOpts():
     opts = OptionValues()
@@ -113,6 +110,7 @@ def setMetaData(oeb, title='Feeds', lang='zh-cn', date=None, creator='Arroz'):
     oeb.uid = oeb.metadata.identifier[0]
     oeb.metadata.add("publication_type", "periodical:magazine:KindleEar")
     if not date:
+        import datetime
         date = datetime.datetime.strftime(datetime.datetime.now(),"%Y-%m-%d")
     oeb.metadata.add("date", date)
 

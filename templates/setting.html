@@ -7,28 +7,18 @@
 </div>
 {% endif %}
 <form id="set_frm" action="" method="post">
-    {% if success %}
-    {% if user and not user.kindle_email %}
-    <strong class="error">{{_("Kindle E-mail is requied!")}}</strong>
-    {% else %}
-    <strong class="success">{{_("Settings Saved!")}}</strong>
-    {% endif %}
+    {% if tips %}
+    <p style="text-align:center;"><strong class="error"> {{tips}}</strong></p>
     {% endif %}
     
     <fieldset id="kindle_fieldset">
         <legend>{{_("Base Setting")}}</legend>
-        <p>
-            <label>Kindle E-mail (name@free.kindle.com or @iduokan.com)<em class="required">*</em></label><br />
-            <input type="text" name="kindle_email" style="width:240px" value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" />
-            {% if success and not user.kindle_email %}<em style="color:red;font-size:80%">{{_("The item is empty")}}</em>{% endif %}
-        </p>
-        <p>
-            <input type="checkbox" name="enable_send" {% if user and user.enable_send %}checked="1"{% endif %} />
-            <label>{{_("Enable deliver")}}</label>
-        </p>
-        <p>
-            <label>{{_("Timezone")}}<em class="required">*</em></label>
-            <select class="bool" name="timezone">
+        <table border="0">
+            <tr><td><label><em class="required">*</em>Kindle E-mail</label> : </td>
+            <td><input type="text" name="kindleemail" style="width:280px" value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" />
+            </td></tr>
+            <tr><td style="text-align:right;"><label>{{_("Time zone")}} : </label></td>
+            <td><select class="bool" name="timezone">
                 {% for i in range(-12, 0) %}
                 <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT%02.0f:00" % i }}</option>
                 {% endfor %}
@@ -36,39 +26,45 @@
                 {% for i in range(1, 14) %}
                 <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT+%2.0f:00" % i }}</option>
                 {% endfor %}
-            </select>
-        </p>
-        <p>
-            <label>{{_("Deliver time")}}<em class="required">*</em></label>
-            <select class="bool" name="send_time">
+            </select></td></tr>
+            <tr><td style="text-align:right;"><label>{{_("Deliver time")}} : </label></td>
+            <td><select class="bool" name="sendtime">
                 {% for i in range(0, 24) %}
                 <option value="{{ i }}" {% if user.send_time|int == i %}selected="selected"{% endif %}>{{ "%02.0f:00" % i }}</option>
                 {% endfor %}
-            </select>
-        </p>
-        <p>
-            <label>{{_("Book format")}}<em class="required">*</em></label>
-            <select class="bool" name="book_type">
+            </select></td></tr>
+            <tr><td style="text-align:right;"><label>{{_("Book type")}}</label> : </td>
+            <td><select class="bool" name="booktype">
                 <option value="mobi" {% if user.book_type != 'epub' %}selected="selected"{% endif %}>mobi</option>
                 <option value="epub" {% if user.book_type == 'epub' %}selected="selected"{% endif %}>epub</option>
-            </select>
-        </p>
-        
+            </select></td></tr>
+            <tr><td style="text-align:right;"><label>{{_("Title format")}}</label> : </td>
+            <td><select class="bool" name="titlefmt">
+                <option value="" {% if not user.titlefmt %}selected="selected"{% endif %}>{{_("Title Only")}}</option>
+                <option value="%Y-%m-%d" {% if user.titlefmt=='%Y-%m-%d' %}selected="selected"{% endif %}>{{_("Title YYYY-MM-DD")}}</option>
+                <option value="%m-%d" {% if user.titlefmt=='%m-%d' %}selected="selected"{% endif %}>{{_("Title MM-DD")}}</option>
+                <option value="%m/%d" {% if user.titlefmt=='%m/%d' %}selected="selected"{% endif %}>{{_("Title MM/DD")}}</option>
+                <option value="%d/%m" {% if user.titlefmt=='%d/%m' %}selected="selected"{% endif %}>{{_("Title DD/MM")}}</option>
+                <option value="%b %d" {% if user.titlefmt=='%b %d' %}selected="selected"{% endif %}>{{_("Title MMM DD")}}</option>
+                <option value="%a, %b %d" {% if user.titlefmt=='%a, %b %d' %}selected="selected"{% endif %}>{{_("Title Day, MMM DD")}}</option>
+            </select></td></tr>
+        </table>
+        <br />
+        <input type="checkbox" name="enablesend" {% if user and user.enable_send %}checked="1"{% endif %} />
+        <label>{{_("Enable deliver")}}</label>
         <p>
             <a id="testlink" href="/deliver?u={{nickname}}">{{_("Deliver now")}}</a>
-            <strong id="testmsg" class="error"></strong> {{_("Note: deliver will be executed after some minutes.")}}
+            <strong id="testmsg" class="error"></strong> {{_("Note: task deliver will be executed after some minutes.")}}
         </p>        
     </fieldset>
     <p></p>
     <fieldset id="adv_fieldset">
         <legend>{{_("Custom Rss Setting")}}</legend>
-        <p>
-            <label>{{_("Title")}}<em class="required">*</em></label>
-            <input type="text" name="rt" style="width:240px" value="{% if user and user.ownfeeds %}{{ user.ownfeeds.title }}{% endif %}" />
-        </p>
-        <p>
-            <label>{{_("Language")}}<em class="required">*</em></label>
-            <select class="bool" name="lng">
+        <table border="0">
+            <tr><td style="text-align:right;"><label><em class="required">*</em>{{_("Title")}} : </label></td>
+        <td><input type="text" name="rt" style="width:240px" value="{% if user and user.ownfeeds %}{{ user.ownfeeds.title }}{% endif %}" /></td></tr>
+            <tr><td style="text-align:right;"><label>{{_("Language")}} : </label></td>
+            <td><select class="bool" name="lng">
                 <option value="zh-cn" {% if not user.ownfeeds.language or user.ownfeeds.language=="zh-cn" %}selected="selected"{% endif %}>{{_("Chinese")}}</option>
                 <option value="en-us" {% if user.ownfeeds.language=="en-us" %}selected="selected"{% endif %}>{{_("English")}}</option>
                 <option value="fr-fr" {% if user.ownfeeds.language=="fr-fr" %}selected="selected"{% endif %}>{{_("French")}}</option>
@@ -78,8 +74,19 @@
                 <option value="it-it" {% if user.ownfeeds.language=="it-it" %}selected="selected"{% endif %}>{{_("Italian")}}</option>
                 <option value="ja-jp" {% if user.ownfeeds.language=="ja-jp" %}selected="selected"{% endif %}>{{_("Japanese")}}</option>
                 <option value="ru-ru" {% if user.ownfeeds.language=="ru-ru" %}selected="selected"{% endif %}>{{_("Russian")}}</option>
-            </select>
-        </p>
+            </select></td></tr>
+            <tr><td style="text-align:right;"><label>{{_("Oldest article")}}</label> : </td>
+            <td><select class="bool" name="oldest">
+                <option value="0" {% if not user.ownfeeds.oldest_article %}selected="selected"{% endif %}>{{_("No limit")}}</option>
+                <option value="1" {% if user.ownfeeds.oldest_article==1 %}selected="selected"{% endif %}>{{_("1 Day")}}</option>
+                <option value="2" {% if user.ownfeeds.oldest_article==2 %}selected="selected"{% endif %}>{{_("2 Days")}}</option>
+                <option value="3" {% if user.ownfeeds.oldest_article==3 %}selected="selected"{% endif %}>{{_("3 Days")}}</option>
+                <option value="4" {% if user.ownfeeds.oldest_article==4 %}selected="selected"{% endif %}>{{_("4 Days")}}</option>
+                <option value="5" {% if user.ownfeeds.oldest_article==5 %}selected="selected"{% endif %}>{{_("5 Days")}}</option>
+                <option value="6" {% if user.ownfeeds.oldest_article==6 %}selected="selected"{% endif %}>{{_("6 Days")}}</option>
+                <option value="7" {% if user.ownfeeds.oldest_article>=7 %}selected="selected"{% endif %}>{{_("7 Days")}}</option>
+            </select></td></tr>
+        </table>
         <p>
             <input type="checkbox" name="keepimage" {% if user and user.ownfeeds.keep_image %}checked="1"{% endif %} />
             <label>{{_("Keep images")}}</label>
@@ -91,7 +98,7 @@
         </p>
     </fieldset>
     <p class="save_btn">
-        <input type="submit" class="btn" value="{{_("Save settings")}}" />
+        <input type="submit" class="btn" value="  {{_("Save settings")}}  " />
     </p>
 </form>
 <p>

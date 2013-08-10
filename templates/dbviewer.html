@@ -13,7 +13,7 @@
 {% endblock %}
 {% block content %}
 {% if books and books.count()>0 %}
-<p style="text-align:center;color:red;font-weight:bold;">BOOKS</p>
+<p style="text-align:center;color:red;font-weight:bold;">Books</p>
 <table border="1" cellspacing="0" cellpadding="0" align="center" width="100%">
     <thead>
     <tr>
@@ -39,7 +39,7 @@
 {% endif %}
 {% if users and users.count()>0 %}
 <hr />
-<p style="text-align:center;color:red;font-weight:bold;">USERS</p>
+<p style="text-align:center;color:red;font-weight:bold;">Users</p>
 <table border="1" cellspacing="0" cellpadding="0" align="center" width="100%">
     <thead>
     <tr>
@@ -49,6 +49,7 @@
         <th class="center">Enable</th>
         <th class="center">Book</th>
         <th class="center">Timezone</th>
+        <th class="center">Titlefmt</th>
         <th class="center">Expires</th>
     </tr>
     </thead>
@@ -61,6 +62,7 @@
         <td class="center">{{item.enable_send}}</td>
         <td class="center">{{item.book_type}}</td>
         <td class="center">{{item.timezone}}</td>
+        <td class="center">{{item.titlefmt}}</td>
         <td class="center">{%if item.expires%}{{item.expires.strftime("%Y-%m-%d")}}
             {%else%}-{%endif%}</td>
     </tr>
@@ -70,7 +72,7 @@
 {% endif %}
 {% if feeds and feeds.count()>0 %}
 <hr />
-<p style="text-align:center;color:red;font-weight:bold;">FEEDS</p>
+<p style="text-align:center;color:red;font-weight:bold;">Feeds</p>
 <table border="1" cellspacing="0" cellpadding="0" align="center" width="100%">
     <thead>
     <tr>
@@ -90,6 +92,30 @@
         <td class="center">{{item.url[:20]}}..</td>
         <td class="center">{%if item.isfulltext%}<span style="color:red;">1</span>
             {%else%}0{%endif%}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% if urlencs and urlencs.count()>0 %}
+<hr />
+<p style="text-align:center;color:red;font-weight:bold;">UrlEncoding</p>
+<table border="1" cellspacing="0" cellpadding="0" align="center" width="100%">
+    <thead>
+    <tr>
+        <th class="center">ID</th>
+        <th class="center">Host</th>
+        <th class="center">FeedEncoding</th>
+        <th class="center">PageEncoding</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in urlencs %}
+    <tr class={{loop.cycle("odd","even")}}>
+        <td class="center">{{item.key().id()}}</td>
+        <td class="center">{{item.netloc}}</td>
+        <td class="center">{{item.feedenc}}</td>
+        <td class="center">{{item.pageenc}}</td>
     </tr>
     {% endfor %}
     </tbody>

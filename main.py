@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.6"
+__Version__ = "1.6.1"
 __Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import gettext
 
 # for debug
@@ -29,14 +29,14 @@ from config import *
 from lib.makeoeb import *
 from lib.memcachestore import MemcacheStore
 from books import BookClasses, BookClass
-from books.base import BaseFeedBook
+from books.base import BaseFeedBook, UrlEncoding
 
 #reload(sys)
 #sys.setdefaultencoding('utf-8')
 
 log.setLevel(logging.INFO if IsRunInLocal else logging.WARN)
 
-def local_time(fmt = "%Y-%m-%d %H:%M", tz=TIMEZONE):
+def local_time(fmt="%Y-%m-%d %H:%M", tz=TIMEZONE):
     return (datetime.datetime.utcnow()+datetime.timedelta(hours=tz)).strftime(fmt)
 
 #--------------db models----------------
@@ -50,6 +50,7 @@ class Book(db.Model):
     mastheadfile = db.StringProperty() # GIF 600*60
     coverfile = db.StringProperty()
     keep_image = db.BooleanProperty()
+    oldest_article = db.IntegerProperty()
     
     #这两个属性只有自定义RSS才有意义
     @property
@@ -76,6 +77,7 @@ class KeUser(db.Model): # kindleEar User
     book_type = db.StringProperty()
     expires = db.DateTimeProperty()
     ownfeeds = db.ReferenceProperty(Book) # 每个用户都有自己的自定义RSS
+    titlefmt = db.StringProperty() #在元数据标题中添加日期的格式
     
 class Feed(db.Model):
     book = db.ReferenceProperty(Book)
@@ -85,7 +87,6 @@ class Feed(db.Model):
     
 class DeliverLog(db.Model):
     username = db.StringProperty()
-    #email = db.StringProperty()
     to = db.StringProperty()
     size = db.IntegerProperty()
     time = db.StringProperty()
@@ -136,28 +137,19 @@ class BaseHandler:
     
     def set_lang(self):
         set_lang(session.lang if session.lang else self.browerlang())
-        
-    @classmethod
-    def deliverlog(self, emails, book, size, status='ok', tz=TIMEZONE):
-        if not isinstance(emails, list):
-            emails = [emails,]
-        for email in emails:
-            user = KeUser.all().filter("kindle_email = ", email).get()
-            name = user.name if user else ''
-            timezone = user.timezone if user else tz
-            try:
-                dl = DeliverLog(username=name, to=email, size=size,
-                   time=local_time(tz=timezone), datetime=datetime.datetime.utcnow(),
-                   book=book, status=status)
-                dl.put()
-            except Exception as e:
-                self.log.warn('DeliverLog failed to save:%s',str(e))
     
-    @classmethod        
-    def SendToKindle(self, emails, title, booktype, attachment, tz=TIMEZONE, filewithtime=True):
-        if not isinstance(emails, list):
-            emails = [emails,]
-            
+    @classmethod
+    def deliverlog(self, name, to, book, size, status='ok', tz=TIMEZONE):
+        try:
+            dl = DeliverLog(username=name, to=to, size=size,
+               time=local_time(tz=tz), datetime=datetime.datetime.utcnow(),
+               book=book, status=status)
+            dl.put()
+        except Exception as e:
+            default_log.warn('DeliverLog failed to save:%s',str(e))
+    
+    @classmethod
+    def SendToKindle(self, name, to, title, booktype, attachment, tz=TIMEZONE, filewithtime=True):
         if PINYIN_FILENAME: # 将中文文件名转换为拼音
             from calibre.ebooks.unihandecode.unidecoder import Unidecoder
             decoder = Unidecoder()
@@ -165,24 +157,22 @@ class BaseHandler:
         else:
             basename = title
         
-        for email in emails:
-            user = KeUser.all().filter("kindle_email = ", email).get()
-            tz = user.timezone if user else TIMEZONE
-            if filewithtime:
-                filename = "%s(%s).%s"%(basename,local_time('%Y-%m-%d_%H-%M',tz=tz),booktype)
-            else:
-                filename = "%s.%s"%(basename,booktype)
-            try:
-                mail.send_mail(SrcEmail, email, "KindleEar", "Deliver from KindlerEar",
-                    attachments=[(filename, attachment),])
-            except OverQuotaError as e:
-                self.log.warn('overquota when sendmail to %s:%s', (email, str(e)))
-                self.deliverlog(email, title, len(attachment), tz=tz, status='over quota')
-            except Exception as e:
-                default_log.warn('sendmail to %s failed:%s', (email, str(e)))
-                self.deliverlog(email, title, len(attachment), tz=tz, status='send failed')
-            else:
-                self.deliverlog(email, title, len(attachment), tz=tz)
+        lctime = local_time('%Y-%m-%d_%H-%M',tz)
+        if filewithtime:
+            filename = "%s(%s).%s"%(basename,lctime,booktype)
+        else:
+            filename = "%s.%s"%(basename,booktype)
+        try:
+            mail.send_mail(SrcEmail, to, "KindleEar %s" % lctime, "Deliver from KindlerEar",
+                attachments=[(filename, attachment),])
+        except OverQuotaError as e:
+            self.log.warn('overquota when sendmail to %s:%s' % (to, str(e)))
+            self.deliverlog(name, to, title, len(attachment), tz=tz, status='over quota')
+        except Exception as e:
+            default_log.warn('sendmail to %s failed:%s' % (to, str(e)))
+            self.deliverlog(name, to, title, len(attachment), tz=tz, status='send failed')
+        else:
+            self.deliverlog(name, to, title, len(attachment), tz=tz)
      
 class Home(BaseHandler):
     def GET(self):
@@ -191,34 +181,62 @@ class Home(BaseHandler):
             title="Home",version=__Version__)
 
 class Setting(BaseHandler):
-    def GET(self, success=False):
+    def GET(self, tips=None):
         user = self.getcurrentuser()
         self.set_lang()
         return jjenv.get_template('setting.html').render(nickname=session.username,
-            title="Setting",current='setting',user=user,mail_sender=SrcEmail,success=success)
+            title="Setting",current='setting',user=user,mail_sender=SrcEmail,tips=tips)
     
     def POST(self):
         user = self.getcurrentuser()
-        user.kindle_email = web.input().get('kindle_email')
-        user.timezone = int(web.input().get('timezone'))
-        user.send_time = int(web.input().get('send_time'))
-        user.enable_send = bool(web.input().get('enable_send'))
-        user.book_type = web.input().get('book_type')
-        user.put()
+        self.set_lang()
+        kemail = web.input().get('kindleemail')
+        mytitle = web.input().get("rt")
+        if not kemail:
+            tips = _("Kindle E-mail is requied!")
+        elif not mytitle:
+            tips = _("Title is requied!")
+        else:
+            user.kindle_email = kemail
+            user.timezone = int(web.input().get('timezone', TIMEZONE))
+            user.send_time = int(web.input().get('sendtime'))
+            user.enable_send = bool(web.input().get('enablesend'))
+            user.book_type = web.input().get('booktype')
+            user.titlefmt = web.input().get('titlefmt')
+            user.put()
+            
+            myfeeds = user.ownfeeds
+            myfeeds.language = web.input().get("lng")
+            myfeeds.title = mytitle
+            myfeeds.keep_image = bool(web.input().get("keepimage"))
+            myfeeds.oldest_article = int(web.input().get('oldest', 7))
+            myfeeds.users = [user.name] if web.input().get("enablerss") else []
+            myfeeds.put()
+            tips = _("Settings Saved!")
         
-        myfeeds = user.ownfeeds
-        myfeeds.language = web.input().get("lng")
-        myfeeds.title = web.input().get("rt")
-        myfeeds.keep_image = bool(web.input().get("keepimage"))
-        myfeeds.users = [user.name] if web.input().get("enablerss") else []
-        myfeeds.put()
-        
-        raise web.seeother('')
+        return self.GET(tips)
 
 class AdvSetting(BaseHandler):
     def GET(self):
         user = self.getcurrentuser()
         self.set_lang()
+        return jjenv.get_template('advsetting.html').render(nickname=session.username,
+            title="Advanced Setting",current='advsetting',user=user,
+            urlfilters=UrlFilter.all(),whitelists=WhiteList.all())
+        
+    def POST(self):
+        user = self.getcurrentuser()
+        url = web.input().get('url')
+        if url:
+            UrlFilter(url=url).put()
+        wlist = web.input().get('wlist')
+        if wlist:
+            WhiteList(mail=wlist).put()
+        raise web.seeother('')
+        
+class AdvDel(BaseHandler):
+    def GET(self):
+        user = self.getcurrentuser()
         delurlid = web.input().get('delurlid')
         delwlist = web.input().get('delwlist')
         if delurlid:
@@ -239,18 +257,6 @@ class AdvSetting(BaseHandler):
                 wlist = WhiteList.get_by_id(delwlist)
                 if wlist:
                     wlist.delete()
-        return jjenv.get_template('advsetting.html').render(nickname=session.username,
-            title="Advanced Setting",current='advsetting',user=user,
-            urlfilters=UrlFilter.all(),whitelists=WhiteList.all())
-        
-    def POST(self):
-        user = self.getcurrentuser()
-        url = web.input().get('url')
-        if url:
-            UrlFilter(url=url).put()
-        wlist = web.input().get('wlist')
-        if wlist:
-            WhiteList(mail=wlist).put()
         raise web.seeother('/advsetting')
         
 class Admin(BaseHandler):
@@ -304,7 +310,8 @@ class Admin(BaseHandler):
                         builtin=False,keep_image=True)
                     myfeeds.put()
                     au = KeUser(name=u,passwd=pwd,kindle_email='',enable_send=False,
-                        send_time=7,timezone=TIMEZONE,book_type="mobi",ownfeeds = myfeeds)
+                        send_time=7,timezone=TIMEZONE,book_type="mobi",ownfeeds = myfeeds,
+                        oldest_article=7)
                     au.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
                     au.put()
                     tips = _("Add a account success!")
@@ -324,14 +331,9 @@ class Login(BaseHandler):
             myfeeds = Book(title=MY_FEEDS_TITLE,description=MY_FEEDS_DESC,
                     builtin=False,keep_image=True)
             myfeeds.put()
-            au = KeUser(name='admin',passwd=hashlib.md5('admin').hexdigest())
-            au.kindle_email = ''
-            au.enable_send = False
-            au.send_time = 8
-            au.timezone = TIMEZONE
-            au.book_type = "mobi"
-            au.expires = None
-            au.ownfeeds = myfeeds
+            au = KeUser(name='admin',passwd=hashlib.md5('admin').hexdigest(),
+                kindle_email='',enable_send=False,send_time=8,timezone=TIMEZONE,
+                book_type="mobi",expires=None,ownfeeds=myfeeds,oldest_article=7)
             au.put()
             tips = _("Please use admin/admin to login at first time.")
         else:
@@ -372,9 +374,9 @@ class Login(BaseHandler):
             raise web.seeother(r'/')
         else:
             tips = _("The username no exist or password is wrong!")
-            session.login = 0
-            session.username = ''
-            session.kill()
+            #session.login = 0
+            #session.username = ''
+            #session.kill()
             return jjenv.get_template("login.html").render(nickname='',
                 title='Login',tips=tips,username=name)
             
@@ -382,6 +384,7 @@ class Logout(BaseHandler):
     def GET(self):
         session.login = 0
         session.username = ''
+        session.lang = ''
         session.kill()
         raise web.seeother(r'/')
 
@@ -394,7 +397,7 @@ class AdminMgrPwd(BaseHandler):
         return jjenv.get_template("adminmgrpwd.html").render(nickname=session.username,
             title='Change password',tips=tips,username=name)
         
-    def POST(self):
+    def POST(self, _n=None):
         self.login_required('admin')
         self.set_lang()
         name, p1, p2 = web.input().get('u'),web.input().get('p1'),web.input().get('p2')
@@ -430,7 +433,7 @@ class DelAccount(BaseHandler):
         else:
             raise web.seeother(r'/')
     
-    def POST(self):
+    def POST(self, _n=None):
         self.login_required()
         self.set_lang()
         name = web.input().get('u')
@@ -534,21 +537,15 @@ class DelFeed(BaseHandler):
             feed.delete()
         
         raise web.seeother('/my')
-        
-class Renew(BaseHandler):
-    def GET(self, name):
-        self.login_required()
-        if (name and name != 'admin'
-            and (session.username == 'admin' or name == session.username)):
-            user = KeUser.all().filter("name = ", name).get()
-            if user:
-                user.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
-                user.put()
-            raise web.seeother(r'/setting')
-        else:
-            raise web.seeother(r'/')
-        
+                
 class Deliver(BaseHandler):
+    def queueit(self, usr, bookid):
+        param = {"u":usr.name, "id":bookid, "type":usr.book_type,
+            'to':usr.kindle_email,"tz":usr.timezone}
+        if usr.titlefmt: param["titlefmt"] = usr.titlefmt
+        taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
+             params=param)
+    
     def GET(self):
         username = web.input().get('u')
         books = Book.all()
@@ -560,8 +557,7 @@ class Deliver(BaseHandler):
                     continue
                 user = KeUser.all().filter("name = ", username).get()
                 if user and user.kindle_email:
-                    taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
-                        params={"id":book.key().id(), "type":user.book_type, 'emails':user.kindle_email})
+                    self.queueit(user, book.key().id())
                     sent.append(book.title)
             if len(sent):
                 tips = _("Book(s) (%s) put to queue!") % u', '.join(sent)
@@ -575,7 +571,7 @@ class Deliver(BaseHandler):
             if not book.users: # 没有用户订阅此书
                 continue
             
-            mobiemails, epubemails = [], []
+            #确定此书是否需要下载
             for u in book.users:
                 user = KeUser.all().filter("enable_send = ",True).filter("name = ", u).get()
                 if user:
@@ -590,33 +586,25 @@ class Deliver(BaseHandler):
                                 day = local_time('%A', user.timezone)
                                 days = bkcls.deliver_days if isinstance(bkcls.deliver_days,list) else [bkcls.deliver_days]
                                 if day in days:
-                                    lstemails = epubemails if user.book_type=='epub' else mobiemails
-                                    lstemails.append(user.kindle_email)
+                                    self.queueit(user, book.key().id())
                             else:
-                                lstemails = epubemails if user.book_type=='epub' else mobiemails
-                                lstemails.append(user.kindle_email)
+                                self.queueit(user, book.key().id())
                         else:
-                            lstemails = epubemails if user.book_type=='epub' else mobiemails
-                            lstemails.append(user.kindle_email)
+                            self.queueit(user, book.key().id())
                         sent.append(book.title)
-            if mobiemails:
-                emails = ','.join(mobiemails)
-                taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
-                    params={"id":book.key().id(), "type":"mobi", 'emails': emails})
-            if epubemails:
-                emails = ','.join(epubemails)
-                taskqueue.add(url='/worker', queue_name="deliverqueue1",method='GET',
-                    params={"id":book.key().id(), "type":"epub", 'emails': emails})
         tips = u', '.join(sent)
         return jjenv.get_template("autoback.html").render(nickname=session.username,
                 title='Delivering',tips=_("Book(s) (%s) put to queue!") % tips)
         
 class Worker(BaseHandler):
     def GET(self):
+        username = web.input().get("u")
         bookid = web.input().get("id")
-        emails = web.input().get("emails")
+        to = web.input().get("to")
         booktype = web.input().get("type", "mobi")
-        if not bookid or not emails:
+        titlefmt = web.input().get("titlefmt")
+        tz = int(web.input().get("tz", TIMEZONE))
+        if not bookid or not to:
             return "No book to send!<br />"
         try:
             bookid = int(bookid)
@@ -640,12 +628,11 @@ class Worker(BaseHandler):
             book.description = bk.description
             book.language = bk.language
             book.keep_image = bk.keep_image
+            book.oldest_article = bk.oldest_article
             book.fulltext_by_readability = True
             feeds = bk.feeds
             book.feeds = [(feed.title, feed.url, feed.isfulltext) for feed in feeds]
             book.url_filters = [flt.url for flt in UrlFilter.all()]
-        
-        emails = emails.split(',')
         
         opts = oeb = None
         
@@ -653,7 +640,11 @@ class Worker(BaseHandler):
         global log
         opts = getOpts()
         oeb = CreateOeb(log, None, opts)
-        setMetaData(oeb, book.title, book.language, local_time(), SrcEmail)
+        if titlefmt:
+            title = "%s %s" % (book.title, local_time(titlefmt, tz))
+        else:
+            title = book.title
+        setMetaData(oeb, title, book.language, local_time(tz=tz), SrcEmail)
         oeb.container = ServerContainer(log)
         
         #guide
@@ -698,12 +689,12 @@ class Worker(BaseHandler):
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()
             o.convert(oeb, oIO, opts, log)
-            self.SendToKindle(emails, book.title, booktype, str(oIO.getvalue()))
-            rs = "%s(%s).%s Sent!"%(book.title,local_time(),booktype)
+            self.SendToKindle(username, to, book.title, booktype, str(oIO.getvalue()), tz)
+            rs = "%s(%s).%s Sent!"%(book.title, local_time(tz=tz), booktype)
             log.info(rs)
             return rs
         else:
-            self.deliverlog(emails, book.title, 0, status='nonews')
+            self.deliverlog(username, to, book.title, 0, status='nonews')
             rs = "No new feeds."
             log.info(rs)
             return rs
@@ -743,7 +734,7 @@ class RemoveLogs(BaseHandler):
         db.delete(logs)
         
         return "%s lines log removed.<br />" % c
-
+    
 class SetLang(BaseHandler):
     def GET(self, lang):
         if lang not in ('zh-cn', 'en'):
@@ -761,9 +752,11 @@ class Test(BaseHandler):
 
 class DbViewer(BaseHandler):
     def GET(self):
-        self.login_required()
+        self.login_required('admin')
+        self.set_lang()
         return jjenv.get_template("dbviewer.html").render(nickname=session.username,
-            title='DbViewer',books=Book.all(),users=KeUser.all(),feeds=Feed.all().order('book'))
+            title='DbViewer',books=Book.all(),users=KeUser.all(),
+            feeds=Feed.all().order('book'),urlencs=UrlEncoding.all())
         
 def fix_filesizeformat(value, binary=False):
     " bugfix for do_filesizeformat of jinja2 "
@@ -796,12 +789,12 @@ urls = (
   "/setting", "Setting",
   '/advsetting', 'AdvSetting',
   "/admin","Admin",
-  "/renew/(.*)", "Renew",
   "/deliver", "Deliver",
   "/worker", "Worker",
   "/logs", "Mylogs",
   "/removelogs", "RemoveLogs",
   "/setlang/(.*)", "SetLang",
+  "/advdel", "AdvDel",
   "/test", "Test",
   "/dbviewer","DbViewer",
 )

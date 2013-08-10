@@ -36,7 +36,7 @@
     {% for urlflt in urlfilters %}
     <tr class="{{loop.cycle('trodd', 'treven')}}">
         <td style="width:80%">{{urlflt.url}}</td>
-        <td style="text-align:right;"><a href="/advsetting?delurlid={{urlflt.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
+        <td style="text-align:right;"><a href="/advdel?delurlid={{urlflt.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
     </tr>
     {% endfor %}
     </table>
@@ -63,7 +63,7 @@
     {% for lst in whitelists %}
     <tr class="{{loop.cycle('trodd', 'treven')}}">
         <td style="width:80%">{{lst.mail}}</td>
-        <td style="text-align:right;"><a href="/advsetting?delwlist={{lst.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
+        <td style="text-align:right;"><a href="/advdel?delwlist={{lst.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
     </tr>
     {% endfor %}
     </table>

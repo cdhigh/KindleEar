@@ -6,10 +6,12 @@
 """
 
 import os, re, urllib, urlparse, random, imghdr, logging
+from datetime import datetime
 from urllib2 import *
 import chardet
 from google.appengine.api import urlfetch
 from google.appengine.runtime import apiproxy_errors
+from google.appengine.ext import db
 
 from bs4 import BeautifulSoup, Comment
 from lib import feedparser
@@ -22,10 +24,20 @@ from config import *
 
 MAX_ASYNC_REQUESTS = 5 #最大支持10，数值越大越容易出现流量越限异常
 
+class UrlEncoding(db.Model):
+    #缓存网站的编码记录，探测一次编码成功后，以后再也不需要重新探测
+    netloc = db.StringProperty()
+    feedenc = db.StringProperty()
+    pageenc = db.StringProperty()
+    
 class AutoDecoder:
-    def __init__(self):
+    # 封装数据库编码缓存和同一网站文章的编码缓存
+    # 因为chardet是非常慢的，所以需要那么复杂的缓存和其他特殊处理
+    def __init__(self, isfeed=True):
         self.encoding = None
-    def decode(self, content):
+        self.isfeed = isfeed #True:Feed,False:page
+        
+    def decode(self, content, url):
         result = content
         if not ALWAYS_CHAR_DETECT and self.encoding: # 先使用上次的编码打开文件尝试
             try:
@@ -39,12 +51,52 @@ class AutoDecoder:
                     result = content
                 else: # 保存下次使用，以节省时间
                     self.encoding = encoding
+                    #同时保存到数据库
+                    netloc = urlparse.urlsplit(url)[1]
+                    urlenc = UrlEncoding.all().filter('netloc = ', netloc).get()
+                    if urlenc:
+                        enc = urlenc.feedenc if self.isfeed else urlenc.pageenc
+                        if enc != encoding:
+                            if self.isfeed:
+                                urlenc.feedenc = encoding
+                            else:
+                                urlenc.pageenc = encoding
+                            urlenc.put()
+                    elif self.isfeed:
+                        UrlEncoding(netloc=netloc,feedenc=encoding).put()
+                    else:
+                        UrlEncoding(netloc=netloc,pageenc=encoding).put()
         else:  # 暂时没有之前的编码信息
-            self.encoding = chardet.detect(content)['encoding']
+            netloc = urlparse.urlsplit(url)[1]
+            urlenc = UrlEncoding.all().filter('netloc = ', netloc).get()
+            if urlenc: #先看数据库有没有
+                enc = urlenc.feedenc if self.isfeed else urlenc.pageenc
+                if enc:
+                    try:
+                        result = content.decode(enc)
+                    except UnicodeDecodeError: # 出错，重新探测编码
+                        self.encoding = chardet.detect(content)['encoding']
+                    else:
+                        self.encoding = enc
+                        return result
+                else: #数据库暂时没有数据
+                    self.encoding = chardet.detect(content)['encoding']
+            else:
+                self.encoding = chardet.detect(content)['encoding']
+            
+            #使用探测到的编码解压
             try:
                 result = content.decode(self.encoding)
             except UnicodeDecodeError: # 出错，则不转换，直接返回
                 result = content
+            else:
+                #保存到数据库
+                newurlenc = urlenc if urlenc else UrlEncoding(netloc=netloc)
+                if self.isfeed:
+                    newurlenc.feedenc = self.encoding
+                else:
+                    newurlenc.pageenc = self.encoding
+                newurlenc.put()
         return result
         
 class BaseFeedBook:
@@ -52,9 +104,8 @@ class BaseFeedBook:
     title                 = ''
     __author__            = ''
     description           = ''
-    publisher             = ''
-    category              = ''
     max_articles_per_feed = 30
+    oldest_article        = 7 #下载多长时间之内的文章，单位为天，0则不限制
     host                  = None # 有些网页的图像下载需要请求头里面包含Referer,使用此参数配置
     network_timeout       = None  # None则使用默认
     fetch_img_via_ssl     = False # 当网页为https时，其图片是否也转换成https
@@ -220,6 +271,8 @@ class BaseFeedBook:
     def ParseFeedUrls(self):
         """ return list like [(section,title,url,desc),..] """
         urls = []
+        tnow = datetime.utcnow()
+        urladded = set()
         for feed in self.feeds:
             section, url = feed[0], feed[1]
             isfulltext = feed[2] if len(feed) > 2 else False
@@ -230,23 +283,29 @@ class BaseFeedBook:
                 if self.feed_encoding:
                     feed = feedparser.parse(result.content.decode(self.feed_encoding))
                 else:
-                    feed = feedparser.parse(AutoDecoder().decode(result.content))
+                    feed = feedparser.parse(AutoDecoder(True).decode(result.content,url))
                 
-                urladded = set() # 防止部分RSS产生重复文章
                 for e in feed['entries'][:self.max_articles_per_feed]:
+                    if self.oldest_article > 0 and hasattr(e, 'published_parsed'):
+                            delta = tnow - datetime(*(e.published_parsed[0:6]))
+                            if delta.days*86400+delta.seconds > 86400*self.oldest_article:
+                                self.log.debug("article '%s' is too old"%e.title)
+                                continue
                     #支持HTTPS
                     urlfeed = e.link.replace('http://','https://') if url.startswith('https://') else e.link
-                    if urlfeed not in urladded:
-                        desc = None
-                        if isfulltext:
-                            if hasattr(e, 'content') and e.content[0].value:
-                                desc = e.content[0].value
-                            elif hasattr(e, 'summary'):
-                                desc = e.summary
-                            else:
-                                self.log.warn('feed item invalid,link to webpage for article.(%s)'%e.title)
-                        urls.append((section, e.title, urlfeed, desc))
-                        urladded.add(urlfeed)
+                    if urlfeed in urladded:
+                        continue
+                        
+                    desc = None
+                    if isfulltext:
+                        if hasattr(e, 'content') and e.content[0].value:
+                            desc = e.content[0].value
+                        elif hasattr(e, 'summary'):
+                            desc = e.summary
+                        else:
+                            self.log.warn('feed item invalid,link to webpage for article.(%s)'%e.title)
+                    urls.append((section, e.title, urlfeed, desc))
+                    urladded.add(urlfeed)
             else:
                 self.log.warn('fetch rss failed(%d):%s'%(result.status_code,url))
         return urls
@@ -260,7 +319,7 @@ class BaseFeedBook:
         urls = self.ParseFeedUrls()
         readability = self.readability if self.fulltext_by_readability else self.readability_by_soup
         prevsection = ''
-        decoder = AutoDecoder()
+        decoder = AutoDecoder(False)
         if USE_ASYNC_URLFETCH:
             asyncurls = [(i,url) for i,(_a,_b,url,desc) in enumerate(urls) if not desc]
             rpcs, i = [], 0
@@ -325,7 +384,7 @@ class BaseFeedBook:
                 if self.page_encoding:
                     article = content.decode(self.page_encoding)
                 else:
-                    article = decoder.decode(content)
+                    article = decoder.decode(content,url)
                 
                 #如果是图片，title则是mime
                 for title, imgurl, imgfn, content, brief in readability(article,url,opts):
@@ -372,7 +431,7 @@ class BaseFeedBook:
         if self.page_encoding:
             return content.decode(self.page_encoding)
         else:
-            return decoder.decode(content)
+            return decoder.decode(content,url)
         
     def readability(self, article, url, opts=None):
         #使用readability-lxml处理全文信息
@@ -587,7 +646,7 @@ class WebpageBook(BaseFeedBook):
         对于图片，mime,url,filename,content
         """
         cnt4debug = 0
-        decoder = AutoDecoder()
+        decoder = AutoDecoder(False)
         timeout = self.timeout
         for section, url in self.feeds:
             cnt4debug += 1
@@ -604,7 +663,7 @@ class WebpageBook(BaseFeedBook):
             if self.page_encoding:
                 content = content.decode(self.page_encoding)
             else:
-                content = decoder.decode(content)
+                content = decoder.decode(content,url)
             
             content =  self.preprocess(content)
             soup = BeautifulSoup(content, "lxml")
