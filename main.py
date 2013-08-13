@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.6.1"
+__Version__ = "1.6.2"
 __Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
@@ -549,9 +549,9 @@ class Deliver(BaseHandler):
     def GET(self):
         username = web.input().get('u')
         books = Book.all()
-        sent = []
         if username: # 现在投递
             self.set_lang()
+            sent = []
             for book in books:
                 if username not in book.users:
                     continue
@@ -567,6 +567,7 @@ class Deliver(BaseHandler):
                 title='Delivering',tips=tips)
         
         #定时cron调用
+        sentcnt = 0
         for book in books:
             if not book.users: # 没有用户订阅此书
                 continue
@@ -587,14 +588,14 @@ class Deliver(BaseHandler):
                                 days = bkcls.deliver_days if isinstance(bkcls.deliver_days,list) else [bkcls.deliver_days]
                                 if day in days:
                                     self.queueit(user, book.key().id())
+                                    sentcnt += 1
                             else:
                                 self.queueit(user, book.key().id())
+                                sentcnt += 1
                         else:
                             self.queueit(user, book.key().id())
-                        sent.append(book.title)
-        tips = u', '.join(sent)
-        return jjenv.get_template("autoback.html").render(nickname=session.username,
-                title='Delivering',tips=_("Book(s) (%s) put to queue!") % tips)
+                            sentcnt += 1
+        return "Put <strong>%d</strong> books to queue!" % sentcnt
         
 class Worker(BaseHandler):
     def GET(self):
