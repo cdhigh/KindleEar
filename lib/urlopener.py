@@ -99,8 +99,5 @@ class URLOpener:
         return headers
         
     def _makeCookieHeader(self, cookie):
-        cookieHeader = ""
-        for value in cookie.values():
-            cookieHeader += "%s=%s; " % (value.key, value.value)
-        return cookieHeader
+        return '; '.join(["%s=%s" % (v.key, v.value) for v in cookie.values()])
 

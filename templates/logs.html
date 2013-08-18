@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-{% if logs %}
+{% if mylogs %}
 <em class="required">*</em> {{_("Only display last 10 logs")}}<br />
 <table class="logs_list" border="0" cellspacing="0" cellpadding="0">
     <thead><tr>
@@ -11,7 +11,7 @@
         <th class="center">{{_("Status")}}</th>
     </tr></thead>
     <tbody>
-    {% for log in logs %}
+    {% for log in mylogs %}
     <tr>
         <td class="center">{{ log.time }}</td>
         <td class="center">{{ log.book }}</td>
@@ -25,5 +25,33 @@
 </table>
 {% else %}
 <p>{{_("Has no log")}}</p>
+{% endif %}
+{% if logs %}
+<br />
+<em class="required">*</em> {{_("Logs of other users")}}<br />
+<table class="logs_list" border="0" cellspacing="0" cellpadding="0">
+    <thead><tr>
+        <th class="center">{{_("Username")}}</th>
+        <th class="center">{{_("Time")}}</th>
+        <th class="center">{{_("Title")}}</th>
+        <th class="center">{{_("Size")}}</th>
+        <th class="center">{{_("To")}}</th>
+        <th class="center">{{_("Status")}}</th>
+    </tr></thead>
+    <tbody>
+    {% for u in logs %}
+    {% for log in logs[u] %}
+    <tr>
+        <td class="center">{{ u }}</td>
+        <td class="center">{{ log.time }}</td>
+        <td class="center">{{ log.book }}</td>
+        <td class="center">{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>
+        <td class="center">{{ log.to }}</td>
+        <td class="center">{% if log.status %}{{ log.status }}{% else %}ok{% endif %}</td>
+    </tr>
+    {% endfor %}
+    {% endfor %}
+    </tbody>
+</table>
 {% endif %}
 {% endblock %}
