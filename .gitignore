@@ -7,6 +7,8 @@ mh_globo.gif
 cv_correio.jpg
 cv_globo.jpg
 
+.DS_Store
+
 *.py[cod]
 
 # C extensions
