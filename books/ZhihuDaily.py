@@ -19,7 +19,7 @@ def getBook():
 
 class ZhihuDaily(BaseFeedBook):
     title                 = u'知乎日报'
-    description           = u'知乎日报'
+    description           = u'知乎日报的内容是动态更新的，建议在晚 8 点或 23 点进行投递。此外，知乎日报 API 需要转发服务器，参见 https://github.com/ohdarling/ZhihuDailyForwarder'
     network_timeout = 60
     language = 'zh-cn'
     feed_encoding = "utf-8"
