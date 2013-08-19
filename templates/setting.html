@@ -27,6 +27,14 @@
                 <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT+%2.0f:00" % i }}</option>
                 {% endfor %}
             </select></td></tr>
+            <tr><td style="text-align:right;"><label>{{_("Deliver Days")}} : </label></td>
+            <td><label><input type="checkbox" name="Monday" {% if not user.send_days or "Monday" in user.send_days %}checked="1"{% endif %} />{{_("Mon")}} &nbsp;</lable>
+            <label><input type="checkbox" name="Tuesday" {% if not user.send_days or "Tuesday" in user.send_days %}checked="1"{% endif %} />{{_("Tue")}} &nbsp;</lable>
+            <label><input type="checkbox" name="Wednesday" {% if not user.send_days or "Wednesday" in user.send_days %}checked="1"{% endif %} />{{_("Wed")}} &nbsp;</lable>
+            <label><input type="checkbox" name="Thursday" {% if not user.send_days or "Thursday" in user.send_days %}checked="1"{% endif %} />{{_("Thu")}} &nbsp;</lable>
+            <label><input type="checkbox" name="Friday" {% if not user.send_days or "Friday" in user.send_days %}checked="1"{% endif %} />{{_("Fri")}} &nbsp;</lable>
+            <label><input type="checkbox" name="Saturday" {% if not user.send_days or "Saturday" in user.send_days %}checked="1"{% endif %} />{{_("Sat")}} &nbsp;</lable>
+            <label><input type="checkbox" name="Sunday" {% if not user.send_days or "Sunday" in user.send_days %}checked="1"{% endif %} />{{_("Sun")}} &nbsp;</lable></td></tr>
             <tr><td style="text-align:right;"><label>{{_("Deliver time")}} : </label></td>
             <td><select class="bool" name="sendtime">
                 {% for i in range(0, 24) %}
@@ -50,8 +58,8 @@
             </select></td></tr>
         </table>
         <br />
-        <input type="checkbox" name="enablesend" {% if user and user.enable_send %}checked="1"{% endif %} />
-        <label>{{_("Enable deliver")}}</label>
+        <label><input type="checkbox" name="enablesend" {% if user and user.enable_send %}checked="1"{% endif %} />
+        {{_("Enable deliver")}}</label>
         <p>
             <a id="testlink" href="/deliver?u={{nickname}}">{{_("Deliver now")}}</a>
             <strong id="testmsg" class="error"></strong> {{_("Note: task deliver will be executed after some minutes.")}}
@@ -88,12 +96,12 @@
             </select></td></tr>
         </table>
         <p>
-            <input type="checkbox" name="keepimage" {% if user and user.ownfeeds.keep_image %}checked="1"{% endif %} />
-            <label>{{_("Keep images")}}</label>
+            <label><input type="checkbox" name="keepimage" {% if user and user.ownfeeds.keep_image %}checked="1"{% endif %} />
+            {{_("Keep images")}}</label>
         </p>
         <p>
-            <input type="checkbox" name="enablerss" {% if user and nickname in user.ownfeeds.users %}checked="1"{% endif %} />
-            <label>{{_("Enable deliver custom rss")}}</label>
+            <label><input type="checkbox" name="enablerss" {% if user and nickname in user.ownfeeds.users %}checked="1"{% endif %} />
+            {{_("Enable deliver custom rss")}}</label>
             <p style="color:grey;font-size:0.7em;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{_("This switch only effective when 'Enable deliver' is enabled.")}}</P>
         </p>
     </fieldset>

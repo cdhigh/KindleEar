@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.6.2"
+__Version__ = "1.6.3"
 __Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
@@ -72,6 +72,7 @@ class KeUser(db.Model): # kindleEar User
     passwd = db.StringProperty(required=True)
     kindle_email = db.StringProperty()
     enable_send = db.BooleanProperty()
+    send_days = db.StringListProperty()
     send_time = db.IntegerProperty()
     timezone = db.IntegerProperty()
     book_type = db.StringProperty()
@@ -114,6 +115,9 @@ StoreBookToDb()
 
 class BaseHandler:
     " URL请求处理类的基类，实现一些共同的工具函数 "
+    def __init__(self):
+        set_lang(session.lang if session.lang else self.browerlang())
+        
     @classmethod
     def logined(self):
         return True if session.login == 1 else False
@@ -134,9 +138,6 @@ class BaseHandler:
     def browerlang(self):
         lang = web.ctx.env.get('HTTP_ACCEPT_LANGUAGE', "zh-cn")
         return "zh-cn" if lang.startswith("zh") else "en"
-    
-    def set_lang(self):
-        set_lang(session.lang if session.lang else self.browerlang())
     
     @classmethod
     def deliverlog(self, name, to, book, size, status='ok', tz=TIMEZONE):
@@ -166,7 +167,7 @@ class BaseHandler:
             mail.send_mail(SrcEmail, to, "KindleEar %s" % lctime, "Deliver from KindlerEar",
                 attachments=[(filename, attachment),])
         except OverQuotaError as e:
-            self.log.warn('overquota when sendmail to %s:%s' % (to, str(e)))
+            default_log.warn('overquota when sendmail to %s:%s' % (to, str(e)))
             self.deliverlog(name, to, title, len(attachment), tz=tz, status='over quota')
         except Exception as e:
             default_log.warn('sendmail to %s failed:%s' % (to, str(e)))
@@ -176,20 +177,17 @@ class BaseHandler:
      
 class Home(BaseHandler):
     def GET(self):
-        self.set_lang()
         return jjenv.get_template('home.html').render(nickname=session.username,
             title="Home",version=__Version__)
 
 class Setting(BaseHandler):
     def GET(self, tips=None):
         user = self.getcurrentuser()
-        self.set_lang()
         return jjenv.get_template('setting.html').render(nickname=session.username,
             title="Setting",current='setting',user=user,mail_sender=SrcEmail,tips=tips)
     
     def POST(self):
         user = self.getcurrentuser()
-        self.set_lang()
         kemail = web.input().get('kindleemail')
         mytitle = web.input().get("rt")
         if not kemail:
@@ -203,6 +201,8 @@ class Setting(BaseHandler):
             user.enable_send = bool(web.input().get('enablesend'))
             user.book_type = web.input().get('booktype')
             user.titlefmt = web.input().get('titlefmt')
+            alldays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+            user.send_days = [day for day in alldays if web.input().get(day)]
             user.put()
             
             myfeeds = user.ownfeeds
@@ -219,7 +219,6 @@ class Setting(BaseHandler):
 class AdvSetting(BaseHandler):
     def GET(self):
         user = self.getcurrentuser()
-        self.set_lang()
         return jjenv.get_template('advsetting.html').render(nickname=session.username,
             title="Advanced Setting",current='advsetting',user=user,
             urlfilters=UrlFilter.all(),whitelists=WhiteList.all())
@@ -240,19 +239,15 @@ class AdvDel(BaseHandler):
         delurlid = web.input().get('delurlid')
         delwlist = web.input().get('delwlist')
         if delurlid:
-            try:
-                delurlid = int(delurlid)
-            except:
-                pass
+            try: delurlid = int(delurlid)
+            except: pass
             else:
                 flt = UrlFilter.get_by_id(delurlid)
                 if flt:
                     flt.delete()
         if delwlist:
-            try:
-                delwlist = int(delwlist)
-            except:
-                pass
+            try: delwlist = int(delwlist)
+            except: pass
             else:
                 wlist = WhiteList.get_by_id(delwlist)
                 if wlist:
@@ -263,13 +258,11 @@ class Admin(BaseHandler):
     # 账户管理页面
     def GET(self):
         user = self.getcurrentuser()
-        self.set_lang()
         users=KeUser.all() if user.name == 'admin' else None
         return jjenv.get_template('admin.html').render(nickname=session.username,
             title="Admin", current='admin', user=user, users=users)
     
     def POST(self):
-        self.set_lang()
         u,up1,up2 = web.input().get('u'),web.input().get('up1'),web.input().get('up2')
         op,p1,p2 = web.input().get('op'), web.input().get('p1'), web.input().get('p2')
         user = self.getcurrentuser()
@@ -322,7 +315,6 @@ class Admin(BaseHandler):
        
 class Login(BaseHandler):
     def GET(self):
-        self.set_lang()
         # 第一次登陆时如果没有管理员帐号，
         # 则增加一个管理员帐号admin，密码admin，后续可以修改密码
         tips = ''
@@ -345,7 +337,6 @@ class Login(BaseHandler):
             return jjenv.get_template("login.html").render(nickname='',title='Login',tips=tips)
         
     def POST(self):
-        self.set_lang()
         name, passwd = web.input().get('u'), web.input().get('p')
         if name.strip() == '':
             tips = _("Username is empty!")
@@ -392,14 +383,12 @@ class AdminMgrPwd(BaseHandler):
     # 管理员修改其他账户的密码
     def GET(self, name):
         self.login_required('admin')
-        self.set_lang()
         tips = _("Please input new password to confirm!")
         return jjenv.get_template("adminmgrpwd.html").render(nickname=session.username,
             title='Change password',tips=tips,username=name)
         
     def POST(self, _n=None):
         self.login_required('admin')
-        self.set_lang()
         name, p1, p2 = web.input().get('u'),web.input().get('p1'),web.input().get('p2')
         if name:
             u = KeUser.all().filter("name = ", name).get()
@@ -425,7 +414,6 @@ class AdminMgrPwd(BaseHandler):
 class DelAccount(BaseHandler):
     def GET(self, name):
         self.login_required()
-        self.set_lang()
         if session.username == 'admin' or (name and name == session.username):
             tips = _("Please confirm to delete the account!")
             return jjenv.get_template("delaccount.html").render(nickname=session.username,
@@ -435,7 +423,6 @@ class DelAccount(BaseHandler):
     
     def POST(self, _n=None):
         self.login_required()
-        self.set_lang()
         name = web.input().get('u')
         if name and (session.username == 'admin' or session.username == name):
             u = KeUser.all().filter("name = ", name).get()
@@ -455,7 +442,7 @@ class DelAccount(BaseHandler):
                 if session.username == name:
                     raise web.seeother('/logout')
                 else:
-                    tips = _("Delete success!")
+                    raise web.seeother('/admin')
         else:
             tips = _("The username is empty or you dont have right to delete it!")
         return jjenv.get_template("delaccount.html").render(nickname=session.username,
@@ -465,7 +452,6 @@ class MySubscription(BaseHandler):
     # 管理我的订阅和杂志列表
     def GET(self, tips=None):
         user = self.getcurrentuser()
-        self.set_lang()
         myfeeds = user.ownfeeds.feeds if user.ownfeeds else None
         return jjenv.get_template("my.html").render(nickname=session.username,current='my',
                 title='My subscription',books=Book.all().filter("builtin = ",True),
@@ -479,6 +465,8 @@ class MySubscription(BaseHandler):
         if not title or not url:
             return self.GET(_("Title or url is empty!"))
         
+        if not url.startswith('http'):
+            url = 'http://' + url
         assert user.ownfeeds
         Feed(title=title,url=url,book=user.ownfeeds,isfulltext=isfulltext).put()
         memcache.delete('%d.feedscount'%user.ownfeeds.key().id())
@@ -549,8 +537,7 @@ class Deliver(BaseHandler):
     def GET(self):
         username = web.input().get('u')
         books = Book.all()
-        if username: # 现在投递
-            self.set_lang()
+        if username: # 现在投递，不判断时间和星期
             sent = []
             for book in books:
                 if username not in book.users:
@@ -575,26 +562,39 @@ class Deliver(BaseHandler):
             #确定此书是否需要下载
             for u in book.users:
                 user = KeUser.all().filter("enable_send = ",True).filter("name = ", u).get()
-                if user:
-                    h = int(local_time("%H", user.timezone)) + 1
-                    h = h - 24 if h > 24 else h
-                    if user.send_time == h and user.kindle_email:
-                        if book.builtin:
-                            bkcls = BookClass(book.title)
-                            if not bkcls:
-                                continue
-                            if bkcls.deliver_days: #按星期推送
-                                day = local_time('%A', user.timezone)
-                                days = bkcls.deliver_days if isinstance(bkcls.deliver_days,list) else [bkcls.deliver_days]
-                                if day in days:
-                                    self.queueit(user, book.key().id())
-                                    sentcnt += 1
-                            else:
-                                self.queueit(user, book.key().id())
-                                sentcnt += 1
-                        else:
+                if not user or not user.kindle_email:
+                    continue
+                
+                #先判断当天是否需要推送
+                day = local_time('%A', user.timezone)
+                usrdays = user.send_days
+                if usrdays and day not in usrdays: #为空也表示每日推送
+                    continue
+                
+                #时间判断
+                h = int(local_time("%H", user.timezone)) + 1
+                h = h - 24 if h > 24 else h    
+                if user.send_time != h:
+                    continue
+                
+                #到了这里才算需要推送
+                if book.builtin:
+                    bkcls = BookClass(book.title)
+                    if not bkcls:
+                        continue
+                    if bkcls.deliver_days: #按星期推送                            
+                        days = bkcls.deliver_days
+                        if not isinstance(days, list):
+                            days = [days]
+                        if day in days:
                             self.queueit(user, book.key().id())
                             sentcnt += 1
+                    else: #每天推送
+                        self.queueit(user, book.key().id())
+                        sentcnt += 1
+                else:
+                    self.queueit(user, book.key().id())
+                    sentcnt += 1
         return "Put <strong>%d</strong> books to queue!" % sentcnt
         
 class Worker(BaseHandler):
@@ -695,7 +695,7 @@ class Worker(BaseHandler):
             log.info(rs)
             return rs
         else:
-            self.deliverlog(username, to, book.title, 0, status='nonews')
+            self.deliverlog(username, to, book.title, 0, status='nonews',tz=tz)
             rs = "No new feeds."
             log.info(rs)
             return rs
@@ -703,10 +703,15 @@ class Worker(BaseHandler):
 class Mylogs(BaseHandler):
     def GET(self):
         user = self.getcurrentuser()
-        self.set_lang()
-        logs = DeliverLog.all().filter("username = ", 'admin').order('-time').fetch(limit=10)
+        mylogs = DeliverLog.all().filter("username = ", user.name).order('-time').fetch(limit=10)
+        logs = {}
+        if user.name == 'admin':
+            for u in KeUser.all().filter("name != ", 'admin'):
+                ul = DeliverLog.all().filter("username = ", u.name).order('-time').fetch(limit=5)
+                if ul:
+                    logs[u.name] =  ul
         return jjenv.get_template("logs.html").render(nickname=session.username,
-            title='Deliver log', current='logs', logs=logs)
+            title='Deliver log', current='logs', mylogs=mylogs, logs=logs)
     
 class RemoveLogs(BaseHandler):
     def GET(self):
@@ -738,10 +743,10 @@ class RemoveLogs(BaseHandler):
     
 class SetLang(BaseHandler):
     def GET(self, lang):
+        lang = lang.lower()
         if lang not in ('zh-cn', 'en'):
             return "language invalid!"
         session.lang = lang
-        self.set_lang()
         raise web.seeother(r'/')
         
 class Test(BaseHandler):
@@ -754,7 +759,22 @@ class Test(BaseHandler):
 class DbViewer(BaseHandler):
     def GET(self):
         self.login_required('admin')
-        self.set_lang()
+        #可以修改UrlEncoding，如果chardet自动检测的编码错误的话
+        action = web.input().get('action')
+        if action == 'modurlenc':
+            id = int(web.input().get('id', 0))
+            feedenc = web.input().get('feedenc')
+            pageenc = web.input().get('pageenc')
+            urlenc = UrlEncoding.get_by_id(id)
+            if urlenc:
+                if feedenc: urlenc.feedenc = feedenc
+                if pageenc: urlenc.pageenc = pageenc
+                urlenc.put()
+        elif action == 'delurlenc':
+            id = int(web.input().get('id', 0))
+            urlenc = UrlEncoding.get_by_id(id)
+            if urlenc:
+                urlenc.delete()
         return jjenv.get_template("dbviewer.html").render(nickname=session.username,
             title='DbViewer',books=Book.all(),users=KeUser.all(),
             feeds=Feed.all().order('book'),urlencs=UrlEncoding.all())
@@ -794,7 +814,7 @@ urls = (
   "/worker", "Worker",
   "/logs", "Mylogs",
   "/removelogs", "RemoveLogs",
-  "/setlang/(.*)", "SetLang",
+  "/lang/(.*)", "SetLang",
   "/advdel", "AdvDel",
   "/test", "Test",
   "/dbviewer","DbViewer",
@@ -805,7 +825,7 @@ def set_lang(lang):
     tr = gettext.translation('lang', 'i18n', languages=[lang])
     tr.install(True)
     jjenv.install_gettext_translations(tr)
-    
+
 app = web.application(urls, globals())
 store = MemcacheStore(memcache)
 session = web.session.Session(app, store, initializer={'username':'','login':0,"lang":''})

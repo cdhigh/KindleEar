@@ -41,7 +41,8 @@ class Resources(object):
             return mobify_image(data)
         else:
             return rescale_image(data, png2jpg=self.opts.image_png_to_jpg,
-                            graying=self.opts.graying_image)
+                            graying=self.opts.graying_image,
+                            reduceto=self.opts.reduce_image_to)
         
     def add_resources(self, add_fonts):
         oeb = self.oeb

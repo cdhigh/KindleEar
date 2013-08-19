@@ -17,19 +17,27 @@ from bs4 import BeautifulSoup, Comment
 from lib import feedparser
 from lib.readability import readability
 from lib.urlopener import URLOpener
+from lib.asyncurlopener import AsyncURLOpener
 
 from calibre.utils.img import rescale_image, mobify_image
 
 from config import *
-
-MAX_ASYNC_REQUESTS = 5 #最大支持10，数值越大越容易出现流量越限异常
 
 class UrlEncoding(db.Model):
     #缓存网站的编码记录，探测一次编码成功后，以后再也不需要重新探测
     netloc = db.StringProperty()
     feedenc = db.StringProperty()
     pageenc = db.StringProperty()
-    
+
+def HostEncoding(url, isfeed=True):
+    #查询数据库对应此URL的编码信息，注意返回为unicode格式
+    netloc = urlparse.urlsplit(url)[1]
+    urlenc = UrlEncoding.all().filter('netloc = ', netloc).get()
+    if urlenc:
+        return urlenc.feedenc if isfeed else urlenc.pageenc
+    else:
+        return u''
+
 class AutoDecoder:
     # 封装数据库编码缓存和同一网站文章的编码缓存
     # 因为chardet是非常慢的，所以需要那么复杂的缓存和其他特殊处理
@@ -273,21 +281,29 @@ class BaseFeedBook:
         urls = []
         tnow = datetime.utcnow()
         urladded = set()
+        asyncopener = AsyncURLOpener(self.log)
+        
         for feed in self.feeds:
             section, url = feed[0], feed[1]
             isfulltext = feed[2] if len(feed) > 2 else False
             timeout = self.timeout+10 if isfulltext else self.timeout
+            if USE_ASYNC_URLFETCH_IN_FEEDS:
+                asyncopener.fetch(url,timeout,section,isfulltext)
+                continue
             opener = URLOpener(self.host, timeout=timeout)
             result = opener.open(url)
             if result.status_code == 200 and result.content:
                 if self.feed_encoding:
-                    feed = feedparser.parse(result.content.decode(self.feed_encoding))
+                    content = result.content.decode(self.feed_encoding)
                 else:
-                    feed = feedparser.parse(AutoDecoder(True).decode(result.content,url))
+                    content = AutoDecoder(True).decode(result.content,url)    
+                feed = feedparser.parse(content)
                 
                 for e in feed['entries'][:self.max_articles_per_feed]:
-                    if self.oldest_article > 0 and hasattr(e, 'published_parsed'):
-                            delta = tnow - datetime(*(e.published_parsed[0:6]))
+                    if self.oldest_article > 0 and hasattr(e, 'updated_parsed'):
+                        updated = e.updated_parsed
+                        if updated:
+                            delta = tnow - datetime(*(updated[0:6]))
                             if delta.days*86400+delta.seconds > 86400*self.oldest_article:
                                 self.log.debug("article '%s' is too old"%e.title)
                                 continue
@@ -298,38 +314,69 @@ class BaseFeedBook:
                         
                     desc = None
                     if isfulltext:
-                        if hasattr(e, 'content') and e.content[0].value:
-                            desc = e.content[0].value
-                        elif hasattr(e, 'summary'):
-                            desc = e.summary
+                        if hasattr(e, 'content') and e.content[0]['value']:
+                            desc = e.content[0]['value']
+                        elif hasattr(e, 'description'):
+                            desc = e.description
                         else:
                             self.log.warn('feed item invalid,link to webpage for article.(%s)'%e.title)
                     urls.append((section, e.title, urlfeed, desc))
                     urladded.add(urlfeed)
             else:
                 self.log.warn('fetch rss failed(%d):%s'%(result.status_code,url))
+        
+        #异步下载
+        if USE_ASYNC_URLFETCH_IN_FEEDS:
+            for result,url,(section,isfulltext) in asyncopener.get_result():
+                if result.status_code == 200 and result.content:
+                    if self.feed_encoding:
+                        content = result.content.decode(self.feed_encoding)
+                    else:
+                        content = AutoDecoder(True).decode(result.content,url)    
+                    feed = feedparser.parse(content)
+                    
+                    for e in feed['entries'][:self.max_articles_per_feed]:
+                        if self.oldest_article > 0 and hasattr(e, 'updated_parsed'):
+                            updated = e.updated_parsed
+                            if updated:
+                                delta = tnow - datetime(*(updated[0:6]))
+                                if delta.days*86400+delta.seconds > 86400*self.oldest_article:
+                                    self.log.debug("article '%s' is too old"%e.title)
+                                    continue
+                        #支持HTTPS
+                        urlfeed = e.link.replace('http://','https://') if url.startswith('https://') else e.link
+                        if urlfeed in urladded:
+                            continue
+                            
+                        desc = None
+                        if isfulltext:
+                            if hasattr(e, 'content') and e.content[0]['value']:
+                                desc = e.content[0]['value']
+                            elif hasattr(e, 'description'):
+                                desc = e.description
+                            else:
+                                self.log.warn('feed item invalid,link to webpage for article.(%s)'%e.title)
+                        urls.append((section, e.title, urlfeed, desc))
+                        urladded.add(urlfeed)
+                else:
+                    self.log.warn('async fetch rss failed(%d):%s'%(result.status_code,url))
         return urls
         
     def Items(self, opts=None):
         """
         生成器，返回一个元组
-        对于HTML：section,url,title,content
-        对于图片，mime,url,filename,content
+        对于HTML：section,url,title,content,brief
+        对于图片，mime,url,filename,content,brief
         """
         urls = self.ParseFeedUrls()
         readability = self.readability if self.fulltext_by_readability else self.readability_by_soup
         prevsection = ''
         decoder = AutoDecoder(False)
         if USE_ASYNC_URLFETCH:
-            asyncurls = [(i,url) for i,(_a,_b,url,desc) in enumerate(urls) if not desc]
-            rpcs, i = [], 0
-            #先启动几个异步请求
-            while i < min(MAX_ASYNC_REQUESTS, len(asyncurls)):
-                rpc = urlfetch.create_rpc(deadline=self.timeout)
-                index,url = asyncurls.pop(0)
-                urlfetch.make_fetch_call(rpc, url, validate_certificate=False)
-                rpcs.append((index,rpc))
-                i += 1
+            #启动异步下载
+            asyncopener = AsyncURLOpener(self.log)
+            rpcs = [asyncopener.fetch(url,self.timeout,sec,title) 
+                    for sec,title,url,desc in urls if not desc]
             
             #为了效率起见，先处理全文RSS
             #在处理全文RSS的时候，其他RSS在后台拼命下载中...
@@ -348,34 +395,11 @@ class BaseFeedBook:
                         yield (section, url, title, content, brief)
             
             #轮到摘要RSS了
-            while True:
-                if not rpcs:
-                    break
-                index, rpc = rpcs.pop(0)
-                section, ftitle, url, desc = urls[index]
+            for result,url,(section,ftitle) in asyncopener.get_result():
                 if section != prevsection or prevsection == '':
                     decoder.encoding = '' #每个小节都重新探测编码
                     prevsection = section
                     
-                try:
-                    result = rpc.get_result()
-                except urlfetch.DownloadError as e:
-                    self.log.warn(str(e))
-                    continue
-                except apiproxy_errors.DeadlineExceededError:
-                    self.log.warn('timeout:%s' % url)
-                    continue
-                except Exception as e:
-                    self.log.warn('%s:%s' % (type(e), url))
-                    continue
-                finally:
-                    #再启动一个新的异步URL请求
-                    if asyncurls:
-                        rpc = urlfetch.create_rpc(deadline=self.timeout)
-                        index, newurl = asyncurls.pop(0)
-                        urlfetch.make_fetch_call(rpc, newurl, validate_certificate=False)
-                        rpcs.append((index, rpc))
-                
                 status_code, content = result.status_code, result.content
                 if status_code != 200 or not content:
                     self.log.warn('async fetch article failed(%d):%s.' % (status_code,url))
@@ -790,6 +814,7 @@ def process_image(data, opts):
             return mobify_image(data)
         else:
             return rescale_image(data, png2jpg=opts.image_png_to_jpg,
-                            graying=opts.graying_image)
+                            graying=opts.graying_image,
+                            reduceto=opts.reduce_image_to)
     except Exception:
         return None

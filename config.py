@@ -27,13 +27,11 @@ PINYIN_FILENAME = False
 #否则还是推荐设置为False
 ALWAYS_CHAR_DETECT = False
 
-#是否使用异步方式获取RSS文章，好处是效率比较高，可以在GAE的限额10分钟内处理
-#更多的RSS订阅源，缺点就是没有了失败重试和重定向COOKIE处理功能。
-#而且如果你的RSS订阅源的文章很多很大，则很容易超过22MB/min的Urlfeth免费限额。
-#如果有部分RSS出现Too many redirects异常，则建议设置为False
-#如果你的RSS订阅源不多，GAE的Logs内没有DeadlineExceededError异常，也建议设置为False
-#因为除非你是付费账号，否则异步URLFETCH特别容易超过每分钟21MB的免费限额
-USE_ASYNC_URLFETCH = True
+#是否使用异步方式获取RSS文章。
+#经过多次测试，异步urlfetch相比同步模式并没有什么优势，时不时反而比同步模式还
+#慢，建议设置为False
+USE_ASYNC_URLFETCH = False
+USE_ASYNC_URLFETCH_IN_FEEDS = False
 
 #是否生成TOC的文章内容预览，如果使用非触摸版Kindle，没意义，因为看不到
 #对于kindle touch和kindle paperwhite可以考虑，不过因为需要额外的处理，效率低一点

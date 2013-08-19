@@ -28,6 +28,7 @@ handlers:
 
 - url: /_ah/mail/.+
   script: handlemail.appmail
-
+  
 - url: /.*
   script: main.app
+  
