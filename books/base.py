@@ -685,7 +685,7 @@ class WebpageBook(BaseFeedBook):
                 continue
             
             if self.page_encoding:
-                content = content.decode(self.page_encoding)
+                content = content.decode(self.page_encoding, errors='ignore')
             else:
                 content = decoder.decode(content,url)
             

@@ -6,9 +6,6 @@
     <meta name="description" content="KindleEar is a service for Amazon Kindle owners that lets you aggregate feeds you chosen and have them delivered to your Kindle in a convenient, easy-to-navigate format." />
     <link rel="stylesheet" href="base.css" type="text/css" charset="utf-8"/>
     <style type="text/css">
-    h2{
-        font-size:1.2em;
-    }
 	li{
 		margin:0.5em;
 	}
@@ -49,7 +46,7 @@
 		<li>在app.yaml的同一个目录，打开config.py文件，修改SrcEmail为你的gmail账号。其他的选项也可以根据注释有选择性的修改，或者使用默认即可。</li>
 		<li>正式上传KindleEar。可以使用Google App Engine Launcher或使用命令行，因为Launcher不太稳定，这里介绍一下windows下使用命令行的方式。
 			<li>依次点击：开始-运行-输入CMD，打开命令行窗口</li>
-			<li>进入到App Engine SDK安装目录；例如：cd "C:\Program Files\Go_appengine"</li>
+			<li>进入到App Engine SDK安装目录；例如：cd "C:\Program Files\Google\google_appengine"</li>
 			<li>输入“上传”命令：c:\python27\python.exe appcfg.py update C:\KindleEar</li>
 			<li>依次输入gmail账号及密码（密码输入时屏幕不显示）既可成功上传。</li></li>
 		<li>显示上传成功后使用你的浏览器打开域名：kindleear123.appspot.com（举例而已，kindleear123要改为你申请的GAE程序名称），如果能正常打开，则还有最后一步。</li>
@@ -87,20 +84,6 @@
         <li>coverfile = 'books/xxxx.jpg'</li></ul></p>
     <h2>GAE上传遇到SSL出错，如何解决？</h2>
     <p class="answer">墙内的朋友有时候在上传代码时遇到此错误：urllib2.URLError: &lt;urlopen error [Errno 8] _ssl.c:504: EOF occurred in violation of protocol&gt;，如果这样，改hosts即可：“74.125.229.174  appengine.google.com”</p>
-    <h2>有部分文章乱码？</h2>
-    <p class="answer">对于自定义RSS和不指定编码的内置书籍，软件使用python模块chardet自动检测编码，此模块的检测结果并不是100%正确的，如果检测错误，则文章可能乱码，这在浏览器上偶尔碰到网页乱码一样道理。
-        <br />因为这种情况很罕见，KindleEar仅提供一个不是很优雅的hack方案：手工更改数据库缓存的chardet检测的编码。<br />方法如下：
-        <ol><li>使用admin登陆appid.appspot.com（假定你的应用名字为appid）。</li>
-        <li>浏览器地址栏中输入https://appid.appspot.com/dbviewer，翻到页面UrlEncoding区段，查看乱码文章对应网站的编码信息，如果编码不对，记下ID号，进行下一步。</li>
-        <li>地址栏中输入https://appid.appspot.com/dbviewer?action=modurlenc&id=dbid&feedenc=fenc&pageenc=penc
-        <ul>解释一下，在这一长串字符串中，你先要更改：
-            <li>dbid:你记下来的编码对应网站ID。</li>
-            <li>fenc:你希望更改FeedEncoding的编码。</li>
-            <li>penc:你希望更改PageEncoding的编码。</li>
-        </ul></li>
-        <li>至于怎么获取正确的编码，可以通过在浏览器中查看网页源码。</li>
-        </ol>
-        </p>
     
 	<pre><p> </p><p> </p></pre>
     <div id="footer">

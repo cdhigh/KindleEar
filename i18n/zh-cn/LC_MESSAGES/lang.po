@@ -59,6 +59,9 @@ msgstr "用户名'%s'不存在！"
 msgid "Please confirm to delete the account!"
 msgstr "请确认是否要删除此账号！"
 
+msgid "Delete success!"
+msgstr "删除成功！"
+
 msgid "The username is empty or you dont have right to delete it!"
 msgstr "用户名为空或你没有权限删除此账号！"
 
@@ -369,7 +372,7 @@ msgid "Title Day, MMM DD"
 msgstr "标题 星期, 英文月 日"
 
 msgid "Oldest article"
-msgstr "最旧文章"
+msgstr "最老文章"
 
 msgid "No limit"
 msgstr "不限制"
@@ -394,30 +397,3 @@ msgstr "六天"
 
 msgid "7 Days"
 msgstr "一星期"
-
-msgid "Deliver Days"
-msgstr "投递日"
-
-msgid "Mon"
-msgstr "一"
-
-msgid "Tue"
-msgstr "二"
-
-msgid "Wed"
-msgstr "三"
-
-msgid "Thu"
-msgstr "四"
-
-msgid "Fri"
-msgstr "五"
-
-msgid "Sat"
-msgstr "六"
-
-msgid "Sun"
-msgstr "日"
-
-msgid "Logs of other users"
-msgstr "其他用户的日志"
