@@ -23,11 +23,11 @@ from calibre.ebooks.mobi.utils import (encint, encode_trailing_data,
 from calibre.ebooks.mobi.writer2.indexer import Indexer
 
 # Modify by Arroz, you can add more languages supported here.
-dictLng = {   "en":0x009,"en-us":0x409,"en-gb":0x809,   "pt":0x016,"pt-br":0x416,
+dictlng = {   "en":0x009,"en-us":0x409,"en-gb":0x809,   "pt":0x016,"pt-br":0x416,
            "pt-pt":0x816,   "zh":0x004,"zh-cn":0x804,"zh-tw":0x404,"zh-hk":0xc04,
               "es":0x00a,"es-es":0x40a,   "fr":0x00c,"fr-fr":0x40c,   "de":0x007,
            "de-de":0x407,   "it":0x010,"it-it":0x410,   "ja":0x011,"ja-jp":0x411,
-              "ru":0x019,"ru-ru":0x819,}
+              "ru":0x019,"ru-ru":0x819,   "tr":0x01f,"tr-tr":0x41f,}
 
 # Disabled as I dont care about uncrossable breaks
 WRITE_UNCROSSABLE_BREAKS = False
@@ -286,8 +286,11 @@ class MobiWriter(object):
             0xe8 + 16 + len(exth), len(title)))
         
         # 0x4c - 0x4f : Language specifier
-        nLng = dictLng.get(str(metadata.language[0]).lower(), 0x009)
-        record0.write(pack(b'>I', nLng))
+        lng = str(metadata.language[0]).lower()
+        nlng = dictlng.get(lng)
+        if not nlng:
+            nlng = dictlng.get(lng.split('-')[0], 0x009) if '-' in lng else 0x009
+        record0.write(pack(b'>I', nlng))
         
         # 0x50 - 0x57 : Input language and Output language
         record0.write(b'\0' * 8)

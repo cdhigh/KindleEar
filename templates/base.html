@@ -71,13 +71,14 @@
         {% block footer %}
         <div class="clear"></div>
         2013 &copy; KindleEar&nbsp;&nbsp;|&nbsp;&nbsp;
-        <a href="https://kindleear.appspot.com/static/faq.html" target="_blank" style="text-decoration:none;">FAQ</a>
+        <a href="/static/faq{%if lang and not lang.startswith('zh')%}_en{%endif%}.html" target="_blank" style="text-decoration:none;">FAQ</a>
         &nbsp;&nbsp;|&nbsp;&nbsp;
         <a href="https://github.com/cdhigh/kindleear" target="_blank" style="text-decoration:none;">Github page</a>
         &nbsp;&nbsp;|&nbsp;&nbsp;
         <a href="http://appengine.google.com" target="_blank" style="text-decoration:none;">App Engine</a>
         <div style="float:right;"><a href="/lang/en"><img src="/static/us.gif" alt="EN" /></a>
-        <a href="/lang/zh-cn"><img src="/static/cn.gif" alt="CN" /></a></div>
+        <a href="/lang/zh-cn"><img src="/static/cn.gif" alt="CN" /></a>
+        <a href="/lang/tr-tr"><img src="/static/tr.gif" alt="TR" /></a></div>
         <pre><p></p></pre>
         {% endblock %}
     </div>

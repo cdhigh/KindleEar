@@ -319,7 +319,7 @@ class BaseFeedBook:
                         elif hasattr(e, 'description'):
                             desc = e.description
                         else:
-                            self.log.warn('feed item invalid,link to webpage for article.(%s)'%e.title)
+                            self.log.warn('fulltext feed item no has desc,link to webpage for article.(%s)'%e.title)
                     urls.append((section, e.title, urlfeed, desc))
                     urladded.add(urlfeed)
             else:
@@ -666,8 +666,8 @@ class WebpageBook(BaseFeedBook):
     def Items(self, opts=None):
         """
         生成器，返回一个元组
-        对于HTML：section,url,title,content
-        对于图片，mime,url,filename,content
+        对于HTML：section,url,title,content,brief
+        对于图片，mime,url,filename,content,brief
         """
         cnt4debug = 0
         decoder = AutoDecoder(False)

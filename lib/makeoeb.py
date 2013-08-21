@@ -87,7 +87,7 @@ def getOpts():
     setattr(opts, "graying_image", True)
     setattr(opts, "image_png_to_jpg", False)
     setattr(opts, "fix_indents", False)
-    setattr(opts, "reduce_image_to", (600,800))
+    setattr(opts, "reduce_image_to", (568,682))
     
     #epub
     setattr(opts, "dont_split_on_page_breaks", False)

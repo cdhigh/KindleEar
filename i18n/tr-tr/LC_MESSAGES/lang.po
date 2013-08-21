@@ -1,0 +1,427 @@
+# KindleEar translation.
+# Copyright (C) 2013 Kindle Turkiye Facebook Group
+# Kindle Turkiye Facebook Group, 2013.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.6\n"
+"PO-Revision-Date: 2013-08-20 21:48+0200\n"
+"Last-Translator: \n"
+"Language-Team: Kinde Turkiye Facebook Group\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 1.5.7\n"
+"POT-Creation-Date: \n"
+
+msgid "Old password is wrong!"
+msgstr "Eski şifre yanlış!"
+
+msgid "The new passwords are different!"
+msgstr "Yeni şifre girişleri aynı değil!"
+
+msgid "Change password success!"
+msgstr "Şifre başarıyla değiştirildi!"
+
+msgid "Username is empty!"
+msgstr "Kullanıcı adı boş olamaz!"
+
+msgid "Already exist the username!"
+msgstr "Bu isimde bir kullanıcı kaydı zaten mevcut!"
+
+msgid "Add a account success!"
+msgstr "Yeni hesap başarıyla eklendi!"
+
+msgid "Please use admin/admin to login at first time."
+msgstr "İlk giriş için kullanıcı adı:'admin' ve şifre: 'admin'"
+
+msgid "Please input username and password."
+msgstr "Lütfen kullanıcı adı ve şifresini giriniz"
+
+msgid "The len of username reached the limit of 25 chars!"
+msgstr "Kullanıcı adı 25 karakterden fazla olmamalı!"
+
+msgid "The username includes unsafe chars!"
+msgstr "Kullanıcı adı alfa-numerik olmalı!"
+
+msgid "The password includes non-ascii chars!"
+msgstr "Şifrenizde ASCII dışı karakterler olmamalı"
+
+msgid "The username no exist or password is wrong!"
+msgstr "Kullanıcı mevcut değil veya şifre hatalı!"
+
+msgid "Please input new password to confirm!"
+msgstr "Lütfen onaylamak için yeni şifreyi giriniz! "
+
+msgid "The username '%s' not exist!"
+msgstr "'%s' isminde bir kullanıcı bulunmuyor!"
+
+msgid "Please confirm to delete the account!"
+msgstr "Lütfen hesap silme işlemini onaylayınız!"
+
+msgid "The username is empty or you dont have right to delete it!"
+msgstr "Kullanıcı adı mevcut değil veya sizin silmeye yetkiniz yok!"
+
+msgid "Title or url is empty!"
+msgstr "URL veya başlık hatalı"
+
+msgid "Book(s) (%s) put to queue!"
+msgstr "%s kitapları işlem sırasına eklendi"
+
+msgid "No book(s) to deliver!"
+msgstr "Gönderim için kitap yok!"
+
+msgid "Logout"
+msgstr "Çıkış"
+
+msgid "Feeds"
+msgstr "RSSler" 
+
+msgid "Setting"
+msgstr "Ayarlar"
+
+msgid "Logs"
+msgstr "Kayıtlar"
+
+msgid "Admin"
+msgstr "Yönetim"
+
+msgid "Advance"
+msgstr "Gelişmiş"
+
+msgid "Please Login"
+msgstr "Lütfen Giriş Yapın"
+
+msgid "Change Password"
+msgstr "Şifre Değiştirme"
+
+msgid "Old password"
+msgstr "Eski şifre"
+
+msgid "New password"
+msgstr "Yeni şifre"
+
+msgid "Confirm password"
+msgstr "Şifreyi onayla"
+
+msgid "Confirm Change"
+msgstr "Değişikliği Onayla"
+
+msgid "Add Account"
+msgstr "Hesap Ekle"
+
+msgid "Username"
+msgstr "Kullanıcı adı"
+
+msgid "Password"
+msgstr "Şifre"
+
+msgid "Confirm password"
+msgstr "Şifreyi onayla"
+
+msgid "Add"
+msgstr "Ekle"
+
+msgid "Note : No support many accounts for limit of free account of GAE."
+msgstr "Not: Ücretsiz Google App Engine hesabında çok fazla kullanıcı oluşturma sorun oluşturabilir..."
+
+msgid "Accounts"
+msgstr "Hesaplar"
+
+msgid "No."
+msgstr "No:"
+
+msgid "Enable"
+msgstr "Aktif"
+
+msgid "Operation"
+msgstr "İşlemler"
+
+msgid "Change"
+msgstr "Değiştir"
+
+msgid "Delete"
+msgstr "Sil"
+
+msgid "Please dont change these configures if you dont know what's mean!"
+msgstr "Lütfen ne yaptığınızdan tam emin değilseniz değişiklik yapmayın!"
+
+msgid "Url Filter"
+msgstr "URL Filtresi"
+
+msgid "Urls in list would not be downloaded for saving of time."
+msgstr "Bu listedeki URLler zamandan kazanmak için indirilmeyecektir."
+
+msgid "Please input regular expression"
+msgstr "Bir regex(düzenli ifade) belirtin"
+
+msgid "White List"
+msgstr "Beyaz liste"
+
+msgid "mail sent to xxx@<em>appid</em>.appspotmail.com will be transfered to admin's kindle."
+msgstr "xxx@<em>appid</em>.appspotmail.com adresine gönderilen emailler admin hesabına bağlı Kindle’a gönderilecek."
+
+msgid "Please input mail address"
+msgstr "Lütfen e-posta adresini giriniz"
+
+msgid "Auto back to previous page after 5 seconds"
+msgstr "5 saniye sonra otomatik olarak önceki sayfaya döneceksiniz."
+
+msgid "Click to back"
+msgstr "Geri dönmek için tıklayınız"
+
+msgid "KindleEar is a web application to aggregate rss for generating"
+msgstr "KindleEar web uygulaması birden fazla RSSten"
+
+msgid "periodical mobi file with images"
+msgstr "resimli dergi formatında  mobi dosyaları"
+
+msgid "and send it to your kindle automatically."
+msgstr "oluşturmak ve Kindle'a göndermek için oluşturulmuştur."
+
+msgid "Author modified and ported Calibre to generate mobi file in GAE without kindlegen tool of Amazon,"
+msgstr "Google App Engine de Amazonun Kindlegen uygulamasını kullanmadan mobi dosyalar oluşturabilmek için Calibre kodlarını yeniden düzenlenmiştir."
+
+msgid "for periodical mobi file is a better format to represent news feeds."
+msgstr "Çünkü mobi formatı RSSleri sunmak için iyi bir formattır."
+
+msgid "With my"
+msgstr "Bu"
+
+msgid "open source KindleEar application"
+msgstr "açık kaynak KindleEar uygulaması"
+
+msgid ", You can deploy your own server to push news feeds to your kindle dialy or share with your friends."
+msgstr "ile siz de kendi serverınızı kurup Kindleınıza RSSleri günlük gönderebilir veya arkadaşlarınızla paylaşabilirsiniz."
+
+msgid "Current version : "
+msgstr "Mevcut sürüm："
+
+msgid "Login"
+msgstr "Giriş"
+
+msgid "The website dont allow register, you can ask owner open a account for you."
+msgstr "Web sayfası kayıt olmaya izin vermemektedir, yöneticiden bir hesap isteyebilirsiniz."
+
+msgid "Only display last 10 logs"
+msgstr "Sadece son 10 işlem kaydını gösterir."
+
+msgid "Time"
+msgstr "Tarih/Saat"
+
+msgid "Title"
+msgstr "Başlık"
+
+msgid "Size"
+msgstr "Dosya Boyutu"
+
+msgid "To"
+msgstr "Kime"
+
+msgid "Status"
+msgstr "Durum"
+
+msgid "Has no log"
+msgstr "Kayıt yok."
+
+msgid "Subscribed"
+msgstr "Abone Olduğunuz Kitaplar"
+
+msgid "Cancel"
+msgstr "İptal"
+
+msgid "No have book subscribed"
+msgstr "Abone olduğunuz kitap yok."
+
+msgid "Custom Rss"
+msgstr "Özel RSS"
+
+msgid "Fulltext"
+msgstr "Tam Metin"
+
+msgid "Unsubscribed"
+msgstr "Abone Olmadığınız Kitaplar"
+
+msgid "Subscribe"
+msgstr "Abone ol"
+
+msgid "No have book unsubscrebed"
+msgstr "Abone olmadığınız kitap yok."
+
+msgid "Your account will pause after"
+msgstr "Hebanızın pasifleştirilmesine kalan süre:"
+
+msgid ", Please login before expire."
+msgstr "Lütfen hesabınız pasifleştirilmeden önce giriş yapınız."
+
+msgid "Delete Account"
+msgstr "Hesabı Sil"
+
+msgid "Kindle E-mail is requied!"
+msgstr "Kindle E-mail adresi gerekli!"
+
+msgid "Title is requied!"
+msgstr "Başlık gerekli!"
+
+msgid "Settings Saved!"
+msgstr "Ayarlar Kaydedildi!"
+
+msgid "Base Setting"
+msgstr "Temel Ayarlar"
+
+msgid "The item is empty"
+msgstr "İçerik boş"
+
+msgid "Enable deliver"
+msgstr "Gönderime izin ver."
+
+msgid "Time zone"
+msgstr "Saat dilimi"
+
+msgid "Deliver time"
+msgstr "Gönderim zamanı"
+
+msgid "Book type"
+msgstr "Dosya tipi"
+
+msgid "Deliver now"
+msgstr "Şimdi gönder"
+
+msgid "Note: task deliver will be executed after some minutes."
+msgstr "Not: Gönderim, tıkladıktan birkaç dakika sonra gerçekleşir."
+
+msgid "Custom Rss Setting"
+msgstr "Özel RSS Ayarları"
+
+msgid "Language"
+msgstr "Dil"
+
+msgid "Chinese"
+msgstr "Çince"
+
+msgid "English"
+msgstr "İngilizce"
+
+msgid "French"
+msgstr "Fransızca"
+
+msgid "Spanish"
+msgstr "İspanyolca"
+
+msgid "Portuguese"
+msgstr "Portekizce"
+
+msgid "German"
+msgstr "Almanca"
+
+msgid "Italian"
+msgstr "İtalyanca"
+
+msgid "Japanese"
+msgstr "Japonca"
+
+msgid "Russian"
+msgstr "Rusça"
+
+msgid "Turkish"
+msgstr "Türkçe"
+
+msgid "Keep images"
+msgstr "Resimler gözüksün."
+
+msgid "Enable deliver custom rss"
+msgstr "Özel RSS gönderilmesine izin ver."
+
+msgid "This switch only effective when 'Enable deliver' is enabled."
+msgstr "Bu ayar yalnızca ’Gönderime izin ver.’ seçeneği seçilmişken geçerlidir."
+
+msgid "Save settings"
+msgstr "Ayarları kaydet"
+
+msgid "Important: Please activate your kindle firstly, and goto"
+msgstr "Önemli: Lütfen ilk olarak Kindleınızı aktifleştirin ve"
+
+msgid "Page and add"
+msgstr "sayfasına gidin."
+
+msgid "to 'Your Kindle's approved email list'."
+msgstr "mail adresini onaylanmış mail adreslerine ekleyin."
+
+msgid "Title format"
+msgstr "Başlık Formatı"
+
+msgid "Title Only"
+msgstr "Yalnızca Başlık"
+
+msgid "Title YYYY-MM-DD"
+msgstr "Başlık YYYY-AA-GG"
+
+msgid "Title MM-DD"
+msgstr "Başlık AA-GG"
+
+msgid "Title MM/DD"
+msgstr "Başlık AA/GG"
+
+msgid "Title DD/MM"
+msgstr "Başlık GG/AA"
+
+msgid "Title MMM DD"
+msgstr "Başlık AAA GG"
+
+msgid "Title Day, MMM DD"
+msgstr "Başlık Gün, AAA GG"
+
+msgid "Oldest article"
+msgstr "En eski içerik?"
+
+msgid "No limit"
+msgstr "Sınırlama yok."
+
+msgid "1 Day"
+msgstr "1 Günlük"
+
+msgid "2 Days"
+msgstr "2 Günlük"
+
+msgid "3 Days"
+msgstr "3 Günlük"
+
+msgid "4 Days"
+msgstr "4 Günlük"
+
+msgid "5 Days"
+msgstr "5 Günlük"
+
+msgid "6 Days"
+msgstr "6 Günlük"
+
+msgid "7 Days"
+msgstr "7 Günlük"
+
+msgid "Deliver Days"
+msgstr "Gönderim Günleri"
+
+msgid "Mon"
+msgstr "Pzt"
+
+msgid "Tue"
+msgstr "Sal"
+
+msgid "Wed"
+msgstr "Çar"
+
+msgid "Thu"
+msgstr "Prş"
+
+msgid "Fri"
+msgstr "Cum"
+
+msgid "Sat"
+msgstr "Cts"
+
+msgid "Sun"
+msgstr "Paz"
+
+msgid "Logs of other users"
+msgstr "Diğer kullanıcıların işlem kayıtları"

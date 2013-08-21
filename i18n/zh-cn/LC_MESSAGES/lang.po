@@ -323,6 +323,9 @@ msgstr "日语"
 msgid "Russian"
 msgstr "俄语"
 
+msgid "Turkish"
+msgstr "土耳其语"
+
 msgid "Keep images"
 msgstr "保留文章图片"
 

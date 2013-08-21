@@ -35,7 +35,9 @@
     <table class="tburl">
     {% for urlflt in urlfilters %}
     <tr class="{{loop.cycle('trodd', 'treven')}}">
-        <td style="width:80%">{{urlflt.url}}</td>
+        <td style="width:80%">
+            {%if urlflt.url|length>70%}{{urlflt.url[:70]}}...{%else%}{{urlflt.url}}{%endif%}
+        </td>
         <td style="text-align:right;"><a href="/advdel?delurlid={{urlflt.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
     </tr>
     {% endfor %}

@@ -49,7 +49,7 @@
 		<li>在app.yaml的同一个目录，打开config.py文件，修改SrcEmail为你的gmail账号。其他的选项也可以根据注释有选择性的修改，或者使用默认即可。</li>
 		<li>正式上传KindleEar。可以使用Google App Engine Launcher或使用命令行，因为Launcher不太稳定，这里介绍一下windows下使用命令行的方式。
 			<li>依次点击：开始-运行-输入CMD，打开命令行窗口</li>
-			<li>进入到App Engine SDK安装目录；例如：cd "C:\Program Files\Go_appengine"</li>
+			<li>进入到App Engine SDK安装目录；例如：cd "C:\Program Files\Google\google_appengine"</li>
 			<li>输入“上传”命令：c:\python27\python.exe appcfg.py update C:\KindleEar</li>
 			<li>依次输入gmail账号及密码（密码输入时屏幕不显示）既可成功上传。</li></li>
 		<li>显示上传成功后使用你的浏览器打开域名：kindleear123.appspot.com（举例而已，kindleear123要改为你申请的GAE程序名称），如果能正常打开，则还有最后一步。</li>
@@ -101,12 +101,15 @@
         <li>至于怎么获取正确的编码，可以通过在浏览器中查看网页源码。</li>
         </ol>
         </p>
+    <h2>忘记密码了怎么办？</h2>
+    <p class="answer">如果是忘记非管理员账号的密码，则可以通知管理员改密码。如果是管理员密码，则可以登陆appengine.google.com，在左边选择"Datastore Admin"，删除KeUser的所有数据，则所有账号的信息都会被删除，然后重新使用admin/admin登陆你的应用即可。没有找到"Datastore Admin"？则可以先在"Application Settings"里面打开。
+        <br />如果你会编程，则你会有其他方法，不用我说。</p>
     
 	<pre><p> </p><p> </p></pre>
     <div id="footer">
         <div class="clear"></div>
         2013 &copy; KindleEar&nbsp;&nbsp;|&nbsp;&nbsp;
-        <a href="https://kindleear.appspot.com/static/faq.html" target="_blank" style="text-decoration:none;">FAQ</a>
+        <a href="/static/faq.html" target="_blank" style="text-decoration:none;">FAQ</a>
         &nbsp;&nbsp;|&nbsp;&nbsp;
         <a href="https://github.com/cdhigh/kindleear" target="_blank" style="text-decoration:none;">Github page</a>
         &nbsp;&nbsp;|&nbsp;&nbsp;
