@@ -270,6 +270,9 @@ msgstr "Ayarlar Kaydedildi!"
 msgid "Base Setting"
 msgstr "Temel Ayarlar"
 
+msgid "Kindle E-mail"
+msgstr "Kindle E-mail"
+
 msgid "The item is empty"
 msgstr "İçerik boş"
 

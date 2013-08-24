@@ -27,12 +27,6 @@ PINYIN_FILENAME = False
 #否则还是推荐设置为False
 ALWAYS_CHAR_DETECT = False
 
-#是否使用异步方式获取RSS文章。
-#经过多次测试，异步urlfetch相比同步模式并没有什么优势，时不时反而比同步模式还
-#慢，建议设置为False
-USE_ASYNC_URLFETCH = False
-USE_ASYNC_URLFETCH_IN_FEEDS = False
-
 #是否生成TOC的文章内容预览，如果使用非触摸版Kindle，没意义，因为看不到
 #对于kindle touch和kindle paperwhite可以考虑，不过因为需要额外的处理，效率低一点
 #如果没有必要可以关闭。

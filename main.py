@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.6.4"
+__Version__ = "1.6.5"
 __Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
@@ -53,7 +53,7 @@ class Book(db.Model):
     keep_image = db.BooleanProperty()
     oldest_article = db.IntegerProperty()
     
-    #这两个属性只有自定义RSS才有意义
+    #这三个属性只有自定义RSS才有意义
     @property
     def feeds(self):
         return Feed.all().filter('book = ', self.key())
@@ -67,6 +67,9 @@ class Book(db.Model):
             fc = self.feeds.count()
             memcache.add(mkey, fc, 86400)
             return fc
+    @property
+    def owner(self):
+        return KeUser.all().filter('ownfeeds = ', self.key())
     
 class KeUser(db.Model): # kindleEar User
     name = db.StringProperty(required=True)
@@ -101,7 +104,7 @@ class UrlFilter(db.Model):
 
 class WhiteList(db.Model):
     mail = db.StringProperty()
-
+    
 def StoreBookToDb():
     for book in BookClasses():  #添加内置书籍
         if memcache.get(book.title): #使用memcache加速
@@ -201,7 +204,7 @@ class BaseHandler:
 class Home(BaseHandler):
     def GET(self):
         return self.render('home.html',"Home")
-
+        
 class Setting(BaseHandler):
     def GET(self, tips=None):
         user = self.getcurrentuser()
@@ -636,6 +639,7 @@ class Worker(BaseHandler):
             if not book:
                 return "the builtin book not exist!<br />"
             book = book()
+            book.url_filters = [flt.url for flt in UrlFilter.all()]
         else: # 自定义RSS
             if bk.feedscount == 0:
                 return "the book has no feed!<br />"
@@ -656,10 +660,8 @@ class Worker(BaseHandler):
         global log
         opts = getOpts()
         oeb = CreateOeb(log, None, opts)
-        if titlefmt:
-            title = "%s %s" % (book.title, local_time(titlefmt, tz))
-        else:
-            title = book.title
+        title = "%s %s" % (book.title, local_time(titlefmt, tz)) if titlefmt else book.title
+        
         setMetaData(oeb, title, book.language, local_time(tz=tz), SrcEmail)
         oeb.container = ServerContainer(log)
         
@@ -681,7 +683,7 @@ class Worker(BaseHandler):
         sections = OrderedDict()
         # 对于html文件，变量名字自文档
         # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
-        for sec_or_media, url, title, content, brief in book.Items():
+        for sec_or_media, url, title, content, brief in book.Items(opts):
             if not sec_or_media or not title or not content:
                 continue
             
@@ -689,18 +691,26 @@ class Worker(BaseHandler):
                 id, href = oeb.manifest.generate(id='img', href=title)
                 item = oeb.manifest.add(id, href, sec_or_media, data=content)
             else:
-                id, href = oeb.manifest.generate(id='feed', href='feed%d.htm'%itemcnt)
-                item = oeb.manifest.add(id, href, 'text/html', data=content)
+                id, href = oeb.manifest.generate(id='feed', href='feed%d.html'%itemcnt)
+                item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=content)
                 oeb.spine.add(item, True)
                 sections.setdefault(sec_or_media, [])
                 sections[sec_or_media].append((title, item, brief))
                 itemcnt += 1
                 
         if itemcnt > 0: # 建立TOC，杂志模式需要为两层目录结构
+            stoc = ['<html><head><title>Table Of Contents</title></head><body>']
             for sec in sections.keys():
+                stoc.append('<h3><a href="%s">%s</a></h3>'%(sections[sec][0][1].href,sec))
                 sectoc = oeb.toc.add(sec, sections[sec][0][1].href)
                 for title, a, brief in sections[sec]:
+                    stoc.append('&nbsp;&nbsp;&nbsp;&nbsp;<a href="%s">%s</a><br />'%(a.href,title))
                     sectoc.add(title, a.href, description=brief if brief else None)
+            stoc.append('</body></html>')
+            id, href = oeb.manifest.generate(id='toc', href='toc.html')
+            item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=''.join(stoc))
+            oeb.guide.add('toc', 'Table of Contents', href)
+            oeb.spine.add(item, True)
             
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()

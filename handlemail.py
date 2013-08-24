@@ -37,14 +37,10 @@ class HandleMail(InboundMailHandler):
         #bodies = message.bodies('text/plain')
         html_bodies = message.bodies('text/html')
         allBodies = [body.decode() for content_type, body in html_bodies]
-        allBodies = u'<hr />'.join(allBodies)
-        
-        html = u"""<html><head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>%s</title></head><body>%s</body></html>"""
-        html = html % (subject, allBodies)
-        html = html.encode("utf-8")
-        BaseHandler.SendToKindle('admin', admin.kindle_email,subject[:15],'html',
+        Bodies = u'<hr />'.join(allBodies)
+            
+        html = Bodies.encode("utf-8")
+        BaseHandler.SendToKindle('admin', admin.kindle_email, subject[:15], 'html',
             html, admin.timezone, False)
         self.response.out.write('Done')
 

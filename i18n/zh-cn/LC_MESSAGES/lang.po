@@ -269,6 +269,9 @@ msgstr "恭喜，保存成功！"
 msgid "Base Setting"
 msgstr "基本设置"
 
+msgid "Kindle E-mail"
+msgstr "Kindle E-mail"
+
 msgid "The item is empty"
 msgstr "此项不能为空"
 
