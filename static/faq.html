@@ -46,7 +46,7 @@
 		<li>安装 <a href="http://www.python.org/getit/">Python 2.7.x</a>，在此页面中选择你的系统平台对应的2.7.x版本下载，然后直接双击安装。注意不要安装成Python 3.x版本，GAE暂不支持。</li>
 		<li>下载 <a href="https://developers.google.com/appengine/downloads?hl=zh-CN">GAE SDK</a>，这是用来上传GAE程序用的。在此页面中的区段“Google App Engine SDK for Python”中选择你的系统平台对应的版本点击即可下载，然后安装，一路next无话。</li>
 		<li>打开资源管理器，进入之前下载的KindleEar目录C:\KindleEar，使用任何文本编辑器打开app.yaml文件，将第一行的kindleear字样修改为你之前申请的GAE程序名（比如kindleear123），保存退出。</li>
-		<li>在app.yaml的同一个目录，打开config.py文件，修改SrcEmail为你的gmail账号。其他的选项也可以根据注释有选择性的修改，或者使用默认即可。</li>
+		<li>在app.yaml的同一个目录，打开config.py文件，修改SRC_EMAIL为你的gmail账号。其他的选项也可以根据注释有选择性的修改，或者使用默认即可。</li>
 		<li>正式上传KindleEar。可以使用Google App Engine Launcher或使用命令行，因为Launcher不太稳定，这里介绍一下windows下使用命令行的方式。
 			<li>依次点击：开始-运行-输入CMD，打开命令行窗口</li>
 			<li>进入到App Engine SDK安装目录；例如：cd "C:\Program Files\Google\google_appengine"</li>

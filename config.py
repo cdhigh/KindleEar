@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 """app的配置文件"""
 
-SrcEmail = "akindleear@gmail.com"  #邮件的发件人地址
+SRC_EMAIL = "akindleear@gmail.com"  #邮件的发件人地址
 
 DEFAULT_MASTHEAD = "mh_default.gif" #如果书籍没有题图，则使用此题图。
 DEFAULT_COVER = "cv_default.jpg" #如果书籍没有封面，则使用此封面，留空则不添加封面

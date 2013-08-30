@@ -11,7 +11,7 @@
             <a href="/unsubscribe/{{book.key().id()}}" class="actionButton">{{_("Cancel")}}</a>
         </div>
         <div class="summaryRow">
-            {%if book.description|length>70%}{{book.description[:70]}}...{%else%}{{book.description}}{%endif%}
+            {%if book.description|length>80%}{{book.description[:80]}}...<span>{{book.description}}</span>{%else%}{{book.description}}{%endif%}
         </div>
     </div>
     {% do hasitem.append(1) %}
@@ -34,8 +34,9 @@
             <a href="/delfeed/{{feed.key().id()}}" class="actionButton">{{_("Delete")}}</a>
         </div>
         <div class="summaryRow">
-            <a href="{{feed.url}}" target="_blank" style="text-decoration:none;color:grey;">
-            {%if feed.url|length>70%}{{feed.url[:70]}}...{%else%}{{feed.url}}{%endif%}</a>
+            <a href="{{feed.url}}" target="_blank" style="text-decoration:none;color:grey;" 
+                {%if feed.url|length>80%}title="{{feed.url}}"{%endif%}>
+            {%if feed.url|length>80%}{{feed.url[:80]}}...{%else%}{{feed.url}}{%endif%}</a>
         </div>
     </div>
     {% endfor %}
@@ -70,7 +71,7 @@
             <a href="/subscribe/{{book.key().id()}}" class="actionButton">{{_("Subscribe")}}</a>
         </div>
         <div class="summaryRow">
-            {%if book.description|length>70%}{{book.description[:70]}}...{%else%}{{book.description}}{%endif%}
+            {%if book.description|length>80%}{{book.description[:80]}}...<span>{{book.description}}</span>{%else%}{{book.description}}{%endif%}
         </div>
     </div>
     {% do hasitem2.append(1) %}

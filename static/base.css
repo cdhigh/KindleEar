@@ -259,6 +259,26 @@ legend {
     padding-right:26px;
     clear:both;
 }
+.summaryRow span{
+    display:none;
+}
+.summaryRow:hover{
+    cursor:pointer;
+    position:relative;
+    z-index:1;
+}
+.summaryRow:hover span{
+    display:block;
+    padding:2px;
+    background:#ffffe1;
+    border:1px solid #000000;
+    color:#333;
+    z-index:10;
+    position:absolute;
+    top:1.2em;
+    left:5px;
+    width:600px;
+}
 .cornerControls {
     float: right;
     text-align: right;

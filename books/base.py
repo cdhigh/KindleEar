@@ -13,7 +13,7 @@ from google.appengine.api import urlfetch
 from google.appengine.runtime import apiproxy_errors
 from google.appengine.ext import db
 
-from bs4 import BeautifulSoup, Comment
+from bs4 import BeautifulSoup, Comment, NavigableString, CData, Tag
 from lib import feedparser
 from lib.readability import readability
 from lib.urlopener import URLOpener
@@ -170,6 +170,8 @@ class BaseFeedBook:
     remove_classes = [] # 清除标签的class属性为列表中内容的标签
     remove_attrs = [] # 清除所有标签的特定属性，不清除标签内容
     
+    extra_css = ''
+    
     # 一个字符串列表，可以包含正则表达式，在此列表中的url不会被下载
     # 可用于一些注定无法下载的链接，以便节省时间
     url_filters = []
@@ -280,7 +282,7 @@ class BaseFeedBook:
         urls = []
         tnow = datetime.utcnow()
         urladded = set()
-                
+        
         for feed in self.feeds:
             section, url = feed[0], feed[1]
             isfulltext = feed[2] if len(feed) > 2 else False
@@ -377,23 +379,59 @@ class BaseFeedBook:
         
         # 提取正文
         doc = readability.Document(content)
-        summary = doc.summary(html_partial=True)
+        summary = doc.summary(html_partial=False)
         title = doc.short_title()
         title = self.processtitle(title)
         #if summary.startswith('<body'): #readability解析出错
         #    html = content
         #else:
-        html = self.FragToXhtml(summary, title, addtitleinbody=True)
+        #html = self.FragToXhtml(summary, title, addtitleinbody=True)
         
         #因为现在只剩文章内容了，使用BeautifulSoup也不会有什么性能问题
-        soup = BeautifulSoup(html, "lxml")
+        soup = BeautifulSoup(summary, "lxml")
+        h = soup.find('head')
+        if not h:
+            h = soup.new_tag('head')
+            t = soup.new_tag('title')
+            t.string = title
+            h.append(t)
+            soup.html.insert(0, h)
+            
+        #如果没有内容标题则添加
+        t = soup.html.body.find(['h1','h2'])
+        if not t:
+            t = soup.new_tag('h1')
+            t.string = title
+            soup.html.body.insert(0, t)
+        else:
+            totallen = 0
+            for ps in t.previous_siblings:
+                totallen += len(string_of_tag(ps))
+                if totallen > 40: #此H1/H2在文章中间出现，不是文章标题
+                    t = soup.new_tag('h1')
+                    t.string = title
+                    soup.html.body.insert(0, t)
+                    break
+                    
+        if self.extra_css:
+            sty = soup.new_tag('style', type="text/css")
+            sty.string = self.extra_css
+            soup.html.head.append(sty)
+            
         self.soupbeforeimage(soup)
         
-        for attr in ['id','class']:
+        if self.remove_tags:
+            for tag in soup.find_all(self.remove_tags):
+                tag.decompose()
+        for id in self.remove_ids:
+            for tag in soup.find_all(attrs={"id":id}):
+                tag.decompose()
+        for cls in self.remove_classes:
+            for tag in soup.find_all(attrs={"class":cls}):
+                tag.decompose()
+        for attr in self.remove_attrs:
             for tag in soup.find_all(attrs={attr:True}):
                 del tag[attr]
-        for cmt in soup.find_all(text=lambda text:isinstance(text, Comment)):
-            cmt.extract()
         
         if self.keep_image:
             opener = URLOpener(self.host, timeout=self.timeout)
@@ -458,10 +496,15 @@ class BaseFeedBook:
         except AttributeError:
             self.log.warn('object soup invalid!(%s)'%url)
             return
-            
+        
         title = self.processtitle(title)
         soup.html.head.title.string = title
         
+        if self.extra_css:
+            sty = soup.new_tag('style', type="text/css")
+            sty.string = self.extra_css
+            soup.html.head.append(sty)
+            
         if self.keep_only_tags:
             body = soup.new_tag('body')
             try:
@@ -626,6 +669,11 @@ class WebpageBook(BaseFeedBook):
             
             title = self.processtitle(title)
             
+            if self.extra_css:
+                sty = soup.new_tag('style', type="text/css")
+                sty.string = self.extra_css
+                soup.html.head.append(sty)
+            
             if self.keep_only_tags:
                 body = soup.new_tag('body')
                 try:
@@ -732,3 +780,23 @@ class WebpageBook(BaseFeedBook):
             yield (section, url, title, content, brief)
 
 
+#几个小工具函数
+def string_of_tag(tag, normalize_whitespace=False):
+    '''获取BeautifulSoup中的一个tag下面的所有字符串 '''
+    if not tag:
+        return ''
+    if isinstance(tag, basestring):
+        return tag
+    strings = []
+    for item in tag.contents:
+        if isinstance(item, (NavigableString, CData)):
+            strings.append(item.string)
+        elif isinstance(item, Tag):
+            res = string_of_tag(item)
+            if res:
+                strings.append(res)
+    ans = u''.join(strings)
+    if normalize_whitespace:
+        ans = re.sub(r'\s+', ' ', ans)
+    return ans
+    

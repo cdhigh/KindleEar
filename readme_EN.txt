@@ -15,7 +15,7 @@
    4.Download all files of this application and uncompress it into a directory for example: c:\kindleear.
    5.Modify the first line of app.yaml, change kindleear to name of application that you create in step 1.
    6.Modify variable SrcEmail and TIMEZONE of config.py
-      SrcEmail : your gmail address that used to register a GAE account in step 1.
+      SRC_EMAIL : your gmail address that used to register a GAE account in step 1.
       TIMEZONE : your timezone
    7.Execute command in directory GAE SDK(default is C:\Program Files\Google\google_appengine)
       'c:\python27\python.exe appcfg.py update c:\kindleear' (c:\kindleear is directory that you put files in step 4)

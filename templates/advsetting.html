@@ -24,6 +24,25 @@
 .treven{
     background-color:#e5e5e5;
 }
+td span{
+    display:none;
+}
+td:hover{
+    cursor:pointer;
+    position:relative;
+    z-index:1;
+}
+td:hover span{
+    display:block;
+    background:#ffffe1;
+    border:1px solid #000000;
+    color:#333;
+    z-index:10;
+    position:absolute;
+    top:1.2em;
+    left:5px;
+    width:600px;
+}
 </style>
 {% endblock %}
 {% block content %}
@@ -36,7 +55,7 @@
     {% for urlflt in urlfilters %}
     <tr class="{{loop.cycle('trodd', 'treven')}}">
         <td style="width:80%">
-            {%if urlflt.url|length>70%}{{urlflt.url[:70]}}...{%else%}{{urlflt.url}}{%endif%}
+            {%if urlflt.url|length>70%}{{urlflt.url[:70]}}...<span>{{urlflt.url}}</span>{%else%}{{urlflt.url}}{%endif%}
         </td>
         <td style="text-align:right;"><a href="/advdel?delurlid={{urlflt.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
     </tr>

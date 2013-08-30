@@ -346,6 +346,8 @@ class FlowSplitter(object):
                     # We want to keep the descendants of the split point in
                     # Tree 1
                     keep_descendants = True
+                    # We want the split point element, but not its tail
+                    elem.tail = '\n'
 
                 continue
             if hit_split_point:
@@ -360,12 +362,31 @@ class FlowSplitter(object):
                 nix_element(elem)
 
         # Tree 2
+        ancestors = frozenset(XPath('ancestor::*')(split_point2))
         for elem in tuple(body2.iterdescendants()):
             if elem is split_point2:
                 if not before:
+                    # Keep the split point element's tail, if it contains non-whitespace
+                    # text
+                    tail = elem.tail
+                    if tail and not tail.isspace():
+                        parent = elem.getparent()
+                        idx = parent.index(elem)
+                        if idx == 0:
+                            parent.text = (parent.text or '') + tail
+                        else:
+                            sib = parent[idx-1]
+                            sib.tail = (sib.tail or '') + tail
+                    # Remove the element itself
                     nix_element(elem)
                 break
-            nix_element(elem, top=False)
+            if elem in ancestors:
+                # We have to preserve the ancestors as they could have CSS
+                # styles that are inherited/applicable, like font or
+                # width. So we only remove the text, if any.
+                elem.text = '\n'
+            else:
+                nix_element(elem, top=False)
 
         body2.text = '\n'
 

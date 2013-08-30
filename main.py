@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.6.5"
+__Version__ = "1.6.6"
 __Author__ = "Arroz"
 
 import os, datetime, logging, re, random, __builtin__, hashlib
@@ -15,7 +15,7 @@ __builtin__.__dict__['default_log'] = log
 __builtin__.__dict__['IsRunInLocal'] = IsRunInLocal
 
 supported_languages = ['en','zh-cn','tr-tr'] #不支持的语种则使用第一个语言
-gettext.install('lang', 'i18n', unicode=True) #for calibre startup
+#gettext.install('lang', 'i18n', unicode=True) #for calibre startup
 
 import web
 import jinja2
@@ -184,7 +184,7 @@ class BaseHandler:
         else:
             filename = "%s.%s"%(basename,booktype)
         try:
-            mail.send_mail(SrcEmail, to, "KindleEar %s" % lctime, "Deliver from KindlerEar",
+            mail.send_mail(SRC_EMAIL, to, "KindleEar %s" % lctime, "Deliver from KindlerEar",
                 attachments=[(filename, attachment),])
         except OverQuotaError as e:
             default_log.warn('overquota when sendmail to %s:%s' % (to, str(e)))
@@ -209,7 +209,7 @@ class Setting(BaseHandler):
     def GET(self, tips=None):
         user = self.getcurrentuser()
         return self.render('setting.html',"Setting",
-            current='setting',user=user,mail_sender=SrcEmail,tips=tips)
+            current='setting',user=user,mail_sender=SRC_EMAIL,tips=tips)
         
     def POST(self):
         user = self.getcurrentuser()
@@ -662,7 +662,7 @@ class Worker(BaseHandler):
         oeb = CreateOeb(log, None, opts)
         title = "%s %s" % (book.title, local_time(titlefmt, tz)) if titlefmt else book.title
         
-        setMetaData(oeb, title, book.language, local_time(tz=tz), SrcEmail)
+        setMetaData(oeb, title, book.language, local_time(tz=tz), SRC_EMAIL)
         oeb.container = ServerContainer(log)
         
         #guide

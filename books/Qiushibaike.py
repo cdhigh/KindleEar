@@ -17,6 +17,7 @@ class Qiushibaike(WebpageBook):
     page_encoding = "utf-8"
     mastheadfile = "mh_qiushibaike.gif"
     coverfile = "cv_qiushibaike.jpg"
+    network_timeout       = 30
     keep_only_tags = [dict(name='div', attrs={'class':['main']}), # qiushibaike
         dict(name='div',attrs={'class':['block joke-item']}), # haha.mx
             ]
@@ -105,7 +106,24 @@ def rescale_image_QSBK(data, maxsizeb=4000000, dimen=None,
     elif width > reducewidth or height > reduceheight:
         ratio = min(float(reducewidth)/float(width), float(reduceheight)/float(height))
         neww,newh = int(width*ratio),int(height*ratio)
-        if newh in (reduceheight,reduceheight-1) and float(height)/float(width) >= 12.0:
+        if newh >= reduceheight-1 and float(height)/float(width) >= 18.0:
+            imgnew = Image.new('L' if graying else 'RGB', (int(width*4), int(height/4)), 'white')
+            region1 = img.crop((0,0,width,int(height/4)))
+            region2 = img.crop((0,int(height/4),width,int(height/2)))
+            region3 = img.crop((0,int(height/2),width,int(height*3/4)))
+            region4 = img.crop((0,int(height*3/4),width,height))
+            region1.load()
+            region2.load()
+            region3.load()
+            region4.load()
+            imgnew.paste(region1,(0,0))
+            imgnew.paste(region2,(width,0))
+            imgnew.paste(region3,(width*2,0))
+            imgnew.paste(region4,(width*3,0))
+            ratio = min(float(reducewidth)/float(width*4), float(reduceheight)/float(height/4))
+            neww,newh = int(width*4*ratio),int(height/4*ratio)
+            img = imgnew.resize((neww, newh))
+        elif newh >= reduceheight-1 and float(height)/float(width) >= 11.0:
             imgnew = Image.new('L' if graying else 'RGB', (int(width*3), int(height/3)), 'white')
             region1 = img.crop((0,0,width,int(height/3)))
             region2 = img.crop((0,int(height/3),width,int(height*2/3)))
@@ -119,7 +137,7 @@ def rescale_image_QSBK(data, maxsizeb=4000000, dimen=None,
             ratio = min(float(reducewidth)/float(width*3), float(reduceheight)/float(height/3))
             neww,newh = int(width*3*ratio),int(height/3*ratio)
             img = imgnew.resize((neww, newh))
-        elif newh in (reduceheight,reduceheight-1) and float(height)/float(width) >= 5.33:
+        elif newh >= reduceheight-1 and float(height)/float(width) >= 4.0:
             imgnew = Image.new('L' if graying else 'RGB', (int(width*2), int(height/2)), 'white')
             region1 = img.crop((0,0,width,int(height/2)))
             region2 = img.crop((0,int(height/2),width,height))

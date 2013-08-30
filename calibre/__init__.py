@@ -258,6 +258,7 @@ def strftime(fmt, t=None):
     if iswindows:
         if isinstance(fmt, unicode):
             fmt = fmt.encode('mbcs')
+        fmt = fmt.replace(b'%e', b'%#d')
         ans = plugins['winutil'][0].strftime(fmt, t)
     else:
         ans = time.strftime(fmt, t).decode(preferred_encoding, 'replace')
@@ -378,8 +379,8 @@ def human_readable(size, sep=' '):
     """ Convert a size in bytes into a human readable form """
     divisor, suffix = 1, "B"
     for i, candidate in enumerate(('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB')):
-        if size < 1024**(i+1):
-            divisor, suffix = 1024**(i), candidate
+        if size < (1 << ((i + 1) * 10)):
+            divisor, suffix = (1 << (i * 10)), candidate
             break
     size = str(float(size)/divisor)
     if size.find(".") > -1:
