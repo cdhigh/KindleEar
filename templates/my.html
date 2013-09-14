@@ -8,7 +8,7 @@
     <div class="book">
         <div class="titleRow">{{book.title}}</div>
         <div class="cornerControls">
-            <a href="/unsubscribe/{{book.key().id()}}" class="actionButton">{{_("Cancel")}}</a>
+            <a href="/unsubscribe/{{book.key().id()}}" class="actionButton">{{_("Unsubscribe")}}</a>
         </div>
         <div class="summaryRow">
             {%if book.description|length>80%}{{book.description[:80]}}...<span>{{book.description}}</span>{%else%}{{book.description}}{%endif%}

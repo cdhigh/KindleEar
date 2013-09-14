@@ -23,6 +23,7 @@ class HandleMail(InboundMailHandler):
         sender = parseaddr(message.sender)[1]
         if not WhiteList.all().filter('mail = ', sender).get():
             self.response.out.write("Spam mail!")
+            default_log.warn('Spam mail from : %s' % sender)
             return
         
         if hasattr(message, 'subject'):

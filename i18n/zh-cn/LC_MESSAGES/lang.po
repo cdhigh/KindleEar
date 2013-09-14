@@ -17,7 +17,7 @@ msgstr ""
 msgid "Old password is wrong!"
 msgstr "原密码错误！"
 
-msgid "The new passwords are different!"
+msgid "The two new passwords are dismatch!"
 msgstr "两次输入的新密码不匹配！"
 
 msgid "Change password success!"
@@ -47,7 +47,7 @@ msgstr "用户名包含非法字符！"
 msgid "The password includes non-ascii chars!"
 msgstr "密码包含非ASCII字符！"
 
-msgid "The username no exist or password is wrong!"
+msgid "The username not exist or password is wrong!"
 msgstr "用户名不存在或密码错误！"
 
 msgid "Please input new password to confirm!"
@@ -122,7 +122,7 @@ msgstr "确认密码"
 msgid "Add"
 msgstr "添加"
 
-msgid "Note : No support many accounts for limit of free account of GAE."
+msgid "Note : No supports many accounts for limit of free account of GAE."
 msgstr "因为GAE免费资源的有限，不建议添加很多用户账户。"
 
 msgid "Accounts"
@@ -200,7 +200,7 @@ msgstr "当前运行版本："
 msgid "Login"
 msgstr "确认登陆"
 
-msgid "The website dont allow register, you can ask owner open a account for you."
+msgid "The website dont allow register, you can ask owner for a account."
 msgstr "本站不开放注册，需要管理员先添加账号然后才能使用对应账号登录使用相应服务。"
 
 msgid "Only display last 10 logs"
@@ -227,7 +227,7 @@ msgstr "还没有投递过"
 msgid "Subscribed"
 msgstr "已订阅"
 
-msgid "Cancel"
+msgid "Unsubscribe"
 msgstr "退订"
 
 msgid "No have book subscribed"

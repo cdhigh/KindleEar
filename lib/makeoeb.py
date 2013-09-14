@@ -3,19 +3,13 @@
 #将News feed生成的HTML文件转换成内存中的OEB格式
 import os, sys, uuid
 
-#sys.extensions_location = r"."
-#sys.resources_location = r"."
-
 #这两个是必须先引入的，会有一些全局初始化
 import calibre.startup
 import calibre.utils.resources
 
-from calibre.customize.profiles import KindleInput, KindleOutput
 from calibre.ebooks.conversion.mobioutput import MOBIOutput
 from calibre.ebooks.conversion.epuboutput import EPUBOutput
 from calibre.utils.bytestringio import byteStringIO
-from calibre.ebooks.oeb.base import OEBBook
-from calibre.ebooks.conversion.preprocess import HTMLPreProcessor
 
 def MimeFromFilename(f):
     #从文件名生成MIME
@@ -37,19 +31,18 @@ class ServerContainer(object):
     def read(self, path):
         path = path.lower()
         #所有的图片文件都放在images目录下
-        if path.endswith(("jpg","png","gif")):
-            if r'/' not in path:
-                path = os.path.join("images", path)
+        if path.endswith((".jpg",".png",".gif",".jpeg")) \
+            and r'/' not in path:
+            path = os.path.join("images", path)
         d,f  = '',None
         try:
             f = open(path, "rb")
             d = f.read()
         except Exception,e:
-            self.log.warn('read file %s failed:%s'%(path,str(e)))
+            self.log.warn("read file '%s' failed : %s" % (path,str(e)))
         finally:
             if f:
                 f.close()
-        
         return d
     def write(self, path):
         return None
@@ -59,13 +52,17 @@ class ServerContainer(object):
         return []
 
 def CreateOeb(log, path_or_stream, opts, encoding='utf-8'):
-    """创建一个空的OEB书籍 """
+    """ 创建一个空的OEB书籍 """
+    from calibre.ebooks.conversion.preprocess import HTMLPreProcessor
+    from calibre.ebooks.oeb.base import OEBBook
     html_preprocessor = HTMLPreProcessor(log, opts)
     if not encoding:
         encoding = None
     return OEBBook(log, html_preprocessor, pretty_print=opts.pretty_print, input_encoding=encoding)
 
 def getOpts():
+    from calibre.customize.profiles import KindleInput, KindleOutput
+    from config import REDUCE_IMAGE_TO
     opts = OptionValues()
     setattr(opts, "pretty_print", False)
     setattr(opts, "prefer_author_sort", True)
@@ -87,7 +84,7 @@ def getOpts():
     setattr(opts, "graying_image", True)
     setattr(opts, "image_png_to_jpg", False)
     setattr(opts, "fix_indents", False)
-    setattr(opts, "reduce_image_to", (568,682))
+    setattr(opts, "reduce_image_to", REDUCE_IMAGE_TO)
     
     #epub
     setattr(opts, "dont_split_on_page_breaks", False)
@@ -103,7 +100,7 @@ def getOpts():
     
     return opts
     
-def setMetaData(oeb, title='Feeds', lang='zh-cn', date=None, creator='Arroz'):
+def setMetaData(oeb, title='Feeds', lang='zh-cn', date=None, creator='KindleEar'):
     oeb.metadata.add('language', lang if lang else 'zh-cn')
     oeb.metadata.add('creator', creator)
     oeb.metadata.add('title', title)

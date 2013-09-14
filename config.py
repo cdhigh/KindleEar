@@ -4,7 +4,7 @@
 
 SRC_EMAIL = "akindleear@gmail.com"  #邮件的发件人地址
 
-DEFAULT_MASTHEAD = "mh_default.gif" #如果书籍没有题图，则使用此题图。
+DEFAULT_MASTHEAD = "mh_default.gif" #如果书籍没有报头，则使用此报头。
 DEFAULT_COVER = "cv_default.jpg" #如果书籍没有封面，则使用此封面，留空则不添加封面
 TIMEZONE = 8 #默认时区
 
@@ -28,7 +28,11 @@ PINYIN_FILENAME = False
 ALWAYS_CHAR_DETECT = False
 
 #是否生成TOC的文章内容预览，如果使用非触摸版Kindle，没意义，因为看不到
-#对于kindle touch和kindle paperwhite可以考虑，不过因为需要额外的处理，效率低一点
-#如果没有必要可以关闭。
+#对于kindle touch和kindle paperwhite可以设置为True。
 GENERATE_TOC_DESC = True
 TOC_DESC_WORD_LIMIT = 150  # 内容预览（摘要）字数限制
+
+#为减少文件大小，将大图片缩小为此尺寸，(Width,Height)
+#此尺寸是适应Kindle3的，如果你是完美主义者，可以设置为(568,682)，扣除margin
+#如果你使用的是其他分辨率的设置，可以直接修改为其他值
+REDUCE_IMAGE_TO = (600,800)

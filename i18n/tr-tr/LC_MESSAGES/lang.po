@@ -18,7 +18,7 @@ msgstr ""
 msgid "Old password is wrong!"
 msgstr "Eski şifre yanlış!"
 
-msgid "The new passwords are different!"
+msgid "The two new passwords are dismatch!"
 msgstr "Yeni şifre girişleri aynı değil!"
 
 msgid "Change password success!"
@@ -48,7 +48,7 @@ msgstr "Kullanıcı adı alfa-numerik olmalı!"
 msgid "The password includes non-ascii chars!"
 msgstr "Şifrenizde ASCII dışı karakterler olmamalı"
 
-msgid "The username no exist or password is wrong!"
+msgid "The username not exist or password is wrong!"
 msgstr "Kullanıcı mevcut değil veya şifre hatalı!"
 
 msgid "Please input new password to confirm!"
@@ -123,7 +123,7 @@ msgstr "Şifreyi onayla"
 msgid "Add"
 msgstr "Ekle"
 
-msgid "Note : No support many accounts for limit of free account of GAE."
+msgid "Note : No supports many accounts for limit of free account of GAE."
 msgstr "Not: Ücretsiz Google App Engine hesabında çok fazla kullanıcı oluşturma sorun oluşturabilir..."
 
 msgid "Accounts"
@@ -201,7 +201,7 @@ msgstr "Mevcut sürüm："
 msgid "Login"
 msgstr "Giriş"
 
-msgid "The website dont allow register, you can ask owner open a account for you."
+msgid "The website dont allow register, you can ask owner for a account."
 msgstr "Web sayfası kayıt olmaya izin vermemektedir, yöneticiden bir hesap isteyebilirsiniz."
 
 msgid "Only display last 10 logs"
@@ -228,7 +228,7 @@ msgstr "Kayıt yok."
 msgid "Subscribed"
 msgstr "Abone Olduğunuz Kitaplar"
 
-msgid "Cancel"
+msgid "Unsubscribe"
 msgstr "İptal"
 
 msgid "No have book subscribed"

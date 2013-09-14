@@ -263,7 +263,7 @@ legend {
     display:none;
 }
 .summaryRow:hover{
-    cursor:pointer;
+    /*cursor:pointer;*/
     position:relative;
     z-index:1;
 }

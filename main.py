@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.6.6"
+__Version__ = "1.6.7"
 __Author__ = "Arroz"
 
-import os, datetime, logging, re, random, __builtin__, hashlib
+import os, datetime, logging, __builtin__, hashlib
 from collections import OrderedDict, defaultdict
 import gettext
 
@@ -39,6 +39,12 @@ log.setLevel(logging.INFO if IsRunInLocal else logging.WARN)
 
 def local_time(fmt="%Y-%m-%d %H:%M", tz=TIMEZONE):
     return (datetime.datetime.utcnow()+datetime.timedelta(hours=tz)).strftime(fmt)
+
+def set_lang(lang):
+    """ 设置网页显示语言 """
+    tr = gettext.translation('lang', 'i18n', languages=[lang])
+    tr.install(True)
+    jjenv.install_gettext_translations(tr)
 
 #--------------db models----------------
 class Book(db.Model):
@@ -105,32 +111,32 @@ class UrlFilter(db.Model):
 class WhiteList(db.Model):
     mail = db.StringProperty()
     
-def StoreBookToDb():
-    for book in BookClasses():  #添加内置书籍
-        if memcache.get(book.title): #使用memcache加速
-            continue
-        b = Book.all().filter("title = ", book.title).get()
-        if not b:
-            b = Book(title=book.title,description=book.description,builtin=True)
-            b.put()
-            memcache.add(book.title, book.description, 86400)
+#def StoreBookToDb():
+for book in BookClasses():  #添加内置书籍
+    if memcache.get(book.title): #使用memcache加速
+        continue
+    b = Book.all().filter("title = ", book.title).get()
+    if not b:
+        b = Book(title=book.title,description=book.description,builtin=True)
+        b.put()
+        memcache.add(book.title, book.description, 86400)
 
-StoreBookToDb()
+#StoreBookToDb()
 
 class BaseHandler:
     " URL请求处理类的基类，实现一些共同的工具函数 "
     def __init__(self):
-        if not session.lang:
+        if not session.get('lang'):
             session.lang = self.browerlang()
         set_lang(session.lang)
         
     @classmethod
     def logined(self):
-        return True if session.login == 1 else False
+        return True if session.get('login') == 1 else False
     
     @classmethod
     def login_required(self, username=None):
-        if (session.login == 0) or (username and username != session.username):
+        if (session.get('login') != 1) or (username and username != session.get('username')):
             raise web.seeother(r'/')
     
     @classmethod
@@ -153,7 +159,7 @@ class BaseHandler:
         for c in langs: #浏览器直接支持的语种
             if c in supported_languages:
                 return c
-        for c in langs: #判断同一语种的其他可选语言
+        for c in langs: #同一语种的其他可选语言
             for sl in supported_languages:
                 if sl.startswith(c):
                     return sl
@@ -196,9 +202,9 @@ class BaseHandler:
             self.deliverlog(name, to, title, len(attachment), tz=tz)
     
     def render(self, templatefile, title='KindleEar', **kwargs):
-        if 'nickname' not in kwargs: kwargs['nickname'] = session.username
-        if 'lang' not in kwargs: kwargs['lang'] = session.lang
-        if 'version' not in kwargs: kwargs['version'] = __Version__
+        kwargs.setdefault('nickname', session.get('username'))
+        kwargs.setdefault('lang', session.get('lang', 'en'))
+        kwargs.setdefault('version', __Version__)
         return jjenv.get_template(templatefile).render(title=title, **kwargs)
         
 class Home(BaseHandler):
@@ -262,27 +268,21 @@ class AdvDel(BaseHandler):
         user = self.getcurrentuser()
         delurlid = web.input().get('delurlid')
         delwlist = web.input().get('delwlist')
-        if delurlid:
-            try: delurlid = int(delurlid)
-            except: pass
-            else:
-                flt = UrlFilter.get_by_id(delurlid)
-                if flt:
-                    flt.delete()
-        if delwlist:
-            try: delwlist = int(delwlist)
-            except: pass
-            else:
-                wlist = WhiteList.get_by_id(delwlist)
-                if wlist:
-                    wlist.delete()
+        if delurlid and delurlid.isdigit():
+            flt = UrlFilter.get_by_id(int(delurlid))
+            if flt:
+                flt.delete()
+        if delwlist and delwlist.isdigit():
+            wlist = WhiteList.get_by_id(int(delwlist))
+            if wlist:
+                wlist.delete()
         raise web.seeother('/advsetting')
         
 class Admin(BaseHandler):
     # 账户管理页面
     def GET(self):
         user = self.getcurrentuser()
-        users=KeUser.all() if user.name == 'admin' else None
+        users = KeUser.all() if user.name == 'admin' else None
         return self.render('admin.html',"Admin",
             current='admin', user=user, users=users)
         
@@ -290,7 +290,7 @@ class Admin(BaseHandler):
         u,up1,up2 = web.input().get('u'),web.input().get('up1'),web.input().get('up2')
         op,p1,p2 = web.input().get('op'), web.input().get('p1'), web.input().get('p2')
         user = self.getcurrentuser()
-        users=KeUser.all() if user.name == 'admin' else None
+        users = KeUser.all() if user.name == 'admin' else None
         if op is not None and p1 is not None and p2 is not None: #修改密码
             try:
                 pwd = hashlib.md5(op).hexdigest()
@@ -301,7 +301,7 @@ class Admin(BaseHandler):
                 if user.passwd != pwd:
                     tips = _("Old password is wrong!")
                 elif p1 != p2:
-                    tips = _("The new passwords are different!")
+                    tips = _("The two new passwords are dismatch!")
                 else:
                     tips = _("Change password success!")
                     user.passwd = newpwd
@@ -314,7 +314,7 @@ class Admin(BaseHandler):
             elif not u:
                 tips = _("Username is empty!")
             elif up1 != up2:
-                tips = _("The new passwords are different!")
+                tips = _("The two new passwords are dismatch!")
             elif KeUser.all().filter("name = ", u).get():
                 tips = _("Already exist the username!")
             else:
@@ -324,11 +324,10 @@ class Admin(BaseHandler):
                     tips = _("The password includes non-ascii chars!")
                 else:
                     myfeeds = Book(title=MY_FEEDS_TITLE,description=MY_FEEDS_DESC,
-                        builtin=False,keep_image=True)
+                        builtin=False,keep_image=True,oldest_article=7)
                     myfeeds.put()
                     au = KeUser(name=u,passwd=pwd,kindle_email='',enable_send=False,
-                        send_time=7,timezone=TIMEZONE,book_type="mobi",ownfeeds = myfeeds,
-                        oldest_article=7)
+                        send_time=7,timezone=TIMEZONE,book_type="mobi",ownfeeds=myfeeds)
                     au.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
                     au.put()
                     tips = _("Add a account success!")
@@ -345,17 +344,17 @@ class Login(BaseHandler):
         u = KeUser.all().filter("name = ", 'admin').get()
         if not u:
             myfeeds = Book(title=MY_FEEDS_TITLE,description=MY_FEEDS_DESC,
-                    builtin=False,keep_image=True)
+                    builtin=False,keep_image=True,oldest_article=7)
             myfeeds.put()
             au = KeUser(name='admin',passwd=hashlib.md5('admin').hexdigest(),
                 kindle_email='',enable_send=False,send_time=8,timezone=TIMEZONE,
-                book_type="mobi",expires=None,ownfeeds=myfeeds,oldest_article=7)
+                book_type="mobi",expires=None,ownfeeds=myfeeds)
             au.put()
             tips = _("Please use admin/admin to login at first time.")
         else:
             tips = _("Please input username and password.")
         
-        if session.login == 1:
+        if session.get('login') == 1:
             web.seeother(r'/')
         else:
             return self.render('login.html',"Login",tips=tips)
@@ -385,10 +384,10 @@ class Login(BaseHandler):
                 u.put()
             raise web.seeother(r'/')
         else:
-            tips = _("The username no exist or password is wrong!")
-            #session.login = 0
-            #session.username = ''
-            #session.kill()
+            tips = _("The username not exist or password is wrong!")
+            session.login = 0
+            session.username = ''
+            session.kill()
             return self.render('login.html',"Login",nickname='',tips=tips,username=name)
             
 class Logout(BaseHandler):
@@ -415,7 +414,7 @@ class AdminMgrPwd(BaseHandler):
             if not u:
                 tips = _("The username '%s' not exist!") % name
             elif p1 != p2:
-                tips = _("The new passwords are different!")
+                tips = _("The two new passwords are dismatch!")
             else:
                 try:
                     pwd = hashlib.md5(p1).hexdigest()
@@ -429,7 +428,7 @@ class AdminMgrPwd(BaseHandler):
             tips = _("Username is empty!")
         
         return self.render('adminmgrpwd.html', "Change password",
-            tips=tips,username=name)
+            tips=tips, username=name)
         
 class DelAccount(BaseHandler):
     def GET(self, name):
@@ -450,10 +449,12 @@ class DelAccount(BaseHandler):
                 tips = _("The username '%s' not exist!") % name
             else:
                 if u.ownfeeds:
+                    for feed in u.ownfeeds.feeds:
+                        feed.delete()
                     u.ownfeeds.delete()
                 u.delete()
                 
-                # 要删掉数据库中订阅记录
+                # 删掉订阅记录
                 for book in Book.all():
                     if book.users and name in book.users:
                         book.users.remove(name)
@@ -466,7 +467,7 @@ class DelAccount(BaseHandler):
         else:
             tips = _("The username is empty or you dont have right to delete it!")
         return self.render('delaccount.html', "Delete account",
-                tips=tips,username=name)
+                tips=tips, username=name)
 
 class MySubscription(BaseHandler):
     # 管理我的订阅和杂志列表
@@ -484,7 +485,7 @@ class MySubscription(BaseHandler):
         if not title or not url:
             return self.GET(_("Title or url is empty!"))
         
-        if not url.startswith('http'):
+        if not url.lower().startswith('http'): #http and https
             url = 'http://' + url
         assert user.ownfeeds
         Feed(title=title,url=url,book=user.ownfeeds,isfulltext=isfulltext).put()
@@ -546,6 +547,7 @@ class DelFeed(BaseHandler):
         raise web.seeother('/my')
                 
 class Deliver(BaseHandler):
+    """ 判断需要推送哪些书籍 """
     def queueit(self, usr, bookid):
         param = {"u":usr.name, "id":bookid, "type":usr.book_type,
             'to':usr.kindle_email,"tz":usr.timezone}
@@ -577,45 +579,50 @@ class Deliver(BaseHandler):
             if not book.users: # 没有用户订阅此书
                 continue
             
+            bkcls = None
+            if book.builtin:
+                bkcls = BookClass(book.title)
+                if not bkcls:
+                    continue
+            
             #确定此书是否需要下载
             for u in book.users:
                 user = KeUser.all().filter("enable_send = ",True).filter("name = ", u).get()
                 if not user or not user.kindle_email:
                     continue
-                
+                    
                 #先判断当天是否需要推送
                 day = local_time('%A', user.timezone)
                 usrdays = user.send_days
-                if usrdays and day not in usrdays: #为空也表示每日推送
+                if bkcls and bkcls.deliver_days: #按星期推送
+                    days = bkcls.deliver_days
+                    if not isinstance(days, list):
+                        days = [days]
+                    if day not in days:
+                        continue
+                elif usrdays and day not in usrdays: #为空也表示每日推送
                     continue
-                
+                    
                 #时间判断
                 h = int(local_time("%H", user.timezone)) + 1
-                h = h - 24 if h > 24 else h    
-                if user.send_time != h:
+                if h >= 24:
+                    h -= 24
+                if bkcls and bkcls.deliver_times:
+                    times = bkcls.deliver_times
+                    if not isinstance(times, list):
+                        times = [times]
+                    if h not in times:
+                        continue
+                elif user.send_time != h:
                     continue
                 
-                #到了这里才算需要推送
-                if book.builtin:
-                    bkcls = BookClass(book.title)
-                    if not bkcls:
-                        continue
-                    if bkcls.deliver_days: #按星期推送                            
-                        days = bkcls.deliver_days
-                        if not isinstance(days, list):
-                            days = [days]
-                        if day in days:
-                            self.queueit(user, book.key().id())
-                            sentcnt += 1
-                    else: #每天推送
-                        self.queueit(user, book.key().id())
-                        sentcnt += 1
-                else:
-                    self.queueit(user, book.key().id())
-                    sentcnt += 1
+                #到了这里才是需要推送的
+                self.queueit(user, book.key().id())
+                sentcnt += 1
         return "Put <strong>%d</strong> books to queue!" % sentcnt
         
 class Worker(BaseHandler):
+    """ 实际下载文章和生成电子书并且发送邮件 """
     def GET(self):
         username = web.input().get("u")
         bookid = web.input().get("id")
@@ -662,7 +669,7 @@ class Worker(BaseHandler):
         oeb = CreateOeb(log, None, opts)
         title = "%s %s" % (book.title, local_time(titlefmt, tz)) if titlefmt else book.title
         
-        setMetaData(oeb, title, book.language, local_time(tz=tz), SRC_EMAIL)
+        setMetaData(oeb, title, book.language, local_time(tz=tz), 'KindleEar')
         oeb.container = ServerContainer(log)
         
         #guide
@@ -699,7 +706,7 @@ class Worker(BaseHandler):
                 itemcnt += 1
                 
         if itemcnt > 0: # 建立TOC，杂志模式需要为两层目录结构
-            stoc = ['<html><head><title>Table Of Contents</title></head><body>']
+            stoc = ['<html><head><title>Table Of Contents</title></head><body><h2>Table Of Contents</h2>']
             for sec in sections.keys():
                 stoc.append('<h3><a href="%s">%s</a></h3>'%(sections[sec][0][1].href,sec))
                 sectoc = oeb.toc.add(sec, sections[sec][0][1].href)
@@ -735,7 +742,7 @@ class Mylogs(BaseHandler):
                 ul = DeliverLog.all().filter("username = ", u.name).order('-time').fetch(limit=5)
                 if ul:
                     logs[u.name] =  ul
-        return self.render('logs.html', "Deliver log",current='logs',
+        return self.render('logs.html', "Deliver log", current='logs',
             mylogs=mylogs, logs=logs)
         
 class RemoveLogs(BaseHandler):
@@ -753,7 +760,7 @@ class RemoveLogs(BaseHandler):
                 bk.delete()
         
         # 停止过期用户的推送
-        for user in KeUser.all():
+        for user in KeUser.all().filter('enable_send = ', True):
             if user.expires and (user.expires < datetime.datetime.utcnow()):
                 user.enable_send = False
                 user.put()
@@ -822,12 +829,6 @@ def fix_filesizeformat(value, binary=False):
                 return '%.1f %s' % ((base * bytes / unit), prefix)
         return '%.1f %s' % ((base * bytes / unit), prefix)        
 
-def set_lang(lang):
-    """ 设置网页显示语言 """
-    tr = gettext.translation('lang', 'i18n', languages=[lang])
-    tr.install(True)
-    jjenv.install_gettext_translations(tr)
-
 urls = (
   r"/", "Home",
   "/login", "Login",
@@ -851,12 +852,12 @@ urls = (
   "/dbviewer","DbViewer",
 )
 
-app = web.application(urls, globals())
+application = web.application(urls, globals())
 store = MemcacheStore(memcache)
-session = web.session.Session(app, store, initializer={'username':'','login':0,"lang":''})
+session = web.session.Session(application, store, initializer={'username':'','login':0,"lang":''})
 jjenv = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'),
                             extensions=["jinja2.ext.do",'jinja2.ext.i18n'])
 jjenv.filters['filesizeformat'] = fix_filesizeformat
-app = app.wsgifunc()
+app = application.wsgifunc()
 
 web.config.debug = IsRunInLocal

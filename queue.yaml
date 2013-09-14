@@ -1,8 +1,8 @@
 queue:
 
 - name: deliverqueue1
-  rate: 5/m
-  bucket_size: 5
+  rate: 2/m
+  bucket_size: 2
   retry_parameters:
     task_retry_limit: 2
     task_age_limit: 5m

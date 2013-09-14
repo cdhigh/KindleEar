@@ -2,15 +2,11 @@
 # -*- coding:utf-8 -*-
 """
 电子书基类，每本投递到kindle的书籍抽象为这里的一个类
-
 """
 
-import os, re, urllib, urlparse, random, imghdr, logging
-from datetime import datetime
+import os, re, urllib, urlparse, imghdr, logging, datetime
 from urllib2 import *
 import chardet
-from google.appengine.api import urlfetch
-from google.appengine.runtime import apiproxy_errors
 from google.appengine.ext import db
 
 from bs4 import BeautifulSoup, Comment, NavigableString, CData, Tag
@@ -23,7 +19,7 @@ from calibre.utils.img import rescale_image, mobify_image
 from config import *
 
 class UrlEncoding(db.Model):
-    #缓存网站的编码记录，探测一次编码成功后，以后再也不需要重新探测
+    #缓存网站的编码记录，chardet探测一次编码成功后，以后再也不需要重新探测
     netloc = db.StringProperty()
     feedenc = db.StringProperty()
     pageenc = db.StringProperty()
@@ -132,8 +128,16 @@ class BaseFeedBook:
     keep_image = True #生成的MOBI是否需要图片
     
     #是否按星期投递，留空则每天投递，否则是一个星期字符串列表
+    #一旦设置此属性，则网页上设置的星期推送对此书无效
     #'Monday','Tuesday',...,'Sunday'，大小写敏感
+    #比如设置为['Friday']
     deliver_days = []
+    
+    #自定义书籍推送时间，一旦设置了此时间，则网页上设置的时间对此书无效
+    #用此属性还可以实现一天推送多次
+    #格式为整形列表，比如每天8点/18点推送，则设置为[8,18]
+    #时区则自动使用订阅者的时区
+    deliver_times = []
     
     #设置是否使用readability-lxml(Yuri Baburov)自动处理网页
     #正常来说，大部分的网页，readability处理完后的效果都不错
@@ -170,15 +174,18 @@ class BaseFeedBook:
     remove_classes = [] # 清除标签的class属性为列表中内容的标签
     remove_attrs = [] # 清除所有标签的特定属性，不清除标签内容
     
+    # 添加到每篇文章的额外CSS，可以更完美的控制文章呈现
+    # 仅需要CSS内容，不要包括<style type="text/css"></style>标签
+    # 可以使用多行字符串
     extra_css = ''
     
-    # 一个字符串列表，可以包含正则表达式，在此列表中的url不会被下载
-    # 可用于一些注定无法下载的链接，以便节省时间
+    # 一个字符串列表，为正则表达式，在此列表中的url不会被下载
+    # 可用于一些注定无法下载的图片链接，以便节省时间
     url_filters = []
     
     #每个子类必须重新定义这个属性，为RSS/网页链接列表
-    #每个链接格式为元组：(分节标题, URL, fulltext)
-    #最后一项fulltext是可选的，如果存在，取值为True/False
+    #每个链接格式为元组：(分节标题, URL, isfulltext)
+    #最后一项isfulltext是可选的，如果存在，取值为True/False
     #注意，如果分节标题是中文的话，增加u前缀，比如
     #(u'8小时最热', 'http://www.qiushibaike.com'),
     feeds = []
@@ -217,10 +224,16 @@ class BaseFeedBook:
     def __init__(self, log=None):
         self.log = default_log if log is None else log
         self.compiled_urlfilters = []
+        self._imgindex = 0
     
     @property
     def timeout(self):
         return self.network_timeout if self.network_timeout else CONNECTION_TIMEOUT
+    
+    @property
+    def imgindex(self):
+        self._imgindex += 1
+        return self._imgindex
         
     def isfiltered(self, url):
         if not self.url_filters:
@@ -280,7 +293,7 @@ class BaseFeedBook:
     def ParseFeedUrls(self):
         """ return list like [(section,title,url,desc),..] """
         urls = []
-        tnow = datetime.utcnow()
+        tnow = datetime.datetime.utcnow()
         urladded = set()
         
         for feed in self.feeds:
@@ -300,7 +313,7 @@ class BaseFeedBook:
                     if self.oldest_article > 0 and hasattr(e, 'updated_parsed'):
                         updated = e.updated_parsed
                         if updated:
-                            delta = tnow - datetime(*(updated[0:6]))
+                            delta = tnow - datetime.datetime(*(updated[0:6]))
                             if delta.days*86400+delta.seconds > 86400*self.oldest_article:
                                 self.log.debug("article '%s' is too old"%e.title)
                                 continue
@@ -439,7 +452,7 @@ class BaseFeedBook:
                 imgurl = img['src']
                 if img.get('height') in ('1','2','3','4','5') \
                     or img.get('width') in ('1','2','3','4','5'):
-                    self.log.warn('img size too small,take away it:%s' % imgurl)
+                    self.log.warn('img size too small,take it away : %s' % imgurl)
                     img.decompose()
                     continue
                 if not imgurl.startswith('http'):
@@ -447,7 +460,7 @@ class BaseFeedBook:
                 if self.fetch_img_via_ssl and url.startswith('https://'):
                     imgurl = imgurl.replace('http://', 'https://')
                 if self.isfiltered(imgurl):
-                    self.log.warn('img filtered:%s' % imgurl)
+                    self.log.warn('img filtered : %s' % imgurl)
                     img.decompose()
                     continue
                 imgresult = opener.open(imgurl)
@@ -456,7 +469,7 @@ class BaseFeedBook:
                     imgtype = imghdr.what(None, imgcontent)
                     if imgtype:
                         imgmime = r"image/" + imgtype
-                        fnimg = "%d.%s" % (random.randint(10000,99999999), 'jpg' if imgtype=='jpeg' else imgtype)
+                        fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
                         img['src'] = fnimg
                         yield (imgmime, imgurl, fnimg, imgcontent, None)
                     else:
@@ -475,8 +488,8 @@ class BaseFeedBook:
         brief = u''
         if GENERATE_TOC_DESC:
             body = soup.find('body')
-            for h1 in body.find_all('h1'): # 去掉H1，避免和标题重复
-                h1.decompose()
+            for h in body.find_all(['h1','h2']): # 去掉h1/h2，避免和标题重复
+                h.decompose()
             for s in body.stripped_strings:
                 brief += unicode(s) + u' '
                 if len(brief) >= TOC_DESC_WORD_LIMIT:
@@ -517,7 +530,7 @@ class BaseFeedBook:
             except AttributeError: # soup has no body element
                 pass
         
-        def remove_beyond(tag, next): # 内联函数
+        def remove_beyond(tag, next): # 内嵌函数
             while tag is not None and getattr(tag, 'name', None) != 'body':
                 after = getattr(tag, next)
                 while after is not None:
@@ -581,7 +594,7 @@ class BaseFeedBook:
                     imgtype = imghdr.what(None, imgcontent)
                     if imgtype:
                         imgmime = r"image/" + imgtype
-                        fnimg = "%d.%s" % (random.randint(10000,99999999), 'jpg' if imgtype=='jpeg' else imgtype)
+                        fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
                         img['src'] = fnimg
                         yield (imgmime, imgurl, fnimg, imgcontent, None)
                     else:
@@ -605,8 +618,8 @@ class BaseFeedBook:
         brief = u''
         if GENERATE_TOC_DESC:
             body = soup.find('body')
-            for h1 in body.find_all('h1'): # 去掉H1，避免和标题重复
-                h1.decompose()
+            for h in body.find_all(['h1','h2']): # 去掉h1/h2，避免和标题重复
+                h.decompose()
             for s in body.stripped_strings:
                 brief += unicode(s) + u' '
                 if len(brief) >= TOC_DESC_WORD_LIMIT:
@@ -631,6 +644,7 @@ class BaseFeedBook:
 
 class WebpageBook(BaseFeedBook):
     fulltext_by_readability = False
+    
     # 直接在网页中获取信息
     def Items(self, opts=None):
         """
@@ -638,13 +652,13 @@ class WebpageBook(BaseFeedBook):
         对于HTML：section,url,title,content,brief
         对于图片，mime,url,filename,content,brief
         """
-        cnt4debug = 0
+        #cnt4debug = 0
         decoder = AutoDecoder(False)
         timeout = self.timeout
         for section, url in self.feeds:
-            cnt4debug += 1
-            if IsRunInLocal and cnt4debug > 1:
-                break
+            #cnt4debug += 1
+            #if IsRunInLocal and cnt4debug > 1:
+            #    break
             
             opener = URLOpener(self.host, timeout=timeout)
             result = opener.open(url)
@@ -661,11 +675,20 @@ class WebpageBook(BaseFeedBook):
             content =  self.preprocess(content)
             soup = BeautifulSoup(content, "lxml")
             
+            h = soup.find('head')
+            if not h:
+                h = soup.new_tag('head')
+                t = soup.new_tag('title')
+                t.string = section
+                h.append(t)
+                soup.html.insert(0, h)
+        
             try:
                 title = soup.html.head.title.string
             except AttributeError:
-                self.log.warn('object soup invalid!(%s)'%url)
-                continue
+                title = section
+                #self.log.warn('object soup invalid!(%s)'%url)
+                #continue
             
             title = self.processtitle(title)
             
@@ -748,7 +771,7 @@ class WebpageBook(BaseFeedBook):
                         imgtype = imghdr.what(None, imgcontent)
                         if imgtype:
                             imgmime = r"image/" + imgtype
-                            fnimg = "%d.%s" % (random.randint(10000,99999999), 'jpg' if imgtype=='jpeg' else imgtype)
+                            fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
                             img['src'] = fnimg
                             yield (imgmime, imgurl, fnimg, imgcontent, None)
                         else:
@@ -767,8 +790,8 @@ class WebpageBook(BaseFeedBook):
             brief = u''
             if GENERATE_TOC_DESC:
                 body = soup.find('body')
-                for h1 in body.find_all('h1'): # 去掉H1，避免和标题重复
-                    h1.decompose()
+                for h in body.find_all(['h1','h2']): # 去掉h1/h2，避免和标题重复
+                    h.decompose()
                 for s in body.stripped_strings:
                     brief += unicode(s) + u' '
                     if len(brief) >= TOC_DESC_WORD_LIMIT:
@@ -782,7 +805,7 @@ class WebpageBook(BaseFeedBook):
 
 #几个小工具函数
 def string_of_tag(tag, normalize_whitespace=False):
-    '''获取BeautifulSoup中的一个tag下面的所有字符串 '''
+    """ 获取BeautifulSoup中的一个tag下面的所有字符串 """
     if not tag:
         return ''
     if isinstance(tag, basestring):
