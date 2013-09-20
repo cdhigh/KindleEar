@@ -21,7 +21,8 @@ def decode_subject(subject):
 class HandleMail(InboundMailHandler):
     def receive(self, message):
         sender = parseaddr(message.sender)[1]
-        if not WhiteList.all().filter('mail = ', sender).get():
+        if not WhiteList.all().filter('mail = ', '*').get() and \
+            not WhiteList.all().filter('mail = ', sender).get():
             self.response.out.write("Spam mail!")
             default_log.warn('Spam mail from : %s' % sender)
             return

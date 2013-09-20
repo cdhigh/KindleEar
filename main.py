@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.6.7"
+__Version__ = "1.6.8"
 __Author__ = "Arroz"
 
 import os, datetime, logging, __builtin__, hashlib
@@ -330,6 +330,7 @@ class Admin(BaseHandler):
                         send_time=7,timezone=TIMEZONE,book_type="mobi",ownfeeds=myfeeds)
                     au.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
                     au.put()
+                    users = KeUser.all() if user.name == 'admin' else None
                     tips = _("Add a account success!")
             return self.render('admin.html',"Admin",
                 current='admin', user=user, users=users,actips=tips)

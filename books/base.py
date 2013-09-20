@@ -202,7 +202,7 @@ class BaseFeedBook:
     #网页title处理，比如去掉网站标识，一长串的SEQ字符串等
     #返回处理后的title
     def processtitle(self, title):
-        return re.sub(r'(\n)+', '', title)
+        return re.sub(r'(\n)+', ' ', title)
     
     #如果要处理图像，则在处理图片前调用此函数，可以处理和修改图片URL等
     def soupbeforeimage(self, soup):

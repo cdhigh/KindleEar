@@ -29,7 +29,7 @@ class Economist(BaseFeedBook):
         mainurl = 'http://www.economist.com/printedition'
         urls = []
         urladded = set()
-        opener = URLOpener(self.host)
+        opener = URLOpener(self.host, timeout=30)
         result = opener.open(mainurl)
         if result.status_code != 200:
             self.log.warn('fetch rss failed:%s'%mainurl)

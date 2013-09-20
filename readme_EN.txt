@@ -23,10 +23,6 @@
       after finished, you can open the website 'appid.appspot.com' (appid is name of your application)
       for example site of author: kindleear.appspot.com
       the initial username is 'admin', password is 'admin', please change it immediately after login.
-
-3. Translation
-   You can submit your translation in https://www.transifex.com/projects/p/kindleear/, after confirmed, 
-   would be merged to formal version.
-   
-4. License
+  
+3. License
    KindleEar is Licensed under the GPL license: http://www.gnu.org/licenses/gpl.html
