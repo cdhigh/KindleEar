@@ -9,7 +9,7 @@
    6.website support multi-languages.
 
 2. Deployment step by step
-   1.register a GAE account and create a application : https://appengine.google.com/
+   1.Register a GAE account and create a application : https://appengine.google.com/
    2.Download GAE SDK and install: https://developers.google.com/appengine/downloads
    3.Install Python 2.7.x
    4.Download all files of this application and uncompress it into a directory for example: c:\kindleear.
@@ -23,6 +23,10 @@
       after finished, you can open the website 'appid.appspot.com' (appid is name of your application)
       for example site of author: kindleear.appspot.com
       the initial username is 'admin', password is 'admin', please change it immediately after login.
+   8.more details can be found in faq.
+   9.If you don't want to intall GAE SDK and python, you have another choice, download a uploader from:
+     https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing
+     put kindleear folder into uploader directory, then double-click uploader.bat.
   
 3. License
    KindleEar is Licensed under the GPL license: http://www.gnu.org/licenses/gpl.html

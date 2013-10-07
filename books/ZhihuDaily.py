@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 __author__      = "@ohdarling88"
-__version__     = "0.1.0"
+__version__     = "0.1.2"
 
 import urllib
 import json
@@ -29,20 +29,26 @@ class ZhihuDaily(BaseFeedBook):
     page_encoding = "utf-8"
     mastheadfile = "mh_zhihudaily.gif"
     coverfile = "cv_zhihudaily.jpg"
-    keep_only_tags = [dict(name='div', attrs={'class':['question']})]
+    fulltext_by_readability = False
+    fulltext_by_instapaper = False
+    keep_only_tags = [dict(name='h1', attrs={'class':'headline-title'}),
+        dict(name='div', attrs={'class':'question'})]
     remove_tags = []
     remove_ids = []
-    remove_classes = ['view-more', 'avatar', 'headline', 'global-header']
+    remove_classes = ['view-more', 'avatar']
     remove_attrs = []
+    extra_css = """
+        .question-title {font-size:1.1em;font-weight:normal;text-decoration:underline;color:#606060;}
+        .meta {font-size:0.9em;color:#808080;}
+    """
     
     http_forwarder = 'http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u=%s'
     
     feeds = [
-            (u'今日头条', r'http://news.at.zhihu.com/api/1.1/news/latest', u'top_stories'),
-            (u'今日热闻', r'http://news.at.zhihu.com/api/1.1/news/latest', u'news'),
+            (u'今日头条', 'http://news.at.zhihu.com/api/1.2/news/latest'),
            ]
            
-    partitions = {u'top_stories':u'今日头条',u'news':u'今日热闻'}
+    partitions = [('top_stories',u'今日头条'),('news',u'今日热闻'),]
     
     def url4forwarder(self, url):
         ' 生成经过转发器的URL '
@@ -52,25 +58,23 @@ class ZhihuDaily(BaseFeedBook):
         """ return list like [(section,title,url,desc),..] """
         urls = []
         urladded = set()
-        url = self.url4forwarder('http://news.at.zhihu.com/api/1.1/news/latest')
+        url = self.url4forwarder(self.feeds[0][1])
         opener = URLOpener(self.host, timeout=self.timeout)
         result = opener.open(url)
         if result.status_code == 200 and result.content:
             feed = json.loads(result.content.decode(self.feed_encoding))
             
-            for partition in self.partitions:
+            for partition,section in self.partitions:
                 for item in feed[partition]:
-                    for e in item['items']:
-                        urlfeed = e['share_url']
-                        if urlfeed in urladded:
-                            self.log.warn('skipped %s' % urlfeed)
-                            continue
-                            
-                        urls.append((self.partitions[partition], e['title'], urlfeed, None))
-                        urladded.add(urlfeed)
+                    urlfeed = item['share_url']
+                    if urlfeed in urladded:
+                        self.log.warn('skipped %s' % urlfeed)
+                        continue
+                        
+                    urls.append((section, item['title'], urlfeed, None))
+                    urladded.add(urlfeed)
         else:
             self.log.warn('fetch rss failed(%d):%s'%(result.status_code,url))
-        #self.log.warn('%s' % json.dumps(urls))
         return urls
 
     def fetcharticle(self, url, decoder):

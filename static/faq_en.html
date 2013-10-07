@@ -19,10 +19,10 @@
         <h1><a href="/">KindleEar<sup>&#9728;</sup></a></h1>
         <div class="clear"></div>
     </div>
-	<h2>What are the characteristics of this application and benefits?</h2>
+	<h2>What are the features and benefits?</h2>
 	<p class="answer">Features:
 	<ul>
-	 <li>custom RSS</li>
+	 <li>custom rss</li>
      <li>multi-account management, which supports many kindles</li>
      <li>the magazine format MOBI with images</li>
      <li>automatic daily scheduled deliver</li>
@@ -34,12 +34,12 @@
      <a href="periodical.gif" target="_blank"><img src="periodical.gif" style="width:750px;" /></a>
 	</ul>
 	</p>
-
-    <h2>This application requires its own servers?</h2>
+    <hr />
+    <h2>This application requires its own server?</h2>
     <p class="answer">This application hosted on Google App Engine server, do not need your own server.</p>
-    
-    <h2>How to build your own push server?</h2>
-    <p class="answer">Following steps:
+    <hr />
+    <h2>How to deploy my own delivery server?</h2>
+    <p class="answer"><strong>Following formal steps:</strong>
         <ol>
 		<li>in <a href="http://www.github.com/cdhigh/kindleear">Github</a>  page to download the latest version KindleEar in the lower right corner of the page there is a button "Download ZIP", click to download a ZIP file that contains all the source code, and then extract it to your favorite directory, such as C:\KindleEar (below in this example).</li>
 		<li>you need a GAE account, please visit <a href="https://appengine.google.com/">Google AppEngine</a> page. Use your gmail account to login, click on "Create Application", in the account activation SMS page, select Others, enter your cellphone number with country code (+nn), click Send, you can receive activation information on the phone in a while, after activate click Create Application again, in the Application Identifier field, enter a name of your choice applications (eg: KindleEar123). The remaining options can keep the default, click on the Create Application to create a GAE application.</li>
@@ -53,44 +53,61 @@
 			<li>enter 'upload' command: c:\python27\python.exe appcfg.py update C:\KindleEar</li>
 			<li>enter the gmail account and password (password does not display in screen).</li></li>
 		<li>after uploaded successfully use your browser to open domain: http://kindleear123.appspot.com (example only, kindleear123 should be changed to the name of your gae application), if they can open properly, then goto last step.</li>
-	    <li>add your gmail account to your kindle push email whitelist. you should know how to do it before.</li>
-		<li>then what? Enjoy your own push service now!</li>
+	    <li>add your gmail account to your kindle email whitelist. you should know how to do it before.</li>
+		<li>then what? Enjoy your own delivery service now!</li>
 		</ol>
+    <p><strong>Following steps much easy.</strong>
+        <ol>
+        <li>download KindleEar and get a GAE account, then create a application.</li>
+        <li>modify the files app.yaml and config.py.</li>
+        <li>download <a href="https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing">uploader</a>.</li>
+        <li>uncompress 'uploader' to a directory, copy a folder of KindleEar here and rename it to kindleear, then double-click 'uploader.bat' to start a procedure for upload.</li>
+        </ol></p>
     </p>
-	<h2>Why am I not receiving push RSS?</h2>
+    <hr />
+	<h2>Why am I not receive rss?</h2>
 	<p class="answer">For many reasons, the following are a few possibilities:
 	<ol>
     <li>didnot enable "Enable deliver custom rss" switch, this switch local in bottom of setting page.</li>
 	<li>didnot add kindle email whitelist to your gmail address:</li>
 		<ul><li>Solution: add whitelist in http://www.amazon.com/</li></ul>
 	<li>the number of custom rss too many to proccess in limit of 10 minutes.
-		<ul><li>the number of RSS is generally less than ten, more rss can be supported if have more "fulltext RSS".</li>
+		<ul><li>the number of rss is generally less than ten, more rss can be supported if have more "fulltext RSS".</li>
 		<li>please login <a href="https://appengine.google.com"> appengine </a>, click your application, check if has exception DeadlineExceededError logged in logs, if yes, reduce the number of rss, or split them for two accounts.</li></ul>
 	</li>
 	<li>the number of rss too many, cause excessive memory of 128MB(default).
 	    <ul><li>open <a href="https://appengine.google.com">appengine</a> check if has exception 'soft private memory limit', if yes, click 'Application Settings' in the left, change 'Frontend Instance Class' of section 'Performance' to 'F2(1200MHz,256MB)'.</li></ul>
 	</li>
+    <li>the content of rss link isn't a valid XML format.</li>
 	</ol></p>
+    <hr />
 	<h2>What is fulltext rss?</h2>
-<p class="answer">Fulltext rss is which contains all content of articles in rss, on the other hand, summary rss contains only brief description of articles. you can confirm it by opening the link of rss.</p>
+    <p class="answer">Fulltext rss is which contains all content of articles in rss, on the other hand, summary rss contains only brief description of articles. you can confirm it by opening the link of rss.</p>
+    <hr />
 	<h2>Can fulltext rss be processed as summary rss? and vice versa?</h2>
-<p class="answer">Fulltext rss can be processed as summary rss, in this case, program ignore the content in rss xml file and fetch fulltext in original link, this would spend much time, resulting in the number of supported RSS decreased. If summary rss processed as fulltext rss, articles pushed to your kindle would have brief description only.</p>
-	<h2>How to deal with subscription weekly?</h2>
+    <p class="answer">Fulltext rss can be processed as summary rss, in this case, program ignore the content in rss xml file and fetch fulltext in original link, this would spend much time, resulting in the number of supported rss decreased. If summary rss processed as fulltext rss, articles pushed to your kindle would have brief description only.</p>
+	<hr />
+    <h2>How to deal with subscription weekly?</h2>
 	<p class="answer">Some rss update weekly, for this type of rss, you can write a py file to directory books of application with variable 'deliver_days' set to a Day like 'Friday'.</p>
+    <hr />
     <h2>How Url filter works.</h2>
-<p class="answer">Url filter is no for beginner,for whom know Regular Expressions and python. urls in list would not be downloaded for saving of time.</p>
+    <p class="answer">Url filter is no for beginner,for whom know Regular Expressions and python. urls in list would not be downloaded for saving of time.</p>
+    <hr />
     <h2>How to do if the gfw of China block some rss?</h2>
 	<p class="answer">Change the link to use https protocol.</p>
-<h2>How to put cover and masthead images in other directory if I add a builtin books.</h2>
+    <hr />
+    <h2>How to put cover and masthead images in other directory if I add a builtin books.</h2>
 	<p class="answer">Put a full path in variable mastheadfile and coverfile, for example:<ul>
 	    <li>mastheadfile = 'books/xxxx.gif'</li>
         <li>coverfile = 'books/xxxx.jpg'</li></ul></p>
+    <hr />
     <h2>How to deal with when occur SSL error when upload code to gae server?</h2>
-<p class="answer">Some fiends in China would encounter urllib2.URLError: &lt;urlopen error [Errno 8] _ssl.c:504: EOF occurred in violation of protocol&gt;, in this case, change the hosts file of OS, add a line "74.125.229.174  appengine.google.com"</p>
+    <p class="answer">Some fiends in China would encounter urllib2.URLError: &lt;urlopen error [Errno 8] _ssl.c:504: EOF occurred in violation of protocol&gt;, in this case, change the hosts file of OS, add a line "74.125.229.174  appengine.google.com"</p>
+    <hr />
     <h2>Some articles garbled?</h2>
-    <p class="answer">For custom RSS and built-books without encoding specified, program detects encoding automatically by using chardet module of python, this module is not 100% accurate, and if encoding detected is wrong, the article may be garbled. Because this situation is very rare, KindleEar only supply a not very elegant solution like geeker: manually change chardet-detect encoding saved in database. steps follows:<br /> 
-<ol><li>login appid.appspot.com by using account 'admin'(assuming your application name is appid).</li>
-<li>input url 'https://appid.appspot.com/dbviewer' in your brower address bar. check encoding of websites in section UrlEncoding. if encoding is wrong for some site, record its ID of database item.</li>
+    <p class="answer">For custom rss and built-books without encoding specified, program detects encoding automatically by using chardet module of python, this module is not 100% accurate, and if encoding detected is wrong, the article may be garbled. Because this situation is very rare, KindleEar only supply a not very elegant solution like geeker: manually change chardet-detect encoding saved in database. steps follows:<br /> 
+    <ol><li>login appid.appspot.com by using account 'admin'(assuming your application name is appid).</li>
+    <li>input url 'https://appid.appspot.com/dbviewer' in your brower address bar. check encoding of websites in section UrlEncoding. if encoding is wrong for some site, record its ID of database item.</li>
         <li>enter a long string in addressbar of brower, 'https://appid.appspot.com/dbviewer?action=modurlenc&id=dbid&feedenc=fenc&pageenc=penc'
         <ul>before press enter, modify some vaiable follows:
             <li>dbid: the ID of database item.</li>
@@ -100,6 +117,7 @@
     <li>You can obtain the correct encoding by viewing source code of a webpage.</li>
         </ol>
         </p>
+    <hr />
     <h2>How can I do if forgot password?</h2>
     <p class="answer">If you have forgotten the password for non-administrator account, you can notify the administrator to change your password. If an administrator password forgot, you can login appengine.google.com, on the left select "Datastore Admin", delete all KeUser data, all account information will be deleted, and then re-use admin/admin login to your application . Did not find "Datastore Admin"? You can active it in the "Application Settings".
         <br />If you know python, you would find other solution.</p>

@@ -19,7 +19,7 @@
         <h1><a href="/">KindleEar<sup>&#9728;</sup></a></h1>
         <div class="clear"></div>
     </div>
-	<h2>这个应用有什么特点和优点？</h2>
+    <h2>这个应用有什么特点和优点？</h2>
 	<p class="answer">特点：
 	<ul>
 	 <li>自定义RSS</li>
@@ -34,12 +34,12 @@
      <a href="periodical.gif" target="_blank"><img src="periodical.gif" style="width:750px;" /></a>
 	</ul>
 	</p>
-
+    <hr />
     <h2>此应用需要自己的服务器吗？</h2>
     <p class="answer">此应用托管在Google App Engine服务器上，不需要你自己的服务器。</p>
-    
+    <hr />
     <h2>如何搭建自己的推送服务器？</h2>
-    <p class="answer">以下是搭建步骤：
+    <p class="answer"><strong>以下是正规的搭建步骤：</strong>
         <ol>
 		<li>在 <a href="http://www.github.com/cdhigh/kindleear">Github</a> 页面上下载KindleEar的最新版本，在页面的右下角有一个按钮"Download ZIP"，点击即可下载一个包含全部源码的ZIP文档，然后解压到你喜欢的目录，比如C:\KindleEar（下面以这个为例）。</li>
 		<li>你需要一个GAE账号，请移步 <a href="https://appengine.google.com/">Google AppEngine</a> 申请。使用G你的gmail账号登陆后，点击"Create Application"，进入到帐号短信激活界面，选择Others，输入你自己的手机号（中国手机国家号：+86），输入完毕点击Send，稍后就可以在手机上收到激活信息，待激活后再次点击Create Application，在Application Identifier一栏输入你选择的应用名字（如：KindleEar123）。其余选项保持默认即可，点击页尾的Create Application即成功创建了一个GAE程序（用来上传KinldeEar之用）。</li>
@@ -56,7 +56,15 @@
 		<li>将你的gmail账号加入kindle推送邮箱的白名单。这一步你应该早就会了吧。</li>
 		<li>然后呢？享受你自己的推送服务吧！</li>
 		</ol>
+    <p><strong>以下是简化的搭建步骤（使用uploader）：</strong>
+        <ol>
+        <li>下载KindleEar和申请GAE账号，并创建一个application。</li>
+        <li>修改KindleEar的app.yaml和config.py文件中的配置。</li>
+        <li>下载<a href="https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing">uploader</a>。如果此链接被墙，可以使用此墙内地址<a href="http://yunpan.cn/QGiHjKRZ6EreW">uploader</a>。</li>
+        <li>解压uploader到特定目录，将之前下载并解压的KindleEar目录拷贝到此目录下，改名为kindleear，然后双击执行uploader.bat后根据提示输入email和密码即可上传代码。</li>
+        </ol></p>
     </p>
+    <hr />
 	<h2>为什么我收不到推送的RSS？</h2>
 	<p class="answer">收不到推送的RSS原因很多，如下是几种可能：
 	<ol>
@@ -70,23 +78,32 @@
 	<li>添加RSS过多导致内存占用过大，程序被自动终止。
 	    <ul><li>请打开<a href="https://appengine.google.com">appengine</a>，查看logs是否有内存越限异常，如果有的话，请打开appengine左边栏目“Application Settings”，在"Performance"小节将"Frontend Instance Class"选择为"F2(1200MHz,256MB)。"</li></ul>
 	</li>
+    <li>你输入的订阅地址不是合法的RSS/ATOM订阅（XML格式）。</li>
 	</ol></p>
+    <hr />
 	<h2>何为全文RSS？</h2>
 	<p class="answer">全文RSS就是在RSS的XML文件中已经给出了文章全文的RSS，使用浏览器打开RSS对应的链接，查看是否已经有全部的文章内容？如果是，则为全文RSS。如果仅给出文章摘要，则不是。</p>
-	<h2>全文RSS能否按照摘要RSS处理？反之是否可以？</h2>
+	<hr />
+    <h2>全文RSS能否按照摘要RSS处理？反之是否可以？</h2>
 	<p class="answer">全文RSS当然可以按照摘要RSS处理，这样就忽略RSS链接中给出的文章内容，而直接到原链接中获取，只是时间要多花费不少，导致支持的RSS数量下降。如果是摘要RSS，则不能按全文RSS处理，否则会导致文章内容不全。</p>
-	<h2>如何按周订阅？</h2>
+	<hr />
+    <h2>如何按周订阅？</h2>
 	<p class="answer">有些RSS每周更新，这样每天推送同样的内容就蛋疼了点，碰到这种情况，请添加一个py文件，将参数deliver_days设置为你需要推送到星期（英文星期单词），注意deliver_days是一个列表，你也可以设置为几个单词，这样的话，其实也可以设置为什么时候不推送，比如周末不推送。</p>
+    <hr />
     <h2>URL过滤器功能如何使用？</h2>
 	<p class="answer">URL过滤器为高级功能，面向懂python正则表达式的同学，应用场景是这样的：有一些RSS的一部分固定的图像会一直下载不了，为了节省时间支持更多的RSS，则建议过滤这些图像URL，不再下载。URL过滤器支持正则表达式，请严格按python正则表达式的语法编写URL过滤器。</p>
+    <hr />
     <h2>部分RSS有敏感内容，被qiang屏蔽了怎么办？</h2>
 	<p class="answer">升级到1.5及以上版本，并且将被qiang的RSS的链接协议改为https。</p>
+    <hr />
     <h2>自定义书籍py文件，如何将封面/题图放到py同一目录？</h2>
 	<p class="answer">升级到1.5及以上版本，在封面/题图文件设置中有全路径信息即可，如下：<ul>
 	    <li>mastheadfile = 'books/xxxx.gif'</li>
         <li>coverfile = 'books/xxxx.jpg'</li></ul></p>
+    <hr />
     <h2>GAE上传遇到SSL出错，如何解决？</h2>
     <p class="answer">墙内的朋友有时候在上传代码时遇到此错误：urllib2.URLError: &lt;urlopen error [Errno 8] _ssl.c:504: EOF occurred in violation of protocol&gt;，如果这样，改hosts即可：“74.125.229.174  appengine.google.com”</p>
+    <hr />
     <h2>有部分文章乱码？</h2>
     <p class="answer">对于自定义RSS和不指定编码的内置书籍，软件使用python模块chardet自动检测编码，此模块的检测结果并不是100%正确的，如果检测错误，则文章可能乱码，这在浏览器上偶尔碰到网页乱码一样道理。
         <br />因为这种情况很罕见，KindleEar仅提供一个不是很优雅的hack方案：手工更改数据库缓存的chardet检测的编码。<br />方法如下：
@@ -101,8 +118,9 @@
         <li>至于怎么获取正确的编码，可以通过在浏览器中查看网页源码。</li>
         </ol>
         </p>
+    <hr />
     <h2>忘记密码了怎么办？</h2>
-    <p class="answer">如果是忘记非管理员账号的密码，则可以通知管理员改密码。如果是管理员密码，则可以登陆appengine.google.com，在左边选择"Datastore Admin"，删除KeUser的所有数据，则所有账号的信息都会被删除，然后重新使用admin/admin登陆你的应用即可。没有找到"Datastore Admin"？则可以先在"Application Settings"里面打开。
+    <p class="answer">如果是忘记非管理员账号的密码，则可以通知管理员改密码。如果是管理员密码，则可以登陆appengine.google.com，在左边选择"Datastore Admin"，删除KeUser的所有数据，则所有账号的信息都会被删除，或者将所有数据库都删除也可以，然后重新使用admin/admin登陆你的应用即可。没有找到"Datastore Admin"？则可以先在"Application Settings"里面打开。
         <br />如果你会编程，则你会有其他方法，不用我说。</p>
     
 	<pre><p> </p><p> </p></pre>

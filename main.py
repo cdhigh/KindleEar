@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.6.8"
+__Version__ = "1.6.9"
 __Author__ = "Arroz"
 
 import os, datetime, logging, __builtin__, hashlib
@@ -558,11 +558,14 @@ class Deliver(BaseHandler):
     
     def GET(self):
         username = web.input().get('u')
+        id = web.input().get('id') #for debug
         books = Book.all()
-        if username: # 现在投递，不判断时间和星期
+        if username: #现在投递，不判断时间和星期
             sent = []
-            for book in books:
-                if username not in book.users:
+            books2push = Book.get_by_id(int(id)) if id and id.isdigit() else None
+            books2push = [books2push] if books2push else books
+            for book in books2push:
+                if not id and username not in book.users:
                     continue
                 user = KeUser.all().filter("name = ", username).get()
                 if user and user.kindle_email:
@@ -573,11 +576,11 @@ class Deliver(BaseHandler):
             else:
                 tips = _("No book(s) to deliver!")
             return self.render('autoback.html', "Delivering",tips=tips)
-            
+        
         #定时cron调用
         sentcnt = 0
         for book in books:
-            if not book.users: # 没有用户订阅此书
+            if not book.users: #没有用户订阅此书
                 continue
             
             bkcls = None

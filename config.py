@@ -3,10 +3,10 @@
 """app的配置文件"""
 
 SRC_EMAIL = "akindleear@gmail.com"  #邮件的发件人地址
+TIMEZONE = 8                        #默认时区
 
 DEFAULT_MASTHEAD = "mh_default.gif" #如果书籍没有报头，则使用此报头。
 DEFAULT_COVER = "cv_default.jpg" #如果书籍没有封面，则使用此封面，留空则不添加封面
-TIMEZONE = 8 #默认时区
 
 #自定义RSS的默认标题，后续可以在网页上修改，如果包含中文则需要在前面加u''
 MY_FEEDS_TITLE = u'KindleEar'
@@ -34,5 +34,5 @@ TOC_DESC_WORD_LIMIT = 150  # 内容预览（摘要）字数限制
 
 #为减少文件大小，将大图片缩小为此尺寸，(Width,Height)
 #此尺寸是适应Kindle3的，如果你是完美主义者，可以设置为(568,682)，扣除margin
-#如果你使用的是其他分辨率的设置，可以直接修改为其他值
+#如果你使用的是其他分辨率的机器，可以直接修改为其他值
 REDUCE_IMAGE_TO = (600,800)

@@ -147,14 +147,15 @@ class BaseFeedBook:
     fulltext_by_readability = True
     
     #如果为True则使用instapaper服务先清理网页，否则直接连URL下载网页内容
-    #instapaper的服务不太稳定，经常连接超时，建议设置为False
+    #instapaper的服务很赞，能将一个乱七八糟的网页转换成只有正文内容的网页
+    #但是缺点就是不太稳定，经常连接超时，建议设置为False
     #这样你需要自己编程清理网页，建议使用下面的keep_only_tags[]工具
     fulltext_by_instapaper = False
     
     # 背景知识：下面所说的标签为HTML标签，比如'body','h1','div','p'等都是标签
     
     # 仅抽取网页中特定的标签段，在一个复杂的网页中抽取正文，这个工具效率最高
-    # 比如：keep_only_tags = [dict(name='div', attrs={'id':['article']}),]
+    # 比如：keep_only_tags = [dict(name='div', attrs={'id':'article'}),]
     # 这个优先级最高，先处理了这个标签再处理其他标签。
     keep_only_tags = []
     
@@ -163,10 +164,10 @@ class BaseFeedBook:
     remove_tags_before = []
     
     # 内置的几个必须删除的标签，不建议子类修改
-    insta_remove_tags = ['script','object','video','embed','iframe','noscript']
-    insta_remove_attrs = ['title','width','height','onclick','onload','id','class']
+    insta_remove_tags = ['script','object','video','embed','noscript','style','link']
+    insta_remove_attrs = ['width','height','onclick','onload',]
     insta_remove_classes = []
-    insta_remove_ids = ['controlbar_container','left_buttons','right_buttons','title_label',]
+    insta_remove_ids = ['controlbar_container',]
     
     # 子类定制的HTML标签清理内容
     remove_tags = [] # 完全清理此标签
@@ -174,7 +175,7 @@ class BaseFeedBook:
     remove_classes = [] # 清除标签的class属性为列表中内容的标签
     remove_attrs = [] # 清除所有标签的特定属性，不清除标签内容
     
-    # 添加到每篇文章的额外CSS，可以更完美的控制文章呈现
+    # 添加到每篇文章的CSS，可以更完美的控制文章呈现
     # 仅需要CSS内容，不要包括<style type="text/css"></style>标签
     # 可以使用多行字符串
     extra_css = ''
@@ -194,7 +195,7 @@ class BaseFeedBook:
     #子类可以使用钩子函数进一步定制
     
     #普通Feed在网页元素拆分分析前调用，全文Feed在FEED拆分前调用
-    #网络上估计90%的RSS都是普通Feed，只有概要信息
+    #网络上大部分的RSS都是普通Feed，只有概要信息
     #content为网页字符串，记得处理后返回字符串
     def preprocess(self, content):
         return content
@@ -369,7 +370,7 @@ class BaseFeedBook:
                     yield (section, url, title, content, brief)
     
     def fetcharticle(self, url, decoder):
-        #使用同步方式获取一篇文章
+        """链接网页获取一篇文章"""
         if self.fulltext_by_instapaper and not self.fulltext_by_readability:
             url = "http://www.instapaper.com/m?u=%s" % self.url_unescape(url)
         
@@ -380,13 +381,18 @@ class BaseFeedBook:
             self.log.warn('fetch article failed(%d):%s.' % (status_code,url))
             return None
         
+        if 0: #有些网站封锁GAE，将GAE获取的网页发送到自己邮箱调试
+            from google.appengine.api import mail
+            mail.send_mail(SRC_EMAIL, SRC_EMAIL, "KindleEar Debug", "KindlerEar",
+                attachments=[("Page.html", content),])
+                
         if self.page_encoding:
             return content.decode(self.page_encoding)
         else:
             return decoder.decode(content,url)
         
     def readability(self, article, url, opts=None):
-        #使用readability-lxml处理全文信息
+        """ 使用readability-lxml处理全文信息 """
         #因为图片文件占内存，为了节省内存，这个函数也做为生成器
         content = self.preprocess(article)
         
@@ -426,11 +432,6 @@ class BaseFeedBook:
                     soup.html.body.insert(0, t)
                     break
                     
-        if self.extra_css:
-            sty = soup.new_tag('style', type="text/css")
-            sty.string = self.extra_css
-            soup.html.head.append(sty)
-            
         self.soupbeforeimage(soup)
         
         if self.remove_tags:
@@ -445,7 +446,14 @@ class BaseFeedBook:
         for attr in self.remove_attrs:
             for tag in soup.find_all(attrs={attr:True}):
                 del tag[attr]
-        
+        for cmt in soup.find_all(text=lambda text:isinstance(text, Comment)):
+            cmt.extract()
+            
+        if self.extra_css:
+            sty = soup.new_tag('style', type="text/css")
+            sty.string = self.extra_css
+            soup.html.head.append(sty)
+            
         if self.keep_image:
             opener = URLOpener(self.host, timeout=self.timeout)
             for img in soup.find_all('img',attrs={'src':True}):
@@ -477,6 +485,11 @@ class BaseFeedBook:
                 else:
                     self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
                     img.decompose()
+                    
+            #去掉图像上面的链接
+            for img in soup.find_all('img'):
+                if img.parent.name == 'a':
+                    img.parent.replace_with(img)
         else:
             for img in soup.find_all('img'):
                 img.decompose()
@@ -500,6 +513,7 @@ class BaseFeedBook:
         yield (title, None, None, content, brief)
         
     def readability_by_soup(self, article, url, opts=None):
+        """ 使用BeautifulSoup手动解析网页，提取正文内容 """
         #因为图片文件占内存，为了节省内存，这个函数也做为生成器
         content = self.preprocess(article)
         soup = BeautifulSoup(content, "lxml")
@@ -513,11 +527,6 @@ class BaseFeedBook:
         title = self.processtitle(title)
         soup.html.head.title.string = title
         
-        if self.extra_css:
-            sty = soup.new_tag('style', type="text/css")
-            sty.string = self.extra_css
-            soup.html.head.append(sty)
-            
         if self.keep_only_tags:
             body = soup.new_tag('body')
             try:
@@ -530,23 +539,12 @@ class BaseFeedBook:
             except AttributeError: # soup has no body element
                 pass
         
-        def remove_beyond(tag, next): # 内嵌函数
-            while tag is not None and getattr(tag, 'name', None) != 'body':
-                after = getattr(tag, next)
-                while after is not None:
-                    ns = getattr(tag, next)
-                    after.decompose()
-                    after = ns
-                tag = tag.parent
+        for spec in self.remove_tags_after:
+            tag = soup.find(**spec)
+            remove_beyond(tag, 'next_sibling')
         
-        if self.remove_tags_after:
-            rt = [self.remove_tags_after] if isinstance(self.remove_tags_after, dict) else self.remove_tags_after
-            for spec in rt:
-                tag = soup.find(**spec)
-                remove_beyond(tag, 'next_sibling')
-        
-        if self.remove_tags_before:
-            tag = soup.find(**self.remove_tags_before)
+        for spec in self.remove_tags_before:
+            tag = soup.find(**spec)
             remove_beyond(tag, 'previous_sibling')
         
         remove_tags = self.insta_remove_tags + self.remove_tags
@@ -565,11 +563,14 @@ class BaseFeedBook:
         for attr in remove_attrs:
             for tag in soup.find_all(attrs={attr:True}):
                 del tag[attr]
-        for tag in soup.find_all(attrs={"type":"text/css"}):
-            tag.decompose()
         for cmt in soup.find_all(text=lambda text:isinstance(text, Comment)):
             cmt.extract()
         
+        if self.extra_css:
+            sty = soup.new_tag('style', type="text/css")
+            sty.string = self.extra_css
+            soup.html.head.append(sty)
+            
         if self.keep_image:
             opener = URLOpener(self.host, timeout=self.timeout)
             self.soupbeforeimage(soup)
@@ -602,14 +603,30 @@ class BaseFeedBook:
                 else:
                     self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
                     img.decompose()
+            
+            #去掉图像上面的链接
+            for img in soup.find_all('img'):
+                if img.parent.name == 'a':
+                    img.parent.replace_with(img)
         else:
             for img in soup.find_all('img'):
                 img.decompose()
         
-        if not soup.find('h1'):
-            h1 = soup.new_tag('h1')
-            h1.string = title
-            soup.find('body').insert(0,h1)
+        #如果没有内容标题则添加
+        t = soup.html.body.find(['h1','h2'])
+        if not t:
+            t = soup.new_tag('h1')
+            t.string = title
+            soup.html.body.insert(0, t)
+        else:
+            totallen = 0
+            for ps in t.previous_siblings:
+                totallen += len(string_of_tag(ps))
+                if totallen > 40: #此H1/H2在文章中间出现，不是文章标题
+                    t = soup.new_tag('h1')
+                    t.string = title
+                    soup.html.body.insert(0, t)
+                    break
         
         self.soupprocessex(soup)
         content = unicode(soup)
@@ -692,11 +709,6 @@ class WebpageBook(BaseFeedBook):
             
             title = self.processtitle(title)
             
-            if self.extra_css:
-                sty = soup.new_tag('style', type="text/css")
-                sty.string = self.extra_css
-                soup.html.head.append(sty)
-            
             if self.keep_only_tags:
                 body = soup.new_tag('body')
                 try:
@@ -708,24 +720,13 @@ class WebpageBook(BaseFeedBook):
                     soup.find('body').replace_with(body)
                 except AttributeError: # soup has no body element
                     pass
+                        
+            for spec in self.remove_tags_after:
+                tag = soup.find(**spec)
+                remove_beyond(tag, 'next_sibling')
             
-            def remove_beyond(tag, next):
-                while tag is not None and getattr(tag, 'name', None) != 'body':
-                    after = getattr(tag, next)
-                    while after is not None:
-                        ns = getattr(tag, next)
-                        after.decompose()
-                        after = ns
-                    tag = tag.parent
-            
-            if self.remove_tags_after:
-                rt = [self.remove_tags_after] if isinstance(self.remove_tags_after, dict) else self.remove_tags_after
-                for spec in rt:
-                    tag = soup.find(**spec)
-                    remove_beyond(tag, 'next_sibling')
-            
-            if self.remove_tags_before:
-                tag = soup.find(**self.remove_tags_before)
+            for spec in self.remove_tags_before:
+                tag = soup.find(**spec)
                 remove_beyond(tag, 'previous_sibling')
             
             remove_tags = self.insta_remove_tags + self.remove_tags
@@ -743,11 +744,14 @@ class WebpageBook(BaseFeedBook):
             for attr in remove_attrs:
                 for tag in soup.find_all(attrs={attr:True}):
                     del tag[attr]
-            for tag in soup.find_all(attrs={"type":"text/css"}):
-                tag.decompose()
             for cmt in soup.find_all(text=lambda text:isinstance(text, Comment)):
                 cmt.extract()
             
+            if self.extra_css:
+                sty = soup.new_tag('style', type="text/css")
+                sty.string = self.extra_css
+                soup.html.head.append(sty)
+                
             if self.keep_image:
                 self.soupbeforeimage(soup)
                 for img in soup.find_all('img',attrs={'src':True}):
@@ -778,7 +782,13 @@ class WebpageBook(BaseFeedBook):
                             img.decompose()
                     else:
                         self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
-                        img.decompose()                
+                        img.decompose()
+                        
+                #去掉图像上面的链接
+                for img in soup.find_all('img'):
+                    if img.parent.name == 'a':
+                        img.parent.replace_with(img)
+                    
             else:
                 for img in soup.find_all('img'):
                     img.decompose()
@@ -804,6 +814,14 @@ class WebpageBook(BaseFeedBook):
 
 
 #几个小工具函数
+def remove_beyond(tag, next):
+    while tag is not None and getattr(tag, 'name', None) != 'body':
+        after = getattr(tag, next)
+        while after is not None:
+            after.extract()
+            after = getattr(tag, next)
+        tag = tag.parent
+
 def string_of_tag(tag, normalize_whitespace=False):
     """ 获取BeautifulSoup中的一个tag下面的所有字符串 """
     if not tag:

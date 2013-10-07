@@ -114,8 +114,8 @@
     <tr class={{loop.cycle("odd","even")}}>
         <td class="center">{{item.key().id()}}</td>
         <td class="center">{{item.netloc}}</td>
-        <td class="center">{{item.feedenc}}</td>
-        <td class="center">{{item.pageenc}}</td>
+        <td class="center">{% if item.feedenc %}{{item.feedenc}}{% else %}-{% endif %}</td>
+        <td class="center">{% if item.pageenc %}{{item.pageenc}}{% else %}-{% endif %}</td>
     </tr>
     {% endfor %}
     </tbody>

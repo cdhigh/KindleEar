@@ -30,7 +30,7 @@ class FolhaDeSaopaulo(BaseFeedBook):
             #(u'Cotidiano', u'http://feeds.folha.uol.com.br/folha/cotidiano/rss091.xml'),
             (u'Brasil', u'http://feeds.folha.uol.com.br/folha/brasil/rss091.xml'),
             (u'Mundo', u'http://feeds.folha.uol.com.br/mundo/rss091.xml'),
-            #(u'Poder', u'http://feeds.folha.uol.com.br/poder/rss091.xml'),
+            (u'Poder', u'http://feeds.folha.uol.com.br/poder/rss091.xml'),
             (u'Mercado', u'http://feeds.folha.uol.com.br/folha/dinheiro/rss091.xml'),
             (u'Saber', u'http://feeds.folha.uol.com.br/folha/educacao/rss091.xml'),
             (u'Tec', u'http://feeds.folha.uol.com.br/folha/informatica/rss091.xml'),
