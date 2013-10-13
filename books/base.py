@@ -488,7 +488,8 @@ class BaseFeedBook:
                     
             #去掉图像上面的链接
             for img in soup.find_all('img'):
-                if img.parent.name == 'a':
+                if img.parent and img.parent.parent and \
+                    img.parent.name == 'a':
                     img.parent.replace_with(img)
         else:
             for img in soup.find_all('img'):
@@ -606,7 +607,8 @@ class BaseFeedBook:
             
             #去掉图像上面的链接
             for img in soup.find_all('img'):
-                if img.parent.name == 'a':
+                if img.parent and img.parent.parent and \
+                    img.parent.name == 'a':
                     img.parent.replace_with(img)
         else:
             for img in soup.find_all('img'):
@@ -786,7 +788,8 @@ class WebpageBook(BaseFeedBook):
                         
                 #去掉图像上面的链接
                 for img in soup.find_all('img'):
-                    if img.parent.name == 'a':
+                    if img.parent and img.parent.parent and \
+                        img.parent.name == 'a':
                         img.parent.replace_with(img)
                     
             else:
