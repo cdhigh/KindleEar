@@ -100,13 +100,14 @@ def getOpts():
     
     return opts
     
-def setMetaData(oeb, title='Feeds', lang='zh-cn', date=None, creator='KindleEar'):
+def setMetaData(oeb, title='Feeds', lang='zh-cn', date=None, creator='KindleEar',
+    pubtype='periodical:magazine:KindleEar'):
     oeb.metadata.add('language', lang if lang else 'zh-cn')
     oeb.metadata.add('creator', creator)
     oeb.metadata.add('title', title)
     oeb.metadata.add('identifier', str(uuid.uuid4()), id='uuid_id', scheme='uuid')
     oeb.uid = oeb.metadata.identifier[0]
-    oeb.metadata.add("publication_type", "periodical:magazine:KindleEar")
+    oeb.metadata.add("publication_type", pubtype)
     if not date:
         import datetime
         date = datetime.datetime.strftime(datetime.datetime.now(),"%Y-%m-%d")

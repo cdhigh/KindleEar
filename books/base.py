@@ -532,8 +532,10 @@ class BaseFeedBook:
             body = soup.new_tag('body')
             try:
                 if isinstance(self.keep_only_tags, dict):
-                    self.keep_only_tags = [self.keep_only_tags]
-                for spec in self.keep_only_tags:
+                    keep_only_tags = [self.keep_only_tags]
+                else:
+                    keep_only_tags = self.keep_only_tags
+                for spec in keep_only_tags:
                     for tag in soup.find('body').find_all(**spec):
                         body.insert(len(body.contents), tag)
                 soup.find('body').replace_with(body)
@@ -715,8 +717,10 @@ class WebpageBook(BaseFeedBook):
                 body = soup.new_tag('body')
                 try:
                     if isinstance(self.keep_only_tags, dict):
-                        self.keep_only_tags = [self.keep_only_tags]
-                    for spec in self.keep_only_tags:
+                        keep_only_tags = [self.keep_only_tags]
+                    else:
+                        keep_only_tags = self.keep_only_tags
+                    for spec in keep_only_tags:
                         for tag in soup.find('body').find_all(**spec):
                             body.insert(len(body.contents), tag)
                     soup.find('body').replace_with(body)
@@ -815,7 +819,18 @@ class WebpageBook(BaseFeedBook):
             content =  self.postprocess(content)
             yield (section, url, title, content, brief)
 
-
+class BaseUrlBook(BaseFeedBook):
+    """ 提供网页URL，而不是RSS订阅地址，
+    此类生成的MOBI使用普通书籍格式，而不是期刊杂志格式
+    feeds中的地址为网页的URL，section可以为空。
+    """
+    fulltext_by_readability = True
+    
+    def ParseFeedUrls(self):
+        """ return list like [(section,title,url,desc),..] """
+        return [(sec,sec,url,'') for sec, url in self.feeds]
+        
+    
 #几个小工具函数
 def remove_beyond(tag, next):
     while tag is not None and getattr(tag, 'name', None) != 'body':

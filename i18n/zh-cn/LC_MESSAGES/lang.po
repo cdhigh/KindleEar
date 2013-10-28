@@ -68,7 +68,7 @@ msgstr "标题和URL都不能为空！"
 msgid "Book(s) (%s) put to queue!"
 msgstr "书籍 (%s) 已放入推送队列！"
 
-msgid "No book(s) to deliver!"
+msgid "No book to deliver!"
 msgstr "没有需要推送的书籍！"
 
 msgid "Logout"
@@ -142,9 +142,6 @@ msgstr "改密码"
 
 msgid "Delete"
 msgstr "删除"
-
-msgid "Please dont change these configures if you dont know what's mean!"
-msgstr "除非你很熟悉这些配置，否则不建议修改！"
 
 msgid "Url Filter"
 msgstr "URL过滤"

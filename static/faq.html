@@ -122,7 +122,10 @@
     <h2>忘记密码了怎么办？</h2>
     <p class="answer">如果是忘记非管理员账号的密码，则可以通知管理员改密码。如果是管理员密码，则可以登陆appengine.google.com，在左边选择"Datastore Admin"，删除KeUser的所有数据，则所有账号的信息都会被删除，或者将所有数据库都删除也可以，然后重新使用admin/admin登陆你的应用即可。没有找到"Datastore Admin"？则可以先在"Application Settings"里面打开。
         <br />如果你会编程，则你会有其他方法，不用我说。</p>
-    
+    <h2>xxx@appid.appspotmail.com邮件地址怎么用？</h2>
+    <p class="answer">xxx@appid.appspotmail.com是KindleEar附送的邮件服务，在部署好KindleEar后，你自动拥有了无数个EMAIL邮箱地址，格式为：xxx@appid.appspotmail.com，xxx为任意合法字符串，appid为你的应用名。<br />
+        此邮箱将收到的邮件正文转换为邮件附件推送至管理员注册的Kindle Email邮箱，如果邮件中只有一个链接，则抓取此链接的网页内容制作成电子书然后再推送。<br />
+        要使用此功能，比先要添加白名单，如果为'*'则允许所有邮件，否则格式为'xx@xx.xx'或'@xx.xx'。</p>
 	<pre><p> </p><p> </p></pre>
     <div id="footer">
         <div class="clear"></div>

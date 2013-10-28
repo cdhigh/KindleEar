@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.6.9t"
+__Version__ = "1.6.10"
 __Author__ = "Arroz"
 
 import os, datetime, logging, __builtin__, hashlib
@@ -30,7 +30,7 @@ from config import *
 from lib.makeoeb import *
 from lib.memcachestore import MemcacheStore
 from books import BookClasses, BookClass
-from books.base import BaseFeedBook, UrlEncoding
+from books.base import BaseFeedBook, UrlEncoding, BaseUrlBook
 
 #reload(sys)
 #sys.setdefaultencoding('utf-8')
@@ -137,14 +137,14 @@ class BaseHandler:
     @classmethod
     def login_required(self, username=None):
         if (session.get('login') != 1) or (username and username != session.get('username')):
-            raise web.seeother(r'/')
+            raise web.seeother(r'/login')
     
     @classmethod
     def getcurrentuser(self):
         self.login_required()
         u = KeUser.all().filter("name = ", session.username).get()
         if not u:
-            raise web.seeother(r'/')
+            raise web.seeother(r'/login')
         return u
         
     def browerlang(self):
@@ -383,7 +383,7 @@ class Login(BaseHandler):
             if u.expires: #用户登陆后自动续期
                 u.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
                 u.put()
-            raise web.seeother(r'/')
+            raise web.seeother(r'/my')
         else:
             tips = _("The username not exist or password is wrong!")
             session.login = 0
@@ -397,7 +397,7 @@ class Logout(BaseHandler):
         session.username = ''
         session.lang = ''
         session.kill()
-        raise web.seeother(r'/')
+        raise web.seeother(r'/login')
 
 class AdminMgrPwd(BaseHandler):
     # 管理员修改其他账户的密码
@@ -574,7 +574,7 @@ class Deliver(BaseHandler):
             if len(sent):
                 tips = _("Book(s) (%s) put to queue!") % u', '.join(sent)
             else:
-                tips = _("No book(s) to deliver!")
+                tips = _("No book to deliver!")
             return self.render('autoback.html', "Delivering",tips=tips)
         
         #定时cron调用
@@ -735,7 +735,68 @@ class Worker(BaseHandler):
             rs = "No new feeds."
             log.info(rs)
             return rs
+
+class Url2Book(BaseHandler):
+    """ 抓取指定链接，转换成附件推送 """
+    def GET(self):
+        username = web.input().get("u")
+        url = web.input().get("url")
+        subject = web.input().get("subject")
+        to = web.input().get("to")
+        language = web.input().get("lng")
+        keepimage = bool(web.input().get("keepimage") == '1')
+        booktype = web.input().get("type", "mobi")
+        tz = int(web.input().get("tz", TIMEZONE))
+        if not all((username,url,subject,to,language,booktype,tz)):
+            return "Some parameter missing!<br />"
         
+        book = BaseUrlBook()
+        book.title = book.description = subject
+        book.language = language
+        book.keep_image = keepimage
+        book.network_timeout = 60
+        book.feeds = [(subject,url)]
+        book.url_filters = [flt.url for flt in UrlFilter.all()]
+        
+        opts = oeb = None
+        
+        # 创建 OEB
+        global log
+        opts = getOpts()
+        oeb = CreateOeb(log, None, opts)
+        
+        setMetaData(oeb, subject, language, local_time(tz=tz), pubtype='book:book:KindleEar')
+        oeb.container = ServerContainer(log)
+        
+        # 对于html文件，变量名字自文档
+        # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
+        itemcnt = 0
+        for sec_or_media, url, title, content, brief in book.Items(opts):
+            if sec_or_media.startswith(r'image/'):
+                id, href = oeb.manifest.generate(id='img', href=title)
+                item = oeb.manifest.add(id, href, sec_or_media, data=content)
+                itemcnt += 1
+            else:
+                id, href = oeb.manifest.generate(id='page', href='page.html')
+                item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=content)
+                oeb.spine.add(item, False)
+                oeb.toc.add(title, href)
+                itemcnt += 1
+            
+        if itemcnt > 0:
+            oIO = byteStringIO()
+            o = EPUBOutput() if booktype == "epub" else MOBIOutput()
+            o.convert(oeb, oIO, opts, log)
+            self.SendToKindle(username, to, book.title, booktype, str(oIO.getvalue()), tz)
+            rs = "%s(%s).%s Sent!"%(book.title, local_time(tz=tz), booktype)
+            log.info(rs)
+            return rs
+        else:
+            self.deliverlog(username, to, book.title, 0, status='fetch failed',tz=tz)
+            rs = "[Url2Book]Fetch url failed."
+            log.info(rs)
+            return rs
+            
 class Mylogs(BaseHandler):
     def GET(self):
         user = self.getcurrentuser()
@@ -756,8 +817,12 @@ class RemoveLogs(BaseHandler):
             found = False
             for book in BookClasses():
                 if book.title == bk.title:
+                    if bk.description != book.description:
+                        bk.description = book.description
+                        bk.put()
                     found = True
                     break
+            
             if not found:
                 for fd in bk.feeds:
                     fd.delete()
@@ -848,6 +913,7 @@ urls = (
   "/admin","Admin",
   "/deliver", "Deliver",
   "/worker", "Worker",
+  "/url2book", "Url2Book",
   "/logs", "Mylogs",
   "/removelogs", "RemoveLogs",
   "/lang/(.*)", "SetLang",

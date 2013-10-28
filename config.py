@@ -36,3 +36,9 @@ TOC_DESC_WORD_LIMIT = 150  # 内容预览（摘要）字数限制
 #此尺寸是适应Kindle3的，如果你是完美主义者，可以设置为(568,682)，扣除margin
 #如果你使用的是其他分辨率的机器，可以直接修改为其他值
 REDUCE_IMAGE_TO = (600,800)
+
+#在使用string@appid.appspotmail.com邮件转发时，是否删除CSS
+#删除CSS后阅读体验更佳，但是会丢失各种字体和颜色等排版信息
+#如果不删除CSS，则部分文本可能太小以致于难以阅读
+#当转换HTML时，Amazon的推送服务器会删除CSS
+DELETE_CSS_FOR_APPSPOTMAIL = True

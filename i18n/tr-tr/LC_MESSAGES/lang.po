@@ -69,7 +69,7 @@ msgstr "URL veya başlık hatalı"
 msgid "Book(s) (%s) put to queue!"
 msgstr "%s kitapları işlem sırasına eklendi"
 
-msgid "No book(s) to deliver!"
+msgid "No book to deliver!"
 msgstr "Gönderim için kitap yok!"
 
 msgid "Logout"
@@ -143,9 +143,6 @@ msgstr "Değiştir"
 
 msgid "Delete"
 msgstr "Sil"
-
-msgid "Please dont change these configures if you dont know what's mean!"
-msgstr "Lütfen ne yaptığınızdan tam emin değilseniz değişiklik yapmayın!"
 
 msgid "Url Filter"
 msgstr "URL Filtresi"

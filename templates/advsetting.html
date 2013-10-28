@@ -28,7 +28,6 @@ td span{
     display:none;
 }
 td:hover{
-    cursor:pointer;
     position:relative;
     z-index:1;
 }
@@ -46,33 +45,6 @@ td:hover span{
 </style>
 {% endblock %}
 {% block content %}
-<p style="font-size:1em;color:red;text-align:center;">{{_("Please dont change these configures if you dont know what's mean!")}}</p>
-<fieldset id="urlfilter">
-    <legend>{{_("Url Filter")}}</legend>
-    <p style="font-size:0.8em;color:grey;">{{_("Urls in list would not be downloaded for saving of time.")}}</p>
-    {% if urlfilters.count() %}
-    <table class="tburl">
-    {% for urlflt in urlfilters %}
-    <tr class="{{loop.cycle('trodd', 'treven')}}">
-        <td style="width:80%">
-            {%if urlflt.url|length>70%}{{urlflt.url[:70]}}...<span>{{urlflt.url}}</span>{%else%}{{urlflt.url}}{%endif%}
-        </td>
-        <td style="text-align:right;"><a href="/advdel?delurlid={{urlflt.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
-    </tr>
-    {% endfor %}
-    </table>
-    {% endif %}
-    <form action="" method="POST">
-    <div class="addfilter">
-        <div class="newfilter">
-            <input type="text" name="url" style="width:80%;" placeholder="{{_("Please input regular expression")}}" />
-        </div>
-        <div class="cornerControls">
-            <input type="submit" value="{{_("Add")}}" class="actionButton" />
-        </div>
-    </div>
-    </form>
-</fieldset>
 {% if nickname == 'admin' %}
 <fieldset id="whitelist">
     <legend>{{_("White List")}}</legend>
@@ -100,5 +72,32 @@ td:hover span{
     </div>
     </form>
 </fieldset>
+<p style="font-size:8px;"> </p>
 {% endif %}
+<fieldset id="urlfilter">
+    <legend>{{_("Url Filter")}}</legend>
+    <p style="font-size:0.8em;color:grey;">{{_("Urls in list would not be downloaded for saving of time.")}}</p>
+    {% if urlfilters.count() %}
+    <table class="tburl">
+    {% for urlflt in urlfilters %}
+    <tr class="{{loop.cycle('trodd', 'treven')}}">
+        <td style="width:80%">
+            {%if urlflt.url|length>70%}{{urlflt.url[:70]}}...<span>{{urlflt.url}}</span>{%else%}{{urlflt.url}}{%endif%}
+        </td>
+        <td style="text-align:right;"><a href="/advdel?delurlid={{urlflt.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
+    </tr>
+    {% endfor %}
+    </table>
+    {% endif %}
+    <form action="" method="POST">
+    <div class="addfilter">
+        <div class="newfilter">
+            <input type="text" name="url" style="width:80%;" placeholder="{{_("Please input regular expression")}}" />
+        </div>
+        <div class="cornerControls">
+            <input type="submit" value="{{_("Add")}}" class="actionButton" />
+        </div>
+    </div>
+    </form>
+</fieldset>
 {% endblock %}
