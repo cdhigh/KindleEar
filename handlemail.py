@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 """
-将发到xxx@appid.appspotmail.com的邮件正文转成附件发往管理员的kindle邮箱。
+将发到string@appid.appspotmail.com的邮件正文转成附件发往管理员的kindle邮箱。
 """
 import re
 from email.Header import decode_header
@@ -12,7 +12,7 @@ from google.appengine.ext.webapp.mail_handlers import InboundMailHandler
 from google.appengine.api import taskqueue
 
 from main import KeUser, WhiteList, BaseHandler
-from config import DELETE_CSS_FOR_APPSPOTMAIL
+from config import DELETE_CSS_FOR_APPSPOTMAIL, WORDCNT_THRESHOLD_FOR_APMAIL
 
 def decode_subject(subject):
     if subject[0:2] == '=?' and subject[-2:] == '?=':
@@ -43,6 +43,7 @@ class HandleMail(InboundMailHandler):
             self.response.out.write('No admin account or no email configured!')
             return
         
+        R = r"""^(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>???“”‘’]))"""
         txt_bodies = message.bodies('text/plain')
         html_bodies = message.bodies('text/html')
         try:
@@ -51,6 +52,7 @@ class HandleMail(InboundMailHandler):
             default_log.warn('Decode html bodies of mail failed.')
             allBodies = []
         if len(allBodies) == 0: #此邮件为纯文本邮件
+            default_log.info('no html body, use text body.')
             try:
                 allBodies = [body.decode() for ctype, body in txt_bodies]
             except:
@@ -59,11 +61,12 @@ class HandleMail(InboundMailHandler):
             bodies = u''.join(allBodies)
             if not bodies:
                 return
-            if len(bodies) < 100: #可能是链接
-                R = r"""^(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>???“”‘’]))"""
-                M = re.match(R, bodies)
-                if M:
-                    bodies = '<a href="%s">%s</a>' % (M.group(),M.group())
+                
+            M = re.match(R, bodies) #判断是否是链接
+            if M is not None:
+                link = M.group()
+                if len(bodies[len(link):]) < WORDCNT_THRESHOLD_FOR_APMAIL:
+                    bodies = '<a href="%s">%s</a>' % (link,link)
             bodies = u"""<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
                     <title>%s</title></head><body>%s</body></html>""" %(subject,bodies)
             allBodies = [bodies.encode('utf-8')]
@@ -91,19 +94,27 @@ class HandleMail(InboundMailHandler):
         #只有一个链接并且邮件字数很少则认为需要抓取网页，否则直接转发邮件正文
         links = list(soup.body.find_all('a',attrs={'href':True}))
         link = links[0]['href'] if links else ''
-        if len(links) == 1 and \
-            len(''.join([s for s in soup.body.stripped_strings if not s.endswith(link)])) < 100:
-                param = {'u':'admin',
-                         'url':link, 
-                         'type':admin.book_type,
-                         'to':admin.kindle_email,
-                         'tz':admin.timezone,
-                         'subject':subject[:15],
-                         'lng':admin.ownfeeds.language,
-                         'keepimage':'1' if admin.ownfeeds.keep_image else '0'
-                        }
-                taskqueue.add(url='/url2book',queue_name="deliverqueue1",method='GET',
-                    params=param)
+        text = ' '.join([s for s in soup.body.stripped_strings])
+        M = re.match(R, text)
+        if M is not None:
+            link = M.group()
+            links = [link]
+            text = text.replace(link, '')
+        elif len(links) == 1:
+            text = text.replace(link, '') #去掉可能的链接本身字符
+            
+        if len(links) == 1 and len(text) < WORDCNT_THRESHOLD_FOR_APMAIL:
+            param = {'u':'admin',
+                     'url':link, 
+                     'type':admin.book_type,
+                     'to':admin.kindle_email,
+                     'tz':admin.timezone,
+                     'subject':subject[:15],
+                     'lng':admin.ownfeeds.language,
+                     'keepimage':'1' if admin.ownfeeds.keep_image else '0'
+                    }
+            taskqueue.add(url='/url2book',queue_name="deliverqueue1",method='GET',
+                params=param)
         else: #直接转发邮件正文
             #先判断是否有图片
             from lib.makeoeb import MimeFromFilename

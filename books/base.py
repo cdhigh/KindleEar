@@ -255,6 +255,8 @@ class BaseFeedBook:
         join = urlparse.urljoin(base,url)
         url = urlparse.urlsplit(join)
         path = os.path.normpath(url.path)
+        if IsRunInLocal: #假定调试环境为windows
+            path = path.replace('\\', '/')
         return urlparse.urlunsplit((url.scheme,url.netloc,path,url.query,url.fragment))
 
     def FragToXhtml(self, content, title, htmlencoding='utf-8', addtitleinbody=False):
@@ -316,7 +318,7 @@ class BaseFeedBook:
                         if updated:
                             delta = tnow - datetime.datetime(*(updated[0:6]))
                             if delta.days*86400+delta.seconds > 86400*self.oldest_article:
-                                self.log.debug("article '%s' is too old"%e.title)
+                                self.log.info("Skip old article: %s" % e.link)
                                 continue
                     #支持HTTPS
                     urlfeed = e.link.replace('http://','https://') if url.startswith('https://') else e.link
@@ -464,7 +466,7 @@ class BaseFeedBook:
                     img.decompose()
                     continue
                 if not imgurl.startswith('http'):
-                    imgurl = urlparse.urljoin(url, imgurl)
+                    imgurl = self.urljoin(url, imgurl)
                 if self.fetch_img_via_ssl and url.startswith('https://'):
                     imgurl = imgurl.replace('http://', 'https://')
                 if self.isfiltered(imgurl):
@@ -585,7 +587,7 @@ class BaseFeedBook:
                     img.decompose()
                     continue
                 if not imgurl.startswith('http'):
-                    imgurl = urlparse.urljoin(url, imgurl)
+                    imgurl = self.urljoin(url, imgurl)
                 if self.fetch_img_via_ssl and url.startswith('https://'):
                     imgurl = imgurl.replace('http://', 'https://')
                 if self.isfiltered(imgurl):
@@ -768,7 +770,7 @@ class WebpageBook(BaseFeedBook):
                         img.decompose()
                         continue
                     if not imgurl.startswith('http'):
-                        imgurl = urlparse.urljoin(url, imgurl)
+                        imgurl = self.urljoin(url, imgurl)
                     if self.fetch_img_via_ssl and url.startswith('https://'):
                         imgurl = imgurl.replace('http://', 'https://')
                     if self.isfiltered(imgurl):

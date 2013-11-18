@@ -42,3 +42,6 @@ REDUCE_IMAGE_TO = (600,800)
 #如果不删除CSS，则部分文本可能太小以致于难以阅读
 #当转换HTML时，Amazon的推送服务器会删除CSS
 DELETE_CSS_FOR_APPSPOTMAIL = True
+
+#如果邮件中除链接外，正文少于多少个字则直接抓取链接，忽略正文
+WORDCNT_THRESHOLD_FOR_APMAIL = 100
