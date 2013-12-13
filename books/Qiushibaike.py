@@ -58,7 +58,7 @@ class Qiushibaike(WebpageBook):
                 article.replace_with(p)
             
             first = True
-            for detail in soup.find_all("div", attrs={"class":"detail"}):
+            for detail in soup.find_all("div", attrs={"class":"content"}):
                 if not first:
                     hr = soup.new_tag("hr")
                     detail.insert(0, hr)

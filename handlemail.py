@@ -12,7 +12,7 @@ from google.appengine.ext.webapp.mail_handlers import InboundMailHandler
 from google.appengine.api import taskqueue
 
 from main import KeUser, WhiteList, BaseHandler
-from config import DELETE_CSS_FOR_APPSPOTMAIL, WORDCNT_THRESHOLD_FOR_APMAIL
+from config import *
 
 def decode_subject(subject):
     if subject[0:2] == '=?' and subject[-2:] == '?=':
@@ -109,7 +109,7 @@ class HandleMail(InboundMailHandler):
                      'type':admin.book_type,
                      'to':admin.kindle_email,
                      'tz':admin.timezone,
-                     'subject':subject[:15],
+                     'subject':subject[:SUBJECT_WORDCNT_FOR_APMAIL],
                      'lng':admin.ownfeeds.language,
                      'keepimage':'1' if admin.ownfeeds.keep_image else '0'
                     }
@@ -118,15 +118,16 @@ class HandleMail(InboundMailHandler):
         else: #直接转发邮件正文
             #先判断是否有图片
             from lib.makeoeb import MimeFromFilename
+            hasimage = False
             if hasattr(message, 'attachments'):
                 for f,c in message.attachments:
                     if MimeFromFilename(f):
                         hasimage = True
                         break
-            else:
-                hasimage = False
-                
-            if hasimage: #有图片的话，要生成MOBI或EPUB才行
+            
+            #有图片的话，要生成MOBI或EPUB才行
+            #而且多看邮箱不支持html推送，也先转换epub再推送
+            if hasimage or (admin.book_type == "epub"):
                 from main import local_time
                 from lib.makeoeb import (getOpts, CreateOeb, setMetaData,
                                     ServerContainer, byteStringIO, 
@@ -148,29 +149,32 @@ class HandleMail(InboundMailHandler):
                 opts = getOpts()
                 oeb = CreateOeb(default_log, None, opts)
                 
-                setMetaData(oeb, subject[:15], admin.ownfeeds.language, 
-                    local_time(tz=admin.timezone), pubtype='book:book:KindleEar')
+                setMetaData(oeb, subject[:SUBJECT_WORDCNT_FOR_APMAIL], 
+                    admin.ownfeeds.language, local_time(tz=admin.timezone), 
+                    pubtype='book:book:KindleEar')
                 oeb.container = ServerContainer(default_log)
                 id, href = oeb.manifest.generate(id='page', href='page.html')
                 item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=unicode(soup))
                 oeb.spine.add(item, False)
                 oeb.toc.add(subject, href)
                 
-                for filename,content in message.attachments:
-                    mimetype = MimeFromFilename(filename)
-                    if mimetype:
-                        try:
-                            content = content.decode()
-                        except:
-                            pass
-                        else:
-                            id, href = oeb.manifest.generate(id='img', href=filename)
-                            item = oeb.manifest.add(id, href, mimetype, data=content)
+                if hasattr(message, 'attachments'):
+                    for filename,content in message.attachments:
+                        mimetype = MimeFromFilename(filename)
+                        if mimetype:
+                            try:
+                                content = content.decode()
+                            except:
+                                pass
+                            else:
+                                id, href = oeb.manifest.generate(id='img', href=filename)
+                                item = oeb.manifest.add(id, href, mimetype, data=content)
                 
                 oIO = byteStringIO()
                 o = EPUBOutput() if admin.book_type == "epub" else MOBIOutput()
                 o.convert(oeb, oIO, opts, default_log)
-                BaseHandler.SendToKindle('admin', admin.kindle_email, subject[:15], 
+                BaseHandler.SendToKindle('admin', admin.kindle_email, 
+                    subject[:SUBJECT_WORDCNT_FOR_APMAIL], 
                     admin.book_type, str(oIO.getvalue()), admin.timezone)
             else: #没有图片则直接推送HTML文件，阅读体验更佳
                 m = soup.find('meta', attrs={"http-equiv":"Content-Type"})
@@ -182,8 +186,8 @@ class HandleMail(InboundMailHandler):
                     m['content'] = "text/html; charset=utf-8"
                 
                 html = unicode(soup).encode('utf-8')
-                BaseHandler.SendToKindle('admin', admin.kindle_email, subject[:15], 'html',
-                    html, admin.timezone, False)
+                BaseHandler.SendToKindle('admin', admin.kindle_email, 
+                    subject[:SUBJECT_WORDCNT_FOR_APMAIL], 'html', html, admin.timezone, False)
         self.response.out.write('Done')
 
 appmail = webapp2.WSGIApplication([HandleMail.mapping()], debug=True)

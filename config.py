@@ -45,3 +45,6 @@ DELETE_CSS_FOR_APPSPOTMAIL = True
 
 #如果邮件中除链接外，正文少于多少个字则直接抓取链接，忽略正文
 WORDCNT_THRESHOLD_FOR_APMAIL = 100
+
+#邮件转发时截取的标题长度
+SUBJECT_WORDCNT_FOR_APMAIL = 16
