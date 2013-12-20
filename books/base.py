@@ -327,10 +327,10 @@ class BaseFeedBook:
                         
                     desc = None
                     if isfulltext:
-                        if hasattr(e, 'content') and e.content[0]['value']:
-                            desc = e.content[0]['value']
-                        elif hasattr(e, 'description'):
+                        if hasattr(e, 'description'):
                             desc = e.description
+                        elif hasattr(e, 'content') and e.content[0]['value']:
+                            desc = e.content[0]['value']
                         else:
                             self.log.warn('fulltext feed item no has desc,link to webpage for article.(%s)'%e.title)
                     urls.append((section, e.title, urlfeed, desc))
@@ -403,6 +403,7 @@ class BaseFeedBook:
         summary = doc.summary(html_partial=False)
         title = doc.short_title()
         title = self.processtitle(title)
+        
         #if summary.startswith('<body'): #readability解析出错
         #    html = content
         #else:

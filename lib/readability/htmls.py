@@ -102,13 +102,13 @@ def shorten_title(doc):
                 elif zhPattern.search(parts[-1]) and len(parts[-1]) > 4:
                     title = parts[-1]
                     break
-        else:
-            if ': ' in title:
-                parts = orig.split(': ')
-                if len(parts[-1].split()) >= 4:
-                    title = parts[-1]
-                else:
-                    title = orig.split(': ', 1)[1]
+        #else:
+        #    if ': ' in title:
+        #        parts = orig.split(': ')
+        #        if len(parts[-1].split()) >= 4:
+        #            title = parts[-1]
+        #        else:
+        #            title = orig.split(': ', 1)[1]
     
     if zhPattern.search(title):
         if not 4 < len(title) < 100:

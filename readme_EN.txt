@@ -24,7 +24,7 @@
       for example site of author: kindleear.appspot.com
       the initial username is 'admin', password is 'admin', please change it immediately after login.
    8.more details can be found in faq.
-   9.If you don't want to intall GAE SDK and python, you have another choice, download a uploader from:
+   9.If you don't want to intall GAE SDK and python, you have another choice, download 'uploader' from:
      https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing
      put kindleear folder into uploader directory, then double-click uploader.bat.
   

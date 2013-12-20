@@ -17,8 +17,6 @@ class URLOpener:
         self.timeout = timeout
     
     def open(self, url, data=None):
-        #如果启用缓存，建议全部使用命名参数
-        #cache标识是否将获取的内容缓存起来，仅支持命名参数
         method = urlfetch.GET if data is None else urlfetch.POST
         
         maxRedirect = self.maxRedirect
@@ -100,4 +98,3 @@ class URLOpener:
         
     def _makeCookieHeader(self, cookie):
         return '; '.join(["%s=%s" % (v.key, v.value) for v in cookie.values()])
-
