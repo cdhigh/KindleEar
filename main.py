@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.6.12"
+__Version__ = "1.6.14"
 __Author__ = "Arroz"
 
 import os, datetime, logging, __builtin__, hashlib
