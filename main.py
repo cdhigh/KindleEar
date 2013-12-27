@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.6.14"
+__Version__ = "1.6.15"
 __Author__ = "Arroz"
 
 import os, datetime, logging, __builtin__, hashlib
@@ -62,7 +62,8 @@ class Book(db.Model):
     #这三个属性只有自定义RSS才有意义
     @property
     def feeds(self):
-        return Feed.all().filter('book = ', self.key())
+        return Feed.all().filter('book = ', self.key()).order('time')
+        
     @property
     def feedscount(self):
         mkey = '%d.feedscount'%self.key().id()
@@ -95,6 +96,7 @@ class Feed(db.Model):
     title = db.StringProperty()
     url = db.StringProperty()
     isfulltext = db.BooleanProperty()
+    time = db.DateTimeProperty() #源被加入的时间，用于排序
     
 class DeliverLog(db.Model):
     username = db.StringProperty()
@@ -489,7 +491,8 @@ class MySubscription(BaseHandler):
         if not url.lower().startswith('http'): #http and https
             url = 'http://' + url
         assert user.ownfeeds
-        Feed(title=title,url=url,book=user.ownfeeds,isfulltext=isfulltext).put()
+        Feed(title=title,url=url,book=user.ownfeeds,isfulltext=isfulltext,
+            time=datetime.datetime.utcnow()).put()
         memcache.delete('%d.feedscount'%user.ownfeeds.key().id())
         raise web.seeother('/my')
         

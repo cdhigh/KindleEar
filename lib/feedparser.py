@@ -3448,7 +3448,7 @@ registerDateHandler(_parse_date_w3dtf)
 # Define the strings used by the RFC822 datetime parser
 _rfc822_months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun',
           'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-_rfc822_daynames = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+_rfc822_daynames = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun', 'wes']
 
 # Only the first three letters of the month name matter
 _rfc822_month = "(?P<month>%s)(?:[a-z]*,?)" % ('|'.join(_rfc822_months))

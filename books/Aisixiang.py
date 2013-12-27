@@ -17,7 +17,7 @@ class Aisixiang(BaseFeedBook):
     page_encoding = "gbk"
     mastheadfile = "mh_aisixiang.gif"
     coverfile =  'cv_aisixiang.jpg'
-    deliver_days = ['Saturday',]
+    deliver_days = ['Saturday']
     fulltext_by_readability = True
     fulltext_by_instapaper = False
     
@@ -43,8 +43,15 @@ class Aisixiang(BaseFeedBook):
         #内嵌函数，用于处理分页信息
         def not_is_thispage(tag):
             return not tag.has_attr('class')
-            
-        firstpart = content.decode(self.page_encoding)
+        
+        if self.page_encoding:
+            try:
+                firstpart = content.decode(self.page_encoding)
+            except UnicodeDecodeError:
+                firstpart = decoder.decode(content,url)
+        else:
+            firstpart = decoder.decode(content,url)
+        
         otherparts = []
         soup = BeautifulSoup(firstpart, "lxml")
         listpage = soup.find('div', attrs={'class':'list_page'})
@@ -58,7 +65,15 @@ class Aisixiang(BaseFeedBook):
                     if status_code != 200 or not content:
                         self.log.warn('fetch article failed(%d):%s.' % (status_code,url))
                     else:
-                        otherparts.append(content.decode(self.page_encoding))
+                        if self.page_encoding:
+                            try:
+                                thispart = content.decode(self.page_encoding)
+                            except UnicodeDecodeError:
+                                thispart = decoder.decode(content,parturl)
+                        else:
+                            thispart = decoder.decode(content,parturl)
+                        otherparts.append(thispart)
+                        
             #合并文件后不再需要分页标志
             listpage.decompose()
             

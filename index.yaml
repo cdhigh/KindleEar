@@ -20,3 +20,8 @@ indexes:
   - name: username
   - name: time
     direction: desc
+
+- kind: Feed
+  properties:
+  - name: book
+  - name: time

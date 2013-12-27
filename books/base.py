@@ -307,19 +307,29 @@ class BaseFeedBook:
             result = opener.open(url)
             if result.status_code == 200 and result.content:
                 if self.feed_encoding:
-                    content = result.content.decode(self.feed_encoding)
+                    try:
+                        content = result.content.decode(self.feed_encoding)
+                    except UnicodeDecodeError:
+                        content = AutoDecoder(True).decode(result.content,url)
                 else:
-                    content = AutoDecoder(True).decode(result.content,url)    
+                    content = AutoDecoder(True).decode(result.content,url)
                 feed = feedparser.parse(content)
                 
                 for e in feed['entries'][:self.max_articles_per_feed]:
-                    if self.oldest_article > 0 and hasattr(e, 'updated_parsed'):
+                    updated = None
+                    if hasattr(e, 'updated_parsed') and e.updated_parsed:
                         updated = e.updated_parsed
-                        if updated:
-                            delta = tnow - datetime.datetime(*(updated[0:6]))
-                            if delta.days*86400+delta.seconds > 86400*self.oldest_article:
-                                self.log.info("Skip old article: %s" % e.link)
-                                continue
+                    elif hasattr(e, 'published_parsed') and e.published_parsed:
+                        updated = e.published_parsed
+                    elif hasattr(e, 'created_parsed'):
+                        updated = e.created_parsed
+                        
+                    if self.oldest_article > 0 and updated:
+                        delta = tnow - datetime.datetime(*(updated[0:6]))
+                        if delta.days*86400+delta.seconds > 86400*self.oldest_article:
+                            self.log.info("Skip old article: %s" % e.link)
+                            continue
+                    
                     #支持HTTPS
                     urlfeed = e.link.replace('http://','https://') if url.startswith('https://') else e.link
                     if urlfeed in urladded:
@@ -389,7 +399,10 @@ class BaseFeedBook:
                 attachments=[("Page.html", content),])
                 
         if self.page_encoding:
-            return content.decode(self.page_encoding)
+            try:
+                return content.decode(self.page_encoding)
+            except UnicodeDecodeError:
+                return decoder.decode(content,url)
         else:
             return decoder.decode(content,url)
         
@@ -692,7 +705,10 @@ class WebpageBook(BaseFeedBook):
                 continue
             
             if self.page_encoding:
-                content = content.decode(self.page_encoding)
+                try:
+                    content = content.decode(self.page_encoding)
+                except UnicodeDecodeError:
+                    content = decoder.decode(content,url)
             else:
                 content = decoder.decode(content,url)
             
