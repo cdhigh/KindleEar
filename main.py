@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__Version__ = "1.6.16"
+__Version__ = "1.6.17"
 __Author__ = "Arroz"
 
 import os, datetime, logging, __builtin__, hashlib
@@ -385,6 +385,13 @@ class Login(BaseHandler):
             if u.expires: #用户登陆后自动续期
                 u.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
                 u.put()
+                
+            #修正从1.6.15之前的版本升级过来后自定义RSS丢失的问题
+            for fd in Feed.all():
+                if not fd.time:
+                    fd.time = datetime.datetime.utcnow()
+                    fd.put()
+                    
             raise web.seeother(r'/my')
         else:
             tips = _("The username not exist or password is wrong!")
