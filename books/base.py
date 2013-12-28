@@ -77,7 +77,7 @@ class AutoDecoder:
                 if enc:
                     try:
                         result = content.decode(enc)
-                    except UnicodeDecodeError: # 出错，重新探测编码
+                    except UnicodeDecodeError: # 出错，重新检测编码
                         self.encoding = chardet.detect(content)['encoding']
                     else:
                         self.encoding = enc
@@ -87,7 +87,7 @@ class AutoDecoder:
             else:
                 self.encoding = chardet.detect(content)['encoding']
             
-            #使用探测到的编码解压
+            #使用检测到的编码解压
             try:
                 result = content.decode(self.encoding)
             except UnicodeDecodeError: # 出错，则不转换，直接返回
@@ -310,9 +310,9 @@ class BaseFeedBook:
                     try:
                         content = result.content.decode(self.feed_encoding)
                     except UnicodeDecodeError:
-                        content = AutoDecoder(True).decode(result.content,url)
+                        content = AutoDecoder(True).decode(result.content,opener.realurl)
                 else:
-                    content = AutoDecoder(True).decode(result.content,url)
+                    content = AutoDecoder(True).decode(result.content,opener.realurl)
                 feed = feedparser.parse(content)
                 
                 for e in feed['entries'][:self.max_articles_per_feed]:
@@ -337,11 +337,18 @@ class BaseFeedBook:
                         
                     desc = None
                     if isfulltext:
-                        if hasattr(e, 'description'):
-                            desc = e.description
-                        elif hasattr(e, 'content') and e.content[0]['value']:
-                            desc = e.content[0]['value']
-                        else:
+                        summary = e.summary if hasattr(e, 'summary') else None
+                        desc = e.content[0]['value'] if (hasattr(e, 'content') 
+                            and e.content[0]['value']) else None
+                            
+                        #同时存在，因为有的RSS全文内容放在summary，有的放在content
+                        #所以认为内容多的为全文
+                        if summary and desc:
+                            desc = summary if len(summary) > len(desc) else desc
+                        elif summary:
+                            desc = summary
+                            
+                        if not desc:
                             self.log.warn('fulltext feed item no has desc,link to webpage for article.(%s)'%e.title)
                     urls.append((section, e.title, urlfeed, desc))
                     urladded.add(urlfeed)
@@ -402,9 +409,9 @@ class BaseFeedBook:
             try:
                 return content.decode(self.page_encoding)
             except UnicodeDecodeError:
-                return decoder.decode(content,url)
+                return decoder.decode(content,opener.realurl)
         else:
-            return decoder.decode(content,url)
+            return decoder.decode(content,opener.realurl)
         
     def readability(self, article, url, opts=None):
         """ 使用readability-lxml处理全文信息 """
@@ -708,9 +715,9 @@ class WebpageBook(BaseFeedBook):
                 try:
                     content = content.decode(self.page_encoding)
                 except UnicodeDecodeError:
-                    content = decoder.decode(content,url)
+                    content = decoder.decode(content,opener.realurl)
             else:
-                content = decoder.decode(content,url)
+                content = decoder.decode(content,opener.realurl)
             
             content =  self.preprocess(content)
             soup = BeautifulSoup(content, "lxml")

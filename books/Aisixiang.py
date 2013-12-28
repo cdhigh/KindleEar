@@ -48,9 +48,9 @@ class Aisixiang(BaseFeedBook):
             try:
                 firstpart = content.decode(self.page_encoding)
             except UnicodeDecodeError:
-                firstpart = decoder.decode(content,url)
+                firstpart = decoder.decode(content,opener.realurl)
         else:
-            firstpart = decoder.decode(content,url)
+            firstpart = decoder.decode(content,opener.realurl)
         
         otherparts = []
         soup = BeautifulSoup(firstpart, "lxml")

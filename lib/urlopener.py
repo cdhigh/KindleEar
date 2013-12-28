@@ -15,11 +15,13 @@ class URLOpener:
         self.host = host
         self.addReferer = addreferer
         self.timeout = timeout
+        self.realurl = ''
     
     def open(self, url, data=None):
         method = urlfetch.GET if data is None else urlfetch.POST
-        
+        self.realurl = url
         maxRedirect = self.maxRedirect
+        
         class resp: #出现异常时response不是合法的对象，使用一个模拟的
             status_code=555
             content=None
@@ -83,6 +85,7 @@ class URLOpener:
         if maxRedirect <= 0:
             default_log.warn('Too many redirections:%s'%url)
         
+        self.realurl = url
         return response
         
     def _getHeaders(self, cookie, url):
