@@ -79,7 +79,7 @@ h2 a{
     margin:10px 0;
 }
 
-#set_frm fieldset{
+/*#set_frm fieldset{
     background:#F8F8F8;
     padding:20px;
     -moz-border-radius: 8px;
@@ -89,7 +89,7 @@ h2 a{
     border-style: solid;
     border-color: #DDDDDD;
     margin:15px 0
-}
+}*/
 .save_btn{
     text-align:center
 }
@@ -133,6 +133,29 @@ h2 a{
     text-align: left;
     padding: 5px 10px;
     border: 1px solid #e6e6e6;
+}
+.logs_list .logbook {
+    text-align:center;
+}
+
+.logs_list .logbook span{
+    display:none;
+}
+.logs_list .logbook:hover{
+    position:relative;
+    z-index:1;
+}
+.logs_list .logbook:hover span{
+    display:block;
+    padding:2px;
+    background:#ffffe1;
+    border:1px solid #000000;
+    color:#333;
+    z-index:10;
+    position:absolute;
+    top:1.2em;
+    left:5px;
+    width:400px;
 }
 
 #content {
@@ -194,21 +217,32 @@ table.tb_cm tr.tb_cm_tr_th {
     text-align:center;
 }
 
-fieldset {
+fieldset{
+border:1px solid silver;
+margin:0 2px;
+padding:.35em .625em .75em
+}
+legend{
+border:0;
+padding:0;
+white-space:normal;
+*margin-left:-7px
+}
+/*fieldset {
 -webkit-border-radius: 8px;
 -moz-border-radius: 8px;
 border-radius: 8px;
 padding: 3px 3px 3px 3px;
-}
-legend {
+}*/
+/*legend {
   padding: 0.2em 0.5em;
   border:1px solid green;
-  color:green;
+  color:#06c;
   font-size:80%;
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;
   border-radius: 8px;
-}
+}*/
 .actionButton,
 .actionButton:visited,
 .actionButton:active {
@@ -229,21 +263,28 @@ legend {
 
 .actionButton:hover {
     text-decoration: none;
-    /*background-color: #448;*/
-    border-color: #448;
+    /*border-color: #448;*/
+    outline:0;
+    outline:thin dotted \9;
+    border-color:#129FEA;
 }
 
 .book {
-    border:1px solid #ccc;
-    -webkit-border-radius: 9px;
-    -moz-border-radius: 9px;
-    border-radius: 9px;
+    border:1px solid silver;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
     padding: 3px 3px 3px 3px;
+    margin-bottom: 2px;
+}
+
+.book:hover{
+    border-color: #548;
 }
 .titleRow {
-    font-size:1.1em;
+    font-size:1em;
     font-weight:bold;
-    margin-bottom:1px;
+    margin-bottom:10px;
     margin-top:1px;
     float: left;
     padding-top: 3px;
@@ -252,18 +293,18 @@ legend {
     clear:both;
 }
 .summaryRow {
-    font-size: 13px;
+    font-size: 0.8em;
     color: #555;
     margin-top: 10px;
     margin-left:6px;
     padding-right:26px;
+    padding-bottom:5px;
     clear:both;
 }
 .summaryRow span{
     display:none;
 }
 .summaryRow:hover{
-    /*cursor:pointer;*/
     position:relative;
     z-index:1;
 }
@@ -286,4 +327,8 @@ legend {
 }
 img{
     border: 0px;
+}
+
+#categoryHeader{
+    font-size: 1.4em;
 }

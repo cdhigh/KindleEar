@@ -15,7 +15,7 @@ MY_FEEDS_DESC = u'RSS delivering from KindleEar'
 #设置下载RSS和文章的超时时间，单位为秒，如果RSS很多，设置短一点有可能提高一些效率
 #但是也增加了下载超时的可能，超时则丢失超时的RSS或文章或图片，不会有更多的影响
 #(GAE默认为5秒)
-CONNECTION_TIMEOUT = 25
+CONNECTION_TIMEOUT = 30
 
 # True则发送邮件的文件名转换为拼音（如果是汉字的话）
 PINYIN_FILENAME = False
@@ -48,3 +48,10 @@ WORDCNT_THRESHOLD_FOR_APMAIL = 100
 
 #邮件转发时截取的标题长度
 SUBJECT_WORDCNT_FOR_APMAIL = 16
+
+#发送推送邮件时如果发送失败，重试次数
+SENDMAIL_RETRY_CNT = 1
+
+#GAE对邮件附件的后缀要求很严格，很多后缀都不能发送，
+#打开此开关后碰到不能发送的附件，则将点号替换成下划线再发送
+SENDMAIL_ALL_POSTFIX = False

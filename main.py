@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+#A GAE web application to aggregate rss and send it to your kindle.
+#Visit https://github.com/cdhigh/KindleEar for the latest version
 
-__Version__ = "1.6.17"
+__Version__ = "1.7"
 __Author__ = "Arroz"
 
-import os, datetime, logging, __builtin__, hashlib
+import os, datetime, logging, __builtin__, hashlib, time
 from collections import OrderedDict, defaultdict
 import gettext
 
@@ -23,7 +25,10 @@ from google.appengine.api import mail
 from google.appengine.ext import db
 from google.appengine.api import taskqueue
 from google.appengine.api import memcache
-from google.appengine.runtime.apiproxy_errors import OverQuotaError
+from google.appengine.runtime.apiproxy_errors import (OverQuotaError,
+                                                DeadlineExceededError)
+from google.appengine.api.mail_errors import (InvalidSenderError,
+                                           InvalidAttachmentTypeError)
 
 from config import *
 
@@ -91,6 +96,14 @@ class KeUser(db.Model): # kindleEar User
     ownfeeds = db.ReferenceProperty(Book) # 每个用户都有自己的自定义RSS
     titlefmt = db.StringProperty() #在元数据标题中添加日期的格式
     
+    @property
+    def whitelist(self):
+        return WhiteList.all().filter('user = ', self.key())
+    
+    @property
+    def urlfilter(self):
+        return UrlFilter.all().filter('user = ', self.key())
+    
 class Feed(db.Model):
     book = db.ReferenceProperty(Book)
     title = db.StringProperty()
@@ -106,12 +119,14 @@ class DeliverLog(db.Model):
     datetime = db.DateTimeProperty()
     book = db.StringProperty()
     status = db.StringProperty()
-    
-class UrlFilter(db.Model):
-    url = db.StringProperty()
 
 class WhiteList(db.Model):
     mail = db.StringProperty()
+    user = db.ReferenceProperty(KeUser)
+
+class UrlFilter(db.Model):
+    url = db.StringProperty()
+    user = db.ReferenceProperty(KeUser)
     
 #def StoreBookToDb():
 for book in BookClasses():  #添加内置书籍
@@ -185,23 +200,51 @@ class BaseHandler:
             basename = decoder.decode(title)
         else:
             basename = title
-        
+            
         lctime = local_time('%Y-%m-%d_%H-%M',tz)
-        if filewithtime:
-            filename = "%s(%s).%s"%(basename,lctime,booktype)
+        if booktype:
+            if filewithtime:
+                filename = "%s(%s).%s"%(basename,lctime,booktype)
+            else:
+                filename = "%s.%s"%(basename,booktype)
         else:
-            filename = "%s.%s"%(basename,booktype)
-        try:
-            mail.send_mail(SRC_EMAIL, to, "KindleEar %s" % lctime, "Deliver from KindlerEar",
-                attachments=[(filename, attachment),])
-        except OverQuotaError as e:
-            default_log.warn('overquota when sendmail to %s:%s' % (to, str(e)))
-            self.deliverlog(name, to, title, len(attachment), tz=tz, status='over quota')
-        except Exception as e:
-            default_log.warn('sendmail to %s failed:%s' % (to, str(e)))
-            self.deliverlog(name, to, title, len(attachment), tz=tz, status='send failed')
-        else:
-            self.deliverlog(name, to, title, len(attachment), tz=tz)
+            filename = basename
+            
+        for i in range(SENDMAIL_RETRY_CNT+1):
+            try:
+                mail.send_mail(SRC_EMAIL, to, "KindleEar %s" % lctime, "Deliver from KindlerEar",
+                    attachments=[(filename, attachment),])
+            except OverQuotaError as e:
+                default_log.warn('overquota when sendmail to %s:%s' % (to, str(e)))
+                self.deliverlog(name, to, title, len(attachment), tz=tz, status='over quota')
+                break
+            except InvalidSenderError as e:
+                default_log.warn('UNAUTHORIZED_SENDER when sendmail to %s:%s' % (to, str(e)))
+                self.deliverlog(name, to, title, len(attachment), tz=tz, status='wrong SRC_EMAIL')
+                break
+            except InvalidAttachmentTypeError as e: #继续发送一次
+                if SENDMAIL_ALL_POSTFIX:
+                    filename = filename.replace('.', '_')
+                    title = title.replace('.', '_')
+                else:
+                    default_log.warn('InvalidAttachmentTypeError when sendmail to %s:%s' % (to, str(e)))
+                    self.deliverlog(name, to, title, len(attachment), tz=tz, status='invalid postfix')
+                    break
+            except DeadlineExceededError as e:
+                if i < SENDMAIL_RETRY_CNT:
+                    default_log.warn('timeout when sendmail to %s:%s, retry!' % (to, str(e)))
+                    time.sleep(5)
+                else:
+                    default_log.warn('timeout when sendmail to %s:%s, abort!' % (to, str(e)))
+                    self.deliverlog(name, to, title, len(attachment), tz=tz, status='timeout')
+                    break
+            except Exception as e:
+                default_log.warn('sendmail to %s failed:%s.<%s>' % (to, str(e), type(e)))
+                self.deliverlog(name, to, title, len(attachment), tz=tz, status='send failed')
+                break
+            else:
+                self.deliverlog(name, to, title, len(attachment), tz=tz)
+                break
     
     def render(self, templatefile, title='KindleEar', **kwargs):
         kwargs.setdefault('nickname', session.get('username'))
@@ -253,19 +296,20 @@ class AdvSetting(BaseHandler):
     def GET(self):
         user = self.getcurrentuser()
         return self.render('advsetting.html',"Advanced Setting",current='advsetting',
-            user=user,urlfilters=UrlFilter.all(),whitelists=WhiteList.all())
+            user=user,urlfilters=user.urlfilter,whitelists=user.whitelist)
         
     def POST(self):
         user = self.getcurrentuser()
         url = web.input().get('url')
         if url:
-            UrlFilter(url=url).put()
+            UrlFilter(url=url,user=user).put()
         wlist = web.input().get('wlist')
         if wlist:
-            WhiteList(mail=wlist).put()
+            WhiteList(mail=wlist,user=user).put()
         raise web.seeother('')
         
 class AdvDel(BaseHandler):
+    #删除白名单或URL过滤器项目
     def GET(self):
         user = self.getcurrentuser()
         delurlid = web.input().get('delurlid')
@@ -391,7 +435,18 @@ class Login(BaseHandler):
                 if not fd.time:
                     fd.time = datetime.datetime.utcnow()
                     fd.put()
-                    
+            
+            #1.7新增各用户独立的白名单和URL过滤器，这些处理是为了兼容以前的版本
+            if name == 'admin':
+                for wl in WhiteList.all():
+                    if not wl.user:
+                        wl.user = u
+                        wl.put()
+                for uf in UrlFilter.all():
+                    if not uf.user:
+                        uf.user = u
+                        uf.put()
+                        
             raise web.seeother(r'/my')
         else:
             tips = _("The username not exist or password is wrong!")
@@ -650,6 +705,10 @@ class Worker(BaseHandler):
             bookid = int(bookid)
         except:
             return "id of book is invalid!<br />"
+        
+        user = KeUser.all().filter("name = ", username).get()
+        if not user or not user.kindle_email:
+            return "User not exist!<br />"
             
         bk = Book.get_by_id(bookid)
         if not bk:
@@ -660,7 +719,7 @@ class Worker(BaseHandler):
             if not book:
                 return "the builtin book not exist!<br />"
             book = book()
-            book.url_filters = [flt.url for flt in UrlFilter.all()]
+            book.url_filters = [flt.url for flt in user.urlfilter]
         else: # 自定义RSS
             if bk.feedscount == 0:
                 return "the book has no feed!<br />"
@@ -673,7 +732,7 @@ class Worker(BaseHandler):
             book.fulltext_by_readability = True
             feeds = bk.feeds
             book.feeds = [(feed.title, feed.url, feed.isfulltext) for feed in feeds]
-            book.url_filters = [flt.url for flt in UrlFilter.all()]
+            book.url_filters = [flt.url for flt in user.urlfilter]
         
         opts = oeb = None
         
@@ -760,18 +819,39 @@ class Url2Book(BaseHandler):
         if not all((username,url,subject,to,language,booktype,tz)):
             return "Some parameter missing!<br />"
         
+        global log
+        
+        if booktype == 'Download': #直接下载电子书并推送
+            from lib.filedownload import Download
+            dlinfo, filename, content = Download(url)
+            #如果标题已经给定了文件名，则使用标题文件名
+            if '.' in subject and (1 < len(subject.split('.')[-1]) < 5):
+                filename = subject
+                
+            if content:
+                self.SendToKindle(username, to, filename, '', content, tz)
+            else:
+                if not dlinfo:
+                    dlinfo = 'download failed'
+                self.deliverlog(username, to, filename, 0, status=dlinfo,tz=tz)
+            log.info("%s Sent!" % filename)
+            return "%s Sent!" % filename
+            
+        user = KeUser.all().filter("name = ", username).get()
+        if not user or not user.kindle_email:
+            return "User not exist!<br />"
+            
         book = BaseUrlBook()
         book.title = book.description = subject
         book.language = language
         book.keep_image = keepimage
         book.network_timeout = 60
         book.feeds = [(subject,url)]
-        book.url_filters = [flt.url for flt in UrlFilter.all()]
+        book.url_filters = [flt.url for flt in user.urlfilter]
         
         opts = oeb = None
         
         # 创建 OEB
-        global log
         opts = getOpts()
         oeb = CreateOeb(log, None, opts)
         

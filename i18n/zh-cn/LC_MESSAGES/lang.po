@@ -155,8 +155,8 @@ msgstr "请输入正则表达式"
 msgid "White List"
 msgstr "邮件白名单"
 
-msgid "mail sent to xxx@<em>appid</em>.appspotmail.com will be transfered to admin's kindle."
-msgstr "发送到xxx@<em>appid</em>.appspotmail.com的邮件正文将会被转发至管理员的Kindle邮箱"
+msgid "mail sent to %sxxx@<em>appid</em>.appspotmail.com will be transfered to your email."
+msgstr "发送到%sxxx@<em>appid</em>.appspotmail.com的邮件正文将会被转发至你注册的邮箱"
 
 msgid "Please input mail address"
 msgstr "请输入邮件地址"

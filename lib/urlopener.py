@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 """为了应付时不时出现的Too many redirects异常，使用此类打开链接。
 此类会自动处理redirect和cookie，同时增加了失败自动重试功能"""
-import urllib, urllib2, Cookie, urlparse
+import urllib, urllib2, Cookie, urlparse, time
 from google.appengine.api import urlfetch
 from config import CONNECTION_TIMEOUT
 
@@ -33,14 +33,14 @@ class URLOpener:
             while cnt < self.maxFetchCount:
                 try:
                     response = urlfetch.fetch(url=url, payload=data, method=method,
-                        headers=self._getHeaders(self.cookie,url),
+                        headers=self._getHeaders(url),
                         allow_truncated=False, follow_redirects=False, 
                         deadline=self.timeout, validate_certificate=False)
                 except urlfetch.DeadlineExceededError:
                     if response.status_code == 555:
                         response.status_code = 504
-                    #cnt += 1
-                    break
+                    cnt += 1
+                    time.sleep(1)
                 except urlfetch.ResponseTooLargeError:
                     if response.status_code == 555:
                         response.status_code = 509
@@ -59,7 +59,7 @@ class URLOpener:
                 except urlfetch.DownloadError:
                     if response.status_code == 555:
                         response.status_code = 450
-                    cnt += 1
+                    #cnt += 1
                     break
                 except Exception:
                     if response.status_code == 555:
@@ -74,7 +74,7 @@ class URLOpener:
             
             data = None
             method = urlfetch.GET
-            self.cookie.load(response.headers.get('set-cookie', ''))
+            self.SaveCookies(response.header_msg.getheaders('Set-Cookie'))
             urlnew = response.headers.get('Location')
             if urlnew and not urlnew.startswith("http"):
                 url = urlparse.urljoin(url, urlnew)
@@ -88,16 +88,25 @@ class URLOpener:
         self.realurl = url
         return response
         
-    def _getHeaders(self, cookie, url):
+    def _getHeaders(self, url=None):
         headers = {
-             #'User-Agent':'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36',
              'User-Agent':"Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)",
              'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-             'Cookie':self._makeCookieHeader(cookie)
                 }
-        if self.addReferer:
+        cookie = '; '.join(["%s=%s" % (v.key, v.value) for v in self.cookie.values()])
+        if cookie:
+            headers['Cookie'] = cookie
+        if self.addReferer and (self.host or url):
             headers['Referer'] = self.host if self.host else url
         return headers
         
-    def _makeCookieHeader(self, cookie):
-        return '; '.join(["%s=%s" % (v.key, v.value) for v in cookie.values()])
+    def SaveCookies(self, cookies):
+        if not cookies:
+            return
+        self.cookie.load(cookies[0])
+        for cookie in cookies[1:]:
+            obj = Cookie.SimpleCookie()
+            obj.load(cookie)
+            for v in obj.values():
+                self.cookie[v.key] = v.value
+            

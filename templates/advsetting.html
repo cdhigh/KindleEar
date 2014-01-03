@@ -13,7 +13,7 @@
     padding-right:6px;
 }
 .tburl{
-    border:1px dotted black;
+    border:1px solid silver;
     cellspacing:0;
     cellpadding:0;
     width:100%;
@@ -45,11 +45,10 @@ td:hover span{
 </style>
 {% endblock %}
 {% block content %}
-{% if nickname == 'admin' %}
 <fieldset id="whitelist">
     <legend>{{_("White List")}}</legend>
     <p style="font-size:0.8em;color:grey;">
-        {{_("mail sent to xxx@<em>appid</em>.appspotmail.com will be transfered to admin's kindle.")}}
+        {{_("mail sent to %sxxx@<em>appid</em>.appspotmail.com will be transfered to your email.")|format('' if user.name=="admin" else user.name+"__")}}
     </p>
     {% if whitelists.count() %}
     <table class="tburl">
@@ -73,7 +72,6 @@ td:hover span{
     </form>
 </fieldset>
 <p style="font-size:8px;"> </p>
-{% endif %}
 <fieldset id="urlfilter">
     <legend>{{_("Url Filter")}}</legend>
     <p style="font-size:0.8em;color:grey;">{{_("Urls in list would not be downloaded for saving of time.")}}</p>

@@ -156,8 +156,8 @@ msgstr "Bir regex(düzenli ifade) belirtin"
 msgid "White List"
 msgstr "Beyaz liste"
 
-msgid "mail sent to xxx@<em>appid</em>.appspotmail.com will be transfered to admin's kindle."
-msgstr "xxx@<em>appid</em>.appspotmail.com adresine gönderilen emailler admin hesabına bağlı Kindle’a gönderilecek."
+msgid "mail sent to %sxxx@<em>appid</em>.appspotmail.com will be transfered to your email."
+msgstr "%sxxx@<em>appid</em>.appspotmail.com adresine gönderilen emailler admin hesabına bağlı Kindle’a gönderilecek."
 
 msgid "Please input mail address"
 msgstr "Lütfen e-posta adresini giriniz"

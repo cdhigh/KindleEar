@@ -23,12 +23,31 @@ def decode_subject(subject):
 
 class HandleMail(InboundMailHandler):
     def receive(self, message):
+        #如果有多个收件人的话，只解释第一个收件人
+        to = parseaddr(message.to)[1]
+        to = to.split('@')[0] if to and '@' in to else 'xxx'
+        if '__' in to:
+            listto = to.split('__')
+            username = listto[0] if listto[0] else 'admin'
+            to = listto[1]
+        else:
+            username = 'admin'
+            
+        user = KeUser.all().filter('name = ', username).get()
+        if not user:
+            username = 'admin'
+            user = KeUser.all().filter('name = ', username).get()
+        
+        if not user or not user.kindle_email:
+            self.response.out.write('No account or no email configured!')
+            return
+        
         sender = parseaddr(message.sender)[1]
         mailhost = sender.split('@')[1] if sender and '@' in sender else None
         if (not sender or not mailhost) or \
-            (not WhiteList.all().filter('mail = ', '*').get()
-            and not WhiteList.all().filter('mail = ', sender.lower()).get()
-            and not WhiteList.all().filter('mail = ', '@' + mailhost.lower()).get()):
+            (not user.whitelist.filter('mail = ', '*').get()
+            and not user.whitelist.filter('mail = ', sender.lower()).get()
+            and not user.whitelist.filter('mail = ', '@' + mailhost.lower()).get()):
             self.response.out.write("Spam mail!")
             default_log.warn('Spam mail from : %s' % sender)
             return
@@ -37,12 +56,8 @@ class HandleMail(InboundMailHandler):
             subject = decode_subject(message.subject)
         else:
             subject = u"NoSubject"
-            
-        admin = KeUser.all().filter('name = ', 'admin').get()
-        if not admin or not admin.kindle_email:
-            self.response.out.write('No admin account or no email configured!')
-            return
         
+        # R是判断一个字符串是否是链接的正则表达式
         R = r"""^(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>???“”‘’]))"""
         txt_bodies = message.bodies('text/plain')
         html_bodies = message.bodies('text/html')
@@ -104,14 +119,17 @@ class HandleMail(InboundMailHandler):
             text = text.replace(link, '') #去掉可能的链接本身字符
             
         if len(links) == 1 and len(text) < WORDCNT_THRESHOLD_FOR_APMAIL:
-            param = {'u':'admin',
-                     'url':link, 
-                     'type':admin.book_type,
-                     'to':admin.kindle_email,
-                     'tz':admin.timezone,
+            #判断是下载文件还是转发内容
+            isbook = bool(to.lower() in ('book', 'file', 'download'))
+            
+            param = {'u':username,
+                     'url':link,
+                     'type':'Download' if isbook else user.book_type,
+                     'to':user.kindle_email,
+                     'tz':user.timezone,
                      'subject':subject[:SUBJECT_WORDCNT_FOR_APMAIL],
-                     'lng':admin.ownfeeds.language,
-                     'keepimage':'1' if admin.ownfeeds.keep_image else '0'
+                     'lng':user.ownfeeds.language,
+                     'keepimage':'1' if user.ownfeeds.keep_image else '0'
                     }
             taskqueue.add(url='/url2book',queue_name="deliverqueue1",method='GET',
                 params=param)
@@ -127,7 +145,7 @@ class HandleMail(InboundMailHandler):
             
             #有图片的话，要生成MOBI或EPUB才行
             #而且多看邮箱不支持html推送，也先转换epub再推送
-            if hasimage or (admin.book_type == "epub"):
+            if hasimage or (user.book_type == "epub"):
                 from main import local_time
                 from lib.makeoeb import (getOpts, CreateOeb, setMetaData,
                                     ServerContainer, byteStringIO, 
@@ -150,7 +168,7 @@ class HandleMail(InboundMailHandler):
                 oeb = CreateOeb(default_log, None, opts)
                 
                 setMetaData(oeb, subject[:SUBJECT_WORDCNT_FOR_APMAIL], 
-                    admin.ownfeeds.language, local_time(tz=admin.timezone), 
+                    user.ownfeeds.language, local_time(tz=user.timezone), 
                     pubtype='book:book:KindleEar')
                 oeb.container = ServerContainer(default_log)
                 id, href = oeb.manifest.generate(id='page', href='page.html')
@@ -171,11 +189,11 @@ class HandleMail(InboundMailHandler):
                                 item = oeb.manifest.add(id, href, mimetype, data=content)
                 
                 oIO = byteStringIO()
-                o = EPUBOutput() if admin.book_type == "epub" else MOBIOutput()
+                o = EPUBOutput() if user.book_type == "epub" else MOBIOutput()
                 o.convert(oeb, oIO, opts, default_log)
-                BaseHandler.SendToKindle('admin', admin.kindle_email, 
+                BaseHandler.SendToKindle(username, user.kindle_email, 
                     subject[:SUBJECT_WORDCNT_FOR_APMAIL], 
-                    admin.book_type, str(oIO.getvalue()), admin.timezone)
+                    user.book_type, str(oIO.getvalue()), user.timezone)
             else: #没有图片则直接推送HTML文件，阅读体验更佳
                 m = soup.find('meta', attrs={"http-equiv":"Content-Type"})
                 if not m:
@@ -186,8 +204,8 @@ class HandleMail(InboundMailHandler):
                     m['content'] = "text/html; charset=utf-8"
                 
                 html = unicode(soup).encode('utf-8')
-                BaseHandler.SendToKindle('admin', admin.kindle_email, 
-                    subject[:SUBJECT_WORDCNT_FOR_APMAIL], 'html', html, admin.timezone, False)
+                BaseHandler.SendToKindle(username, user.kindle_email, 
+                    subject[:SUBJECT_WORDCNT_FOR_APMAIL], 'html', html, user.timezone, False)
         self.response.out.write('Done')
 
 appmail = webapp2.WSGIApplication([HandleMail.mapping()], debug=True)
