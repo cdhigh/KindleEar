@@ -147,7 +147,7 @@ msgstr "Sil"
 msgid "Url Filter"
 msgstr "URL Filtresi"
 
-msgid "Urls in list would not be downloaded for saving of time."
+msgid "Urls in list would not be downloaded."
 msgstr "Bu listedeki URLler zamandan kazanmak için indirilmeyecektir."
 
 msgid "Please input regular expression"
@@ -168,14 +168,17 @@ msgstr "5 saniye sonra otomatik olarak önceki sayfaya döneceksiniz."
 msgid "Click to back"
 msgstr "Geri dönmek için tıklayınız"
 
-msgid "KindleEar is a web application to aggregate rss for generating"
-msgstr "KindleEar web uygulaması birden fazla RSSten"
+msgid "Free Forever."
+msgstr "Free Forever."
 
-msgid "periodical mobi file with images"
-msgstr "resimli dergi formatında  mobi dosyaları"
+msgid "Good News Always Come With You."
+msgstr "Good News Always Come With You."
 
-msgid "and send it to your kindle automatically."
-msgstr "oluşturmak ve Kindle'a göndermek için oluşturulmuştur."
+msgid "Inherited From Calibre"
+msgstr "Inherited From Calibre"
+
+msgid "Share Your Idea"
+msgstr "Share Your Idea"
 
 msgid "Author modified and ported Calibre to generate mobi file in GAE without kindlegen tool of Amazon,"
 msgstr "Google App Engine de Amazonun Kindlegen uygulamasını kullanmadan mobi dosyalar oluşturabilmek için Calibre kodlarını yeniden düzenlenmiştir."
@@ -191,9 +194,6 @@ msgstr "açık kaynak KindleEar uygulaması"
 
 msgid ", You can deploy your own server to push news feeds to your kindle dialy or share with your friends."
 msgstr "ile siz de kendi serverınızı kurup Kindleınıza RSSleri günlük gönderebilir veya arkadaşlarınızla paylaşabilirsiniz."
-
-msgid "Current version : "
-msgstr "Mevcut sürüm："
 
 msgid "Login"
 msgstr "Giriş"
@@ -425,3 +425,15 @@ msgstr "Paz"
 
 msgid "Logs of other users"
 msgstr "Diğer kullanıcıların işlem kayıtları"
+
+msgid "Merge books into one"
+msgstr "Merge books into one"
+
+msgid "Append hyperlink '%s' to article"
+msgstr "Append hyperlink '%s' to article"
+
+msgid "Share"
+msgstr "Share"
+
+msgid "Append hyperlinks for share to article."
+msgstr "Append hyperlinks for share to article."

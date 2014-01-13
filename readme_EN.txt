@@ -13,15 +13,15 @@
    2.Download GAE SDK and install: https://developers.google.com/appengine/downloads
    3.Install Python 2.7.x
    4.Download all files of this application and uncompress it into a directory for example: c:\kindleear.
-   5.Modify the first line of app.yaml, change kindleear to name of application that you create in step 1.
-   6.Modify variable SrcEmail and TIMEZONE of config.py
+   5.Modify the first line in app.yaml, change kindleear to name of application that you create in step 1.
+   6.Modify some variables in config.py
       SRC_EMAIL : your gmail address that used to register a GAE account in step 1.
-      TIMEZONE : your timezone
+      DOMAIN : domain of your gae application.
    7.Execute command in directory GAE SDK(default is C:\Program Files\Google\google_appengine)
       'c:\python27\python.exe appcfg.py update c:\kindleear' (c:\kindleear is directory that you put files in step 4)
       input email address and password and wait it finish.
       after finished, you can open the website 'appid.appspot.com' (appid is name of your application)
-      for example site of author: kindleear.appspot.com
+      for example author's site: kindleear.appspot.com
       the initial username is 'admin', password is 'admin', please change it immediately after login.
    8.more details can be found in faq.
    9.If you don't want to intall GAE SDK and python, you have another choice, download 'uploader' from:

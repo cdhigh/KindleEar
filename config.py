@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-"""app的配置文件"""
+"""KindleEar的配置文件，开头两个配置项是必须修改的。"""
 
 SRC_EMAIL = "akindleear@gmail.com"  #邮件的发件人地址
-TIMEZONE = 8                        #默认时区
+DOMAIN = "https://kindleear.appspot.com" #你的域名，用于归档链接
+
+TIMEZONE = 8  #默认时区
 
 DEFAULT_MASTHEAD = "mh_default.gif" #如果书籍没有报头，则使用此报头。
 DEFAULT_COVER = "cv_default.jpg" #如果书籍没有封面，则使用此封面，留空则不添加封面
@@ -55,3 +57,7 @@ SENDMAIL_RETRY_CNT = 1
 #GAE对邮件附件的后缀要求很严格，很多后缀都不能发送，
 #打开此开关后碰到不能发送的附件，则将点号替换成下划线再发送
 SENDMAIL_ALL_POSTFIX = False
+
+#归档或分享超链接的文本描述
+SAVE_TO_EVERNOTE = u"Save to evernote"
+SAVE_TO_WIZ = u"Save to Wiz"

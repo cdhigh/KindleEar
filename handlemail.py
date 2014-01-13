@@ -121,6 +121,8 @@ class HandleMail(InboundMailHandler):
         if len(links) == 1 and len(text) < WORDCNT_THRESHOLD_FOR_APMAIL:
             #判断是下载文件还是转发内容
             isbook = bool(to.lower() in ('book', 'file', 'download'))
+            isbook = link[-5:].lower() in ('.mobi','.epub','.docx') if not isbook else isbook
+            isbook = link[-4:].lower() in ('.pdf','.txt','.doc','.rtf') if not isbook else isbook
             
             param = {'u':username,
                      'url':link,

@@ -146,7 +146,7 @@ msgstr "删除"
 msgid "Url Filter"
 msgstr "URL过滤"
 
-msgid "Urls in list would not be downloaded for saving of time."
+msgid "Urls in list would not be downloaded."
 msgstr "在此列表中的URL将不会被下载，以便节省时间，仅适用于文章中的图片URL"
 
 msgid "Please input regular expression"
@@ -167,14 +167,17 @@ msgstr "5秒钟后自动返回上一页"
 msgid "Click to back"
 msgstr "点击直接返回"
 
-msgid "KindleEar is a web application to aggregate rss for generating"
-msgstr "KindleEar是一个将RSS订阅制作成"
+msgid "Free Forever."
+msgstr "分享自由。"
 
-msgid "periodical mobi file with images"
-msgstr "带图杂志mobi格式"
+msgid "Good News Always Come With You."
+msgstr "好消息时刻相随。"
 
-msgid "and send it to your kindle automatically."
-msgstr "发送至Kindle上的应用网站。"
+msgid "Inherited From Calibre"
+msgstr "源自Calibre"
+
+msgid "Share Your Idea"
+msgstr "分享智慧"
 
 msgid "Author modified and ported Calibre to generate mobi file in GAE without kindlegen tool of Amazon,"
 msgstr "作者提取了Calibre的mobi模块用于通过Python在线生成mobi格式文件，不依赖Amazon的kindlegen工具，"
@@ -191,11 +194,8 @@ msgstr "开源的KindleEar程序"
 msgid ", You can deploy your own server to push news feeds to your kindle dialy or share with your friends."
 msgstr "，你可以在GAE上搭建自己的推送服务器，下载包含图片的RSS订阅或网页推送到你的Kindle，并支持多账号，可以提供给三五好友同时使用。"
 
-msgid "Current version : "
-msgstr "当前运行版本："
-
 msgid "Login"
-msgstr "确认登陆"
+msgstr "登陆"
 
 msgid "The website dont allow register, you can ask owner for a account."
 msgstr "本站不开放注册，需要管理员先添加账号然后才能使用对应账号登录使用相应服务。"
@@ -424,3 +424,15 @@ msgstr "日"
 
 msgid "Logs of other users"
 msgstr "其他用户的日志"
+
+msgid "Merge books into one"
+msgstr "多本书籍合并投递为一本"
+
+msgid "Append hyperlink '%s' to article"
+msgstr "在每篇文章后附加 '%s' 超链接"
+
+msgid "Share"
+msgstr "归档和分享"
+
+msgid "Append hyperlinks for share to article."
+msgstr "在文章最后附加归档或分享链接"

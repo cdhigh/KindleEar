@@ -68,7 +68,7 @@ class ZhihuDaily(BaseFeedBook):
                 for item in feed[partition]:
                     urlfeed = item['share_url']
                     if urlfeed in urladded:
-                        self.log.warn('skipped %s' % urlfeed)
+                        self.log.info('skipped %s' % urlfeed)
                         continue
                         
                     urls.append((section, item['title'], urlfeed, None))

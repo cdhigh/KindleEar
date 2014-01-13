@@ -5,28 +5,22 @@
     {% if tips %}
     <p style="color:red;font-weight:bold;">{{tips}}</p>
     {% endif %}
-    <form action="" method="POST">
-    <table id="mgrpwd">
-        <tr>
-            <td style="text-align:right;">{{_("Username")}} : </td>
-            {% if username %}
-            <td><input type="text" name="u" id="username" value={{username}}></td>
-            {% else %}
-            <td><input type="text" name="u" id="username"></td>
-            {% endif %}
-        </tr>
-        <tr>
-            <td style="text-align:right;">{{_("New password")}} : </td>
-            <td><input type="password" name="p1" id="password"></td>
-        </tr>
-        <tr>
-            <td style="text-align:right;">{{_("Confirm password")}} : </td>
-            <td><input type="password" name="p2" id="password"></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><input type="submit" value="{{_("Confirm Change")}}"></td>
-        </tr>
-    </table>
+    <form class="pure-form pure-form-aligned" action="" method="POST">
+        <div class="pure-control-group">
+            <label for="u">{{_("Username")}}</label>
+            <input id="u" name="u" type="text" placeholder="Username" 
+            {% if username %}value="{{username}}"{% endif %} />
+        </div>
+        <div class="pure-control-group">
+            <label for="p1">{{_("New password")}}</label>
+            <input id="p1" name="p1" type="password" placeholder="Password" />
+        </div>
+        <div class="pure-control-group">
+            <label for="p2">{{_("Confirm password")}}</label>
+            <input id="p2" name="p2" type="password" placeholder="Password" />
+        </div>
+        <div class="pure-controls">
+            <button type="submit" class="pure-button pure-button-primary">{{_("Confirm Change")}}</button>
+        </div>
     </form>
 {% endblock %}

@@ -6,12 +6,8 @@
     <meta name="description" content="KindleEar is a service for Amazon Kindle owners that lets you aggregate feeds you chosen and have them delivered to your Kindle in a convenient, easy-to-navigate format." />
     <link rel="stylesheet" href="base.css" type="text/css" charset="utf-8"/>
     <style type="text/css">
-    h2{
-        font-size:1.2em;
-    }
-	li{
-		margin:0.5em;
-	}
+    h2{font-size:1.2em;}
+	li{margin:0.5em;}
     </style>
 </head>
 <body>
@@ -121,7 +117,8 @@
     <h2>How can I do if forgot password?</h2>
     <p class="answer">If you have forgotten the password for non-administrator account, you can notify the administrator to change your password. If an administrator password forgot, you can login appengine.google.com, on the left select "Datastore Admin", delete all KeUser data, all account information will be deleted, and then re-use admin/admin login to your application . Did not find "Datastore Admin"? You can active it in the "Application Settings".
         <br />If you know python, you would find other solution.</p>
-    
+    <h2>Why I did not receive deliver after have chosen 'Merge books into one'?<a name="mergebooks" id="mergebooks" >&nbsp;</a></h2>
+    <p class="answer">With 'Merge books in one' checked, KindleEar have to process all of rss in all books subscribed in limit of 10 minutes defined by GAE, often that cause DeadlineExceededError when you have subscribed much more books. If it happened, please decrease books subscribed or split those into some accounts.</p>
 	<pre><p> </p><p> </p></pre>
     <div id="footer">
         <div class="clear"></div>

@@ -222,10 +222,10 @@ class BaseFeedBook:
     #------------------------------------------------------------
     # 下面的内容为类实现细节
     #------------------------------------------------------------
-    def __init__(self, log=None):
+    def __init__(self, log=None, imgindex=0):
         self.log = default_log if log is None else log
         self.compiled_urlfilters = []
-        self._imgindex = 0
+        self._imgindex = imgindex
     
     @property
     def timeout(self):
@@ -357,7 +357,7 @@ class BaseFeedBook:
         
         return urls
         
-    def Items(self, opts=None):
+    def Items(self, opts=None, user=None):
         """
         生成器，返回一个元组
         对于HTML：section,url,title,content,brief
@@ -380,7 +380,7 @@ class BaseFeedBook:
                 article = self.FragToXhtml(desc, ftitle)
             
             #如果是图片，title则是mime
-            for title, imgurl, imgfn, content, brief in readability(article,url,opts):
+            for title, imgurl, imgfn, content, brief in readability(article,url,opts,user):
                 if title.startswith(r'image/'): #图片
                     yield (title, imgurl, imgfn, content, brief)
                 else:
@@ -413,14 +413,19 @@ class BaseFeedBook:
         else:
             return decoder.decode(content,opener.realurl)
         
-    def readability(self, article, url, opts=None):
+    def readability(self, article, url, opts=None, user=None):
         """ 使用readability-lxml处理全文信息 """
         #因为图片文件占内存，为了节省内存，这个函数也做为生成器
         content = self.preprocess(article)
         
         # 提取正文
-        doc = readability.Document(content)
-        summary = doc.summary(html_partial=False)
+        try:
+            doc = readability.Document(content)
+            summary = doc.summary(html_partial=False)
+        except:
+            self.log.warn('article is invalid.[%s]' % url)
+            return
+            
         title = doc.short_title()
         title = self.processtitle(title)
         
@@ -519,6 +524,26 @@ class BaseFeedBook:
                 img.decompose()
         
         self.soupprocessex(soup)
+        
+        #插入分享链接
+        if user:
+            if user.evernote and user.evernote_mail:
+                span = soup.new_tag('span')
+                span.string = '    '
+                soup.html.body.append(span)
+                href = "%s/share?act=evernote&u=%s&url=%s"%(DOMAIN,user.name,url)
+                ashare = soup.new_tag('a', href=href)
+                ashare.string = SAVE_TO_EVERNOTE
+                soup.html.body.append(ashare)
+            if user.wiz and user.wiz_mail:
+                span = soup.new_tag('span')
+                span.string = '    '
+                soup.html.body.append(span)
+                href = "%s/share?act=wiz&u=%s&url=%s"%(DOMAIN,user.name,url)
+                ashare = soup.new_tag('a', href=href)
+                ashare.string = SAVE_TO_WIZ
+                soup.html.body.append(ashare)
+            
         content = unicode(soup)
         
         #提取文章内容的前面一部分做为摘要
@@ -536,7 +561,7 @@ class BaseFeedBook:
         
         yield (title, None, None, content, brief)
         
-    def readability_by_soup(self, article, url, opts=None):
+    def readability_by_soup(self, article, url, opts=None, user=None):
         """ 使用BeautifulSoup手动解析网页，提取正文内容 """
         #因为图片文件占内存，为了节省内存，这个函数也做为生成器
         content = self.preprocess(article)
@@ -656,6 +681,26 @@ class BaseFeedBook:
                     break
         
         self.soupprocessex(soup)
+        
+        #插入分享链接
+        if user:
+            if user.evernote and user.evernote_mail:
+                span = soup.new_tag('span')
+                span.string = '    '
+                soup.html.body.append(span)
+                href = "%s/share?act=evernote&u=%s&url=%s"%(DOMAIN,user.name,url)
+                ashare = soup.new_tag('a', href=href)
+                ashare.string = SAVE_TO_EVERNOTE
+                soup.html.body.append(ashare)
+            if user.wiz and user.wiz_mail:
+                span = soup.new_tag('span')
+                span.string = '    '
+                soup.html.body.append(span)
+                href = "%s/share?act=wiz&u=%s&url=%s"%(DOMAIN,user.name,url)
+                ashare = soup.new_tag('a', href=href)
+                ashare.string = SAVE_TO_WIZ
+                soup.html.body.append(ashare)
+                
         content = unicode(soup)
         
         #提取文章内容的前面一部分做为摘要
@@ -690,7 +735,7 @@ class WebpageBook(BaseFeedBook):
     fulltext_by_readability = False
     
     # 直接在网页中获取信息
-    def Items(self, opts=None):
+    def Items(self, opts=None, user=None):
         """
         生成器，返回一个元组
         对于HTML：section,url,title,content,brief

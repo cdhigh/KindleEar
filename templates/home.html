@@ -3,24 +3,69 @@
 <style type="text/css">
 p{
     color:#2d2d2d;
-    text-align:center;
+    /*text-align:center;*/
+    line-height: 1.6em;
 }
-li{
-    list-style:circle;
-    color:#2d2d2d;
+.banner {
+    background-color:#c8cdde;
+    text-align: center;
+    background-size: cover;
+    height: 100px;
+    width: 100%;
+    margin-bottom: 1em;
+    display: table;
 }
+
+.banner-head {
+    display: table-cell;
+    vertical-align: middle;
+    margin-bottom: 0;
+    font-size: 1.8em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 1px 1px black;
+}
+.l-box {
+    padding: 0.5em 2em;
+}
+.information {
+    max-width: 800px;
+    margin: 0 auto;
+}
+.information-head {
+    color: black;
+    font-weight: 500;
+}
+
 </style>
 {% endblock %}
+{% block bodytag %}
+<body onload="document.getElementById('u').focus();">
+{% endblock %}
 {% block content %}
-    <p>{{_("KindleEar is a web application to aggregate rss for generating")}}
-        <a href="/static/periodical.gif" target="_blank" style="text-decoration:none;"> {{_("periodical mobi file with images")}} </a>
-        {{_("and send it to your kindle automatically.")}}<br /><br /></p>
-    <ul>
-    <li>{{_("Author modified and ported Calibre to generate mobi file in GAE without kindlegen tool of Amazon,")}}
-        {{_("for periodical mobi file is a better format to represent news feeds.")}}<br /><br /></li>
-    <li>{{_("With my")}} <a href="https://github.com/cdhigh/kindleear" target="_blank" style="text-decoration:none;">
-        {{_("open source KindleEar application")}}</a>
-        {{_(", You can deploy your own server to push news feeds to your kindle dialy or share with your friends.")}}<br /><br /></li>
-    <li>{{_("Current version : ")}}{{version}}<br /></li>
-    </ul>
+    <div class="banner">
+        <h1 class="banner-head">
+            {{_("Free Forever.")}}<br>
+            {{_("Good News Always Come With You.")}}
+        </h1>
+    </div>
+    
+    <div class="pure-g-r">
+    <div class="information pure-u-1-2">
+        <div class="l-box">
+        <h3 class="information-head">{{_("Inherited From Calibre")}}</h3>
+        <p>{{_("Author modified and ported Calibre to generate mobi file in GAE without kindlegen tool of Amazon,")}}
+            {{_("for periodical mobi file is a better format to represent news feeds.")}}</p>
+        </div>
+    </div>
+    <div class="information pure-u-1-2">
+        <div class="l-box">
+        <h3 class="information-head">{{_("Share Your Idea")}}</h3>
+        <p>{{_("With my")}} <a href="https://github.com/cdhigh/kindleear" target="_blank" style="text-decoration:none;">
+            {{_("open source KindleEar application")}}</a>
+            {{_(", You can deploy your own server to push news feeds to your kindle dialy or share with your friends.")}}</p>
+        </div>
+    </div>
+    </div>
+    
 {% endblock %}

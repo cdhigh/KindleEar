@@ -37,4 +37,5 @@
      如果你感兴趣的网站不提供RSS订阅，则可以继承WebpageBook直接连接网页提取信息。
    ★子类能定制的参数都在BaseFeedBook类的定义中，注释很详细。
    ★处理HTML的BeautifulSoup为4.x版本。
-   
+
+   在此贴子里有更详细的说明：http://www.hi-pda.com/forum/viewthread.php?tid=1248204

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block css %}
+<style type="text/css">
+.newitem {
+    margin-bottom:5px;
+    margin-top:3px;
+    float: left;
+    padding-top: 3px;
+    padding-left:3px;
+    width:85%;
+    clear:left;
+    color: #555;
+    padding-right:6px;
+}
+.tburl{
+    border:1px solid silver;
+    cellspacing:0;
+    cellpadding:0;
+    width:100%;
+}
+td span{
+    display:none;
+}
+td:hover{
+    position:relative;
+    z-index:1;
+}
+td:hover span{
+    display:block;
+    background:#ffffe1;
+    border:1px solid #000000;
+    color:#333;
+    z-index:10;
+    position:absolute;
+    top:1.2em;
+    left:5px;
+    width:600px;
+}
+.l-box {
+    padding: 1em;
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="pure-skin-mine">
+<div class="pure-g">
+  <div class="pure-u-4-5">
+  <div class="1-box">
+   {% block advcontent %}
+   {% endblock %}
+  </div>
+  </div>
+  
+  <div class="pure-u-1-5">
+  <div class="1-box">
+   <div class="pure-menu pure-menu-open">
+    <ul>
+    {% if advcurr=='whitelist'%}
+      <li class="pure-menu-selected"><a href="#">{{_("White List")}}</a>
+      </li>
+    {% else %}
+      <li><a href="/advwhitelist">{{_("White List")}}</a></li>
+    {% endif %}
+    
+    {% if advcurr=='share'%}
+      <li class="pure-menu-selected"><a href="#">{{_("Share")}}</a>
+      </li>
+    {% else %}
+      <li><a href="/advshare">{{_("Share")}}</a></li>
+    {% endif %}
+    
+    {% if advcurr=='urlfilter'%}
+      <li class="pure-menu-selected"><a href="#">{{_("Url Filter")}}</a>
+      </li>
+    {% else %}
+      <li><a href="/advurlfilter">{{_("Url Filter")}}</a></li>
+    {% endif %}
+    </ul>
+   </div>
+  </div>
+  </div>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "advbase.html" %}
+{% block advcontent %}
+<form class="pure-form pure-form-stacked" action="" method="POST">
+  <fieldset>
+    <legend>{{_("Share")}}</legend>
+    <p style="font-size:0.8em;color:grey;">
+        {{_("Append hyperlinks for share to article.")}}
+    </p>
+    <div class="pure-control-group">
+        <label for="enable_evernote" class="pure-checkbox">
+            <input id="enable_evernote" name="evernote", type="checkbox" 
+                {% if user and user.evernote %}checked="1"{% endif %} />
+            {{_("Append hyperlink '%s' to article")|format(savetoevernote)}}
+        </label>
+        <input type="text" name="evernote_mail" style="width:280px" placeholder="Evernote Email" 
+            value="{% if user and user.evernote_mail %}{{ user.evernote_mail }}{% endif %}" />
+    </div>
+    
+    <div class="pure-control-group">
+        <label for="enable_wiz" class="pure-checkbox">
+            <input id="enable_wiz" name="wiz", type="checkbox" 
+                {% if user and user.wiz %}checked="1"{% endif %} />
+            {{_("Append hyperlink '%s' to article")|format(savetowiz)}}
+        </label>
+        <input type="text" name="wiz_mail" style="width:280px" placeholder="Wiz Email" 
+            value="{% if user and user.wiz_mail %}{{ user.wiz_mail }}{% endif %}" />
+    </div>
+    <span style="font-size:0.4em;">&nbsp;</span>
+    <div class="pure-controls">
+        <button type="submit" class="pure-button pure-button-primary">{{_("Save settings")}}</button>
+    </div>
+  </fieldset>    
+</form>
+{% endblock %}

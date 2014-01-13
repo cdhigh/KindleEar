@@ -19,7 +19,7 @@
     5.修改app.yaml的第一行：将kindleear修改为你申请的application名字
     6.修改config.py中的这几个变量
       SRC_EMAIL ：你申请GAE账号时的GMAIL邮箱
-      TIMEZONE ：默认时区
+      DOMAIN ：你申请的应用的域名
     7.转到GAE SDK安装目录（默认为：C:\Program Files\Google\google_appengine）
       执行CMD命令：c:\python27\python.exe appcfg.py update kindleear目录
       比如：c:\python27\python.exe appcfg.py update c:\kindleear

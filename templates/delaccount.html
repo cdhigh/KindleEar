@@ -5,16 +5,14 @@
     {% if tips %}
     <p style="color:red;font-weight:bold;">{{tips}}</p>
     {% endif %}
-    <form action="" method="POST">
-    <table id="delaccount">
-        <tr>
-            <td>{{_("Username")}} : </td>
-            <td><input type="text" name="u" id="username" readonly="true" {% if username %}value={{username}}{% endif %}></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><input type="submit" value="   {{_("Delete")}}   "></td>
-        </tr>
-    </table>
+    <form class="pure-form pure-form-aligned" action="" method="POST">
+        <div class="pure-control-group">
+            <label for="u">{{_("Username")}}</label>
+            <input id="u" name="u" type="text" placeholder="Username" 
+            {% if username %}value="{{username}}"{% endif %} readonly="true" />
+        </div>
+        <div class="pure-controls">
+            <button type="submit" class="pure-button pure-button-primary">{{_("Delete")}}</button>
+        </div>        
     </form>
 {% endblock %}

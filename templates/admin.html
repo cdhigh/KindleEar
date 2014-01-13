@@ -3,96 +3,89 @@
 {% block css %}
 <style type="text/css">
 .usrtb {
-background-color:#f0f0f0;
-border:1px dotted black;
 width:100%;
-border-collapse:collapse;
+font-size:0.8em;
 }
-.usrtbhead {
-background-color:#b0b0b0;
-color:white;
-}
-.usrrow .usrh {
-border:1px dotted #c0c0c0;
-}
+.usrtb th{text-align:center;}
 </style>
 {% endblock %}
 
 {% block content %}
-<form id="chpwd" action="" method="POST">
-<fieldset id="fieldset_chpwd">
+<form class="pure-form pure-form-aligned" action="" method="POST">
+<fieldset>
     <legend>{{_("Change Password")}}</legend>
     {% if chpwdtips %}
     <p style="color:red;font-size:0.8em;">{{chpwdtips}}</p>
     {% endif %}
-    <table id="tb_chpwd" align="center">
-    <tr>
-        <td style="text-align:right;">{{_("Old password")}} : </td>
-        <td><input type="password" name="op" id="orgpwd"></td>
-    </tr>
-    <tr>
-        <td style="text-align:right;">{{_("New password")}} : </td>
-        <td><input type="password" name="p1" id="newpwd1"></td>
-    </tr>
-    <tr>
-        <td style="text-align:right;">{{_("Confirm password")}} : </td>
-        <td><input type="password" name="p2" id="newpwd2"></td>
-    </tr>
-    <tr>
-        <td></td>
-        <td><input type="submit" value=" {{_("Confirm Change")}} "></td>
-    </tr>
-    </table>
+    <div class="pure-control-group">
+        <label for="orgpwd">{{_("Old password")}}</label>
+        <input type="password" name="op" id="orgpwd">
+    </div>
+    <div class="pure-control-group">
+        <label for="newpwd1">{{_("New password")}}</label>
+        <input type="password" name="p1" id="newpwd1">
+    </div>
+    <div class="pure-control-group">
+        <label for="newpwd2">{{_("Confirm password")}}</label>
+        <input type="password" name="p2" id="newpwd2">
+    </div>
+    <div class="pure-controls">
+        <button type="submit" class="pure-button">{{_("Confirm Change")}}</button>
+    </div>
 </fieldset>
 </form>
 
 {% if nickname == 'admin' %}
-<form id="fmac" action="" method="POST">
-<fieldset id="fieldset_ac">
+<form class="pure-form pure-form-aligned" action="" method="POST">
+<fieldset>
     <legend>{{_("Add Account")}}</legend>
     {% if actips %}
     <p style="color:red;font-size:0.8em;">{{actips}}</p>
     {% endif %}
-    <table id="addcount" align="center">
-        <tr>
-            <td style="text-align:right;">{{_("Username")}} : </td>
-            <td><input type="text" name="u" id="username"></td>
-        </tr>
-        <tr>
-            <td style="text-align:right;">{{_("Password")}} : </td>
-            <td><input type="text" name="up1" id="password"></td>
-        </tr>
-        <tr>
-            <td style="text-align:right;">{{_("Confirm password")}} : </td>
-            <td><input type="text" name="up2" id="password"></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><input type="submit" value="  {{_("Add")}}  "></td>
-        </tr>
-    </table>
+    <div class="pure-control-group">
+        <label for="username">{{_("Username")}}</label>
+        <input type="text" name="u" id="username" />
+    </div>
+    <div class="pure-control-group">
+        <label for="password1">{{_("Password")}}</label>
+        <input type="text" name="up1" id="password1">
+    </div>
+    <div class="pure-control-group">
+        <label for="password2">{{_("Confirm password")}}</label>
+        <input type="text" name="up2" id="password2">
+    </div>
+    <div class="pure-controls">
+        <button type="submit" class="pure-button">{{_("Add")}}</button>
+    </div>
     <p style="font-size:0.8em;color:grey;">{{_("Note : No supports many accounts for limit of free account of GAE.")}}</p>
 </fieldset>
 </form>
 
-<fieldset id="fieldset_cm">
-    <legend>{{_("Accounts")}}</legend>
-    <table id="tb_cm" class="usrtb">
-        <tr class="usrtbhead">
-        <th class="usrh">{{_("No.")}}</th><th class="usrh">{{_("Username")}}</th>
-        <th class="usrh">{{_("Enable")}}</th>
-        <th class="usrh" colspan="2">{{_("Operation")}}</th>
-        </tr>
+<hr />
+{#<fieldset>#}
+    {#<legend>{{_("Accounts")}}</legend>#}
+    <table class="pure-table pure-table-bordered usrtb">
+        <caption>{{_("Accounts")}}</caption>
+        <thead><tr>
+            <th>{{_("No.")}}</th>
+            <th>{{_("Username")}}</th>
+            <th>{{_("Enable")}}</th>
+            <th colspan="2">{{_("Operation")}}</th>
+        </tr></thead>
+        
+        <tbody>
         {% for u in users %}
-        <tr class="usrrow">
-        <th class="usrh">{{loop.index}}</th><th class="usrh">{{u.name}}</th>
-        <th class="usrh">{{u.enable_send}}</th>
-        <th class="usrh"><a href="/mgrpwd/{{u.name}}" class="actionButton">{{_("Change")}}</a></th>
-        <th class="usrh"><a href="delaccount/{{u.name}}" class="actionButton">{{_("Delete")}}</a></th>
+        <tr>
+        <th>{{loop.index}}</th>
+        <th>{{u.name}}</th>
+        <th>{{u.enable_send}}</th>
+        <th><a href="/mgrpwd/{{u.name}}" class="actionButton">{{_("Change")}}</a></th>
+        <th><a href="delaccount/{{u.name}}" class="actionButton">{{_("Delete")}}</a></th>
         </tr>
         {% endfor %}
+        </tbody>
     </table>
-</fieldset>
+{#</fieldset>#}
 {% endif %}
 
 {% endblock %}

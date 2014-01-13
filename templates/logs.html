@@ -1,8 +1,73 @@
 {% extends "base.html" %}
+{% block css %}
+<style type="text/css">
+.logs_list{
+    border-spacing: 0;
+    border-collapse: collapse;
+    background:#F8F8F8;
+    width:100%;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    border-radius: 8px;
+}
+.logs_list td,.logs_list th{
+    font-size: 13px;
+    padding:3px 10px;
+    border: 1px solid #e6e6e6;
+}
+
+.logs_list td{
+    line-height: 25px;
+    text-align: left;
+    padding-left: 10px;
+}
+.logs_list th{
+    font-weight: bold;
+    color: #333;
+    line-height: 25px;
+    text-align: left;
+    padding-left: 10px;
+}
+
+.logs_list .center{
+    text-align:center;
+}
+.logs_list strong{font-weight: bold;color:#005DA7;}
+.logs_list caption{
+    font-size: 16px;
+    text-align: left;
+    padding: 5px 10px;
+    border: 1px solid #e6e6e6;
+}
+.logs_list .logbook {
+    text-align:center;
+}
+
+.logs_list .logbook span{
+    display:none;
+}
+.logs_list .logbook:hover{
+    position:relative;
+    z-index:1;
+}
+.logs_list .logbook:hover span{
+    display:block;
+    padding:2px;
+    background:#ffffe1;
+    border:1px solid #000000;
+    color:#333;
+    z-index:10;
+    position:absolute;
+    top:1.2em;
+    left:5px;
+    width:400px;
+}
+</style>
+{% endblock %}
 {% block content %}
 {% if mylogs %}
 <em class="required">*</em> {{_("Only display last 10 logs")}}<br />
-<table class="logs_list" border="0" cellspacing="0" cellpadding="0">
+<table class="pure-table pure-table-striped logs_list">
     <thead><tr>
         <th class="center">{{_("Time")}}</th>
         <th class="center">{{_("Title")}}</th>
@@ -31,7 +96,7 @@
 {% if logs %}
 <br />
 <em class="required">*</em> {{_("Logs of other users")}}<br />
-<table class="logs_list" border="0" cellspacing="0" cellpadding="0">
+<table class="pure-table pure-table-striped logs_list">
     <thead><tr>
         <th class="center">{{_("Username")}}</th>
         <th class="center">{{_("Time")}}</th>
