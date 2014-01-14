@@ -2,8 +2,8 @@
 # -*- coding:utf-8 -*-
 """KindleEar的配置文件，开头两个配置项是必须修改的。"""
 
-SRC_EMAIL = "akindleear@gmail.com"  #邮件的发件人地址
-DOMAIN = "https://kindleear.appspot.com" #你的域名，用于归档链接
+SRC_EMAIL = "henryouly@gmail.com"  #邮件的发件人地址
+DOMAIN = "https://kindleplex.appspot.com" #你的域名，用于归档链接
 
 TIMEZONE = 8  #默认时区
 
