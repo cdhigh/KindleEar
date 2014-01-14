@@ -169,7 +169,6 @@ class FileDownload:
                 elif len(response.content):
                     self.SaveCookies(response.header_msg.getheaders('Set-Cookie'))
                     parts.append(response.content)
-                    default_log.warn('Dowlaod len : %s' % len(response.content)) #TODO
                     self.start += len(response.content)
                     if self.start >= self.filelen:
                         break

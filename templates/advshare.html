@@ -25,6 +25,12 @@
         <input type="text" name="wiz_mail" style="width:280px" placeholder="Wiz Email" 
             value="{% if user and user.wiz_mail %}{{ user.wiz_mail }}{% endif %}" />
     </div>
+    <hr />
+    <label for="fuck_gfw" class="pure-checkbox">
+        <input id="fuck_gfw" type="checkbox" name="fuckgfw" 
+        {% if user and user.share_fuckgfw %}checked="1"{% endif %} >
+        {{_("Fuck Gfw (For users in China)")}}
+    </label>
     <span style="font-size:0.4em;">&nbsp;</span>
     <div class="pure-controls">
         <button type="submit" class="pure-button pure-button-primary">{{_("Save settings")}}</button>

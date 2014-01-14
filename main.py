@@ -4,7 +4,7 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.8"
+__Version__ = "1.9"
 __Author__ = "Arroz"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -106,6 +106,7 @@ class KeUser(db.Model): # kindleEar User
     titlefmt = db.StringProperty() #在元数据标题中添加日期的格式
     merge_books = db.BooleanProperty() #是否合并书籍成一本
     
+    share_fuckgfw = db.BooleanProperty() #归档和分享时是否需要翻墙
     evernote = db.BooleanProperty() #是否分享至evernote
     evernote_mail = db.StringProperty() #evernote邮件地址
     wiz = db.BooleanProperty() #为知笔记
@@ -376,6 +377,7 @@ class AdvShare(BaseHandler):
     def POST(self):
         user = self.getcurrentuser()
         
+        fuckgfw = bool(web.input().get('fuckgfw'))
         evernote = bool(web.input().get('evernote'))
         evernote_mail = web.input().get('evernote_mail', '')
         if not evernote_mail:
@@ -384,6 +386,7 @@ class AdvShare(BaseHandler):
         wiz_mail = web.input().get('wiz_mail', '')
         if not wiz_mail:
             wiz = False
+        user.share_fuckgfw = fuckgfw
         user.evernote = evernote
         user.evernote_mail = evernote_mail
         user.wiz = wiz
@@ -868,13 +871,18 @@ class Worker(BaseHandler):
         oeb.container = ServerContainer(log)
         
         #guide
-        mhfile = book4meta.mastheadfile if len(bks)==1 else DEFAULT_MASTHEAD
+        if len(bks)==1 and bks[0].builtin:
+            mhfile = book4meta.mastheadfile
+            coverfile = book4meta.coverfile
+        else:
+            mhfile = DEFAULT_MASTHEAD
+            coverfile = DEFAULT_COVER
+        
         if mhfile:
             id, href = oeb.manifest.generate('masthead', mhfile) # size:600*60
             oeb.manifest.add(id, href, MimeFromFilename(mhfile))
             oeb.guide.add('masthead', 'Masthead Image', href)
         
-        coverfile = book4meta.coverfile if len(bks)==1 else DEFAULT_COVER
         if coverfile:
             id, href = oeb.manifest.generate('cover', coverfile)
             item = oeb.manifest.add(id, href, MimeFromFilename(coverfile))

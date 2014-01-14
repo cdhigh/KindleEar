@@ -437,3 +437,6 @@ msgstr "Share"
 
 msgid "Append hyperlinks for share to article."
 msgstr "Append hyperlinks for share to article."
+
+msgid "Fuck Gfw (For users in China)"
+msgstr "Fuck Gfw (For users in China)"

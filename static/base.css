@@ -3,9 +3,9 @@ body {
     font-size: 100%;
     max-width: 800px;
     min-width: 300px;
-    margin:5px auto 0;
+    margin: 5px auto 0;
     padding: 0 5px;
-    /*background-color: #f4f4f4;*/
+    background-color: white;
     position: relative;
 }
 
@@ -1120,4 +1120,3 @@ margin: 7px 2px;
 
 }
 /* end from menu-responsive.css ******************/
-

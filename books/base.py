@@ -532,6 +532,8 @@ class BaseFeedBook:
                 span.string = '    '
                 soup.html.body.append(span)
                 href = "%s/share?act=evernote&u=%s&url=%s"%(DOMAIN,user.name,url)
+                if user.share_fuckgfw:
+                    href = SHARE_FUCK_GFW_SRV % urllib.quote(href)
                 ashare = soup.new_tag('a', href=href)
                 ashare.string = SAVE_TO_EVERNOTE
                 soup.html.body.append(ashare)
@@ -540,6 +542,8 @@ class BaseFeedBook:
                 span.string = '    '
                 soup.html.body.append(span)
                 href = "%s/share?act=wiz&u=%s&url=%s"%(DOMAIN,user.name,url)
+                if user.share_fuckgfw:
+                    href = SHARE_FUCK_GFW_SRV % urllib.quote(href)
                 ashare = soup.new_tag('a', href=href)
                 ashare.string = SAVE_TO_WIZ
                 soup.html.body.append(ashare)
@@ -689,6 +693,8 @@ class BaseFeedBook:
                 span.string = '    '
                 soup.html.body.append(span)
                 href = "%s/share?act=evernote&u=%s&url=%s"%(DOMAIN,user.name,url)
+                if user.share_fuckgfw:
+                    href = SHARE_FUCK_GFW_SRV % urllib.quote(href)
                 ashare = soup.new_tag('a', href=href)
                 ashare.string = SAVE_TO_EVERNOTE
                 soup.html.body.append(ashare)
@@ -697,6 +703,8 @@ class BaseFeedBook:
                 span.string = '    '
                 soup.html.body.append(span)
                 href = "%s/share?act=wiz&u=%s&url=%s"%(DOMAIN,user.name,url)
+                if user.share_fuckgfw:
+                    href = SHARE_FUCK_GFW_SRV % urllib.quote(href)
                 ashare = soup.new_tag('a', href=href)
                 ashare.string = SAVE_TO_WIZ
                 soup.html.body.append(ashare)

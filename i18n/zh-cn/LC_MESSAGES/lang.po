@@ -436,3 +436,6 @@ msgstr "归档和分享"
 
 msgid "Append hyperlinks for share to article."
 msgstr "在文章最后附加归档或分享链接"
+
+msgid "Fuck Gfw (For users in China)"
+msgstr "我需要翻墙（我骄傲，我自豪，我是中国人）"
