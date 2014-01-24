@@ -61,6 +61,7 @@ SENDMAIL_ALL_POSTFIX = False
 #归档或分享超链接的文本描述
 #SHARE_FUCK_GFW_SRV：翻墙转发服务器（如果需要翻墙的话）
 #翻墙转发服务器源码：http://github.com/cdhigh/forwarder
-SHARE_FUCK_GFW_SRV = "http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u=%s"
+#SHARE_FUCK_GFW_SRV = "http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u=%s"
+SHARE_FUCK_GFW_SRV = "http://kforwarder.herokuapp.com/?k=xzSlE&t=60&u=%s"
 SAVE_TO_EVERNOTE = u"Save to evernote"
 SAVE_TO_WIZ = u"Save to Wiz"

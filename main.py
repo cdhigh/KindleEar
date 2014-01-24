@@ -4,7 +4,7 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.9"
+__Version__ = "1.9.1"
 __Author__ = "Arroz"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -1046,8 +1046,7 @@ class Share(BaseHandler):
         action = web.input().get('act')
         username = web.input().get("u")
         url = web.input().get("url")
-        if not username or not url or \
-            action not in ('evernote',):
+        if not username or not url or not action:
             return "Some parameter is missing or wrong!<br />"
         
         user = KeUser.all().filter("name = ", username).get()

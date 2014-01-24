@@ -13,7 +13,7 @@
         <td style="width:80%;font-size:0.9em;">
             {%if urlflt.url|length>70%}{{urlflt.url[:70]}}...<span>{{urlflt.url}}</span>{%else%}{{urlflt.url}}{%endif%}
         </td>
-        <td style="text-align:right;"><a href="/advdel?delurlid={{urlflt.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
+        <td style="text-align:right;margin:0;padding:0;"><a href="/advdel?delurlid={{urlflt.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
     </tr>
     {% endfor %}
     </table>

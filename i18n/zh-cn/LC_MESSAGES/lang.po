@@ -398,7 +398,7 @@ msgstr "六天"
 msgid "7 Days"
 msgstr "一星期"
 
-msgid "Deliver Days"
+msgid "Deliver days"
 msgstr "投递日"
 
 msgid "Mon"

@@ -399,7 +399,7 @@ msgstr "6 Günlük"
 msgid "7 Days"
 msgstr "7 Günlük"
 
-msgid "Deliver Days"
+msgid "Deliver days"
 msgstr "Gönderim Günleri"
 
 msgid "Mon"

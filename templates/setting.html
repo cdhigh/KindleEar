@@ -32,7 +32,7 @@
             </select>
         </div>
         <div class="pure-control-group">
-            <label>{{_("Deliver Days")}}</label>
+            <label>{{_("Deliver days")}}</label>
             <label><input type="checkbox" name="Monday" {% if not user.send_days or "Monday" in user.send_days %}checked="1"{% endif %} />{{_("Mon")}} &nbsp;</lable>
             <label><input type="checkbox" name="Tuesday" {% if not user.send_days or "Tuesday" in user.send_days %}checked="1"{% endif %} />{{_("Tue")}} &nbsp;</lable>
             <label><input type="checkbox" name="Wednesday" {% if not user.send_days or "Wednesday" in user.send_days %}checked="1"{% endif %} />{{_("Wed")}} &nbsp;</lable>
@@ -87,7 +87,7 @@
                 <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT+%d:00" % i }}</option>
                 {% endfor %}
             </select></td></tr>
-            <tr><td style="text-align:right;"><label>{{_("Deliver Days")}} : </label></td>
+            <tr><td style="text-align:right;"><label>{{_("Deliver days")}} : </label></td>
             <td>
             <input type="checkbox" id="mon" name="Monday" {% if not user.send_days or "Monday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Mon")}} &nbsp;</span>
             <input type="checkbox" id="tue" name="Tuesday" {% if not user.send_days or "Tuesday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Tue")}} &nbsp;</span>

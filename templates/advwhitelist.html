@@ -11,7 +11,7 @@
     {% for lst in user.whitelist %}
     <tr>
         <td style="width:80%;font-size:0.9em;">{{lst.mail}}</td>
-        <td style="text-align:right;"><a href="/advdel?delwlist={{lst.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
+        <td style="text-align:right;margin:0;padding:0;"><a href="/advdel?delwlist={{lst.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
     </tr>
     {% endfor %}
     </table>
