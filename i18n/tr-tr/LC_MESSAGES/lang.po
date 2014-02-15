@@ -169,16 +169,16 @@ msgid "Click to back"
 msgstr "Geri dönmek için tıklayınız"
 
 msgid "Free Forever."
-msgstr "Free Forever."
+msgstr "Daima Ücretsiz."
 
 msgid "Good News Always Come With You."
-msgstr "Good News Always Come With You."
+msgstr "İyi Haberler Her Zaman Sizinle Olsun."
 
 msgid "Inherited From Calibre"
-msgstr "Inherited From Calibre"
+msgstr "Calibre Kodları Kullanıldı."
 
 msgid "Share Your Idea"
-msgstr "Share Your Idea"
+msgstr "Fikrinizi Paylaşın"
 
 msgid "Author modified and ported Calibre to generate mobi file in GAE without kindlegen tool of Amazon,"
 msgstr "Google App Engine de Amazonun Kindlegen uygulamasını kullanmadan mobi dosyalar oluşturabilmek için Calibre kodlarını yeniden düzenlenmiştir."
@@ -427,16 +427,16 @@ msgid "Logs of other users"
 msgstr "Diğer kullanıcıların işlem kayıtları"
 
 msgid "Merge books into one"
-msgstr "Merge books into one"
+msgstr "Kitapları birleştir"
 
 msgid "Append hyperlink '%s' to article"
-msgstr "Append hyperlink '%s' to article"
+msgstr "'%s' linkini makaleye ekle"
 
 msgid "Share"
-msgstr "Share"
+msgstr "Paylaş"
 
 msgid "Append hyperlinks for share to article."
-msgstr "Append hyperlinks for share to article."
+msgstr "Paylaşım linklerini makaleye ekle."
 
 msgid "Fuck Gfw (For users in China)"
-msgstr "Fuck Gfw (For users in China)"
+msgstr "Fuck Gfw (Çindeki kullanıcılar için)"
