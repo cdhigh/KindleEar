@@ -4,8 +4,8 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.9.1"
-__Author__ = "Arroz"
+__Version__ = "1.9.2"
+__Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
 from collections import OrderedDict, defaultdict
@@ -34,7 +34,6 @@ from google.appengine.api.mail_errors import (InvalidSenderError,
                                            InvalidAttachmentTypeError)
 
 from config import *
-
 from lib.makeoeb import *
 from lib.memcachestore import MemcacheStore
 from books import BookClasses, BookClass
@@ -49,8 +48,12 @@ def local_time(fmt="%Y-%m-%d %H:%M", tz=TIMEZONE):
     return (datetime.datetime.utcnow()+datetime.timedelta(hours=tz)).strftime(fmt)
 
 def hide_email(email):
-    """ 隐藏真实email地址，使用星号代替部分字符，适用于4位字符以上 """
+    """ 隐藏真实email地址，使用星号代替部分字符 """
+    if not email or '@' not in email:
+        return email
     email = email.split('@')
+    if len(email[0]) < 4:
+        return email[0][0] + '**@' + email[-1]
     to = email[0][0:2] + ''.join(['*' for s in email[0][2:-1]]) + email[0][-1]
     return to + '@' + email[-1]
     

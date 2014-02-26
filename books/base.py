@@ -486,11 +486,6 @@ class BaseFeedBook:
             opener = URLOpener(self.host, timeout=self.timeout)
             for img in soup.find_all('img',attrs={'src':True}):
                 imgurl = img['src']
-                if img.get('height') in ('1','2','3','4','5') \
-                    or img.get('width') in ('1','2','3','4','5'):
-                    self.log.warn('img size too small,take it away : %s' % imgurl)
-                    img.decompose()
-                    continue
                 if not imgurl.startswith('http'):
                     imgurl = self.urljoin(url, imgurl)
                 if self.fetch_img_via_ssl and url.startswith('https://'):
@@ -631,11 +626,6 @@ class BaseFeedBook:
             self.soupbeforeimage(soup)
             for img in soup.find_all('img',attrs={'src':True}):
                 imgurl = img['src']
-                if img.get('height') in ('1','2','3','4','5') \
-                    or img.get('width') in ('1','2','3','4','5'):
-                    self.log.warn('img size too small,take away it:%s' % imgurl)
-                    img.decompose()
-                    continue
                 if not imgurl.startswith('http'):
                     imgurl = self.urljoin(url, imgurl)
                 if self.fetch_img_via_ssl and url.startswith('https://'):

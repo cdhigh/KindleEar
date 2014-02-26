@@ -345,7 +345,7 @@ msgstr "Önemli: Lütfen ilk olarak Kindleınızı aktifleştirin ve"
 msgid "Page and add"
 msgstr "sayfasına gidin."
 
-msgid "to 'Your Kindle's approved email list'."
+msgid "to 'Approved Personal Document E-mail List'."
 msgstr "mail adresini onaylanmış mail adreslerine ekleyin."
 
 msgid "Title format"

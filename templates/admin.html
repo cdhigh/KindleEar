@@ -36,12 +36,13 @@ font-size:0.8em;
 </form>
 
 {% if nickname == 'admin' %}
-<form class="pure-form pure-form-aligned" action="" method="POST">
+<form class="pure-form pure-form-aligned" action="" method="POST" style="margin-top:10px;">
 <fieldset>
     <legend>{{_("Add Account")}}</legend>
     {% if actips %}
     <p style="color:red;font-size:0.8em;">{{actips}}</p>
     {% endif %}
+    <p style="font-size:0.8em;color:grey;">{{_("Note : No supports many accounts for limit of free account of GAE.")}}</p>
     <div class="pure-control-group">
         <label for="username">{{_("Username")}}</label>
         <input type="text" name="u" id="username" />
@@ -57,15 +58,12 @@ font-size:0.8em;
     <div class="pure-controls">
         <button type="submit" class="pure-button">{{_("Add")}}</button>
     </div>
-    <p style="font-size:0.8em;color:grey;">{{_("Note : No supports many accounts for limit of free account of GAE.")}}</p>
 </fieldset>
 </form>
-
-<hr />
+<p>{{_("Accounts")}}</p>
 {#<fieldset>#}
     {#<legend>{{_("Accounts")}}</legend>#}
     <table class="pure-table pure-table-bordered usrtb">
-        <caption>{{_("Accounts")}}</caption>
         <thead><tr>
             <th>{{_("No.")}}</th>
             <th>{{_("Username")}}</th>
@@ -87,5 +85,4 @@ font-size:0.8em;
     </table>
 {#</fieldset>#}
 {% endif %}
-
 {% endblock %}

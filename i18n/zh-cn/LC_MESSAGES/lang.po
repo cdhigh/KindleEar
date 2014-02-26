@@ -344,8 +344,8 @@ msgstr "注意：必须首先激活您的Kindle，同时请到亚马逊账户中
 msgid "Page and add"
 msgstr "页面将"
 
-msgid "to 'Your Kindle's approved email list'."
-msgstr "加入 'Your Kindle's approved email list'。"
+msgid "to 'Approved Personal Document E-mail List'."
+msgstr "加入 'Approved Personal Document E-mail List'。"
 
 msgid "Title format"
 msgstr "标题样式"
@@ -438,4 +438,4 @@ msgid "Append hyperlinks for share to article."
 msgstr "在文章最后附加归档或分享链接"
 
 msgid "Fuck Gfw (For users in China)"
-msgstr "我需要翻墙（我骄傲，我自豪，我是中国人）"
+msgstr "我需要翻墙（针对中国用户）"

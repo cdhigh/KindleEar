@@ -9,6 +9,10 @@ body {
     position: relative;
 }
 
+a{ color: #0078e7;text-decoration: none; }
+a:hover{ color:#0060b8;text-decoration: underline; }
+a:active{ color:#00498d; }
+
 .error{
     text-align:center;
     font-weight:bold;
@@ -24,7 +28,8 @@ body {
 }
 
 #header{
-    border-bottom: 2px solid #444;
+    position: relative;;
+    padding-bottom: 10px;
 }
 
 #header h1{
@@ -32,7 +37,6 @@ body {
     width:45%;
     margin:0;
     font-size:160%;
-    text-shadow: 0 1px 1px silver;
 }
 
 #header h1 sup, sup.beta{
@@ -47,29 +51,36 @@ body {
 
 #header span,#header a.nav{
     float:right;
-    font-size:1em;
+    font-size:90%;
     text-align:right;
     margin-left:4px;
 }
 
 .grey{
-    color: #555; 
     font-size: 13px; 
-    margin-bottom: 20px;
+    padding: 5px 0 10px 0;
+    text-align: center;
+    color:#f60;
 }
 
 #content{
-    margin:10px 0;
-}
-
-#content {
-    min-height: 300px;
+    margin:0 0 10px 0;
 }
 #footer{
-    margin-top:10px;
+    margin-top: 20px;
+    padding: 20px 0;
     text-align: center;
-    border-top: 1px solid #444;
-    font-size:0.9em;
+    border-top: 1px solid #d8d8d8;
+    font-size:70%;
+    color:#888;
+}
+
+#footer a{
+    color:#888;
+}
+
+#footer a:hover{
+    text-decoration: underline;
 }
 
 .actionButton,
@@ -99,35 +110,30 @@ body {
 }
 
 .book {
-    border:1px solid silver;
-    -webkit-border-radius: 8px;
-    -moz-border-radius: 8px;
-    border-radius: 8px;
-    padding: 3px 3px 3px 3px;
-    margin-bottom: -1px;
+    position: relative;;
+    border-bottom:1px solid #d8d8d8;
+    padding: 2px 5px;
 }
 
-.book:hover{
-    border-color: #868686;
+#ownfeeds .book{
+    border-bottom: 1px dotted #d8d8d8;
+    padding: 10px 0;
 }
+
+#ownfeeds .book:last-child{
+    border-bottom: 0;
+}
+
 .titleRow {
     font-size:0.9em;
     font-weight:bold;
-    margin-bottom:10px;
-    margin-top:1px;
     float: left;
-    padding-top: 3px;
-    padding-left:3px;
     width:400px;
     clear:both;
 }
 .summaryRow {
     font-size: 0.8em;
     color: #555;
-    margin-top: 10px;
-    margin-left:6px;
-    padding-right:26px;
-    padding-bottom:5px;
     clear:both;
 }
 .summaryRow span{
@@ -149,19 +155,27 @@ body {
     left:5px;
     width:600px;
 }
+.summaryRow a{color:#aaa;text-decoration: none;}
+.summaryRow a:hover{color: #0078e7;text-decoration: underline;}
+.summaryRow a:active{color: #00498d;}
 .cornerControls {
-    float: right;
+    position: absolute;
+    top: 8px;
+    right: 0;
     text-align: right;
     padding-top: 3px;
     font-size: 0.8em;
 }
 
 .headerloginform {
-    font-size:80%;
+    position: absolute;
+    top: 3px;
+    right: 0;
+    font-size:90%;
     vertical-align:middle;
     text-align:right;
 }
-.pure-button-small {font-size: 80%;}
+.pure-button-small {padding: .6em 2em;font-size: 85%;}
 .font90{font-size:90%;}
 .width100{width:100%;}
 
@@ -170,6 +184,8 @@ body {
 }
 
 /* from PURE buttons-core.css */
+.pure-skin-mine{margin-bottom: 10px;}
+
 .pure-skin-mine .pure-button {
     /* Structure */
     display: inline-block;
@@ -200,22 +216,13 @@ body {
     font-size: 100%;
     *font-size: 90%; /*IE 6/7 - To reduce IE's oversized button text*/
     *overflow: visible; /*IE 6/7 - Because of IE's overly large left/right padding on buttons */
-    padding: 0.5em 1.5em 0.5em;
+    padding: .7em 1.5em;
     color: #0e1320; /* rgba not supported (IE 8) */
     /* color: rgba(0, 0, 0, 0.80); rgba supported */
     /* *color: #444; IE 6 & 7 */
-    border: 1px solid #a6b3d9; /*IE 6/7/8*/
     border: none rgba(0, 0, 0, 0); /*IE9 + everything else*/
     background-color: #b0bcdd;
     text-decoration: none;
-    border-radius: 2px;
-    -webkit-font-smoothing: antialiased;
-    /* Transitions */
-    -webkit-transition: 0.1s linear -webkit-box-shadow;
-    -moz-transition: 0.1s linear -moz-box-shadow;
-    -ms-transition: 0.1s linear box-shadow;
-    -o-transition: 0.1s linear box-shadow;
-    transition: 0.1s linear box-shadow;
 }
 
 .pure-skin-mine .pure-button-hover,
@@ -266,7 +273,7 @@ body {
 .pure-skin-mine .pure-button-selected,
 .pure-skin-mine a.pure-button-primary,
 .pure-skin-mine a.pure-button-selected {
-    background-color: #3355BA;
+    background-color: #0078e7;
     color: #fbfcfe;
 }
 
@@ -295,9 +302,8 @@ Forms Core
  
 
 .pure-skin-mine .pure-form fieldset {
-    border: 1px solid #c0c0c0;
-    margin: 0 2px;
-    padding: 0.35em 0.625em 0.75em;
+    border: 1px solid #d8d8d8;
+    padding: 15px;
 }
 
 /*
@@ -324,7 +330,7 @@ Forms Core
 .pure-skin-mine .pure-form input,
 .pure-skin-mine .pure-form select,
 .pure-skin-mine .pure-form textarea {
-    font-size: 100%; /* 1 */
+    font-size: 90%; /* 1 */
     margin: 0; /* 2 */
     vertical-align: baseline; /* 3 */
     *vertical-align: middle; /* 3 */
@@ -472,6 +478,7 @@ Forms Core
         text-align: left;
         display: block;
         width: 100%;
+        font-size: 90%;
     }
 
     .pure-skin-mine .pure-form-aligned .pure-controls {
@@ -506,21 +513,9 @@ Forms Core
 .pure-skin-mine .pure-form input[type="color"],
 .pure-skin-mine .pure-form select,
 .pure-skin-mine .pure-form textarea {
-    padding: 0.5em 0.6em;
+    padding: 0.6em;
     display: inline-block;
-    border: 1px solid #e6e6e6;
-    font-size: 0.8em;
-    box-shadow: inset 0 1px 3px #e6e6e6;
-    border-radius: 4px;
-    -webkit-transition: 0.3s linear border;
-    -moz-transition: 0.3s linear border;
-    -ms-transition: 0.3s linear border;
-    -o-transition: 0.3s linear border;
-    transition: 0.3s linear border;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
+    border: 1px solid #ccc;
 }
 
 .pure-skin-mine .pure-form input[type="text"]:focus,
@@ -615,19 +610,11 @@ Forms Core
     color: #4f4f4f;
     font-size:90%;
 }
-.pure-skin-mine .pure-form fieldset {
-    margin: 0;
-    padding: 0.35em 0 0.75em;
-    border: 0;
-}
 .pure-skin-mine .pure-form legend {
     display: block;
-    width: 100%;
-    padding: 0.3em 0;
-    margin-bottom: 0.3em;
-    font-size: 125%;
+    margin: 0;
+    padding: 0 5px;
     color: #262626;
-    border-bottom: 1px solid #ededed;
 }
 
 .pure-skin-mine .pure-form-stacked input[type="text"],
@@ -779,7 +766,7 @@ Forms Core
 }
 
 .pure-skin-mine .pure-table thead {
-    background-color: #d1d7eb;
+    background-color: #fff;
     color: #1c2440;
     text-align: left;
     vertical-align: bottom;
@@ -847,6 +834,7 @@ striping:
     padding: 0;
     top: -10000px;
     z-index: 1;
+    font-size: 90%;
 }
 
 .pure-skin-mine .pure-menu > ul { position: relative; }
@@ -929,8 +917,7 @@ striping:
 
 /* Initial menus should be inline-block so that they are horizontal */
 .pure-skin-mine .pure-menu-horizontal li {
-    display: inline-block;
-    *display: inline;
+    float:left;
     zoom: 1;
     vertical-align: middle;
 }
@@ -1047,7 +1034,7 @@ margin: 7px 2px;
 
 .pure-skin-mine .pure-menu a,
 .pure-skin-mine .pure-menu .pure-menu-can-have-children > li:after {
-    color: #344579;
+    color: #333;
 }
 
 .pure-skin-mine .pure-menu .pure-menu-can-have-children > li:hover:after {
@@ -1094,7 +1081,7 @@ margin: 7px 2px;
 
 /* SELECTED MENU ITEM */
 .pure-skin-mine .pure-menu li.pure-menu-selected a {
-    background-color: #3355BA;
+    background-color: #0078e7;
     color: #fbfcfe;
 }
 

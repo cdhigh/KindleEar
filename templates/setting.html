@@ -172,11 +172,11 @@
             <p style="color:grey;font-size:0.7em;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{_("This switch only effective when 'Enable deliver' is enabled.")}}</P>
         </p>
     </fieldset>
+    <p>
+    {{_("Important: Please activate your kindle firstly, and goto")}} <a href="https://www.amazon.com/gp/digital/fiona/manage#pdocSettings" rel="external" target="_blank">Personal Document Settings</a> {{_("Page and add")}} <strong>{{ mail_sender }}</strong> {{_("to 'Approved Personal Document E-mail List'.")}}
+    </p>
     <p style="text-align:center;">
         <input type="submit" class="pure-button pure-button-primary" value="{{_("Save settings")}}" />
     </p>
 </form>
-<p>
-{{_("Important: Please activate your kindle firstly, and goto")}} <a href="https://www.amazon.com/gp/digital/fiona/manage" rel="external">Manage Your Kindle</a> {{_("Page and add")}} <strong>{{ mail_sender }}</strong> {{_("to 'Your Kindle's approved email list'.")}}
-</p>
 {% endblock %}

@@ -2,15 +2,8 @@
 {% block css %}
 <style type="text/css">
 .newitem {
-    margin-bottom:5px;
-    margin-top:3px;
-    float: left;
-    padding-top: 3px;
-    padding-left:3px;
-    width:85%;
-    clear:left;
+    width:96.7%;
     color: #555;
-    padding-right:6px;
 }
 .tburl{
     border:1px solid silver;
@@ -36,8 +29,11 @@ td:hover span{
     left:5px;
     width:600px;
 }
-.l-box {
-    padding: 1em;
+.m-box-l {
+    padding:0.5em 0.5em 0.5em 0;
+}
+.m-box-r {
+    padding:0.5em 0 0.5em 0.5em;
 }
 </style>
 {% endblock %}
@@ -45,14 +41,14 @@ td:hover span{
 <div class="pure-skin-mine">
 <div class="pure-g">
   <div class="pure-u-4-5">
-  <div class="1-box">
+  <div class="m-box-l">
    {% block advcontent %}
    {% endblock %}
   </div>
   </div>
   
   <div class="pure-u-1-5">
-  <div class="1-box">
+  <div class="m-box-r">
    <div class="pure-menu pure-menu-open">
     <ul>
     {% if advcurr=='whitelist'%}

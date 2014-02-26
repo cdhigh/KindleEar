@@ -13,7 +13,7 @@
         <td style="width:80%;font-size:0.9em;">
             {%if urlflt.url|length>70%}{{urlflt.url[:70]}}...<span>{{urlflt.url}}</span>{%else%}{{urlflt.url}}{%endif%}
         </td>
-        <td style="text-align:right;margin:0;padding:0;"><a href="/advdel?delurlid={{urlflt.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
+        <td style="text-align:right;"><a href="/advdel?delurlid={{urlflt.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
     </tr>
     {% endfor %}
     </table>
@@ -21,9 +21,7 @@
     <div class="newitem">
         <input type="text" name="url" style="width:100%;" placeholder="{{_("Please input regular expression")}}" />
     </div>
-    <div class="cornerControls">
-        <input type="submit" value="{{_("Add")}}" class="actionButton" />
-    </div>
+    <input type="submit" value="{{_("Add")}}" class="pure-button pure-button-primary" style="margin-top:8px;" />
   </fieldset>
 </form>
 

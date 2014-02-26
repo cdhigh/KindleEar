@@ -19,7 +19,9 @@ class Economist(BaseFeedBook):
         h2 { font-size: small;  }
         h1 { font-size: medium;  }
         '''
-        
+    
+    remove_classes = ['ec-messages',]
+    
     feeds = [
             ('Index', 'http://www.economist.com/printedition'),
            ]
