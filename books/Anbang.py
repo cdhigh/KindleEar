@@ -64,4 +64,37 @@ class AnBang(BaseFeedBook):
             urls.append((u'安邦咨询',title.string,title['href'],None))
             
         return urls
+    
+    def soupprocessex(self, soup):
+        """ 在网页内容上添加目录的超链接。
+        因为在BeautifulSoup对象上一边遍历一边修改会随机出问题，
+        所以第一次遍历先记录要修改的位置，然后再统一修改。
+        """
+        titles = [] #待修改位置
+        seen = {} #确认哪些位置需要修改
+        for e in soup.body.descendants:
+            s = e.string.strip() if e.string else ''
+            if s.startswith(u'【') and s.endswith(u'】'):
+                #对应标题的内容
+                if s in seen and e.parent is not seen[s]:
+                    titles.append((seen[s], e))
+                else:
+                    seen[s] = e
+        
+        #增加超链接
+        idxname = 0
+        for src,des in titles:
+            if src.parent:
+                a = soup.new_tag('a', href='#article_%d'%idxname)
+                a['name'] = 'articletoc_%d'%idxname
+                a.string = src.string
+                src.replace_with(a)
+            
+            if des.parent:
+                a = soup.new_tag('a', href='#articletoc_%d'%idxname)
+                a['name'] = 'article_%d'%idxname
+                a.string = des.string
+                des.replace_with(a)
+            
+            idxname += 1
         

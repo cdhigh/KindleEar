@@ -13,6 +13,7 @@ class FTChinese(BaseFeedBook):
     page_encoding         = "utf-8"
     mastheadfile          = "mh_ftchinese.gif"
     coverfile             = "cv_ftchinese.jpg"
+    oldest_article        = 1
     
     feeds = [
             (u'每日新闻', 'http://www.ftchinese.com/rss/feed'),

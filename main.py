@@ -4,7 +4,7 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.9.2"
+__Version__ = "1.9.3"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -935,13 +935,16 @@ class Worker(BaseHandler):
                     itemcnt += 1
                     
         if itemcnt > 0: # 建立TOC，杂志模式需要为两层目录结构
+            po = 0
             stoc = ['<html><head><title>Table Of Contents</title></head><body><h2>Table Of Contents</h2>']
             for sec in sections.keys():
                 stoc.append('<h3><a href="%s">%s</a></h3>'%(sections[sec][0][1].href,sec))
-                sectoc = oeb.toc.add(sec, sections[sec][0][1].href)
+                sectoc = oeb.toc.add(sec, sections[sec][0][1].href, play_order=po)
+                po += 1
                 for title, a, brief in sections[sec]:
                     stoc.append('&nbsp;&nbsp;&nbsp;&nbsp;<a href="%s">%s</a><br />'%(a.href,title))
-                    sectoc.add(title, a.href, description=brief if brief else None)
+                    sectoc.add(title, a.href, description=brief if brief else None, play_order=po)
+                    po += 1
             stoc.append('</body></html>')
             id, href = oeb.manifest.generate(id='toc', href='toc.html')
             item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=''.join(stoc))
@@ -1045,6 +1048,9 @@ class Url2Book(BaseHandler):
 
 class Share(BaseHandler):
     """ 保存到evernote或分享到社交媒体 """
+    
+    SHARE_IMAGE_EMBEDDED = True
+    
     def GET(self):
         action = web.input().get('act')
         username = web.input().get("u")
@@ -1082,7 +1088,11 @@ class Share(BaseHandler):
             # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
             for sec_or_media, url, title, content, brief in book.Items():
                 if sec_or_media.startswith(r'image/'):
-                    attachments.append((title,content))
+                    if self.SHARE_IMAGE_EMBEDDED:
+                        attachments.append(mail.Attachment(title,
+                            content,content_id='<%s>'%title))
+                    else:
+                        attachments.append((title,content))
                 else:
                     soup = BeautifulSoup(content, 'lxml')
                     
@@ -1094,12 +1104,17 @@ class Share(BaseHandler):
                     p.append(a)
                     soup.html.body.insert(0,p)
                     
-                    #标注图片位置
-                    for img in soup.find_all('img', attrs={'src':True}):
-                        p = soup.new_tag('p')
-                        p.string = 'Image : ' + img['src']
-                        img.insert_after(p)
-                    
+                    if self.SHARE_IMAGE_EMBEDDED:
+                        #内嵌图片标识
+                        for img in soup.find_all('img', attrs={'src':True}):
+                            img['src'] = 'cid:' + img['src']
+                    else:
+                        #标注图片位置
+                        for img in soup.find_all('img', attrs={'src':True}):
+                            p = soup.new_tag('p')
+                            p.string = 'Image : ' + img['src']
+                            img.insert_after(p)
+                        
                     try:
                         title = unicode(soup.html.head.title.string)
                     except:
@@ -1110,7 +1125,7 @@ class Share(BaseHandler):
             to = user.wiz_mail if action=='wiz' else user.evernote_mail
             if html:
                 self.SendHtmlMail(username,to,title,html,attachments,user.timezone)
-                info = "'%s' saved to %s (%s)." % (title,action,hide_email(to))
+                info = '"%s" saved to %s (%s).' % (title,action,hide_email(to))
                 log.info(info)
                 web.header('Content-type', "text/html; charset=utf-8")
                 info = """<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
