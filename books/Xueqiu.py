@@ -11,8 +11,8 @@ class Xueqiu(BaseFeedBook):
     language              = 'zh-cn'
     feed_encoding         = "utf-8"
     page_encoding         = "utf-8"
-    mastheadfile          = "mh_ftchinese.gif"
-    coverfile             = "cv_ftchinese.jpg"
+    mastheadfile          = "mh_default.gif"
+    coverfile             = "cv_default.jpg"
     oldest_article        = 1
     
     feeds = [
