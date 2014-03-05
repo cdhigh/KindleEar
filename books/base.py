@@ -486,11 +486,6 @@ class BaseFeedBook:
             opener = URLOpener(self.host, timeout=self.timeout)
             for img in soup.find_all('img',attrs={'src':True}):
                 imgurl = img['src']
-                if img.get('height') in ('1','2','3','4','5') \
-                    or img.get('width') in ('1','2','3','4','5'):
-                    self.log.warn('img size too small,take it away : %s' % imgurl)
-                    img.decompose()
-                    continue
                 if not imgurl.startswith('http'):
                     imgurl = self.urljoin(url, imgurl)
                 if self.fetch_img_via_ssl and url.startswith('https://'):
@@ -532,6 +527,8 @@ class BaseFeedBook:
                 span.string = '    '
                 soup.html.body.append(span)
                 href = "%s/share?act=evernote&u=%s&url=%s"%(DOMAIN,user.name,url)
+                if user.share_fuckgfw:
+                    href = SHARE_FUCK_GFW_SRV % urllib.quote(href)
                 ashare = soup.new_tag('a', href=href)
                 ashare.string = SAVE_TO_EVERNOTE
                 soup.html.body.append(ashare)
@@ -540,6 +537,8 @@ class BaseFeedBook:
                 span.string = '    '
                 soup.html.body.append(span)
                 href = "%s/share?act=wiz&u=%s&url=%s"%(DOMAIN,user.name,url)
+                if user.share_fuckgfw:
+                    href = SHARE_FUCK_GFW_SRV % urllib.quote(href)
                 ashare = soup.new_tag('a', href=href)
                 ashare.string = SAVE_TO_WIZ
                 soup.html.body.append(ashare)
@@ -627,11 +626,6 @@ class BaseFeedBook:
             self.soupbeforeimage(soup)
             for img in soup.find_all('img',attrs={'src':True}):
                 imgurl = img['src']
-                if img.get('height') in ('1','2','3','4','5') \
-                    or img.get('width') in ('1','2','3','4','5'):
-                    self.log.warn('img size too small,take away it:%s' % imgurl)
-                    img.decompose()
-                    continue
                 if not imgurl.startswith('http'):
                     imgurl = self.urljoin(url, imgurl)
                 if self.fetch_img_via_ssl and url.startswith('https://'):
@@ -689,6 +683,8 @@ class BaseFeedBook:
                 span.string = '    '
                 soup.html.body.append(span)
                 href = "%s/share?act=evernote&u=%s&url=%s"%(DOMAIN,user.name,url)
+                if user.share_fuckgfw:
+                    href = SHARE_FUCK_GFW_SRV % urllib.quote(href)
                 ashare = soup.new_tag('a', href=href)
                 ashare.string = SAVE_TO_EVERNOTE
                 soup.html.body.append(ashare)
@@ -697,6 +693,8 @@ class BaseFeedBook:
                 span.string = '    '
                 soup.html.body.append(span)
                 href = "%s/share?act=wiz&u=%s&url=%s"%(DOMAIN,user.name,url)
+                if user.share_fuckgfw:
+                    href = SHARE_FUCK_GFW_SRV % urllib.quote(href)
                 ashare = soup.new_tag('a', href=href)
                 ashare.string = SAVE_TO_WIZ
                 soup.html.body.append(ashare)

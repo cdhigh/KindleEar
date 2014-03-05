@@ -1,31 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-<fieldset id="mybooks">
-    <legend>{{_("Subscribed")}}</legend>
-    {% set hasitem = [] %}
-    {% for book in books %}
-    {% if nickname in book.users %}
-    <div class="book">
-        <div class="titleRow">{{book.title}}</div>
-        <div class="cornerControls">
-            <a href="/unsubscribe/{{book.key().id()}}" class="actionButton">{{_("Unsubscribe")}}</a>
-        </div>
-        <div class="summaryRow">
-            {%if book.description|length>80%}{{book.description[:80]}}...<span>{{book.description}}</span>{%else%}{{book.description}}{%endif%}
-        </div>
-    </div>
-    {% do hasitem.append(1) %}
-    {% endif %}
-    {% endfor %}
-    {% if not hasitem %}
-    <p style="font-size:0.8em;color:grey;">{{_("No have book subscribed")}}</p>
-    {% endif %}
-</fieldset>
-{% if myfeeds %}
-<p></p>
+{% if myfeeds -%}
 <fieldset id="ownfeeds">
     <legend>{{_("Custom Rss")}}</legend>
-    {% for feed in myfeeds %}
+    {% for feed in myfeeds -%}
     <div class="book">
         <div class="titleRow">{{feed.title}} {% if feed.isfulltext %}
             <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" />{% endif %}
@@ -39,33 +17,43 @@
             {%if feed.url|length>80%}{{feed.url[:80]}}...{%else%}{{feed.url}}{%endif%}</a>
         </div>
     </div>
-    {% endfor %}
+    {% endfor -%}
     <form class="pure-form" action="" method="POST">
-    <div class="book">
+    <div class="book" style="border-bottom:0;">
         <div class="titleRow">
-            <table border="0"><tr>
-            <td><input type="text" name="t" placeholder={{_("Title")}} /></td>
-            <td><input type="checkbox" name="fulltext" checked="checked" /></td>
-            <td><img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" /></td>
-            </tr></table>
-        </div>
-        <div class="cornerControls">
-            <input type="submit" value="{{_("Add")}}" class="actionButton" />
+            <input type="text" name="t" placeholder={{_("Title")}} style="width:250px;" />
+            <input type="checkbox" name="fulltext" checked="checked" />
+            <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" />
         </div>
         <div class="summaryRow">
-            <input type="text" name="url" style="width:100%;" placeholder="URL" />
+            <input type="text" name="url" style="width:600px;margin-top:8px;" placeholder="URL" />
         </div>
+        <input type="submit" value="{{_("Add")}}" class="pure-button pure-button-primary" style="margin-top:8px;" />
         {% if tips %}<p style="color:red;font-size:0.7em;">{{tips}}</p>{% endif %}
     </div>
     </form>
 </fieldset>
-{% endif %}
-<p></p>
-<fieldset id="books">
+{% endif -%}
+<fieldset id="mybooks" style="margin-top:10px;">
+    <legend>{{_("Subscribed")}}</legend>
+    {% for book in books -%}
+    {% if nickname in book.users -%}
+    <div class="book">
+        <div class="titleRow">{{book.title}}</div>
+        <div class="cornerControls">
+            <a href="/unsubscribe/{{book.key().id()}}" class="actionButton">{{_("Unsubscribe")}}</a>
+        </div>
+        <div class="summaryRow">
+            {%if book.description|length>80%}{{book.description[:80]}}...<span>{{book.description}}</span>{%else%}{{book.description}}{%endif%}
+        </div>
+    </div>
+    {% endif -%}
+    {% endfor -%}
+</fieldset>
+<fieldset id="books" style="margin-top:10px;">
     <legend>{{_("Unsubscribed")}}</legend>
-    {% set hasitem2 = [] %}
-    {% for book in books %}
-    {% if nickname not in book.users %}
+    {% for book in books -%}
+    {% if nickname not in book.users -%}
     <div class="book">
         <div class="titleRow">{{book.title}}</div>
         <div class="cornerControls">
@@ -75,11 +63,7 @@
             {%if book.description|length>80%}{{book.description[:80]}}...<span>{{book.description}}</span>{%else%}{{book.description}}{%endif%}
         </div>
     </div>
-    {% do hasitem2.append(1) %}
-    {% endif %}
-    {% endfor %}
-    {% if not hasitem2 %}
-    <p style="font-size:0.8em;color:grey;">{{_("No have book unsubscrebed")}}</p>
-    {% endif %}
+    {% endif -%}
+    {% endfor -%}
 </fieldset>
-{% endblock %}
+{% endblock -%}

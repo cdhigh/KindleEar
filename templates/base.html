@@ -17,7 +17,7 @@
 {% endblock %}
     <div id="header">
         {% block header %}
-        <h1><a href="/">KindleEar<sup>&#9728;</sup></a></h1>
+        <h1><a href="/">KindleEar</a></h1>
         {% if nickname %}
           <a class="nav" href="/logout">{{_("Logout")}}</a>
           <span style="color: #ccc;">&bull;</span>
@@ -32,10 +32,10 @@
         <div class="clear"></div>
         {% endblock %}
     </div>
-    <div class="pure-skin-mine">
-    <div class="pure-menu pure-menu-open pure-menu-horizontal">
     {% block menubar %}
     {% if nickname %}
+    <div class="pure-skin-mine">
+    <div class="pure-menu pure-menu-open pure-menu-horizontal">
         <ul>
         {% if current == "my" %}
         <li class="pure-menu-selected"><a href="#">{{_("Feeds")}}</a></li>
@@ -63,12 +63,14 @@
         <li><a href="/advwhitelist">{{_("Advance")}}</a></li>
         {% endif %}
         </ul>
+    </div>
+    </div>
     {% else %}
         {#<h2 style="text-align:center;padding:10px 0;"><a href="/login">{{_("Please Login")}}</a></h2>#}
+    </div>
+    </div>
     {% endif %}
     {% endblock %}
-    </div>
-    </div>
     <div id="content">
     {% block content %}
     {% endblock %}
@@ -85,7 +87,6 @@
         <div style="float:right;"><a href="/lang/en"><img src="/static/us.gif" alt="EN" /></a>
         <a href="/lang/zh-cn"><img src="/static/cn.gif" alt="CN" /></a>
         <a href="/lang/tr-tr"><img src="/static/tr.gif" alt="TR" /></a></div>
-        <pre><p></p></pre>
         {% endblock %}
     </div>
 </body>

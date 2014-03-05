@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-import re
 from base import BaseFeedBook
 
 def getBook():
@@ -20,4 +19,3 @@ class Dapenti(BaseFeedBook):
     feeds = [
             (u'喷嚏图卦', 'https://www.dapenti.com/blog/rssfortugua.asp', True),
            ]
-           
