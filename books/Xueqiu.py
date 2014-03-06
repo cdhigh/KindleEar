@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
+
 from base import BaseFeedBook
 import re
 from lib.urlopener import URLOpener
@@ -22,18 +24,14 @@ class Xueqiu(BaseFeedBook):
 
     remove_tags = ['meta']
     remove_attrs = ['xmlns']
-    #keep_only_tags = [dict(name='div', attrs={'class':'statusContent'})]
 
-    feeds = [
-            (u'今日话题', 'http://xueqiu.com/hots/topic/rss', True),
-            ]
+    feeds = [ (u'今日话题', 'http://xueqiu.com/hots/topic/rss', True) ]
 
     def processtitle(self, title):
         self.log.info('Title: %s' % title)
         return BaseFeedBook.processtitle(self, title)
 
     def preprocess(self, article):
-        #self.log.info('Preprocess: %s ' % article)
         return BaseFeedBook.preprocess(self, article)
     
     def postprocess(self, content):
@@ -41,7 +39,6 @@ class Xueqiu(BaseFeedBook):
                         re.I)
         mt = pn.search(content)
         url = mt.group(1) if mt else None
-        self.log.info(url)
         if url:
             opener = URLOpener(url, timeout=self.timeout)
             result = opener.open(url)
@@ -59,10 +56,12 @@ class Xueqiu(BaseFeedBook):
         soup = BeautifulSoup(content, "lxml")
         for c in j['comments']:
             p = soup.new_tag('p')
-            p.string = c['description']
-            self.log.info('desc: %s'%p.string)
-            soup.html.body.append(p)
+            u = c['user']['screen_name']
+            t = BeautifulSoup('<p>@%s:%s</p>' % (u, c['text']))
+            for img in t.find_all('img', alt=True):
+                img.replace_with(t.new_string(img['alt']))
+            self.log.info(t.html.body.p)
+            soup.html.body.append(t.html.body.p)
 
         content = unicode(soup)
-        self.log.info('Content:%s' % content)
         return content
