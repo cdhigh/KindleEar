@@ -5,14 +5,14 @@ p{
     color:#2d2d2d;
     /*text-align:center;*/
     line-height: 1.6em;
+    margin:1em 0 0 0;
 }
 .banner {
-    background-color:#c8cdde;
+    background-color:#0078e7;
     text-align: center;
     background-size: cover;
     height: 100px;
     width: 100%;
-    margin-bottom: 1em;
     display: table;
 }
 
@@ -20,13 +20,12 @@ p{
     display: table-cell;
     vertical-align: middle;
     margin-bottom: 0;
-    font-size: 1.8em;
+    font-size: 1.5em;
     color: white;
     font-weight: 500;
-    text-shadow: 0 1px 1px black;
 }
 .l-box {
-    padding: 0.5em 2em;
+    padding: 0.5em 1em;
 }
 .information {
     max-width: 800px;
@@ -45,8 +44,7 @@ p{
 {% block content %}
     <div class="banner">
         <h1 class="banner-head">
-            {{_("Free Forever.")}}<br>
-            {{_("Good News Always Come With You.")}}
+            {{_("Free Forever.")}} {{_("Good News Always Come With You.")}}
         </h1>
     </div>
     

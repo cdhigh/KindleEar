@@ -11,7 +11,7 @@ import webapp2
 from google.appengine.ext.webapp.mail_handlers import InboundMailHandler
 from google.appengine.api import taskqueue
 
-from main import KeUser, WhiteList, BaseHandler
+from main import KeUser, Book, WhiteList, BaseHandler
 from config import *
 
 def decode_subject(subject):
@@ -57,6 +57,10 @@ class HandleMail(InboundMailHandler):
         else:
             subject = u"NoSubject"
         
+        #通过邮件触发一次“现在投递”
+        if to.lower() == 'trigger':
+            return self.TrigDeliver(subject, username)
+            
         # R是判断一个字符串是否是链接的正则表达式
         R = r"""^(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>???“”‘’]))"""
         txt_bodies = message.bodies('text/plain')
@@ -209,5 +213,26 @@ class HandleMail(InboundMailHandler):
                 BaseHandler.SendToKindle(username, user.kindle_email, 
                     subject[:SUBJECT_WORDCNT_FOR_APMAIL], 'html', html, user.timezone, False)
         self.response.out.write('Done')
-
-appmail = webapp2.WSGIApplication([HandleMail.mapping()], debug=True)
+    
+    def TrigDeliver(self, subject, username):
+        """ 触发一次推送 
+            邮件主题为需要投递的书籍，为空或all则等同于网页的"现在投递"按钮
+            如果是书籍名，则单独投递，多个书籍名使用逗号分隔
+        """
+        if subject.lower() in (u'nosubject', u'all'):
+            taskqueue.add(url='/deliver',queue_name="deliverqueue1",method='GET',
+                params={'u':username})
+        else:
+            bkids = []
+            booklist = subject.split(',')
+            for b in booklist:
+                trigbook = Book.all().filter('title = ', b.strip()).get()
+                if trigbook:
+                    bkids.append(str(trigbook.key().id()))
+                else:
+                    default_log.warn('book not found : %s' % b.strip())
+            if bkids:
+                taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
+                    params={'u':username,'id':','.join(bkids)})
+            
+appmail = webapp2.WSGIApplication([HandleMail.mapping()], debug=False)

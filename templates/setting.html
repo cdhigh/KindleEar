@@ -13,7 +13,8 @@
     
     <fieldset>
         <legend>{{_("Base Setting")}}</legend>
-        {#<div class="pure-control-group">
+        {#
+        <div class="pure-control-group">
             <label><em class="required">*</em>{{_("Kindle E-mail")}}</label>
             <input type="text" name="kindleemail" style="width:280px" 
             value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" />
@@ -31,7 +32,7 @@
             </select>
         </div>
         <div class="pure-control-group">
-            <label>{{_("Deliver Days")}}</label>
+            <label>{{_("Deliver days")}}</label>
             <label><input type="checkbox" name="Monday" {% if not user.send_days or "Monday" in user.send_days %}checked="1"{% endif %} />{{_("Mon")}} &nbsp;</lable>
             <label><input type="checkbox" name="Tuesday" {% if not user.send_days or "Tuesday" in user.send_days %}checked="1"{% endif %} />{{_("Tue")}} &nbsp;</lable>
             <label><input type="checkbox" name="Wednesday" {% if not user.send_days or "Wednesday" in user.send_days %}checked="1"{% endif %} />{{_("Wed")}} &nbsp;</lable>
@@ -86,14 +87,16 @@
                 <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT+%d:00" % i }}</option>
                 {% endfor %}
             </select></td></tr>
-            <tr><td style="text-align:right;"><label>{{_("Deliver Days")}} : </label></td>
-            <td><input type="checkbox" id="mon" name="Monday" {% if not user.send_days or "Monday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Mon")}} &nbsp;</span>
+            <tr><td style="text-align:right;"><label>{{_("Deliver days")}} : </label></td>
+            <td>
+            <input type="checkbox" id="mon" name="Monday" {% if not user.send_days or "Monday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Mon")}} &nbsp;</span>
             <input type="checkbox" id="tue" name="Tuesday" {% if not user.send_days or "Tuesday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Tue")}} &nbsp;</span>
             <input type="checkbox" id="wed" name="Wednesday" {% if not user.send_days or "Wednesday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Wed")}} &nbsp;</span>
             <input type="checkbox" id="thu" name="Thursday" {% if not user.send_days or "Thursday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Thu")}} &nbsp;</span>
             <input type="checkbox" id="fri" name="Friday" {% if not user.send_days or "Friday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Fri")}} &nbsp;</span>
             <input type="checkbox" id="sat" name="Saturday" {% if not user.send_days or "Saturday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Sat")}} &nbsp;</span>
-            <input type="checkbox" id="sun" name="Sunday" {% if not user.send_days or "Sunday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Sun")}} &nbsp;</span></td></tr>
+            <input type="checkbox" id="sun" name="Sunday" {% if not user.send_days or "Sunday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Sun")}} &nbsp;</span>
+            </td></tr>
             
             <tr><td style="text-align:right;"><label>{{_("Deliver time")}} : </label></td>
             <td><select class="bool" name="sendtime">
@@ -117,6 +120,7 @@
                 <option value="%a, %b %d" {% if user.titlefmt=='%a, %b %d' %}selected="selected"{% endif %}>{{_("Title Day, MMM DD")}}</option>
             </select></td></tr>
         </table>
+        
         <p><label><input type="checkbox" name="mergebooks" {% if user and user.merge_books %}checked="1"{% endif %} />
         {{_("Merge books into one")}}</label><em style="font-size:70%">&nbsp;
         (<a href="/static/faq{%if lang and not lang.startswith('zh')%}_en{%endif%}.html#mergebooks">{{_("read faq firstly.")}}</a>)</em></p>
@@ -168,11 +172,11 @@
             <p style="color:grey;font-size:0.7em;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{_("This switch only effective when 'Enable deliver' is enabled.")}}</P>
         </p>
     </fieldset>
+    <p>
+    {{_("Important: Please activate your kindle firstly, and goto")}} <a href="https://www.amazon.com/gp/digital/fiona/manage#pdocSettings" rel="external" target="_blank">Personal Document Settings</a> {{_("Page and add")}} <strong>{{ mail_sender }}</strong> {{_("to 'Approved Personal Document E-mail List'.")}}
+    </p>
     <p style="text-align:center;">
         <input type="submit" class="pure-button pure-button-primary" value="{{_("Save settings")}}" />
     </p>
 </form>
-<p>
-{{_("Important: Please activate your kindle firstly, and goto")}} <a href="https://www.amazon.com/gp/digital/fiona/manage" rel="external">Manage Your Kindle</a> {{_("Page and add")}} <strong>{{ mail_sender }}</strong> {{_("to 'Your Kindle's approved email list'.")}}
-</p>
 {% endblock %}
