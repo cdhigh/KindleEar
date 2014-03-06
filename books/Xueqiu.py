@@ -28,7 +28,6 @@ class Xueqiu(BaseFeedBook):
     feeds = [ (u'今日话题', 'http://xueqiu.com/hots/topic/rss', True) ]
 
     def processtitle(self, title):
-        self.log.info('Title: %s' % title)
         return BaseFeedBook.processtitle(self, title)
 
     def preprocess(self, article):
@@ -60,7 +59,6 @@ class Xueqiu(BaseFeedBook):
             t = BeautifulSoup('<p>@%s:%s</p>' % (u, c['text']))
             for img in t.find_all('img', alt=True):
                 img.replace_with(t.new_string(img['alt']))
-            self.log.info(t.html.body.p)
             soup.html.body.append(t.html.body.p)
 
         content = unicode(soup)
