@@ -48,12 +48,11 @@ class Xueqiu(BaseFeedBook):
         j = json.loads(comment_json)
         soup = BeautifulSoup(content, "lxml")
         for c in j['comments']:
-            p = soup.new_tag('p')
             u = c['user']['screen_name']
             t = BeautifulSoup('<p>@%s:%s</p>' % (u, c['text']))
             for img in t.find_all('img', alt=True):
                 img.replace_with(t.new_string(img['alt']))
-            soup.html.body.append(t.html.body.p)
+            soup.html.body.append(t.p)
 
         content = unicode(soup)
         return content
