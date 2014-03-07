@@ -17,8 +17,8 @@ class Xueqiu(BaseFeedBook):
     language              = 'zh-cn'
     feed_encoding         = "utf-8"
     page_encoding         = "utf-8"
-    mastheadfile          = "mh_default.gif"
-    coverfile             = "cv_default.jpg"
+    mastheadfile          = "mh_xueqiu.gif"
+    coverfile             = "cv_xueqiu.jpg"
     oldest_article        = 1
     fulltext_by_readability = False
 
@@ -27,12 +27,6 @@ class Xueqiu(BaseFeedBook):
 
     feeds = [ (u'今日话题', 'http://xueqiu.com/hots/topic/rss', True) ]
 
-    def processtitle(self, title):
-        return BaseFeedBook.processtitle(self, title)
-
-    def preprocess(self, article):
-        return BaseFeedBook.preprocess(self, article)
-    
     def postprocess(self, content):
         pn = re.compile(ur'<a href="(\S*?)">本话题在雪球有.*?条讨论，点击查看。</a>',
                         re.I)
