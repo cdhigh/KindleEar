@@ -3,7 +3,7 @@
 """KindleEar的配置文件，开头两个配置项是必须修改的。"""
 
 SRC_EMAIL = "akindleear@gmail.com"  #邮件的发件人地址
-DOMAIN = "https://kindleear.appspot.com" #你的域名，用于归档链接
+DOMAIN = "http://kindleear.appspot.com" #你的域名，用于归档链接，也可以使用https协议
 
 TIMEZONE = 8  #默认时区
 
@@ -59,5 +59,9 @@ SENDMAIL_RETRY_CNT = 1
 SENDMAIL_ALL_POSTFIX = False
 
 #归档或分享超链接的文本描述
+#SHARE_FUCK_GFW_SRV：翻墙转发服务器（如果需要翻墙的话）
+#翻墙转发服务器源码：http://github.com/cdhigh/forwarder
+#SHARE_FUCK_GFW_SRV = "http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u=%s"
+SHARE_FUCK_GFW_SRV = "http://kforwarder.herokuapp.com/?k=xzSlE&t=60&u=%s"
 SAVE_TO_EVERNOTE = u"Save to evernote"
 SAVE_TO_WIZ = u"Save to Wiz"
