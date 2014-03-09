@@ -18,15 +18,16 @@
 	<h2>What are the features and benefits?</h2>
 	<p class="answer">Features:
 	<ul>
-	 <li>custom rss</li>
-     <li>multi-account management, which supports many kindles</li>
-     <li>the magazine format MOBI with images</li>
-     <li>automatic daily scheduled deliver</li>
+	 <li>Custom rss</li>
+   <li>Supports fulltext rss and summary rss</li>
+   <li>Multi-account management, which supports many kindles</li>
+   <li>The magazine format MOBI with images</li>
+   <li>Automatic daily scheduled deliver</li>
 	</ul>
 	Benefits:
 	<ul>
-	 <li>all free, not only this application is free, but GAE provides free hosting space, you do not need to pay a penny. </li>
-     <li>generate fine magazine format books. Sample as follows (the left one for kindle3, the right two for kindle touch): </li>
+	 <li>All free, not only this application is free, but GAE provides free hosting space, you do not need to pay a penny. </li>
+     <li>Generate fine magazine format books. Sample as follows (the left one in kindle3, the right two in kindle touch): </li>
      <a href="periodical.gif" target="_blank"><img src="periodical.gif" style="width:750px;" /></a>
 	</ul>
 	</p>
@@ -37,44 +38,44 @@
     <h2>How to deploy my own delivery server?</h2>
     <p class="answer"><strong>Following formal steps:</strong>
         <ol>
-		<li>in <a href="http://www.github.com/cdhigh/kindleear">Github</a>  page to download the latest version KindleEar in the lower right corner of the page there is a button "Download ZIP", click to download a ZIP file that contains all the source code, and then extract it to your favorite directory, such as C:\KindleEar (below in this example).</li>
-		<li>you need a GAE account, please visit <a href="https://appengine.google.com/">Google AppEngine</a> page. Use your gmail account to login, click on "Create Application", in the account activation SMS page, select Others, enter your cellphone number with country code (+nn), click Send, you can receive activation information on the phone in a while, after activate click Create Application again, in the Application Identifier field, enter a name of your choice applications (eg: KindleEar123). The remaining options can keep the default, click on the Create Application to create a GAE application.</li>
-		<li>install <a href="http://www.python.org/getit/">Python 2.7.x</a>, on this page, select your platform corresponding to the 2.7.x version to download, and then simply double-click the installation. Note Do not install a Python 3.x version, GAE does not support now.</li>
-		<li>install <a href="https://developers.google.com/appengine/downloads">GAE SDK</a>, which is used to upload GAE program. in section on this page "Google App Engine SDK for Python", choose your platform, click to download the corresponding version, then install, all the way next without words.</li>
-		<li>open Resouce Explorer of your platform, enter the previously downloaded KindleEar directory (eg C:\KindleEar), use a text editor to open app.yaml file, modify the word 'kindleear' in the first line to your GAE application name (eg kindleear123), save and exit.</li>
-	    <li>modify variable 'SRC_EMAIL' in config.py of same directory of app.yaml to your gmail account in the same way. you can modify other variables if you want and understand it, or default value recommented.</li>
-		<li>start uploade KindleEar now. you can use Google App Engine Launcher gui or command line. because Launcher is not stable, here is what you use in windows command line.
-			<li>followed by clicking: Start - Run - type CMD, and open a command line window</li>
-			<li>change current directory into App Engine SDK installation directory. example: cd "C:\Program Files\Google\google_appengine"</li>
-			<li>enter 'upload' command: c:\python27\python.exe appcfg.py update C:\KindleEar</li>
-			<li>enter the gmail account and password (password does not display in screen).</li></li>
-		<li>after uploaded successfully use your browser to open domain: http://kindleear123.appspot.com (example only, kindleear123 should be changed to the name of your gae application), if they can open properly, then goto last step.</li>
-	    <li>add your gmail account to your kindle email whitelist. you should know how to do it before.</li>
-		<li>then what? Enjoy your own delivery service now!</li>
+		<li>In <a href="http://www.github.com/cdhigh/kindleear">Github</a>  page to download the latest version KindleEar in the lower right corner of the page there is a button "Download ZIP", click to download a ZIP file that contains all the source code, and then extract it to your favorite directory, such as C:\KindleEar (below in this example).</li>
+		<li>You need a GAE account, please visit <a href="https://appengine.google.com/">Google AppEngine</a> page. Use your gmail account to login, click on "Create Application", in the account activation SMS page, select Others, enter your cellphone number with country code (+nn), click Send, you can receive activation information on the phone in a while, after activate click Create Application again, in the Application Identifier field, enter a name of your choice applications (eg: KindleEar123). The remaining options can keep the default, click on the Create Application to create a GAE application.</li>
+		<li>Install <a href="http://www.python.org/getit/">Python 2.7.x</a>, on this page, select your platform corresponding to the 2.7.x version to download, and then simply double-click the installation. Note Do not install a Python 3.x version, GAE does not support now.</li>
+		<li>Install <a href="https://developers.google.com/appengine/downloads">GAE SDK</a>, which is used to upload GAE program. in section on this page "Google App Engine SDK for Python", choose your platform, click to download the corresponding version, then install, all the way next without words.</li>
+		<li>Open Resouce Explorer of your platform, enter the previously downloaded KindleEar directory (eg C:\KindleEar), use a text editor to open app.yaml file, modify the word 'kindleear' in the first line to your GAE application name (eg kindleear123), save and exit.</li>
+	    <li>Modify variable 'SRC_EMAIL' in config.py of same directory of app.yaml to your gmail account in the same way. you can modify other variables if you want and understand it, or default value recommented.</li>
+		<li>Start uploade KindleEar now. you can use Google App Engine Launcher gui or command line. because Launcher is not stable, here is what you use in windows command line.
+			<li>Followed by clicking: Start - Run - type CMD, and open a command line window</li>
+			<li>Change current directory into App Engine SDK installation directory. example: cd "C:\Program Files\Google\google_appengine"</li>
+			<li>Enter 'upload' command: c:\python27\python.exe appcfg.py update C:\KindleEar</li>
+			<li>Enter the gmail account and password (password does not display in screen).</li></li>
+		<li>After uploaded successfully use your browser to open domain: http://kindleear123.appspot.com (example only, kindleear123 should be changed to the name of your gae application), if they can open properly, then goto last step.</li>
+	    <li>Add your gmail account to your kindle email whitelist. you should know how to do it before.</li>
+		<li>Then what? Enjoy your own delivery service now!</li>
 		</ol>
     <p><strong>Following steps much easy.</strong>
         <ol>
-        <li>download KindleEar and get a GAE account, then create a application.</li>
-        <li>modify the files app.yaml and config.py.</li>
-        <li>download <a href="https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing">uploader</a>.</li>
-        <li>uncompress 'uploader' to a directory, copy a folder of KindleEar here and rename it to kindleear, then double-click 'uploader.bat' to start a procedure for upload.</li>
+        <li>Download KindleEar and get a GAE account, then create a application.</li>
+        <li>Modify the files app.yaml and config.py.</li>
+        <li>Download <a href="https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing">uploader</a>.</li>
+        <li>Uncompress 'uploader' to a directory, copy a folder of KindleEar here and rename it to kindleear, then double-click 'uploader.bat' to start a procedure for upload.</li>
         </ol></p>
     </p>
     <hr />
 	<h2>Why am I not receive rss?</h2>
 	<p class="answer">For many reasons, the following are a few possibilities:
 	<ol>
-    <li>didnot enable "Enable deliver custom rss" switch, this switch local in bottom of setting page.</li>
-	<li>didnot add kindle email whitelist to your gmail address:</li>
+    <li>Didnot enable "Enable deliver custom rss" switch, this switch local in bottom of setting page.</li>
+	<li>Didnot add kindle email whitelist to your gmail address:</li>
 		<ul><li>Solution: add whitelist in http://www.amazon.com/</li></ul>
-	<li>the number of custom rss too many to proccess in limit of 10 minutes.
-		<ul><li>the number of rss is generally less than ten, more rss can be supported if have more "fulltext RSS".</li>
-		<li>please login <a href="https://appengine.google.com"> appengine </a>, click your application, check if has exception DeadlineExceededError logged in logs, if yes, reduce the number of rss, or split them for two accounts.</li></ul>
+	<li>The number of custom rss too many to proccess in limit of 10 minutes.
+		<ul><li>The number of rss is generally less than ten, more rss can be supported if have more "fulltext RSS".</li>
+		<li>Please login <a href="https://appengine.google.com"> appengine </a>, click your application, check if has exception DeadlineExceededError logged in logs, if yes, reduce the number of rss, or split them for two accounts.</li></ul>
 	</li>
-	<li>the number of rss too many, cause excessive memory of 128MB(default).
-	    <ul><li>open <a href="https://appengine.google.com">appengine</a> check if has exception 'soft private memory limit', if yes, click 'Application Settings' in the left, change 'Frontend Instance Class' of section 'Performance' to 'F2(1200MHz,256MB)'.</li></ul>
+	<li>The number of rss too many, cause excessive memory of 128MB(default).
+	    <ul><li>Open <a href="https://appengine.google.com">appengine</a> check if has exception 'soft private memory limit', if yes, click 'Application Settings' in the left, change 'Frontend Instance Class' of section 'Performance' to 'F2(1200MHz,256MB)'.</li></ul>
 	</li>
-    <li>the content of rss link isn't a valid XML format.</li>
+    <li>The content of rss link isn't a valid XML format.</li>
 	</ol></p>
     <hr />
 	<h2>What is fulltext rss?</h2>
@@ -117,6 +118,20 @@
     <h2>How can I do if forgot password?</h2>
     <p class="answer">If you have forgotten the password for non-administrator account, you can notify the administrator to change your password. If an administrator password forgot, you can login appengine.google.com, on the left select "Datastore Admin", delete all KeUser data, all account information will be deleted, and then re-use admin/admin login to your application . Did not find "Datastore Admin"? You can active it in the "Application Settings".
         <br />If you know python, you would find other solution.</p>
+    <hr />
+    <h2>How to use mail service xxx@appid.appspotmail.com?</h2>
+    <p class="answer">
+    KindleEar supports mail service which address likes xxx@appid.appspotmail.com, xxx is any ascii string, appid is id of your application.<br />
+    <ul> <li>KindleEar would transfer <b>content</b> of email receviced to your kindle. if content of email contains  hyperlinks only (a link per line), would fetch url(s) to generate a ebook and then push to kindle. </li>
+       <li>Before you can enjoy the feature, please add whitelists in menu 'Advance'|'White List'. A asterisk '*' means allow all sender or add some addresses like 'xx@xx.xx'/'@xx.xx'.</li>
+       <li>Send mail to username__xxx@appid.appspotmail.com would push ebook to kindle of username if account username exist.</li>
+       <li>Send mail with hyperlinks of ebook to book@appid.appspotmail.com or username__book@appid.appspotmail.com would trigger a task that download ebook and deliver to kindle directly.<br />
+        The list of postfix allowed of ebook refers to <a href="https://developers.google.com/appengine/docs/python/mail#Python_Sending_mail_with_attachments">Mail Python API Overview</a><br />
+        </li>
+       <li>address trigger@appid.appspotmail.com or username__trigger@appid.appspotmail.com is a trigger, would start a deliver task, which effect when subject is empty or is 'all' equal that you click button 'deliver now' in Menu 'Setting', that place book's title in subject would push book you choosed, multi books separated by comma.<br /></li>
+    </ul>
+    </p>
+    <hr />
     <h2>Why I did not receive deliver after have chosen 'Merge books into one'?<a name="mergebooks" id="mergebooks" >&nbsp;</a></h2>
     <p class="answer">With 'Merge books in one' checked, KindleEar have to process all of rss in all books subscribed in limit of 10 minutes defined by GAE, often that cause DeadlineExceededError when you have subscribed much more books. If it happened, please decrease books subscribed or split those into some accounts.</p>
 	<pre><p> </p><p> </p></pre>

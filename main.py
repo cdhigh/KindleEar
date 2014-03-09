@@ -4,7 +4,7 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.9.3"
+__Version__ = "1.9.4"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -147,7 +147,6 @@ class UrlFilter(db.Model):
     url = db.StringProperty()
     user = db.ReferenceProperty(KeUser)
     
-#def StoreBookToDb():
 for book in BookClasses():  #添加内置书籍
     if memcache.get(book.title): #使用memcache加速
         continue
@@ -156,8 +155,6 @@ for book in BookClasses():  #添加内置书籍
         b = Book(title=book.title,description=book.description,builtin=True)
         b.put()
         memcache.add(book.title, book.description, 86400)
-
-#StoreBookToDb()
 
 class BaseHandler:
     " URL请求处理类的基类，实现一些共同的工具函数 "
@@ -821,7 +818,55 @@ class Deliver(BaseHandler):
                 sentcnt += 1
         self.flushqueue()
         return "Put <strong>%d</strong> books to queue!" % sentcnt
-        
+
+def InsertToc(oeb, sections, toTail=True):
+    """ 创建OEB的两级目录，
+    sections为字典，关键词为段名，元素为元组列表(title,item,desc)
+    toTail=True则将HTML目录放在书籍末尾，否则放在前面
+    """
+    po = 1
+    htmltoc = ['<html><head><title>Table Of Contents</title></head><body><h2>Table Of Contents</h2>']
+    for sec in sections.keys():
+        htmltoc.append('<h3><a href="%s">%s</a></h3>'%(sections[sec][0][1].href,sec))
+        sectoc = oeb.toc.add(sec, sections[sec][0][1].href, play_order=po, id='toc_%d'%po)
+        po += 1
+        for title, a, brief in sections[sec]:
+            htmltoc.append('&nbsp;&nbsp;&nbsp;&nbsp;<a href="%s">%s</a><br />'%(a.href,title))
+            sectoc.add(title, a.href, description=brief if brief else None, play_order=po, id='toc_%d'%po)
+            po += 1
+    htmltoc.append('</body></html>')
+    id, href = oeb.manifest.generate(id='toc', href='toc.html')
+    item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=''.join(htmltoc))
+    oeb.guide.add('toc', 'Table of Contents', href)
+    if toTail:
+        oeb.spine.add(item, True)
+    else:
+        oeb.spine.insert(0, item, True)
+    
+def InsertPeriodicalToc(oeb, sections):
+    """杂志模式TOC """
+    po = 1
+    toc = oeb.toc.add(unicode(oeb.metadata.title[0]), 
+        oeb.spine[0].href, id='periodical', 
+        klass='periodical', play_order=po)
+    po += 1
+    htmltoc = ['<html><head><title>Table Of Contents</title></head><body><h2>Table Of Contents</h2>']
+    for sec in sections.keys():
+        sectoc = toc.add(unicode(sec), sections[sec][0][1].href,
+            klass='section', play_order=po, id='Main-section')
+        po += 1
+        htmltoc.append('<h3><a href="%s">%s</a></h3>'%(sections[sec][0][1].href,sec))
+        for title, a, brief in sections[sec]:
+            sectoc.add(unicode(title), a.href, description=brief if brief else None, 
+            klass='article', play_order=po, id='article-%d'%po)
+            po += 1
+            htmltoc.append('&nbsp;&nbsp;&nbsp;&nbsp;<a href="%s">%s</a><br />'%(a.href,title))
+    htmltoc.append('</body></html>')
+    id, href = oeb.manifest.generate(id='toc', href='toc.html')
+    item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=''.join(htmltoc))
+    oeb.guide.add('toc', 'Table of Contents', href)
+    oeb.spine.add(item, True)
+    
 class Worker(BaseHandler):
     """ 实际下载文章和生成电子书并且发送邮件 """
     def GET(self):
@@ -934,23 +979,8 @@ class Worker(BaseHandler):
                     sections[sec_or_media].append((title, item, brief))
                     itemcnt += 1
                     
-        if itemcnt > 0: # 建立TOC，杂志模式需要为两层目录结构
-            po = 0
-            stoc = ['<html><head><title>Table Of Contents</title></head><body><h2>Table Of Contents</h2>']
-            for sec in sections.keys():
-                stoc.append('<h3><a href="%s">%s</a></h3>'%(sections[sec][0][1].href,sec))
-                sectoc = oeb.toc.add(sec, sections[sec][0][1].href, play_order=po)
-                po += 1
-                for title, a, brief in sections[sec]:
-                    stoc.append('&nbsp;&nbsp;&nbsp;&nbsp;<a href="%s">%s</a><br />'%(a.href,title))
-                    sectoc.add(title, a.href, description=brief if brief else None, play_order=po)
-                    po += 1
-            stoc.append('</body></html>')
-            id, href = oeb.manifest.generate(id='toc', href='toc.html')
-            item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=''.join(stoc))
-            oeb.guide.add('toc', 'Table of Contents', href)
-            oeb.spine.add(item, True)
-            
+        if itemcnt > 0:
+            InsertToc(oeb, sections)
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()
             o.convert(oeb, oIO, opts, log)
@@ -968,32 +998,33 @@ class Url2Book(BaseHandler):
     """ 抓取指定链接，转换成附件推送 """
     def GET(self):
         username = web.input().get("u")
-        url = web.input().get("url")
+        urls = web.input().get("urls")
         subject = web.input().get("subject")
         to = web.input().get("to")
         language = web.input().get("lng")
         keepimage = bool(web.input().get("keepimage") == '1')
         booktype = web.input().get("type", "mobi")
         tz = int(web.input().get("tz", TIMEZONE))
-        if not all((username,url,subject,to,language,booktype,tz)):
+        if not all((username,urls,subject,to,language,booktype,tz)):
             return "Some parameter missing!<br />"
         
         global log
         
         if booktype == 'Download': #直接下载电子书并推送
             from lib.filedownload import Download
-            dlinfo, filename, content = Download(url)
-            #如果标题已经给定了文件名，则使用标题文件名
-            if '.' in subject and (1 < len(subject.split('.')[-1]) < 5):
-                filename = subject
-                
-            if content:
-                self.SendToKindle(username, to, filename, '', content, tz)
-            else:
-                if not dlinfo:
-                    dlinfo = 'download failed'
-                self.deliverlog(username, to, filename, 0, status=dlinfo,tz=tz)
-            log.info("%s Sent!" % filename)
+            for url in urls.split('|'):
+                dlinfo, filename, content = Download(url)
+                #如果标题已经给定了文件名，则使用标题文件名
+                if '.' in subject and (1 < len(subject.split('.')[-1]) < 5):
+                    filename = subject
+                    
+                if content:
+                    self.SendToKindle(username, to, filename, '', content, tz)
+                else:
+                    if not dlinfo:
+                        dlinfo = 'download failed'
+                    self.deliverlog(username, to, filename, 0, status=dlinfo,tz=tz)
+                log.info("%s Sent!" % filename)
             return "%s Sent!" % filename
             
         user = KeUser.all().filter("name = ", username).get()
@@ -1005,7 +1036,7 @@ class Url2Book(BaseHandler):
         book.language = language
         book.keep_image = keepimage
         book.network_timeout = 60
-        book.feeds = [(subject,url)]
+        book.feeds = [(subject,url) for url in urls.split('|')]
         book.url_filters = [flt.url for flt in user.urlfilter]
         
         opts = oeb = None
@@ -1013,26 +1044,51 @@ class Url2Book(BaseHandler):
         # 创建 OEB
         opts = getOpts()
         oeb = CreateOeb(log, None, opts)
-        
-        setMetaData(oeb, subject, language, local_time(tz=tz), pubtype='book:book:KindleEar')
         oeb.container = ServerContainer(log)
+        
+        if len(book.feeds) > 1:
+            setMetaData(oeb, subject, language, local_time(tz=tz))
+            id, href = oeb.manifest.generate('masthead', DEFAULT_MASTHEAD)
+            oeb.manifest.add(id, href, MimeFromFilename(DEFAULT_MASTHEAD))
+            oeb.guide.add('masthead', 'Masthead Image', href)
+        else:
+            setMetaData(oeb, subject, language, local_time(tz=tz), pubtype='book:book:KindleEar')
+        
+        id, href = oeb.manifest.generate('cover', DEFAULT_COVER)
+        item = oeb.manifest.add(id, href, MimeFromFilename(DEFAULT_COVER))
+        oeb.guide.add('cover', 'Cover', href)
+        oeb.metadata.add('cover', id)
         
         # 对于html文件，变量名字自文档
         # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
-        itemcnt = 0
+        itemcnt,hasimage = 0,False
+        sections = {subject:[]}
         for sec_or_media, url, title, content, brief in book.Items(opts,user):
             if sec_or_media.startswith(r'image/'):
                 id, href = oeb.manifest.generate(id='img', href=title)
                 item = oeb.manifest.add(id, href, sec_or_media, data=content)
                 itemcnt += 1
+                hasimage = True
             else:
                 id, href = oeb.manifest.generate(id='page', href='page.html')
                 item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=content)
                 oeb.spine.add(item, False)
-                oeb.toc.add(title, href)
+                if len(book.feeds) > 1:
+                    sections[subject].append((title,item,brief))
+                else:
+                    oeb.toc.add(title, href)
                 itemcnt += 1
             
         if itemcnt > 0:
+            if len(book.feeds) > 1:
+                InsertToc(oeb, sections)
+            elif not hasimage: #单文章没有图片则去掉封面
+                href = oeb.guide['cover'].href
+                oeb.guide.remove('cover')
+                item = oeb.manifest.hrefs[href]
+                oeb.manifest.remove(item)
+                oeb.metadata.clear('cover')
+                
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()
             o.convert(oeb, oIO, opts, log)
@@ -1052,6 +1108,7 @@ class Share(BaseHandler):
     SHARE_IMAGE_EMBEDDED = True
     
     def GET(self):
+        import urlparse,urllib
         action = web.input().get('act')
         username = web.input().get("u")
         url = web.input().get("url")
@@ -1064,6 +1121,10 @@ class Share(BaseHandler):
         
         global log
         
+        #因为知乎好文章比较多，特殊处理一下知乎
+        if urlparse.urlsplit(url)[1].endswith('zhihu.com'):
+            url = 'http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u=%s'%urllib.quote(url)
+            
         if action in ('evernote','wiz'): #保存至evernote/wiz
             if action=='evernote' and (not user.evernote or not user.evernote_mail):
                 log.warn('No have evernote mail yet.')

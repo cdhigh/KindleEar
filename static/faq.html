@@ -128,7 +128,7 @@
     <hr />
     <h2>xxx@appid.appspotmail.com邮件地址怎么用？</h2>
     <p class="answer">xxx@appid.appspotmail.com是KindleEar附送的邮件服务，在部署好KindleEar后，你自动拥有了无数个EMAIL邮箱地址，格式为：xxx@appid.appspotmail.com，xxx为任意合法字符串，appid为你的应用名。<br />
-    <ul> <li>此邮箱将收到的邮件正文转换为邮件附件推送至你注册的Email邮箱，如果邮件中只有一个链接，则抓取此链接的网页内容制作成电子书然后再推送。</li>
+    <ul> <li>此邮箱将收到的邮件正文转换为邮件附件推送至你注册的Email邮箱。如果邮件中只有链接（多个链接则每行一个），则抓取链接的网页内容制作成电子书然后再推送。</li>
        <li>要使用此功能，先要添加白名单，如果为'*'则允许所有邮件，否则格式为'xx@xx.xx'或'@xx.xx'。</li>
        <li>默认推送至管理员注册的邮箱，如果要推送至其他用户的邮箱，则使用格式：username__xxx@appid.appspotmail.com。（注意是双下划线）</li>
        <li>如果将电子书下载链接发送至book@appid.appspotmail.com 或 username__book@appid.appspotmail.com则KindleEar直接下载对应的电子书并转发至注册的邮箱（注意GAE对后缀名有限制，不能发送可能有安全隐患的文件后缀比如exe等，zip文件能发送，但是zip文件内不能包含可能有安全隐患的文件）。<br />
@@ -165,7 +165,6 @@
     <p class="answer">启用此功能后，KindleEar会在每篇文件的最后都附加一个超链接，在Kindle上点击此超链接会自动打开浏览器将你正在阅读的此文章归档至网络笔记（需要打开网络连接）。<br />
         有几点需要注意的：
         <ol><li>请先修改config.py里面的DOMAIN为你申请的应用域名；</li>
-        <li>因GAE暂时不支持发送图文混排的邮件，因此文章中的图片均以附件的形式附在文章最后。</li>
         <li>如果你在红墙内，可能需要打开“我需要翻墙（针对中国用户）”开关，默认的翻墙转发器采用作者在appfog上搭建的免费服务器： http://forwarder.ap01.aws.af.cm，如果你有余力或者注重隐私，建议自己搭建一个，源码托管在 https://github.com/cdhigh/forwarder。</li></ol>
     </p>
     <hr />

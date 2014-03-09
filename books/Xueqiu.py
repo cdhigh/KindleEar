@@ -8,6 +8,8 @@ from lib.urlopener import URLOpener
 from bs4 import BeautifulSoup
 import json
 
+__author__ = 'henryouly'
+
 def getBook():
     return Xueqiu
 

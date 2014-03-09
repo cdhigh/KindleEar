@@ -460,8 +460,6 @@ class BaseFeedBook:
                     soup.html.body.insert(0, t)
                     break
                     
-        self.soupbeforeimage(soup)
-        
         if self.remove_tags:
             for tag in soup.find_all(self.remove_tags):
                 tag.decompose()
@@ -481,7 +479,9 @@ class BaseFeedBook:
             sty = soup.new_tag('style', type="text/css")
             sty.string = self.extra_css
             soup.html.head.append(sty)
-            
+        
+        self.soupbeforeimage(soup)
+        
         if self.keep_image:
             opener = URLOpener(self.host, timeout=self.timeout)
             for img in soup.find_all('img',attrs={'src':True}):
@@ -621,9 +621,10 @@ class BaseFeedBook:
             sty.string = self.extra_css
             soup.html.head.append(sty)
             
+        self.soupbeforeimage(soup)
+        
         if self.keep_image:
             opener = URLOpener(self.host, timeout=self.timeout)
-            self.soupbeforeimage(soup)
             for img in soup.find_all('img',attrs={'src':True}):
                 imgurl = img['src']
                 if not imgurl.startswith('http'):

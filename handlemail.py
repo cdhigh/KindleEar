@@ -21,6 +21,15 @@ def decode_subject(subject):
         subject = unicode(collapse_rfc2231_value(subject))
     return subject
 
+def IsHyperLink(txt):
+    """ 判断一个字符串是否是超链接，返回链接本身，否则空串 """
+    R = r"""^(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>???“”‘’]))"""
+    M = re.match(R, txt)
+    if M is not None:
+        return M.group()
+    else:
+        return ''
+
 class HandleMail(InboundMailHandler):
     def receive(self, message):
         #如果有多个收件人的话，只解释第一个收件人
@@ -60,9 +69,8 @@ class HandleMail(InboundMailHandler):
         #通过邮件触发一次“现在投递”
         if to.lower() == 'trigger':
             return self.TrigDeliver(subject, username)
-            
-        # R是判断一个字符串是否是链接的正则表达式
-        R = r"""^(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>???“”‘’]))"""
+        
+        #获取和解码邮件内容
         txt_bodies = message.bodies('text/plain')
         html_bodies = message.bodies('text/html')
         try:
@@ -70,7 +78,9 @@ class HandleMail(InboundMailHandler):
         except:
             default_log.warn('Decode html bodies of mail failed.')
             allBodies = []
-        if len(allBodies) == 0: #此邮件为纯文本邮件
+        
+        #此邮件为纯文本邮件
+        if len(allBodies) == 0:
             default_log.info('no html body, use text body.')
             try:
                 allBodies = [body.decode() for ctype, body in txt_bodies]
@@ -80,27 +90,26 @@ class HandleMail(InboundMailHandler):
             bodies = u''.join(allBodies)
             if not bodies:
                 return
-                
-            M = re.match(R, bodies) #判断是否是链接
-            if M is not None:
-                link = M.group()
-                if len(bodies[len(link):]) < WORDCNT_THRESHOLD_FOR_APMAIL:
-                    bodies = '<a href="%s">%s</a>' % (link,link)
+            bodyurls = []
+            for l in bodies.split('\n'):
+                l = l.strip()
+                if not l:
+                    continue
+                link = IsHyperLink(l)
+                if link:
+                    bodyurls.append('<a href="%s">%s</a><br />' % (link,link))
+                else:
+                    break
+
             bodies = u"""<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-                    <title>%s</title></head><body>%s</body></html>""" %(subject,bodies)
+              <title>%s</title></head><body>%s</body></html>""" %(subject,
+              ''.join(bodyurls) if bodyurls else bodies)
             allBodies = [bodies.encode('utf-8')]
         
+        #开始处理邮件内容
         soup = BeautifulSoup(allBodies[0], 'lxml')
-        h = soup.find('head')
-        if not h:
-            h = soup.new_tag('head')
-            soup.html.insert(0, h)
-        t = soup.find('title')
-        if not t:
-            t = soup.new_tag('title')
-            t.string = subject
-            soup.html.head.insert(0, t)
         
+        #合并多个邮件文本段
         if len(allBodies) > 1:
             for o in allBodies[1:]:
                 so = BeautifulSoup(o, 'lxml')
@@ -110,26 +119,32 @@ class HandleMail(InboundMailHandler):
                 for c in b.contents:
                     soup.body.append(c)
         
-        #只有一个链接并且邮件字数很少则认为需要抓取网页，否则直接转发邮件正文
-        links = list(soup.body.find_all('a',attrs={'href':True}))
-        link = links[0]['href'] if links else ''
-        text = ' '.join([s for s in soup.body.stripped_strings])
-        M = re.match(R, text)
-        if M is not None:
-            link = M.group()
-            links = [link]
+        #判断邮件内容是文本还是链接（包括多个链接的情况）
+        links = []
+        body = soup.body if soup.find('body') else soup
+        for s in body.stripped_strings:
+            link = IsHyperLink(s)
+            if link:
+                links.append(link)
+            else: #如果是多个链接，则必须一行一个
+                break
+        if not links: #正常字符判断没有链接，看html的a标签
+            links = list(soup.find_all('a',attrs={'href':True}))
+            link = links[0]['href'] if links else ''
+            text = ' '.join([s for s in body.stripped_strings])
             text = text.replace(link, '')
-        elif len(links) == 1:
-            text = text.replace(link, '') #去掉可能的链接本身字符
+            #如果字数太多，则认为直接推送正文内容
+            if len(links) != 1 or len(text) > WORDCNT_THRESHOLD_FOR_APMAIL:
+                links = []
             
-        if len(links) == 1 and len(text) < WORDCNT_THRESHOLD_FOR_APMAIL:
+        if links:
             #判断是下载文件还是转发内容
             isbook = bool(to.lower() in ('book', 'file', 'download'))
             isbook = link[-5:].lower() in ('.mobi','.epub','.docx') if not isbook else isbook
             isbook = link[-4:].lower() in ('.pdf','.txt','.doc','.rtf') if not isbook else isbook
             
             param = {'u':username,
-                     'url':link,
+                     'urls':'|'.join(links),
                      'type':'Download' if isbook else user.book_type,
                      'to':user.kindle_email,
                      'tz':user.timezone,
@@ -148,6 +163,17 @@ class HandleMail(InboundMailHandler):
                     if MimeFromFilename(f):
                         hasimage = True
                         break
+                        
+            #先修正不规范的HTML邮件
+            h = soup.find('head')
+            if not h:
+                h = soup.new_tag('head')
+                soup.html.insert(0, h)
+            t = soup.head.find('title')
+            if not t:
+                t = soup.new_tag('title')
+                t.string = subject
+                soup.head.insert(0, t)
             
             #有图片的话，要生成MOBI或EPUB才行
             #而且多看邮箱不支持html推送，也先转换epub再推送
@@ -234,5 +260,6 @@ class HandleMail(InboundMailHandler):
             if bkids:
                 taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
                     params={'u':username,'id':','.join(bkids)})
-            
+                    
+        
 appmail = webapp2.WSGIApplication([HandleMail.mapping()], debug=False)

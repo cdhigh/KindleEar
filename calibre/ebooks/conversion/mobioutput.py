@@ -101,7 +101,7 @@ class MOBIOutput:
                     articles[id(sec)].append(a)
                     sec.nodes.remove(a)
 
-            root = TOC(klass='periodical', href=self.oeb.spine[0].href,
+            root = TOC(klass='periodical', href=self.oeb.spine[0].href, play_order=0, id='periodical',
                     title=unicode(self.oeb.metadata.title[0]))
             #建立 root/Sections/artcicles三层结构
             for s in sections:
