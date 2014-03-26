@@ -14,8 +14,15 @@ class Dapenti(BaseFeedBook):
     max_articles_per_feed = 1
     mastheadfile          = "mh_dapenti.gif"
     coverfile             = "cv_dapenti.jpg"
-    network_timeout       = 30
+    network_timeout       = 60
     fetch_img_via_ssl     = False
     feeds = [
             (u'喷嚏图卦', 'https://www.dapenti.com/blog/rssfortugua.asp', True),
            ]
+    
+    def soupbeforeimage(self, soup):
+        ' 更换另一个图库，因为RSS中的图库已经被封 '
+        for img in soup.find_all('img', attrs={'src':True}):
+            if img['src'].startswith('http://ptimg.org:88'):
+                img['src'] = img['src'].replace('http://ptimg.org:88','http://pic.yupoo.com')
+                

@@ -4,7 +4,7 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.9.4"
+__Version__ = "1.10"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -114,6 +114,11 @@ class KeUser(db.Model): # kindleEar User
     evernote_mail = db.StringProperty() #evernote邮件地址
     wiz = db.BooleanProperty() #为知笔记
     wiz_mail = db.StringProperty()
+    xweibo = db.BooleanProperty()
+    tweibo = db.BooleanProperty()
+    facebook = db.BooleanProperty() #分享链接到facebook
+    twitter = db.BooleanProperty()
+    tumblr = db.BooleanProperty()
     
     @property
     def whitelist(self):
@@ -370,9 +375,18 @@ class AdvShare(BaseHandler):
     """ 设置归档和分享配置项 """
     def GET(self):
         user = self.getcurrentuser()
-        return self.render('advshare.html',"Share",current='advsetting',
-            user=user,advcurr='share',savetoevernote=SAVE_TO_EVERNOTE,
-            savetowiz=SAVE_TO_WIZ)
+        current = 'advsetting'
+        advcurr = 'share'
+        savetoevernote = SAVE_TO_EVERNOTE
+        savetowiz = SAVE_TO_WIZ
+        shareonxweibo = SHARE_ON_XWEIBO
+        shareontweibo = SHARE_ON_TWEIBO
+        shareonfacebook = SHARE_ON_FACEBOOK
+        shareontwitter = SHARE_ON_TWITTER
+        shareontumblr = SHARE_ON_TUMBLR
+        args = locals()
+        args.pop('self')
+        return self.render('advshare.html',"Share",**args)
         
     def POST(self):
         user = self.getcurrentuser()
@@ -386,11 +400,22 @@ class AdvShare(BaseHandler):
         wiz_mail = web.input().get('wiz_mail', '')
         if not wiz_mail:
             wiz = False
+        xweibo = bool(web.input().get('xweibo'))
+        tweibo = bool(web.input().get('tweibo'))
+        facebook = bool(web.input().get('facebook'))
+        twitter = bool(web.input().get('twitter'))
+        tumblr = bool(web.input().get('tumblr'))
+        
         user.share_fuckgfw = fuckgfw
         user.evernote = evernote
         user.evernote_mail = evernote_mail
         user.wiz = wiz
         user.wiz_mail = wiz_mail
+        user.xweibo = xweibo
+        user.tweibo = tweibo
+        user.facebook = facebook
+        user.twitter = twitter
+        user.tumblr = tumblr
         user.put()
         
         raise web.seeother('')
@@ -819,29 +844,35 @@ class Deliver(BaseHandler):
         self.flushqueue()
         return "Put <strong>%d</strong> books to queue!" % sentcnt
 
-def InsertToc(oeb, sections, toTail=True):
+def InsertToc(oeb, sections, addHtmlToc=False, toTail=True):
     """ 创建OEB的两级目录，
     sections为字典，关键词为段名，元素为元组列表(title,item,desc)
+    addHtmlToc:是否生成HTML目录
     toTail=True则将HTML目录放在书籍末尾，否则放在前面
     """
     po = 1
-    htmltoc = ['<html><head><title>Table Of Contents</title></head><body><h2>Table Of Contents</h2>']
+    htmltoc = ''
+    if addHtmlToc:
+        htmltoc = ['<html><head><title>Table Of Contents</title></head><body><h2>Table Of Contents</h2>']
     for sec in sections.keys():
-        htmltoc.append('<h3><a href="%s">%s</a></h3>'%(sections[sec][0][1].href,sec))
+        if addHtmlToc:
+            htmltoc.append('<h3><a href="%s">%s</a></h3>'%(sections[sec][0][1].href,sec))
         sectoc = oeb.toc.add(sec, sections[sec][0][1].href, play_order=po, id='toc_%d'%po)
         po += 1
         for title, a, brief in sections[sec]:
-            htmltoc.append('&nbsp;&nbsp;&nbsp;&nbsp;<a href="%s">%s</a><br />'%(a.href,title))
+            if addHtmlToc:
+                htmltoc.append('&nbsp;&nbsp;&nbsp;&nbsp;<a href="%s">%s</a><br />'%(a.href,title))
             sectoc.add(title, a.href, description=brief if brief else None, play_order=po, id='toc_%d'%po)
             po += 1
-    htmltoc.append('</body></html>')
-    id, href = oeb.manifest.generate(id='toc', href='toc.html')
-    item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=''.join(htmltoc))
-    oeb.guide.add('toc', 'Table of Contents', href)
-    if toTail:
-        oeb.spine.add(item, True)
-    else:
-        oeb.spine.insert(0, item, True)
+    if addHtmlToc:
+        htmltoc.append('</body></html>')
+        id, href = oeb.manifest.generate(id='toc', href='toc.html')
+        item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=''.join(htmltoc))
+        oeb.guide.add('toc', 'Table of Contents', href)
+        if toTail:
+            oeb.spine.add(item, True)
+        else:
+            oeb.spine.insert(0, item, True)
     
 def InsertPeriodicalToc(oeb, sections):
     """杂志模式TOC """
@@ -915,7 +946,7 @@ class Worker(BaseHandler):
         oeb = CreateOeb(log, None, opts)
         title = "%s %s" % (book4meta.title, local_time(titlefmt, tz)) if titlefmt else book4meta.title
         
-        setMetaData(oeb, title, book4meta.language, local_time(tz=tz), 'KindleEar')
+        setMetaData(oeb, title, book4meta.language, local_time("%Y-%m-%d",tz), 'KindleEar')
         oeb.container = ServerContainer(log)
         
         #guide
@@ -1120,6 +1151,8 @@ class Share(BaseHandler):
             return "User not exist!<br />"
         
         global log
+        
+        url = urllib.unquote(url)
         
         #因为知乎好文章比较多，特殊处理一下知乎
         if urlparse.urlsplit(url)[1].endswith('zhihu.com'):

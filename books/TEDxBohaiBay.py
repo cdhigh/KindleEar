@@ -79,6 +79,6 @@ class TEDxBohaiBay(BaseFeedBook):
     def soupbeforeimage(self, soup):
         #去掉第一个图片“旋转圈”
         img = soup.body.find('img',attrs={'src':True})
-        if 'loading' in img['src']:
+        if img and 'loading' in img['src']:
             img.decompose()
         

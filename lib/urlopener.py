@@ -59,8 +59,8 @@ class URLOpener:
                 except urlfetch.DownloadError:
                     if response.status_code == 555:
                         response.status_code = 450
-                    #cnt += 1
-                    break
+                    cnt += 1
+                    #break
                 except Exception:
                     if response.status_code == 555:
                         response.status_code = 451

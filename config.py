@@ -65,3 +65,8 @@ SENDMAIL_ALL_POSTFIX = False
 SHARE_FUCK_GFW_SRV = "http://kforwarder.herokuapp.com/?k=xzSlE&t=60&u=%s"
 SAVE_TO_EVERNOTE = u"Save to evernote"
 SAVE_TO_WIZ = u"Save to Wiz"
+SHARE_ON_XWEIBO = u"Share on Sina Weibo"
+SHARE_ON_TWEIBO = u"Share on Tencent Weibo"
+SHARE_ON_FACEBOOK = u"Share on facebook"
+SHARE_ON_TWITTER = u"Tweet it"
+SHARE_ON_TUMBLR = u"Share on tumblr"

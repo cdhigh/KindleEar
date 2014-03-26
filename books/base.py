@@ -165,7 +165,7 @@ class BaseFeedBook:
     
     # 内置的几个必须删除的标签，不建议子类修改
     insta_remove_tags = ['script','object','video','embed','noscript','style','link']
-    insta_remove_attrs = ['width','height','onclick','onload',]
+    insta_remove_attrs = ['width','height','onclick','onload','style']
     insta_remove_classes = []
     insta_remove_ids = ['controlbar_container',]
     
@@ -323,11 +323,12 @@ class BaseFeedBook:
                         updated = e.published_parsed
                     elif hasattr(e, 'created_parsed'):
                         updated = e.created_parsed
-                        
+                    
                     if self.oldest_article > 0 and updated:
-                        delta = tnow - datetime.datetime(*(updated[0:6]))
+                        updated = datetime.datetime(*(updated[0:6]))
+                        delta = tnow - updated
                         if delta.days*86400+delta.seconds > 86400*self.oldest_article:
-                            self.log.info("Skip old article: %s" % e.link)
+                            self.log.info("Skip old article(%s): %s" % (updated.strftime('%Y-%m-%d %H:%M:%S'),e.link))
                             continue
                     
                     #支持HTTPS
@@ -427,6 +428,10 @@ class BaseFeedBook:
             return
             
         title = doc.short_title()
+        if not title:
+            self.log.warn('article has no title.[%s]' % url)
+            return
+            
         title = self.processtitle(title)
         
         #if summary.startswith('<body'): #readability解析出错
@@ -522,26 +527,7 @@ class BaseFeedBook:
         
         #插入分享链接
         if user:
-            if user.evernote and user.evernote_mail:
-                span = soup.new_tag('span')
-                span.string = '    '
-                soup.html.body.append(span)
-                href = "%s/share?act=evernote&u=%s&url=%s"%(DOMAIN,user.name,url)
-                if user.share_fuckgfw:
-                    href = SHARE_FUCK_GFW_SRV % urllib.quote(href)
-                ashare = soup.new_tag('a', href=href)
-                ashare.string = SAVE_TO_EVERNOTE
-                soup.html.body.append(ashare)
-            if user.wiz and user.wiz_mail:
-                span = soup.new_tag('span')
-                span.string = '    '
-                soup.html.body.append(span)
-                href = "%s/share?act=wiz&u=%s&url=%s"%(DOMAIN,user.name,url)
-                if user.share_fuckgfw:
-                    href = SHARE_FUCK_GFW_SRV % urllib.quote(href)
-                ashare = soup.new_tag('a', href=href)
-                ashare.string = SAVE_TO_WIZ
-                soup.html.body.append(ashare)
+            self.AppendShareLinksToArticle(soup, user, url)
             
         content = unicode(soup)
         
@@ -571,7 +557,10 @@ class BaseFeedBook:
         except AttributeError:
             self.log.warn('object soup invalid!(%s)'%url)
             return
-        
+        if not title:
+            self.log.warn('article has no title.[%s]' % url)
+            return
+            
         title = self.processtitle(title)
         soup.html.head.title.string = title
         
@@ -679,27 +668,8 @@ class BaseFeedBook:
         
         #插入分享链接
         if user:
-            if user.evernote and user.evernote_mail:
-                span = soup.new_tag('span')
-                span.string = '    '
-                soup.html.body.append(span)
-                href = "%s/share?act=evernote&u=%s&url=%s"%(DOMAIN,user.name,url)
-                if user.share_fuckgfw:
-                    href = SHARE_FUCK_GFW_SRV % urllib.quote(href)
-                ashare = soup.new_tag('a', href=href)
-                ashare.string = SAVE_TO_EVERNOTE
-                soup.html.body.append(ashare)
-            if user.wiz and user.wiz_mail:
-                span = soup.new_tag('span')
-                span.string = '    '
-                soup.html.body.append(span)
-                href = "%s/share?act=wiz&u=%s&url=%s"%(DOMAIN,user.name,url)
-                if user.share_fuckgfw:
-                    href = SHARE_FUCK_GFW_SRV % urllib.quote(href)
-                ashare = soup.new_tag('a', href=href)
-                ashare.string = SAVE_TO_WIZ
-                soup.html.body.append(ashare)
-                
+            self.AppendShareLinksToArticle(soup, user, url)
+        
         content = unicode(soup)
         
         #提取文章内容的前面一部分做为摘要
@@ -729,7 +699,82 @@ class BaseFeedBook:
                                 reduceto=opts.reduce_image_to)
         except Exception:
             return None
-
+            
+    def AppendShareLinksToArticle(self, soup, user, url):
+        " 在文章末尾添加分享链接 "
+        if not user or not soup:
+            return
+        if user.evernote and user.evernote_mail:
+            href = self.MakeShareLink('evernote', user, url)
+            ashare = soup.new_tag('a', href=href)
+            ashare.string = SAVE_TO_EVERNOTE
+            soup.html.body.append(ashare)
+        if user.wiz and user.wiz_mail:
+            self.AppendSpaces(soup,4)
+            href = self.MakeShareLink('wiz', user, url)
+            ashare = soup.new_tag('a', href=href)
+            ashare.string = SAVE_TO_WIZ
+            soup.html.body.append(ashare)
+        if user.xweibo:
+            self.AppendSpaces(soup,4)
+            href = self.MakeShareLink('xweibo', user, url)
+            ashare = soup.new_tag('a', href=href)
+            ashare.string = SHARE_ON_XWEIBO
+            soup.html.body.append(ashare)
+        if user.tweibo:
+            self.AppendSpaces(soup,4)
+            href = self.MakeShareLink('tweibo', user, url)
+            ashare = soup.new_tag('a', href=href)
+            ashare.string = SHARE_ON_TWEIBO
+            soup.html.body.append(ashare)
+        if user.facebook:
+            self.AppendSpaces(soup,4)
+            href = self.MakeShareLink('facebook', user, url)
+            ashare = soup.new_tag('a', href=href)
+            ashare.string = SHARE_ON_FACEBOOK
+            soup.html.body.append(ashare)
+        if user.twitter:
+            self.AppendSpaces(soup,4)
+            href = self.MakeShareLink('twitter', user, url)
+            ashare = soup.new_tag('a', href=href)
+            ashare.string = SHARE_ON_TWITTER
+            soup.html.body.append(ashare)
+        if user.tumblr:
+            self.AppendSpaces(soup,4)
+            href = self.MakeShareLink('tumblr', user, url)
+            ashare = soup.new_tag('a', href=href)
+            ashare.string = SHARE_ON_TUMBLR
+            soup.html.body.append(ashare)
+            
+    def MakeShareLink(self, sharetype, user, url):
+        " 生成保存内容或分享文章链接的KindleEar调用链接 "
+        if sharetype in ('evernote','wiz'):
+            href = "%s/share?act=%s&u=%s&url="%(DOMAIN,sharetype,user.name)
+        elif sharetype == 'xweibo':
+            href = 'http://v.t.sina.com.cn/share/share.php?url='
+        elif sharetype == 'tweibo':
+            href = 'http://v.t.qq.com/share/share.php?url='
+        elif sharetype == 'facebook':
+            href = 'http://www.facebook.com/share.php?u='
+        elif sharetype == 'twitter':
+            href = 'http://twitter.com/home?status='
+        elif sharetype == 'tumblr':
+            href = 'http://www.tumblr.com/share/link?url='
+        else:
+            href = ''
+        if user.share_fuckgfw and sharetype in ('evernote','wiz','facebook','twitter'):
+            href = SHARE_FUCK_GFW_SRV % urllib.quote(href+url)
+        else:
+            href += urllib.quote(url)
+        return href
+        
+    def AppendSpaces(self, soup, cnt):
+        " 在文章末尾添加空格 "
+        for i in range(cnt):
+            span = soup.new_tag('span')
+            span.string = ' '
+            soup.html.body.append(span)
+            
 class WebpageBook(BaseFeedBook):
     fulltext_by_readability = False
     
