@@ -332,9 +332,16 @@ class BaseFeedBook:
                             continue
                     
                     #支持HTTPS
-                    urlfeed = e.link.replace('http://','https://') if url.startswith('https://') else e.link
-                    if urlfeed in urladded:
-                        continue
+                    if hasattr(e, 'link'):
+                        if url.startswith('https://'):
+                            urlfeed = e.link.replace('http://','https://')
+                        else:
+                            urlfeed = e.link
+                            
+                        if urlfeed in urladded:
+                            continue
+                    else:
+                        urlfeed = ''
                         
                     desc = None
                     if isfulltext:
@@ -350,7 +357,10 @@ class BaseFeedBook:
                             desc = summary
                             
                         if not desc:
-                            self.log.warn('fulltext feed item no has desc,link to webpage for article.(%s)'%e.title)
+                            if not urlfeed:
+                                continue
+                            else:
+                                self.log.warn('fulltext feed item no has desc,link to webpage for article.(%s)'%e.title)
                     urls.append((section, e.title, urlfeed, desc))
                     urladded.add(urlfeed)
             else:
