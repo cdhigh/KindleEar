@@ -4,7 +4,7 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.10.6"
+__Version__ = "1.10.7"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -1035,9 +1035,12 @@ class Worker(BaseHandler):
                         htmlcontent.append("<div id='%d'></div>" % (num_articles)) #insert anchor && pagebreak
                         first_flag=True
                     body_obj = re.search(body_ex, content)
-                    htmlcontent.append(body_obj.group()) #insect article
-                    secondary_toc_list.append((title, num_articles, brief))
-                    num_articles += 1
+                    if body_obj:
+                        htmlcontent.append(body_obj.group()) #insect article
+                        secondary_toc_list.append((title, num_articles, brief))
+                        num_articles += 1
+                    else:
+                        htmlcontent.pop()
                 htmlcontent.append('</body></html>')
 
                 #add section.html to maninfest and spine
