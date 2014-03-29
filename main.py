@@ -1060,7 +1060,7 @@ class Worker(BaseHandler):
 
             #Generate HTML TOC for Calibre mostly
             ##html_toc_1 top level toc
-            html_toc_1 = ['<html><head><title>Table Of Contents</title></head><body><h2>Table Of Contents</h2>']
+            html_toc_1 = ['<html><head><title>Table Of Contents</title></head><body><h2>目录</h2>']
             html_toc_1_ = []
             #We need index but not reversed()
             for a in xrange(len(html_toc_2)-1,-1,-1):

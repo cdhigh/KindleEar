@@ -250,7 +250,7 @@ class Serializer(object):
         buf.write(b'<body>')
         self.body_start_offset = buf.tell()
 
-        if self.is_periodical:
+        if False and self.is_periodical: #不要增加额外的HTML目录
             top_toc = self.oeb.toc.nodes[0]
             serialize_toc_level(top_toc)
 
@@ -259,7 +259,7 @@ class Serializer(object):
 
         for item in spine:
 
-            if self.is_periodical and item.is_section_start:
+            if False and self.is_periodical and item.is_section_start: #不要增加额外的二级目录
                 for section_toc in top_toc.nodes:
                     if urlnormalize(item.href) == section_toc.href:
                         # create section url of the form r'feed_\d+/index.html'
