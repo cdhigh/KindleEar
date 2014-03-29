@@ -81,8 +81,8 @@ def getOpts():
     setattr(opts, "change_justification", "Left")
     setattr(opts, "process_images", True)
     setattr(opts, "mobi_keep_original_images", False)
-    setattr(opts, "graying_image", True)
-    setattr(opts, "image_png_to_jpg", True)
+    setattr(opts, "graying_image", False) #changed
+    setattr(opts, "image_png_to_jpg", False) #changed
     setattr(opts, "fix_indents", False)
     setattr(opts, "reduce_image_to", REDUCE_IMAGE_TO)
     
