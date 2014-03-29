@@ -1010,7 +1010,7 @@ class Worker(BaseHandler):
                     #item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=content)
                     #oeb.spine.add(item, True)
                     sections.setdefault(sec_or_media, [])
-                    sections[sec_or_media].append((title, item, brief, content))
+                    sections[sec_or_media].append((title, '', brief, content))
                     itemcnt += 1
                     
         if itemcnt > 0:
