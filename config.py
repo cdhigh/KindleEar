@@ -70,3 +70,6 @@ SHARE_ON_TWEIBO = u"Share on Tencent Weibo"
 SHARE_ON_FACEBOOK = u"Share on facebook"
 SHARE_ON_TWITTER = u"Tweet it"
 SHARE_ON_TUMBLR = u"Share on tumblr"
+
+#图片转换成灰度
+COLOR2GRAY = True
