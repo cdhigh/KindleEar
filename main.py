@@ -1060,13 +1060,13 @@ class Worker(BaseHandler):
 
             #Generate HTML TOC for Calibre mostly
             ##html_toc_1 top level toc
-            html_toc_1 = ['<html><head><title>Table Of Contents</title></head><body><h2>目录</h2><ul>']
+            html_toc_1 = [u'<html><head><title>Table Of Contents</title></head><body><h2>目录</h2><ul>']
             html_toc_1_ = []
             #We need index but not reversed()
             for a in xrange(len(html_toc_2)-1,-1,-1):
                 #Generate Secondary HTML TOC
                 id_, href = oeb.manifest.generate(id='section', href='toc_%d.html' % (a))
-                item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(html_toc_2[a]))
+                item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=" ".join(html_toc_2[a]))
                 oeb.spine.insert(0, item, True)
                 html_toc_1_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s">%s</a></li><br />'%(href,name_section_list[a]))
             for a in reversed(html_toc_1_):
