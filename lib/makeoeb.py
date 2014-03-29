@@ -10,6 +10,7 @@ import calibre.utils.resources
 from calibre.ebooks.conversion.mobioutput import MOBIOutput
 from calibre.ebooks.conversion.epuboutput import EPUBOutput
 from calibre.utils.bytestringio import byteStringIO
+from config import *
 
 def MimeFromFilename(f):
     #从文件名生成MIME
