@@ -1048,11 +1048,11 @@ class Worker(BaseHandler):
                 ncx_toc.append(('section',sec,href,'')) #Sections name && href && no brief
 
                 #generate the secondary toc
-                html_toc_ = ['<html><head><title>toc</title></head><body><h2>%s</h2>' % (sec)]
+                html_toc_ = ['<html><head><title>toc</title></head><body><h2>%s</h2><ol>' % (sec)]
                 for title, anchor, brief in secondary_toc_list:
-                    html_toc_.append('&nbsp;&nbsp;&nbsp;&nbsp;<a href="%s#%d">%s</a><br />'%(href, anchor, title))
+                    html_toc_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s#%d">%s</a></li><br />'%(href, anchor, title))
                     ncx_toc.append(('article',title, '%s#%d'%(href,anchor), brief)) # article name & article href && article brief
-                html_toc_.append('</body></html>')
+                html_toc_.append('</ol></body></html>')
                 html_toc_2.append(html_toc_)
                 name_section_list.append(sec)
 
@@ -1060,7 +1060,7 @@ class Worker(BaseHandler):
 
             #Generate HTML TOC for Calibre mostly
             ##html_toc_1 top level toc
-            html_toc_1 = ['<html><head><title>Table Of Contents</title></head><body><h2>目录</h2>']
+            html_toc_1 = ['<html><head><title>Table Of Contents</title></head><body><h2>目录</h2><ul>']
             html_toc_1_ = []
             #We need index but not reversed()
             for a in xrange(len(html_toc_2)-1,-1,-1):
@@ -1068,10 +1068,10 @@ class Worker(BaseHandler):
                 id_, href = oeb.manifest.generate(id='section', href='toc_%d.html' % (a))
                 item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(html_toc_2[a]))
                 oeb.spine.insert(0, item, True)
-                html_toc_1_.append('&nbsp;&nbsp;&nbsp;&nbsp;<a href="%s">%s</a><br />'%(href,name_section_list[a]))
+                html_toc_1_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s">%s</a></li><br />'%(href,name_section_list[a]))
             for a in reversed(html_toc_1_):
                 html_toc_1.append(a)
-            html_toc_1.append('</body></html>')
+            html_toc_1.append('</ul></body></html>')
             #Generate Top HTML TOC
             id_, href = oeb.manifest.generate(id='toc', href='toc.html')
             item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(html_toc_1))
