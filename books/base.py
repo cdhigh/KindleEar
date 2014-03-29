@@ -720,37 +720,37 @@ class BaseFeedBook:
             ashare.string = SAVE_TO_EVERNOTE
             soup.html.body.append(ashare)
         if user.wiz and user.wiz_mail:
-            self.AppendSpaces(soup,4)
+            self.AppendSperate(soup)
             href = self.MakeShareLink('wiz', user, url)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SAVE_TO_WIZ
             soup.html.body.append(ashare)
         if user.xweibo:
-            self.AppendSpaces(soup,4)
+            self.AppendSperate(soup)
             href = self.MakeShareLink('xweibo', user, url)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_XWEIBO
             soup.html.body.append(ashare)
         if user.tweibo:
-            self.AppendSpaces(soup,4)
+            self.AppendSperate(soup)
             href = self.MakeShareLink('tweibo', user, url)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_TWEIBO
             soup.html.body.append(ashare)
         if user.facebook:
-            self.AppendSpaces(soup,4)
+            self.AppendSperate(soup)
             href = self.MakeShareLink('facebook', user, url)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_FACEBOOK
             soup.html.body.append(ashare)
         if user.twitter:
-            self.AppendSpaces(soup,4)
+            self.AppendSperate(soup)
             href = self.MakeShareLink('twitter', user, url)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_TWITTER
             soup.html.body.append(ashare)
         if user.tumblr:
-            self.AppendSpaces(soup,4)
+            self.AppendSperate(soup)
             href = self.MakeShareLink('tumblr', user, url)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_TUMBLR
@@ -784,6 +784,11 @@ class BaseFeedBook:
             span = soup.new_tag('span')
             span.string = ' '
             soup.html.body.append(span)
+
+    def AppendSperate(self,soup):
+        span = soup.new_tag('span')
+        span.string = ' | '
+        soup.html.body.append(span)
             
 class WebpageBook(BaseFeedBook):
     fulltext_by_readability = False
