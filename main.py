@@ -1000,8 +1000,8 @@ class Worker(BaseHandler):
                 book.feeds = [(feed.title, feed.url, feed.isfulltext) for feed in feeds]
                 book.url_filters = [flt.url for flt in user.urlfilter]            
             
-            # 对于html文件，变量名字自文档
-            # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
+            # 对于html文件，变量名字自文档,thumbnail为文章第一个img的url
+            # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容,thumbail仅当article的第第一个img为True
             for sec_or_media, url, title, content, brief, thumbnail in book.Items(opts,user):
                 if not sec_or_media or not title or not content:
                     continue
