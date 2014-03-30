@@ -1036,7 +1036,7 @@ class Worker(BaseHandler):
                 secondary_toc_list = []
                 first_flag=False
                 sec_toc_thumbnail = None
-                for title, a, brief, content in sections[sec]:
+                for title, a, brief, content, thumbnail in sections[sec]:
                     if first_flag:
                         htmlcontent.append("<div id='%d' class='pagebreak'></div>" % (num_articles)) #insert anchor && pagebreak
                     else:
