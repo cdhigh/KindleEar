@@ -4,7 +4,7 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.10.7"
+__Version__ = "1.10.8"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -120,6 +120,7 @@ class KeUser(db.Model): # kindleEar User
     facebook = db.BooleanProperty() #分享链接到facebook
     twitter = db.BooleanProperty()
     tumblr = db.BooleanProperty()
+    broswer = db.BooleanProperty()
     
     @property
     def whitelist(self):
@@ -385,6 +386,7 @@ class AdvShare(BaseHandler):
         shareonfacebook = SHARE_ON_FACEBOOK
         shareontwitter = SHARE_ON_TWITTER
         shareontumblr = SHARE_ON_TUMBLR
+        openinbroswer = OPEN_IN_BROSWER
         args = locals()
         args.pop('self')
         return self.render('advshare.html',"Share",**args)
@@ -406,6 +408,7 @@ class AdvShare(BaseHandler):
         facebook = bool(web.input().get('facebook'))
         twitter = bool(web.input().get('twitter'))
         tumblr = bool(web.input().get('tumblr'))
+        broswer = bool(web.input().get('broswer'))
         
         user.share_fuckgfw = fuckgfw
         user.evernote = evernote
@@ -417,6 +420,7 @@ class AdvShare(BaseHandler):
         user.facebook = facebook
         user.twitter = twitter
         user.tumblr = tumblr
+        user.broswer = broswer
         user.put()
         
         raise web.seeother('')
@@ -844,7 +848,7 @@ class Deliver(BaseHandler):
                 sentcnt += 1
         self.flushqueue()
         return "Put <strong>%d</strong> books to queue!" % sentcnt
-
+'''
 #not used
 def InsertToc(oeb, sections, addHtmlToc=False, toTail=True):
     """ 创建OEB的两级目录，
@@ -899,7 +903,7 @@ def InsertPeriodicalToc(oeb, sections):
     id, href = oeb.manifest.generate(id='toc', href='toc.html')
     item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=''.join(htmltoc))
     oeb.guide.add('toc', 'Table of Contents', href)
-    oeb.spine.add(item, True)
+    oeb.spine.add(item, True)'''
     
 class Worker(BaseHandler):
     """ 实际下载文章和生成电子书并且发送邮件 """
@@ -1063,7 +1067,7 @@ class Worker(BaseHandler):
 
             #Generate HTML TOC for Calibre mostly
             ##html_toc_1 top level toc
-            html_toc_1 = [u'<html><head><title>Table Of Contents</title></head><body><h2>目录</h2><ul>']
+            html_toc_1 = [u'<html><head><title>Table Of Contents</title></head><body><h2>%s</h2><ul>'%(TABLE_OF_CONTENTS)]
             html_toc_1_ = []
             #We need index but not reversed()
             for a in xrange(len(html_toc_2)-1,-1,-1):

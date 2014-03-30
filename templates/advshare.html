@@ -52,6 +52,11 @@
                 {% if user and user.tumblr %}checked="1"{% endif %} />
             {{_("Append hyperlink '%s' to article")|format(shareontumblr)}}
         </label>
+        <label for="enable_broswer" class="pure-checkbox">
+            <input id="enable_broswer" name="broswer", type="checkbox" 
+                {% if user and user.tumblr %}checked="1"{% endif %} />
+            {{_("Append hyperlink '%s' to article")|format(openinbroswer)}}
+        </label>
     </div>
     <hr style="width:90%;color:silver;margin:1em auto;" />
     <label for="fuck_gfw" class="pure-checkbox">
