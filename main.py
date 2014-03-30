@@ -4,7 +4,7 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.10.8"
+__Version__ = "1.10.9"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -977,6 +977,7 @@ class Worker(BaseHandler):
         
         itemcnt,imgindex = 0,0
         sections = OrderedDict()
+        toc_thumbnails = {} #map img-url -> manifest-href
         for bk in bks:
             if bk.builtin:
                 book = BookClass(bk.title)
@@ -1001,20 +1002,22 @@ class Worker(BaseHandler):
             
             # 对于html文件，变量名字自文档
             # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
-            for sec_or_media, url, title, content, brief in book.Items(opts,user):
+            for sec_or_media, url, title, content, brief, thumbnail in book.Items(opts,user):
                 if not sec_or_media or not title or not content:
                     continue
                 
                 if sec_or_media.startswith(r'image/'):
                     id_, href = oeb.manifest.generate(id='img', href=title)
                     item = oeb.manifest.add(id_, href, sec_or_media, data=content)
+                    if thumbnail:
+                        toc_thumbnails[url] = href
                     imgindex += 1
                 else:
                     #id, href = oeb.manifest.generate(id='feed', href='feed%d.html'%itemcnt)
                     #item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=content)
                     #oeb.spine.add(item, True)
                     sections.setdefault(sec_or_media, [])
-                    sections[sec_or_media].append((title, '', brief, content))
+                    sections[sec_or_media].append((title, '', brief, thumbnail, content))
                     itemcnt += 1
                     
         if itemcnt > 0:
@@ -1032,16 +1035,19 @@ class Worker(BaseHandler):
                 htmlcontent = ['<html><head><title>%s</title><style type="text/css">.pagebreak{page-break-before: always;}</style></head><body>' % (sec)]
                 secondary_toc_list = []
                 first_flag=False
+                sec_toc_thumbnail = None
                 for title, a, brief, content in sections[sec]:
                     if first_flag:
                         htmlcontent.append("<div id='%d' class='pagebreak'></div>" % (num_articles)) #insert anchor && pagebreak
                     else:
                         htmlcontent.append("<div id='%d'></div>" % (num_articles)) #insert anchor && pagebreak
                         first_flag=True
+                        if thumbnail:
+                            sec_toc_thumbnail = thumbnail
                     body_obj = re.search(body_ex, content)
                     if body_obj:
                         htmlcontent.append(body_obj.group()) #insect article
-                        secondary_toc_list.append((title, num_articles, brief))
+                        secondary_toc_list.append((title, num_articles, brief, thumbnail))
                         num_articles += 1
                     else:
                         htmlcontent.pop()
@@ -1052,13 +1058,13 @@ class Worker(BaseHandler):
                 id_, href = oeb.manifest.generate(id='feed', href='feed%d.html'%num_sections)
                 item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(htmlcontent))
                 oeb.spine.add(item, True)
-                ncx_toc.append(('section',sec,href,'')) #Sections name && href && no brief
+                ncx_toc.append(('section',sec,href,'',sec_toc_thumbnail)) #Sections name && href && no brief
 
                 #generate the secondary toc
                 html_toc_ = ['<html><head><title>toc</title></head><body><h2>%s</h2><ol>' % (sec)]
                 for title, anchor, brief in secondary_toc_list:
                     html_toc_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s#%d">%s</a></li><br />'%(href, anchor, title))
-                    ncx_toc.append(('article',title, '%s#%d'%(href,anchor), brief)) # article name & article href && article brief
+                    ncx_toc.append(('article',title, '%s#%d'%(href,anchor), brief, thumbnail)) # article name & article href && article brief
                 html_toc_.append('</ol></body></html>')
                 html_toc_2.append(html_toc_)
                 name_section_list.append(sec)
@@ -1091,9 +1097,9 @@ class Worker(BaseHandler):
             po += 1
             for ncx in ncx_toc:
                 if ncx[0] == 'section':
-                    sectoc = toc.add(unicode(ncx[1]), ncx[2], klass='section', play_order=po, id='Main-section-%d'%po)
+                    sectoc = toc.add(unicode(ncx[1]), ncx[2], klass='section', play_order=po, id='Main-section-%d'%po, toc_thumbnail=toc_thumbnails[ncx[4]] if GENERATE_TOC_THUMBNAIL and ncx[4] else None)
                 else:
-                    sectoc.add(unicode(ncx[1]), ncx[2], description=ncx[3] if ncx[3] else None, klass='article', play_order=po, id='article-%d'%po)
+                    sectoc.add(unicode(ncx[1]), ncx[2], description=ncx[3] if ncx[3] else None, klass='article', play_order=po, id='article-%d'%po, toc_thumbnail=toc_thumbnails[ncx[4]] if GENERATE_TOC_THUMBNAIL and ncx[4] else None)
                 po += 1
 
             '''po=1

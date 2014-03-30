@@ -39,6 +39,9 @@ ALWAYS_CHAR_DETECT = False
 GENERATE_TOC_DESC = True
 TOC_DESC_WORD_LIMIT = 150  # 内容预览（摘要）字数限制
 
+#生成TOC的文章内容预览是否包含图片缩略
+GENERATE_TOC_THUMBNAIL = True
+
 #为减少文件大小，将大图片缩小为此尺寸，(Width,Height)
 #此尺寸是适应Kindle3的，如果你是完美主义者，可以设置为(568,682)，扣除margin
 #如果你使用的是其他分辨率的机器，可以直接修改为其他值
