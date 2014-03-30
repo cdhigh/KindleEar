@@ -4,7 +4,7 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.10.10"
+__Version__ = "1.11.0"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -1072,6 +1072,8 @@ class Worker(BaseHandler):
 
                 num_sections += 1
 
+            sections = None
+
             #Generate HTML TOC for Calibre mostly
             ##html_toc_1 top level toc
             html_toc_1 = [u'<html><head><title>Table Of Contents</title></head><body><h2>%s</h2><ul>'%(TABLE_OF_CONTENTS)]
@@ -1106,6 +1108,7 @@ class Worker(BaseHandler):
                     sectoc.add(unicode(ncx[1]), ncx[2], description=ncx[3] if ncx[3] else None, klass='article', play_order=po, id='article-%d'%po, toc_thumbnail=toc_thumbnails[ncx[4]] if GENERATE_TOC_THUMBNAIL and ncx[4] else None)
                 po += 1
             toc_thumbnails ={}
+            ncx_toc = []
 
             '''po=1
             for sect,name,href,brief in ncx_toc:
