@@ -4,12 +4,13 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.10.1"
+__Version__ = "1.10.7"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
 from collections import OrderedDict, defaultdict
 import gettext
+import re
 
 # for debug
 # 本地启动调试服务器：python.exe dev_appserver.py c:\kindleear
@@ -844,6 +845,7 @@ class Deliver(BaseHandler):
         self.flushqueue()
         return "Put <strong>%d</strong> books to queue!" % sentcnt
 
+#not used
 def InsertToc(oeb, sections, addHtmlToc=False, toTail=True):
     """ 创建OEB的两级目录，
     sections为字典，关键词为段名，元素为元组列表(title,item,desc)
@@ -874,6 +876,7 @@ def InsertToc(oeb, sections, addHtmlToc=False, toTail=True):
         else:
             oeb.spine.insert(0, item, True)
     
+#This function is never called?
 def InsertPeriodicalToc(oeb, sections):
     """杂志模式TOC """
     po = 1
@@ -958,15 +961,15 @@ class Worker(BaseHandler):
             coverfile = DEFAULT_COVER
         
         if mhfile:
-            id, href = oeb.manifest.generate('masthead', mhfile) # size:600*60
-            oeb.manifest.add(id, href, MimeFromFilename(mhfile))
+            id_, href = oeb.manifest.generate('masthead', mhfile) # size:600*60
+            oeb.manifest.add(id_, href, MimeFromFilename(mhfile))
             oeb.guide.add('masthead', 'Masthead Image', href)
         
         if coverfile:
-            id, href = oeb.manifest.generate('cover', coverfile)
-            item = oeb.manifest.add(id, href, MimeFromFilename(coverfile))
+            id_, href = oeb.manifest.generate('cover', coverfile)
+            item = oeb.manifest.add(id_, href, MimeFromFilename(coverfile))
             oeb.guide.add('cover', 'Cover', href)
-            oeb.metadata.add('cover', id)
+            oeb.metadata.add('cover', id_)
         
         itemcnt,imgindex = 0,0
         sections = OrderedDict()
@@ -999,19 +1002,104 @@ class Worker(BaseHandler):
                     continue
                 
                 if sec_or_media.startswith(r'image/'):
-                    id, href = oeb.manifest.generate(id='img', href=title)
-                    item = oeb.manifest.add(id, href, sec_or_media, data=content)
+                    id_, href = oeb.manifest.generate(id='img', href=title)
+                    item = oeb.manifest.add(id_, href, sec_or_media, data=content)
                     imgindex += 1
                 else:
-                    id, href = oeb.manifest.generate(id='feed', href='feed%d.html'%itemcnt)
-                    item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=content)
-                    oeb.spine.add(item, True)
+                    #id, href = oeb.manifest.generate(id='feed', href='feed%d.html'%itemcnt)
+                    #item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=content)
+                    #oeb.spine.add(item, True)
                     sections.setdefault(sec_or_media, [])
-                    sections[sec_or_media].append((title, item, brief))
+                    sections[sec_or_media].append((title, '', brief, content))
                     itemcnt += 1
                     
         if itemcnt > 0:
-            InsertToc(oeb, sections)
+            #InsertToc(oeb, sections)
+            body_pat=r'(?<=<body>).*?(?=</body>)'
+            body_ex = re.compile(body_pat,re.M|re.S)
+            num_articles=1
+            num_sections=0
+
+            ncx_toc = []
+            #html_toc_2 secondary toc
+            html_toc_2 = []
+            name_section_list = []
+            for sec in sections.keys():
+                htmlcontent = ['<html><head><title>%s</title><style type="text/css">.pagebreak{page-break-before: always;}</style></head><body>' % (sec)]
+                secondary_toc_list = []
+                first_flag=False
+                for title, a, brief, content in sections[sec]:
+                    if first_flag:
+                        htmlcontent.append("<div id='%d' class='pagebreak'></div>" % (num_articles)) #insert anchor && pagebreak
+                    else:
+                        htmlcontent.append("<div id='%d'></div>" % (num_articles)) #insert anchor && pagebreak
+                        first_flag=True
+                    body_obj = re.search(body_ex, content)
+                    if body_obj:
+                        htmlcontent.append(body_obj.group()) #insect article
+                        secondary_toc_list.append((title, num_articles, brief))
+                        num_articles += 1
+                    else:
+                        htmlcontent.pop()
+                htmlcontent.append('</body></html>')
+
+                #add section.html to maninfest and spine
+                #We'd better not use id as variable. It's a python builtin function.
+                id_, href = oeb.manifest.generate(id='feed', href='feed%d.html'%num_sections)
+                item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(htmlcontent))
+                oeb.spine.add(item, True)
+                ncx_toc.append(('section',sec,href,'')) #Sections name && href && no brief
+
+                #generate the secondary toc
+                html_toc_ = ['<html><head><title>toc</title></head><body><h2>%s</h2><ol>' % (sec)]
+                for title, anchor, brief in secondary_toc_list:
+                    html_toc_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s#%d">%s</a></li><br />'%(href, anchor, title))
+                    ncx_toc.append(('article',title, '%s#%d'%(href,anchor), brief)) # article name & article href && article brief
+                html_toc_.append('</ol></body></html>')
+                html_toc_2.append(html_toc_)
+                name_section_list.append(sec)
+
+                num_sections += 1
+
+            #Generate HTML TOC for Calibre mostly
+            ##html_toc_1 top level toc
+            html_toc_1 = [u'<html><head><title>Table Of Contents</title></head><body><h2>目录</h2><ul>']
+            html_toc_1_ = []
+            #We need index but not reversed()
+            for a in xrange(len(html_toc_2)-1,-1,-1):
+                #Generate Secondary HTML TOC
+                id_, href = oeb.manifest.generate(id='section', href='toc_%d.html' % (a))
+                item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=" ".join(html_toc_2[a]))
+                oeb.spine.insert(0, item, True)
+                html_toc_1_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s">%s</a></li><br />'%(href,name_section_list[a]))
+            for a in reversed(html_toc_1_):
+                html_toc_1.append(a)
+            html_toc_1.append('</ul></body></html>')
+            #Generate Top HTML TOC
+            id_, href = oeb.manifest.generate(id='toc', href='toc.html')
+            item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(html_toc_1))
+            oeb.guide.add('toc', 'Table of Contents', href)
+            oeb.spine.insert(0, item, True)
+
+            #Generate NCX TOC for Kindle
+            po=1 
+            toc=oeb.toc.add(unicode(oeb.metadata.title[0]), oeb.spine[0].href, id='periodical', klass='periodical', play_order=po)
+            po += 1
+            for ncx in ncx_toc:
+                if ncx[0] == 'section':
+                    sectoc = toc.add(unicode(ncx[1]), ncx[2], klass='section', play_order=po, id='Main-section-%d'%po)
+                else:
+                    sectoc.add(unicode(ncx[1]), ncx[2], description=ncx[3] if ncx[3] else None, klass='article', play_order=po, id='article-%d'%po)
+                po += 1
+
+            '''po=1
+            for sect,name,href,brief in ncx_toc:
+                if sect == 'section':
+                    sectoc = oeb.toc.add(unicode(name), href, play_order=po, id='Main-section-%d'%po)
+                else:
+                    sectoc.add(unicode(name), href, description=brief if brief else None, play_order=po, id='article-%d'%po)
+                po += 1'''
+
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()
             o.convert(oeb, oIO, opts, log)

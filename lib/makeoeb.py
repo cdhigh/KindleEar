@@ -10,6 +10,7 @@ import calibre.utils.resources
 from calibre.ebooks.conversion.mobioutput import MOBIOutput
 from calibre.ebooks.conversion.epuboutput import EPUBOutput
 from calibre.utils.bytestringio import byteStringIO
+from config import *
 
 def MimeFromFilename(f):
     #从文件名生成MIME
@@ -81,8 +82,8 @@ def getOpts():
     setattr(opts, "change_justification", "Left")
     setattr(opts, "process_images", True)
     setattr(opts, "mobi_keep_original_images", False)
-    setattr(opts, "graying_image", True)
-    setattr(opts, "image_png_to_jpg", True)
+    setattr(opts, "graying_image", COLOR2GRAY) #changed
+    setattr(opts, "image_png_to_jpg", COLOR2GRAY) #changed
     setattr(opts, "fix_indents", False)
     setattr(opts, "reduce_image_to", REDUCE_IMAGE_TO)
     
