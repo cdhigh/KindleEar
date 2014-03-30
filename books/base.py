@@ -522,7 +522,7 @@ class BaseFeedBook:
                         img['src'] = fnimg
                         if not has_imgs:
                             has_imgs = True
-                            thumbnail = fnimg
+                            thumbnail = imgurl
                             yield (imgmime, imgurl, fnimg, imgcontent, None, True)
                         else:
                             yield (imgmime, imgurl, fnimg, imgcontent, None, None)
