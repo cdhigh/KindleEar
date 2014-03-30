@@ -4,7 +4,7 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.10.9"
+__Version__ = "1.10.10"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -1057,6 +1057,7 @@ class Worker(BaseHandler):
                 #We'd better not use id as variable. It's a python builtin function.
                 id_, href = oeb.manifest.generate(id='feed', href='feed%d.html'%num_sections)
                 item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(htmlcontent))
+                htmlcontent = [] #free merory
                 oeb.spine.add(item, True)
                 ncx_toc.append(('section',sec,href,'',sec_toc_thumbnail)) #Sections name && href && no brief
 
@@ -1082,12 +1083,15 @@ class Worker(BaseHandler):
                 item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=" ".join(html_toc_2[a]))
                 oeb.spine.insert(0, item, True)
                 html_toc_1_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s">%s</a></li><br />'%(href,name_section_list[a]))
+            html_toc_2 = []
             for a in reversed(html_toc_1_):
                 html_toc_1.append(a)
+            html_toc_1_ = []
             html_toc_1.append('</ul></body></html>')
             #Generate Top HTML TOC
             id_, href = oeb.manifest.generate(id='toc', href='toc.html')
             item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(html_toc_1))
+            html_toc_1 = []
             oeb.guide.add('toc', 'Table of Contents', href)
             oeb.spine.insert(0, item, True)
 
@@ -1101,6 +1105,7 @@ class Worker(BaseHandler):
                 else:
                     sectoc.add(unicode(ncx[1]), ncx[2], description=ncx[3] if ncx[3] else None, klass='article', play_order=po, id='article-%d'%po, toc_thumbnail=toc_thumbnails[ncx[4]] if GENERATE_TOC_THUMBNAIL and ncx[4] else None)
                 po += 1
+            toc_thumbnails ={}
 
             '''po=1
             for sect,name,href,brief in ncx_toc:
