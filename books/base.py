@@ -758,7 +758,7 @@ class BaseFeedBook:
         if user.broswer:
             self.AppendSperate(soup)
             ashare = soup.new_tag('a', href=url)
-            ashare.string = u"Open in Broswer"
+            ashare.string = OPEN_IN_BROSWER
             soup.html.body.append(ashare)
             
     def MakeShareLink(self, sharetype, user, url):
