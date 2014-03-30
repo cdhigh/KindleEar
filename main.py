@@ -1062,7 +1062,7 @@ class Worker(BaseHandler):
 
                 #generate the secondary toc
                 html_toc_ = ['<html><head><title>toc</title></head><body><h2>%s</h2><ol>' % (sec)]
-                for title, anchor, brief in secondary_toc_list:
+                for title, anchor, brief, thumbnail in secondary_toc_list:
                     html_toc_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s#%d">%s</a></li><br />'%(href, anchor, title))
                     ncx_toc.append(('article',title, '%s#%d'%(href,anchor), brief, thumbnail)) # article name & article href && article brief
                 html_toc_.append('</ol></body></html>')
