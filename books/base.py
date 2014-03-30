@@ -755,6 +755,11 @@ class BaseFeedBook:
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_TUMBLR
             soup.html.body.append(ashare)
+        if user.broswer:
+            self.AppendSperate(soup)
+            ashare = soup.new_tag('a', href=url)
+            ashare.string = u"Open in Broswer"
+            soup.html.body.append(ashare)
             
     def MakeShareLink(self, sharetype, user, url):
         " 生成保存内容或分享文章链接的KindleEar调用链接 "
