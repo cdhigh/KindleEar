@@ -14,6 +14,11 @@ DEFAULT_COVER = "cv_default.jpg" #如果书籍没有封面，则使用此封面�
 MY_FEEDS_TITLE = u'KindleEar'
 MY_FEEDS_DESC = u'RSS delivering from KindleEar'
 
+#HTML目录标题
+TABLE_OF_CONTENTS = u'目录'
+#English should be:
+#TABLE_OF_CONTENTS = u'Table Of Contents'
+
 #设置下载RSS和文章的超时时间，单位为秒，如果RSS很多，设置短一点有可能提高一些效率
 #但是也增加了下载超时的可能，超时则丢失超时的RSS或文章或图片，不会有更多的影响
 #(GAE默认为5秒)
@@ -33,6 +38,9 @@ ALWAYS_CHAR_DETECT = False
 #对于kindle touch和kindle paperwhite可以设置为True。
 GENERATE_TOC_DESC = True
 TOC_DESC_WORD_LIMIT = 150  # 内容预览（摘要）字数限制
+
+#生成TOC的文章内容预览是否包含图片缩略
+GENERATE_TOC_THUMBNAIL = True
 
 #为减少文件大小，将大图片缩小为此尺寸，(Width,Height)
 #此尺寸是适应Kindle3的，如果你是完美主义者，可以设置为(568,682)，扣除margin
@@ -70,6 +78,7 @@ SHARE_ON_TWEIBO = u"Share on Tencent Weibo"
 SHARE_ON_FACEBOOK = u"Share on facebook"
 SHARE_ON_TWITTER = u"Tweet it"
 SHARE_ON_TUMBLR = u"Share on tumblr"
+OPEN_IN_BROSWER = u"Open in Broswer"
 
 #图片转换成灰度
 COLOR2GRAY = True
