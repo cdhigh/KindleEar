@@ -959,7 +959,7 @@ class Worker(BaseHandler):
                     itemcnt += 1
                     
         if itemcnt > 0:
-            #InsertToc(oeb, sections)
+            #-------------------add by rexdf-----------
             body_pat=r'(?<=<body>).*?(?=</body>)'
             body_ex = re.compile(body_pat,re.M|re.S)
             num_articles=1
@@ -999,13 +999,16 @@ class Worker(BaseHandler):
                 ncx_toc.append(('section',sec,href,'',sec_toc_thumbnail)) #Sections name && href && no brief
 
                 #generate the secondary toc
-                html_toc_ = ['<html><head><title>toc</title></head><body><h2>%s</h2><ol>' % (sec)]
+                if GENERATE_HTML_TOC:
+                    html_toc_ = ['<html><head><title>toc</title></head><body><h2>%s</h2><ol>' % (sec)]
                 for title, anchor, brief, thumbnail in secondary_toc_list:
-                    html_toc_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s#%d">%s</a></li><br />'%(href, anchor, title))
+                    if GENERATE_HTML_TOC:
+                        html_toc_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s#%d">%s</a></li><br />'%(href, anchor, title))
                     ncx_toc.append(('article',title, '%s#%d'%(href,anchor), brief, thumbnail)) # article name & article href && article brief
-                html_toc_.append('</ol></body></html>')
-                html_toc_2.append(html_toc_)
-                name_section_list.append(sec)
+                if GENERATE_HTML_TOC:
+                    html_toc_.append('</ol></body></html>')
+                    html_toc_2.append(html_toc_)
+                    name_section_list.append(sec)
 
                 num_sections += 1
 
@@ -1042,6 +1045,7 @@ class Worker(BaseHandler):
                 else:
                     sectoc.add(unicode(ncx[1]), ncx[2], description=ncx[3] if ncx[3] else None, klass='article', play_order=po, id='article-%d'%po, toc_thumbnail=toc_thumbnails[ncx[4]] if GENERATE_TOC_THUMBNAIL and ncx[4] else None)
                 po += 1
+            #----------------end----------------
 
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()
