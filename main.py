@@ -995,7 +995,6 @@ class Worker(BaseHandler):
                 #We'd better not use id as variable. It's a python builtin function.
                 id_, href = oeb.manifest.generate(id='feed', href='feed%d.html'%num_sections)
                 item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(htmlcontent))
-                htmlcontent = [] #free merory
                 oeb.spine.add(item, True)
                 ncx_toc.append(('section',sec,href,'',sec_toc_thumbnail)) #Sections name && href && no brief
 
