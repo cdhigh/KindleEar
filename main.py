@@ -4,7 +4,7 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.10.7"
+__Version__ = "1.11.0"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -120,6 +120,7 @@ class KeUser(db.Model): # kindleEar User
     facebook = db.BooleanProperty() #分享链接到facebook
     twitter = db.BooleanProperty()
     tumblr = db.BooleanProperty()
+    broswer = db.BooleanProperty()
     
     @property
     def whitelist(self):
@@ -385,6 +386,7 @@ class AdvShare(BaseHandler):
         shareonfacebook = SHARE_ON_FACEBOOK
         shareontwitter = SHARE_ON_TWITTER
         shareontumblr = SHARE_ON_TUMBLR
+        openinbroswer = OPEN_IN_BROSWER
         args = locals()
         args.pop('self')
         return self.render('advshare.html',"Share",**args)
@@ -406,6 +408,7 @@ class AdvShare(BaseHandler):
         facebook = bool(web.input().get('facebook'))
         twitter = bool(web.input().get('twitter'))
         tumblr = bool(web.input().get('tumblr'))
+        broswer = bool(web.input().get('broswer'))
         
         user.share_fuckgfw = fuckgfw
         user.evernote = evernote
@@ -417,6 +420,7 @@ class AdvShare(BaseHandler):
         user.facebook = facebook
         user.twitter = twitter
         user.tumblr = tumblr
+        user.broswer = broswer
         user.put()
         
         raise web.seeother('')
@@ -844,74 +848,12 @@ class Deliver(BaseHandler):
                 sentcnt += 1
         self.flushqueue()
         return "Put <strong>%d</strong> books to queue!" % sentcnt
-
-#not used
-def InsertToc(oeb, sections, addHtmlToc=False, toTail=True):
-    """ 创建OEB的两级目录，
-    sections为字典，关键词为段名，元素为元组列表(title,item,desc)
-    addHtmlToc:是否生成HTML目录
-    toTail=True则将HTML目录放在书籍末尾，否则放在前面
-    """
-    po = 1
-    htmltoc = ''
-    if addHtmlToc:
-        htmltoc = ['<html><head><title>Table Of Contents</title></head><body><h2>Table Of Contents</h2>']
-    for sec in sections.keys():
-        if addHtmlToc:
-            htmltoc.append('<h3><a href="%s">%s</a></h3>'%(sections[sec][0][1].href,sec))
-        sectoc = oeb.toc.add(sec, sections[sec][0][1].href, play_order=po, id='toc_%d'%po)
-        po += 1
-        for title, a, brief in sections[sec]:
-            if addHtmlToc:
-                htmltoc.append('&nbsp;&nbsp;&nbsp;&nbsp;<a href="%s">%s</a><br />'%(a.href,title))
-            sectoc.add(title, a.href, description=brief if brief else None, play_order=po, id='toc_%d'%po)
-            po += 1
-    if addHtmlToc:
-        htmltoc.append('</body></html>')
-        id, href = oeb.manifest.generate(id='toc', href='toc.html')
-        item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=''.join(htmltoc))
-        oeb.guide.add('toc', 'Table of Contents', href)
-        if toTail:
-            oeb.spine.add(item, True)
-        else:
-            oeb.spine.insert(0, item, True)
-    
-#This function is never called?
-def InsertPeriodicalToc(oeb, sections):
-    """杂志模式TOC """
-    po = 1
-    toc = oeb.toc.add(unicode(oeb.metadata.title[0]), 
-        oeb.spine[0].href, id='periodical', 
-        klass='periodical', play_order=po)
-    po += 1
-    htmltoc = ['<html><head><title>Table Of Contents</title></head><body><h2>Table Of Contents</h2>']
-    for sec in sections.keys():
-        sectoc = toc.add(unicode(sec), sections[sec][0][1].href,
-            klass='section', play_order=po, id='Main-section')
-        po += 1
-        htmltoc.append('<h3><a href="%s">%s</a></h3>'%(sections[sec][0][1].href,sec))
-        for title, a, brief in sections[sec]:
-            sectoc.add(unicode(title), a.href, description=brief if brief else None, 
-            klass='article', play_order=po, id='article-%d'%po)
-            po += 1
-            htmltoc.append('&nbsp;&nbsp;&nbsp;&nbsp;<a href="%s">%s</a><br />'%(a.href,title))
-    htmltoc.append('</body></html>')
-    id, href = oeb.manifest.generate(id='toc', href='toc.html')
-    item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=''.join(htmltoc))
-    oeb.guide.add('toc', 'Table of Contents', href)
-    oeb.spine.add(item, True)
     
 class Worker(BaseHandler):
     """ 实际下载文章和生成电子书并且发送邮件 """
     def GET(self):
         username = web.input().get("u")
         bookid = web.input().get("id")
-        #to = web.input().get("to")
-        #booktype = web.input().get("type", "mobi")
-        #titlefmt = web.input().get("titlefmt")
-        #tz = int(web.input().get("tz", TIMEZONE))
-        #if not bookid:
-        #    return "No book to send!<br />"
         
         user = KeUser.all().filter("name = ", username).get()
         if not user:
@@ -973,6 +915,7 @@ class Worker(BaseHandler):
         
         itemcnt,imgindex = 0,0
         sections = OrderedDict()
+        toc_thumbnails = {} #map img-url -> manifest-href
         for bk in bks:
             if bk.builtin:
                 book = BookClass(bk.title)
@@ -995,22 +938,24 @@ class Worker(BaseHandler):
                 book.feeds = [(feed.title, feed.url, feed.isfulltext) for feed in feeds]
                 book.url_filters = [flt.url for flt in user.urlfilter]            
             
-            # 对于html文件，变量名字自文档
-            # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
-            for sec_or_media, url, title, content, brief in book.Items(opts,user):
+            # 对于html文件，变量名字自文档,thumbnail为文章第一个img的url
+            # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容,thumbail仅当article的第第一个img为True
+            for sec_or_media, url, title, content, brief, thumbnail in book.Items(opts,user):
                 if not sec_or_media or not title or not content:
                     continue
                 
                 if sec_or_media.startswith(r'image/'):
                     id_, href = oeb.manifest.generate(id='img', href=title)
                     item = oeb.manifest.add(id_, href, sec_or_media, data=content)
+                    if thumbnail:
+                        toc_thumbnails[url] = href
                     imgindex += 1
                 else:
                     #id, href = oeb.manifest.generate(id='feed', href='feed%d.html'%itemcnt)
                     #item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=content)
                     #oeb.spine.add(item, True)
                     sections.setdefault(sec_or_media, [])
-                    sections[sec_or_media].append((title, '', brief, content))
+                    sections[sec_or_media].append((title, '', brief, thumbnail, content))
                     itemcnt += 1
                     
         if itemcnt > 0:
@@ -1028,16 +973,19 @@ class Worker(BaseHandler):
                 htmlcontent = ['<html><head><title>%s</title><style type="text/css">.pagebreak{page-break-before: always;}</style></head><body>' % (sec)]
                 secondary_toc_list = []
                 first_flag=False
-                for title, a, brief, content in sections[sec]:
+                sec_toc_thumbnail = None
+                for title, a, brief, thumbnail, content in sections[sec]:
                     if first_flag:
                         htmlcontent.append("<div id='%d' class='pagebreak'></div>" % (num_articles)) #insert anchor && pagebreak
                     else:
                         htmlcontent.append("<div id='%d'></div>" % (num_articles)) #insert anchor && pagebreak
                         first_flag=True
+                        if thumbnail:
+                            sec_toc_thumbnail = thumbnail
                     body_obj = re.search(body_ex, content)
                     if body_obj:
                         htmlcontent.append(body_obj.group()) #insect article
-                        secondary_toc_list.append((title, num_articles, brief))
+                        secondary_toc_list.append((title, num_articles, brief, thumbnail))
                         num_articles += 1
                     else:
                         htmlcontent.pop()
@@ -1047,23 +995,26 @@ class Worker(BaseHandler):
                 #We'd better not use id as variable. It's a python builtin function.
                 id_, href = oeb.manifest.generate(id='feed', href='feed%d.html'%num_sections)
                 item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(htmlcontent))
+                htmlcontent = [] #free merory
                 oeb.spine.add(item, True)
-                ncx_toc.append(('section',sec,href,'')) #Sections name && href && no brief
+                ncx_toc.append(('section',sec,href,'',sec_toc_thumbnail)) #Sections name && href && no brief
 
                 #generate the secondary toc
                 html_toc_ = ['<html><head><title>toc</title></head><body><h2>%s</h2><ol>' % (sec)]
-                for title, anchor, brief in secondary_toc_list:
+                for title, anchor, brief, thumbnail in secondary_toc_list:
                     html_toc_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s#%d">%s</a></li><br />'%(href, anchor, title))
-                    ncx_toc.append(('article',title, '%s#%d'%(href,anchor), brief)) # article name & article href && article brief
+                    ncx_toc.append(('article',title, '%s#%d'%(href,anchor), brief, thumbnail)) # article name & article href && article brief
                 html_toc_.append('</ol></body></html>')
                 html_toc_2.append(html_toc_)
                 name_section_list.append(sec)
 
                 num_sections += 1
 
+            sections = None
+
             #Generate HTML TOC for Calibre mostly
             ##html_toc_1 top level toc
-            html_toc_1 = [u'<html><head><title>Table Of Contents</title></head><body><h2>目录</h2><ul>']
+            html_toc_1 = [u'<html><head><title>Table Of Contents</title></head><body><h2>%s</h2><ul>'%(TABLE_OF_CONTENTS)]
             html_toc_1_ = []
             #We need index but not reversed()
             for a in xrange(len(html_toc_2)-1,-1,-1):
@@ -1072,12 +1023,15 @@ class Worker(BaseHandler):
                 item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=" ".join(html_toc_2[a]))
                 oeb.spine.insert(0, item, True)
                 html_toc_1_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s">%s</a></li><br />'%(href,name_section_list[a]))
+            html_toc_2 = []
             for a in reversed(html_toc_1_):
                 html_toc_1.append(a)
+            html_toc_1_ = []
             html_toc_1.append('</ul></body></html>')
             #Generate Top HTML TOC
             id_, href = oeb.manifest.generate(id='toc', href='toc.html')
             item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(html_toc_1))
+            html_toc_1 = []
             oeb.guide.add('toc', 'Table of Contents', href)
             oeb.spine.insert(0, item, True)
 
@@ -1087,18 +1041,10 @@ class Worker(BaseHandler):
             po += 1
             for ncx in ncx_toc:
                 if ncx[0] == 'section':
-                    sectoc = toc.add(unicode(ncx[1]), ncx[2], klass='section', play_order=po, id='Main-section-%d'%po)
+                    sectoc = toc.add(unicode(ncx[1]), ncx[2], klass='section', play_order=po, id='Main-section-%d'%po, toc_thumbnail=toc_thumbnails[ncx[4]] if GENERATE_TOC_THUMBNAIL and ncx[4] else None)
                 else:
-                    sectoc.add(unicode(ncx[1]), ncx[2], description=ncx[3] if ncx[3] else None, klass='article', play_order=po, id='article-%d'%po)
+                    sectoc.add(unicode(ncx[1]), ncx[2], description=ncx[3] if ncx[3] else None, klass='article', play_order=po, id='article-%d'%po, toc_thumbnail=toc_thumbnails[ncx[4]] if GENERATE_TOC_THUMBNAIL and ncx[4] else None)
                 po += 1
-
-            '''po=1
-            for sect,name,href,brief in ncx_toc:
-                if sect == 'section':
-                    sectoc = oeb.toc.add(unicode(name), href, play_order=po, id='Main-section-%d'%po)
-                else:
-                    sectoc.add(unicode(name), href, description=brief if brief else None, play_order=po, id='article-%d'%po)
-                po += 1'''
 
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()
