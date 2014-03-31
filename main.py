@@ -1009,30 +1009,29 @@ class Worker(BaseHandler):
 
                 num_sections += 1
 
-            sections = None
-
-            #Generate HTML TOC for Calibre mostly
-            ##html_toc_1 top level toc
-            html_toc_1 = [u'<html><head><title>Table Of Contents</title></head><body><h2>%s</h2><ul>'%(TABLE_OF_CONTENTS)]
-            html_toc_1_ = []
-            #We need index but not reversed()
-            for a in xrange(len(html_toc_2)-1,-1,-1):
-                #Generate Secondary HTML TOC
-                id_, href = oeb.manifest.generate(id='section', href='toc_%d.html' % (a))
-                item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=" ".join(html_toc_2[a]))
+            if GENERATE_HTML_TOC:
+                #Generate HTML TOC for Calibre mostly
+                ##html_toc_1 top level toc
+                html_toc_1 = [u'<html><head><title>Table Of Contents</title></head><body><h2>%s</h2><ul>'%(TABLE_OF_CONTENTS)]
+                html_toc_1_ = []
+                #We need index but not reversed()
+                for a in xrange(len(html_toc_2)-1,-1,-1):
+                    #Generate Secondary HTML TOC
+                    id_, href = oeb.manifest.generate(id='section', href='toc_%d.html' % (a))
+                    item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=" ".join(html_toc_2[a]))
+                    oeb.spine.insert(0, item, True)
+                    html_toc_1_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s">%s</a></li><br />'%(href,name_section_list[a]))
+                html_toc_2 = []
+                for a in reversed(html_toc_1_):
+                    html_toc_1.append(a)
+                html_toc_1_ = []
+                html_toc_1.append('</ul></body></html>')
+                #Generate Top HTML TOC
+                id_, href = oeb.manifest.generate(id='toc', href='toc.html')
+                item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(html_toc_1))
+                html_toc_1 = []
+                oeb.guide.add('toc', 'Table of Contents', href)
                 oeb.spine.insert(0, item, True)
-                html_toc_1_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s">%s</a></li><br />'%(href,name_section_list[a]))
-            html_toc_2 = []
-            for a in reversed(html_toc_1_):
-                html_toc_1.append(a)
-            html_toc_1_ = []
-            html_toc_1.append('</ul></body></html>')
-            #Generate Top HTML TOC
-            id_, href = oeb.manifest.generate(id='toc', href='toc.html')
-            item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(html_toc_1))
-            html_toc_1 = []
-            oeb.guide.add('toc', 'Table of Contents', href)
-            oeb.spine.insert(0, item, True)
 
             #Generate NCX TOC for Kindle
             po=1 
