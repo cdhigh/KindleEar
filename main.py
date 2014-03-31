@@ -1029,7 +1029,6 @@ class Worker(BaseHandler):
                 #Generate Top HTML TOC
                 id_, href = oeb.manifest.generate(id='toc', href='toc.html')
                 item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(html_toc_1))
-                html_toc_1 = []
                 oeb.guide.add('toc', 'Table of Contents', href)
                 oeb.spine.insert(0, item, True)
 
