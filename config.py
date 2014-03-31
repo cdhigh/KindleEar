@@ -43,10 +43,10 @@ TABLE_OF_CONTENTS = u'目录'
 #生成TOC的文章内容预览是否包含图片缩略
 GENERATE_TOC_THUMBNAIL = True
 
-#是否生成HTML的TOC,主要是用于Calibre阅读，或者多看的epub？
+#是否生成HTML的TOC,对于Kindle可以不需要,主要是用于Calibre阅读，或者多看的epub？
 GENERATE_HTML_TOC = True
 
-#图片转换成灰度
+#图片转换成灰度，对于支持彩色的Kindle平板则可以设置False保留彩色
 COLOR2GRAY = True
 #----------------end----------------
 
