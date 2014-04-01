@@ -371,8 +371,8 @@ class BaseFeedBook:
     def Items(self, opts=None, user=None):
         """
         生成器，返回一个元组
-        对于HTML：section,url,title,content,brief
-        对于图片，mime,url,filename,content,brief
+        对于HTML：section,url,title,content,brief, thumbnail
+        对于图片，mime,url,filename,content,brief, thumbnail
         """
         urls = self.ParseFeedUrls()
         readability = self.readability if self.fulltext_by_readability else self.readability_by_soup
@@ -391,13 +391,13 @@ class BaseFeedBook:
                 article = self.FragToXhtml(desc, ftitle)
             
             #如果是图片，title则是mime
-            for title, imgurl, imgfn, content, brief in readability(article,url,opts,user):
+            for title, imgurl, imgfn, content, brief, thumbnail in readability(article,url,opts,user):
                 if title.startswith(r'image/'): #图片
-                    yield (title, imgurl, imgfn, content, brief)
+                    yield (title, imgurl, imgfn, content, brief, thumbnail)
                 else:
                     if not title: title = ftitle
                     content =  self.postprocess(content)
-                    yield (section, url, title, content, brief)
+                    yield (section, url, title, content, brief, thumbnail)
     
     def fetcharticle(self, url, decoder):
         """链接网页获取一篇文章"""
@@ -496,6 +496,9 @@ class BaseFeedBook:
             soup.html.head.append(sty)
         
         self.soupbeforeimage(soup)
+
+        has_imgs = False
+        thumbnail = None
         
         if self.keep_image:
             opener = URLOpener(self.host, timeout=self.timeout)
@@ -517,7 +520,12 @@ class BaseFeedBook:
                         imgmime = r"image/" + imgtype
                         fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
                         img['src'] = fnimg
-                        yield (imgmime, imgurl, fnimg, imgcontent, None)
+                        if not has_imgs:
+                            has_imgs = True
+                            thumbnail = imgurl
+                            yield (imgmime, imgurl, fnimg, imgcontent, None, True)
+                        else:
+                            yield (imgmime, imgurl, fnimg, imgcontent, None, None)
                     else:
                         img.decompose()
                 else:
@@ -554,7 +562,7 @@ class BaseFeedBook:
                     break
         soup = None
         
-        yield (title, None, None, content, brief)
+        yield (title, None, None, content, brief, thumbnail)
         
     def readability_by_soup(self, article, url, opts=None, user=None):
         """ 使用BeautifulSoup手动解析网页，提取正文内容 """
@@ -621,6 +629,9 @@ class BaseFeedBook:
             soup.html.head.append(sty)
             
         self.soupbeforeimage(soup)
+
+        has_imgs = False
+        thumbnail = None
         
         if self.keep_image:
             opener = URLOpener(self.host, timeout=self.timeout)
@@ -642,7 +653,12 @@ class BaseFeedBook:
                         imgmime = r"image/" + imgtype
                         fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
                         img['src'] = fnimg
-                        yield (imgmime, imgurl, fnimg, imgcontent, None)
+                        if not has_imgs:
+                            has_imgs = True
+                            thumbnail = imgurl
+                            yield (imgmime, imgurl, fnimg, imgcontent, None, True)
+                        else:
+                            yield (imgmime, imgurl, fnimg, imgcontent, None, None)
                     else:
                         img.decompose()
                 else:
@@ -695,7 +711,7 @@ class BaseFeedBook:
                     break
         soup = None
         
-        yield (title, None, None, content, brief)        
+        yield (title, None, None, content, brief, thumbnail)        
     
     def process_image(self, data, opts):
         try:
@@ -754,6 +770,11 @@ class BaseFeedBook:
             href = self.MakeShareLink('tumblr', user, url)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_TUMBLR
+            soup.html.body.append(ashare)
+        if user.broswer:
+            self.AppendSperate(soup)
+            ashare = soup.new_tag('a', href=url)
+            ashare.string = OPEN_IN_BROSWER
             soup.html.body.append(ashare)
             
     def MakeShareLink(self, sharetype, user, url):

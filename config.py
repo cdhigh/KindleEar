@@ -34,6 +34,22 @@ ALWAYS_CHAR_DETECT = False
 GENERATE_TOC_DESC = True
 TOC_DESC_WORD_LIMIT = 150  # 内容预览（摘要）字数限制
 
+#-------------------add by rexdf-----------
+#HTML目录标题
+TABLE_OF_CONTENTS = u'目录'
+#English should be:
+#TABLE_OF_CONTENTS = u'Table Of Contents'
+
+#生成TOC的文章内容预览是否包含图片缩略
+GENERATE_TOC_THUMBNAIL = True
+
+#是否生成HTML的TOC,对于Kindle可以不需要,主要是用于Calibre阅读，或者多看的epub？
+GENERATE_HTML_TOC = True
+
+#图片转换成灰度，对于支持彩色的Kindle平板则可以设置False保留彩色
+COLOR2GRAY = True
+#----------------end----------------
+
 #为减少文件大小，将大图片缩小为此尺寸，(Width,Height)
 #此尺寸是适应Kindle3的，如果你是完美主义者，可以设置为(568,682)，扣除margin
 #如果你使用的是其他分辨率的机器，可以直接修改为其他值
@@ -71,5 +87,6 @@ SHARE_ON_FACEBOOK = u"Share on facebook"
 SHARE_ON_TWITTER = u"Tweet it"
 SHARE_ON_TUMBLR = u"Share on tumblr"
 
-#图片转换成灰度
-COLOR2GRAY = True
+#-------------------add by rexdf-----------
+OPEN_IN_BROSWER = u"Open in Broswer"
+#----------------end----------------
