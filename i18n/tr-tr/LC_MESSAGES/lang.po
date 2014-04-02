@@ -70,7 +70,7 @@ msgid "Book(s) (%s) put to queue!"
 msgstr "%s kitapları işlem sırasına eklendi"
 
 msgid "No book to deliver!"
-msgstr "Gönderim için kitap yok!"
+msgstr "Gönderilecek kitap yok!"
 
 msgid "Logout"
 msgstr "Çıkış"
@@ -172,7 +172,7 @@ msgid "Free Forever."
 msgstr "Daima Ücretsiz."
 
 msgid "Good News Always Come With You."
-msgstr "İyi Haberler Her Zaman Sizinle Olsun."
+msgstr "İyi Haberler Daima Sizinle Olsun."
 
 msgid "Inherited From Calibre"
 msgstr "Calibre Kodları Kullanıldı."
@@ -193,13 +193,13 @@ msgid "open source KindleEar application"
 msgstr "açık kaynak KindleEar uygulaması"
 
 msgid ", You can deploy your own server to push news feeds to your kindle dialy or share with your friends."
-msgstr "ile siz de kendi serverınızı kurup Kindleınıza RSSleri günlük gönderebilir veya arkadaşlarınızla paylaşabilirsiniz."
+msgstr "ile siz de kendi serverınızı kurup Kindle'ınıza RSS'leri günlük gönderebilir veya arkadaşlarınızla paylaşabilirsiniz."
 
 msgid "Login"
 msgstr "Giriş"
 
 msgid "The website dont allow register, you can ask owner for a account."
-msgstr "Web sayfası kayıt olmaya izin vermemektedir, yöneticiden bir hesap isteyebilirsiniz."
+msgstr "Yeni bir hesap açmak için bir site yönetici ile iletişime geçmeniz gerekmektedir."
 
 msgid "Only display last 10 logs"
 msgstr "Sadece son 10 işlem kaydını gösterir."
@@ -247,10 +247,10 @@ msgid "No have book unsubscrebed"
 msgstr "Abone olmadığınız kitap yok."
 
 msgid "Your account will pause after"
-msgstr "Hebanızın pasifleştirilmesine kalan süre:"
+msgstr "Bu hesabın gönderileri şu tarihte duraklatılacak:"
 
 msgid ", Please login before expire."
-msgstr "Lütfen hesabınız pasifleştirilmeden önce giriş yapınız."
+msgstr ", duraklatılmaması için bu tarihten önce giriş yapınız."
 
 msgid "Delete Account"
 msgstr "Hesabı Sil"
@@ -259,7 +259,7 @@ msgid "Kindle E-mail is requied!"
 msgstr "Kindle E-mail adresi gerekli!"
 
 msgid "Title is requied!"
-msgstr "Başlık gerekli!"
+msgstr "Başlık zorunlu!"
 
 msgid "Settings Saved!"
 msgstr "Ayarlar Kaydedildi!"
@@ -274,7 +274,7 @@ msgid "The item is empty"
 msgstr "İçerik boş"
 
 msgid "Enable deliver"
-msgstr "Gönderime izin ver."
+msgstr "Gönderimleri aktifleştir."
 
 msgid "Time zone"
 msgstr "Saat dilimi"
@@ -331,16 +331,16 @@ msgid "Keep images"
 msgstr "Resimler gözüksün."
 
 msgid "Enable deliver custom rss"
-msgstr "Özel RSS gönderilmesine izin ver."
+msgstr "Özel RSS gönderimini aktifleştir."
 
 msgid "This switch only effective when 'Enable deliver' is enabled."
-msgstr "Bu ayar yalnızca ’Gönderime izin ver.’ seçeneği seçilmişken geçerlidir."
+msgstr "Bu ayar yalnızca ’Gönderimleri aktifleştir.’ seçeneği seçilmişken geçerlidir."
 
 msgid "Save settings"
 msgstr "Ayarları kaydet"
 
 msgid "Important: Please activate your kindle firstly, and goto"
-msgstr "Önemli: Lütfen ilk olarak Kindleınızı aktifleştirin ve"
+msgstr "Önemli: Lütfen ilk olarak Kindle'ınızı aktifleştirin ve"
 
 msgid "Page and add"
 msgstr "sayfasına gidin."
@@ -427,7 +427,7 @@ msgid "Logs of other users"
 msgstr "Diğer kullanıcıların işlem kayıtları"
 
 msgid "Merge books into one"
-msgstr "Kitapları birleştir"
+msgstr "Kitapları birleştirerek gönder"
 
 msgid "Append hyperlink '%s' to article"
 msgstr "'%s' linkini makaleye ekle"
