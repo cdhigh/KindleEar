@@ -28,59 +28,68 @@ class URLOpener:
             headers={}
         
         response = resp()
-        while url and (maxRedirect > 0):
-            cnt = 0
-            while cnt < self.maxFetchCount:
-                try:
-                    response = urlfetch.fetch(url=url, payload=data, method=method,
-                        headers=self._getHeaders(url),
-                        allow_truncated=False, follow_redirects=False, 
-                        deadline=self.timeout, validate_certificate=False)
-                except urlfetch.DeadlineExceededError:
-                    if response.status_code == 555:
-                        response.status_code = 504
-                    cnt += 1
-                    time.sleep(1)
-                except urlfetch.ResponseTooLargeError:
-                    if response.status_code == 555:
-                        response.status_code = 509
-                    break
-                except urlfetch.SSLCertificateError:
-                    #有部分网站不支持HTTPS访问，对于这些网站，尝试切换http
-                    if url.startswith(r'https://'):
-                        url = url.replace(r'https://', r'http://')
+        if url.startswith('data:image/'):
+            from base64 import b64decode
+            try:
+                idx_begin = url.find(';base64,') or url.find(';BASE64,')
+                response.content = b64decode(url[idx_begin+8:])
+                response.status_code=202
+            except TypeError:
+                response.status_code=404
+        else:
+            while url and (maxRedirect > 0):
+                cnt = 0
+                while cnt < self.maxFetchCount:
+                    try:
+                        response = urlfetch.fetch(url=url, payload=data, method=method,
+                            headers=self._getHeaders(url),
+                            allow_truncated=False, follow_redirects=False, 
+                            deadline=self.timeout, validate_certificate=False)
+                    except urlfetch.DeadlineExceededError:
                         if response.status_code == 555:
-                            response.status_code = 452
-                        continue #这里不用自增变量
-                    else:
+                            response.status_code = 504
+                        cnt += 1
+                        time.sleep(1)
+                    except urlfetch.ResponseTooLargeError:
                         if response.status_code == 555:
-                            response.status_code = 453
+                            response.status_code = 509
                         break
-                except urlfetch.DownloadError:
-                    if response.status_code == 555:
-                        response.status_code = 450
-                    cnt += 1
-                    #break
-                except Exception:
-                    if response.status_code == 555:
-                        response.status_code = 451
+                    except urlfetch.SSLCertificateError:
+                        #有部分网站不支持HTTPS访问，对于这些网站，尝试切换http
+                        if url.startswith(r'https://'):
+                            url = url.replace(r'https://', r'http://')
+                            if response.status_code == 555:
+                                response.status_code = 452
+                            continue #这里不用自增变量
+                        else:
+                            if response.status_code == 555:
+                                response.status_code = 453
+                            break
+                    except urlfetch.DownloadError:
+                        if response.status_code == 555:
+                            response.status_code = 450
+                        cnt += 1
+                        #break
+                    except Exception:
+                        if response.status_code == 555:
+                            response.status_code = 451
+                        break
+                    else:
+                        break
+                
+                #只处理重定向信息
+                if response.status_code not in [300,301,302,303,307]:
                     break
+                
+                data = None
+                method = urlfetch.GET
+                self.SaveCookies(response.header_msg.getheaders('Set-Cookie'))
+                urlnew = response.headers.get('Location')
+                if urlnew and not urlnew.startswith("http"):
+                    url = urlparse.urljoin(url, urlnew)
                 else:
-                    break
-            
-            #只处理重定向信息
-            if response.status_code not in [300,301,302,303,307]:
-                break
-            
-            data = None
-            method = urlfetch.GET
-            self.SaveCookies(response.header_msg.getheaders('Set-Cookie'))
-            urlnew = response.headers.get('Location')
-            if urlnew and not urlnew.startswith("http"):
-                url = urlparse.urljoin(url, urlnew)
-            else:
-                url = urlnew
-            maxRedirect -= 1
+                    url = urlnew
+                maxRedirect -= 1
         
         if maxRedirect <= 0:
             default_log.warn('Too many redirections:%s'%url)

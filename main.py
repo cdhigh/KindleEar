@@ -4,7 +4,7 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.11.3"
+__Version__ = "1.11.4"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
