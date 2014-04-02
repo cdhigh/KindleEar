@@ -85,7 +85,7 @@ def compile_pattern(elements):
         return elements
     if isinstance(elements, basestring):
         elements = elements.split(',')
-    return re.compile(u'|'.join([re.escape(x.lower()) for x in elements]), re.U)
+    return re.compile(u'|'.join([re.escape(x.lower()) for x in elements]), re.I) #rexdf It seem not working, If we use re.U
 
 class Document:
     """Class to build a etree document out of html."""
@@ -274,7 +274,7 @@ class Document:
             self.TEXT_LENGTH_THRESHOLD)
         candidates = {}
         ordered = []
-        for elem in self.tags(self._html(), "p", "pre", "td"):
+        for elem in self.tags(self._html(), "p", "pre", "td", "figcaption"): #rexdf Add HTML5 Image Support!
             parent_node = elem.getparent()
             if parent_node is None:
                 continue
@@ -335,7 +335,7 @@ class Document:
                     weight += 25
 
                 if self.positive_keywords and self.positive_keywords.search(feature):
-                    weight += 25
+                    weight += 150 #rexdf More weight for postive keyword
 
                 if self.negative_keywords and self.negative_keywords.search(feature):
                     weight -= 25
@@ -353,6 +353,8 @@ class Document:
         name = elem.tag.lower()
         if name == "div":
             content_score += 5
+        elif name in ["figure"]: #rexdf figure in HTML5 is mostly in section article && post should have more wight, Or we'll miss it!
+            content_score += 50
         elif name in ["pre", "td", "blockquote"]:
             content_score += 3
         elif name in ["address", "ol", "ul", "dl", "dd", "dt", "li", "form"]:
@@ -391,6 +393,11 @@ class Document:
                 #self.debug("Altering %s to p" % (describe(elem)))
                 elem.tag = "p"
                 #print "Fixed element "+describe(elem)
+            parent_node = elem.getparent() #rexdf HTML5 <figure> including a <div> and `an <img> & a <figcaption>`  buried in this <div>
+            if parent_node is None:
+                continue
+            if 'figure' == parent_node.tag.lower():
+                elem.tag = "p"
 
         for elem in self.tags(self.html, 'div'):
             if elem.text and elem.text.strip():

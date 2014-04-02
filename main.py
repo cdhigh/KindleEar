@@ -4,7 +4,7 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.11.0"
+__Version__ = "1.11.2"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -900,7 +900,7 @@ class Worker(BaseHandler):
             coverfile = book4meta.coverfile
         else:
             mhfile = DEFAULT_MASTHEAD
-            coverfile = DEFAULT_COVER
+            coverfile = DEFAULT_COVER_BV if user.merge_books else DEFAULT_COVER
         
         if mhfile:
             id_, href = oeb.manifest.generate('masthead', mhfile) # size:600*60

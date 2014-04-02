@@ -35,6 +35,8 @@ GENERATE_TOC_DESC = True
 TOC_DESC_WORD_LIMIT = 150  # 内容预览（摘要）字数限制
 
 #-------------------add by rexdf-----------
+#合订本封面
+DEFAULT_COVER_BV = "cv_bound.jpg"
 #HTML目录标题
 TABLE_OF_CONTENTS = u'目录'
 #English should be:

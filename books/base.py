@@ -169,6 +169,15 @@ class BaseFeedBook:
     insta_remove_classes = []
     insta_remove_ids = ['controlbar_container',]
     
+    #---------------add by rexdf-------------
+    #下面的积极关键词,有些内容会被readability过滤掉，比如html5的figure，可以通过增加权重保留
+    #这个是针对部分html5网站优化的，子类需要修改可以不用继承，因为子类往往针对特定某一网站，可以专门定制
+    positive_classes = ['image-block','image-block-caption','image-block-ins'] 
+
+    #图像最小大小，有些网站会在正文插入一个1*1像素的图像，大约是带有的水印信息，这样的图片视觉无意义，而且干扰thumbnail
+    img_min_size = 1024
+    #---------------end----------------------
+    
     # 子类定制的HTML标签清理内容
     remove_tags = [] # 完全清理此标签
     remove_ids = [] # 清除标签的id属性为列表中内容的标签
@@ -431,7 +440,7 @@ class BaseFeedBook:
         
         # 提取正文
         try:
-            doc = readability.Document(content)
+            doc = readability.Document(content,positive_keywords=self.positive_classes)
             summary = doc.summary(html_partial=False)
         except:
             self.log.warn('article is invalid.[%s]' % url)
@@ -520,6 +529,9 @@ class BaseFeedBook:
                         imgmime = r"image/" + imgtype
                         fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
                         img['src'] = fnimg
+                        if len(imgcontent) < self.img_min_size: #rexdf too small image
+                            img.decompose()
+                            continue
                         if not has_imgs:
                             has_imgs = True
                             thumbnail = imgurl
@@ -653,6 +665,9 @@ class BaseFeedBook:
                         imgmime = r"image/" + imgtype
                         fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
                         img['src'] = fnimg
+                        if len(imgcontent) < self.img_min_size: #rexdf too small image
+                            img.decompose()
+                            continue
                         if not has_imgs:
                             has_imgs = True
                             thumbnail = imgurl
