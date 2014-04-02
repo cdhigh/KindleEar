@@ -4,7 +4,7 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 
-__Version__ = "1.11.2"
+__Version__ = "1.11.4"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -1129,7 +1129,7 @@ class Url2Book(BaseHandler):
         # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
         itemcnt,hasimage = 0,False
         sections = {subject:[]}
-        for sec_or_media, url, title, content, brief in book.Items(opts,user):
+        for sec_or_media, url, title, content, brief, thumbnail in book.Items(opts,user):
             if sec_or_media.startswith(r'image/'):
                 id, href = oeb.manifest.generate(id='img', href=title)
                 item = oeb.manifest.add(id, href, sec_or_media, data=content)
@@ -1215,7 +1215,7 @@ class Share(BaseHandler):
             
             # 对于html文件，变量名字自文档
             # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
-            for sec_or_media, url, title, content, brief in book.Items():
+            for sec_or_media, url, title, content, brief, thumbnail in book.Items():
                 if sec_or_media.startswith(r'image/'):
                     if self.SHARE_IMAGE_EMBEDDED:
                         attachments.append(mail.Attachment(title,
