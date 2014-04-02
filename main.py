@@ -900,7 +900,7 @@ class Worker(BaseHandler):
             coverfile = book4meta.coverfile
         else:
             mhfile = DEFAULT_MASTHEAD
-            coverfile = DEFAULT_COVER
+            coverfile = DEFAULT_COVER_BV if usr.merge_books else DEFAULT_COVER
         
         if mhfile:
             id_, href = oeb.manifest.generate('masthead', mhfile) # size:600*60
