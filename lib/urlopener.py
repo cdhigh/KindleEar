@@ -33,9 +33,9 @@ class URLOpener:
             try:
                 idx_begin = url.find(';base64,') or url.find(';BASE64,')
                 response.content = b64decode(url[idx_begin+8:])
-                response.status_code=202
+                response.status_code = 200
             except TypeError:
-                response.status_code=404
+                response.status_code = 404
         else:
             while url and (maxRedirect > 0):
                 cnt = 0

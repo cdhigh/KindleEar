@@ -9,6 +9,7 @@ TIMEZONE = 8  #默认时区
 
 DEFAULT_MASTHEAD = "mh_default.gif" #如果书籍没有报头，则使用此报头。
 DEFAULT_COVER = "cv_default.jpg" #如果书籍没有封面，则使用此封面，留空则不添加封面
+DEFAULT_COVER_BV = "cv_bound.jpg" #多本书籍合并后使用的封面
 
 #自定义RSS的默认标题，后续可以在网页上修改，如果包含中文则需要在前面加u''
 MY_FEEDS_TITLE = u'KindleEar'
@@ -35,22 +36,20 @@ GENERATE_TOC_DESC = True
 TOC_DESC_WORD_LIMIT = 150  # 内容预览（摘要）字数限制
 
 #-------------------add by rexdf-----------
-#合订本封面
-DEFAULT_COVER_BV = "cv_bound.jpg"
 #HTML目录标题
-TABLE_OF_CONTENTS = u'目录'
+#TABLE_OF_CONTENTS = u'目录'
 #English should be:
-#TABLE_OF_CONTENTS = u'Table Of Contents'
+TABLE_OF_CONTENTS = u'Table Of Contents'
 
 #生成TOC的文章内容预览是否包含图片缩略
 GENERATE_TOC_THUMBNAIL = True
 
-#是否生成HTML的TOC,对于Kindle可以不需要,主要是用于Calibre阅读，或者多看的epub？
+#是否生成HTML的TOC,对于Kindle可以不需要,主要是用于Calibre阅读
 GENERATE_HTML_TOC = True
 
 #图片转换成灰度，对于支持彩色的Kindle平板则可以设置False保留彩色
-COLOR2GRAY = True
-#----------------end----------------
+COLOR_TO_GRAY = True
+#----------------end of add by rexdf-------
 
 #为减少文件大小，将大图片缩小为此尺寸，(Width,Height)
 #此尺寸是适应Kindle3的，如果你是完美主义者，可以设置为(568,682)，扣除margin
@@ -89,6 +88,6 @@ SHARE_ON_FACEBOOK = u"Share on facebook"
 SHARE_ON_TWITTER = u"Tweet it"
 SHARE_ON_TUMBLR = u"Share on tumblr"
 
-#-------------------add by rexdf-----------
-OPEN_IN_BROSWER = u"Open in Broswer"
+#------------add by rexdf-----------
+OPEN_IN_BROWSER = u"Open in Browser"
 #----------------end----------------
