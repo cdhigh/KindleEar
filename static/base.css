@@ -120,10 +120,20 @@ a:active{ color:#00498d; }
     padding: 10px 0;
 }
 
-#ownfeeds .book:last-child{
+#ownfeeds .book:last-child,#ownfeeds .book:last-child:hover{
     border-bottom: 0;
+    background: white;
+    padding: 10px 0;
 }
-
+#ownfeeds .book:hover{
+    border-bottom: 3px solid #d8d8d8;
+    background: #F4F9FD;
+    padding: 11px 0;
+}
+#mybooks .book:hover, #books .book:hover{
+    border-bottom: 3px solid #d8d8d8;
+    background: #F4F9FD;
+}
 .titleRow {
     font-size:0.9em;
     font-weight:bold;

@@ -54,7 +54,8 @@ COLOR_TO_GRAY = True
 #为减少文件大小，将大图片缩小为此尺寸，(Width,Height)
 #此尺寸是适应Kindle3的，如果你是完美主义者，可以设置为(568,682)，扣除margin
 #如果你使用的是其他分辨率的机器，可以直接修改为其他值
-REDUCE_IMAGE_TO = (600,800)
+#rexdf: 现在可以设置成None，然后再Web界面选择设备类型进行适配
+REDUCE_IMAGE_TO = None #(600,800)
 
 #在使用string@appid.appspotmail.com邮件转发时，是否删除CSS
 #删除CSS后阅读体验更佳，但是会丢失各种字体和颜色等排版信息
