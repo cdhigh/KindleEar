@@ -532,7 +532,7 @@ class Login(BaseHandler):
             myfeeds.put()
             au = KeUser(name='admin',passwd=hashlib.md5('admin').hexdigest(),
                 kindle_email='',enable_send=False,send_time=8,timezone=TIMEZONE,
-                book_type="mobi",expires=None,ownfeeds=myfeeds,merge_books=False)
+                book_type="mobi",device='kindle',expires=None,ownfeeds=myfeeds,merge_books=False)
             au.put()
             return False
         else:
