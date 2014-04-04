@@ -57,6 +57,16 @@
             </select>
         </div>
         <div class="pure-control-group">
+            <label>{{_("Device type")}}</label>
+            <select class="bool" name="devicetype">
+                <option value="kindle" {% if user.devicetype == 'kindle' %}selected="selected"{% endif %}>Kindle</option>
+                <option value="kindledx" {% if user.devicetype == 'kindledx' %}selected="selected"{% endif %}>Kindle DX</option>
+                <option value="kindlepw" {% if user.devicetype == 'kindlepw' %}selected="selected"{% endif %}>Kindle PaperWhite</option>
+                <option value="kindlefire" {% if user.devicetype == 'kindlefire' %}selected="selected"{% endif %}>Kindle Fire</option>
+                <option value="others" {% if user.devicetype == 'others' %}selected="selected"{% endif %}>Others</option>
+            </select>
+        </div>
+        <div class="pure-control-group">
             <label>{{_("Title format")}}</label>
             <select class="bool" name="titlefmt">
                 <option value="" {% if not user.titlefmt %}selected="selected"{% endif %}>{{_("Title Only")}}</option>
@@ -108,6 +118,15 @@
             <td><select class="bool" name="booktype">
                 <option value="mobi" {% if user.book_type != 'epub' %}selected="selected"{% endif %}>mobi</option>
                 <option value="epub" {% if user.book_type == 'epub' %}selected="selected"{% endif %}>epub</option>
+            </select></td></tr>
+            <tr><td style="text-align:right;"><label>{{_("Device type")}}</label> : </td>
+            <td><select class="bool" name="devicetype">
+                <option value="kindle" {% if user.device == 'kindle' %}selected="selected"{% endif %}>Kindle</option>
+                <option value="kindledx" {% if user.device == 'kindledx' %}selected="selected"{% endif %}>Kindle DX</option>
+                <option value="kindlepw" {% if user.device == 'kindlepw' %}selected="selected"{% endif %}>Kindle PaperWhite</option>
+                <option value="kindlefire" {% if user.device == 'kindlefire' %}selected="selected"{% endif %}>Kindle Fire</option>
+                <option value="others" {% if user.device == 'others' %}selected="selected"{% endif %}>Others</option>
+            </select>
             </select></td></tr>
             <tr><td style="text-align:right;"><label>{{_("Title format")}}</label> : </td>
             <td><select class="bool" name="titlefmt">

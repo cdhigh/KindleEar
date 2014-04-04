@@ -107,6 +107,7 @@ class KeUser(db.Model): # kindleEar User
     send_time = db.IntegerProperty()
     timezone = db.IntegerProperty()
     book_type = db.StringProperty()
+    device = db.StringProperty()
     expires = db.DateTimeProperty()
     ownfeeds = db.ReferenceProperty(Book) # 每个用户都有自己的自定义RSS
     titlefmt = db.StringProperty() #在元数据标题中添加日期的格式
@@ -343,6 +344,7 @@ class Setting(BaseHandler):
             user.send_time = int(web.input().get('sendtime'))
             user.enable_send = bool(web.input().get('enablesend'))
             user.book_type = web.input().get('booktype')
+            user.device = web.input().get('devicetype') or 'kindle'
             user.titlefmt = web.input().get('titlefmt')
             alldays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
             user.send_days = [day for day in alldays if web.input().get(day)]
@@ -997,7 +999,7 @@ class Worker(BaseHandler):
         
         # 创建 OEB
         global log
-        opts = getOpts()
+        opts = getOpts(user.device)
         oeb = CreateOeb(log, None, opts)
         title = "%s %s" % (book4meta.title, local_time(titlefmt, tz)) if titlefmt else book4meta.title
         
@@ -1132,7 +1134,7 @@ class Url2Book(BaseHandler):
         opts = oeb = None
         
         # 创建 OEB
-        opts = getOpts()
+        opts = getOpts(user.device)
         oeb = CreateOeb(log, None, opts)
         oeb.container = ServerContainer(log)
         
@@ -1153,7 +1155,7 @@ class Url2Book(BaseHandler):
         # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
         itemcnt,hasimage = 0,False
         sections = {subject:[]}
-        toc_thumbnails = []
+        toc_thumbnails = {} #map img-url -> manifest-href
         for sec_or_media, url, title, content, brief, thumbnail in book.Items(opts,user):
             if sec_or_media.startswith(r'image/'):
                 id, href = oeb.manifest.generate(id='img', href=title)
