@@ -885,7 +885,7 @@ def InsertToc(oeb, sections, toc_thumbnails):
     html_toc_2 = []
     name_section_list = []
     for sec in sections.keys():
-        htmlcontent = ['<html><head><title>%s</title><style type="text/css">.pagebreak{page-break-before: always;}</style></head><body>' % (sec)]
+        htmlcontent = ['<html><head><title>%s</title><style type="text/css">.pagebreak{page-break-before: always;} h2{font-size: 120%;}</style></head><body>' % (sec)]
         secondary_toc_list = []
         first_flag = False
         sec_toc_thumbnail = None
