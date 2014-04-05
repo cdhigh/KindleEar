@@ -502,7 +502,8 @@ class BaseFeedBook:
             cmt.extract()
             
         #删除body的所有属性，以便InsertToc使用正则表达式匹配<body>
-        for attr in body.attrs:
+        bodyattrs = [attr for attr in body.attrs]
+        for attr in bodyattrs:
             del body[attr]
         
         if self.extra_css:
@@ -719,7 +720,8 @@ class BaseFeedBook:
                     break
         
         #删除body的所有属性，以便InsertToc使用正则表达式匹配<body>
-        for attr in body.attrs:
+        bodyattrs = [attr for attr in body.attrs]
+        for attr in bodyattrs:
             del body[attr]
         
         self.soupprocessex(soup)
@@ -928,7 +930,8 @@ class WebpageBook(BaseFeedBook):
             
             #删除body的所有属性，以便InsertToc使用正则表达式匹配<body>
             body = soup.html.body
-            for attr in body.attrs:
+            bodyattrs = [attr for attr in body.attrs]
+            for attr in bodyattrs:
                 del body[attr]
                 
             if self.extra_css:
