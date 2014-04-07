@@ -18,6 +18,7 @@ from config import *
 import main
 
 class Login(BaseHandler):
+    __url__ = "/login"
     def CheckAdminAccount(self):
         #判断管理员账号是否存在
         #如果管理员账号不存在，创建一个，并返回False，否则返回True
@@ -118,6 +119,7 @@ class Login(BaseHandler):
             return self.render('login.html',"Login",nickname='',tips=tips,username=name)
 
 class Logout(BaseHandler):
+    __url__ = "/logout"
     def GET(self):
         main.session.login = 0
         main.session.username = ''

@@ -14,6 +14,7 @@ from apps.dbModels import *
 from books.base import UrlEncoding
 
 class DbViewer(BaseHandler):
+    __url__ = "/dbviewer"
     def GET(self):
         self.login_required('admin')
         #可以修改UrlEncoding，如果chardet自动检测的编码错误的话

@@ -20,6 +20,7 @@ from books import BookClasses, BookClass
 
 class Deliver(BaseHandler):
     """ 判断需要推送哪些书籍 """
+    __url__ = "/deliver"
     def queueit(self, usr, bookid):
         param = {"u":usr.name, "id":bookid}
         

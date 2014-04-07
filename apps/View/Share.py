@@ -19,7 +19,7 @@ import main
 
 class Share(BaseHandler):
     """ 保存到evernote或分享到社交媒体 """
-    
+    __url__ = "/share"
     SHARE_IMAGE_EMBEDDED = True
     
     def GET(self):

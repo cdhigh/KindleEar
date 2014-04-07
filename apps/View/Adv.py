@@ -15,6 +15,7 @@ from config import *
 
 class AdvShare(BaseHandler):
     """ 设置归档和分享配置项 """
+    __url__ = "/advshare"
     def GET(self):
         user = self.getcurrentuser()
         current = 'advsetting'
@@ -67,6 +68,7 @@ class AdvShare(BaseHandler):
 
 class AdvUrlFilter(BaseHandler):
     """ 设置URL过滤器 """
+    __url__ = "/advurlfilter"
     def GET(self):
         user = self.getcurrentuser()
         return self.render('advurlfilter.html',"Url Filter",current='advsetting',
@@ -81,6 +83,7 @@ class AdvUrlFilter(BaseHandler):
         raise web.seeother('')
         
 class AdvDel(BaseHandler):
+    __url__ = "/advdel"
     #删除白名单或URL过滤器项目
     def GET(self):
         user = self.getcurrentuser()
@@ -99,6 +102,7 @@ class AdvDel(BaseHandler):
 
 class AdvWhiteList(BaseHandler):
     """ 设置邮件白名单 """
+    __url__ = "/advwhitelist"
     def GET(self):
         user = self.getcurrentuser()
         return self.render('advwhitelist.html',"White List",current='advsetting',

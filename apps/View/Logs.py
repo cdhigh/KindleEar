@@ -10,6 +10,7 @@ from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
 
 class Mylogs(BaseHandler):
+    __url__ = "/logs"
     def GET(self):
         user = self.getcurrentuser()
         mylogs = DeliverLog.all().filter("username = ", user.name).order('-time').fetch(limit=10)
@@ -23,6 +24,7 @@ class Mylogs(BaseHandler):
             mylogs=mylogs, logs=logs)
         
 class RemoveLogs(BaseHandler):
+    __url__ = "/removelogs"
     def GET(self):
         # 停止过期用户的推送
         for user in KeUser.all().filter('enable_send = ', True):

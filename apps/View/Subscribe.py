@@ -18,6 +18,7 @@ from apps.dbModels import *
 import main
 
 class MySubscription(BaseHandler):
+    __url__ = "/my"
     # 管理我的订阅和杂志列表
     def GET(self, tips=None):
         user = self.getcurrentuser()
@@ -42,6 +43,7 @@ class MySubscription(BaseHandler):
         raise web.seeother('/my')
         
 class Subscribe(BaseHandler):
+    __url__ = "/subscribe/(.*)"
     def GET(self, id):
         self.login_required()
         if not id:
@@ -61,6 +63,7 @@ class Subscribe(BaseHandler):
         raise web.seeother('/my')
         
 class Unsubscribe(BaseHandler):
+    __url__ = "/unsubscribe/(.*)"
     def GET(self, id):
         self.login_required()
         if not id:
@@ -80,6 +83,7 @@ class Unsubscribe(BaseHandler):
         raise web.seeother('/my')
 
 class DelFeed(BaseHandler):
+    __url__ = "/delfeed/(.*)"
     def GET(self, id):
         user = self.getcurrentuser()
         if not id:

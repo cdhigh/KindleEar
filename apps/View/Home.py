@@ -9,5 +9,6 @@
 from apps.BaseHandler import BaseHandler
 
 class Home(BaseHandler):
+    __url__ = r"/"
     def GET(self):
         return self.render('home.html',"Home")

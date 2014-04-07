@@ -18,6 +18,7 @@ from config import *
 import main
 
 class Admin(BaseHandler):
+    __url__ = "/admin"
     # 账户管理页面
     def GET(self):
         user = self.getcurrentuser()
@@ -78,6 +79,7 @@ class Admin(BaseHandler):
             return self.GET()
 
 class AdminMgrPwd(BaseHandler):
+    __url__ = "/mgrpwd/(.*)"
     # 管理员修改其他账户的密码
     def GET(self, name):
         self.login_required('admin')
@@ -110,6 +112,7 @@ class AdminMgrPwd(BaseHandler):
             tips=tips, username=name)
         
 class DelAccount(BaseHandler):
+    __url__ = "/delaccount/(.*)"
     def GET(self, name):
         self.login_required()
         if main.session.username == 'admin' or (name and name == main.session.username):

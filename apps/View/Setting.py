@@ -18,6 +18,7 @@ from config import *
 import main
 
 class Setting(BaseHandler):
+    __url__ = "/setting"
     def GET(self, tips=None):
         user = self.getcurrentuser()
         return self.render('setting.html',"Setting",
@@ -56,6 +57,7 @@ class Setting(BaseHandler):
         return self.GET(tips)
 
 class SetLang(BaseHandler):
+    __url__ = "/lang/(.*)"
     def GET(self, lang):
         lang = lang.lower()
         if lang not in main.supported_languages:

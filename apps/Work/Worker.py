@@ -20,6 +20,7 @@ import main
 
 class Worker(BaseHandler):
     """ 实际下载文章和生成电子书并且发送邮件 """
+    __url__ = "/worker"
     def GET(self):
         username = web.input().get("u")
         bookid = web.input().get("id")

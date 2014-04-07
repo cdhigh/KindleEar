@@ -6,7 +6,7 @@
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
-__Version__ = "1.13-alpha"
+__Version__ = "1.13.1-alpha"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -57,32 +57,7 @@ class Test(BaseHandler):
             s += "<pre><p>" + str(d).rjust(28) + " | " + str(os.environ[d]) + "</p></pre>"
         return s
 
-urls = (
-  r"/", "Home",
-  "/login", "Login",
-  "/logout", "Logout",
-  "/mgrpwd/(.*)", "AdminMgrPwd",
-  "/delaccount/(.*)", "DelAccount",
-  "/my", "MySubscription",
-  "/subscribe/(.*)", "Subscribe",
-  "/unsubscribe/(.*)", "Unsubscribe",
-  "/delfeed/(.*)", "DelFeed",
-  "/setting", "Setting",
-  "/advwhitelist","AdvWhiteList",
-  "/advshare","AdvShare",
-  "/advurlfilter","AdvUrlFilter",
-  "/admin","Admin",
-  "/deliver", "Deliver",
-  "/worker", "Worker",
-  "/url2book", "Url2Book",
-  "/share", "Share",
-  "/logs", "Mylogs",
-  "/removelogs", "RemoveLogs",
-  "/lang/(.*)", "SetLang",
-  "/advdel", "AdvDel",
-  "/test", "Test",
-  "/dbviewer","DbViewer",
-)
+urls += ["/test", "Test",]
 
 application = web.application(urls, globals())
 store = MemcacheStore(memcache)
