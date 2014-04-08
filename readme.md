@@ -1,4 +1,7 @@
-Update-logs & Roadmap
+# Update-logs & Roadmap #
+
+**note: both app.yaml & module-worker.yaml require application id
+and use upload.sh or upload.bat to deploy module**
 
 #Roadmap:
 ###Manage(add/del/edit) Book online
@@ -15,6 +18,7 @@ Update-logs & Roadmap
 
 #Update log:
 4/7/2014: Code refactoring
+4/8/2014: Module support, Performance Optimization.
 
 #License
 KindleEar is Licensed under the GPL license: http://www.gnu.org/licenses/gpl.html

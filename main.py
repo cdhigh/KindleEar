@@ -6,7 +6,7 @@
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
-__Version__ = "1.13.1-alpha"
+__Version__ = "1.13.2-alpha"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -23,7 +23,7 @@ supported_languages = ['en','zh-cn','tr-tr'] #不支持的语种则使用第一�
 
 import web
 import jinja2
-from google.appengine.api import mail
+#from google.appengine.api import mail
 from google.appengine.api import taskqueue
 from google.appengine.api import memcache
 

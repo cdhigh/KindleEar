@@ -28,13 +28,13 @@ class Deliver(BaseHandler):
             self.queue2push[usr.name].append(str(bookid))
         else:
             taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
-                params=param)
+                params=param,target="worker")
         
     def flushqueue(self):
         for name in self.queue2push:
             param = {'u':name, 'id':','.join(self.queue2push[name])}
             taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
-                params=param)
+                params=param,target="worker")
         self.queue2push = defaultdict(list)
         
     def GET(self):
