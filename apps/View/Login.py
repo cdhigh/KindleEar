@@ -15,7 +15,7 @@ from books import BookClasses, BookClass
 
 from config import *
 
-import main
+#import main
 
 class Login(BaseHandler):
     __url__ = "/login"

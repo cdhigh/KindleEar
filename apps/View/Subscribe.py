@@ -15,7 +15,7 @@ from google.appengine.api import memcache
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
 
-import main
+#import main
 
 class MySubscription(BaseHandler):
     __url__ = "/my"

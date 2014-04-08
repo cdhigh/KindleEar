@@ -16,7 +16,7 @@ from lib.makeoeb import *
 from books import BookClasses, BookClass
 from books.base import BaseFeedBook
 
-import main
+#import main
 
 class Worker(BaseHandler):
     """ 实际下载文章和生成电子书并且发送邮件 """

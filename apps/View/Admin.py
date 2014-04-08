@@ -15,7 +15,7 @@ from apps.dbModels import *
 
 from config import *
 
-import main
+#import main
 
 class Admin(BaseHandler):
     __url__ = "/admin"

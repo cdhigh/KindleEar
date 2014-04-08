@@ -21,6 +21,19 @@ __builtin__.__dict__['IsRunInLocal'] = IsRunInLocal
 supported_languages = ['en','zh-cn','tr-tr'] #不支持的语种则使用第一个语言
 #gettext.install('lang', 'i18n', unicode=True) #for calibre startup
 
+class Main_Var:
+    urls = []
+    session = None
+    jjenv = None
+    supported_languages = None
+    log = None
+    __Version__ = None
+
+__builtin__.__dict__['main'] = Main_Var
+main.supported_languages = supported_languages
+main.log = log
+main.__Version__ = __Version__
+
 import web
 import jinja2
 #from google.appengine.api import mail
@@ -30,11 +43,11 @@ from google.appengine.api import memcache
 from lib.memcachestore import MemcacheStore
 from books import BookClasses
 
+from apps.Work import *
+
 from apps.dbModels import Book
 from apps.BaseHandler import BaseHandler
 from apps.utils import fix_filesizeformat
-from apps.View import *
-from apps.Work import *
 
 #reload(sys)
 #sys.setdefaultencoding('utf-8')
@@ -57,9 +70,9 @@ class Test(BaseHandler):
             s += "<pre><p>" + str(d).rjust(28) + " | " + str(os.environ[d]) + "</p></pre>"
         return s
 
-urls += ["/test", "Test",]
+main.urls += ["/test", "Test",]
 
-application = web.application(urls, globals())
+application = web.application(main.urls, globals())
 store = MemcacheStore(memcache)
 session = web.session.Session(application, store, initializer={'username':'','login':0,"lang":''})
 jjenv = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'),
@@ -69,3 +82,6 @@ jjenv.filters['filesizeformat'] = fix_filesizeformat
 app = application.wsgifunc()
 
 web.config.debug = IsRunInLocal
+
+main.session = session
+main.jjenv = jjenv

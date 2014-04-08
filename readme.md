@@ -1,6 +1,6 @@
 # Update-logs & Roadmap #
 
-**note: both app.yaml & module-worker.yaml require application id
+**note: Both app.yaml & module-worker.yaml require application id
 and use upload.sh or upload.bat to deploy module**
 (You need to set application to F1 in Application settings/Performance/Frontend Instance Class)
 

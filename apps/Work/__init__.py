@@ -6,7 +6,7 @@ __all__ = []
 import pkgutil
 import inspect
 
-import main
+#import main
 
 #Load all class with __url__ attribute in the directory
 

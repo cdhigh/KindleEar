@@ -15,7 +15,7 @@ from lib.makeoeb import *
 
 from books.base import BaseUrlBook
 
-import main
+#import main
 
 class Url2Book(BaseHandler):
     """ 抓取指定链接，转换成附件推送 """

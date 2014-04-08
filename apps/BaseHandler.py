@@ -19,7 +19,7 @@ from google.appengine.api.mail_errors import (InvalidSenderError,
 from google.appengine.runtime.apiproxy_errors import (OverQuotaError,
                                                 DeadlineExceededError)
 
-import main
+#import main
 
 class BaseHandler:
     " URL请求处理类的基类，实现一些共同的工具函数 "

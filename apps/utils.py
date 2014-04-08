@@ -11,7 +11,7 @@ import datetime
 import gettext
 import re
 
-import main
+#import main
 
 def local_time(fmt="%Y-%m-%d %H:%M", tz=TIMEZONE):
     return (datetime.datetime.utcnow()+datetime.timedelta(hours=tz)).strftime(fmt)

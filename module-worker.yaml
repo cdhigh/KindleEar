@@ -35,5 +35,5 @@ handlers:
   script: handlemail.appmail
   
 - url: /.*
-  script: main.app
+  script: apps.module_backend.app
   
