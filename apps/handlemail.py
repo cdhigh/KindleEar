@@ -11,7 +11,9 @@ import webapp2
 from google.appengine.ext.webapp.mail_handlers import InboundMailHandler
 from google.appengine.api import taskqueue
 
-from main import KeUser, Book, WhiteList, BaseHandler
+from apps.dbModels import KeUser, Book, WhiteList
+from apps.BaseHandler import BaseHandler
+from apps.utils import local_time
 from config import *
 
 def decode_subject(subject):
@@ -153,7 +155,7 @@ class HandleMail(InboundMailHandler):
                      'keepimage':'1' if user.ownfeeds.keep_image else '0'
                     }
             taskqueue.add(url='/url2book',queue_name="deliverqueue1",method='GET',
-                params=param)
+                params=param,target='worker')
         else: #直接转发邮件正文
             #先判断是否有图片
             from lib.makeoeb import MimeFromFilename
@@ -247,7 +249,7 @@ class HandleMail(InboundMailHandler):
         """
         if subject.lower() in (u'nosubject', u'all'):
             taskqueue.add(url='/deliver',queue_name="deliverqueue1",method='GET',
-                params={'u':username})
+                params={'u':username},target='worker')
         else:
             bkids = []
             booklist = subject.split(',')
@@ -259,7 +261,7 @@ class HandleMail(InboundMailHandler):
                     default_log.warn('book not found : %s' % b.strip())
             if bkids:
                 taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
-                    params={'u':username,'id':','.join(bkids)})
+                    params={'u':username,'id':','.join(bkids)},target='worker')
                     
         
 appmail = webapp2.WSGIApplication([HandleMail.mapping()], debug=False)

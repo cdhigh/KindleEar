@@ -34,7 +34,7 @@ handlers:
   static_dir: static
 
 - url: /_ah/mail/.+
-  script: handlemail.appmail
+  script: apps.handlemail.appmail
   
 - url: /.*
   script: apps.module_front.app

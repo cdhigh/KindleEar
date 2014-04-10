@@ -9,5 +9,5 @@ dispatch:
   - url: "*/url2book*"
     module: worker
 
-  - url: "*/_ah/mail/*"
-    module: worker
+#  - url: "*/_ah/mail/*"
+#    module: worker
