@@ -891,15 +891,15 @@ def InsertToc(oeb, sections, toc_thumbnails):
         sec_toc_thumbnail = None
         for title, brief, thumbnail, content in sections[sec]:
             if first_flag:
-                htmlcontent.append('<div id="%d" class="pagebreak"></div>' % (num_articles)) #insert anchor && pagebreak
+                htmlcontent.append('<div id="%d" class="pagebreak">' % (num_articles)) #insert anchor && pagebreak
             else:
-                htmlcontent.append('<div id="%d"></div>' % (num_articles)) #insert anchor && pagebreak
+                htmlcontent.append('<div id="%d">' % (num_articles)) #insert anchor && pagebreak
                 first_flag = True
                 if thumbnail:
                     sec_toc_thumbnail = thumbnail #url
             body_obj = re.search(body_ex, content)
             if body_obj:
-                htmlcontent.append(body_obj.group()) #insect article
+                htmlcontent.append(body_obj.group()+'</div>') #insect article
                 secondary_toc_list.append((title, num_articles, brief, thumbnail))
                 num_articles += 1
             else:
