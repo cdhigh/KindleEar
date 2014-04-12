@@ -98,7 +98,10 @@ class BaseHandler:
             except OverQuotaError as e:
                 default_log.warn('overquota when sendmail to %s:%s' % (to, str(e)))
                 self.deliverlog(name, to, title, len(attachment), tz=tz, status='over quota')
-                break
+                default_log.warn('overquota when sendmail to %s:%s, retry!' % (to, str(e)))
+                time.sleep(10)
+                if i>2:
+                    break
             except InvalidSenderError as e:
                 default_log.warn('UNAUTHORIZED_SENDER when sendmail to %s:%s' % (to, str(e)))
                 self.deliverlog(name, to, title, len(attachment), tz=tz, status='wrong SRC_EMAIL')
