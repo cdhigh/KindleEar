@@ -111,11 +111,6 @@ a:active{ color:#00498d; }
 
 .book {
     position: relative;;
-    border-bottom:1px solid #d8d8d8;
-    padding: 2px 5px;
-}
-
-#ownfeeds .book{
     border-bottom: 1px dotted #d8d8d8;
     padding: 10px 0;
 }
@@ -126,12 +121,12 @@ a:active{ color:#00498d; }
     padding: 10px 0;
 }
 #ownfeeds .book:hover{
-    border-bottom: 3px solid #d8d8d8;
+    border-bottom: 1px dotted #d8d8d8;
     background: #F4F9FD;
     padding: 11px 0;
 }
 #mybooks .book:hover, #books .book:hover{
-    border-bottom: 3px solid #d8d8d8;
+    border-bottom: 1px dotted #d8d8d8;
     background: #F4F9FD;
 }
 .titleRow {
