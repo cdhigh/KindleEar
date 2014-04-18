@@ -33,7 +33,7 @@
       双击uploader.bat即可上传。
       https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing
       如果上面的地址被墙，可以使用备份的墙内地址：
-      http://yunpan.cn/QGiHjKRZ6EreW
+      http://yunpan.cn/QGiHjKRZ6EreW （访问密码：beaa）
 
 三、许可
 

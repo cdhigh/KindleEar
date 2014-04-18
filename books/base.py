@@ -563,6 +563,11 @@ class BaseFeedBook:
             for img in soup.find_all('img'):
                 img.decompose()
         
+        #将HTML5标签转换为div
+        for x in soup.find_all(['article', 'aside', 'header', 'footer', 'nav',
+            'figcaption', 'figure', 'section', 'time']):
+            x.name = 'div'
+        
         self.soupprocessex(soup)
         
         #插入分享链接
@@ -723,6 +728,11 @@ class BaseFeedBook:
         bodyattrs = [attr for attr in body.attrs]
         for attr in bodyattrs:
             del body[attr]
+        
+        #将HTML5标签转换为div
+        for x in soup.find_all(['article', 'aside', 'header', 'footer', 'nav',
+            'figcaption', 'figure', 'section', 'time']):
+            x.name = 'div'
         
         self.soupprocessex(soup)
         
