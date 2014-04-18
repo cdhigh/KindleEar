@@ -6,7 +6,7 @@
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
-__Version__ = "1.13.4-r1"
+__Version__ = "1.13.4-r2"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -33,6 +33,7 @@ __builtin__.__dict__['main'] = Main_Var
 main.supported_languages = supported_languages
 main.log = log
 main.__Version__ = __Version__
+log.setLevel(logging.INFO if IsRunInLocal else logging.WARN)
 
 import web
 import jinja2
@@ -51,8 +52,6 @@ from apps.utils import fix_filesizeformat
 
 #reload(sys)
 #sys.setdefaultencoding('utf-8')
-
-log.setLevel(logging.INFO if IsRunInLocal else logging.WARN)
 
 for book in BookClasses():  #添加内置书籍
     if memcache.get(book.title): #使用memcache加速
