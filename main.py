@@ -59,7 +59,7 @@ def hide_email(email):
         return email[0][0] + '**@' + email[-1]
     to = email[0][0:2] + ''.join(['*' for s in email[0][2:-1]]) + email[0][-1]
     return to + '@' + email[-1]
-    
+
 def set_lang(lang):
     """ 设置网页显示语言 """
     tr = gettext.translation('lang', 'i18n', languages=[lang])
@@ -78,12 +78,12 @@ class Book(db.Model):
     coverfile = db.StringProperty()
     keep_image = db.BooleanProperty()
     oldest_article = db.IntegerProperty()
-    
+
     #这三个属性只有自定义RSS才有意义
     @property
     def feeds(self):
         return Feed.all().filter('book = ', self.key()).order('time')
-        
+
     @property
     def feedscount(self):
         mkey = '%d.feedscount'%self.key().id()
@@ -97,7 +97,7 @@ class Book(db.Model):
     @property
     def owner(self):
         return KeUser.all().filter('ownfeeds = ', self.key())
-    
+
 class KeUser(db.Model): # kindleEar User
     name = db.StringProperty(required=True)
     passwd = db.StringProperty(required=True)
@@ -112,7 +112,7 @@ class KeUser(db.Model): # kindleEar User
     ownfeeds = db.ReferenceProperty(Book) # 每个用户都有自己的自定义RSS
     titlefmt = db.StringProperty() #在元数据标题中添加日期的格式
     merge_books = db.BooleanProperty() #是否合并书籍成一本
-    
+
     share_fuckgfw = db.BooleanProperty() #归档和分享时是否需要翻墙
     evernote = db.BooleanProperty() #是否分享至evernote
     evernote_mail = db.StringProperty() #evernote邮件地址
@@ -124,22 +124,22 @@ class KeUser(db.Model): # kindleEar User
     twitter = db.BooleanProperty()
     tumblr = db.BooleanProperty()
     browser = db.BooleanProperty()
-    
+
     @property
     def whitelist(self):
         return WhiteList.all().filter('user = ', self.key())
-    
+
     @property
     def urlfilter(self):
         return UrlFilter.all().filter('user = ', self.key())
-    
+
 class Feed(db.Model):
     book = db.ReferenceProperty(Book)
     title = db.StringProperty()
     url = db.StringProperty()
     isfulltext = db.BooleanProperty()
     time = db.DateTimeProperty() #源被加入的时间，用于排序
-    
+
 class DeliverLog(db.Model):
     username = db.StringProperty()
     to = db.StringProperty()
@@ -156,7 +156,7 @@ class WhiteList(db.Model):
 class UrlFilter(db.Model):
     url = db.StringProperty()
     user = db.ReferenceProperty(KeUser)
-    
+
 for book in BookClasses():  #添加内置书籍
     if memcache.get(book.title): #使用memcache加速
         continue
@@ -172,16 +172,16 @@ class BaseHandler:
         if not session.get('lang'):
             session.lang = self.browerlang()
         set_lang(session.lang)
-        
+
     @classmethod
     def logined(self):
         return True if session.get('login') == 1 else False
-    
+
     @classmethod
     def login_required(self, username=None):
         if (session.get('login') != 1) or (username and username != session.get('username')):
             raise web.seeother(r'/login')
-    
+
     @classmethod
     def getcurrentuser(self):
         self.login_required()
@@ -189,7 +189,7 @@ class BaseHandler:
         if not u:
             raise web.seeother(r'/login')
         return u
-        
+
     def browerlang(self):
         lang = web.ctx.env.get('HTTP_ACCEPT_LANGUAGE', "en")
         #分析浏览器支持那些语种，为了效率考虑就不用全功能的分析语种和排序了
@@ -198,7 +198,7 @@ class BaseHandler:
         langs = [c.strip() for c in langs if '=' not in c]
         baselangs = {c.split('-')[0] for c in langs if '-' in c}
         langs.extend(baselangs)
-        
+
         for c in langs: #浏览器直接支持的语种
             if c in supported_languages:
                 return c
@@ -207,7 +207,7 @@ class BaseHandler:
                 if sl.startswith(c):
                     return sl
         return supported_languages[0]
-        
+
     @classmethod
     def deliverlog(self, name, to, book, size, status='ok', tz=TIMEZONE):
         try:
@@ -217,7 +217,7 @@ class BaseHandler:
             dl.put()
         except Exception as e:
             default_log.warn('DeliverLog failed to save:%s',str(e))
-    
+
     @classmethod
     def SendToKindle(self, name, to, title, booktype, attachment, tz=TIMEZONE, filewithtime=True):
         if PINYIN_FILENAME: # 将中文文件名转换为拼音
@@ -226,7 +226,7 @@ class BaseHandler:
             basename = decoder.decode(title)
         else:
             basename = title
-            
+
         lctime = local_time('%Y-%m-%d_%H-%M',tz)
         if booktype:
             if filewithtime:
@@ -235,7 +235,7 @@ class BaseHandler:
                 filename = "%s.%s"%(basename,booktype)
         else:
             filename = basename
-            
+
         for i in range(SENDMAIL_RETRY_CNT+1):
             try:
                 mail.send_mail(SRC_EMAIL, to, "KindleEar %s" % lctime, "Deliver from KindlerEar",
@@ -271,7 +271,7 @@ class BaseHandler:
             else:
                 self.deliverlog(name, to, title, len(attachment), tz=tz)
                 break
-    
+
     @classmethod
     def SendHtmlMail(self, name, to, title, html, attachments, tz=TIMEZONE):
         for i in range(SENDMAIL_RETRY_CNT+1):
@@ -313,23 +313,23 @@ class BaseHandler:
                     size = len(html)
                 self.deliverlog(name, to, title, size, tz=tz)
                 break
-    
+
     def render(self, templatefile, title='KindleEar', **kwargs):
         kwargs.setdefault('nickname', session.get('username'))
         kwargs.setdefault('lang', session.get('lang', 'en'))
         kwargs.setdefault('version', __Version__)
         return jjenv.get_template(templatefile).render(title=title, **kwargs)
-        
+
 class Home(BaseHandler):
     def GET(self):
         return self.render('home.html',"Home")
-        
+
 class Setting(BaseHandler):
     def GET(self, tips=None):
         user = self.getcurrentuser()
         return self.render('setting.html',"Setting",
             current='setting',user=user,mail_sender=SRC_EMAIL,tips=tips)
-        
+
     def POST(self):
         user = self.getcurrentuser()
         kemail = web.input().get('kindleemail')
@@ -350,7 +350,7 @@ class Setting(BaseHandler):
             user.send_days = [day for day in alldays if web.input().get(day)]
             user.merge_books = bool(web.input().get('mergebooks'))
             user.put()
-            
+
             myfeeds = user.ownfeeds
             myfeeds.language = web.input().get("lng")
             myfeeds.title = mytitle
@@ -359,7 +359,7 @@ class Setting(BaseHandler):
             myfeeds.users = [user.name] if web.input().get("enablerss") else []
             myfeeds.put()
             tips = _("Settings Saved!")
-        
+
         return self.GET(tips)
 
 class AdvWhiteList(BaseHandler):
@@ -368,15 +368,15 @@ class AdvWhiteList(BaseHandler):
         user = self.getcurrentuser()
         return self.render('advwhitelist.html',"White List",current='advsetting',
             user=user,advcurr='whitelist')
-        
+
     def POST(self):
         user = self.getcurrentuser()
-        
+
         wlist = web.input().get('wlist')
         if wlist:
             WhiteList(mail=wlist,user=user).put()
         raise web.seeother('')
-        
+
 class AdvShare(BaseHandler):
     """ 设置归档和分享配置项 """
     def GET(self):
@@ -394,10 +394,10 @@ class AdvShare(BaseHandler):
         args = locals()
         args.pop('self')
         return self.render('advshare.html',"Share",**args)
-        
+
     def POST(self):
         user = self.getcurrentuser()
-        
+
         fuckgfw = bool(web.input().get('fuckgfw'))
         evernote = bool(web.input().get('evernote'))
         evernote_mail = web.input().get('evernote_mail', '')
@@ -413,7 +413,7 @@ class AdvShare(BaseHandler):
         twitter = bool(web.input().get('twitter'))
         tumblr = bool(web.input().get('tumblr'))
         browser = bool(web.input().get('browser'))
-        
+
         user.share_fuckgfw = fuckgfw
         user.evernote = evernote
         user.evernote_mail = evernote_mail
@@ -426,24 +426,24 @@ class AdvShare(BaseHandler):
         user.tumblr = tumblr
         user.browser = browser
         user.put()
-        
+
         raise web.seeother('')
-        
+
 class AdvUrlFilter(BaseHandler):
     """ 设置URL过滤器 """
     def GET(self):
         user = self.getcurrentuser()
         return self.render('advurlfilter.html',"Url Filter",current='advsetting',
             user=user,advcurr='urlfilter')
-        
+
     def POST(self):
         user = self.getcurrentuser()
-        
+
         url = web.input().get('url')
         if url:
             UrlFilter(url=url,user=user).put()
         raise web.seeother('')
-        
+
 class AdvDel(BaseHandler):
     #删除白名单或URL过滤器项目
     def GET(self):
@@ -460,7 +460,7 @@ class AdvDel(BaseHandler):
             if wlist:
                 wlist.delete()
             raise web.seeother('/advwhitelist')
-        
+
 class Admin(BaseHandler):
     # 账户管理页面
     def GET(self):
@@ -468,7 +468,7 @@ class Admin(BaseHandler):
         users = KeUser.all() if user.name == 'admin' else None
         return self.render('admin.html',"Admin",
             current='admin', user=user, users=users)
-        
+
     def POST(self):
         u,up1,up2 = web.input().get('u'),web.input().get('up1'),web.input().get('up2')
         op,p1,p2 = web.input().get('op'), web.input().get('p1'), web.input().get('p2')
@@ -520,13 +520,13 @@ class Admin(BaseHandler):
                 current='admin', user=user, users=users,actips=tips)
         else:
             return self.GET()
-       
+
 class Login(BaseHandler):
     def CheckAdminAccount(self):
         #判断管理员账号是否存在
         #如果管理员账号不存在，创建一个，并返回False，否则返回True
         u = KeUser.all().filter("name = ", 'admin').get()
-        if not u:            
+        if not u:
             myfeeds = Book(title=MY_FEEDS_TITLE,description=MY_FEEDS_DESC,
                     builtin=False,keep_image=True,oldest_article=7)
             myfeeds.put()
@@ -537,7 +537,7 @@ class Login(BaseHandler):
             return False
         else:
             return True
-            
+
     def GET(self):
         # 第一次登陆时如果没有管理员帐号，
         # 则增加一个管理员帐号admin，密码admin，后续可以修改密码
@@ -546,12 +546,12 @@ class Login(BaseHandler):
             tips = _("Please use admin/admin to login at first time.")
         else:
             tips = _("Please input username and password.")
-        
+
         if session.get('login') == 1:
             web.seeother(r'/')
         else:
             return self.render('login.html',"Login",tips=tips)
-        
+
     def POST(self):
         name, passwd = web.input().get('u'), web.input().get('p')
         if name.strip() == '':
@@ -563,9 +563,9 @@ class Login(BaseHandler):
         elif '<' in name or '>' in name or '&' in name:
             tips = _("The username includes unsafe chars!")
             return self.render('login.html',"Login",nickname='',tips=tips)
-        
+
         self.CheckAdminAccount() #确认管理员账号是否存在
-        
+
         try:
             pwdhash = hashlib.md5(passwd).hexdigest()
         except:
@@ -578,13 +578,13 @@ class Login(BaseHandler):
             if u.expires: #用户登陆后自动续期
                 u.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
                 u.put()
-                
+
             #修正从1.6.15之前的版本升级过来后自定义RSS丢失的问题
             for fd in Feed.all():
                 if not fd.time:
                     fd.time = datetime.datetime.utcnow()
                     fd.put()
-            
+
             #1.7新增各用户独立的白名单和URL过滤器，这些处理是为了兼容以前的版本
             if name == 'admin':
                 for wl in WhiteList.all():
@@ -595,7 +595,7 @@ class Login(BaseHandler):
                     if not uf.user:
                         uf.user = u
                         uf.put()
-                        
+
             #如果删除了内置书籍py文件，则在数据库中也清除
             #放在同步数据库是为了推送任务的效率
             for bk in Book.all().filter('builtin = ', True):
@@ -607,12 +607,12 @@ class Login(BaseHandler):
                             bk.put()
                         found = True
                         break
-                
+
                 if not found:
                     for fd in bk.feeds:
                         fd.delete()
                     bk.delete()
-            
+
             raise web.seeother(r'/my')
         else:
             tips = _("The username not exist or password is wrong!")
@@ -620,7 +620,7 @@ class Login(BaseHandler):
             session.username = ''
             session.kill()
             return self.render('login.html',"Login",nickname='',tips=tips,username=name)
-            
+
 class Logout(BaseHandler):
     def GET(self):
         session.login = 0
@@ -636,7 +636,7 @@ class AdminMgrPwd(BaseHandler):
         tips = _("Please input new password to confirm!")
         return self.render('adminmgrpwd.html', "Change password",
             tips=tips,username=name)
-        
+
     def POST(self, _n=None):
         self.login_required('admin')
         name, p1, p2 = web.input().get('u'),web.input().get('p1'),web.input().get('p2')
@@ -657,10 +657,10 @@ class AdminMgrPwd(BaseHandler):
                     tips = _("Change password success!")
         else:
             tips = _("Username is empty!")
-        
+
         return self.render('adminmgrpwd.html', "Change password",
             tips=tips, username=name)
-        
+
 class DelAccount(BaseHandler):
     def GET(self, name):
         self.login_required()
@@ -670,7 +670,7 @@ class DelAccount(BaseHandler):
                 tips=tips,username=name)
         else:
             raise web.seeother(r'/')
-    
+
     def POST(self, _n=None):
         self.login_required()
         name = web.input().get('u')
@@ -684,13 +684,13 @@ class DelAccount(BaseHandler):
                         feed.delete()
                     u.ownfeeds.delete()
                 u.delete()
-                
+
                 # 删掉订阅记录
                 for book in Book.all():
                     if book.users and name in book.users:
                         book.users.remove(name)
                         book.put()
-                
+
                 if session.username == name:
                     raise web.seeother('/logout')
                 else:
@@ -707,7 +707,7 @@ class MySubscription(BaseHandler):
         myfeeds = user.ownfeeds.feeds if user.ownfeeds else None
         return self.render('my.html', "My subscription",current='my',
             books=Book.all().filter("builtin = ",True),myfeeds=myfeeds,tips=tips)
-    
+
     def POST(self): # 添加自定义RSS
         user = self.getcurrentuser()
         title = web.input().get('t')
@@ -715,7 +715,7 @@ class MySubscription(BaseHandler):
         isfulltext = bool(web.input().get('fulltext'))
         if not title or not url:
             return self.GET(_("Title or url is empty!"))
-        
+
         if not url.lower().startswith('http'): #http and https
             url = 'http://' + url
         assert user.ownfeeds
@@ -723,7 +723,7 @@ class MySubscription(BaseHandler):
             time=datetime.datetime.utcnow()).put()
         memcache.delete('%d.feedscount'%user.ownfeeds.key().id())
         raise web.seeother('/my')
-        
+
 class Subscribe(BaseHandler):
     def GET(self, id):
         self.login_required()
@@ -733,16 +733,16 @@ class Subscribe(BaseHandler):
             id = int(id)
         except:
             return "the id is invalid!<br />"
-        
+
         bk = Book.get_by_id(id)
         if not bk:
             return "the book(%d) not exist!<br />" % id
-        
+
         if session.username not in bk.users:
             bk.users.append(session.username)
             bk.put()
         raise web.seeother('/my')
-        
+
 class Unsubscribe(BaseHandler):
     def GET(self, id):
         self.login_required()
@@ -752,11 +752,11 @@ class Unsubscribe(BaseHandler):
             id = int(id)
         except:
             return "the id is invalid!<br />"
-            
+
         bk = Book.get_by_id(id)
         if not bk:
             return "the book(%d) not exist!<br />" % id
-        
+
         if session.username in bk.users:
             bk.users.remove(session.username)
             bk.put()
@@ -771,37 +771,37 @@ class DelFeed(BaseHandler):
             id = int(id)
         except:
             return "the id is invalid!<br />"
-        
+
         feed = Feed.get_by_id(id)
         if feed:
             feed.delete()
-        
+
         raise web.seeother('/my')
-                
+
 class Deliver(BaseHandler):
     """ 判断需要推送哪些书籍 """
     def queueit(self, usr, bookid):
         param = {"u":usr.name, "id":bookid}
-        
+
         if usr.merge_books:
             self.queue2push[usr.name].append(str(bookid))
         else:
             taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
                 params=param)
-        
+
     def flushqueue(self):
         for name in self.queue2push:
             param = {'u':name, 'id':','.join(self.queue2push[name])}
             taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
                 params=param)
         self.queue2push = defaultdict(list)
-        
+
     def GET(self):
         username = web.input().get('u')
         id = web.input().get('id') #for debug
-        
+
         self.queue2push = defaultdict(list)
-        
+
         books = Book.all()
         if username: #现在投递，不判断时间和星期
             sent = []
@@ -820,25 +820,25 @@ class Deliver(BaseHandler):
             else:
                 tips = _("No book to deliver!")
             return self.render('autoback.html', "Delivering",tips=tips)
-        
+
         #定时cron调用
         sentcnt = 0
         for book in books:
             if not book.users: #没有用户订阅此书
                 continue
-            
+
             bkcls = None
             if book.builtin:
                 bkcls = BookClass(book.title)
                 if not bkcls:
                     continue
-            
+
             #确定此书是否需要下载
             for u in book.users:
                 user = KeUser.all().filter("enable_send = ",True).filter("name = ", u).get()
                 if not user or not user.kindle_email:
                     continue
-                    
+
                 #先判断当天是否需要推送
                 day = local_time('%A', user.timezone)
                 usrdays = user.send_days
@@ -850,7 +850,7 @@ class Deliver(BaseHandler):
                         continue
                 elif usrdays and day not in usrdays: #为空也表示每日推送
                     continue
-                    
+
                 #时间判断
                 h = int(local_time("%H", user.timezone)) + 1
                 if h >= 24:
@@ -863,13 +863,13 @@ class Deliver(BaseHandler):
                         continue
                 elif user.send_time != h:
                     continue
-                
+
                 #到了这里才是需要推送的
                 self.queueit(user, book.key().id())
                 sentcnt += 1
         self.flushqueue()
         return "Put <strong>%d</strong> books to queue!" % sentcnt
-        
+
 def InsertToc(oeb, sections, toc_thumbnails):
     """ 创建OEB的两级目录，主要代码由rexdf贡献
     sections为有序字典，关键词为段名，元素为元组列表(title,brief,humbnail,content)
@@ -879,7 +879,7 @@ def InsertToc(oeb, sections, toc_thumbnails):
     body_ex = re.compile(body_pat,re.M|re.S)
     num_articles = 1
     num_sections = 0
-    
+
     ncx_toc = []
     #html_toc_2 secondary toc
     html_toc_2 = []
@@ -905,7 +905,7 @@ def InsertToc(oeb, sections, toc_thumbnails):
             else:
                 htmlcontent.pop()
         htmlcontent.append('</body></html>')
-        
+
         #add section.html to maninfest and spine
         #We'd better not use id as variable. It's a python builtin function.
         id_, href = oeb.manifest.generate(id='feed', href='feed%d.html'%num_sections)
@@ -951,7 +951,7 @@ def InsertToc(oeb, sections, toc_thumbnails):
         oeb.spine.insert(0, item, True)
 
     #Generate NCX TOC for Kindle
-    po = 1 
+    po = 1
     toc = oeb.toc.add(unicode(oeb.metadata.title[0]), oeb.spine[0].href, id='periodical', klass='periodical', play_order=po)
     po += 1
     for ncx in ncx_toc:
@@ -960,22 +960,22 @@ def InsertToc(oeb, sections, toc_thumbnails):
         elif sectoc:
             sectoc.add(unicode(ncx[1]), ncx[2], description=ncx[3] if ncx[3] else None, klass='article', play_order=po, id='article-%d'%po, toc_thumbnail=toc_thumbnails[ncx[4]] if GENERATE_TOC_THUMBNAIL and ncx[4] else None)
         po += 1
-    
+
 class Worker(BaseHandler):
     """ 实际下载文章和生成电子书并且发送邮件 """
     def GET(self):
         username = web.input().get("u")
         bookid = web.input().get("id")
-        
+
         user = KeUser.all().filter("name = ", username).get()
         if not user:
             return "User not exist!<br />"
-        
+
         to = user.kindle_email
         booktype = user.book_type
         titlefmt = user.titlefmt
         tz = user.timezone
-        
+
         bookid = bookid.split(',') if ',' in bookid else [bookid]
         bks = []
         for id in bookid:
@@ -984,28 +984,28 @@ class Worker(BaseHandler):
             except:
                 continue
                 #return "id of book is invalid or book not exist!<br />"
-        
+
         if len(bks) == 0:
             return "No have book to push!"
         elif len(bks) == 1:
             book4meta = BookClass(bks[0].title) if bks[0].builtin else bks[0]
         else: #多本书合并推送时使用“自定义RSS”的元属性
             book4meta = user.ownfeeds
-        
+
         if not book4meta:
             return "No have book to push.<br />"
-            
+
         opts = oeb = None
-        
+
         # 创建 OEB
         global log
         opts = getOpts(user.device)
         oeb = CreateOeb(log, None, opts)
         title = "%s %s" % (book4meta.title, local_time(titlefmt, tz)) if titlefmt else book4meta.title
-        
+
         setMetaData(oeb, title, book4meta.language, local_time("%Y-%m-%d",tz), 'KindleEar')
         oeb.container = ServerContainer(log)
-        
+
         #guide
         if len(bks)==1 and bks[0].builtin:
             mhfile = book4meta.mastheadfile
@@ -1013,18 +1013,18 @@ class Worker(BaseHandler):
         else:
             mhfile = DEFAULT_MASTHEAD
             coverfile = DEFAULT_COVER_BV if user.merge_books else DEFAULT_COVER
-        
+
         if mhfile:
             id_, href = oeb.manifest.generate('masthead', mhfile) # size:600*60
             oeb.manifest.add(id_, href, MimeFromFilename(mhfile))
             oeb.guide.add('masthead', 'Masthead Image', href)
-        
+
         if coverfile:
             id_, href = oeb.manifest.generate('cover', coverfile)
             item = oeb.manifest.add(id_, href, MimeFromFilename(coverfile))
             oeb.guide.add('cover', 'Cover', href)
             oeb.metadata.add('cover', id_)
-        
+
         itemcnt,imgindex = 0,0
         sections = OrderedDict()
         toc_thumbnails = {} #map img-url -> manifest-href
@@ -1048,15 +1048,15 @@ class Worker(BaseHandler):
                 book.fulltext_by_readability = True
                 feeds = bk.feeds
                 book.feeds = [(feed.title, feed.url, feed.isfulltext) for feed in feeds]
-                book.url_filters = [flt.url for flt in user.urlfilter]            
-            
+                book.url_filters = [flt.url for flt in user.urlfilter]
+
             # 对于html文件，变量名字自文档,thumbnail为文章第一个img的url
             # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容,
             #    img的thumbail仅当其为article的第一个img为True
             for sec_or_media, url, title, content, brief, thumbnail in book.Items(opts,user):
                 if not sec_or_media or not title or not content:
                     continue
-                
+
                 if sec_or_media.startswith(r'image/'):
                     id_, href = oeb.manifest.generate(id='img', href=title)
                     item = oeb.manifest.add(id_, href, sec_or_media, data=content)
@@ -1070,7 +1070,7 @@ class Worker(BaseHandler):
                     sections.setdefault(sec_or_media, [])
                     sections[sec_or_media].append((title, brief, thumbnail, content))
                     itemcnt += 1
-                    
+
         if itemcnt > 0:
             InsertToc(oeb, sections, toc_thumbnails)
             oIO = byteStringIO()
@@ -1099,9 +1099,9 @@ class Url2Book(BaseHandler):
         tz = int(web.input().get("tz", TIMEZONE))
         if not all((username,urls,subject,to,language,booktype,tz)):
             return "Some parameter missing!<br />"
-        
+
         global log
-        
+
         if booktype == 'Download': #直接下载电子书并推送
             from lib.filedownload import Download
             for url in urls.split('|'):
@@ -1109,7 +1109,7 @@ class Url2Book(BaseHandler):
                 #如果标题已经给定了文件名，则使用标题文件名
                 if '.' in subject and (1 < len(subject.split('.')[-1]) < 5):
                     filename = subject
-                    
+
                 if content:
                     self.SendToKindle(username, to, filename, '', content, tz)
                 else:
@@ -1118,11 +1118,11 @@ class Url2Book(BaseHandler):
                     self.deliverlog(username, to, filename, 0, status=dlinfo,tz=tz)
                 log.info("%s Sent!" % filename)
             return "%s Sent!" % filename
-            
+
         user = KeUser.all().filter("name = ", username).get()
         if not user or not user.kindle_email:
             return "User not exist!<br />"
-            
+
         book = BaseUrlBook()
         book.title = book.description = subject
         book.language = language
@@ -1130,14 +1130,14 @@ class Url2Book(BaseHandler):
         book.network_timeout = 60
         book.feeds = [(subject,url) for url in urls.split('|')]
         book.url_filters = [flt.url for flt in user.urlfilter]
-        
+
         opts = oeb = None
-        
+
         # 创建 OEB
         opts = getOpts(user.device)
         oeb = CreateOeb(log, None, opts)
         oeb.container = ServerContainer(log)
-        
+
         if len(book.feeds) > 1:
             setMetaData(oeb, subject, language, local_time(tz=tz))
             id, href = oeb.manifest.generate('masthead', DEFAULT_MASTHEAD)
@@ -1145,12 +1145,12 @@ class Url2Book(BaseHandler):
             oeb.guide.add('masthead', 'Masthead Image', href)
         else:
             setMetaData(oeb, subject, language, local_time(tz=tz), pubtype='book:book:KindleEar')
-        
+
         id, href = oeb.manifest.generate('cover', DEFAULT_COVER)
         item = oeb.manifest.add(id, href, MimeFromFilename(DEFAULT_COVER))
         oeb.guide.add('cover', 'Cover', href)
         oeb.metadata.add('cover', id)
-        
+
         # 对于html文件，变量名字自文档
         # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
         itemcnt,hasimage = 0,False
@@ -1173,7 +1173,7 @@ class Url2Book(BaseHandler):
                     oeb.spine.add(item, False)
                     oeb.toc.add(title, href)
                 itemcnt += 1
-            
+
         if itemcnt > 0:
             if len(book.feeds) > 1:
                 InsertToc(oeb, sections, toc_thumbnails)
@@ -1183,7 +1183,7 @@ class Url2Book(BaseHandler):
                 item = oeb.manifest.hrefs[href]
                 oeb.manifest.remove(item)
                 oeb.metadata.clear('cover')
-                
+
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()
             o.convert(oeb, oIO, opts, log)
@@ -1199,9 +1199,9 @@ class Url2Book(BaseHandler):
 
 class Share(BaseHandler):
     """ 保存到evernote或分享到社交媒体 """
-    
+
     SHARE_IMAGE_EMBEDDED = True
-    
+
     def GET(self):
         import urlparse,urllib
         action = web.input().get('act')
@@ -1209,19 +1209,19 @@ class Share(BaseHandler):
         url = web.input().get("url")
         if not username or not url or not action:
             return "Some parameter is missing or wrong!<br />"
-        
+
         user = KeUser.all().filter("name = ", username).get()
         if not user or not user.kindle_email:
             return "User not exist!<br />"
-        
+
         global log
-        
+
         url = urllib.unquote(url)
-        
+
         #因为知乎好文章比较多，特殊处理一下知乎
         if urlparse.urlsplit(url)[1].endswith('zhihu.com'):
             url = 'http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u=%s'%urllib.quote(url)
-            
+
         if action in ('evernote','wiz'): #保存至evernote/wiz
             if action=='evernote' and (not user.evernote or not user.evernote_mail):
                 log.warn('No have evernote mail yet.')
@@ -1229,7 +1229,7 @@ class Share(BaseHandler):
             elif action=='wiz' and (not user.wiz or not user.wiz_mail):
                 log.warn('No have wiz mail yet.')
                 return "No have wiz mail yet."
-                
+
             book = BaseUrlBook()
             book.title = book.description = action
             book.language = user.ownfeeds.language
@@ -1237,11 +1237,11 @@ class Share(BaseHandler):
             book.network_timeout = 60
             book.feeds = [(action,url)]
             book.url_filters = [flt.url for flt in user.urlfilter]
-            
+
             attachments = [] #(filename, attachment),]
             html = ''
             title = action
-            
+
             # 对于html文件，变量名字自文档
             # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
             for sec_or_media, url, title, content, brief, thumbnail in book.Items():
@@ -1253,7 +1253,7 @@ class Share(BaseHandler):
                         attachments.append((title,content))
                 else:
                     soup = BeautifulSoup(content, 'lxml')
-                    
+
                     #插入源链接
                     p = soup.new_tag('p', style='font-size:80%;color:grey;')
                     a = soup.new_tag('a', href=url)
@@ -1261,7 +1261,7 @@ class Share(BaseHandler):
                     p.string = 'origin : '
                     p.append(a)
                     soup.html.body.insert(0,p)
-                    
+
                     if self.SHARE_IMAGE_EMBEDDED:
                         #内嵌图片标识
                         for img in soup.find_all('img', attrs={'src':True}):
@@ -1272,14 +1272,14 @@ class Share(BaseHandler):
                             p = soup.new_tag('p')
                             p.string = 'Image : ' + img['src']
                             img.insert_after(p)
-                        
+
                     try:
                         title = unicode(soup.html.head.title.string)
                     except:
                         pass
-                    
+
                     html = unicode(soup)
-                    
+
             to = user.wiz_mail if action=='wiz' else user.evernote_mail
             if html:
                 self.SendHtmlMail(username,to,title,html,attachments,user.timezone)
@@ -1295,7 +1295,7 @@ class Share(BaseHandler):
                 return "[Share]Fetch url failed."
         else:
             return "Unknown parameter 'action'!"
-        
+
 class Mylogs(BaseHandler):
     def GET(self):
         user = self.getcurrentuser()
@@ -1308,7 +1308,7 @@ class Mylogs(BaseHandler):
                     logs[u.name] =  ul
         return self.render('logs.html', "Deliver log", current='logs',
             mylogs=mylogs, logs=logs)
-        
+
 class RemoveLogs(BaseHandler):
     def GET(self):
         # 停止过期用户的推送
@@ -1316,15 +1316,15 @@ class RemoveLogs(BaseHandler):
             if user.expires and (user.expires < datetime.datetime.utcnow()):
                 user.enable_send = False
                 user.put()
-        
+
         query = DeliverLog.all()
         query.filter('datetime < ', datetime.datetime.utcnow() - datetime.timedelta(days=25))
         logs = query.fetch(1000)
         c = len(logs)
         db.delete(logs)
-        
+
         return "%s lines log removed.<br />" % c
-        
+
 class SetLang(BaseHandler):
     def GET(self, lang):
         lang = lang.lower()
@@ -1332,7 +1332,7 @@ class SetLang(BaseHandler):
             return "language invalid!"
         session.lang = lang
         raise web.seeother(r'/')
-        
+
 class Test(BaseHandler):
     def GET(self):
         s = ''
@@ -1362,7 +1362,7 @@ class DbViewer(BaseHandler):
         return self.render('dbviewer.html', "DbViewer",
             books=Book.all(),users=KeUser.all(),
             feeds=Feed.all().order('book'),urlencs=UrlEncoding.all())
-        
+
 def fix_filesizeformat(value, binary=False):
     " bugfix for do_filesizeformat of jinja2 "
     bytes = float(value)
@@ -1379,7 +1379,7 @@ def fix_filesizeformat(value, binary=False):
             unit = base ** (i + 2)
             if bytes < unit:
                 return '%.1f %s' % ((base * bytes / unit), prefix)
-        return '%.1f %s' % ((base * bytes / unit), prefix)        
+        return '%.1f %s' % ((base * bytes / unit), prefix)
 
 urls = (
   r"/", "Home",
