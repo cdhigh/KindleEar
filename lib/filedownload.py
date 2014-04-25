@@ -4,6 +4,7 @@
 import urllib, urllib2, Cookie, urlparse, time, re
 from google.appengine.api import urlfetch
 from google.appengine.runtime.apiproxy_errors import OverQuotaError
+from lib.urlopener import URLOpener
 
 URLFETCH_MAX = 2
 URLFETCH_MAXSIZE = 1*1024*1024 #最大4M，但是为了稳定性，每次下载1M
@@ -13,16 +14,33 @@ def Download(url):
     """ FileDownload工具函数，简化文件下载工作 
     返回一个元组 (status, filename, content)
     """
-    
     FilenameFromUrl = lambda url: urlparse.urlparse(url)[2].split('/')[-1]
     
+    FilenameFromHandler = None
+    
+    #先获取真实下载地址（如果需要的话）
+    for handler in _realurl_handlers:
+        url4dnld = handler(url)
+        if not url4dnld:
+            continue
+        if isinstance(url4dnld, tuple):
+            FilenameFromHandler, url = url4dnld
+        else:
+            url = url4dnld
+        break
+        
     dl = FileDownload()
     resp = dl.open(url)
     
     #获取文件名
-    filename = dl.filename if dl.filename else FilenameFromUrl(dl.realurl)
-    if not filename:
-        filename = 'NoName'
+    if FilenameFromHandler:
+        filename = FilenameFromHandler
+    elif dl.filename:
+        filename = dl.filename
+    else:
+        filename = FilenameFromUrl(dl.realurl)        
+        if not filename:
+            filename = 'NoName'
     
     if resp.status_code == 413:
         return 'too large', filename, ''
@@ -136,7 +154,7 @@ class FileDownload:
                 time.sleep(5)
                 i += 1
             except urlfetch.DeadlineExceededError as e:
-                default_log.warn('timeout(deadline:%s, url:%r)' % (deadline, url))
+                default_log.warn('timeout(deadline:%s, url:%r)' % (self.timeout, url))
                 time.sleep(1)
                 i += 1
             except urlfetch.DownloadError as e:
@@ -211,3 +229,43 @@ class FileDownload:
             for v in obj.values():
                 self.cookie[v.key] = v.value
             
+            
+#===================================================
+#  处理在各类网盘的文件插件，作用是获取真实文件链接
+_realurl_handlers = []
+def RegisterRealUrlHandler(func):
+    """注册网盘文件的真实下载链接处理函数，
+    handle函数接受一个参数url，返回真实下载地址字符串，
+    如果需要返回真实文件名，可以返回一个tuple (filename, link)
+    如果返回空则调用下个handle函数，
+    直到有一个返回有效地址为止。"""
+    _realurl_handlers.append(func)
+
+def BaiduPanHandler(url):
+    import json
+    o = urlparse.urlparse(url)
+    if not o[1] or not o[1].endswith(('pan.baidu.com','yun.baidu.com')):
+        return None
+    
+    #为了简单起见，这里使用网友制作的网站获取真实链接
+    #后续为了减少依赖，可以借鉴
+    #https://github.com/banbanchs/pan-baidu-download
+    #和 https://github.com/xuanqinanhai/bleed-baidu-white
+    #将代码集成过来
+    url = 'http://daimajia.duapp.com/baidu/?url=%s' % url
+    opener = URLOpener()
+    result = opener.open(url)
+    if result.status_code != 200 or not result.content:
+        return None
+    linkinfo = json.loads(result.content.decode('utf-8'))
+    filename = linkinfo.get('name')
+    if '\u' in filename:
+        try:
+            filename = filename.decode('unicode-escape')
+        except:
+            pass
+    link = linkinfo.get('download')
+    
+    return (filename,link) if link else None
+    
+RegisterRealUrlHandler(BaiduPanHandler)

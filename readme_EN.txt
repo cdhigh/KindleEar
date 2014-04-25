@@ -17,6 +17,7 @@
    6.Modify some variables in config.py
       SRC_EMAIL : your gmail address that used to register a GAE account in step 1.
       DOMAIN : domain of your gae application.
+      TIMEZONE : your timezone
    7.Execute command in directory GAE SDK(default is C:\Program Files\Google\google_appengine)
       'c:\python27\python.exe appcfg.py update c:\kindleear' (c:\kindleear is directory that you put files in step 4)
       input email address and password and wait it finish.

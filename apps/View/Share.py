@@ -40,7 +40,7 @@ class Share(BaseHandler):
         
         #因为知乎好文章比较多，特殊处理一下知乎
         if urlparse.urlsplit(url)[1].endswith('zhihu.com'):
-            url = 'http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u=%s'%urllib.quote(url)
+            url = 'http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u=%s'%urllib.quote(url.encode('utf-8'))
             
         if action in ('evernote','wiz'): #保存至evernote/wiz
             if action=='evernote' and (not user.evernote or not user.evernote_mail):

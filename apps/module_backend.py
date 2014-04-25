@@ -3,10 +3,10 @@
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
+#Author: cdhigh
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
-__Version__ = "1.13.2-alpha"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -38,38 +38,38 @@ log.setLevel(logging.INFO if IsRunInLocal else logging.WARN)
 import web
 import jinja2
 #from google.appengine.api import mail
-from google.appengine.api import taskqueue
+#from google.appengine.api import taskqueue
 from google.appengine.api import memcache
 
 from lib.memcachestore import MemcacheStore
-from books import BookClasses
+#from books import BookClasses
 
 from apps.Work import *
 
-from apps.dbModels import Book
-from apps.BaseHandler import BaseHandler
+#from apps.dbModels import Book
+#from apps.BaseHandler import BaseHandler
 from apps.utils import fix_filesizeformat
 
 #reload(sys)
 #sys.setdefaultencoding('utf-8')
 
-for book in BookClasses():  #添加内置书籍
-    if memcache.get(book.title): #使用memcache加速
-        continue
-    b = Book.all().filter("title = ", book.title).get()
-    if not b:
-        b = Book(title=book.title,description=book.description,builtin=True)
-        b.put()
-        memcache.add(book.title, book.description, 86400)
+#for book in BookClasses():  #添加内置书籍
+#    if memcache.get(book.title): #使用memcache加速
+#        continue
+#    b = Book.all().filter("title = ", book.title).get()
+#    if not b:
+#        b = Book(title=book.title,description=book.description,builtin=True)
+#        b.put()
+#        memcache.add(book.title, book.description, 86400)
+#
+#class Test(BaseHandler):
+#    def GET(self):
+#        s = ''
+#        for d in os.environ:
+#            s += "<pre><p>" + str(d).rjust(28) + " | " + str(os.environ[d]) + "</p></pre>"
+#        return s
 
-class Test(BaseHandler):
-    def GET(self):
-        s = ''
-        for d in os.environ:
-            s += "<pre><p>" + str(d).rjust(28) + " | " + str(os.environ[d]) + "</p></pre>"
-        return s
-
-main.urls += ["/test", "Test",]
+#main.urls += ["/test", "Test",]
 
 application = web.application(main.urls, globals())
 store = MemcacheStore(memcache)

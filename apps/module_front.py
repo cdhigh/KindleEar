@@ -3,10 +3,10 @@
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
+#Author: cdhigh
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
-__Version__ = "1.13.4-r3"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
@@ -38,7 +38,7 @@ log.setLevel(logging.INFO if IsRunInLocal else logging.WARN)
 import web
 import jinja2
 #from google.appengine.api import mail
-from google.appengine.api import taskqueue
+#from google.appengine.api import taskqueue
 from google.appengine.api import memcache
 
 from lib.memcachestore import MemcacheStore
