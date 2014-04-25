@@ -39,7 +39,7 @@ class AutoDecoder:
     def __init__(self, isfeed=True):
         self.encoding = None
         self.isfeed = isfeed #True:Feed,False:page
-        
+
     def decode(self, content, url):
         result = content
         if not ALWAYS_CHAR_DETECT and self.encoding: # 先使用上次的编码打开文件尝试
@@ -69,6 +69,30 @@ class AutoDecoder:
                         UrlEncoding(netloc=netloc,feedenc=encoding).put()
                     else:
                         UrlEncoding(netloc=netloc,pageenc=encoding).put()
+        elif ALWAYS_CHAR_DETECT:
+            encoding = chardet.detect(content)['encoding']
+            try:
+                result = content.decode(encoding)
+            except UnicodeDecodeError:
+                self.encoding = None
+                result = content
+            else:
+                self.encoding = encoding
+                #同时保存到数据库
+                netloc = urlparse.urlsplit(url)[1]
+                urlenc = UrlEncoding.all().filter('netloc = ', netloc).get()
+                if urlenc:
+                    enc = urlenc.feedenc if self.isfeed else urlenc.pageenc
+                    if enc != encoding:
+                        if self.isfeed:
+                            urlenc.feedenc = encoding
+                        else:
+                            urlenc.pageenc = encoding
+                        urlenc.put()
+                elif self.isfeed:
+                    UrlEncoding(netloc=netloc,feedenc=encoding).put()
+                else:
+                    UrlEncoding(netloc=netloc,pageenc=encoding).put()
         else:  # 暂时没有之前的编码信息
             netloc = urlparse.urlsplit(url)[1]
             urlenc = UrlEncoding.all().filter('netloc = ', netloc).get()
@@ -86,7 +110,7 @@ class AutoDecoder:
                     self.encoding = chardet.detect(content)['encoding']
             else:
                 self.encoding = chardet.detect(content)['encoding']
-            
+
             #使用检测到的编码解压
             try:
                 result = content.decode(self.encoding)
@@ -101,7 +125,7 @@ class AutoDecoder:
                     newurlenc.pageenc = self.encoding
                 newurlenc.put()
         return result
-        
+
 class BaseFeedBook:
     """ base class of Book """
     title                 = ''
@@ -113,121 +137,121 @@ class BaseFeedBook:
     network_timeout       = None  # None则使用默认
     fetch_img_via_ssl     = False # 当网页为https时，其图片是否也转换成https
     language = 'und' #最终书籍的语言定义，比如zh-cn,en等
-    
+
     #下面这两个编码建议设置，如果留空，则使用自动探测解码，稍耗费CPU
     feed_encoding = '' # RSS编码，一般为XML格式，直接打开源码看头部就有编码了
     page_encoding = '' # 页面编码，获取全文信息时的网页编码
-    
+
     # 题图文件名，格式：gif(600*60)，所有图片文件存放在images/下面，文件名不需要images/前缀
     # 如果不提供此图片，软件使用PIL生成一个，但是因为GAE不能使用ImageFont组件
     # 所以字体很小，而且不支持中文标题，使用中文会出错
     mastheadfile = DEFAULT_MASTHEAD
-    
+
     coverfile = DEFAULT_COVER #封面图片文件
-    
+
     keep_image = True #生成的MOBI是否需要图片
-    
+
     #是否按星期投递，留空则每天投递，否则是一个星期字符串列表
     #一旦设置此属性，则网页上设置的星期推送对此书无效
     #'Monday','Tuesday',...,'Sunday'，大小写敏感
     #比如设置为['Friday']
     deliver_days = []
-    
+
     #自定义书籍推送时间，一旦设置了此时间，则网页上设置的时间对此书无效
     #用此属性还可以实现一天推送多次
     #格式为整形列表，比如每天8点/18点推送，则设置为[8,18]
     #时区则自动使用订阅者的时区
     deliver_times = []
-    
+
     #设置是否使用readability-lxml(Yuri Baburov)自动处理网页
     #正常来说，大部分的网页，readability处理完后的效果都不错
     #不过如果你需要更精细的控制排版和内容，可以设置为False
     #然后使用下面的一些选项和回调函数自己处理
     #一旦设置此选项为True，则没有必要关注其他的内容控制选项
     fulltext_by_readability = True
-    
+
     #如果为True则使用instapaper服务先清理网页，否则直接连URL下载网页内容
     #instapaper的服务很赞，能将一个乱七八糟的网页转换成只有正文内容的网页
     #但是缺点就是不太稳定，经常连接超时，建议设置为False
     #这样你需要自己编程清理网页，建议使用下面的keep_only_tags[]工具
     fulltext_by_instapaper = False
-    
+
     # 背景知识：下面所说的标签为HTML标签，比如'body','h1','div','p'等都是标签
-    
+
     # 仅抽取网页中特定的标签段，在一个复杂的网页中抽取正文，这个工具效率最高
     # 比如：keep_only_tags = [dict(name='div', attrs={'id':'article'}),]
     # 这个优先级最高，先处理了这个标签再处理其他标签。
     keep_only_tags = []
-    
+
     # 顾名思义，删除特定标签前/后的所有内容，格式和keep_only_tags相同
     remove_tags_after = []
     remove_tags_before = []
-    
+
     # 内置的几个必须删除的标签，不建议子类修改
     insta_remove_tags = ['script','object','video','embed','noscript','style','link']
     insta_remove_attrs = ['width','height','onclick','onload','style']
     insta_remove_classes = []
     insta_remove_ids = ['controlbar_container',]
-    
+
     #---------------add by rexdf-------------
     #下面的积极关键词,有些内容会被readability过滤掉，比如html5的figure，可以通过增加权重保留
     #这个是针对部分html5网站优化的，子类需要修改可以不用继承，因为子类往往针对特定某一网站，可以专门定制
-    positive_classes = ['image-block','image-block-caption','image-block-ins'] 
+    positive_classes = ['image-block','image-block-caption','image-block-ins']
 
     #图像最小大小，有些网站会在正文插入一个1*1像素的图像，大约是带有的水印信息，这样的图片视觉无意义，而且干扰thumbnail
     img_min_size = 1024
     #---------------end----------------------
-    
+
     # 子类定制的HTML标签清理内容
     remove_tags = [] # 完全清理此标签
     remove_ids = [] # 清除标签的id属性为列表中内容的标签
     remove_classes = [] # 清除标签的class属性为列表中内容的标签
     remove_attrs = [] # 清除所有标签的特定属性，不清除标签内容
-    
+
     # 添加到每篇文章的CSS，可以更完美的控制文章呈现
     # 仅需要CSS内容，不要包括<style type="text/css"></style>标签
     # 可以使用多行字符串
     extra_css = ''
-    
+
     # 一个字符串列表，为正则表达式，在此列表中的url不会被下载
     # 可用于一些注定无法下载的图片链接，以便节省时间
     url_filters = []
-    
+
     #每个子类必须重新定义这个属性，为RSS/网页链接列表
     #每个链接格式为元组：(分节标题, URL, isfulltext)
     #最后一项isfulltext是可选的，如果存在，取值为True/False
     #注意，如果分节标题是中文的话，增加u前缀，比如
     #(u'8小时最热', 'http://www.qiushibaike.com'),
     feeds = []
-    
+
     #几个钩子函数，基类在适当的时候会调用，
     #子类可以使用钩子函数进一步定制
-    
+
     #普通Feed在网页元素拆分分析前调用，全文Feed在FEED拆分前调用
     #网络上大部分的RSS都是普通Feed，只有概要信息
     #content为网页字符串，记得处理后返回字符串
     def preprocess(self, content):
         return content
-    
+
     #网页title处理，比如去掉网站标识，一长串的SEQ字符串等
     #返回处理后的title
     def processtitle(self, title):
         return re.sub(r'(\n)+', ' ', title)
-    
+
     #如果要处理图像，则在处理图片前调用此函数，可以处理和修改图片URL等
     def soupbeforeimage(self, soup):
         return None
-        
+
     #BeautifulSoup拆分网页分析处理后再提供给子类进一步处理
     #soup为BeautifulSoup实例引用，直接在soup上处理即可，不需要返回值
     def soupprocessex(self, soup):
         return None
-    
+
     #Items()生成器里面每个Feed返回给MOBI生成模块前对内容的最后处理机会
     #content为网页字符串，记得返回处理后的字符串
     def postprocess(self, content):
         return content
-    
+
     #------------------------------------------------------------
     # 下面的内容为类实现细节
     #------------------------------------------------------------
@@ -235,29 +259,29 @@ class BaseFeedBook:
         self.log = default_log if log is None else log
         self.compiled_urlfilters = []
         self._imgindex = imgindex
-    
+
     @property
     def timeout(self):
         return self.network_timeout if self.network_timeout else CONNECTION_TIMEOUT
-    
+
     @property
     def imgindex(self):
         self._imgindex += 1
         return self._imgindex
-        
+
     def isfiltered(self, url):
         if not self.url_filters:
             return False
         elif not self.compiled_urlfilters:
             self.compiled_urlfilters = [re.compile(unicode(flt), re.I) for flt in self.url_filters]
-        
+
         if not isinstance(url, unicode):
             url = unicode(url)
         for flt in self.compiled_urlfilters:
             if flt.match(url):
                 return True
         return False
-        
+
     @classmethod
     def urljoin(self, base, url):
         #urlparse.urljoin()处理有..的链接有点问题，此函数修正此问题。
@@ -290,24 +314,24 @@ class BaseFeedBook:
             if not htmlencoding:
                 htmlencoding = 'utf-8'
             return frame % (htmlencoding, title, t, content)
-    
+
     def FetchTitle(self, content, default=' '):
         pn = re.compile(r'<title.*?>(.*?)</title>', re.S|re.I)
         mt = pn.search(content)
         return mt.group(1) if mt else default
-        
+
     def url_unescape(self, value):
         s = urllib.unquote_plus(value)
         if isinstance(s, str):
             s = s.decode("utf-8")
         return s
-        
+
     def ParseFeedUrls(self):
         """ return list like [(section,title,url,desc),..] """
         urls = []
         tnow = datetime.datetime.utcnow()
         urladded = set()
-        
+
         for feed in self.feeds:
             section, url = feed[0], feed[1]
             isfulltext = feed[2] if len(feed) > 2 else False
@@ -323,7 +347,7 @@ class BaseFeedBook:
                 else:
                     content = AutoDecoder(True).decode(result.content,opener.realurl)
                 feed = feedparser.parse(content)
-                
+
                 for e in feed['entries'][:self.max_articles_per_feed]:
                     updated = None
                     if hasattr(e, 'updated_parsed') and e.updated_parsed:
@@ -332,39 +356,39 @@ class BaseFeedBook:
                         updated = e.published_parsed
                     elif hasattr(e, 'created_parsed'):
                         updated = e.created_parsed
-                    
+
                     if self.oldest_article > 0 and updated:
                         updated = datetime.datetime(*(updated[0:6]))
                         delta = tnow - updated
                         if delta.days*86400+delta.seconds > 86400*self.oldest_article:
                             self.log.info("Skip old article(%s): %s" % (updated.strftime('%Y-%m-%d %H:%M:%S'),e.link))
                             continue
-                    
+
                     #支持HTTPS
                     if hasattr(e, 'link'):
                         if url.startswith('https://'):
                             urlfeed = e.link.replace('http://','https://')
                         else:
                             urlfeed = e.link
-                            
+
                         if urlfeed in urladded:
                             continue
                     else:
                         urlfeed = ''
-                        
+
                     desc = None
                     if isfulltext:
                         summary = e.summary if hasattr(e, 'summary') else None
-                        desc = e.content[0]['value'] if (hasattr(e, 'content') 
+                        desc = e.content[0]['value'] if (hasattr(e, 'content')
                             and e.content[0]['value']) else None
-                            
+
                         #同时存在，因为有的RSS全文内容放在summary，有的放在content
                         #所以认为内容多的为全文
                         if summary and desc:
                             desc = summary if len(summary) > len(desc) else desc
                         elif summary:
                             desc = summary
-                            
+
                         if not desc:
                             if not urlfeed:
                                 continue
@@ -374,9 +398,9 @@ class BaseFeedBook:
                     urladded.add(urlfeed)
             else:
                 self.log.warn('fetch rss failed(%d):%s'%(result.status_code,url))
-        
+
         return urls
-        
+
     def Items(self, opts=None, user=None):
         """
         生成器，返回一个元组
@@ -392,13 +416,13 @@ class BaseFeedBook:
                 if section != prevsection or prevsection == '':
                     decoder.encoding = '' #每个小节都重新探测编码
                     prevsection = section
-                
+
                 article = self.fetcharticle(url, decoder)
                 if not article:
                     continue
             else:
                 article = self.FragToXhtml(desc, ftitle)
-            
+
             #如果是图片，title则是mime
             for title, imgurl, imgfn, content, brief, thumbnail in readability(article,url,opts,user):
                 if title.startswith(r'image/'): #图片
@@ -407,24 +431,24 @@ class BaseFeedBook:
                     if not title: title = ftitle
                     content =  self.postprocess(content)
                     yield (section, url, title, content, brief, thumbnail)
-    
+
     def fetcharticle(self, url, decoder):
         """链接网页获取一篇文章"""
         if self.fulltext_by_instapaper and not self.fulltext_by_readability:
             url = "http://www.instapaper.com/m?u=%s" % self.url_unescape(url)
-        
+
         opener = URLOpener(self.host, timeout=self.timeout)
         result = opener.open(url)
         status_code, content = result.status_code, result.content
         if status_code != 200 or not content:
             self.log.warn('fetch article failed(%d):%s.' % (status_code,url))
             return None
-        
+
         if 0: #有些网站封锁GAE，将GAE获取的网页发送到自己邮箱调试
             from google.appengine.api import mail
             mail.send_mail(SRC_EMAIL, SRC_EMAIL, "KindleEar Debug", "KindlerEar",
                 attachments=[("Page.html", content),])
-                
+
         if self.page_encoding:
             try:
                 return content.decode(self.page_encoding)
@@ -432,13 +456,13 @@ class BaseFeedBook:
                 return decoder.decode(content,opener.realurl)
         else:
             return decoder.decode(content,opener.realurl)
-        
+
     def readability(self, article, url, opts=None, user=None):
         """ 使用readability-lxml处理全文信息
         #因为图片文件占内存，为了节省内存，这个函数也做为生成器
         """
         content = self.preprocess(article)
-        
+
         # 提取正文
         try:
             doc = readability.Document(content,positive_keywords=self.positive_classes)
@@ -446,19 +470,19 @@ class BaseFeedBook:
         except:
             self.log.warn('article is invalid.[%s]' % url)
             return
-            
+
         title = doc.short_title()
         if not title:
             self.log.warn('article has no title.[%s]' % url)
             return
-            
+
         title = self.processtitle(title)
-        
+
         #if summary.startswith('<body'): #readability解析出错
         #    html = content
         #else:
         #html = self.FragToXhtml(summary, title, addtitleinbody=True)
-        
+
         #因为现在只剩文章内容了，使用BeautifulSoup也不会有什么性能问题
         soup = BeautifulSoup(summary, "lxml")
         h = soup.find('head')
@@ -468,7 +492,7 @@ class BaseFeedBook:
             t.string = title
             h.append(t)
             soup.html.insert(0, h)
-            
+
         #如果没有内容标题则添加
         body = soup.html.body
         t = body.find(['h1','h2'])
@@ -485,7 +509,7 @@ class BaseFeedBook:
                     t.string = title
                     body.insert(0, t)
                     break
-                    
+
         if self.remove_tags:
             for tag in soup.find_all(self.remove_tags):
                 tag.decompose()
@@ -500,22 +524,22 @@ class BaseFeedBook:
                 del tag[attr]
         for cmt in soup.find_all(text=lambda text:isinstance(text, Comment)):
             cmt.extract()
-            
+
         #删除body的所有属性，以便InsertToc使用正则表达式匹配<body>
         bodyattrs = [attr for attr in body.attrs]
         for attr in bodyattrs:
             del body[attr]
-        
+
         if self.extra_css:
             sty = soup.new_tag('style', type="text/css")
             sty.string = self.extra_css
             soup.html.head.append(sty)
-        
+
         self.soupbeforeimage(soup)
 
         has_imgs = False
         thumbnail = None
-        
+
         if self.keep_image:
             opener = URLOpener(self.host, timeout=self.timeout)
             for img in soup.find_all('img',attrs={'src':True}):
@@ -534,13 +558,13 @@ class BaseFeedBook:
                     if len(imgcontent) < self.img_min_size: #rexdf too small image
                         img.decompose()
                         continue
-                        
+
                     imgtype = imghdr.what(None, imgcontent)
                     if imgtype:
                         imgmime = r"image/" + imgtype
                         fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
                         img['src'] = fnimg
-                        
+
                         #使用第一个图片做为目录缩略图
                         if not has_imgs:
                             has_imgs = True
@@ -553,7 +577,7 @@ class BaseFeedBook:
                 else:
                     self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
                     img.decompose()
-                    
+
             #去掉图像上面的链接，以免误触后打开浏览器
             for img in soup.find_all('img'):
                 if img.parent and img.parent.parent and \
@@ -562,20 +586,20 @@ class BaseFeedBook:
         else:
             for img in soup.find_all('img'):
                 img.decompose()
-        
+
         #将HTML5标签转换为div
         for x in soup.find_all(['article', 'aside', 'header', 'footer', 'nav',
             'figcaption', 'figure', 'section', 'time']):
             x.name = 'div'
-        
+
         self.soupprocessex(soup)
-        
+
         #插入分享链接
         if user:
             self.AppendShareLinksToArticle(soup, user, url)
-            
+
         content = unicode(soup)
-        
+
         #提取文章内容的前面一部分做为摘要
         brief = u''
         if GENERATE_TOC_DESC:
@@ -587,16 +611,16 @@ class BaseFeedBook:
                     brief = brief[:TOC_DESC_WORD_LIMIT]
                     break
         soup = None
-        
+
         yield (title, None, None, content, brief, thumbnail)
-        
+
     def readability_by_soup(self, article, url, opts=None, user=None):
         """ 使用BeautifulSoup手动解析网页，提取正文内容
         因为图片文件占内存，为了节省内存，这个函数也做为生成器
         """
         content = self.preprocess(article)
         soup = BeautifulSoup(content, "lxml")
-        
+
         try:
             title = soup.html.head.title.string
         except AttributeError:
@@ -605,10 +629,10 @@ class BaseFeedBook:
         if not title:
             self.log.warn('article has no title.[%s]' % url)
             return
-            
+
         title = self.processtitle(title)
         soup.html.head.title.string = title
-        
+
         if self.keep_only_tags:
             body = soup.new_tag('body')
             try:
@@ -622,20 +646,20 @@ class BaseFeedBook:
                 soup.find('body').replace_with(body)
             except AttributeError: # soup has no body element
                 pass
-        
+
         for spec in self.remove_tags_after:
             tag = soup.find(**spec)
             remove_beyond(tag, 'next_sibling')
-        
+
         for spec in self.remove_tags_before:
             tag = soup.find(**spec)
             remove_beyond(tag, 'previous_sibling')
-        
+
         remove_tags = self.insta_remove_tags + self.remove_tags
         remove_ids = self.insta_remove_ids + self.remove_ids
         remove_classes = self.insta_remove_classes + self.remove_classes
         remove_attrs = self.insta_remove_attrs + self.remove_attrs
-        
+
         for tag in soup.find_all(remove_tags):
             tag.decompose()
         for id in remove_ids:
@@ -649,17 +673,17 @@ class BaseFeedBook:
                 del tag[attr]
         for cmt in soup.find_all(text=lambda text:isinstance(text, Comment)):
             cmt.extract()
-            
+
         if self.extra_css:
             sty = soup.new_tag('style', type="text/css")
             sty.string = self.extra_css
             soup.html.head.append(sty)
-            
+
         self.soupbeforeimage(soup)
 
         has_imgs = False
         thumbnail = None
-        
+
         if self.keep_image:
             opener = URLOpener(self.host, timeout=self.timeout)
             for img in soup.find_all('img',attrs={'src':True}):
@@ -678,13 +702,13 @@ class BaseFeedBook:
                     if len(imgcontent) < self.img_min_size: #rexdf too small image
                         img.decompose()
                         continue
-                        
+
                     imgtype = imghdr.what(None, imgcontent)
                     if imgtype:
                         imgmime = r"image/" + imgtype
                         fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
                         img['src'] = fnimg
-                        
+
                         #使用第一个图片做为目录缩略图
                         if not has_imgs:
                             has_imgs = True
@@ -697,7 +721,7 @@ class BaseFeedBook:
                 else:
                     self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
                     img.decompose()
-            
+
             #去掉图像上面的链接，以免误触后打开浏览器
             for img in soup.find_all('img'):
                 if img.parent and img.parent.parent and \
@@ -706,7 +730,7 @@ class BaseFeedBook:
         else:
             for img in soup.find_all('img'):
                 img.decompose()
-        
+
         #如果没有内容标题则添加
         body = soup.html.body
         t = body.find(['h1','h2'])
@@ -723,25 +747,25 @@ class BaseFeedBook:
                     t.string = title
                     body.insert(0, t)
                     break
-        
+
         #删除body的所有属性，以便InsertToc使用正则表达式匹配<body>
         bodyattrs = [attr for attr in body.attrs]
         for attr in bodyattrs:
             del body[attr]
-        
+
         #将HTML5标签转换为div
         for x in soup.find_all(['article', 'aside', 'header', 'footer', 'nav',
             'figcaption', 'figure', 'section', 'time']):
             x.name = 'div'
-        
+
         self.soupprocessex(soup)
-        
+
         #插入分享链接
         if user:
             self.AppendShareLinksToArticle(soup, user, url)
-        
+
         content = unicode(soup)
-        
+
         #提取文章内容的前面一部分做为摘要
         brief = u''
         if GENERATE_TOC_DESC:
@@ -753,9 +777,9 @@ class BaseFeedBook:
                     brief = brief[:TOC_DESC_WORD_LIMIT]
                     break
         soup = None
-        
+
         yield (title, None, None, content, brief, thumbnail)
-    
+
     def process_image(self, data, opts):
         try:
             if not opts or not opts.process_images or not opts.process_images_immediately:
@@ -768,7 +792,7 @@ class BaseFeedBook:
                                 reduceto=opts.reduce_image_to)
         except Exception:
             return None
-            
+
     def AppendShareLinksToArticle(self, soup, user, url):
         " 在文章末尾添加分享链接 "
         if not user or not soup:
@@ -820,7 +844,7 @@ class BaseFeedBook:
             ashare = soup.new_tag('a', href=url)
             ashare.string = OPEN_IN_BROWSER
             body.append(ashare)
-            
+
     def MakeShareLink(self, sharetype, user, url):
         " 生成保存内容或分享文章链接的KindleEar调用链接 "
         if sharetype in ('evernote','wiz'):
@@ -842,16 +866,16 @@ class BaseFeedBook:
         else:
             href += urllib.quote(url)
         return href
-        
+
     def AppendSperate(self, soup):
         " 在文章末尾添加'|'分隔符 "
         span = soup.new_tag('span')
         span.string = ' | '
         soup.html.body.append(span)
-        
+
 class WebpageBook(BaseFeedBook):
     fulltext_by_readability = False
-    
+
     # 直接在网页中获取信息
     def Items(self, opts=None, user=None):
         """
@@ -869,7 +893,7 @@ class WebpageBook(BaseFeedBook):
             if status_code != 200 or not content:
                 self.log.warn('fetch article failed(%d):%s.' % (status_code,url))
                 continue
-            
+
             if self.page_encoding:
                 try:
                     content = content.decode(self.page_encoding)
@@ -877,10 +901,10 @@ class WebpageBook(BaseFeedBook):
                     content = decoder.decode(content,opener.realurl)
             else:
                 content = decoder.decode(content,opener.realurl)
-            
+
             content =  self.preprocess(content)
             soup = BeautifulSoup(content, "lxml")
-            
+
             h = soup.find('head')
             if not h:
                 h = soup.new_tag('head')
@@ -888,16 +912,16 @@ class WebpageBook(BaseFeedBook):
                 t.string = section
                 h.append(t)
                 soup.html.insert(0, h)
-        
+
             try:
                 title = soup.html.head.title.string
             except AttributeError:
                 title = section
                 #self.log.warn('object soup invalid!(%s)'%url)
                 #continue
-            
+
             title = self.processtitle(title)
-            
+
             if self.keep_only_tags:
                 body = soup.new_tag('body')
                 try:
@@ -911,15 +935,15 @@ class WebpageBook(BaseFeedBook):
                     soup.find('body').replace_with(body)
                 except AttributeError: # soup has no body element
                     pass
-                        
+
             for spec in self.remove_tags_after:
                 tag = soup.find(**spec)
                 remove_beyond(tag, 'next_sibling')
-            
+
             for spec in self.remove_tags_before:
                 tag = soup.find(**spec)
                 remove_beyond(tag, 'previous_sibling')
-            
+
             remove_tags = self.insta_remove_tags + self.remove_tags
             remove_ids = self.insta_remove_ids + self.remove_ids
             remove_classes = self.insta_remove_classes + self.remove_classes
@@ -937,18 +961,18 @@ class WebpageBook(BaseFeedBook):
                     del tag[attr]
             for cmt in soup.find_all(text=lambda text:isinstance(text, Comment)):
                 cmt.extract()
-            
+
             #删除body的所有属性，以便InsertToc使用正则表达式匹配<body>
             body = soup.html.body
             bodyattrs = [attr for attr in body.attrs]
             for attr in bodyattrs:
                 del body[attr]
-                
+
             if self.extra_css:
                 sty = soup.new_tag('style', type="text/css")
                 sty.string = self.extra_css
                 soup.html.head.append(sty)
-            
+
             has_imgs = False
             thumbnail = None
             if self.keep_image:
@@ -969,13 +993,13 @@ class WebpageBook(BaseFeedBook):
                         if len(imgcontent) < self.img_min_size: #rexdf too small image
                             img.decompose()
                             continue
-                            
+
                         imgtype = imghdr.what(None, imgcontent)
                         if imgtype:
                             imgmime = r"image/" + imgtype
                             fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
                             img['src'] = fnimg
-                            
+
                             #使用第一个图片做为目录摘要图
                             if not has_imgs:
                                 has_imgs = True
@@ -988,20 +1012,20 @@ class WebpageBook(BaseFeedBook):
                     else:
                         self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
                         img.decompose()
-                        
+
                 #去掉图像上面的链接
                 for img in soup.find_all('img'):
                     if img.parent and img.parent.parent and \
                         img.parent.name == 'a':
                         img.parent.replace_with(img)
-                    
+
             else:
                 for img in soup.find_all('img'):
                     img.decompose()
-            
+
             self.soupprocessex(soup)
             content = unicode(soup)
-            
+
             #提取文章内容的前面一部分做为摘要
             brief = u''
             if GENERATE_TOC_DESC:
@@ -1013,22 +1037,22 @@ class WebpageBook(BaseFeedBook):
                         brief = brief[:TOC_DESC_WORD_LIMIT]
                         break
             soup = None
-            
+
             content =  self.postprocess(content)
             yield (section, url, title, content, brief, thumbnail)
-            
+
 class BaseUrlBook(BaseFeedBook):
     """ 提供网页URL，而不是RSS订阅地址，
     此类生成的MOBI使用普通书籍格式，而不是期刊杂志格式
     feeds中的地址为网页的URL，section可以为空。
     """
     fulltext_by_readability = True
-    
+
     def ParseFeedUrls(self):
         """ return list like [(section,title,url,desc),..] """
         return [(sec,sec,url,'') for sec, url in self.feeds]
-        
-    
+
+
 #几个小工具函数
 def remove_beyond(tag, next):
     while tag is not None and getattr(tag, 'name', None) != 'body':
@@ -1056,4 +1080,4 @@ def string_of_tag(tag, normalize_whitespace=False):
     if normalize_whitespace:
         ans = re.sub(r'\s+', ' ', ans)
     return ans
-    
+

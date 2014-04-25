@@ -6,7 +6,7 @@
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
-__Version__ = "1.13.4-r2"
+__Version__ = "1.13.4-r3"
 __Author__ = "cdhigh"
 
 import os, datetime, logging, __builtin__, hashlib, time
