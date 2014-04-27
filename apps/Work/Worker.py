@@ -135,10 +135,11 @@ class Worker(BaseHandler):
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()
             o.convert(oeb, oIO, opts, main.log)
-            all_logs = DeliverLog.all().order('-time')
-            diff = datetime.datetime.utcnow()+datetime.timedelta(hours=tz) - all_logs[0].datetime
-            if diff.seconds <5:
-                time.sleep(8)
+            ultima_log = DeliverLog.all().order('-time').get()
+            if ultima_log:
+                diff = datetime.datetime.utcnow() - ultima_log.datetime
+                if diff.days * 86400 + diff.seconds < 5:
+                    time.sleep(8)
             self.SendToKindle(username, to, book4meta.title, booktype, str(oIO.getvalue()), tz)
             rs = "%s(%s).%s Sent!"%(book4meta.title, local_time(tz=tz), booktype)
             main.log.info(rs)

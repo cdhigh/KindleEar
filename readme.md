@@ -15,7 +15,7 @@
 > 注：如果您要求不高，自定义RSS推送功能能应付一般应用，如果要求排版和完美，可以参照books目录下的文件自己增加一个文件，
 在您懂python的前提下，您可以完全的操控网页，可以生成您需要的最完美的MOBI文件。
 
-#部署步骤：
+#部署步骤
 1. 申请GAE账号并创建一个application。 <https://appengine.google.com/>
 2. 下载GAE SDK。 <https://developers.google.com/appengine/downloads?hl=zh-CN>
 3. 安装Python 2.7 如果已经安装了，跳过此步骤

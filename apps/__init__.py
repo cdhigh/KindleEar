@@ -8,6 +8,6 @@
 
 import __builtin__
 
-__Version__ = "1.13.5"
+__Version__ = "1.13.6"
 
 __builtin__.__dict__['__Version__'] = __Version__
