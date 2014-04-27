@@ -460,4 +460,4 @@ msgid "Fuck Gfw (For users in China)"
 msgstr "Fuck Gfw (Çindeki kullanıcılar için)"
 
 msgid "Others"
-msgstr "Others"
+msgstr "Diğerleri"
