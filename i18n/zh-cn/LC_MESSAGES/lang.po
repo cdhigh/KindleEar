@@ -453,3 +453,6 @@ msgstr "在文章最后附加归档或分享链接"
 
 msgid "Fuck Gfw (For users in China)"
 msgstr "我需要翻墙（针对中国用户）"
+
+msgid "Others"
+msgstr "其他"

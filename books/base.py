@@ -42,10 +42,15 @@ class AutoDecoder:
 
     def decode(self, content, url):
         result = content
-        if not ALWAYS_CHAR_DETECT and self.encoding: # 先使用上次的编码打开文件尝试
+        if ALWAYS_CHAR_DETECT:
+            self.encoding = chardet.detect(content)['encoding']
+            
+        if self.encoding: # 先使用上次的编码打开文件尝试
             try:
                 result = content.decode(self.encoding)
             except UnicodeDecodeError: # 解码错误，使用自动检测编码
+                if ALWAYS_CHAR_DETECT:
+                    return ''
                 encoding = chardet.detect(content)['encoding']
                 try:
                     result = content.decode(encoding)
@@ -69,30 +74,6 @@ class AutoDecoder:
                         UrlEncoding(netloc=netloc,feedenc=encoding).put()
                     else:
                         UrlEncoding(netloc=netloc,pageenc=encoding).put()
-        elif ALWAYS_CHAR_DETECT:
-            encoding = chardet.detect(content)['encoding']
-            try:
-                result = content.decode(encoding)
-            except UnicodeDecodeError:
-                self.encoding = None
-                result = content
-            else:
-                self.encoding = encoding
-                #同时保存到数据库
-                netloc = urlparse.urlsplit(url)[1]
-                urlenc = UrlEncoding.all().filter('netloc = ', netloc).get()
-                if urlenc:
-                    enc = urlenc.feedenc if self.isfeed else urlenc.pageenc
-                    if enc != encoding:
-                        if self.isfeed:
-                            urlenc.feedenc = encoding
-                        else:
-                            urlenc.pageenc = encoding
-                        urlenc.put()
-                elif self.isfeed:
-                    UrlEncoding(netloc=netloc,feedenc=encoding).put()
-                else:
-                    UrlEncoding(netloc=netloc,pageenc=encoding).put()
         else:  # 暂时没有之前的编码信息
             netloc = urlparse.urlsplit(url)[1]
             urlenc = UrlEncoding.all().filter('netloc = ', netloc).get()
@@ -586,12 +567,12 @@ class BaseFeedBook:
         else:
             for img in soup.find_all('img'):
                 img.decompose()
-
+        
         #将HTML5标签转换为div
         for x in soup.find_all(['article', 'aside', 'header', 'footer', 'nav',
             'figcaption', 'figure', 'section', 'time']):
             x.name = 'div'
-
+        
         self.soupprocessex(soup)
 
         #插入分享链接
@@ -752,12 +733,12 @@ class BaseFeedBook:
         bodyattrs = [attr for attr in body.attrs]
         for attr in bodyattrs:
             del body[attr]
-
+        
         #将HTML5标签转换为div
         for x in soup.find_all(['article', 'aside', 'header', 'footer', 'nav',
             'figcaption', 'figure', 'section', 'time']):
             x.name = 'div'
-
+        
         self.soupprocessex(soup)
 
         #插入分享链接
@@ -797,50 +778,65 @@ class BaseFeedBook:
         " 在文章末尾添加分享链接 "
         if not user or not soup:
             return
+        FirstLink = True
         body = soup.html.body
         if user.evernote and user.evernote_mail:
             href = self.MakeShareLink('evernote', user, url)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SAVE_TO_EVERNOTE
             body.append(ashare)
+            FirstLink = False
         if user.wiz and user.wiz_mail:
-            self.AppendSperate(soup)
+            if not FirstLink:
+                self.AppendSeperator(soup)
             href = self.MakeShareLink('wiz', user, url)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SAVE_TO_WIZ
             body.append(ashare)
+            FirstLink = False
         if user.xweibo:
-            self.AppendSperate(soup)
+            if not FirstLink:
+                self.AppendSeperator(soup)
             href = self.MakeShareLink('xweibo', user, url)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_XWEIBO
             body.append(ashare)
+            FirstLink = False
         if user.tweibo:
-            self.AppendSperate(soup)
+            if not FirstLink:
+                self.AppendSeperator(soup)
             href = self.MakeShareLink('tweibo', user, url)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_TWEIBO
             body.append(ashare)
+            FirstLink = False
         if user.facebook:
-            self.AppendSperate(soup)
+            if not FirstLink:
+                self.AppendSeperator(soup)
             href = self.MakeShareLink('facebook', user, url)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_FACEBOOK
             body.append(ashare)
+            FirstLink = False
         if user.twitter:
-            self.AppendSperate(soup)
+            if not FirstLink:
+                self.AppendSeperator(soup)
             href = self.MakeShareLink('twitter', user, url)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_TWITTER
             body.append(ashare)
+            FirstLink = False
         if user.tumblr:
-            self.AppendSperate(soup)
+            if not FirstLink:
+                self.AppendSeperator(soup)
             href = self.MakeShareLink('tumblr', user, url)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_TUMBLR
             body.append(ashare)
+            FirstLink = False
         if user.browser:
-            self.AppendSperate(soup)
+            if not FirstLink:
+                self.AppendSeperator(soup)
             ashare = soup.new_tag('a', href=url)
             ashare.string = OPEN_IN_BROWSER
             body.append(ashare)
@@ -862,17 +858,17 @@ class BaseFeedBook:
         else:
             href = ''
         if user.share_fuckgfw and sharetype in ('evernote','wiz','facebook','twitter'):
-            href = SHARE_FUCK_GFW_SRV % urllib.quote(href+url)
+            href = SHARE_FUCK_GFW_SRV % urllib.quote((href+url).encode('utf-8'))
         else:
-            href += urllib.quote(url)
+            href += urllib.quote(url.encode('utf-8'))
         return href
 
-    def AppendSperate(self, soup):
+    def AppendSeperator(self, soup):
         " 在文章末尾添加'|'分隔符 "
         span = soup.new_tag('span')
         span.string = ' | '
         soup.html.body.append(span)
-
+        
 class WebpageBook(BaseFeedBook):
     fulltext_by_readability = False
 

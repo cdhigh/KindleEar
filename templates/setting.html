@@ -13,76 +13,6 @@
     
     <fieldset>
         <legend>{{_("Base Setting")}}</legend>
-        {#
-        <div class="pure-control-group">
-            <label><em class="required">*</em>{{_("Kindle E-mail")}}</label>
-            <input type="text" name="kindleemail" style="width:280px" 
-            value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" />
-        </div>
-        <div class="pure-control-group">
-            <label>{{_("Time zone")}}</label>
-            <select class="bool" name="timezone">
-                {% for i in range(-12, 0) %}
-                <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT%d:00" % i }}</option>
-                {% endfor %}
-                <option value="0" {% if user.timezone|int==0 %}selected="selected"{% endif %}>GMT</option>
-                {% for i in range(1, 14) %}
-                <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT+%d:00" % i }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="pure-control-group">
-            <label>{{_("Deliver days")}}</label>
-            <label><input type="checkbox" name="Monday" {% if not user.send_days or "Monday" in user.send_days %}checked="1"{% endif %} />{{_("Mon")}} &nbsp;</lable>
-            <label><input type="checkbox" name="Tuesday" {% if not user.send_days or "Tuesday" in user.send_days %}checked="1"{% endif %} />{{_("Tue")}} &nbsp;</lable>
-            <label><input type="checkbox" name="Wednesday" {% if not user.send_days or "Wednesday" in user.send_days %}checked="1"{% endif %} />{{_("Wed")}} &nbsp;</lable>
-            <label><input type="checkbox" name="Thursday" {% if not user.send_days or "Thursday" in user.send_days %}checked="1"{% endif %} />{{_("Thu")}} &nbsp;</lable>
-            <label><input type="checkbox" name="Friday" {% if not user.send_days or "Friday" in user.send_days %}checked="1"{% endif %} />{{_("Fri")}} &nbsp;</lable>
-            <label><input type="checkbox" name="Saturday" {% if not user.send_days or "Saturday" in user.send_days %}checked="1"{% endif %} />{{_("Sat")}} &nbsp;</lable>
-            <label><input type="checkbox" name="Sunday" {% if not user.send_days or "Sunday" in user.send_days %}checked="1"{% endif %} />{{_("Sun")}} &nbsp;</lable>
-        </div>
-        <div class="pure-control-group">
-            <label>{{_("Deliver time")}}</label>
-            <select class="bool" name="sendtime">
-                {% for i in range(0, 24) %}
-                <option value="{{ i }}" {% if user.send_time|int == i %}selected="selected"{% endif %}>{{ "%02d:00" % i }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="pure-control-group">
-            <label>{{_("Book type")}}</label>
-            <select class="bool" name="booktype">
-                <option value="mobi" {% if user.book_type != 'epub' %}selected="selected"{% endif %}>mobi</option>
-                <option value="epub" {% if user.book_type == 'epub' %}selected="selected"{% endif %}>epub</option>
-            </select>
-        </div>
-        <div class="pure-control-group">
-            <label>{{_("Device type")}}</label>
-            <select class="bool" name="devicetype">
-                <option value="kindle" {% if user.devicetype == 'kindle' %}selected="selected"{% endif %}>Kindle</option>
-                <option value="kindledx" {% if user.devicetype == 'kindledx' %}selected="selected"{% endif %}>Kindle DX</option>
-                <option value="kindlepw" {% if user.devicetype == 'kindlepw' %}selected="selected"{% endif %}>Kindle PaperWhite</option>
-                <option value="kindlefire" {% if user.devicetype == 'kindlefire' %}selected="selected"{% endif %}>Kindle Fire</option>
-                <option value="others" {% if user.devicetype == 'others' %}selected="selected"{% endif %}>Others</option>
-            </select>
-        </div>
-        <div class="pure-control-group">
-            <label>{{_("Title format")}}</label>
-            <select class="bool" name="titlefmt">
-                <option value="" {% if not user.titlefmt %}selected="selected"{% endif %}>{{_("Title Only")}}</option>
-                <option value="%Y-%m-%d" {% if user.titlefmt=='%Y-%m-%d' %}selected="selected"{% endif %}>{{_("Title YYYY-MM-DD")}}</option>
-                <option value="%m-%d" {% if user.titlefmt=='%m-%d' %}selected="selected"{% endif %}>{{_("Title MM-DD")}}</option>
-                <option value="%m/%d" {% if user.titlefmt=='%m/%d' %}selected="selected"{% endif %}>{{_("Title MM/DD")}}</option>
-                <option value="%d/%m" {% if user.titlefmt=='%d/%m' %}selected="selected"{% endif %}>{{_("Title DD/MM")}}</option>
-                <option value="%b %d" {% if user.titlefmt=='%b %d' %}selected="selected"{% endif %}>{{_("Title MMM DD")}}</option>
-                <option value="%a, %b %d" {% if user.titlefmt=='%a, %b %d' %}selected="selected"{% endif %}>{{_("Title Day, MMM DD")}}</option>
-            </select>
-        </div>
-        
-        <label><input type="checkbox" name="mergebooks" {% if user and user.merge_books %}checked="1"{% endif %} class="pure-checkbox" />{{_("Merge books into one")}}</label>
-        <label><input type="checkbox" name="enablesend" {% if user and user.enable_send %}checked="1"{% endif %} class="pure-checkbox" />{{_("Enable deliver")}}</label>
-        #}
-        
         <table border="0">
             <tr><td style="text-align:right;"><label><em class="required">*</em>{{_("Kindle E-mail")}}</label> : </td>
             <td><input type="text" name="kindleemail" style="width:280px" value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" required />
@@ -125,7 +55,7 @@
                 <option value="kindledx" {% if user.device == 'kindledx' %}selected="selected"{% endif %}>Kindle DX</option>
                 <option value="kindlepw" {% if user.device == 'kindlepw' %}selected="selected"{% endif %}>Kindle PaperWhite</option>
                 <option value="kindlefire" {% if user.device == 'kindlefire' %}selected="selected"{% endif %}>Kindle Fire</option>
-                <option value="others" {% if user.device == 'others' %}selected="selected"{% endif %}>Others</option>
+                <option value="others" {% if user.device == 'others' %}selected="selected"{% endif %}>{{_("Others")}}</option>
             </select>
             </select></td></tr>
             <tr><td style="text-align:right;"><label>{{_("Title format")}}</label> : </td>
@@ -141,8 +71,7 @@
         </table>
         
         <p><label><input type="checkbox" name="mergebooks" {% if user and user.merge_books %}checked="1"{% endif %} />
-        {{_("Merge books into one")}}</label><em style="font-size:70%">&nbsp;
-        (<a href="/static/faq{%if lang and not lang.startswith('zh')%}_en{%endif%}.html#mergebooks">{{_("read faq firstly.")}}</a>)</em></p>
+        {{_("Merge books into one")}}</label></p>
         <p><label><input type="checkbox" name="enablesend" {% if user and user.enable_send %}checked="1"{% endif %} />
         {{_("Enable deliver")}}</label></p>
         <p>

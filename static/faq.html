@@ -27,6 +27,7 @@
      <li>多账号管理，也就是支持多kindle</li>
      <li>带图的杂志格式MOBI</li>
      <li>自动每天定时推送</li>
+     <li>强大并且方便的邮件中转服务</li>
 	</ul>
 	优点：
 	<ul>
@@ -46,23 +47,22 @@
 		<li>你需要一个GAE账号，请移步 <a href="https://appengine.google.com/">Google AppEngine</a> 申请。使用G你的gmail账号登陆后，点击"Create Application"，进入到帐号短信激活界面，选择Others，输入你自己的手机号（中国手机国家号：+86），输入完毕点击Send，稍后就可以在手机上收到激活信息，待激活后再次点击Create Application，在Application Identifier一栏输入你选择的应用名字（如：KindleEar123）。其余选项保持默认即可，点击页尾的Create Application即成功创建了一个GAE程序（用来上传KinldeEar之用）。</li>
 		<li>安装 <a href="http://www.python.org/getit/">Python 2.7.x</a>，在此页面中选择你的系统平台对应的2.7.x版本下载，然后直接双击安装。注意不要安装成Python 3.x版本，GAE暂不支持。</li>
 		<li>下载 <a href="https://developers.google.com/appengine/downloads?hl=zh-CN">GAE SDK</a>，这是用来上传GAE程序用的。在此页面中的区段“Google App Engine SDK for Python”中选择你的系统平台对应的版本点击即可下载，然后安装，一路next无话。</li>
-		<li>打开资源管理器，进入之前下载的KindleEar目录C:\KindleEar，使用任何文本编辑器打开app.yaml文件，将第一行的kindleear字样修改为你之前申请的GAE程序名（比如kindleear123），保存退出。</li>
-		<li>在app.yaml的同一个目录，打开config.py文件，修改SRC_EMAIL为你的gmail账号。其他的选项也可以根据注释有选择性的修改，或者使用默认即可。</li>
+		<li>打开资源管理器，进入之前下载的KindleEar目录C:\KindleEar，使用任何文本编辑器打开app.yaml和module-worker.yaml文件，将第一行的kindleear字样修改为你之前申请的GAE程序名（比如kindleear123），保存退出。</li>
+		<li>在app.yaml的同一个目录，打开config.py文件，修改SRC_EMAIL为你的gmail账号，DOMAIN为你的应用的域名。其他的选项也可以根据注释有选择性的修改，或者使用默认即可。</li>
 		<li>正式上传KindleEar。可以使用Google App Engine Launcher或使用命令行，因为Launcher不太稳定，这里介绍一下windows下使用命令行的方式。
 			<li>依次点击：开始-运行-输入CMD，打开命令行窗口</li>
 			<li>进入到App Engine SDK安装目录；例如：cd "C:\Program Files\Google\google_appengine"</li>
-			<li>输入“上传”命令：c:\python27\python.exe appcfg.py update C:\KindleEar</li>
+			<li>输入“上传”命令：c:\python27\python.exe appcfg.py update C:\kindleear\app.yaml c:\kindleear\module-worker.yaml</li>
 			<li>依次输入gmail账号及密码（密码输入时屏幕不显示）既可成功上传。</li></li>
 		<li>显示上传成功后使用你的浏览器打开域名：kindleear123.appspot.com（举例而已，kindleear123要改为你申请的GAE程序名称），如果能正常打开，则还有最后一步。</li>
 		<li>将你的gmail账号加入kindle推送邮箱的白名单。这一步你应该早就会了吧。</li>
 		<li>然后呢？享受你自己的推送服务吧！</li>
 		</ol>
-    <p><strong>以下是简化的搭建步骤（使用uploader）：</strong>
+    <p><strong>以下是推荐的简化搭建步骤（使用uploader）：</strong>
         <ol>
         <li>下载KindleEar和申请GAE账号，并创建一个application。</li>
-        <li>修改KindleEar的app.yaml和config.py文件中的配置。</li>
-        <li>下载<a href="https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing">uploader</a>。如果此链接被墙，可以使用此墙内地址<a href="http://yunpan.cn/QGiHjKRZ6EreW">uploader</a>。</li>
-        <li>解压uploader到特定目录，将之前下载并解压的KindleEar目录拷贝到此目录下，改名为kindleear，然后双击执行uploader.bat后根据提示输入email和密码即可上传代码。</li>
+        <li>下载<a href="https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing">uploader</a>。如果此链接被墙，可以使用此墙内地址（提取密码：beaa）<a href="http://yunpan.cn/QGiHjKRZ6EreW">uploader</a>。</li>
+        <li>解压uploader到特定目录，将之前下载并解压的KindleEar目录拷贝到此目录下，改名为kindleear，然后双击执行uploader.bat后根据提示输入appid/email/timezone后会正式启动上传程序，输入email和密码即可上传代码。</li>
         </ol></p>
     </p>
     <hr />
@@ -72,12 +72,8 @@
     <li>没有打开"自定义RSS"的投递开关，此开关在设置网页的最下面。</li>
 	<li>没有在kindle邮箱的白名单中加入你的gmail地址:</li>
 		<ul><li>解决方案：登陆http://www.amazon.com/,增加白名单即可</li></ul>
-	<li>增加的RSS数目太多，根据网速和RSS类型不同，支持的RSS数量不同，但是必须要在10分钟内处理完成。
-		<ul><li>一般来说十条以下的RSS是可以支持的，如果“全文RSS”多，则支持多一些，否则少一些。</li>
-		<li>请登录 <a href="https://appengine.google.com"> appengine </a>，选择对应的GAE程序，然后在logs栏目中查看是否有程序执行异常，如果有DeadlineExceededError，说明RSS过多，请减少一些，或分成两个账号推送。</li></ul>
-	</li>
 	<li>添加RSS过多导致内存占用过大，程序被自动终止。
-	    <ul><li>请打开<a href="https://appengine.google.com">appengine</a>，查看logs是否有内存越限异常，如果有的话，请打开appengine左边栏目“Application Settings”，在"Performance"小节将"Frontend Instance Class"选择为"F2(1200MHz,256MB)。"</li></ul>
+	    <ul><li>打开module-worker.yaml，将instance_class值修改为B4，然后重新上传。</li></ul>
 	</li>
     <li>你输入的订阅地址不是合法的RSS/ATOM订阅（XML格式）。</li>
 	</ol></p>
@@ -146,19 +142,18 @@
     <h2>在gae后台时不时有fetch rss failed(450)等错误是什么问题？</h2>
     <p class="answer">括号里面的数字表示错误码，除了标准的HTTP错误码外，以下是KindleEar自定义的错误码。
     <ul><li>504:超时，请适当增加config.py文件里面的超时设置；</li>
-    <li>509:文件超大，GAE限制每个文件不能大于4MB；<li>
+    <li>509:文件超大，GAE限制每个文件不能大于4MB；</li>
     <li>452:网站不支持HTTPS访问；</li>
     <li>453:网站需要访问认证；</li>
     <li>450:下载失败；</li>
     <li>451:其他异常；</li></ul></p>
     <hr />
-    <h2>合并多本书籍推送为何经常投递失败？<a name="mergebooks" id="mergebooks" >&nbsp;</a></h2>
-    <p class="answer">因GAE平台的限制，每个任务连续运行时间最长10分钟，超过则自动被终止，而合并多本书籍后feed会比较多，很容易超时，超时则投递失败。所以建议选择了合并推送的选项后订阅的书籍不要太多，至于具体数量限制，和RSS网站的速度和图片大小数量等都有关系，很难确定一个具体的数值，不过一般认为十个feed以下是非常安全的（注意有的书籍含有多个feed）。如果书籍太多，还是建议分开文件投递或分账号投递。<br />
-    同时，还要注意合并书籍推送到一些特点：<br />
+    <h2>为何合并多本书籍推送后无法查词典？<a name="mergebooks" id="mergebooks" >&nbsp;</a></h2>
+    <p class="answer"> 如果有外文RSS而且需要在kindle上查字典的话，请将自定义RSS的语言设置为对应的外文。 <br />
+    同时，还要注意合并书籍推送的其他特性：<br />
     <ol>
     <li>合并后的书籍使用默认报头和封面；</li>
     <li>合并后的书籍使用自定义RSS设定的标题和语言设置；</li>
-    <li>如果有英文RSS而且需要在kindle上查字典的话，请将自定义RSS的语言设置为英文。</li>
     </ol>
     </p>
 	<hr />
@@ -166,7 +161,7 @@
     <p class="answer">启用此功能后，KindleEar会在每篇文件的最后都附加一个超链接，在Kindle上点击此超链接会自动打开浏览器将你正在阅读的此文章归档至网络笔记或分享至社交网络（需要打开网络连接）。<br />
         有几点需要注意的：
         <ol><li>请先修改config.py里面的DOMAIN为你申请的应用域名；</li>
-        <li>如果你在红墙内，可能需要打开“我需要翻墙（针对中国用户）”开关，默认的翻墙转发器采用作者在heroku上搭建的免费服务器： http://kforwarder.herokuapp.com，如果你有余力或者注重隐私，建议自己搭建一个，源码托管在 https://github.com/cdhigh/forwarder。（如果后续墙也封锁了heroku，则此翻墙方法无效）</li></ol>
+        <li>如果你在红墙内，可能需要打开“我需要翻墙（针对中国用户）”开关，默认的翻墙转发器采用作者在heroku上搭建的免费服务器： http://kforwarder.herokuapp.com，如果你有余力或者注重隐私，建议自己搭建一个，源码托管在 https://github.com/cdhigh/forwarder。（如果将来墙也封锁了heroku，则此翻墙方法无效）</li></ol>
     </p>
     <hr />
     <h2>网站在IE6下显示不正常？</h2>

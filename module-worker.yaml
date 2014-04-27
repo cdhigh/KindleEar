@@ -1,15 +1,13 @@
 application: kindleear
+module: worker
 version: 1
 runtime: python27
 api_version: 1
 threadsafe: true
-instance_class: F1
-#automatic_scaling:
-#  min_idle_instances: 1
-#  max_idle_instances: automatic  # default value
-#  min_pending_latency: automatic  # default value
-#  max_pending_latency: 30ms
-#  max_concurrent_requests: 50
+instance_class: B2
+basic_scaling:
+  max_instances: 3
+  idle_timeout: 30m
 
 libraries:
 - name: lxml
@@ -37,5 +35,5 @@ handlers:
   script: apps.handlemail.appmail
   
 - url: /.*
-  script: apps.module_front.app
+  script: apps.module_backend.app
   

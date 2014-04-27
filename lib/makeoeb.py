@@ -103,6 +103,7 @@ def getOpts(output_type='kindle'):
     setattr(opts, "preserve_cover_aspect_ratio", True)
     setattr(opts, "epub_flatten", False)
     setattr(opts, "epub_dont_compress", False)
+    setattr(opts, "verbose", 0)
     
     #extra
     setattr(opts, "process_images_immediately", True)
