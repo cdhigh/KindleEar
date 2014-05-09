@@ -15,15 +15,13 @@ from google.appengine.api import memcache
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
 
-#import main
-
 class MySubscription(BaseHandler):
     __url__ = "/my"
     # 管理我的订阅和杂志列表
     def GET(self, tips=None):
         user = self.getcurrentuser()
         myfeeds = user.ownfeeds.feeds if user.ownfeeds else None
-        return self.render('my.html', "My subscription",current='my',
+        return self.render('my.html', "My subscription",current='my',user=user,
             books=Book.all().filter("builtin = ",True),myfeeds=myfeeds,tips=tips)
     
     def POST(self): # 添加自定义RSS
@@ -46,8 +44,6 @@ class Subscribe(BaseHandler):
     __url__ = "/subscribe/(.*)"
     def GET(self, id):
         self.login_required()
-        if not id:
-            return "the id is empty!<br />"
         try:
             id = int(id)
         except:
@@ -65,9 +61,7 @@ class Subscribe(BaseHandler):
 class Unsubscribe(BaseHandler):
     __url__ = "/unsubscribe/(.*)"
     def GET(self, id):
-        self.login_required()
-        if not id:
-            return "the id is empty!<br />"
+        user = self.getcurrentuser()
         try:
             id = int(id)
         except:
@@ -80,14 +74,18 @@ class Unsubscribe(BaseHandler):
         if main.session.username in bk.users:
             bk.users.remove(main.session.username)
             bk.put()
+            
+        #为安全起见，退订后也删除网站登陆信息（如果有的话）
+        subs_info = user.subscription_info(bk.title)
+        if subs_info:
+            subs_info.delete()
+            
         raise web.seeother('/my')
 
 class DelFeed(BaseHandler):
     __url__ = "/delfeed/(.*)"
     def GET(self, id):
         user = self.getcurrentuser()
-        if not id:
-            return "the id is empty!<br />"
         try:
             id = int(id)
         except:
@@ -97,4 +95,48 @@ class DelFeed(BaseHandler):
         if feed:
             feed.delete()
         
+        raise web.seeother('/my')
+        
+class BookLoginInfo(BaseHandler):
+    __url__ = "/booklogininfo/(.*)"
+    #修改书籍的网站登陆信息
+    def GET(self, id, tips=None):
+        user = self.getcurrentuser()
+        try:
+            bk = Book.get_by_id(int(id))
+        except:
+            bk = None
+        if not bk:
+            return "Not exist the book!<br />"
+        
+        subs_info = user.subscription_info(bk.title)
+        return self.render('booklogininfo.html', "Book Login Infomation",bk=bk,subs_info=subs_info,tips=tips)
+    
+    def POST(self,id):
+        user = self.getcurrentuser()
+        account = web.input().get('account')
+        password = web.input().get('password')
+        
+        try:
+            bk = Book.get_by_id(int(id))
+        except:
+            bk = None
+        if not bk:
+            return "Not exist the book!<br />"
+        
+        subs_info = user.subscription_info(bk.title)
+        if subs_info:
+            #任何一个留空则删除登陆信息
+            if not account or not password:
+                subs_info.delete()
+            else:
+                subs_info.account = account
+                subs_info.password = password
+                subs_info.put()
+        elif account and password:
+            subs_info = SubscriptionInfo(account=account,user=user,title=bk.title)
+            subs_info.put() #先保存一次才有user信息，然后才能加密
+            subs_info.password = password
+            subs_info.put()
+            
         raise web.seeother('/my')

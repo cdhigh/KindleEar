@@ -44,3 +44,4 @@
 
 #许可
 KindleEar is Licensed under the GPL license: [http://www.gnu.org/licenses/gpl.html](http://www.gnu.org/licenses/gpl.html)
+大体的许可框架是此应用代码你可以任意使用任意修改，可以商用，但是也必须开源并保留版权声明。

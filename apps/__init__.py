@@ -6,8 +6,10 @@
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
-import __builtin__
+import __builtin__, site
 
-__Version__ = "1.13.6"
+__Version__ = "1.20"
 
 __builtin__.__dict__['__Version__'] = __Version__
+
+site.addsitedir('lib')

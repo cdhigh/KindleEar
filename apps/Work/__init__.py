@@ -21,7 +21,7 @@ for loader, name, is_pkg in pkgutil.walk_packages(__path__):
             continue
         globals()[name] = value
         __all__.append(name)
-        main.log.info('debug: %s loaded'%name)
+        #main.log.info('debug: %s loaded'%name)
 
         try:
             main.urls += [url,name]

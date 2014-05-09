@@ -77,8 +77,7 @@ class ZhihuDaily(BaseFeedBook):
             self.log.warn('fetch rss failed(%d):%s'%(result.status_code,url))
         return urls
 
-    def fetcharticle(self, url, decoder):
-        opener = URLOpener(self.host, timeout=self.timeout)
+    def fetcharticle(self, url, opener, decoder):
         result = opener.open(self.url4forwarder(url))
         status_code, content = result.status_code, result.content
         if status_code != 200 or not content:
@@ -88,5 +87,5 @@ class ZhihuDaily(BaseFeedBook):
         if self.page_encoding:
             return content.decode(self.page_encoding)
         else:
-            return decoder.decode(content,url)
+            return decoder.decode(content,url,result.headers)
             

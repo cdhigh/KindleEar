@@ -456,3 +456,18 @@ msgstr "我需要翻墙（针对中国用户）"
 
 msgid "Others"
 msgstr "其他"
+
+msgid "Login Info"
+msgstr "登陆信息"
+
+msgid "Input website login info for book '%s'"
+msgstr "请提供书籍 '%s' 的网站登陆信息"
+
+msgid "Leave any field empty to delete info from database."
+msgstr "留空任何一项则从数据库中删除网站登陆信息。"
+
+msgid "Account"
+msgstr "账号"
+
+msgid "Submit"
+msgstr "提交"

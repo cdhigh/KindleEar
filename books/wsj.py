@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 import re
 from base import BaseFeedBook
-from lib.urlopener import URLOpener
 
 def getBook():
     return WSJ
@@ -25,8 +24,7 @@ class WSJ(BaseFeedBook):
            ]
     keep_only_tags = [dict(name='div', attrs={'id':'A'}),]
     
-    def fetcharticle(self, url, decoder):
-        opener = URLOpener(self.host, timeout=self.timeout)
+    def fetcharticle(self, url, opener, decoder):
         result = opener.open(url)
         status_code, content = result.status_code, result.content
         if status_code != 200 or not content:
@@ -34,9 +32,12 @@ class WSJ(BaseFeedBook):
             return None
         
         if self.page_encoding:
-            content = content.decode('utf-8')
+            try:
+                content = content.decode('utf-8')
+            except UnicodeDecodeError:
+                content = decoder.decode(content,url,result.headers)
         else:
-            content = decoder.decode(content,url)
+            content = decoder.decode(content,url,result.headers)
         
         m = re.search(r'<iframe.*?src="(.*?)".*?>', content)
         if m:
@@ -48,9 +49,12 @@ class WSJ(BaseFeedBook):
                 return None
             
             if self.page_encoding:
-                content = content.decode(self.page_encoding)
+                try:
+                    content = content.decode(self.page_encoding)
+                except UnicodeDecodeError:
+                    content = decoder.decode(content,newurl,result.headers)
             else:
-                content = decoder.decode(content,newurl)
+                content = decoder.decode(content,newurl,result.headers)
         
         return content
         

@@ -46,9 +46,9 @@ class TEDxBohaiBay(BaseFeedBook):
                 try:
                     content = result.content.decode(self.feed_encoding)
                 except UnicodeDecodeError:
-                    content = AutoDecoder(False).decode(result.content,opener.realurl)
+                    content = AutoDecoder(False).decode(result.content,opener.realurl,result.headers)
             else:
-                content = AutoDecoder(False).decode(result.content,opener.realurl)
+                content = AutoDecoder(False).decode(result.content,opener.realurl,result.headers)
             
             soup = BeautifulSoup(content, 'lxml')
             for article in soup.find_all('div', attrs={'class':'feed_item_question'}):

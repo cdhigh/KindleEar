@@ -461,3 +461,18 @@ msgstr "Fuck Gfw (Çindeki kullanıcılar için)"
 
 msgid "Others"
 msgstr "Diğerleri"
+
+msgid "Login Info"
+msgstr "Login Info"
+
+msgid "Input website login info for book '%s'"
+msgstr "Input website login info for book '%s'"
+
+msgid "Leave any field empty to delete info from database."
+msgstr "Leave any field empty to delete info from database."
+
+msgid "Account"
+msgstr "Account"
+
+msgid "Submit"
+msgstr "Submit"

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block css %}
+{% block css -%}
 <style type="text/css">
 p{
     color:#2d2d2d;
@@ -37,17 +37,16 @@ p{
 }
 
 </style>
-{% endblock %}
-{% block bodytag %}
+{% endblock -%}
+{% block bodytag -%}
 <body onload="document.getElementById('u').focus();">
-{% endblock %}
-{% block content %}
+{% endblock -%}
+{% block content -%}
     <div class="banner">
         <h1 class="banner-head">
             {{_("Free Forever.")}} {{_("Good News Always Come With You.")}}
         </h1>
     </div>
-    
     <div class="pure-g-r">
     <div class="information pure-u-1-2">
         <div class="l-box">
@@ -65,5 +64,4 @@ p{
         </div>
     </div>
     </div>
-    
-{% endblock %}
+{% endblock -%}

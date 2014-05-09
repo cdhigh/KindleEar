@@ -12,10 +12,9 @@ import web
 
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
+from apps.utils import new_secret_key
 
 from config import *
-
-#import main
 
 class Admin(BaseHandler):
     __url__ = "/admin"
@@ -31,10 +30,11 @@ class Admin(BaseHandler):
         op,p1,p2 = web.input().get('op'), web.input().get('p1'), web.input().get('p2')
         user = self.getcurrentuser()
         users = KeUser.all() if user.name == 'admin' else None
-        if op is not None and p1 is not None and p2 is not None: #修改密码
+        if all((op, p1, p2)): #修改当前登陆账号的密码
+            secret_key = user.secret_key or ''
             try:
-                pwd = hashlib.md5(op).hexdigest()
-                newpwd = hashlib.md5(p1).hexdigest()
+                pwd = hashlib.md5(op+secret_key).hexdigest()
+                newpwd = hashlib.md5(p1+secret_key).hexdigest()
             except:
                 tips = _("The password includes non-ascii chars!")
             else:
@@ -48,7 +48,7 @@ class Admin(BaseHandler):
                     user.put()
             return self.render('admin.html',"Admin",
                 current='admin', user=user, users=users,chpwdtips=tips)
-        elif u is not None and up1 is not None and up2 is not None: #添加账户
+        elif all((u, up1, up2)): #添加账户
             if user.name != 'admin':
                 raise web.seeother(r'/')
             elif not u:
@@ -58,17 +58,18 @@ class Admin(BaseHandler):
             elif KeUser.all().filter("name = ", u).get():
                 tips = _("Already exist the username!")
             else:
+                secret_key = new_secret_key()
                 try:
-                    pwd = hashlib.md5(up1).hexdigest()
+                    pwd = hashlib.md5(up1 + secret_key).hexdigest()
                 except:
                     tips = _("The password includes non-ascii chars!")
                 else:
                     myfeeds = Book(title=MY_FEEDS_TITLE,description=MY_FEEDS_DESC,
-                        builtin=False,keep_image=True,oldest_article=7)
+                        builtin=False,keep_image=True,oldest_article=7,needs_subscription=False)
                     myfeeds.put()
                     au = KeUser(name=u,passwd=pwd,kindle_email='',enable_send=False,
                         send_time=7,timezone=TIMEZONE,book_type="mobi",
-                        ownfeeds=myfeeds,merge_books=False)
+                        ownfeeds=myfeeds,merge_books=False,secret_key=secret_key)
                     au.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
                     au.put()
                     users = KeUser.all() if user.name == 'admin' else None
@@ -97,8 +98,9 @@ class AdminMgrPwd(BaseHandler):
             elif p1 != p2:
                 tips = _("The two new passwords are dismatch!")
             else:
+                secret_key = u.secret_key or ''
                 try:
-                    pwd = hashlib.md5(p1).hexdigest()
+                    pwd = hashlib.md5(p1 + secret_key).hexdigest()
                 except:
                     tips = _("The password includes non-ascii chars!")
                 else:
@@ -142,6 +144,10 @@ class DelAccount(BaseHandler):
                         book.users.remove(name)
                         book.put()
                 
+                #删掉书籍登陆信息
+                for subs_info in SubscriptionInfo.all().filter('user = ', u.key()):
+                    subs_info.delete()
+                    
                 if main.session.username == name:
                     raise web.seeother('/logout')
                 else:

@@ -1,28 +1,27 @@
 {% extends "advbase.html" %}
-{% block advcontent %}
+{% block advcontent -%}
 <form class="pure-form" action="" method="POST">
   <fieldset>
     <legend>{{_("Url Filter")}}</legend>
     <p style="font-size:0.8em;color:grey;">
         {{_("Urls in list would not be downloaded.")}}
     </p>
-    {% if user.urlfilter.count() %}
+    {% if user.urlfilter.count() -%}
     <table class="pure-table pure-table-striped pure-table-horizontal tburl">
-    {% for urlflt in user.urlfilter %}
+    {% for urlflt in user.urlfilter -%}
     <tr">
         <td style="width:80%;font-size:0.9em;">
             {%if urlflt.url|length>70%}{{urlflt.url[:70]}}...<span>{{urlflt.url}}</span>{%else%}{{urlflt.url}}{%endif%}
         </td>
         <td style="text-align:right;"><a href="/advdel?delurlid={{urlflt.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
     </tr>
-    {% endfor %}
+    {% endfor -%}
     </table>
-    {% endif %}
+    {% endif -%}
     <div class="newitem">
         <input type="text" name="url" style="width:100%;" placeholder="{{_("Please input regular expression")}}" />
     </div>
     <input type="submit" value="{{_("Add")}}" class="pure-button pure-button-primary" style="margin-top:8px;" />
   </fieldset>
 </form>
-
-{% endblock %}
+{% endblock -%}

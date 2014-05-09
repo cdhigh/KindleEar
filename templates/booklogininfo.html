@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block menubar -%}
+{% endblock -%}
+{% block content -%}
+    <form class="pure-form pure-form-aligned" action="" method="POST">
+      <fieldset>
+        <legend>{{_("Input website login info for book '%s'")|format('<strong>' + bk.title + '</strong>')|safe}}</legend>
+        <div class="pure-control-group">
+            <label for="account">{{_("Account")}}</label>
+            <input id="account" name="account" type="text" placeholder="Account" 
+            {% if subs_info and subs_info.account %}value="{{subs_info.account}}"{% endif %} />
+        </div>
+        <div class="pure-control-group">
+            <label for="password">{{_("Password")}}</label>
+            <input id="password" name="password" type="password" placeholder="Password" 
+            {% if subs_info and subs_info.password %}value="{{subs_info.password}}"{% endif %} />
+        </div>
+        <input name="id" type="hidden" value="{{bk.key().id()}}" />
+        {% if tips -%}
+        <p style="color:red;font-weight:bold;">{{tips}}</p>
+        {% else -%}
+        <p style="color:grey;">{{_("Leave any field empty to delete info from database.")}}</p>
+        {% endif -%}
+        <div class="pure-controls">
+            <button type="submit" class="pure-button pure-button-primary"> {{_("Submit")}} </button>
+        </div>
+      </fieldset>
+    </form>
+{% endblock -%}

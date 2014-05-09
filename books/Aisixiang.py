@@ -4,7 +4,7 @@
 
 import re
 from bs4 import BeautifulSoup, NavigableString
-from base import BaseFeedBook, URLOpener
+from base import BaseFeedBook
 
 def getBook():
     return Aisixiang
@@ -31,9 +31,8 @@ class Aisixiang(BaseFeedBook):
     def postprocess(self, content):
         return content.replace('()', '')
         
-    def fetcharticle(self, url, decoder):
+    def fetcharticle(self, url, opener, decoder):
         """ 爱思想的文章有分页，在此函数内下载全部分页，合并成一个单独的HTML返回。"""
-        opener = URLOpener(self.host, timeout=self.timeout)
         result = opener.open(url)
         status_code, content = result.status_code, result.content
         if status_code != 200 or not content:
@@ -48,9 +47,9 @@ class Aisixiang(BaseFeedBook):
             try:
                 firstpart = content.decode(self.page_encoding)
             except UnicodeDecodeError:
-                firstpart = decoder.decode(content,opener.realurl)
+                firstpart = decoder.decode(content,opener.realurl,result.headers)
         else:
-            firstpart = decoder.decode(content,opener.realurl)
+            firstpart = decoder.decode(content,opener.realurl,result.headers)
         
         otherparts = []
         soup = BeautifulSoup(firstpart, "lxml")
@@ -69,9 +68,9 @@ class Aisixiang(BaseFeedBook):
                             try:
                                 thispart = content.decode(self.page_encoding)
                             except UnicodeDecodeError:
-                                thispart = decoder.decode(content,parturl)
+                                thispart = decoder.decode(content,parturl,result.headers)
                         else:
-                            thispart = decoder.decode(content,parturl)
+                            thispart = decoder.decode(content,parturl,result.headers)
                         otherparts.append(thispart)
                         
             #合并文件后不再需要分页标志

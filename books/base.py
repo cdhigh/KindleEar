@@ -1,111 +1,21 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 """
-电子书基类，每本投递到kindle的书籍抽象为这里的一个类
+KindleEar电子书基类，每本投递到kindle的书籍抽象为这里的一个类。
+可以继承BaseFeedBook类而实现自己的定制书籍。
 """
-
-import os, re, urllib, urlparse, imghdr, logging, datetime
+import os, re, urllib, urlparse, imghdr, datetime
 from urllib2 import *
-import chardet
-from google.appengine.ext import db
 
 from bs4 import BeautifulSoup, Comment, NavigableString, CData, Tag
 from lib import feedparser
 from lib.readability import readability
 from lib.urlopener import URLOpener
+from lib.autodecoder import AutoDecoder
 
 from calibre.utils.img import rescale_image, mobify_image
 
 from config import *
-
-class UrlEncoding(db.Model):
-    #缓存网站的编码记录，chardet探测一次编码成功后，以后再也不需要重新探测
-    netloc = db.StringProperty()
-    feedenc = db.StringProperty()
-    pageenc = db.StringProperty()
-
-def HostEncoding(url, isfeed=True):
-    #查询数据库对应此URL的编码信息，注意返回为unicode格式
-    netloc = urlparse.urlsplit(url)[1]
-    urlenc = UrlEncoding.all().filter('netloc = ', netloc).get()
-    if urlenc:
-        return urlenc.feedenc if isfeed else urlenc.pageenc
-    else:
-        return u''
-
-class AutoDecoder:
-    # 封装数据库编码缓存和同一网站文章的编码缓存
-    # 因为chardet是非常慢的，所以需要那么复杂的缓存和其他特殊处理
-    def __init__(self, isfeed=True):
-        self.encoding = None
-        self.isfeed = isfeed #True:Feed,False:page
-
-    def decode(self, content, url):
-        result = content
-        if ALWAYS_CHAR_DETECT:
-            self.encoding = chardet.detect(content)['encoding']
-            
-        if self.encoding: # 先使用上次的编码打开文件尝试
-            try:
-                result = content.decode(self.encoding)
-            except UnicodeDecodeError: # 解码错误，使用自动检测编码
-                if ALWAYS_CHAR_DETECT:
-                    return ''
-                encoding = chardet.detect(content)['encoding']
-                try:
-                    result = content.decode(encoding)
-                except UnicodeDecodeError: # 还是出错，则不转换，直接返回
-                    self.encoding = None
-                    result = content
-                else: # 保存下次使用，以节省时间
-                    self.encoding = encoding
-                    #同时保存到数据库
-                    netloc = urlparse.urlsplit(url)[1]
-                    urlenc = UrlEncoding.all().filter('netloc = ', netloc).get()
-                    if urlenc:
-                        enc = urlenc.feedenc if self.isfeed else urlenc.pageenc
-                        if enc != encoding:
-                            if self.isfeed:
-                                urlenc.feedenc = encoding
-                            else:
-                                urlenc.pageenc = encoding
-                            urlenc.put()
-                    elif self.isfeed:
-                        UrlEncoding(netloc=netloc,feedenc=encoding).put()
-                    else:
-                        UrlEncoding(netloc=netloc,pageenc=encoding).put()
-        else:  # 暂时没有之前的编码信息
-            netloc = urlparse.urlsplit(url)[1]
-            urlenc = UrlEncoding.all().filter('netloc = ', netloc).get()
-            if urlenc: #先看数据库有没有
-                enc = urlenc.feedenc if self.isfeed else urlenc.pageenc
-                if enc:
-                    try:
-                        result = content.decode(enc)
-                    except UnicodeDecodeError: # 出错，重新检测编码
-                        self.encoding = chardet.detect(content)['encoding']
-                    else:
-                        self.encoding = enc
-                        return result
-                else: #数据库暂时没有数据
-                    self.encoding = chardet.detect(content)['encoding']
-            else:
-                self.encoding = chardet.detect(content)['encoding']
-
-            #使用检测到的编码解压
-            try:
-                result = content.decode(self.encoding)
-            except UnicodeDecodeError: # 出错，则不转换，直接返回
-                result = content
-            else:
-                #保存到数据库
-                newurlenc = urlenc if urlenc else UrlEncoding(netloc=netloc)
-                if self.isfeed:
-                    newurlenc.feedenc = self.encoding
-                else:
-                    newurlenc.pageenc = self.encoding
-                newurlenc.put()
-        return result
 
 class BaseFeedBook:
     """ base class of Book """
@@ -113,7 +23,8 @@ class BaseFeedBook:
     __author__            = ''
     description           = ''
     max_articles_per_feed = 30
-    oldest_article        = 7 #下载多长时间之内的文章，单位为天，0则不限制
+    #下载多长时间之内的文章，小于等于365则单位为天，大于365则单位为秒，0为不限制
+    oldest_article        = 7
     host                  = None # 有些网页的图像下载需要请求头里面包含Referer,使用此参数配置
     network_timeout       = None  # None则使用默认
     fetch_img_via_ssl     = False # 当网页为https时，其图片是否也转换成https
@@ -157,6 +68,15 @@ class BaseFeedBook:
     #这样你需要自己编程清理网页，建议使用下面的keep_only_tags[]工具
     fulltext_by_instapaper = False
 
+    #如果设置为True则需要提供用户名和密码，并且还要提供登陆URL
+    #如果登陆界面比较复杂，有可能你需要重新实现login函数
+    needs_subscription = False
+    login_url = ''
+    account = ''
+    password = ''
+    #None为自动猜测，字符串则是表单id或class，整数则为html中form序号（从0开始）
+    form_4_login = None
+    
     # 背景知识：下面所说的标签为HTML标签，比如'body','h1','div','p'等都是标签
 
     # 仅抽取网页中特定的标签段，在一个复杂的网页中抽取正文，这个工具效率最高
@@ -312,7 +232,7 @@ class BaseFeedBook:
         urls = []
         tnow = datetime.datetime.utcnow()
         urladded = set()
-
+        
         for feed in self.feeds:
             section, url = feed[0], feed[1]
             isfulltext = feed[2] if len(feed) > 2 else False
@@ -324,11 +244,11 @@ class BaseFeedBook:
                     try:
                         content = result.content.decode(self.feed_encoding)
                     except UnicodeDecodeError:
-                        content = AutoDecoder(True).decode(result.content,opener.realurl)
+                        content = AutoDecoder(True).decode(result.content,opener.realurl,result.headers)
                 else:
-                    content = AutoDecoder(True).decode(result.content,opener.realurl)
+                    content = AutoDecoder(True).decode(result.content,opener.realurl,result.headers)
                 feed = feedparser.parse(content)
-
+                
                 for e in feed['entries'][:self.max_articles_per_feed]:
                     updated = None
                     if hasattr(e, 'updated_parsed') and e.updated_parsed:
@@ -341,10 +261,15 @@ class BaseFeedBook:
                     if self.oldest_article > 0 and updated:
                         updated = datetime.datetime(*(updated[0:6]))
                         delta = tnow - updated
-                        if delta.days*86400+delta.seconds > 86400*self.oldest_article:
+                        if self.oldest_article > 365:
+                            threshold = self.oldest_article #以秒为单位
+                        else:
+                            threshold = 86400*self.oldest_article #以天为单位
+                        
+                        if delta.days*86400+delta.seconds > threshold:
                             self.log.info("Skip old article(%s): %s" % (updated.strftime('%Y-%m-%d %H:%M:%S'),e.link))
                             continue
-
+                            
                     #支持HTTPS
                     if hasattr(e, 'link'):
                         if url.startswith('https://'):
@@ -379,7 +304,7 @@ class BaseFeedBook:
                     urladded.add(urlfeed)
             else:
                 self.log.warn('fetch rss failed(%d):%s'%(result.status_code,url))
-
+                
         return urls
 
     def Items(self, opts=None, user=None):
@@ -391,19 +316,23 @@ class BaseFeedBook:
         urls = self.ParseFeedUrls()
         readability = self.readability if self.fulltext_by_readability else self.readability_by_soup
         prevsection = ''
+        opener = URLOpener(self.host, timeout=self.timeout)
         decoder = AutoDecoder(False)
         for section, ftitle, url, desc in urls:
             if not desc: #非全文RSS
                 if section != prevsection or prevsection == '':
-                    decoder.encoding = '' #每个小节都重新探测编码
+                    decoder.encoding = '' #每个小节都重新检测编码
                     prevsection = section
-
-                article = self.fetcharticle(url, decoder)
+                    opener = URLOpener(self.host, timeout=self.timeout)
+                    if self.needs_subscription:
+                        self.login(opener, decoder)
+        
+                article = self.fetcharticle(url, opener, decoder)
                 if not article:
                     continue
             else:
                 article = self.FragToXhtml(desc, ftitle)
-
+            
             #如果是图片，title则是mime
             for title, imgurl, imgfn, content, brief, thumbnail in readability(article,url,opts,user):
                 if title.startswith(r'image/'): #图片
@@ -413,34 +342,136 @@ class BaseFeedBook:
                     content =  self.postprocess(content)
                     yield (section, url, title, content, brief, thumbnail)
 
-    def fetcharticle(self, url, decoder):
+    def fetcharticle(self, url, opener, decoder):
         """链接网页获取一篇文章"""
         if self.fulltext_by_instapaper and not self.fulltext_by_readability:
             url = "http://www.instapaper.com/m?u=%s" % self.url_unescape(url)
+        
+        return self.fetch(url, opener, decoder)
+        
+    def login(self, opener, decoder):
+        """登陆网站然后将cookie自动保存在opener内，以便应付一些必须登陆才能下载网页的网站。
+        因为GAE环境的限制，所以如果需要javascript才能登陆的网站就不支持了，
+        需要验证码的网站也无法支持。
+        """
+        if not all((self.login_url, self.account, self.password)):
+            return
+        
+        content = self.fetch(self.login_url, opener, decoder)
+        if not content:
+            return
+        debug_mail(content)
+        soup = BeautifulSoup(content, 'lxml')
+        form = self.SelectLoginForm(soup)
+        
+        if not form:
+            self.log.warn('Cannot found login form!')
+            return
+        
+        self.log.info('Form selected:id(%s),class(%s)' % (form.get('id'),form.get('class')))
 
-        opener = URLOpener(self.host, timeout=self.timeout)
+        method = form.get('method', 'get').upper()
+        action = self.urljoin(self.login_url, form['action']) if form.get('action') else self.login_url
+        
+        #判断帐号域和密码域
+        inputs = list(form.find_all('input', attrs={'type':['text','email','password']}))
+        field_name = field_pwd = None
+        if len(inputs) == 2: #只有两个输入域则假定第一个为账号第二个为密码
+            field_name, field_pwd = inputs[0], inputs[1]
+        elif len(inputs) > 2: #可能需要验证码？先不管了，提取出账号密码域尝试一下
+            for idx,field in enumerate(inputs[1:],1):
+                if field['type'].lower() == 'password': #同时假定密码域的前一个是账号域
+                    field_name, field_pwd = inputs[idx-1], field
+                    break
+        
+        if not field_name or not field_pwd:
+            self.log.warn('Cant determine fields for account and password in login form!')
+            return
+            
+        #直接返回其他元素（包括隐藏元素）
+        name_of_field = lambda x:x.get('name') or x.get('id')
+        input_elems = list(form.find_all('input'))
+        fields_dic = {name_of_field(e):e.get('value','') for e in input_elems if name_of_field(e)}
+        #填写账号密码
+        fields_dic[name_of_field(field_name)] = self.account
+        fields_dic[name_of_field(field_pwd)] = self.password
+        
+        parts = urlparse.urlparse(action)
+        rest, (query, frag) = parts[:-2], parts[-2:]
+        if method == 'GET':
+            target_url = urlparse.urlunparse(rest + (urllib.urlencode(fields_dic),None))
+            self.log.debug('Login url : ' + target_url)
+            opener.open(target_url)
+        else:
+            self.log.warn('field_dic:%s' % repr(fields_dic))
+            target_url = urlparse.urlunparse(rest[:-1] + (None,None,None))
+            return opener.open(target_url, data=fields_dic)
+            
+    def SelectLoginForm(self, soup):
+        "根据用户提供的信息提取登陆表单或猜测哪个Form才是登陆表单"
+        form = None
+        if isinstance(self.form_4_login, (int,long)): #通过序号选择表单
+            forms = soup.select('form:nth-of-type(%d)' % (self.form_4_login+1))
+            form = forms[0] if forms else None
+        elif isinstance(self.form_4_login, basestring): #通过名字
+            if self.form_4_login.startswith('#'): #id
+                form = soup.find(lambda f: f.name=='form' and f.get('id')==self.form_4_login[1:])
+            elif self.form_4_login.startswith('.'): #class
+                form = soup.find(lambda f: f.name=='form' and self.form_4_login[1:] in f.get('class',[]))
+            else: #name & id & class
+                form = soup.find(lambda f: f.name=='form' and (f.get('name')==self.form_4_login 
+                    or f.get('id')==self.form_4_login or self.form_4_login in f.get('class',[])))
+        else: #自动猜测
+            forms = list(soup.find_all('form'))
+            if len(forms) == 1:
+                form = forms[0]
+            elif len(forms) > 1:
+                for f in forms:
+                    #根据表单内元素判断，登陆表单一般来说有一个且只有一个密码域
+                    if len(f.find_all(lambda e:e.name=='input' and e.get('type','').lower()=='password')) == 1:
+                        form = f
+                        break
+                if not form: #如果上面最稳妥的方式找不到，再试其他方法
+                    for f in forms:
+                        #根据表单内密码域的名字判断
+                        for e in f.find_all('input'):
+                            ename = e.get('name','').lower()
+                            if 'password' in ename or 'pwd' in ename or 'pass' in ename:
+                                form = f
+                                break
+                        
+                        #根据名字或提交地址猜测
+                        fname = (f.get('id','') or ''.join(f.get('class',[]))).lower()
+                        action = f.get('action','').lower()
+                        if 'login' in identify or 'login' in action:
+                            form = f
+                            break
+                        
+                if not form: #如果无法判断，则假定第二个为登陆表单
+                    form = forms[1]
+        return form
+        
+    def fetch(self, url, opener, decoder):
+        """链接网络，下载网页并解码"""
         result = opener.open(url)
         status_code, content = result.status_code, result.content
-        if status_code != 200 or not content:
-            self.log.warn('fetch article failed(%d):%s.' % (status_code,url))
+        if status_code not in (200,206) or not content:
+            self.log.warn('fetch page failed(%d):%s.' % (status_code,url))
             return None
-
-        if 0: #有些网站封锁GAE，将GAE获取的网页发送到自己邮箱调试
-            from google.appengine.api import mail
-            mail.send_mail(SRC_EMAIL, SRC_EMAIL, "KindleEar Debug", "KindlerEar",
-                attachments=[("Page.html", content),])
-
+        
+        #debug_mail(content)
+        
         if self.page_encoding:
             try:
                 return content.decode(self.page_encoding)
             except UnicodeDecodeError:
-                return decoder.decode(content,opener.realurl)
+                return decoder.decode(content,opener.realurl,result.headers)
         else:
-            return decoder.decode(content,opener.realurl)
+            return decoder.decode(content,opener.realurl,result.headers)
 
     def readability(self, article, url, opts=None, user=None):
         """ 使用readability-lxml处理全文信息
-        #因为图片文件占内存，为了节省内存，这个函数也做为生成器
+        因为图片文件占内存，为了节省内存，这个函数也做为生成器
         """
         content = self.preprocess(article)
 
@@ -456,26 +487,37 @@ class BaseFeedBook:
         if not title:
             self.log.warn('article has no title.[%s]' % url)
             return
-
+        
         title = self.processtitle(title)
-
-        #if summary.startswith('<body'): #readability解析出错
-        #    html = content
-        #else:
-        #html = self.FragToXhtml(summary, title, addtitleinbody=True)
-
-        #因为现在只剩文章内容了，使用BeautifulSoup也不会有什么性能问题
+        
         soup = BeautifulSoup(summary, "lxml")
-        h = soup.find('head')
-        if not h:
-            h = soup.new_tag('head')
+        
+        #如果readability解析失败，则启用备用算法（不够好，但有全天候适应能力）
+        body = soup.find('body')
+        head = soup.find('head')
+        if len(body.contents) == 0:
+            from simpleextract import simple_extract
+            summary = simple_extract(content)
+            soup = BeautifulSoup(summary, "lxml")
+            body = soup.find('body')
+            head = soup.find('head')
+            #增加备用算法提示，提取效果不好不要找我，类似免责声明：）
+            info = soup.new_tag('p', style='color:#555555;font-size:60%;text-align:right;')
+            info.string = 'extracted by alternative algorithm.'
+            body.append(info)
+            
+            self.log.info('use alternative algorithm to extract content.')
+            
+        if not head:
+            head = soup.new_tag('head')
+            soup.html.insert(0, head)
+            
+        if not head.find('title'):
             t = soup.new_tag('title')
             t.string = title
-            h.append(t)
-            soup.html.insert(0, h)
-
+            head.append(t)
+            
         #如果没有内容标题则添加
-        body = soup.html.body
         t = body.find(['h1','h2'])
         if not t:
             t = soup.new_tag('h2')
@@ -490,7 +532,7 @@ class BaseFeedBook:
                     t.string = title
                     body.insert(0, t)
                     break
-
+                    
         if self.remove_tags:
             for tag in soup.find_all(self.remove_tags):
                 tag.decompose()
@@ -894,21 +936,22 @@ class WebpageBook(BaseFeedBook):
                 try:
                     content = content.decode(self.page_encoding)
                 except UnicodeDecodeError:
-                    content = decoder.decode(content,opener.realurl)
+                    content = decoder.decode(content,opener.realurl,result.headers)
             else:
-                content = decoder.decode(content,opener.realurl)
+                content = decoder.decode(content,opener.realurl,result.headers)
 
             content =  self.preprocess(content)
             soup = BeautifulSoup(content, "lxml")
 
-            h = soup.find('head')
-            if not h:
-                h = soup.new_tag('head')
+            head = soup.find('head')
+            if not head:
+                head = soup.new_tag('head')
+                soup.html.insert(0, head)
+            if not head.find('title'):
                 t = soup.new_tag('title')
                 t.string = section
-                h.append(t)
-                soup.html.insert(0, h)
-
+                head.append(t)
+                
             try:
                 title = soup.html.head.title.string
             except AttributeError:
@@ -1077,3 +1120,9 @@ def string_of_tag(tag, normalize_whitespace=False):
         ans = re.sub(r'\s+', ' ', ans)
     return ans
 
+def debug_mail(content, name='page.html'):
+    "将抓取的网页发到自己邮箱进行调试"
+    from google.appengine.api import mail
+    mail.send_mail(SRC_EMAIL, SRC_EMAIL, "KindleEar Debug", "KindlerEar",
+    attachments=[(name, content),])
+    

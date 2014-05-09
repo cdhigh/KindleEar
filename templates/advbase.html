@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block css %}
+{% block css -%}
 <style type="text/css">
 .newitem {
     width:96.7%;
@@ -36,14 +36,14 @@ td:hover span{
     padding:0.5em 0 0.5em 0.5em;
 }
 </style>
-{% endblock %}
-{% block content %}
+{% endblock -%}
+{% block content -%}
 <div class="pure-skin-mine">
 <div class="pure-g">
   <div class="pure-u-4-5">
   <div class="m-box-l">
-   {% block advcontent %}
-   {% endblock %}
+   {% block advcontent -%}
+   {% endblock -%}
   </div>
   </div>
   
@@ -51,30 +51,28 @@ td:hover span{
   <div class="m-box-r">
    <div class="pure-menu pure-menu-open">
     <ul>
-    {% if advcurr=='whitelist'%}
+    {% if advcurr=='whitelist' -%}
       <li class="pure-menu-selected"><a href="#">{{_("White List")}}</a>
       </li>
-    {% else %}
+    {% else -%}
       <li><a href="/advwhitelist">{{_("White List")}}</a></li>
-    {% endif %}
-    
-    {% if advcurr=='share'%}
+    {% endif -%}
+    {% if advcurr=='share' -%}
       <li class="pure-menu-selected"><a href="#">{{_("Share")}}</a>
       </li>
-    {% else %}
+    {% else -%}
       <li><a href="/advshare">{{_("Share")}}</a></li>
-    {% endif %}
-    
-    {% if advcurr=='urlfilter'%}
+    {% endif -%}
+    {% if advcurr=='urlfilter' -%}
       <li class="pure-menu-selected"><a href="#">{{_("Url Filter")}}</a>
       </li>
-    {% else %}
+    {% else -%}
       <li><a href="/advurlfilter">{{_("Url Filter")}}</a></li>
-    {% endif %}
+    {% endif -%}
     </ul>
    </div>
   </div>
   </div>
 </div>
 </div>
-{% endblock %}
+{% endblock -%}

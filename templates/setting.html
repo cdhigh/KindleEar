@@ -1,15 +1,15 @@
 {% extends "base.html" %}
-{% block content %}
-{% if user and user.expires %}
+{% block content -%}
+{% if user and user.expires -%}
 <div class="grey">
     {{_("Your account will pause after")}} <strong id="expires">{{ user.expires.strftime("%Y-%m-%d") }}</strong> {{_(", Please login before expire.")}} 
     <a href="/delaccount/{{user.name}}">{{_("Delete Account")}}</a>
 </div>
-{% endif %}
+{% endif -%}
 <form class="pure-form pure-form-aligned" action="" method="POST">
-    {% if tips %}
+    {% if tips -%}
     <p class="error">{{tips}}</p>
-    {% endif %}
+    {% endif -%}
     
     <fieldset>
         <legend>{{_("Base Setting")}}</legend>
@@ -19,30 +19,30 @@
             </td></tr>
             <tr><td style="text-align:right;"><label>{{_("Time zone")}} : </label></td>
             <td><select class="bool" name="timezone">
-                {% for i in range(-12, 0) %}
+                {% for i in range(-12, 0) -%}
                 <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT%d:00" % i }}</option>
-                {% endfor %}
+                {% endfor -%}
                 <option value="0" {% if user.timezone|int==0 %}selected="selected"{% endif %}>GMT</option>
-                {% for i in range(1, 14) %}
+                {% for i in range(1, 14) -%}
                 <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT+%d:00" % i }}</option>
-                {% endfor %}
+                {% endfor -%}
             </select></td></tr>
             <tr><td style="text-align:right;"><label>{{_("Deliver days")}} : </label></td>
             <td>
-            <input type="checkbox" id="mon" name="Monday" {% if not user.send_days or "Monday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Mon")}} &nbsp;</span>
-            <input type="checkbox" id="tue" name="Tuesday" {% if not user.send_days or "Tuesday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Tue")}} &nbsp;</span>
-            <input type="checkbox" id="wed" name="Wednesday" {% if not user.send_days or "Wednesday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Wed")}} &nbsp;</span>
-            <input type="checkbox" id="thu" name="Thursday" {% if not user.send_days or "Thursday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Thu")}} &nbsp;</span>
-            <input type="checkbox" id="fri" name="Friday" {% if not user.send_days or "Friday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Fri")}} &nbsp;</span>
-            <input type="checkbox" id="sat" name="Saturday" {% if not user.send_days or "Saturday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Sat")}} &nbsp;</span>
-            <input type="checkbox" id="sun" name="Sunday" {% if not user.send_days or "Sunday" in user.send_days %}checked="1"{% endif %} /><span class="font90">{{_("Sun")}} &nbsp;</span>
+            <input type="checkbox" id="mon" name="Monday" {% if not user.send_days or "Monday" in user.send_days %}checked="1"{% endif %} /><span class="font90" style="cursor:default;" onclick="toggleweekbtn('mon');">{{_("Mon")}} &nbsp;</span>
+            <input type="checkbox" id="tue" name="Tuesday" {% if not user.send_days or "Tuesday" in user.send_days %}checked="1"{% endif %} /><span class="font90" style="cursor:default;" onclick="toggleweekbtn('tue');">{{_("Tue")}} &nbsp;</span>
+            <input type="checkbox" id="wed" name="Wednesday" {% if not user.send_days or "Wednesday" in user.send_days %}checked="1"{% endif %} /><span class="font90" style="cursor:default;" onclick="toggleweekbtn('wed');">{{_("Wed")}} &nbsp;</span>
+            <input type="checkbox" id="thu" name="Thursday" {% if not user.send_days or "Thursday" in user.send_days %}checked="1"{% endif %} /><span class="font90" style="cursor:default;" onclick="toggleweekbtn('thu');">{{_("Thu")}} &nbsp;</span>
+            <input type="checkbox" id="fri" name="Friday" {% if not user.send_days or "Friday" in user.send_days %}checked="1"{% endif %} /><span class="font90" style="cursor:default;" onclick="toggleweekbtn('fri');">{{_("Fri")}} &nbsp;</span>
+            <input type="checkbox" id="sat" name="Saturday" {% if not user.send_days or "Saturday" in user.send_days %}checked="1"{% endif %} /><span class="font90" style="cursor:default;" onclick="toggleweekbtn('sat');">{{_("Sat")}} &nbsp;</span>
+            <input type="checkbox" id="sun" name="Sunday" {% if not user.send_days or "Sunday" in user.send_days %}checked="1"{% endif %} /><span class="font90" style="cursor:default;" onclick="toggleweekbtn('sun');">{{_("Sun")}} &nbsp;</span>
             </td></tr>
             
             <tr><td style="text-align:right;"><label>{{_("Deliver time")}} : </label></td>
             <td><select class="bool" name="sendtime">
-                {% for i in range(0, 24) %}
+                {% for i in range(0, 24) -%}
                 <option value="{{ i }}" {% if user.send_time|int == i %}selected="selected"{% endif %}>{{ "%02d:00" % i }}</option>
-                {% endfor %}
+                {% endfor -%}
             </select></td></tr>
             <tr><td style="text-align:right;"><label>{{_("Book type")}}</label> : </td>
             <td><select class="bool" name="booktype">
@@ -127,4 +127,13 @@
         <input type="submit" class="pure-button pure-button-primary" value="{{_("Save settings")}}" />
     </p>
 </form>
-{% endblock %}
+{% endblock -%}
+{% block js -%}
+<script type="text/javascript">
+function toggleweekbtn(btn_name) {
+  if (!btn_name) return
+  var btn = document.getElementById(btn_name);
+  btn.checked = !btn.checked;
+}
+</script>
+{% endblock -%}

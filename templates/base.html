@@ -7,76 +7,76 @@
     <title>{{title}} - Kindle's Ear</title>
     <link rel="stylesheet" href="/static/pure-min.css" type="text/css" charset="utf-8"/>
     <link rel="stylesheet" href="/static/base.css" type="text/css" charset="utf-8"/>
-    {% block cssfiles %}{% endblock %}
-    {% block css %}{% endblock %}
-    {% block jsfiles %}{% endblock %}
-    {% block js %}{% endblock %}
+    {% block cssfiles %}{% endblock -%}
+    {% block css %}{% endblock -%}
+    {% block jsfiles %}{% endblock -%}
+    {% block js %}{% endblock -%}
 </head>
-{% block bodytag %}
+{% block bodytag -%}
 <body>
-{% endblock %}
+{% endblock -%}
     <div id="header">
-        {% block header %}
+        {% block header -%}
         <h1><a href="/">KindleEar</a></h1>
-        {% if nickname %}
+        {% if nickname -%}
           <a class="nav" href="/logout">{{_("Logout")}}</a>
           <span style="color: #ccc;">&bull;</span>
         <span>Hello, <a href="/admin"><strong>{{nickname}}</strong></a></span>
-        {% else %}
+        {% else -%}
         <form class="pure-form headerloginform" action="/login" method="POST">
-            <input type="text" class="pure-u-1-6" placeholder={{_("Name")}} name="u" id="u" />
-            <input type="password" class="pure-u-1-6" placeholder={{_("Password")}} name="p" />
+            <input type="text" class="pure-u-1-6" style="min-width:100px;" placeholder={{_("Name")}} name="u" id="u" />
+            <input type="password" class="pure-u-1-6" style="min-width:100px;" placeholder={{_("Password")}} name="p" />
             <input type="submit" class="pure-button pure-button-small" value={{_("Login")}} />
         </form>
-        {% endif %}
+        {% endif -%}
         <div class="clear"></div>
-        {% endblock %}
+        {% endblock -%}
     </div>
-    {% block menubar %}
-    {% if nickname %}
+    {% block menubar -%}
+    {% if nickname -%}
     <div class="pure-skin-mine">
     <div class="pure-menu pure-menu-open pure-menu-horizontal">
         <ul>
-        {% if current == "my" %}
+        {% if current == "my" -%}
         <li class="pure-menu-selected"><a href="#">{{_("Feeds")}}</a></li>
-        {% else %}
+        {% else -%}
         <li><a href="/my">{{_("Feeds")}}</a></li>
-        {% endif %}
-        {% if current == "setting" %}
+        {% endif -%}
+        {% if current == "setting" -%}
         <li class="pure-menu-selected"><a href="#">{{_("Setting")}}</a></li>
-        {% else %}
+        {% else -%}
         <li><a href="/setting">{{_("Setting")}}</a></li>
-        {% endif %}
-        {% if current == "logs" %}
+        {% endif -%}
+        {% if current == "logs" -%}
         <li class="pure-menu-selected"><a href="#">{{_("Logs")}}</a></li>
-        {% else %}
+        {% else -%}
         <li><a href="/logs">{{_("Logs")}}</a></li>
-        {% endif %}
-        {% if current == "admin" %}
+        {% endif -%}
+        {% if current == "admin" -%}
         <li class="pure-menu-selected"><a href="#">{{_("Admin")}}</a></li>
-        {% else %}
+        {% else -%}
         <li><a href="/admin">{{_("Admin")}}</a></li>
-        {% endif %}
-        {% if current == "advsetting" %}
+        {% endif -%}
+        {% if current == "advsetting" -%}
         <li class="pure-menu-selected"><a href="#">{{_("Advance")}}</a></li>
-        {% else %}
+        {% else -%}
         <li><a href="/advwhitelist">{{_("Advance")}}</a></li>
-        {% endif %}
+        {% endif -%}
         </ul>
     </div>
     </div>
-    {% else %}
+    {% else -%}
         {#<h2 style="text-align:center;padding:10px 0;"><a href="/login">{{_("Please Login")}}</a></h2>#}
     </div>
     </div>
-    {% endif %}
-    {% endblock %}
+    {% endif -%}
+    {% endblock -%}
     <div id="content">
-    {% block content %}
-    {% endblock %}
+    {% block content -%}
+    {% endblock -%}
     </div>
     <div id="footer">
-        {% block footer %}
+        {% block footer -%}
         <div class="clear"></div>
         2013 &copy; KindleEar&nbsp;@{{version}}&nbsp;&nbsp;|&nbsp;&nbsp;
         <a href="/static/faq{%if lang and not lang.startswith('zh')%}_en{%endif%}.html" target="_blank" style="text-decoration:none;">FAQ</a>
@@ -87,7 +87,7 @@
         <div style="float:right;"><a href="/lang/en"><img src="/static/us.gif" alt="EN" /></a>
         <a href="/lang/zh-cn"><img src="/static/cn.gif" alt="CN" /></a>
         <a href="/lang/tr-tr"><img src="/static/tr.gif" alt="TR" /></a></div>
-        {% endblock %}
+        {% endblock -%}
     </div>
 </body>
 </html>

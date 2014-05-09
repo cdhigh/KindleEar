@@ -7,7 +7,7 @@ from google.appengine.api import urlfetch
 from config import CONNECTION_TIMEOUT
 
 class URLOpener:
-    def __init__(self, host=None, maxfetchcount=2, maxredirect=3, 
+    def __init__(self, host=None, maxfetchcount=2, maxredirect=5, 
                 timeout=CONNECTION_TIMEOUT, addreferer=False):
         self.cookie = Cookie.SimpleCookie()
         self.maxFetchCount = maxfetchcount
@@ -28,7 +28,7 @@ class URLOpener:
             headers={}
         
         response = resp()
-        if url.startswith('data:image/'):
+        if url.startswith(r'data:image/'):
             from base64 import b64decode
             try:
                 idx_begin = url.find(';base64,') or url.find(';BASE64,')
@@ -41,6 +41,8 @@ class URLOpener:
                 cnt = 0
                 while cnt < self.maxFetchCount:
                     try:
+                        if data and isinstance(data, dict):
+                            data = urllib.urlencode(data)
                         response = urlfetch.fetch(url=url, payload=data, method=method,
                             headers=self._getHeaders(url),
                             allow_truncated=False, follow_redirects=False, 

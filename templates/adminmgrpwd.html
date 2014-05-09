@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block menubar %}
-{% endblock %}
-{% block content %}
-    {% if tips %}
+{% block menubar -%}
+{% endblock -%}
+{% block content -%}
+    {% if tips -%}
     <p style="color:red;font-weight:bold;">{{tips}}</p>
-    {% endif %}
+    {% endif -%}
     <form class="pure-form pure-form-aligned" action="" method="POST">
         <div class="pure-control-group">
             <label for="u">{{_("Username")}}</label>
@@ -23,4 +23,4 @@
             <button type="submit" class="pure-button pure-button-primary">{{_("Confirm Change")}}</button>
         </div>
     </form>
-{% endblock %}
+{% endblock -%}

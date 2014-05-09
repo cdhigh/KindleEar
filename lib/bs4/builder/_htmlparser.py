@@ -45,7 +45,15 @@ HTMLPARSER = 'html.parser'
 class BeautifulSoupHTMLParser(HTMLParser):
     def handle_starttag(self, name, attrs):
         # XXX namespace
-        self.soup.handle_starttag(name, None, None, dict(attrs))
+        attr_dict = {}
+        for key, value in attrs:
+            # Change None attribute values to the empty string
+            # for consistency with the other tree builders.
+            if value is None:
+                value = ''
+            attr_dict[key] = value
+            attrvalue = '""'
+        self.soup.handle_starttag(name, None, None, attr_dict)
 
     def handle_endtag(self, name):
         self.soup.handle_endtag(name)
@@ -135,13 +143,14 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
         replaced with REPLACEMENT CHARACTER).
         """
         if isinstance(markup, unicode):
-            return markup, None, None, False
+            yield (markup, None, None, False)
+            return
 
         try_encodings = [user_specified_encoding, document_declared_encoding]
         dammit = UnicodeDammit(markup, try_encodings, is_html=True)
-        return (dammit.markup, dammit.original_encoding,
-                dammit.declared_html_encoding,
-                dammit.contains_replacement_characters)
+        yield (dammit.markup, dammit.original_encoding,
+               dammit.declared_html_encoding,
+               dammit.contains_replacement_characters)
 
     def feed(self, markup):
         args, kwargs = self.parser_args

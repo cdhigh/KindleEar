@@ -1,6 +1,5 @@
 {% extends "base.html" %}
-
-{% block css %}
+{% block css -%}
 <style type="text/css">
 .usrtb {
 width:100%;
@@ -8,15 +7,14 @@ font-size:0.8em;
 }
 .usrtb th{text-align:center;}
 </style>
-{% endblock %}
-
-{% block content %}
+{% endblock -%}
+{% block content -%}
 <form class="pure-form pure-form-aligned" action="" method="POST">
 <fieldset>
     <legend>{{_("Change Password")}}</legend>
-    {% if chpwdtips %}
+    {% if chpwdtips -%}
     <p style="color:red;font-size:0.8em;">{{chpwdtips}}</p>
-    {% endif %}
+    {% endif -%}
     <div class="pure-control-group">
         <label for="orgpwd">{{_("Old password")}}</label>
         <input type="password" name="op" id="orgpwd">
@@ -34,14 +32,13 @@ font-size:0.8em;
     </div>
 </fieldset>
 </form>
-
-{% if nickname == 'admin' %}
+{% if nickname == 'admin' -%}
 <form class="pure-form pure-form-aligned" action="" method="POST" style="margin-top:10px;">
 <fieldset>
     <legend>{{_("Add Account")}}</legend>
-    {% if actips %}
+    {% if actips -%}
     <p style="color:red;font-size:0.8em;">{{actips}}</p>
-    {% endif %}
+    {% endif -%}
     <p style="font-size:0.8em;color:grey;">{{_("Note : No supports many accounts for limit of free account of GAE.")}}</p>
     <div class="pure-control-group">
         <label for="username">{{_("Username")}}</label>
@@ -61,28 +58,24 @@ font-size:0.8em;
 </fieldset>
 </form>
 <p>{{_("Accounts")}}</p>
-{#<fieldset>#}
-    {#<legend>{{_("Accounts")}}</legend>#}
-    <table class="pure-table pure-table-bordered usrtb">
-        <thead><tr>
-            <th>{{_("No.")}}</th>
-            <th>{{_("Username")}}</th>
-            <th>{{_("Enable")}}</th>
-            <th colspan="2">{{_("Operation")}}</th>
-        </tr></thead>
-        
-        <tbody>
-        {% for u in users %}
-        <tr>
-        <th>{{loop.index}}</th>
-        <th>{{u.name}}</th>
-        <th>{{u.enable_send}}</th>
-        <th><a href="/mgrpwd/{{u.name}}" class="actionButton">{{_("Change")}}</a></th>
-        <th><a href="delaccount/{{u.name}}" class="actionButton">{{_("Delete")}}</a></th>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-{#</fieldset>#}
-{% endif %}
-{% endblock %}
+<table class="pure-table pure-table-bordered usrtb">
+    <thead><tr>
+        <th>{{_("No.")}}</th>
+        <th>{{_("Username")}}</th>
+        <th>{{_("Enable")}}</th>
+        <th colspan="2">{{_("Operation")}}</th>
+    </tr></thead>
+    <tbody>
+    {% for u in users -%}
+    <tr>
+    <th>{{loop.index}}</th>
+    <th>{{u.name}}</th>
+    <th>{{u.enable_send}}</th>
+    <th><a href="/mgrpwd/{{u.name}}" class="actionButton">{{_("Change")}}</a></th>
+    <th><a href="delaccount/{{u.name}}" class="actionButton">{{_("Delete")}}</a></th>
+    </tr>
+    {% endfor -%}
+    </tbody>
+</table>
+{% endif -%}
+{% endblock -%}

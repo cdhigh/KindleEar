@@ -11,8 +11,6 @@ import datetime
 import gettext
 import re
 
-#import main
-
 def local_time(fmt="%Y-%m-%d %H:%M", tz=TIMEZONE):
     return (datetime.datetime.utcnow()+datetime.timedelta(hours=tz)).strftime(fmt)
 
@@ -65,7 +63,7 @@ def InsertToc(oeb, sections, toc_thumbnails):
     html_toc_2 = []
     name_section_list = []
     for sec in sections.keys():
-        htmlcontent = ['<html><head><title>%s</title><style type="text/css">.pagebreak{page-break-before: always;} h2{font-size: 120%%;}</style></head><body>' % (sec)]
+        htmlcontent = ['<html><head><title>%s</title><style type="text/css">.pagebreak{page-break-before:always;}h1{font-size:2.0em;}h2{font-size:1.5em;}h3{font-size:1.4em;} h4{font-size:1.2em;}h5{font-size:1.1em;}h6{font-size:1.0em;} </style></head><body>' % (sec)]
         secondary_toc_list = []
         first_flag = False
         sec_toc_thumbnail = None
@@ -140,3 +138,60 @@ def InsertToc(oeb, sections, toc_thumbnails):
         elif sectoc:
             sectoc.add(unicode(ncx[1]), ncx[2], description=ncx[3] if ncx[3] else None, klass='article', play_order=po, id='article-%d'%po, toc_thumbnail=toc_thumbnails[ncx[4]] if GENERATE_TOC_THUMBNAIL and ncx[4] else None)
         po += 1
+        
+#-----------以下几个函数为安全相关的
+def new_secret_key(length=8):
+    import random
+    allchars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXZY0123456789'
+    return ''.join([random.choice(allchars) for i in range(length)])
+    
+def ke_encrypt(s, key):
+    return auth_code(s, key, 'ENCODE')
+    
+def ke_decrypt(s, key):
+    return auth_code(s, key, 'DECODE')
+
+def auth_code(string, key, operation='DECODE'):
+    import hashlib,base64
+    key = str(key) if key else ''
+    string = str(string)
+    key = hashlib.md5(key).hexdigest()
+    keya = hashlib.md5(key[:16]).hexdigest()
+    keyb = hashlib.md5(key[16:]).hexdigest()
+    cryptkey = keya + hashlib.md5(keya).hexdigest()
+    key_length = len(cryptkey)
+    
+    if operation == 'DECODE':
+        string = base64.urlsafe_b64decode(string)
+    else:
+        string = hashlib.md5(string + keyb).hexdigest()[:16] + string
+    string_length = len(string)
+    
+    result = ''
+    box = range(256)
+    rndkey = {}
+    for i in range(256):
+        rndkey[i] = ord(cryptkey[i % key_length])
+    
+    j = 0
+    for i in range(256):
+        j = (j + box[i] + rndkey[i]) % 256
+        tmp = box[i]
+        box[i] = box[j]
+        box[j] = tmp
+    a = j = 0
+    for i in range(string_length):
+        a = (a + 1) % 256
+        j = (j + box[a]) % 256
+        tmp = box[a]
+        box[a] = box[j]
+        box[j] = tmp
+        result += chr(ord(string[i]) ^ (box[(box[a] + box[j]) % 256]))
+    if operation == 'DECODE':
+        if result[:16] == hashlib.md5(result[16:] + keyb).hexdigest()[:16]:
+            return result[16:]
+        else:
+            return ''
+    else:
+        return base64.urlsafe_b64encode(result)
+        

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block css %}
+{% block css -%}
 <style type="text/css">
 #tips{
     color:red;
@@ -12,17 +12,17 @@
     text-align:center;
 }
 </style>
-{% endblock %}
-{% block bodytag %}
+{% endblock -%}
+{% block bodytag -%}
 <body onload="document.getElementById('u').focus();">
-{% endblock %}
-{% block menubar %}
-{% endblock %}
-{% block content %}
+{% endblock -%}
+{% block menubar -%}
+{% endblock -%}
+{% block content -%}
     <fieldset id="fs_login">
-    {% if tips %}
+    {% if tips -%}
     <p id="tips">{{tips}}</p>
-    {% endif %}
+    {% endif -%}
     <form action="/login" method="POST" class="pure-form pure-form-aligned">
         <div class="pure-control-group">
             <label for="u">{{_("Username")}}</label>
@@ -39,4 +39,4 @@
     </form>
     </fieldset>
     <p id="note">{{_("The website dont allow register, you can ask owner for a account.")}}</p>
-{% endblock %}
+{% endblock -%}

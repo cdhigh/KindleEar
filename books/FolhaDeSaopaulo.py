@@ -40,9 +40,9 @@ class FolhaDeSaopaulo(BaseFeedBook):
             #(u'Esporte', u'http://feeds.folha.uol.com.br/folha/esporte/rss091.xml'),
            ]
     
-    #def fetcharticle(self, url, decoder):
+    #def fetcharticle(self, url, opener, decoder):
     #    url = 'http://tools.folha.com.br/print?url=' + url
-    #    return BaseFeedBook.fetcharticle(self, url, decoder)
+    #    return BaseFeedBook.fetcharticle(self, url, opener, decoder)
         
     def processtitle(self, title):
         pn = re.compile(r'^(.*?) - \d\d/\d\d/\d\d\d\d - .*? - (Folha de S\.Paulo|F5)$', re.I)

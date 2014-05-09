@@ -11,7 +11,7 @@ import web
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
 
-from books.base import UrlEncoding
+from lib.autodecoder import UrlEncoding
 
 class DbViewer(BaseHandler):
     __url__ = "/dbviewer"

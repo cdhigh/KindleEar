@@ -1,10 +1,15 @@
 """Diagnostic functions, mainly for use when doing tech support."""
+import cProfile
 from StringIO import StringIO
 from HTMLParser import HTMLParser
+import bs4
 from bs4 import BeautifulSoup, __version__
 from bs4.builder import builder_registry
+
 import os
+import pstats
 import random
+import tempfile
 import time
 import traceback
 import sys
@@ -61,14 +66,14 @@ def diagnose(data):
 
         print "-" * 80
 
-def lxml_trace(data, html=True):
+def lxml_trace(data, html=True, **kwargs):
     """Print out the lxml events that occur during parsing.
 
     This lets you see how lxml parses a document when no Beautiful
     Soup code is running.
     """
     from lxml import etree
-    for event, element in etree.iterparse(StringIO(data), html=html):
+    for event, element in etree.iterparse(StringIO(data), html=html, **kwargs):
         print("%s, %4s, %s" % (event, element.tag, element.text))
 
 class AnnouncingParser(HTMLParser):
@@ -173,6 +178,27 @@ def benchmark_parsers(num_elements=100000):
     etree.HTML(data)
     b = time.time()
     print "Raw lxml parsed the markup in %.2fs." % (b-a)
+
+    import html5lib
+    parser = html5lib.HTMLParser()
+    a = time.time()
+    parser.parse(data)
+    b = time.time()
+    print "Raw html5lib parsed the markup in %.2fs." % (b-a)
+
+def profile(num_elements=100000, parser="lxml"):
+
+    filehandle = tempfile.NamedTemporaryFile()
+    filename = filehandle.name
+
+    data = rdoc(num_elements)
+    vars = dict(bs4=bs4, data=data, parser=parser)
+    cProfile.runctx('bs4.BeautifulSoup(data, parser)' , vars, vars, filename)
+
+    stats = pstats.Stats(filename)
+    # stats.strip_dirs()
+    stats.sort_stats("cumulative")
+    stats.print_stats('_html5lib|bs4', 50)
 
 if __name__ == '__main__':
     diagnose(sys.stdin.read())

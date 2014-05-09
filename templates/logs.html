@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block css %}
+{% block css -%}
 <style type="text/css">
 .logs_list{
     border-spacing: 0;
@@ -63,9 +63,9 @@
     width:400px;
 }
 </style>
-{% endblock %}
-{% block content %}
-{% if mylogs %}
+{% endblock -%}
+{% block content -%}
+{% if mylogs -%}
 <p><em class="required">*</em> {{_("Only display last 10 logs")}}</p>
 <table class="pure-table pure-table-striped logs_list">
     <thead><tr>
@@ -76,24 +76,24 @@
         <th class="center">{{_("Status")}}</th>
     </tr></thead>
     <tbody>
-    {% for log in mylogs %}
+    {% for log in mylogs -%}
     <tr>
         <td class="center">{{ log.time }}</td>
         <td class="logbook">
-        {% if log.book|length>20 %}
+        {% if log.book|length>20 -%}
         {{log.book[:20]}}...<span>{{log.book}}</span>
         {% else %}{{log.book}}{% endif %}</td>
         <td class="center">{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>
         <td class="center">{{ log.to }}</td>
         <td class="center">{% if log.status %}{{ log.status }}{% else %}ok{% endif %}</td>
     </tr>
-    {% endfor %}
+    {% endfor -%}
     </tbody>
 </table>
-{% else %}
+{% else -%}
 <p>{{_("Has no log")}}</p>
-{% endif %}
-{% if logs %}
+{% endif -%}
+{% if logs -%}
 <br />
 <em class="required">*</em> {{_("Logs of other users")}}<br />
 <table class="pure-table pure-table-striped logs_list">
@@ -106,22 +106,22 @@
         <th class="center">{{_("Status")}}</th>
     </tr></thead>
     <tbody>
-    {% for u in logs %}
-    {% for log in logs[u] %}
+    {% for u in logs -%}
+    {% for log in logs[u] -%}
     <tr>
         <td class="center">{{ u }}</td>
         <td class="center">{{ log.time }}</td>
         <td class="logbook">
-        {% if log.book|length>20 %}
+        {% if log.book|length>20 -%}
         {{log.book[:20]}}...<span>{{log.book}}</span>
         {% else %}{{log.book}}{% endif %}</td>
         <td class="center">{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>
         <td class="center">{{ log.to }}</td>
         <td class="center">{% if log.status %}{{ log.status }}{% else %}ok{% endif %}</td>
     </tr>
-    {% endfor %}
-    {% endfor %}
+    {% endfor -%}
+    {% endfor -%}
     </tbody>
 </table>
-{% endif %}
-{% endblock %}
+{% endif -%}
+{% endblock -%}

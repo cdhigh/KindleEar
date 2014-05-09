@@ -7,105 +7,163 @@
     <link rel="stylesheet" href="base.css" type="text/css" charset="utf-8"/>
     <style type="text/css">
     h2{
-        font-size:1.2em;
+      font-size:1.2em;
+      margin-top:2em;
+      padding-left:0.8em;
+      border-left:0.5em outset silver;
+      border-bottom:1px dotted silver;
     }
-	li{
-		margin:0.5em;
-	}
+    li{margin:0.5em;list-style-type:square;}
+    ul#navlst > li{list-style-type:circle;}
     </style>
 </head>
 <body>
     <div id="header">  
-        <h1><a href="/">KindleEar<sup>&#9728;</sup></a></h1>
+        <h1><a href="/">KindleEar</a></h1>
         <div class="clear"></div>
     </div>
-    <h2>这个应用有什么特点和优点？</h2>
-	<p class="answer">特点：
-	<ul>
-	 <li>自定义RSS</li>
+    <div class="faqnav">
+      <ul id="navlst">
+        <li><a href="#whatis">KindleEar是什么？</a></li>
+        <li><a href="#needserver">此应用需要自己的服务器吗？</a></li>
+        <li><a href="#ownserver">如何搭建自己的推送服务器？</a></li>
+        <li><a href="#notreceived">为什么我收不到推送的RSS？</a></li>
+        <li><a href="#whatisfulltext">何为全文RSS？</a></li>
+        <li><a href="#fulltextandsummary">全文RSS能否按照摘要RSS处理？反之是否可以？</a></li>
+        <li><a href="#weekly">如何按周订阅？</a></li>
+        <li><a href="#moretimesperday">如何一天推送多次？</a></li>
+        <li><a href="#urlfilter">URL过滤器功能如何使用？</a></li>
+        <li><a href="#gfwblock">部分RSS有敏感内容，被墙屏蔽了怎么办？</a></li>
+        <li><a href="#imagesfolder">自定义书籍py文件，如何将封面/报头放到py同一目录？</a></li>
+        <li><a href="#sslerror">GAE上传遇到SSL出错，如何解决？</a></li>
+        <li><a href="#garbled">有部分文章乱码？</a></li>
+        <li><a href="#forgotpwd">忘记密码了怎么办？</a></li>
+        <li><a href="#mailservice">xxx@appid.appspotmail.com邮件地址怎么用？</a></li>
+        <li><a href="#delaytocn">推送至亚马逊中国邮箱有比较大的延迟？</a></li>
+        <li><a href="#errorcodes">在gae后台时不时有fetch rss failed(450)等错误是什么问题？</a></li>
+        <li><a href="#mergebooks">为何合并多本书籍推送后无法查词典？</a></li>
+        <li><a href="#share">“高级设置”里的归档和分享功能如何使用？</a></li>
+        <li><a href="#needlogin">有的网站需要登陆才能阅读文章的问题如何解决？</a></li>
+        <li><a href="#inie6">网站在IE6下显示不正常？</a></li>
+      </ul>
+    </div>
+    
+    <span id="whatis"></span>
+    <h2>KindleEar是什么？</h2>
+    <p>KindleEar是部署在Google Appengine上的免费应用，主要功能是自动定期通过RSS收集网络文章然后制作成图文并茂的电子书推送至你的Kindle。</p>
+    <p class="answer">主要特性：
+    <ul>
+     <li>自定义RSS</li>
      <li>支持RSS全文抓取</li>
      <li>多账号管理，也就是支持多kindle</li>
      <li>带图的杂志格式MOBI</li>
      <li>自动每天定时推送</li>
      <li>强大并且方便的邮件中转服务</li>
-	</ul>
-	优点：
-	<ul>
-	 <li>全免费，不单此应用免费，而是GAE免费提供托管空间，你不需要付一分钱。</li>
+    </ul>
+    优点：
+    <ul>
+     <li>全免费，不单此应用免费，而是GAE免费提供托管空间，你不需要付一分钱。</li>
      <li>生成精美的杂志格式书籍。样例如下（左一为kindle3，右两个为kindle touch）：</li>
      <a href="periodical.gif" target="_blank"><img src="periodical.gif" style="width:750px;" /></a>
-	</ul>
-	</p>
-    <hr />
+    </ul>
+    </p>
+    
+    <span id="needserver"></span>
     <h2>此应用需要自己的服务器吗？</h2>
     <p class="answer">此应用托管在Google App Engine服务器上，不需要你自己的服务器。</p>
-    <hr />
+    
+    <span id="ownserver"></span>
     <h2>如何搭建自己的推送服务器？</h2>
     <p class="answer"><strong>以下是正规的搭建步骤：</strong>
         <ol>
-		<li>在 <a href="http://www.github.com/cdhigh/kindleear">Github</a> 页面上下载KindleEar的最新版本，在页面的右下角有一个按钮"Download ZIP"，点击即可下载一个包含全部源码的ZIP文档，然后解压到你喜欢的目录，比如C:\KindleEar（下面以这个为例）。</li>
-		<li>你需要一个GAE账号，请移步 <a href="https://appengine.google.com/">Google AppEngine</a> 申请。使用G你的gmail账号登陆后，点击"Create Application"，进入到帐号短信激活界面，选择Others，输入你自己的手机号（中国手机国家号：+86），输入完毕点击Send，稍后就可以在手机上收到激活信息，待激活后再次点击Create Application，在Application Identifier一栏输入你选择的应用名字（如：KindleEar123）。其余选项保持默认即可，点击页尾的Create Application即成功创建了一个GAE程序（用来上传KinldeEar之用）。</li>
-		<li>安装 <a href="http://www.python.org/getit/">Python 2.7.x</a>，在此页面中选择你的系统平台对应的2.7.x版本下载，然后直接双击安装。注意不要安装成Python 3.x版本，GAE暂不支持。</li>
-		<li>下载 <a href="https://developers.google.com/appengine/downloads?hl=zh-CN">GAE SDK</a>，这是用来上传GAE程序用的。在此页面中的区段“Google App Engine SDK for Python”中选择你的系统平台对应的版本点击即可下载，然后安装，一路next无话。</li>
-		<li>打开资源管理器，进入之前下载的KindleEar目录C:\KindleEar，使用任何文本编辑器打开app.yaml和module-worker.yaml文件，将第一行的kindleear字样修改为你之前申请的GAE程序名（比如kindleear123），保存退出。</li>
-		<li>在app.yaml的同一个目录，打开config.py文件，修改SRC_EMAIL为你的gmail账号，DOMAIN为你的应用的域名。其他的选项也可以根据注释有选择性的修改，或者使用默认即可。</li>
-		<li>正式上传KindleEar。可以使用Google App Engine Launcher或使用命令行，因为Launcher不太稳定，这里介绍一下windows下使用命令行的方式。
-			<li>依次点击：开始-运行-输入CMD，打开命令行窗口</li>
-			<li>进入到App Engine SDK安装目录；例如：cd "C:\Program Files\Google\google_appengine"</li>
-			<li>输入“上传”命令：c:\python27\python.exe appcfg.py update C:\kindleear\app.yaml c:\kindleear\module-worker.yaml</li>
-			<li>依次输入gmail账号及密码（密码输入时屏幕不显示）既可成功上传。</li></li>
-		<li>显示上传成功后使用你的浏览器打开域名：kindleear123.appspot.com（举例而已，kindleear123要改为你申请的GAE程序名称），如果能正常打开，则还有最后一步。</li>
-		<li>将你的gmail账号加入kindle推送邮箱的白名单。这一步你应该早就会了吧。</li>
-		<li>然后呢？享受你自己的推送服务吧！</li>
-		</ol>
+        <li>在 <a href="http://www.github.com/cdhigh/kindleear">Github</a> 页面上下载KindleEar的最新版本，在页面的右下角有一个按钮"Download ZIP"，点击即可下载一个包含全部源码的ZIP文档，然后解压到你喜欢的目录，比如C:\KindleEar（下面以这个为例）。</li>
+        <li>你需要一个GAE账号，请移步 <a href="https://appengine.google.com/">Google AppEngine</a> 申请。使用G你的gmail账号登陆后，点击"Create Application"，进入到帐号短信激活界面，选择Others，输入你自己的手机号（中国手机国家号：+86），输入完毕点击Send，稍后就可以在手机上收到激活信息，待激活后再次点击Create Application，在Application Identifier一栏输入你选择的应用名字（如：KindleEar123）。其余选项保持默认即可，点击页尾的Create Application即成功创建了一个GAE程序（用来上传KinldeEar之用）。</li>
+        <li>安装 <a href="http://www.python.org/getit/">Python 2.7.x</a>，在此页面中选择你的系统平台对应的2.7.x版本下载，然后直接双击安装。注意不要安装成Python 3.x版本，GAE暂不支持。</li>
+        <li>下载 <a href="https://developers.google.com/appengine/downloads?hl=zh-CN">GAE SDK</a>，这是用来上传GAE程序用的。在此页面中的区段“Google App Engine SDK for Python”中选择你的系统平台对应的版本点击即可下载，然后安装，一路next无话。</li>
+        <li>打开资源管理器，进入之前下载的KindleEar目录C:\KindleEar，使用任何文本编辑器打开app.yaml和module-worker.yaml文件，将第一行的kindleear字样修改为你之前申请的GAE程序名（比如kindleear123），保存退出。</li>
+        <li>在app.yaml的同一个目录，打开config.py文件，修改SRC_EMAIL为你的gmail账号，DOMAIN为你的应用的域名。其他的选项也可以根据注释有选择性的修改，或者使用默认即可。</li>
+        <li>正式上传KindleEar。可以使用Google App Engine Launcher或使用命令行，因为Launcher不太稳定，这里介绍一下windows下使用命令行的方式。
+            <li>依次点击：开始-运行-输入CMD，打开命令行窗口</li>
+            <li>进入到App Engine SDK安装目录；例如：cd "C:\Program Files\Google\google_appengine"</li>
+            <li>输入“上传”命令：c:\python27\python.exe appcfg.py update C:\kindleear\app.yaml c:\kindleear\module-worker.yaml</li>
+            <li>依次输入gmail账号及密码（密码输入时屏幕不显示）既可成功上传。</li></li>
+        <li>显示上传成功后使用你的浏览器打开域名：kindleear123.appspot.com（举例而已，kindleear123要改为你申请的GAE程序名称），如果能正常打开，则还有最后一步。</li>
+        <li>将你的gmail账号加入kindle推送邮箱的白名单。这一步你应该早就会了吧。</li>
+        <li>然后呢？享受你自己的推送服务吧！</li>
+        </ol>
     <p><strong>以下是推荐的简化搭建步骤（使用uploader）：</strong>
         <ol>
-        <li>下载KindleEar和申请GAE账号，并创建一个application。</li>
-        <li>下载<a href="https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing">uploader</a>。如果此链接被墙，可以使用此墙内地址（提取密码：beaa）<a href="http://yunpan.cn/QGiHjKRZ6EreW">uploader</a>。</li>
+        <li>下载<a href="http://www.github.com/cdhigh/kindleear">KindleEar</a>和申请GAE账号，并创建一个application。</li>
+        <li>下载<a href="https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing">uploader</a>。如果此链接被墙，可以使用此 <a href="http://yunpan.cn/QGiHjKRZ6EreW">墙内地址</a>（提取密码：beaa）。</li>
         <li>解压uploader到特定目录，将之前下载并解压的KindleEar目录拷贝到此目录下，改名为kindleear，然后双击执行uploader.bat后根据提示输入appid/email/timezone后会正式启动上传程序，输入email和密码即可上传代码。</li>
         </ol></p>
     </p>
-    <hr />
-	<h2>为什么我收不到推送的RSS？</h2>
-	<p class="answer">收不到推送的RSS原因很多，如下是几种可能：
-	<ol>
+    
+    <span id="notreceived"></span>
+    <h2>为什么我收不到推送的RSS？</h2>
+    <p class="answer">收不到推送的RSS原因很多，如下是几种可能：
+    <ol>
     <li>没有打开"自定义RSS"的投递开关，此开关在设置网页的最下面。</li>
-	<li>没有在kindle邮箱的白名单中加入你的gmail地址:</li>
-		<ul><li>解决方案：登陆http://www.amazon.com/,增加白名单即可</li></ul>
-	<li>添加RSS过多导致内存占用过大，程序被自动终止。
-	    <ul><li>打开module-worker.yaml，将instance_class值修改为B4，然后重新上传。</li></ul>
-	</li>
+    <li>没有在kindle邮箱的白名单中加入你的gmail地址:</li>
+        <ul><li>解决方案：登陆http://www.amazon.com/,增加白名单即可</li></ul>
+    <li>添加RSS过多导致内存占用过大，程序被自动终止。
+        <ul><li>打开module-worker.yaml，将instance_class值修改为B4，然后重新上传。</li></ul>
+    </li>
     <li>你输入的订阅地址不是合法的RSS/ATOM订阅（XML格式）。</li>
-	</ol></p>
-    <hr />
-	<h2>何为全文RSS？</h2>
-	<p class="answer">全文RSS就是在RSS的XML文件中已经给出了文章全文的RSS，使用浏览器打开RSS对应的链接，查看是否已经有全部的文章内容？如果是，则为全文RSS。如果仅给出文章摘要，则不是。</p>
-	<hr />
+    </ol></p>
+    
+    <span id="whatisfulltext"></span>
+    <h2>何为全文RSS？</h2>
+    <p class="answer">全文RSS就是在RSS的XML文件中已经给出了文章全文的RSS，使用浏览器打开RSS对应的链接，查看是否已经有全部的文章内容？如果是，则为全文RSS。如果仅给出文章摘要，则不是。</p>
+    
+    <span id="fulltextandsummary"></span>
     <h2>全文RSS能否按照摘要RSS处理？反之是否可以？</h2>
-	<p class="answer">全文RSS当然可以按照摘要RSS处理，这样就忽略RSS链接中给出的文章内容，而直接到原链接中获取，只是时间要多花费不少，导致支持的RSS数量下降。如果是摘要RSS，则不能按全文RSS处理，否则会导致文章内容不全。</p>
-	<hr />
+    <p class="answer">全文RSS当然可以按照摘要RSS处理，这样就忽略RSS链接中给出的文章内容，而直接到原链接中获取，只是时间要多花费不少，导致支持的RSS数量下降。如果是摘要RSS，则不能按全文RSS处理，否则会导致文章内容不全。</p>
+    
+    <span id="weekly"></span>
     <h2>如何按周订阅？</h2>
-	<p class="answer">有些RSS每周更新，这样每天推送同样的内容就蛋疼了点，碰到这种情况，有两种处理方法：
-    <ol><li>添加一个py文件，将参数deliver_days设置为你需要推送的星期（英文星期单词），注意deliver_days是一个列表，你也可以设置为几个单词，这样的话，其实也可以设置为什么时候不推送，比如周末不推送。</li>
+    <p class="answer">有些RSS每周更新，这样每天推送同样的内容就蛋疼了点，碰到这种情况，有两种处理方法：
+    <ol>
+    <li>在books目录下添加一个py文件，将参数deliver_days设置为你需要推送的星期（英文星期单词），注意deliver_days是一个列表，你也可以设置为几个单词，这样的话，其实也可以设置为哪天不推送。
+    <br />比如：<code>deliver_days=['Friday']</code></li>
     <li>使用管理员登陆，新增一个账号，退出，使用新账号登陆，添加需要的RSS，然后在“设置”页面仅选择你需要的其中一个“投递日”，在页面下方的“最旧文章”中选择“一个星期”。</li></ol></p>
-    <hr />
+    
+    <span id="moretimesperday"></span>
+    <h2>如何一天推送多次？</h2>
+    <p class="answer">需要及时跟踪网站最新消息的同学可能有一天推送多次的需求，以下步骤告诉你如何实现：
+    <ol>
+      <li>在books目录下添加一个py文件。</li>
+      <li>deliver_times设置为你需要推送的整点时间列表。
+        <br />比如：<code>deliver_times=[6,14,22] #6:00,14:00,22:00三次推送</code>
+      </li>
+      <li>如果需要，oldest_article设置为多次推送的间隔秒数，这样就不推送重复文章了。
+        <br />比如：<code>oldest_article=28800 #8*60*60</code>
+      </li>
+    </ol>
+    </p>
+    
+    <span id="urlfilter"></span>
     <h2>URL过滤器功能如何使用？</h2>
-	<p class="answer">URL过滤器为高级功能，面向懂python正则表达式的同学，应用场景是这样的：有一些RSS的一部分固定的图像会一直下载不了，为了节省时间支持更多的RSS，则建议过滤这些图像URL，不再下载。URL过滤器支持正则表达式，请严格按python正则表达式的语法编写URL过滤器。</p>
-    <hr />
-    <h2>部分RSS有敏感内容，被qiang屏蔽了怎么办？</h2>
-	<p class="answer">升级到1.5及以上版本，并且将被qiang的RSS的链接协议改为https。</p>
-    <hr />
-    <h2>自定义书籍py文件，如何将封面/题图放到py同一目录？</h2>
-	<p class="answer">升级到1.5及以上版本，在封面/题图文件设置中有全路径信息即可，如下：<ul>
-	    <li>mastheadfile = 'books/xxxx.gif'</li>
+    <p class="answer">URL过滤器为高级功能，面向懂python正则表达式的同学，应用场景是这样的：有一些RSS的一部分固定的图像会一直下载不了，为了节省时间支持更多的RSS，则建议过滤这些图像URL，不再下载。URL过滤器支持正则表达式，请严格按python正则表达式的语法编写URL过滤器。</p>
+    
+    <span id="gfwblock"></span>
+    <h2>部分RSS有敏感内容，被墙屏蔽了怎么办？</h2>
+    <p class="answer">升级到1.5及以上版本，并且将被qiang的RSS的链接协议改为https。</p>
+    
+    <span id="imagesfolder"></span>
+    <h2>自定义书籍py文件，如何将封面/报头放到py同一目录？</h2>
+    <p class="answer">升级到1.5及以上版本，在封面/报头文件设置中有全路径信息即可，如下：<ul>
+        <li>mastheadfile = 'books/xxxx.gif'</li>
         <li>coverfile = 'books/xxxx.jpg'</li></ul></p>
-    <hr />
+    
+    <span id="sslerror"></span>
     <h2>GAE上传遇到SSL出错，如何解决？</h2>
     <p class="answer">墙内的朋友有时候在上传代码时遇到此错误：urllib2.URLError: &lt;urlopen error [Errno 8] _ssl.c:504: EOF occurred in violation of protocol&gt;，如果这样，改hosts即可：“74.125.229.174  appengine.google.com”</p>
-    <hr />
+    
+    <span id="garbled"></span>
     <h2>有部分文章乱码？</h2>
-    <p class="answer">对于自定义RSS和不指定编码的内置书籍，软件使用python模块chardet自动检测编码，此模块的检测结果并不是100%正确的，如果检测错误，则文章可能乱码，这在浏览器上偶尔碰到网页乱码一样道理。
-        <br />因为这种情况很罕见，KindleEar仅提供一个不是很优雅的hack方案：手工更改数据库缓存的chardet检测的编码。<br />方法如下：
+    <p class="answer">对于自定义RSS和不指定编码的内置书籍，软件使用多种方法综合确定网页的编码：HTTP头/HTML头/python模块chardet检测的编码，最终结果并不是100%正确的，如果检测错误，则文章可能乱码，这在浏览器上偶尔碰到网页乱码一样道理。
+        <br />因为这种情况很少见，KindleEar仅提供一个不是很优雅的hack方案：手工更改数据库缓存的chardet检测的编码。<br />方法如下：
         <ol><li>使用admin登陆appid.appspot.com（假定你的应用名字为appid）。</li>
         <li>浏览器地址栏中输入https://appid.appspot.com/dbviewer，翻到页面UrlEncoding区段，查看乱码文章对应网站的编码信息，如果编码不对，记下ID号，进行下一步。</li>
         <li>地址栏中输入https://appid.appspot.com/dbviewer?action=modurlenc&id=dbid&feedenc=fenc&pageenc=penc
@@ -116,13 +174,18 @@
         </ul></li>
         <li>或者你可以在GAE后台的Datastore Viewer中修改。</li>
         <li>至于怎么获取正确的编码，可以通过在浏览器中查看网页源码。</li>
+        <li>如果你在dbviewer页面中找不到你需要修改的网站，则说明KindleEar一直没有使用chardet检测过此网站任何网页编码，仅使用HTTP头/HTML头信息，这种情况你可以设置config.py文件中的ALWAYS_CHAR_DETECT变量为True再尝试。</li>
+        <li>如果设置ALWAYS_CHAR_DETECT为True还是乱码，则说明chardet检测到的编码错误，并且HTTP头/HTML头编码信息不一致（还是有这种奇葩的网站的），这种情况还可以尝试将TRUST_ENCODING_IN_HEADER_OR_META设置为True。</li>
+        <li>尝试了ALWAYS_CHAR_DETECT和TRUST_ENCODING_IN_HEADER_OR_META都不行的话，软件无能为力了，请增加一个py文件，然后手工指定正确的编码吧。</li>
         </ol>
         </p>
-    <hr />
+    
+    <span id="forgotpwd"></span>
     <h2>忘记密码了怎么办？</h2>
-    <p class="answer">如果是忘记非管理员账号的密码，则可以通知管理员改密码。如果是管理员密码，则可以登陆appengine.google.com，在左边选择"Datastore Admin"，删除KeUser的所有数据，则所有账号的信息都会被删除，或者将所有数据库都删除也可以，然后重新使用admin/admin登陆你的应用即可。没有找到"Datastore Admin"？则可以先在"Application Settings"里面打开。
-        <br />如果你会编程，则你会有其他方法，不用我说。</p>
-    <hr />
+    <p class="answer">如果是忘记非管理员账号的密码，则可以通知管理员改密码。如果是管理员密码，则可以登陆appengine.google.com，在左边选择"Datastore Admin"，删除KeUser的所有数据，则所有账号的信息都会被删除，或者建议将所有数据库都删除，然后重新使用admin/admin登陆你的应用即可。没有找到"Datastore Admin"？则可以先在"Application Settings"里面打开。
+    <br />如果你会编程，则你会有其他方法，不用我说。</p>
+    
+    <span id="mailservice"></span>
     <h2>xxx@appid.appspotmail.com邮件地址怎么用？</h2>
     <p class="answer">xxx@appid.appspotmail.com是KindleEar附送的邮件服务，在部署好KindleEar后，你自动拥有了无数个EMAIL邮箱地址，格式为：xxx@appid.appspotmail.com，xxx为任意合法字符串，appid为你的应用名。<br />
     <ul> <li>此邮箱将收到的邮件正文转换为邮件附件推送至你注册的Email邮箱。如果邮件中只有链接（多个链接则每行一个），则抓取链接的网页内容制作成电子书然后再推送。</li>
@@ -135,10 +198,12 @@
        <li>发送至trigger@appid.appspotmail.com 或 username__trigger@appid.appspotmail.com，则触发一次手动投递。邮件标题为空或为all则完全等同于网页上的“现在投递”按钮。如果需要推送特定书籍，则在标题上写书籍名字，多个书籍名字使用逗号分隔。<br />注意：邮件标题上写多个书籍名字则自动合并推送为一本书。</li>
     </ul>
     </p>
-    <hr />
+    
+    <span id="delaytocn"></span>
     <h2>推送至亚马逊中国邮箱有比较大的延迟？</h2>
     <p class="answer">这个经过网友们试验，和伟大的墙有关系，有一个解决方法：KindleEar先推送至某个个人邮箱，然后此个人邮箱自动转发至中亚的kindle邮箱。<br />不过还面临一个问题：部分邮箱设置自动转发需要发到邮箱的验证，而亚马逊邮箱不能登陆无法验证。其实你需要的是找一个不需要目标邮箱确认的邮箱来设置自动转发，比如outlook.com。</p>
-    <hr />
+    
+    <span id="errorcodes"></span>
     <h2>在gae后台时不时有fetch rss failed(450)等错误是什么问题？</h2>
     <p class="answer">括号里面的数字表示错误码，除了标准的HTTP错误码外，以下是KindleEar自定义的错误码。
     <ul><li>504:超时，请适当增加config.py文件里面的超时设置；</li>
@@ -147,8 +212,9 @@
     <li>453:网站需要访问认证；</li>
     <li>450:下载失败；</li>
     <li>451:其他异常；</li></ul></p>
-    <hr />
-    <h2>为何合并多本书籍推送后无法查词典？<a name="mergebooks" id="mergebooks" >&nbsp;</a></h2>
+    
+    <span id="mergebooks"></span>
+    <h2>为何合并多本书籍推送后无法查词典？</h2>
     <p class="answer"> 如果有外文RSS而且需要在kindle上查字典的话，请将自定义RSS的语言设置为对应的外文。 <br />
     同时，还要注意合并书籍推送的其他特性：<br />
     <ol>
@@ -156,14 +222,31 @@
     <li>合并后的书籍使用自定义RSS设定的标题和语言设置；</li>
     </ol>
     </p>
-	<hr />
+    
+    <span id="share"></span>
     <h2>“高级设置”里的归档和分享功能如何使用？</h2>
     <p class="answer">启用此功能后，KindleEar会在每篇文件的最后都附加一个超链接，在Kindle上点击此超链接会自动打开浏览器将你正在阅读的此文章归档至网络笔记或分享至社交网络（需要打开网络连接）。<br />
         有几点需要注意的：
         <ol><li>请先修改config.py里面的DOMAIN为你申请的应用域名；</li>
-        <li>如果你在红墙内，可能需要打开“我需要翻墙（针对中国用户）”开关，默认的翻墙转发器采用作者在heroku上搭建的免费服务器： http://kforwarder.herokuapp.com，如果你有余力或者注重隐私，建议自己搭建一个，源码托管在 https://github.com/cdhigh/forwarder。（如果将来墙也封锁了heroku，则此翻墙方法无效）</li></ol>
+        <li>如果你在红墙内，可能需要打开“我需要翻墙（针对中国用户）”开关，默认的翻墙转发器采用作者在heroku上搭建的免费服务器： http://kforwarder.herokuapp.com，如果你有余力或者注重隐私，建议自己搭建一个，源码托管在 <a href="https://github.com/cdhigh/forwarder">https://github.com/cdhigh/forwarder</a>。（如果将来墙也封锁了heroku，则此翻墙方法无效）</li></ol>
     </p>
-    <hr />
+    
+    <span id="needlogin"></span>
+    <h2>有的网站需要登陆才能阅读文章的问题如何解决？</h2>
+    <p class="answer">
+        有些网站需要先注册账户然后登陆后才能阅读和下载文章，对于此类网站，则可以仿照books目录下的预置书籍，增加一个新的py文件，然后设置这几个属性：
+        <ol>
+            <li><code>needs_subscription</code>&nbsp;：设置为True</li>
+            <li><code>login_url</code>&nbsp;：为此网站的登陆网页URL</li>
+            <li><code>form_4_login</code>&nbsp;：可选（如果你不会看网页HTML源码就暂时不用设置），如果不设置或设置为None则KindleEar尝试自动判断；设置为整数则表示此网页中第几个form为登陆表单（0为第一个）；设置为字符串则表示对应登陆表单form的名字，'#'打头表示id，'.'打头表示class，否则则匹配name/id/class任何一个。</li>
+            <li>登陆KindleEar后，在“我的订阅”页面先订阅对应书籍，然后书籍行右边会新出现一个按钮“登陆信息”， 点击后请在新页面中输入正确的账号和密码。</li>
+        </ol>
+        <p>注1：因为GAE环境的限制，需要执行javascript或要输入验证码的网站则无法支持。</p>
+        <p>注2：对于一些足够特殊和复杂的网站，可能你需要在书籍子类中重写login()函数。</p>
+        <p>注3：你输入的密码将加密保存，密钥为每个账号都不一样的8位随机字符串，有一定的安全性，而且我尽量照顾你的密码安全，你可以随时删除保存的密码信息，书籍退订后也马上删除密码，但因为密钥也保存在GAE上（在另外的数据表），所以不能保证很高的安全性，请自己明白并愿意承担其中的风险。</p>
+    </p>
+    
+    <span id="inie6"></span>
     <h2>网站在IE6下显示不正常？</h2>
     <p class="answer">在IE6下网站排版混乱并且无法显示导航栏，因为网站的排版采用YAHOO的CSS框架pure，而此框架要求IE7以上的IE，或者chrome/firefox，如果你使用的IE版本过低，建议升级到新版本。</p>
     <pre><p> </p></pre>

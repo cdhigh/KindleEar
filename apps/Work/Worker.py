@@ -95,6 +95,11 @@ class Worker(BaseHandler):
                     continue
                 book = book(imgindex=imgindex)
                 book.url_filters = [flt.url for flt in user.urlfilter]
+                if bk.needs_subscription: #需要登录
+                    subs_info = user.subscription_info(bk.title)
+                    if subs_info:
+                        book.account = subs_info.account
+                        book.password = subs_info.password
             else: # 自定义RSS
                 if bk.feedscount == 0:
                     continue  #return "the book has no feed!<br />"

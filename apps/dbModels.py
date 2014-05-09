@@ -8,13 +8,16 @@
 
 from google.appengine.ext import db
 from google.appengine.api import memcache
+from apps.utils import ke_encrypt,ke_decrypt
 
 #--------------db models----------------
 class Book(db.Model):
     title = db.StringProperty(required=True)
     description = db.StringProperty()
     users = db.StringListProperty()
-    builtin = db.BooleanProperty() # 内置书籍不可修改
+    builtin = db.BooleanProperty()
+    needs_subscription = db.BooleanProperty()
+    
     #====自定义书籍
     language = db.StringProperty()
     mastheadfile = db.StringProperty() # GIF 600*60
@@ -44,6 +47,7 @@ class Book(db.Model):
 class KeUser(db.Model): # kindleEar User
     name = db.StringProperty(required=True)
     passwd = db.StringProperty(required=True)
+    secret_key = db.StringProperty()
     kindle_email = db.StringProperty()
     enable_send = db.BooleanProperty()
     send_days = db.StringListProperty()
@@ -76,6 +80,10 @@ class KeUser(db.Model): # kindleEar User
     def urlfilter(self):
         return UrlFilter.all().filter('user = ', self.key())
     
+    def subscription_info(self, title):
+        "获取此账号对应的书籍的网站登陆信息"
+        return SubscriptionInfo.all().filter('user = ', self.key()).filter('title = ', title).get()
+        
 class Feed(db.Model):
     book = db.ReferenceProperty(Book)
     title = db.StringProperty()
@@ -99,3 +107,18 @@ class WhiteList(db.Model):
 class UrlFilter(db.Model):
     url = db.StringProperty()
     user = db.ReferenceProperty(KeUser)
+    
+class SubscriptionInfo(db.Model):
+    title = db.StringProperty()
+    account = db.StringProperty()
+    encrypted_pwd = db.StringProperty()
+    user = db.ReferenceProperty(KeUser)
+    
+    @property
+    def password(self):
+        return ke_decrypt(self.encrypted_pwd, self.user.secret_key)
+        
+    @password.setter
+    def password(self, pwd):
+        self.encrypted_pwd = ke_encrypt(pwd, self.user.secret_key)
+        

@@ -19,8 +19,8 @@ class FTChinese(BaseFeedBook):
             (u'每日新闻', 'http://www.ftchinese.com/rss/feed'),
             ]
     
-    def fetcharticle(self, url, decoder):
+    def fetcharticle(self, url, opener, decoder):
         #每个URL都增加一个后缀full=y，如果有分页则自动获取全部分页
         url += '?full=y'
-        return BaseFeedBook.fetcharticle(self,url,decoder)
+        return BaseFeedBook.fetcharticle(self,url,opener,decoder)
         

@@ -12,10 +12,9 @@ import web
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
 from books import BookClasses, BookClass
+from apps.utils import new_secret_key
 
 from config import *
-
-#import main
 
 class Login(BaseHandler):
     __url__ = "/login"
@@ -25,11 +24,12 @@ class Login(BaseHandler):
         u = KeUser.all().filter("name = ", 'admin').get()
         if not u:            
             myfeeds = Book(title=MY_FEEDS_TITLE,description=MY_FEEDS_DESC,
-                    builtin=False,keep_image=True,oldest_article=7)
+                    builtin=False,keep_image=True,oldest_article=7,needs_subscription=False)
             myfeeds.put()
-            au = KeUser(name='admin',passwd=hashlib.md5('admin').hexdigest(),
+            secret_key = new_secret_key()
+            au = KeUser(name='admin',passwd=hashlib.md5('admin'+secret_key).hexdigest(),
                 kindle_email='',enable_send=False,send_time=8,timezone=TIMEZONE,
-                book_type="mobi",device='kindle',expires=None,ownfeeds=myfeeds,merge_books=False)
+                book_type="mobi",device='kindle',expires=None,ownfeeds=myfeeds,merge_books=False,secret_key=secret_key)
             au.put()
             return False
         else:
@@ -63,25 +63,32 @@ class Login(BaseHandler):
         
         self.CheckAdminAccount() #确认管理员账号是否存在
         
-        try:
-            pwdhash = hashlib.md5(passwd).hexdigest()
-        except:
-            u = None
-        else:
-            u = KeUser.all().filter("name = ", name).filter("passwd = ", pwdhash).get()
+        u = KeUser.all().filter("name = ", name).get()
+        if u:
+            secret_key = u.secret_key or ''
+            pwdhash = hashlib.md5(passwd + secret_key).hexdigest()
+            if u.passwd != pwdhash:
+                u = None
+                
         if u:
             main.session.login = 1
             main.session.username = name
             if u.expires: #用户登陆后自动续期
                 u.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
                 u.put()
+            
+            #为了兼容性，对于新账号才一次性设置secret_key
+            #老账号删除重建则可以享受加强的加密
+            #if not u.secret_key:
+            #    u.secret_key = new_secret_key()
+            #    u.put()
                 
             #修正从1.6.15之前的版本升级过来后自定义RSS丢失的问题
             for fd in Feed.all():
                 if not fd.time:
                     fd.time = datetime.datetime.utcnow()
                     fd.put()
-            
+                
             #1.7新增各用户独立的白名单和URL过滤器，这些处理是为了兼容以前的版本
             if name == 'admin':
                 for wl in WhiteList.all():
@@ -92,9 +99,8 @@ class Login(BaseHandler):
                     if not uf.user:
                         uf.user = u
                         uf.put()
-                        
-            #如果删除了内置书籍py文件，则在数据库中也清除
-            #放在同步数据库是为了推送任务的效率
+            
+            #同步书籍数据库
             for bk in Book.all().filter('builtin = ', True):
                 found = False
                 for book in BookClasses():
@@ -102,14 +108,22 @@ class Login(BaseHandler):
                         if bk.description != book.description:
                             bk.description = book.description
                             bk.put()
+                        if bk.needs_subscription != book.needs_subscription:
+                            bk.needs_subscription = book.needs_subscription
+                            bk.put()
                         found = True
                         break
                 
+                #如果删除了内置书籍py文件，则在数据库中也清除
                 if not found:
+                    subs = u.subscription_info(bk.title)
+                    if subs:
+                        subs.delete()
                     for fd in bk.feeds:
                         fd.delete()
                     bk.delete()
-            
+                    
+                
             raise web.seeother(r'/my')
         else:
             tips = _("The username not exist or password is wrong!")
