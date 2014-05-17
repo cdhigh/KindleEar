@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+#Author:
+# cdhigh <https://github.com/cdhigh>
 """
 将发到string@appid.appspotmail.com的邮件正文转成附件发往管理员的kindle邮箱。
 """

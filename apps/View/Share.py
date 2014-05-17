@@ -8,6 +8,7 @@
 
 import web
 
+from google.appengine.api import mail
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
 from apps.utils import hide_email

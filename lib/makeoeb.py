@@ -28,7 +28,7 @@ class OptionValues(object):
 
 class ServerContainer(object):
     def __init__(self, log=None):
-        self.log = log
+        self.log = log if log else default_log
     def read(self, path):
         path = path.lower()
         #所有的图片文件都放在images目录下

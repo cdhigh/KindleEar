@@ -3,6 +3,8 @@
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
+#Author:
+# cdhigh <https://github.com/cdhigh>
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
@@ -138,7 +140,7 @@ def InsertToc(oeb, sections, toc_thumbnails):
         elif sectoc:
             sectoc.add(unicode(ncx[1]), ncx[2], description=ncx[3] if ncx[3] else None, klass='article', play_order=po, id='article-%d'%po, toc_thumbnail=toc_thumbnails[ncx[4]] if GENERATE_TOC_THUMBNAIL and ncx[4] else None)
         po += 1
-        
+                    
 #-----------以下几个函数为安全相关的
 def new_secret_key(length=8):
     import random

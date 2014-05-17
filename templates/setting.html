@@ -15,7 +15,7 @@
         <legend>{{_("Base Setting")}}</legend>
         <table border="0">
             <tr><td style="text-align:right;"><label><em class="required">*</em>{{_("Kindle E-mail")}}</label> : </td>
-            <td><input type="text" name="kindleemail" style="width:280px" value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" required />
+            <td><input type="email" name="kindleemail" style="width:280px" value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" required />
             </td></tr>
             <tr><td style="text-align:right;"><label>{{_("Time zone")}} : </label></td>
             <td><select class="bool" name="timezone">
