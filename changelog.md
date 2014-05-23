@@ -1,5 +1,11 @@
 #Changelog for KindleEar
 
+##1.20.2
+  1. 针对使用图片延迟加载技术的网页特殊处理，可以获取部分此类网页的图片。
+
+##1.20.2
+  1. Supports some webpage which images take a 'data-src' attribute to load asynchronous content.
+  
 ##1.20.1
   1. 新特性，在合并推送时将各书籍的封面拼贴起来。默认已经开启，如果你使用以前的config.py，请设置DEFAULT_COVER_BV=None，如果不喜欢此效果，可以设置DEFAULT_COVER_BV='cv_bound.jpg'
   2. bugfix: 修正保存到evernote不成功的问题（1.13引入）

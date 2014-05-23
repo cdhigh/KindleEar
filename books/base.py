@@ -565,8 +565,18 @@ class BaseFeedBook:
 
         if self.keep_image:
             opener = URLOpener(self.host, timeout=self.timeout)
-            for img in soup.find_all('img',attrs={'src':True}):
-                imgurl = img['src']
+            for img in soup.find_all('img'):
+                #现在使用延迟加载图片技术的网站越来越多了，这里处理一下
+                #注意：如果data-src之类的属性保存的不是真实url就没辙了
+                imgurl = img['src'] if 'src' in img.attrs else ''
+                if not imgurl:
+                    for attr in img.attrs:
+                        if 'src' in attr: #很多网站使用data-src
+                            imgurl = img[attr]
+                            break
+                if not imgurl:
+                    img.decompose()
+                    continue
                 if not imgurl.startswith('http'):
                     imgurl = self.urljoin(url, imgurl)
                 if self.fetch_img_via_ssl and url.startswith('https://'):
@@ -709,8 +719,18 @@ class BaseFeedBook:
 
         if self.keep_image:
             opener = URLOpener(self.host, timeout=self.timeout)
-            for img in soup.find_all('img',attrs={'src':True}):
-                imgurl = img['src']
+            for img in soup.find_all('img'):
+                #现在使用延迟加载图片技术的网站越来越多了，这里处理一下
+                #注意：如果data-src之类的属性保存的不是真实url就没辙了
+                imgurl = img['src'] if 'src' in img.attrs else ''
+                if not imgurl:
+                    for attr in img.attrs:
+                        if 'src' in attr: #很多网站使用data-src
+                            imgurl = img[attr]
+                            break
+                if not imgurl:
+                    img.decompose()
+                    continue
                 if not imgurl.startswith('http'):
                     imgurl = self.urljoin(url, imgurl)
                 if self.fetch_img_via_ssl and url.startswith('https://'):
@@ -1016,8 +1036,18 @@ class WebpageBook(BaseFeedBook):
             thumbnail = None
             if self.keep_image:
                 self.soupbeforeimage(soup)
-                for img in soup.find_all('img',attrs={'src':True}):
-                    imgurl = img['src']
+                for img in soup.find_all('img'):
+                    #现在使用延迟加载图片技术的网站越来越多了，这里处理一下
+                    #注意：如果data-src之类的属性保存的不是真实url就没辙了
+                    imgurl = img['src'] if 'src' in img.attrs else ''
+                    if not imgurl:
+                        for attr in img.attrs:
+                            if 'src' in attr: #很多网站使用data-src
+                                imgurl = img[attr]
+                                break
+                    if not imgurl:
+                        img.decompose()
+                        continue
                     if not imgurl.startswith('http'):
                         imgurl = self.urljoin(url, imgurl)
                     if self.fetch_img_via_ssl and url.startswith('https://'):
