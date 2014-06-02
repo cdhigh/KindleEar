@@ -1,5 +1,11 @@
 #Changelog for KindleEar
 
+##1.20.3
+  1. 修改内置书籍TED渤海湾以适应其网站改版。
+
+##1.20.3
+  1. fix book 'TEDxBohaiBay'.
+
 ##1.20.2
   1. 针对使用图片延迟加载技术的网页特殊处理，可以获取部分此类网页的图片。
 
@@ -24,6 +30,7 @@
   6. 整理文件夹结构，将相关库都放到lib目录下。
   7. 其他一些小的可用性增强。
   > 升级注意:书籍的fetcharticle()增加了一个参数，如果你定制的书籍使用到此接口，需要修改。
+  
 ##1.20
   1. a new simple algorithm to extract content of webpage when module readability failed.
   2. a new enhanced decoder for webpage which detection algorithm includes more parameters:

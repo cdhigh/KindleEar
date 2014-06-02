@@ -571,7 +571,7 @@ class BaseFeedBook:
                 imgurl = img['src'] if 'src' in img.attrs else ''
                 if not imgurl:
                     for attr in img.attrs:
-                        if 'src' in attr: #很多网站使用data-src
+                        if attr != 'src' and 'src' in attr: #很多网站使用data-src
                             imgurl = img[attr]
                             break
                 if not imgurl:
@@ -725,7 +725,7 @@ class BaseFeedBook:
                 imgurl = img['src'] if 'src' in img.attrs else ''
                 if not imgurl:
                     for attr in img.attrs:
-                        if 'src' in attr: #很多网站使用data-src
+                        if attr != 'src' and 'src' in attr: #很多网站使用data-src
                             imgurl = img[attr]
                             break
                 if not imgurl:
@@ -1042,7 +1042,7 @@ class WebpageBook(BaseFeedBook):
                     imgurl = img['src'] if 'src' in img.attrs else ''
                     if not imgurl:
                         for attr in img.attrs:
-                            if 'src' in attr: #很多网站使用data-src
+                            if attr != 'src' and 'src' in attr: #很多网站使用data-src
                                 imgurl = img[attr]
                                 break
                     if not imgurl:

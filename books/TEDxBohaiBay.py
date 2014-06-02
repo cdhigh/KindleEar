@@ -6,7 +6,7 @@
 import datetime
 from bs4 import BeautifulSoup
 from lib.urlopener import URLOpener
-from base import BaseFeedBook
+from base import BaseFeedBook,string_of_tag
 
 def getBook():
     return TEDxBohaiBay
@@ -72,7 +72,9 @@ class TEDxBohaiBay(BaseFeedBook):
                 if self.oldest_article > 0 and delta.days > self.oldest_article:
                     continue
                 
-                urls.append((feedtitle,title.string,title['href'],None))
+                href = title['href'] if title['href'].startswith('http') else self.urljoin(url,title['href'])
+                
+                urls.append((feedtitle,string_of_tag(title),href,None))
                 
         return urls
     

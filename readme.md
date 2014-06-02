@@ -39,8 +39,6 @@
    解压后将目录改名为kindleear，放到uploader目录下，
    双击uploader.bat即可上传。
    <https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing>
-   如果上面的地址被墙，可以使用备份的墙内地址：
-   <http://yunpan.cn/QGiHjKRZ6EreW> （访问密码：beaa）
 
 #许可
 KindleEar is Licensed under the GPL license: [http://www.gnu.org/licenses/gpl.html](http://www.gnu.org/licenses/gpl.html)
