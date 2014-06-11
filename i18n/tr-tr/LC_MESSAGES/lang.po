@@ -463,16 +463,16 @@ msgid "Others"
 msgstr "Diğerleri"
 
 msgid "Login Info"
-msgstr "Login Info"
+msgstr "Giriş Bilgisi"
 
 msgid "Input website login info for book '%s'"
-msgstr "Input website login info for book '%s'"
+msgstr "'%s' kitabı için giriş bilgilerini belirtin"
 
 msgid "Leave any field empty to delete info from database."
-msgstr "Leave any field empty to delete info from database."
+msgstr "Herhangi bir bilgiyi silmek için alanını boş bırakın."
 
 msgid "Account"
-msgstr "Account"
+msgstr "Hesap"
 
 msgid "Submit"
-msgstr "Submit"
+msgstr "Gönder"
