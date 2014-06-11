@@ -1,5 +1,11 @@
 #Changelog for KindleEar
 
+##1.20.4
+  1. 更新土耳其语翻译。
+
+##1.20.4
+  1. Update Turkish translation.
+
 ##1.20.3
   1. 修改内置书籍TED渤海湾以适应其网站改版。
 
