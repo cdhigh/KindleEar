@@ -24,7 +24,7 @@ class URLOpener:
         
         class resp: #出现异常时response不是合法的对象，使用一个模拟的
             status_code=555
-            content=None
+            content=''
             headers={}
         
         response = resp()
@@ -79,13 +79,14 @@ class URLOpener:
                     else:
                         break
                 
+                data = None
+                method = urlfetch.GET
+                self.SaveCookies(response.header_msg.getheaders('Set-Cookie'))
+                
                 #只处理重定向信息
                 if response.status_code not in [300,301,302,303,307]:
                     break
                 
-                data = None
-                method = urlfetch.GET
-                self.SaveCookies(response.header_msg.getheaders('Set-Cookie'))
                 urlnew = response.headers.get('Location')
                 if urlnew and not urlnew.startswith("http"):
                     url = urlparse.urljoin(url, urlnew)

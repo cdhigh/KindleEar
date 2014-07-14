@@ -1,5 +1,13 @@
 #Changelog for KindleEar
 
+##1.20.5
+  1. 增加网友mcfloundinho提供的《南方周末》。
+  2. bugfix:修改urlopener处理cookie的一个bug.
+
+##1.20.5
+  1. Add book nfzm written by mcfloundinho.
+  2. bugfix: fix a bug in process cookie of module urlopener.
+
 ##1.20.4
   1. 更新土耳其语翻译。
 
