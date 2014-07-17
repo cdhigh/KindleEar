@@ -81,7 +81,10 @@ class URLOpener:
                 
                 data = None
                 method = urlfetch.GET
-                self.SaveCookies(response.header_msg.getheaders('Set-Cookie'))
+                try:
+                    self.SaveCookies(response.header_msg.getheaders('Set-Cookie'))
+                except:
+                    pass
                 
                 #只处理重定向信息
                 if response.status_code not in [300,301,302,303,307]:
