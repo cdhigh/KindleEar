@@ -251,7 +251,7 @@ class HandleMail(InboundMailHandler):
         """
         if subject.lower() in (u'nosubject', u'all'):
             taskqueue.add(url='/deliver',queue_name="deliverqueue1",method='GET',
-                params={'u':username},target='worker')
+                params={'u':username},target='default')
         else:
             bkids = []
             booklist = subject.split(',')

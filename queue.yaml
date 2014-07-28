@@ -9,4 +9,4 @@ queue:
     min_backoff_seconds: 60
     max_backoff_seconds: 600
     max_doublings: 4
-  target: worker
+#  target: worker

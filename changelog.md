@@ -1,5 +1,11 @@
 #Changelog for KindleEar
 
+##1.20.7
+  1. bugfix:修正trigger@appid.appspotmail.com触发投递失败的问题。
+
+##1.20.7
+  1. bugfix:trigger@appid.appspotmail.com trigger task deliver failed.
+  
 ##1.20.6
   1. bugfix:继续修改urlopener处理cookie的一个bug.
 
