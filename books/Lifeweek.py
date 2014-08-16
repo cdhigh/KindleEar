@@ -19,3 +19,6 @@ class Lifeweek(BaseFeedBook):
     feeds = [
             (u'三联生活网', 'http://app.lifeweek.com.cn/?app=rss&controller=index&action=feed'),
            ]
+
+    def processtitle(self, title):
+        return title[:-6] if title.endswith(u'_三联生活网') else title
