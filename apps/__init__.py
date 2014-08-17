@@ -10,7 +10,7 @@
 
 import __builtin__, site
 
-__Version__ = '1.20.7'
+__Version__ = '1.20.8'
 
 __builtin__.__dict__['__Version__'] = __Version__
 
