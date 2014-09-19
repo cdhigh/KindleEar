@@ -16,5 +16,5 @@ class ArtsAndLettersDaily(BaseFeedBook):
     oldest_article        = 7
     
     feeds = [
-            ('http://pipes.yahoo.com/pipes/pipe.run?_id=b268a9d81c3525ef5275eaea242855ad&_render=rss'),
+            ('Arts & Letters Daily','http://pipes.yahoo.com/pipes/pipe.run?_id=b268a9d81c3525ef5275eaea242855ad&_render=rss'),
             ]

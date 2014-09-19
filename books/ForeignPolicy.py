@@ -15,5 +15,5 @@ class ForeignPolicy(BaseFeedBook):
     auto_cleanup = True
     keep_image = True
 
-    feeds          = [('http://www.foreignpolicy.com/node/feed')]
+    feeds          = [('Foreign Policy','http://www.foreignpolicy.com/node/feed'),]
 
