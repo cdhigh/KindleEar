@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 from base import BaseFeedBook
+import re
 
 def getBook():
     return Lifeweek
