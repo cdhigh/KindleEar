@@ -59,7 +59,8 @@ for book in BookClasses():  #添加内置书籍
         continue
     b = Book.all().filter("title = ", book.title).get()
     if not b:
-        b = Book(title=book.title,description=book.description,builtin=True,needs_subscription=book.needs_subscription)
+        b = Book(title = book.title, description = book.description, builtin = True, \
+                 needs_subscription = book.needs_subscription, separate = False)
         b.put()
         memcache.add(book.title, book.description, 86400)
 

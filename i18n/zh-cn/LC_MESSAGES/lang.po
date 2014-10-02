@@ -256,6 +256,9 @@ msgstr "未订阅"
 msgid "Subscribe"
 msgstr "订阅"
 
+msgid "Separate"
+msgstr "单独订阅"
+
 msgid "No have book unsubscrebed"
 msgstr "暂时没有未订阅的书籍"
 
