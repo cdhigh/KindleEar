@@ -260,6 +260,9 @@ msgstr "Abone Olmadığınız Kitaplar"
 msgid "Subscribe"
 msgstr "Abone ol"
 
+msgid "Separate"
+msgstr "Ayrı"
+
 msgid "No have book unsubscrebed"
 msgstr "Abone olmadığınız kitap yok."
 

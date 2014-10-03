@@ -12,7 +12,7 @@
             <a href="/delfeed/{{feed.key().id()}}" class="actionButton">{{_("Delete")}}</a>
         </div>
         <div class="summaryRow">
-            <a href="{{feed.url}}" target="_blank" style="text-decoration:none;color:grey;" 
+            <a href="{{feed.url}}" target="_blank" style="text-decoration:none;color:grey;"
                 {%if feed.url|length>80%}title="{{feed.url}}"{%endif%}>
             {%if feed.url|length>80%}{{feed.url[:80]}}...{%else%}{{feed.url}}{%endif%}</a>
         </div>
@@ -41,6 +41,9 @@
     <div class="book">
         <div class="titleRow">{{book.title}}</div>
         <div class="cornerControls">
+        {% if book.separate -%}
+          <img alt="{{_("Separate")}}" src="static/separate.gif" border="0" />
+        {% endif -%}
           {% if book.needs_subscription -%}
             <a href="/booklogininfo/{{book.key().id()}}" class="actionButton"
             {% if not user.subscription_info(book.title) %}style="color:red;"{% endif %}
@@ -62,7 +65,10 @@
     <div class="book">
         <div class="titleRow">{{book.title}}</div>
         <div class="cornerControls">
-            <a href="/subscribe/{{book.key().id()}}" class="actionButton">{{_("Subscribe")}}</a>
+            <input type="checkbox" id="separate_{{book.key().id()}}" />
+            <img alt="{{_("Separate")}}" src="static/separate.gif" border="0" onclick="toggleSeparate('{{book.key().id()}}');" />
+            <!--<a href="/subscribe/{{book.key().id()}}" class="actionButton">{{_("Subscribe")}}</a>-->
+            <a href="javascript:void(0)" onclick="doSubscribe('{{book.key().id()}}')" class="actionButton">{{_("Subscribe")}}</a>
         </div>
         <div class="summaryRow">
             {%if book.description|length>80%}{{book.description[:80]}}...<span>{{book.description}}</span>{%else%}{{book.description}}{%endif%}
@@ -77,6 +83,20 @@
 function toggleFulltext() {
   var btnft = document.getElementById("fulltext");
   btnft.checked = !btnft.checked;
+}
+
+function toggleSeparate(id) {
+  id = "separate_" + id
+  var btnft = document.getElementById(id);
+  btnft.checked = !btnft.checked;
+}
+
+function doSubscribe(id) {
+  var btnSeparate = document.getElementById("separate_" + id);
+  target = "/subscribe/" + id
+  if (btnSeparate.checked)
+    target += "?separate=true"
+  window.location.href = target
 }
 </script>
 {% endblock -%}
