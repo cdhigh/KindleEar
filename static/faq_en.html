@@ -42,6 +42,8 @@
         <li><a href="#errorcodes">There are some logs likes 'fetch rss failed(450)' in gae backend, what them mean?</a></li>
         <li><a href="#mergebooks">Why I cannot lookup words in dictionary when 'Merge books into one' chosen?</a></li>
         <li><a href="#needlogin">Some websites need subscription(login) to view article?</a></li>
+        <li><a href="#deletebookschinese">Can I delete/hide books in Chinese?</a></li>
+        <li><a href="#pushseparate">What meaning is the option "Separate" for books?</a></li>
       </ul>
     </div>
     
@@ -216,6 +218,17 @@
         <p>Note3: the password will be saved in GAE server with encrypted, key for encrypt is a random string for each account of KindleEar, but key is stored in GAE too, so it's no absolute safe, please take the consequences if the database of KindleEar is stolen.</p>
     </p>
     
+    <span id="deletebookschinese"></span>
+    <h2>Can I delete/hide books in Chinese?</h2>
+    <p class="answer">
+        If you not are Chinese, you can delete some *.py files in directory 'books'. <br />'__init__.py' and 'base.py' are required, please dont delete them.
+    </p>
+
+    <span id="pushseparate"></span>
+    <h2>What meaning is the option "Separate" for books?</h2>
+    <p class="answer">If you the option chosen, the book will be send to kindle separately even if the another option "Merge books into one" is chosen.</p>
+    
+
     <p style="font-size:90%;color:gray;margin-top:2em;">Please forget my poor english, feel free to open a issue in github if you didn't understand what I wrote, or better you can help me to correct it.</p>
     <div id="footer">
         <div class="clear"></div>

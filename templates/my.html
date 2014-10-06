@@ -12,7 +12,7 @@
             <a href="/delfeed/{{feed.key().id()}}" class="actionButton">{{_("Delete")}}</a>
         </div>
         <div class="summaryRow">
-            <a href="{{feed.url}}" target="_blank" style="text-decoration:none;color:grey;"
+            <a href="{{feed.url}}" target="_blank" style="text-decoration:none;color:grey;" 
                 {%if feed.url|length>80%}title="{{feed.url}}"{%endif%}>
             {%if feed.url|length>80%}{{feed.url[:80]}}...{%else%}{{feed.url}}{%endif%}</a>
         </div>
@@ -39,11 +39,12 @@
     {% for book in books -%}
     {% if nickname in book.users -%}
     <div class="book">
-        <div class="titleRow">{{book.title}}</div>
-        <div class="cornerControls">
+        <div class="titleRow">{{book.title}}
         {% if book.separate -%}
           <img alt="{{_("Separate")}}" src="static/separate.gif" border="0" />
         {% endif -%}
+        </div>
+        <div class="cornerControls">
           {% if book.needs_subscription -%}
             <a href="/booklogininfo/{{book.key().id()}}" class="actionButton"
             {% if not user.subscription_info(book.title) %}style="color:red;"{% endif %}
@@ -63,10 +64,11 @@
     {% for book in books -%}
     {% if nickname not in book.users -%}
     <div class="book">
-        <div class="titleRow">{{book.title}}</div>
-        <div class="cornerControls">
-            <input type="checkbox" id="separate_{{book.key().id()}}" />
+        <div class="titleRow">{{book.title}}
+            <input type="checkbox" id="separate_{{book.key().id()}}" style="margin-left:1em;" />
             <img alt="{{_("Separate")}}" src="static/separate.gif" border="0" onclick="toggleSeparate('{{book.key().id()}}');" />
+        </div>
+        <div class="cornerControls">
             <!--<a href="/subscribe/{{book.key().id()}}" class="actionButton">{{_("Subscribe")}}</a>-->
             <a href="javascript:void(0)" onclick="doSubscribe('{{book.key().id()}}')" class="actionButton">{{_("Subscribe")}}</a>
         </div>
@@ -84,7 +86,6 @@ function toggleFulltext() {
   var btnft = document.getElementById("fulltext");
   btnft.checked = !btnft.checked;
 }
-
 function toggleSeparate(id) {
   id = "separate_" + id
   var btnft = document.getElementById(id);

@@ -23,30 +23,26 @@ class Deliver(BaseHandler):
     __url__ = "/deliver"
     def queueit(self, usr, bookid, separate):
         param = {"u":usr.name, "id":bookid}
-
-        if usr.merge_books:
-            if separate:
-                taskqueue.add(url = '/worker', queue_name = "deliverqueue1", method = 'GET',
-                              params = param, target = "worker")
-            else:
-                self.queue2push[usr.name].append(str(bookid))
+        
+        if usr.merge_books and not separate:
+            self.queue2push[usr.name].append(str(bookid))
         else:
             taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
                 params=param,target="worker")
-
+        
     def flushqueue(self):
         for name in self.queue2push:
             param = {'u':name, 'id':','.join(self.queue2push[name])}
             taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
                 params=param,target="worker")
         self.queue2push = defaultdict(list)
-
+        
     def GET(self):
         username = web.input().get('u')
         id = web.input().get('id') #for debug
-
+        
         self.queue2push = defaultdict(list)
-
+        
         books = Book.all()
         if username: #现在投递，不判断时间和星期
             sent = []
@@ -65,25 +61,25 @@ class Deliver(BaseHandler):
             else:
                 tips = _("No book to deliver!")
             return self.render('autoback.html', "Delivering",tips=tips)
-
+        
         #定时cron调用
         sentcnt = 0
         for book in books:
             if not book.users: #没有用户订阅此书
                 continue
-
+            
             bkcls = None
             if book.builtin:
                 bkcls = BookClass(book.title)
                 if not bkcls:
                     continue
-
+            
             #确定此书是否需要下载
             for u in book.users:
                 user = KeUser.all().filter("enable_send = ",True).filter("name = ", u).get()
                 if not user or not user.kindle_email:
                     continue
-
+                    
                 #先判断当天是否需要推送
                 day = local_time('%A', user.timezone)
                 usrdays = user.send_days
@@ -95,7 +91,7 @@ class Deliver(BaseHandler):
                         continue
                 elif usrdays and day not in usrdays: #为空也表示每日推送
                     continue
-
+                    
                 #时间判断
                 h = int(local_time("%H", user.timezone)) + 1
                 if h >= 24:
@@ -108,7 +104,7 @@ class Deliver(BaseHandler):
                         continue
                 elif user.send_time != h:
                     continue
-
+                
                 #到了这里才是需要推送的
                 self.queueit(user, book.key().id(), book.separate)
                 sentcnt += 1

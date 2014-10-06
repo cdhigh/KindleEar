@@ -1,3 +1,5 @@
+# version : 0.3.0.5
+# https://pypi.python.org/pypi/readability-lxml
 from .readability import Document
 
 #Usage:

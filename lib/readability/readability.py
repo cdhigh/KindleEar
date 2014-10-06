@@ -459,6 +459,7 @@ class Document:
                 for kind in ['p', 'img', 'li', 'a', 'embed', 'input']:
                     counts[kind] = len(el.findall('.//%s' % kind))
                 counts["li"] -= 100
+                counts["input"] -= len(el.findall('.//input[@type="hidden"]'))
 
                 # Count the text length excluding any surrounding whitespace
                 content_length = text_length(el)

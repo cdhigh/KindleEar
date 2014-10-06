@@ -23,13 +23,15 @@ class Login(BaseHandler):
         #如果管理员账号不存在，创建一个，并返回False，否则返回True
         u = KeUser.all().filter("name = ", 'admin').get()
         if not u:            
-            myfeeds = Book(title=MY_FEEDS_TITLE,description=MY_FEEDS_DESC,
-                    builtin=False,keep_image=True,oldest_article=7,needs_subscription=False)
+            myfeeds = Book(title=MY_FEEDS_TITLE, description=MY_FEEDS_DESC,
+                    builtin=False, keep_image=True, oldest_article=7,
+                    needs_subscription=False, separate=False)
             myfeeds.put()
             secret_key = new_secret_key()
-            au = KeUser(name='admin',passwd=hashlib.md5('admin'+secret_key).hexdigest(),
-                kindle_email='',enable_send=False,send_time=8,timezone=TIMEZONE,
-                book_type="mobi",device='kindle',expires=None,ownfeeds=myfeeds,merge_books=False,secret_key=secret_key)
+            au = KeUser(name='admin', passwd=hashlib.md5('admin'+secret_key).hexdigest(),
+                kindle_email='', enable_send=False, send_time=8, timezone=TIMEZONE,
+                book_type="mobi", device='kindle', expires=None, ownfeeds=myfeeds, 
+                merge_books=False, secret_key=secret_key)
             au.put()
             return False
         else:

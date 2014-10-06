@@ -260,9 +260,6 @@ msgstr "Abone Olmadığınız Kitaplar"
 msgid "Subscribe"
 msgstr "Abone ol"
 
-msgid "Separate"
-msgstr "Ayrı"
-
 msgid "No have book unsubscrebed"
 msgstr "Abone olmadığınız kitap yok."
 
@@ -479,3 +476,18 @@ msgstr "Hesap"
 
 msgid "Submit"
 msgstr "Gönder"
+
+msgid "Import Feeds"
+msgstr "Import Feeds"
+
+msgid "Import"
+msgstr "Import"
+
+msgid "Import custom rss from a OPML file."
+msgstr "Import custom rss from a OPML file."
+
+msgid "Download"
+msgstr "Download"
+
+msgid "Separate"
+msgstr "Separate"

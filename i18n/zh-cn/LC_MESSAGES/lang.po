@@ -256,9 +256,6 @@ msgstr "未订阅"
 msgid "Subscribe"
 msgstr "订阅"
 
-msgid "Separate"
-msgstr "单独订阅"
-
 msgid "No have book unsubscrebed"
 msgstr "暂时没有未订阅的书籍"
 
@@ -474,3 +471,18 @@ msgstr "账号"
 
 msgid "Submit"
 msgstr "提交"
+
+msgid "Import Feeds"
+msgstr "导入订阅列表"
+
+msgid "Import"
+msgstr "导入"
+
+msgid "Import custom rss from a OPML file."
+msgstr "从OPML文件中导入订阅列表"
+
+msgid "Download"
+msgstr "下载"
+
+msgid "Separate"
+msgstr "单独推送"

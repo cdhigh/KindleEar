@@ -5,13 +5,28 @@
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 #Contributors:
 # rexdf <https://github.com/rexdf>
-
+import datetime
 import web
+
+from google.appengine.api import memcache
 
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
-
+from apps.utils import local_time
 from config import *
+
+MEMC_ADV_ID = '!#AdvSettings@'
+
+class AdvSettings(BaseHandler):
+    """ 高级设置的主入口 """
+    __url__ = "/advsettings"
+    def GET(self):
+        prevUrl = memcache.get(MEMC_ADV_ID)
+        if prevUrl in (AdvShare.__url__, AdvUrlFilter.__url__, AdvWhiteList.__url__, AdvImport.__url__):
+            raise web.seeother(prevUrl)
+        else:
+            memcache.set(MEMC_ADV_ID, AdvWhiteList.__url__, 86400)
+            raise web.seeother(AdvWhiteList.__url__)
 
 class AdvShare(BaseHandler):
     """ 设置归档和分享配置项 """
@@ -30,6 +45,7 @@ class AdvShare(BaseHandler):
         openinbrowser = OPEN_IN_BROWSER
         args = locals()
         args.pop('self')
+        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
         return self.render('advshare.html',"Share",**args)
         
     def POST(self):
@@ -63,7 +79,7 @@ class AdvShare(BaseHandler):
         user.tumblr = tumblr
         user.browser = browser
         user.put()
-        
+        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
         raise web.seeother('')
 
 class AdvUrlFilter(BaseHandler):
@@ -71,6 +87,7 @@ class AdvUrlFilter(BaseHandler):
     __url__ = "/advurlfilter"
     def GET(self):
         user = self.getcurrentuser()
+        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
         return self.render('advurlfilter.html',"Url Filter",current='advsetting',
             user=user,advcurr='urlfilter')
         
@@ -80,6 +97,7 @@ class AdvUrlFilter(BaseHandler):
         url = web.input().get('url')
         if url:
             UrlFilter(url=url,user=user).put()
+        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
         raise web.seeother('')
         
 class AdvDel(BaseHandler):
@@ -105,6 +123,7 @@ class AdvWhiteList(BaseHandler):
     __url__ = "/advwhitelist"
     def GET(self):
         user = self.getcurrentuser()
+        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
         return self.render('advwhitelist.html',"White List",current='advsetting',
             user=user,advcurr='whitelist')
         
@@ -114,4 +133,83 @@ class AdvWhiteList(BaseHandler):
         wlist = web.input().get('wlist')
         if wlist:
             WhiteList(mail=wlist,user=user).put()
+        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
         raise web.seeother('')
+
+class AdvImport(BaseHandler):
+    """ 导入自定义rss订阅列表，当前支持Opml格式 """
+    __url__ = "/advimport"
+    def GET(self, tips=None):
+        user = self.getcurrentuser()
+        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
+        return self.render('advimport.html',"Import",current='advsetting',
+            user=user,advcurr='import',tips=tips)
+
+    def POST(self):
+        import opml
+        x = web.input(importfile={})
+        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
+        if 'importfile' in x:
+            user = self.getcurrentuser()
+            try:
+                rsslist = opml.from_string(x.importfile.file.read())
+            except Exception as e:
+                return self.GET(str(e))
+
+            cnt = len(rsslist)
+            
+            for idx in range(cnt):
+                o = rsslist[idx]
+                title, url, isfulltext = o.text, o.xmlUrl, o.isFulltext #isFulltext为非标准属性
+                isfulltext = bool(isfulltext.lower() in ('true', '1'))
+                if title and url:
+                    rss = Feed.all().filter('book = ', user.ownfeeds).filter("url = ", url).get() #查询是否有重复的
+                    if rss:
+                        rss.title = title
+                        rss.isfulltext = isfulltext
+                        rss.put()
+                    else:
+                        Feed(title=title,url=url,book=user.ownfeeds,isfulltext=isfulltext,
+                            time=datetime.datetime.utcnow()).put()
+            
+            memcache.delete('%d.feedscount'%user.ownfeeds.key().id())
+            raise web.seeother('/my')
+        else:
+            raise web.seeother('')
+
+
+class AdvExport(BaseHandler):
+    """ 生成自定义rss订阅列表的Opml格式文件，让用户下载保存 """
+    __url__ = "/advexport"
+    def GET(self):
+        user = self.getcurrentuser()
+        
+        #为了简单起见，就不用其他库生成xml，而直接使用字符串格式化生成
+        opmlTpl = u"""<?xml version="1.0" encoding="utf-8" ?>
+<opml version="2.0">
+<head>
+    <title>KindleEar.opml</title>
+    <dateCreated>%s</dateCreated>
+    <dateModified>%s</dateModified>
+    <ownerName>KindleEar</ownerName>
+</head>
+<body>
+%s
+</body>
+</opml>"""
+
+        date = local_time('%a, %d %b %Y %H:%M:%S GMT', user.timezone)
+        #添加时区信息
+        if user.timezone != 0:
+            date += '+%02d00' % user.timezone if user.timezone > 0 else '-%02d00' % abs(user.timezone)
+        outlines = []
+        for feed in Feed.all().filter('book = ', user.ownfeeds):
+            outlines.append('    <outline type="rss" text="%s" xmlUrl="%s" isFulltext="%d" />' % 
+                (feed.title, feed.url, feed.isfulltext))
+        outlines = '\n'.join(outlines)
+        
+        opmlfile = opmlTpl % (date, date, outlines)
+        web.header("Content-Type","text/xml;charset=utf-8")
+        web.header("Content-Disposition","attachment;filename=KindleEar_subscription.xml")
+        return opmlfile.encode('utf-8')
+

@@ -69,6 +69,12 @@ td:hover span{
     {% else -%}
       <li><a href="/advurlfilter">{{_("Url Filter")}}</a></li>
     {% endif -%}
+    {% if advcurr=='import' -%}
+      <li class="pure-menu-selected"><a href="#">{{_("Import Feeds")}}</a>
+      </li>
+    {% else -%}
+      <li><a href="/advimport">{{_("Import Feeds")}}</a></li>
+    {% endif -%}
     </ul>
    </div>
   </div>

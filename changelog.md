@@ -1,5 +1,19 @@
 #Changelog for KindleEar
 
+##1.20.9
+  1. 增加从opml文件导入订阅列表的功能。
+  2. 网友seff增加特性：可选部分书籍单独推送。
+  
+##1.20.9
+  1. New feature: import list of custom rss from a opml file. 
+  2. New feature added by seff: add a switch 'Separate' to books. book is pushed to kindle separately if it's checked.
+
+##1.20.8
+  1. 网友mcfloundinho增加《共识网》
+
+##1.20.8
+  1. a book <gongshi> added by mcfloundinho.
+  
 ##1.20.7
   1. bugfix:修正trigger@appid.appspotmail.com触发投递失败的问题。
 
