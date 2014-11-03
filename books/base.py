@@ -500,6 +500,10 @@ class BaseFeedBook:
             summary = simple_extract(content)
             soup = BeautifulSoup(summary, "lxml")
             body = soup.find('body')
+            if not body:
+                self.log.warn('extract article content failed.[%s]' % url)
+                return
+                
             head = soup.find('head')
             #增加备用算法提示，提取效果不好不要找我，类似免责声明：）
             info = soup.new_tag('p', style='color:#555555;font-size:60%;text-align:right;')

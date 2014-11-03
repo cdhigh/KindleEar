@@ -46,6 +46,7 @@
         <li><a href="#needlogin">有的网站需要登陆才能阅读文章的问题如何解决？</a></li>
         <li><a href="#inie6">网站在IE6下显示不正常？</a></li>
         <li><a href="#pushseparate">内置书籍订阅时“Separate”选项是什么意思？</a></li>
+        <li><a href="#internalerror">部署应用后打开网页出现“internal server error”如何处理？</a></li>
       </ul>
     </div>
     
@@ -254,6 +255,16 @@
     <span id="pushseparate"></span>
     <h2>内置书籍订阅时“Separate”选项是什么意思？</h2>
     <p class="answer">一旦你选择了“合并推送”，则所有订阅源都会合并成一本书籍推送至kindle，如果你需要有部分订阅源分开单独推送，则在订阅时选择“Separate“。</p>
+
+    <span id="internalerror"></span>
+    <h2>部署应用后打开网页出现“internal server error”如何处理？</h2>
+    <p class="answer">
+        有部分网友在部署后打开此应用的“我的订阅”和“投递日志”网页会出现“internal server error”错误，一般情况下因为gae没有及时生成对应数据库的索引导致。<br />你可以打开gae后台，查看logs日志，看是否有“NeedIndexError: no matching index found.”异常，如果有的话，证明是没有生成索引。<br />你也可以在gae后台查看“Datastore Indexes”，看每个条目的“Status”，正常情况下应该都是“Serving”，如果是“Building”或其他值，则说明索引也没有正确生成。<br />
+        如果你部署步骤完全正确的话，可以稍等几分钟到几十分钟，等gae自动生成索引，如果gae没有成功自动生成索引，你也可以手动更新索引：<br />
+        <code>python appcfg.py update_indexes KindleEar/</code><br />
+        在终端窗口执行此命令，注意最后一个KindleEar是你保存的此应用的目录名。<br />
+        执行了此命令后稍等还是不行的话，请按照正确步骤重新部署。
+    </p>
     
     <div id="footer">
         <div class="clear"></div>

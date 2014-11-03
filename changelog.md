@@ -1,5 +1,11 @@
 #Changelog for KindleEar
 
+##1.20.10
+  1. bugfix: 修正有部分文章无法提取正文导致推送失败的问题。
+
+##1.20.10
+  1. bugfix: some complex articles cause failure of delivery. 
+
 ##1.20.9
   1. 增加从opml文件导入订阅列表的功能。
   2. 网友seff增加特性：可选部分书籍单独推送。
