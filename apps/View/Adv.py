@@ -155,11 +155,8 @@ class AdvImport(BaseHandler):
                 rsslist = opml.from_string(x.importfile.file.read())
             except Exception as e:
                 return self.GET(str(e))
-
-            cnt = len(rsslist)
             
-            for idx in range(cnt):
-                o = rsslist[idx]
+            for o in self.walkOutline(rsslist):
                 title, url, isfulltext = o.text, o.xmlUrl, o.isFulltext #isFulltext为非标准属性
                 isfulltext = bool(isfulltext.lower() in ('true', '1'))
                 if title and url:
@@ -171,11 +168,24 @@ class AdvImport(BaseHandler):
                     else:
                         Feed(title=title,url=url,book=user.ownfeeds,isfulltext=isfulltext,
                             time=datetime.datetime.utcnow()).put()
-            
+                            
             memcache.delete('%d.feedscount'%user.ownfeeds.key().id())
             raise web.seeother('/my')
         else:
             raise web.seeother('')
+    
+    def walkOutline(self, outline):
+        #遍历opml的outline元素，支持不限层数的嵌套
+        if not outline:
+            return
+        
+        cnt = len(outline)
+        for idx in range(cnt):
+            o = outline[idx]
+            if len(o) > 0:
+                for subOutline in self.walkOutline(o):
+                    yield subOutline
+            yield o
 
 
 class AdvExport(BaseHandler):

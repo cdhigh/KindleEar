@@ -1,5 +1,11 @@
 #Changelog for KindleEar
 
+##1.20.11
+  1. "导入订阅列表"功能支持OPML元素Outline嵌套。
+
+##1.20.11
+  1. "Import Feeds" supports nested outlines in OPML file.
+  
 ##1.20.10
   1. bugfix: 修正有部分文章无法提取正文导致推送失败的问题。
 
