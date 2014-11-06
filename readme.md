@@ -1,4 +1,4 @@
-﻿Readme of english version refers to Readme_EN.txt
+Readme of english version refers to Readme_EN.txt
 
 #简介
 这是一个运行在Google App Engine(GAE)上的Kindle个人推送服务器，生成排版精美的杂志模式MOBI格式自动每天推送至您的kindle，
@@ -20,11 +20,16 @@
 2. 下载GAE SDK。 <https://developers.google.com/appengine/downloads?hl=zh-CN>
 3. 安装Python 2.7 如果已经安装了，跳过此步骤
 4. 下载本应用的所有文件，放到一个特定的目录。
-5. 修改app.yaml/module-worker.yaml的第一行：将kindleear修改为你申请的application名字
-6. 修改config.py中的这几个变量
-   SRC_EMAIL ：你申请GAE账号时的GMAIL邮箱
-   DOMAIN ：你申请的应用的域名
-7. 转到GAE SDK安装目录（默认为：C:\Program Files\Google\google_appengine）
+5. 在以下三个文件中修改：applicationID 和 email（或者运行 [`helper.py`](helper.py) 脚本自动修改）
+
+             文件            |  待修改内容  | 说明                     |
+   -------------------------|------------|--------------------------|
+   app.yaml 的第一行         | kindleear	 | 修改为你申请的applicationID |
+   module-worker.yaml的第一行| kindleear  | 修改为你申请的applicationID |
+   config.py               | SRC_EMAIL  | 你申请GAE账号时的GMAIL邮箱   |
+                           | DOMAIN     | 你申请的应用的域名           |
+
+6. 转到GAE SDK安装目录（默认为：C:\Program Files\Google\google_appengine）
    执行CMD命令：
    `c:\python27\python.exe appcfg.py update kindleear目录\app.yaml kindleear目录\module-worker.yaml`
    <br />比如：<br />
@@ -33,9 +38,10 @@
    app_name.appspot.com (app_name是你申请的application名字)
    比如作者的网站域名为：kindleear.appspot.com
    开始您的个人推送服务了。
+
    注：初始用户为admin，密码为admin，建议登陆后及时修改密码。
-8. 更详细一点的说明请参照FAQ。
-9. 或者如果你不想安装python和GAE SDK，可以下载此uploader，将kindleear下载后不需要修改什么，
+7. 更详细一点的说明请参照[FAQ](static/faq.html)。(部署失败，部署后"internal server error"等都有解释)
+8. 或者如果你不想安装python和GAE SDK，可以下载此uploader，将kindleear下载后不需要修改什么，
    解压后将目录改名为kindleear，放到uploader目录下，
    双击uploader.bat即可上传。
    <https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing>
