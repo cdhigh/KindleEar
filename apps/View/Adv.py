@@ -5,7 +5,7 @@
 #中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 #Contributors:
 # rexdf <https://github.com/rexdf>
-import datetime
+import datetime, urllib
 import web
 
 from google.appengine.api import memcache
@@ -157,7 +157,7 @@ class AdvImport(BaseHandler):
                 return self.GET(str(e))
             
             for o in self.walkOutline(rsslist):
-                title, url, isfulltext = o.text, o.xmlUrl, o.isFulltext #isFulltext为非标准属性
+                title, url, isfulltext = o.text, urllib.unquote_plus(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
                 isfulltext = bool(isfulltext.lower() in ('true', '1'))
                 if title and url:
                     rss = Feed.all().filter('book = ', user.ownfeeds).filter("url = ", url).get() #查询是否有重复的
@@ -215,7 +215,7 @@ class AdvExport(BaseHandler):
         outlines = []
         for feed in Feed.all().filter('book = ', user.ownfeeds):
             outlines.append('    <outline type="rss" text="%s" xmlUrl="%s" isFulltext="%d" />' % 
-                (feed.title, feed.url, feed.isfulltext))
+                (feed.title, urllib.quote_plus(feed.url), feed.isfulltext))
         outlines = '\n'.join(outlines)
         
         opmlfile = opmlTpl % (date, date, outlines)

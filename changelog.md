@@ -1,5 +1,11 @@
 #Changelog for KindleEar
 
+##1.20.12
+  1. 导出opml时将url转义。
+
+##1.20.12
+  1. quote url when export subscriptions to opml.
+
 ##1.20.11
   1. "导入订阅列表"功能支持OPML元素Outline嵌套。
 
