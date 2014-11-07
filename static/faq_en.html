@@ -29,9 +29,9 @@
         <li><a href="#ownserver">How to deploy my own delivery server?</a></li>
         <li><a href="#notreceived">Why do I not receive the deliveries?</a></li>
         <li><a href="#whatisfulltext">What is full text rss?</a></li>
-        <li><a href="#fulltextandsummary">Can full text rss be processed as summary rss? and vice versa?</a></li>
-        <li><a href="#weekly">How to deal with subscription weekly?</a></li>
-        <li><a href="#moretimesperday">Can KindleEar push news to Kindle more than one time per day?</a></li>
+        <li><a href="#fulltextandsummary">Can full text rss be processed as summary rss? What about the reverse?</a></li>
+        <li><a href="#weekly">How to deal with weekly subscriptions?</a></li>
+        <li><a href="#moretimesperday">Can KindleEar deliver news to my kindle more than once a day?</a></li>
         <li><a href="#urlfilter">How Url filter works?</a></li>
         <li><a href="#gfwblock">How to do if the gfw of China block some rss?</a></li>
         <li><a href="#imagesfolder">How to put cover and masthead images in other directory when I add a builtin books?</a></li>
@@ -114,23 +114,23 @@
     <p class="answer">Full text rss means that it contains all the contents of the articles in the rss, while summary rss contains only brief descriptions of the articles. You can check it by opening the link of the rss.</p>
     
     <span id="fulltextandsummary"></span>
-    <h2>Can full text rss be processed as summary rss? and vice versa?</h2>
-    <p class="answer">Full text rss can be processed as summary rss, in this case, program ignore the content in rss xml file and fetch full text in original link, this would spend much time, resulting in the number of supported rss decreased. If summary rss processed as full text rss, articles pushed to your kindle would have brief description only.</p>
+    <h2>Can full text rss be processed as summary rss? What about the reverse?</h2>
+    <p class="answer">Full text rss can be treated as summary rss. In this case, program will ignore the content in the rss xml file and fetch full text from the original link. It costs much time which will result the decreasing of supported rss quantities. If summary rss is processed as full text rss, articles sent to your kindle would still have brief descriptions only.</p>
     
     <span id="weekly"></span>
-    <h2>How to deal with subscription weekly?</h2>
-    <p class="answer">Some rss update weekly, for this type of rss, you can write a py file to directory 'books' with variable 'deliver_days' setted to a Day like 'Friday'.</p>
+    <h2>How to deal with weekly subscription?</h2>
+    <p class="answer">Some rss are updated weekly. For this type of rss, you can touch a new python file in the 'books' directory with variable 'deliver_days' setted to a day(e.g. deliver_days=['Friday']).</p>
     
     <span id="moretimesperday"></span>
-    <h2>Can KindleEar push news to Kindle more than one time per day?</h2>
-    <p class="answer">The answer is yes, follow steps to realize:
+    <h2>Can KindleEar deliver news to my kindle more than once a day?</h2>
+    <p class="answer">The answer is yes, follow the next steps to make it come true:
     <ol>
-      <li>add a python file to directory 'books'.</li>
-      <li>set property 'deliver_times' to a list which elements are hours you chose.
-        <br />for example : <code>deliver_times=[6,14,22] #6:00,14:00,22:00 push three times per day</code>
+      <li>Add a python file to the directory of 'books'.</li>
+      <li>Set 'deliver_times' using a list in the new python file.
+        <br />For example: <code>deliver_times=[6,14,22] #6:00,14:00,22:00 deliver three times a day</code>
       </li>
-      <li>optional, set property 'oldest_article' to number of interval seconds between two deliveries. 
-        <br />for example : <code>oldest_article=28800 #8*60*60</code>
+      <li>Optional: set 'oldest_article' to the number of interval seconds between two deliveries.
+        <br />For example: <code>oldest_article=28800 #8*60*60</code>
       </li>
     </ol>
     </p>
