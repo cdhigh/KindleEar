@@ -35,9 +35,9 @@
         <li><a href="#urlfilter">How to use the url filter?</a></li>
         <li><a href="#gfwblock">What can I do if the gfw of China blocked some rss?</a></li>
         <li><a href="#imagesfolder">How to put the cover or the masthead images in the same directory when I add a customize book?</a></li>
-        <li><a href="#sslerror">How to deal with when occur SSL error in upload procedure?</a></li>
-        <li><a href="#garbled">Some articles garbled?</a></li>
-        <li><a href="#forgotpwd">How can I do if forgot password?</a></li>
+        <li><a href="#sslerror">How to deal with the SSL error problem when I upload KindleEar?</a></li>
+        <li><a href="#garbled">Why some articles have garbled characters?</a></li>
+        <li><a href="#forgotpwd">What can I do if I forget the password?</a></li>
         <li><a href="#mailservice">How to use mail service xxx@appid.appspotmail.com?</a></li>
         <li><a href="#errorcodes">There are some logs likes 'fetch rss failed(450)' in gae backend, what them mean?</a></li>
         <li><a href="#mergebooks">Why I cannot lookup words in dictionary when 'Merge books into one' chosen?</a></li>
@@ -151,14 +151,14 @@
     </p>
     
     <span id="sslerror"></span>
-    <h2>How to deal with when occur SSL error in upload procedure?</h2>
-    <p class="answer">Some fiends in China would encounter urllib2.URLError: &lt;urlopen error [Errno 8] _ssl.c:504: EOF occurred in violation of protocol&gt;, in this case, change the hosts file of OS, add a line "74.125.229.174  appengine.google.com"</p>
+    <h2>How to deal with the SSL error problem when I upload KindleEar?</h2>
+    <p class="answer">Some friends in China would encounter "urllib2.URLError: &lt;urlopen error [Errno 8] _ssl.c:504: EOF occurred in violation of protocol&gt;". To solve this problem, try to add a new line "74.125.229.174  appengine.google.com" to the hosts file.</p>
     
     <span id="garbled"></span>
-    <h2>Some articles garbled?</h2>
-    <p class="answer">For custom rss and built-books without encoding specified, program detects encoding automatically by using http header, html meta and chardet module of python, the result is not 100% accurate, and if encoding detected is wrong, the article may be garbled. Because this situation is very rare, KindleEar only supply a not very elegant solution like geeker: manually change chardet-detect encoding saved in database. steps follows:<br /> 
-    <ol><li>login appid.appspot.com by using account 'admin'(assuming your application name is appid).</li>
-    <li>input url 'https://appid.appspot.com/dbviewer' in your brower address bar. check encoding of websites in section UrlEncoding. if encoding is wrong for some site, record its ID of database item.</li>
+    <h2>Why some articles have garbled characters?</h2>
+    <p class="answer">For custom rss and the builtin-books without encoding specified, program detects encoding automatically by using http header, html meta or the chardet module of python. Howerver, the result is not 100% accurate. If the encoding detecting is wrong, the article may be garbled. Because this situation is very rare, KindleEar only supplies a not very elegant solution: manually change the chardet-detect encoding saved in the database. Steps as follows:<br />
+    <ol><li>Login appid.appspot.com by using account 'admin'(assuming your application name is appid).</li>
+    <li>Input url 'https://appid.appspot.com/dbviewer' in your brower address bar. Check the encoding of the websites in section UrlEncoding. if encoding is wrong for some site, record its ID of database item.</li>
         <li>enter a long string in addressbar of brower, 'https://appid.appspot.com/dbviewer?action=modurlenc&id=dbid&feedenc=fenc&pageenc=penc'
         <ul>before press enter, modify some vaiable follows:
             <li>dbid: the ID of database item.</li>
@@ -174,9 +174,9 @@
     </p>
     
     <span id="forgotpwd"></span>
-    <h2>How can I do if forgot password?</h2>
-    <p class="answer">If you have forgotten the password for non-administrator account, you can notify the administrator to change your password. If an administrator password forgot, you can login appengine.google.com, on the left select "Datastore Admin", delete all KeUser data, all account information will be deleted, and then re-use admin/admin login to your application . Did not find "Datastore Admin"? You can active it in the "Application Settings".
-    <br />If you know python, you would find other solution.</p>
+    <h2>What can I do if I forget the password?</h2>
+    <p class="answer">If you are a non-administrator user, and you forget the password, you can ask the administrator to change your password. If the administrator password was forgot, you can login appengine.google.com, select "Datastore Admin" on the left, delete all KeUser data, all the account information will be deleted. And then re-use admin/admin to login in  your application . Did not find "Datastore Admin"? You can activate it in the "Application Settings".
+    <br />If you know python, I'm sure that you can find other solutions.</p>
     
     <span id="errorcodes"></span>
     <h2>There are some logs likes 'fetch rss failed(450)' in gae backend, what them mean?</h2>
