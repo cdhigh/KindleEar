@@ -39,8 +39,8 @@
         <li><a href="#garbled">Why some articles have garbled characters?</a></li>
         <li><a href="#forgotpwd">What can I do if I forget the password?</a></li>
         <li><a href="#mailservice">How to use mail service xxx@appid.appspotmail.com?</a></li>
-        <li><a href="#errorcodes">There are some logs likes 'fetch rss failed(450)' in gae backend, what them mean?</a></li>
-        <li><a href="#mergebooks">Why I cannot lookup words in dictionary when 'Merge books into one' chosen?</a></li>
+        <li><a href="#errorcodes">There are some logs like 'fetch rss failed(450)' in the gae backend, what's the meaning of them?</a></li>
+        <li><a href="#mergebooks">Why I can't lookup words in the delivery books after I chosen 'Merge books into one'?</a></li>
         <li><a href="#needlogin">Some websites need subscription(login) to view article?</a></li>
         <li><a href="#deletebookschinese">Can I delete/hide books in Chinese?</a></li>
         <li><a href="#pushseparate">What meaning is the option "Separate" for books?</a></li>
@@ -177,21 +177,7 @@
     <h2>What can I do if I forget the password?</h2>
     <p class="answer">If you are a non-administrator user, and you forget the password, you can ask the administrator to change your password. If the administrator password was forgot, you can login appengine.google.com, select "Datastore Admin" on the left, delete all KeUser data, all the account information will be deleted. And then re-use admin/admin to login in  your application . Did not find "Datastore Admin"? You can activate it in the "Application Settings".
     <br />If you know python, I'm sure that you can find other solutions.</p>
-    
-    <span id="errorcodes"></span>
-    <h2>There are some logs likes 'fetch rss failed(450)' in gae backend, what them mean?</h2>
-    <p class="answer">The number in parentheses is a error code, besides standard error code, hereafter shows errorcodes defined by KindleEar.
-    <ul><li>504:timeout.</li>
-    <li>509:file too large, GAE has a limit of 4MB for each file/page.</li>
-    <li>452:website don't support visit by https protocol.</li>
-    <li>453:websit need to authenticate.</li>
-    <li>450:download failed.</li>
-    <li>451:other exception.</li></ul></p>
-    
-    <span id="mergebooks"></span>
-    <h2>Why I cannot lookup words in dictionary when 'Merge books into one' chosen?<a name="mergebooks" id="mergebooks" >&nbsp;</a></h2>
-    <p class="answer">With option 'Merge books in one' checked, KindleEar set the metadata of book as Custom Rss, you have to set the language attribute in section 'Custom Rss Setting'.</p>
-    
+
     <span id="mailservice"></span>
     <h2>How to use mail service xxx@appid.appspotmail.com?</h2>
     <p class="answer">
@@ -205,6 +191,21 @@
        <li>address trigger@appid.appspotmail.com or username__trigger@appid.appspotmail.com is a trigger, would start a deliver task, which effect when subject is empty or is 'all' equal that you click button 'deliver now' in Menu 'Setting', that place book's title in subject would push book you chose, multi books separated by comma.<br /></li>
     </ul>
     </p>
+
+    <span id="errorcodes"></span>
+    <h2>There are some logs like 'fetch rss failed(450)' in the gae backend, what's the meaning of them?</h2>
+    <p class="answer">The number in parentheses is an error code. Besides the standard error codes, hereafter shows errorcodes defined by KindleEar.
+    <ul><li>504:timeout.</li>
+    <li>509:file too large, GAE has a limit of 4MB for each file/page.</li>
+    <li>452:the website doesn't support https protocol.</li>
+    <li>453:need authentication.</li>
+    <li>450:fail to download.</li>
+    <li>451:other exceptions.</li></ul></p>
+    
+    <span id="mergebooks"></span>
+    <h2>Why I can't lookup words in the delivery books after I chosen 'Merge books into one'?<a name="mergebooks" id="mergebooks" >&nbsp;</a></h2>
+    <p class="answer">With the option 'Merge books in one' checked, KindleEar will set the metadata of the book as Custom Rss. To fix this problem, you have to set the language attribute in the 'Custom Rss Setting' section  manually.</p>
+
     
     <span id="needlogin"></span>
     <h2>Some websites need subscription(login) to view article?</h2>
