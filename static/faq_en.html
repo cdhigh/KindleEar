@@ -156,20 +156,20 @@
     
     <span id="garbled"></span>
     <h2>Why some articles have garbled characters?</h2>
-    <p class="answer">For custom rss and the builtin-books without encoding specified, program detects encoding automatically by using http header, html meta or the chardet module of python. Howerver, the result is not 100% accurate. If the encoding detecting is wrong, the article may be garbled. Because this situation is very rare, KindleEar only supplies a not very elegant solution: manually change the chardet-detect encoding saved in the database. Steps as follows:<br />
+    <p class="answer">For custom rss and the built-in books without encoding specified, program detects encoding automatically by using http header, html meta or the chardet module of python. Howerver, the result is not 100% accurate. If the encoding detecting is wrong, the article may be garbled. Because this situation is very rare, KindleEar only supplies an not very elegant solution: manually change the chardet-detect encoding saved in the database. Steps as follows:<br />
     <ol><li>Login appid.appspot.com by using account 'admin'(assuming your application name is appid).</li>
-    <li>Input url 'https://appid.appspot.com/dbviewer' in your brower address bar. Check the encoding of the websites in section UrlEncoding. if encoding is wrong for some site, record its ID of database item.</li>
-        <li>enter a long string in addressbar of brower, 'https://appid.appspot.com/dbviewer?action=modurlenc&id=dbid&feedenc=fenc&pageenc=penc'
-        <ul>before press enter, modify some vaiable follows:
-            <li>dbid: the ID of database item.</li>
+    <li>Visit 'https://appid.appspot.com/dbviewer'. Check the encoding of the website whose articles are garbled in the UrlEncoding section. If the encoding is wrong, take down its ID.</li>
+        <li>Now visit 'https://appid.appspot.com/dbviewer?action=modurlenc&id=dbid&feedenc=fenc&pageenc=penc'
+        <ul>Before you press enter, modify some vaiables:
+            <li>dbid: the ID you just took down.</li>
             <li>fenc: new correct FeedEncoding.</li>
             <li>penc: new correct PageEncoding.</li>
         </ul></li>
-    <li>A method alternate is that change them in 'Datastore viewer' in GAE backend.</li>
-    <li>You can obtain the correct encoding by viewing source code of a webpage.</li>
-    <li>If you cannot find the website in page 'dbviewer', it means KindleEar never detect the encoding of any page of this website, http header and html meta are used only. In this case, you can set the variable 'ALWAYS_CHAR_DETECT' in 'config.py' to True.</li>
-    <li>If article still be garbled after 'ALWAYS_CHAR_DETECT' setted to True, signify encoding detected by chardet is wrong and unmatch of http header and html meta. a final attempt is set 'TRUST_ENCODING_IN_HEADER_OR_META' to True.</li>
-    <li>After all, if you tested all solutions hereinabove and the problem not solved, please add the rss to a python file to folder 'books' with encoding specified.</li>
+    <li>Or you can change them in 'Datastore viewer' in the GAE backend.</li>
+    <li>You can get the correct encoding by reading source code of a webpage.</li>
+    <li>If you cannot find the website in page 'dbviewer', it means KindleEar has never detected the encoding of any page of this website, http header or html meta is used only. In this case, you can set the variable 'ALWAYS_CHAR_DETECT' in 'config.py' to True.</li>
+    <li>If the article still has garbled characters after setting 'ALWAYS_CHAR_DETECT' to True, it means that encoding detected by chardet is wrong and doesn't match with the http header or the html meta. The final attempt is to set 'TRUST_ENCODING_IN_HEADER_OR_META' to True.</li>
+    <li>With all the solutions tested and the problem still exists, please add the rss to a python file in the folder 'books' with encoding specified.</li>
     </ol>
     </p>
     
