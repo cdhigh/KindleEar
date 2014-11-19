@@ -181,14 +181,13 @@
     <span id="mailservice"></span>
     <h2>How to use mail service xxx@appid.appspotmail.com?</h2>
     <p class="answer">
-    KindleEar supports mail service which address likes xxx@appid.appspotmail.com, xxx is any ascii string, appid is id of your application.<br />
-    <ul> <li>KindleEar would transfer <b>content</b> of email receviced to your kindle. if content of email contains  hyperlinks only (a link per line), would fetch url(s) to generate a ebook and then push to kindle. </li>
-       <li>Before you can enjoy the feature, please add whitelists in menu 'Advance'|'White List'. A asterisk '*' means allow all sender, or add some addresses like 'xx@xx.xx'/'@xx.xx'.</li>
-       <li>Send mail to username__xxx@appid.appspotmail.com would push ebook to kindle of username if account username exist.</li>
-       <li>Send mail with hyperlinks of ebook to book@appid.appspotmail.com or username__book@appid.appspotmail.com would trigger a task to download ebook and deliver to kindle directly.<br />
-        The list of postfix allowed of ebook refers to <a href="https://developers.google.com/appengine/docs/python/mail#Python_Sending_mail_with_attachments">Mail Python API Overview</a><br />
-        </li>
-       <li>address trigger@appid.appspotmail.com or username__trigger@appid.appspotmail.com is a trigger, would start a deliver task, which effect when subject is empty or is 'all' equal that you click button 'deliver now' in Menu 'Setting', that place book's title in subject would push book you chose, multi books separated by comma.<br /></li>
+    You'll have uncountable mail addresses like xxx@appid.appspotmail.com as long as xxx is valid ascii string after you have deployed KindleEar(appid is your application id).<br/>
+    <ul> <li>KindleEar will convert the text of the email received from xxx@appid.appspotmail.com as an attachment and then send it to your registered email address. If there are only hyperinks in the email, KindleEar will first fetch the url, generate a book and then send it.</li>
+       <li>Before you can enjoy the feature, please add email addresses to the whitelist in menu 'Advance'|'White List'. A asterisk '*' means allow anyone to trigger it, or only allow some people by adding their emaill addresses like 'john@example.com/susan@example.com'.</li>
+       <li>The generated book will be sent to admin's mailbox by default. Use username__xxx@appid.appspotmail.com(Note: there're two underscores) if you want the book to be sent to other registered users.</li>
+       <li>Send emails with the download link of an ebook to book@appid.appspotmail.com or username__book@appid.appspotmail.com will trigger a task to download the ebook and then diliver it to kindle directly.<br />
+        Refer to <a href="https://developers.google.com/appengine/docs/python/mail#Python_Sending_mail_with_attachments">Mail Python API Overview</a> to get to know the list of allowed postfix of ebooks. <br /></li>
+       <li>Send emails to trigger@appid.appspotmail.com or username__trigger@appid.appspotmail.com will trigger a delivery by hand.It equals to the 'deliver now' button in 'Setting' Menu if the subject is empty or is 'all'.Deliver specific books by adding the name of the book, seperate with commma if there is more than one.<br /></li>
     </ul>
     </p>
 
