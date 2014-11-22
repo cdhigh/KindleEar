@@ -41,11 +41,11 @@ class WeixinBook(BaseFeedBook):
                 for e in content['items'][:self.max_articles_per_feed]:
                     e = feedparser.parse(e)['entries'][0]
                     updated = None
-                    if hasattr(e, 'updated') and e.updated:
-                        updated = e.updated
+                    if hasattr(e, 'lastmodified') and e.lastmodified:
+                        updated = float(e.lastmodified)
 
                     if self.oldest_article > 0 and updated:
-                        updated = datetime.datetime(*[int(x) for x in updated.split('-')])
+                        updated = datetime.datetime.utcfromtimestamp(updated)
                         delta = tnow - updated
                         if self.oldest_article > 365:
                             threshold = self.oldest_article #以秒为单位
