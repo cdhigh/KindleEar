@@ -6,7 +6,7 @@ def getBook():
     return ZhihuDaily
 
 class ZhihuDaily(BaseFeedBook):
-    title                 = u'知乎日报'
+    title                 = u'知乎日報'
     description           = u'知乎日报全文RSS，不需要转发，排版图片正常。'
     language              = 'zh-cn'
     feed_encoding         = "utf-8"
