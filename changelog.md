@@ -1,5 +1,11 @@
 #Changelog for KindleEar
 
+##1.20.13
+  1. bugfix: 修改有部分RSS将一个图片做为一篇文章（没有html包装）导致推送失败的问题。
+
+##1.20.13
+  1. bugfix: a picture as an article (without html wraper) will crash KindleEar.
+  
 ##1.20.12
   1. 导出opml时将url转义。
 
