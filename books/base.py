@@ -474,15 +474,26 @@ class BaseFeedBook:
         因为图片文件占内存，为了节省内存，这个函数也做为生成器
         """
         content = self.preprocess(article)
-
+        if not content:
+            return
+            
         # 提取正文
         try:
             doc = readability.Document(content,positive_keywords=self.positive_classes)
             summary = doc.summary(html_partial=False)
         except:
-            self.log.warn('article is invalid.[%s]' % url)
+            # 如果提取正文出错，可能是图片（一个图片做为一篇文章，没有使用html包装）
+            imgtype = imghdr.what(None, content)
+            if imgtype: #如果是图片，则使用一个简单的html做为容器
+                imgmime = r"image/" + imgtype
+                fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
+                yield (imgmime, url, fnimg, content, None, None)
+                tmphtml = '<html><head><title>Picture</title></head><body><img src="%s" /></body></html>' % fnimg
+                yield ('Picture', None, None, tmphtml, '', None)
+            else:
+                self.log.warn('article is invalid.[%s]' % url)
             return
-
+        
         title = doc.short_title()
         if not title:
             self.log.warn('article has no title.[%s]' % url)

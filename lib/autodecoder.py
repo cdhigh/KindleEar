@@ -74,7 +74,7 @@ class AutoDecoder:
                 encoding = chardet.detect(content)['encoding']
                 try:
                     result = content.decode(encoding)
-                except UnicodeDecodeError: # 还是出错，则不转换，直接返回
+                except: # 还是出错，则不转换，直接返回
                     self.encoding = None
                     result = content
                 else: # 保存下次使用，以节省时间
@@ -115,7 +115,7 @@ class AutoDecoder:
             #使用检测到的编码解压
             try:
                 result = content.decode(self.encoding)
-            except UnicodeDecodeError: # 出错，则不转换，直接返回
+            except: # 出错，则不转换，直接返回
                 result = content
             else:
                 #保存到数据库
