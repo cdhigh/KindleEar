@@ -4,6 +4,7 @@ import datetime, json
 from lib import feedparser
 from lib.urlopener import URLOpener
 from base import BaseFeedBook
+from lib.autodecoder import AutoDecoder
 
 class WeixinBook(BaseFeedBook):
 
