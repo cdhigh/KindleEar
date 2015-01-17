@@ -1,5 +1,11 @@
 #Changelog for KindleEar
 
+##1.20.14
+  1. bugfix: 喷嚏图啩原RSS地址已经失效，更换为另一个地址。
+
+##1.20.14
+  1. bugfix: change address of rss of book 'dapenti.py'.
+
 ##1.20.13
   1. bugfix: 修改有部分RSS将一个图片做为一篇文章（没有html包装）导致推送失败的问题。
 

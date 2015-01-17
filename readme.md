@@ -47,5 +47,5 @@ Readme of english version refers to Readme_EN.txt
    <https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing>
 
 #许可
-KindleEar is Licensed under the GPL license: [http://www.gnu.org/licenses/gpl.html](http://www.gnu.org/licenses/gpl.html)
+KindleEar is Licensed under the AGPLv3 license: [http://www.gnu.org/licenses/agpl-3.0.html](http://www.gnu.org/licenses/agpl-3.0.html)
 大体的许可框架是此应用代码你可以任意使用任意修改，可以商用，但是也必须开源并保留版权声明。
