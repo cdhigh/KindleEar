@@ -1,5 +1,11 @@
 #Changelog for KindleEar
 
+##1.20.15
+  1. bugfix: weixinbase部分解码失败问题。
+
+##1.20.15
+  1. bugfix: weixinbase failed when decode some article.
+
 ##1.20.14
   1. bugfix: 喷嚏图啩原RSS地址已经失效，更换为另一个地址。
 
