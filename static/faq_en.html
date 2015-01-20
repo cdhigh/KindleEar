@@ -18,7 +18,7 @@
     </style>
 </head>
 <body>
-    <div id="header">  
+    <div id="header">
         <h1><a href="/">KindleEar</a></h1>
         <div class="clear"></div>
     </div>
@@ -41,12 +41,12 @@
         <li><a href="#mailservice">How to use mail service xxx@appid.appspotmail.com?</a></li>
         <li><a href="#errorcodes">There are some logs like 'fetch rss failed(450)' in the gae backend, what's the meaning of them?</a></li>
         <li><a href="#mergebooks">Why I can't lookup words in the delivery books after I chosen 'Merge books into one'?</a></li>
-        <li><a href="#needlogin">Some websites need subscription(login) to view article?</a></li>
+        <li><a href="#needlogin">How to deal with those websites that need login before I can view the articles?</a></li>
         <li><a href="#deletebookschinese">Can I delete/hide books in Chinese?</a></li>
         <li><a href="#pushseparate">What's the meaning of the "Separate" option for the built-in books?</a></li>
       </ul>
     </div>
-    
+
     <span id="whatis"></span>
     <h2>What is KindleEar?</h2>
     <p>KindleEar is a free webapp that running on Google App Engine, it aggregates feeds and deliver the generated docs to your Kindle periodically.</p>
@@ -66,11 +66,11 @@
      <a href="periodical.gif" target="_blank"><img src="periodical.gif" style="width:750px;" /></a>
     </ul>
     </p>
-    
+
     <span id="needserver"></span>
     <h2>Dows this application require its own server?</h2>
     <p class="answer">This application is hosted on Google App Engine, it's fine if you don't own a server.</p>
-    
+
     <span id="ownserver"></span>
     <h2>How to deploy my own delivery server?</h2>
     <p class="answer"><strong>The formal way:</strong>
@@ -99,7 +99,7 @@
         <li>Extract 'uploader' to a directory, move the folder of KindleEar into the folder of 'uploader' and rename it to kindleear, then double-click 'uploader.bat' to upload.</li>
         </ol></p>
     </p>
-    
+
     <span id="notreceived"></span>
     <h2>Why do I not receive the deliveries?</h2>
     <p class="answer">There are many possible reasons:
@@ -108,19 +108,19 @@
     <li>You haven't added your gmail address to Amazon's <a href="https://www.amazon.com/gp/digital/fiona/manage#pdocSettings" rel="external" target="_blank">'Approved Personal Document E-mail List'</a>.</li>
     <li>The content of the rss link isn't a valid XML format.</li>
     </ol></p>
-    
+
     <span id="whatisfulltext"></span>
     <h2>What is full text rss?</h2>
     <p class="answer">Full text rss means that it contains all the contents of the articles in the rss, while summary rss contains only brief descriptions of the articles. You can check it by opening the link of the rss.</p>
-    
+
     <span id="fulltextandsummary"></span>
     <h2>Can full text rss be processed as summary rss? What about the reverse?</h2>
     <p class="answer">Full text rss can be treated as summary rss. In this case, program will ignore the content in the rss xml file and fetch full text from the original link. It costs much time which will result the decreasing of supported rss quantities. If summary rss is processed as full text rss, articles sent to your kindle would still have brief descriptions only.</p>
-    
+
     <span id="weekly"></span>
     <h2>How to deal with weekly subscription?</h2>
     <p class="answer">Some rss are updated weekly. For this type of rss, you can touch a new python file in the 'books' directory with variable 'deliver_days' setted to a day(e.g. deliver_days=['Friday']).</p>
-    
+
     <span id="moretimesperday"></span>
     <h2>Can KindleEar deliver news to my kindle more than once a day?</h2>
     <p class="answer">The answer is yes, follow the next steps to make it come true:
@@ -134,26 +134,26 @@
       </li>
     </ol>
     </p>
-    
+
     <span id="urlfilter"></span>
     <h2>How to use the url filter?</h2>
     <p class="answer">Url filter is not for beginners, you need to know regular expression and python. Urls in the list would not be downloaded for saving time.</p>
-    
+
     <span id="gfwblock"></span>
     <h2>What can I do if the gfw of China blocked some rss?</h2>
     <p class="answer">Change the link to use https protocol.</p>
-    
+
     <span id="imagesfolder"></span>
     <h2>How to put the cover or the masthead images in the same directory when I add a customize book?</h2>
     <p class="answer">Set the variable mastheadfile and coverfile to a path, for example:<ul>
         <li>mastheadfile = 'books/xxxx.gif'</li>
         <li>coverfile = 'books/xxxx.jpg'</li></ul>
     </p>
-    
+
     <span id="sslerror"></span>
     <h2>How to deal with the SSL error problem when I upload KindleEar?</h2>
     <p class="answer">Some friends in China would encounter "urllib2.URLError: &lt;urlopen error [Errno 8] _ssl.c:504: EOF occurred in violation of protocol&gt;". To solve this problem, try to add a new line "74.125.229.174  appengine.google.com" to the hosts file.</p>
-    
+
     <span id="garbled"></span>
     <h2>Why some articles have garbled characters?</h2>
     <p class="answer">For custom rss and the built-in books without encoding specified, program detects encoding automatically by using http header, html meta or the chardet module of python. Howerver, the result is not 100% accurate. If the encoding detecting is wrong, the article may be garbled. Because this situation is very rare, KindleEar only supplies an not very elegant solution: manually change the chardet-detect encoding saved in the database. Steps as follows:<br />
@@ -172,7 +172,7 @@
     <li>With all the solutions tested and the problem still exists, please add the rss to a python file in the folder 'books' with encoding specified.</li>
     </ol>
     </p>
-    
+
     <span id="forgotpwd"></span>
     <h2>What can I do if I forget the password?</h2>
     <p class="answer">If you are a non-administrator user, and you forget the password, you can ask the administrator to change your password. If the administrator password was forgot, you can login appengine.google.com, select "Datastore Admin" on the left, delete all KeUser data, all the account information will be deleted. And then re-use admin/admin to login in  your application . Did not find "Datastore Admin"? You can activate it in the "Application Settings".
@@ -200,27 +200,27 @@
     <li>453:need authentication.</li>
     <li>450:fail to download.</li>
     <li>451:other exceptions.</li></ul></p>
-    
+
     <span id="mergebooks"></span>
     <h2>Why I can't lookup words in the delivery books after I chosen 'Merge books into one'?<a name="mergebooks" id="mergebooks" >&nbsp;</a></h2>
     <p class="answer">With the option 'Merge books in one' checked, KindleEar will set the metadata of the book as Custom Rss. To fix this problem, you have to set the language attribute in the 'Custom Rss Setting' section  manually.</p>
 
-    
+
     <span id="needlogin"></span>
-    <h2>Some websites need subscription(login) to view article?</h2>
+    <h2>How to deal with those websites that need login before I can view the articles?</h2>
     <p class="answer">
-        If you need to crawl a website that needs subscription, you have to add a python file to folder 'books', refer to samples books when you don't know how to write a python file.
+        If you want to crawl a website that needs login, you have to add a python file to the folder 'books'. Refer to sample books if you don't know how to write it.
         <ol>
             <li><code>needs_subscription</code>&nbsp;: Set to True</li>
-            <li><code>login_url</code>&nbsp;: Set to URL for login page</li>
-            <li><code>form_4_login</code>&nbsp;: Optional, if not set, KindleEar will guess which form in page is used to login, set to a integer indicate the sequence number (where 0 is the first) of the form in page, set to a string indicate the name of form, start with '#' indicate id of form, start with '.' indicate class of form, string only indicate any of name/id/class of form.</li>
-            <li>Login to KindleEar, In 'Feeds' page, a new button 'Login info' will appear on right side the book which needs_subscription is True in section 'Subscripted'. click it and then provide the account name and password.</li>
+            <li><code>login_url</code>&nbsp;: The URL for login page</li>
+            <li><code>form_4_login</code>&nbsp;: Optional, if not set, KindleEar will guess which form in the page is used to login. Set to an integer indicate the sequence number (where 0 is the first) of the form in the page. Set to a string indicate the name of the form, you can use CSS selector: '#' for id and '.' for class, string only will match any of it(name/id/class).</li>
+            <li>Then login to KindleEar. In the 'Feeds' page, a new 'Login info' button will appear on the right side of the book which needs_subscription setted to True in the 'Subscripted' section. Click on it and then fill in your account name and password.</li>
         </ol>
-        <p>Note1: no support site that need run javascript to login or need to input a captcha.</p>
-        <p>Note2: for some site special, may be you have to rewirte function 'login' in subclass of 'BaseFeedBook'.</p>
-        <p>Note3: the password will be saved in GAE server with encrypted, key for encrypt is a random string for each account of KindleEar, but key is stored in GAE too, so it's no absolute safe, please take the consequences if the database of KindleEar is stolen.</p>
+        <p>Note1: currently we don't support those sites that need run javascript to login or need to input a captcha.</p>
+        <p>Note2: for some special site, you may have to overwirte the 'login' function which inherits from the 'BaseFeedBook' class.</p>
+        <p>Note3: the password will be stored encrypted on GAE, the key for encryption is a random string for each account of KindleEar, but the key is also stored on GAE, so it's not absolutely safe, please keep this in mind.</p>
     </p>
-    
+
     <span id="deletebookschinese"></span>
     <h2>Can I delete/hide books in Chinese?</h2>
     <p class="answer">
@@ -230,9 +230,9 @@
     <span id="pushseparate"></span>
     <h2>What's the meaning of the "Separate" option for the built-in books?</h2>
     <p class="answer">If you choose this option, the book you chosen will be sent to kindle separately even if the option "Merge books into one" is chosen.</p>
-    
 
-    <p style="font-size:90%;color:gray;margin-top:2em;">Please forget my poor english, feel free to open a issue in github if you didn't understand what I wrote, or better you can help me to correct it.</p>
+
+    <p style="font-size:90%;color:gray;margin-top:2em;">I'm sorry for my poor English, please feel free to open an issue on github when you get puzzled, and it will be appreciated if you can help me improve this documentation.</p>
     <div id="footer">
         <div class="clear"></div>
         2013 &copy; KindleEar&nbsp;&nbsp;|&nbsp;&nbsp;
