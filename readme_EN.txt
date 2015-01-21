@@ -30,4 +30,5 @@
      put kindleear folder into uploader directory, then double-click uploader.bat.
   
 3. License
-   KindleEar is Licensed under the GPL license: http://www.gnu.org/licenses/gpl.html
+   KindleEar is Licensed under the AGPLv3 license: http://www.gnu.org/licenses/agpl-3.0.html
+   
