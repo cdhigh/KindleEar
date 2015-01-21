@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-import datetime, json
+import datetime, json, re
+import lxml.html, lxml.etree
 from lib import feedparser
 from lib.urlopener import URLOpener
-from base import BaseFeedBook
 from lib.autodecoder import AutoDecoder
+from base import BaseFeedBook
 
 class WeixinBook(BaseFeedBook):
 
@@ -15,6 +16,24 @@ class WeixinBook(BaseFeedBook):
     #注意，如果分节标题是中文的话，增加u前缀，比如
     #(u'沪江英语', 'http://weixin.sogou.com/gzh?openid=oIWsFt6yAL253-qrm9rkdugjSlOY'),
     feeds = []
+
+    def preprocess(self, html):
+        root = lxml.html.fromstring(html)
+        cover = root.xpath('//div[@class="rich_media_thumb"]/script')
+        coverimg = None
+        if cover:
+            pic = re.findall(r'var cover = "(http://.+)";', cover[0].text)
+            if pic:
+                coverimg = pic[0]
+        content = root.xpath('//div[@id="js_content"]')[0]
+        for img in content.xpath('.//img'):
+            imgattr = img.attrib
+            imgattr['src'] = imgattr['data-src']
+        if coverimg:
+            coverelement = lxml.etree.Element('img')
+            coverelement.set('src', coverimg)
+            content.insert(0, coverelement)
+        return lxml.html.tostring(root, encoding='unicode')
 
     def ParseFeedUrls(self):
         """ return list like [(section,title,url,desc),..] """
@@ -36,11 +55,8 @@ class WeixinBook(BaseFeedBook):
                         content = AutoDecoder(True).decode(result.content,opener.realurl,result.headers)
                 else:
                     content = AutoDecoder(True).decode(result.content,opener.realurl,result.headers)
-                content = content[content.index('{'):content.index('}')+1]
-                try:
-                    content = json.loads(content)
-                except:
-                    continue
+                content = content[content.find('{'):content.rfind('}')+1]
+                content = json.loads(content)
 
                 for e in content['items'][:self.max_articles_per_feed]:
                     e = feedparser.parse(e)['entries'][0]
