@@ -478,25 +478,25 @@ msgid "Submit"
 msgstr "Gönder"
 
 msgid "Import Feeds"
-msgstr "Import Feeds"
+msgstr "feedleri içeri aktar"
 
 msgid "Import"
-msgstr "Import"
+msgstr "İçeri aktar"
 
 msgid "Import custom rss from a OPML file."
-msgstr "Import custom rss from a OPML file."
+msgstr "Bir OPML dosyasındaki rss'leri içeri aktar."
 
 msgid "Download"
-msgstr "Download"
+msgstr "İndir"
 
 msgid "Separate"
-msgstr "Separate"
+msgstr "Ayır"
 
 msgid "Title from"
-msgstr "Title from"
+msgstr "Başlığın alınacağı yer"
 
 msgid "Webpage"
-msgstr "Webpage"
+msgstr "Web sitesi"
 
 msgid "Feed"
 msgstr "Feed"
