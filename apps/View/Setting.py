@@ -39,6 +39,7 @@ class Setting(BaseHandler):
             user.enable_send = bool(web.input().get('enablesend'))
             user.book_type = web.input().get('booktype')
             user.device = web.input().get('devicetype') or 'kindle'
+            user.use_title_in_feed = bool(web.input().get('titlefrom') == 'feed')
             user.titlefmt = web.input().get('titlefmt')
             alldays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
             user.send_days = [day for day in alldays if web.input().get(day)]

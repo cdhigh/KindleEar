@@ -491,3 +491,12 @@ msgstr "Download"
 
 msgid "Separate"
 msgstr "Separate"
+
+msgid "Title from"
+msgstr "Title from"
+
+msgid "Webpage"
+msgstr "Webpage"
+
+msgid "Feed"
+msgstr "Feed"

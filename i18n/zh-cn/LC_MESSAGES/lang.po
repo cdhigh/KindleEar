@@ -486,3 +486,12 @@ msgstr "下载"
 
 msgid "Separate"
 msgstr "单独推送"
+
+msgid "Title from"
+msgstr "标题来源"
+
+msgid "Webpage"
+msgstr "网页"
+
+msgid "Feed"
+msgstr "Feed"

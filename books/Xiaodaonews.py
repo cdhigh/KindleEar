@@ -14,5 +14,5 @@ class Xiaodaonews(WeixinBook):
     oldest_article        = 7
     deliver_days = ['Friday']
     feeds = [
-            (u'小道消息', 'http://weixin.sogou.com/gzh?openid=oIWsFt86NKeSGd_BQKp1GcDkYpv0')
+            (u'小道消息', 'http://weixin.sogou.com/gzh?openid=oIWsFt86NKeSGd_BQKp1GcDkYpv0'),
             ]

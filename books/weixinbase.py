@@ -56,7 +56,10 @@ class WeixinBook(BaseFeedBook):
                 else:
                     content = AutoDecoder(True).decode(result.content,opener.realurl,result.headers)
                 content = content[content.find('{'):content.rfind('}')+1]
-                content = json.loads(content)
+                try:
+                    content = json.loads(content)
+                except:
+                    continue
 
                 for e in content['items'][:self.max_articles_per_feed]:
                     e = feedparser.parse(e)['entries'][0]
