@@ -58,6 +58,11 @@
                 <option value="others" {% if user.device == 'others' %}selected="selected"{% endif %}>{{_("Others")}}</option>
             </select>
             </select></td></tr>
+            <tr><td style="text-align:right;"><label>{{_("Title from")}}</label> : </td>
+            <td><select class="bool" name="titlefrom">
+              <option value="" {% if not user.use_title_in_feed %}selected="selected"{% endif %}>{{_("Webpage")}}</option>
+              <option value="feed" {% if user.use_title_in_feed %}selected="selected"{% endif %}>{{_("Feed")}}</option>
+            </select></td></tr>
             <tr><td style="text-align:right;"><label>{{_("Title format")}}</label> : </td>
             <td><select class="bool" name="titlefmt">
                 <option value="" {% if not user.titlefmt %}selected="selected"{% endif %}>{{_("Title Only")}}</option>

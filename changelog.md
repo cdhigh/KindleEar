@@ -1,5 +1,11 @@
 #Changelog for KindleEar
 
+##1.20.16
+  1. 增加一个选项，可选择使用网页标题还是feed标题做为文章标题。
+
+##1.20.16
+  1. A option added for choose title come from webpage or feed.
+  
 ##1.20.15
   1. bugfix: weixinbase部分解码失败问题。
 

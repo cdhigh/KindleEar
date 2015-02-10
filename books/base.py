@@ -338,8 +338,11 @@ class BaseFeedBook:
                 if title.startswith(r'image/'): #图片
                     yield (title, imgurl, imgfn, content, brief, thumbnail)
                 else:
-                    if not title: title = ftitle
-                    content =  self.postprocess(content)
+                    if user and user.use_title_in_feed:
+                        title = ftitle
+                    elif not title:
+                        title = ftitle
+                    content = self.postprocess(content)
                     yield (section, url, title, content, brief, thumbnail)
 
     def fetcharticle(self, url, opener, decoder):
