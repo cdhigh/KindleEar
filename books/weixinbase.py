@@ -25,7 +25,10 @@ class WeixinBook(BaseFeedBook):
             pic = re.findall(r'var cover = "(http://.+)";', cover[0].text)
             if pic:
                 coverimg = pic[0]
-        content = root.xpath('//div[@id="js_content"]')[0]
+        try:
+            content = root.xpath('//div[@id="js_content"]')[0]
+        except IndexError:
+            return html
         for img in content.xpath('.//img'):
             imgattr = img.attrib
             imgattr['src'] = imgattr['data-src']
@@ -58,7 +61,7 @@ class WeixinBook(BaseFeedBook):
                 content = content[content.find('{'):content.rfind('}')+1]
                 try:
                     content = json.loads(content)
-                except:
+                except ValueError:
                     continue
 
                 for e in content['items'][:self.max_articles_per_feed]:
