@@ -19,7 +19,7 @@ class WeixinBook(BaseFeedBook):
 
     def preprocess(self, html):
         root = lxml.html.fromstring(html)
-        cover = root.xpath('//div[@class="rich_media_thumb"]/script')
+        cover = root.xpath('//*[@id="media"]/script')
         coverimg = None
         if cover:
             pic = re.findall(r'var cover = "(http://.+)";', cover[0].text)
