@@ -1,5 +1,12 @@
 #Changelog for KindleEar
 
+##1.20.17
+  1. 在目录中添加各个源的文章篇数。
+  2. 增加对书籍异常的处理，避免一本书籍的异常而影响其他书籍的推送。
+
+##1.20.17
+  1. add a num of article to title of category.
+  
 ##1.20.16
   1. 增加一个选项，可选择使用网页标题还是feed标题做为文章标题。
 

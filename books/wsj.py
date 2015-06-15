@@ -68,9 +68,10 @@ class WSJ(BaseFeedBook):
     def soupprocessex(self, soup):
         ' 将首字div变成b '
         content = soup.find('div',attrs={'id':'A'})
-        firstdiv = content.find('div')
-        if firstdiv and firstdiv.string and len(firstdiv.string) == 1:
-            b = soup.new_tag('b')
-            b.string = firstdiv.string
-            firstdiv.replace_with(b)
+        if content:
+            firstdiv = content.find('div')
+            if firstdiv and firstdiv.string and len(firstdiv.string) == 1:
+                b = soup.new_tag('b')
+                b.string = firstdiv.string
+                firstdiv.replace_with(b)
             

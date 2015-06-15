@@ -91,11 +91,14 @@ def InsertToc(oeb, sections, toc_thumbnails):
         id_, href = oeb.manifest.generate(id='feed', href='feed%d.html'%num_sections)
         item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(htmlcontent))
         oeb.spine.add(item, True)
-        ncx_toc.append(('section',sec,href,'',sec_toc_thumbnail)) #Sections name && href && no brief
-
+        
+        #在目录分类中添加每个目录下的文章篇数
+        sec_with_num = '%s (%d)' % (sec, len(sections[sec]))
+        ncx_toc.append(('section', sec_with_num, href, '', sec_toc_thumbnail)) #Sections name && href && no brief
+        
         #generate the secondary toc
         if GENERATE_HTML_TOC:
-            html_toc_ = ['<html><head><title>toc</title></head><body><h2>%s</h2><ol>' % (sec)]
+            html_toc_ = ['<html><head><title>toc</title></head><body><h2>%s</h2><ol>' % (sec_with_num)]
         for title, anchor, brief, thumbnail in secondary_toc_list:
             if GENERATE_HTML_TOC:
                 html_toc_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s#%d">%s</a></li><br />'%(href, anchor, title))
@@ -103,7 +106,7 @@ def InsertToc(oeb, sections, toc_thumbnails):
         if GENERATE_HTML_TOC:
             html_toc_.append('</ol></body></html>')
             html_toc_2.append(html_toc_)
-            name_section_list.append(sec)
+            name_section_list.append(sec_with_num)
 
         num_sections += 1
 
