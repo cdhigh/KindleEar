@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-import datetime, json, re
+import datetime, json, re, time, urlparse
 import lxml.html, lxml.etree
 from lib import feedparser
 from lib.urlopener import URLOpener
 from lib.autodecoder import AutoDecoder
+from lib.weixin import process_eqs
 from base import BaseFeedBook
+
+WEIXIN_URL = 'http://weixin.sogou.com/gzhjs?cb=sogou.weixin.gzhcb&openid={id}&eqs={eqs}&ekv={ekv}&page=1&t={t}'
 
 class WeixinBook(BaseFeedBook):
 
@@ -19,27 +22,33 @@ class WeixinBook(BaseFeedBook):
 
     def preprocess(self, html):
         root = lxml.html.fromstring(html)
-        cover = root.xpath('//*[@id="media"]/script')
-        coverimg = None
-        if cover:
-            pic = re.findall(r'var cover = "(http://.+)";', cover[0].text)
-            if pic:
-                coverimg = pic[0]
+    
+        # 抽取封面cover图片
+        script = root.xpath('//*[@id="media"]/script/text()')
+        cover = None
+        if script:
+           l = _COVER_RE.findall(script[0])
+            if l:
+                cover = l[0]
+
+        # 抽取文章内容
         try:
-            content = root.xpath('//div[@id="js_content"]')[0]
+            content = root.xpath('//*[@id="js_content"]')[0]
         except IndexError:
-            return html
+            return ''
+
+        # 处理图片链接
         for img in content.xpath('.//img'):
-            imgattr = img.attrib
-            try:
-                imgattr['src'] = imgattr['data-src']
-            except KeyError:
-                pass
-        if coverimg:
+            if not 'src' in img.attrib:
+                img.attrib['src'] = img.attrib.get('data-src', '')
+
+        # 生成封面
+        if cover:
             coverelement = lxml.etree.Element('img')
-            coverelement.set('src', coverimg)
+            coverelement.set('src', cover)
             content.insert(0, coverelement)
-        return lxml.html.tostring(root, encoding='unicode')
+
+        return lxml.html.tostring(content, encoding='unicode')
 
     def ParseFeedUrls(self):
         """ return list like [(section,title,url,desc),..] """
@@ -48,10 +57,28 @@ class WeixinBook(BaseFeedBook):
         urladded = set()
 
         for feed in self.feeds:
-            section, url = feed[0], feed[1].replace('gzh', 'gzhjs')
+            section, url = feed[0], feed[1]
             isfulltext = feed[2] if len(feed) > 2 else False
             timeout = self.timeout+10 if isfulltext else self.timeout
             opener = URLOpener(self.host, timeout=timeout)
+
+            id = urlparse.urlparse(url).query.split('=')[1]
+
+            result = opener.open(url)
+            if result.status_code == 200 and result.content:
+                if self.feed_encoding:
+                    try:
+                        content = result.content.decode(self.feed_encoding)
+                    except UnicodeDecodeError:
+                        content = AutoDecoder(True).decode(result.content,opener.realurl,result.headers)
+                else:
+                    content = AutoDecoder(True).decode(result.content,opener.realurl,result.headers)
+                    eqs, ekv = process_eqs(content)
+            else:
+                self.log.warn('fetch rss failed(%d):%s'%(result.status_code,url))
+
+            url = WEIXIN_URL.format(id=id, eqs=eqs, ekv=ekv, t=int(time.time()*1000))
+
             result = opener.open(url)
             if result.status_code == 200 and result.content:
                 if self.feed_encoding:
