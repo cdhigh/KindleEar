@@ -263,7 +263,13 @@
         如果你部署步骤完全正确的话，可以稍等几分钟到几十分钟，等gae自动生成索引，如果gae没有成功自动生成索引，你也可以手动更新索引：<br />
         <code>python appcfg.py update_indexes KindleEar/</code><br />
         在终端窗口执行此命令，注意最后一个KindleEar是你保存的此应用的目录名。<br />
-        执行了此命令后稍等还是不行的话，请按照正确步骤重新部署。
+        如果出现的异常信息中有“UnknownQueueError”，则说明部署有问题，可以先单独执行此命令上传更新队列配置信息：<br />
+        <code>python appcfg.py update_queues KindleEar/</code><br />
+        这几个命令也可以执行一遍试试。
+        <code>python appcfg.py update_cron KindleEar/</code>
+        <code>python appcfg.py update_queues KindleEar/</code>
+        <code>python appcfg.py update_dispatch KindleEar/</code><br />
+        如果上面的步骤执行完后还是不行的话，请按照正确步骤重新部署。
     </p>
     
     <div id="footer">

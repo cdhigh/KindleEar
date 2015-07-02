@@ -26,7 +26,7 @@ class Qiushibaike(WebpageBook):
     remove_classes = ['sharebox','comment','share','up','down', #qiushibaike
             'backtop','close','author','col2','sponsor','pagebar', #qiushibaike
             'seconday-nav fl','toolkit fr','fr','info clearfix', # haha.mx
-            'clearfix mt-15 joke-item-footer','pagination',] # haha.mx
+            'joke-item-footer','pagination','pos-ab','praise-box',] # haha.mx
     remove_attrs = []
     
     feeds = [
@@ -44,7 +44,7 @@ class Qiushibaike(WebpageBook):
         return title.replace(u'——分享所有好笑的事情', u'')
         
     def soupbeforeimage(self, soup):
-        if soup.html.head.title.string.startswith(u'哈哈'):
+        if soup.html.head.title.string.find(u'哈哈') > 0:
             for img in list(soup.find_all('img')): #HAHA.MX切换为大图链接
                 src = img['src']
                 if src.find(r'/small/') > 0:
