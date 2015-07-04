@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-import datetime, json, re, time, urlparse
+import datetime, json, re, time, urlparse, urllib
 import lxml.html, lxml.etree
 from lib import feedparser
 from lib.urlopener import URLOpener
@@ -77,7 +77,7 @@ class WeixinBook(BaseFeedBook):
             else:
                 self.log.warn('fetch rss failed(%d):%s'%(result.status_code,url))
 
-            url = WEIXIN_URL.format(id=id, eqs=eqs, ekv=ekv, t=int(time.time()*1000))
+            url = WEIXIN_URL.format(id=id, eqs=urllib.quote(eqs), ekv=ekv, t=int(time.time()*1000))
 
             result = opener.open(url)
             if result.status_code == 200 and result.content:
