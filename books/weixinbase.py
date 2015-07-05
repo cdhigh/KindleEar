@@ -27,7 +27,7 @@ class WeixinBook(BaseFeedBook):
         script = root.xpath('//*[@id="media"]/script/text()')
         cover = None
         if script:
-           l = _COVER_RE.findall(script[0])
+            l = _COVER_RE.findall(script[0])
             if l:
                 cover = l[0]
 
