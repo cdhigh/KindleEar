@@ -12,6 +12,13 @@ import re
 
 def simple_extract(content):
     """使用简单算法提取正文文本，content为unicode文本。"""
+    if not content:
+        return ''
+    
+    #如果是经过压缩后的网页，则每个html标签都追加一个回车，方便后续按行统计
+    if content.count('\n') <= 10:
+        content = content.replace('>', '>\n')
+    
     content = remove_empty_line(remove_js_css(content))
     left,right = rc_extract(content)
     content = '\n'.join(content.split('\n')[left:right])

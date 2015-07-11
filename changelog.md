@@ -1,5 +1,11 @@
 #Changelog for KindleEar
 
+##1.20.19
+  1. 修正pycrypto模块加载失败问题。
+
+##1.20.19
+  1. fix problem of import failed of pycrypto.
+
 ##1.20.18
   1. 微信公众号突破一次防爬取 [zhu327](https://github.com/zhu327/rss)。
   2. 通过邮件链接抓取的文章不添加封面。

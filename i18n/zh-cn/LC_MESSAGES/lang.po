@@ -38,7 +38,7 @@ msgid "Add a account success!"
 msgstr "添加用户账号成功！"
 
 msgid "Please use admin/admin to login at first time."
-msgstr "初次登陆请使用用户名'admin'/密码'admin'登陆。"
+msgstr "初次登录请使用用户名'admin'/密码'admin'。"
 
 msgid "Please input username and password."
 msgstr "请输入正确的用户名和密码。"
@@ -95,7 +95,7 @@ msgid "Advance"
 msgstr "高级设置"
 
 msgid "Please Login"
-msgstr "请先登陆"
+msgstr "请先登录"
 
 msgid "Change Password"
 msgstr "修改密码"
@@ -208,7 +208,7 @@ msgstr ""
 "Kindle，并支持多账号，可以提供给三五好友同时使用。"
 
 msgid "Login"
-msgstr "登陆"
+msgstr "登录"
 
 msgid "The website dont allow register, you can ask owner for a account."
 msgstr ""
@@ -263,7 +263,7 @@ msgid "Your account will pause after"
 msgstr "你的投递将于"
 
 msgid ", Please login before expire."
-msgstr "自动停止，每次登陆后自动延期。"
+msgstr "自动停止，每次登录后自动延期。"
 
 msgid "Delete Account"
 msgstr "删除此账户"
@@ -458,13 +458,13 @@ msgid "Others"
 msgstr "其他"
 
 msgid "Login Info"
-msgstr "登陆信息"
+msgstr "登录信息"
 
 msgid "Input website login info for book '%s'"
-msgstr "请提供书籍 '%s' 的网站登陆信息"
+msgstr "请提供书籍 '%s' 的网站登录信息"
 
 msgid "Leave any field empty to delete info from database."
-msgstr "留空任何一项则从数据库中删除网站登陆信息。"
+msgstr "留空任何一项则从数据库中删除网站登录信息。"
 
 msgid "Account"
 msgstr "账号"
