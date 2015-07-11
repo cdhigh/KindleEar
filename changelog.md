@@ -1,5 +1,25 @@
 #Changelog for KindleEar
 
+##1.20.20
+  1. 修正部分XML文件获取文件编码失败问题。
+
+##1.20.20
+  1. fix wrong decoding of some xml files.
+
+##1.20.19
+  1. 修正pycrypto模块加载失败问题。
+
+##1.20.19
+  1. fix problem of import failed of pycrypto.
+
+##1.20.18
+  1. 微信公众号突破一次防爬取 [zhu327](https://github.com/zhu327/rss)。
+  2. 通过邮件链接抓取的文章不添加封面。
+  
+##1.20.18
+  1. Break through the anti-creeper of Official Account of Wechat [zhu327](https://github.com/zhu327/rss).
+  2. Remove cover when fetching articles from links in email.
+  
 ##1.20.17
   1. 在目录中添加各个源的文章篇数。
   2. 增加对书籍异常的处理，避免一本书籍的异常而影响其他书籍的推送。

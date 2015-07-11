@@ -80,10 +80,10 @@ class Url2Book(BaseHandler):
         else:
             setMetaData(oeb, subject, language, local_time(tz=tz), pubtype='book:book:KindleEar')
         
-        id, href = oeb.manifest.generate('cover', DEFAULT_COVER)
-        item = oeb.manifest.add(id, href, MimeFromFilename(DEFAULT_COVER))
-        oeb.guide.add('cover', 'Cover', href)
-        oeb.metadata.add('cover', id)
+        # id, href = oeb.manifest.generate('cover', DEFAULT_COVER)
+        # item = oeb.manifest.add(id, href, MimeFromFilename(DEFAULT_COVER))
+        # oeb.guide.add('cover', 'Cover', href)
+        # oeb.metadata.add('cover', id)
         
         # 对于html文件，变量名字自文档
         # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
@@ -111,12 +111,12 @@ class Url2Book(BaseHandler):
         if itemcnt > 0:
             if len(book.feeds) > 1:
                 InsertToc(oeb, sections, toc_thumbnails)
-            elif not hasimage: #单文章没有图片则去掉封面
-                href = oeb.guide['cover'].href
-                oeb.guide.remove('cover')
-                item = oeb.manifest.hrefs[href]
-                oeb.manifest.remove(item)
-                oeb.metadata.clear('cover')
+                # elif not hasimage: #单文章没有图片则去掉封面
+                # href = oeb.guide['cover'].href
+                # oeb.guide.remove('cover')
+                # item = oeb.manifest.hrefs[href]
+                # oeb.manifest.remove(item)
+                # oeb.metadata.clear('cover')
                 
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()

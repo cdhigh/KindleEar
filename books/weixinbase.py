@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
+#通过搜狗微信搜索实现特定公众号文章爬取并推送至Kindle
+#或者你可以作者(zhu327)的 <https://diy-devz.rhcloud.com/> 来将微信公众号转换为RSS在KindleEar中直接订阅
+#Author:
+# zhu327 <https://github.com/zhu327>
+
 import datetime, json, re, time, urlparse, urllib
 import lxml.html, lxml.etree
 from lib import feedparser
