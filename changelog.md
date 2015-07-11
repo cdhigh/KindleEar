@@ -1,5 +1,11 @@
 #Changelog for KindleEar
 
+##1.20.20
+  1. 修正部分XML文件获取文件编码失败问题。
+
+##1.20.20
+  1. fix wrong decoding of some xml files.
+
 ##1.20.19
   1. 修正pycrypto模块加载失败问题。
 
