@@ -1,5 +1,11 @@
 #Changelog for KindleEar
 
+##1.20.21
+  1. 添加ETAG机制，减小需要的网络流量。
+
+##1.20.21
+  1. Add etag to http's header to reduce data traffic.
+
 ##1.20.20
   1. 修正部分XML文件获取文件编码失败问题。
 

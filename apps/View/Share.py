@@ -11,7 +11,7 @@ import web
 from google.appengine.api import mail
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
-from apps.utils import hide_email
+from apps.utils import hide_email, etagged
 
 from bs4 import BeautifulSoup
 from books.base import BaseUrlBook
@@ -24,6 +24,7 @@ class Share(BaseHandler):
     __url__ = "/share"
     SHARE_IMAGE_EMBEDDED = True
     
+    @etagged()
     def GET(self):
         import urlparse,urllib
         action = web.input().get('act')

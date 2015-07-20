@@ -7,8 +7,10 @@
 # rexdf <https://github.com/rexdf>
 
 from apps.BaseHandler import BaseHandler
+from apps.utils import etagged
 
 class Home(BaseHandler):
     __url__ = r"/"
+    @etagged()
     def GET(self):
         return self.render('home.html',"Home")
