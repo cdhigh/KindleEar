@@ -1,5 +1,13 @@
 #Changelog for KindleEar
 
+##1.20.22
+  1. 解决URL中有unicode字符时无法导出OPML文件的文件。
+  2. 解决微信公众号获取失败后导致其他书籍推送异常的问题。
+  
+##1.20.22
+  1. bugfix: unicode chars in URL crash the app when export it to OPML.
+  2. bugfix: timeout during fetching Official Account of Wechat crash the app.
+  
 ##1.20.21
   1. 添加ETAG机制，减小需要的网络流量。
 

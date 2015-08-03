@@ -78,10 +78,11 @@ class WeixinBook(BaseFeedBook):
                         content = AutoDecoder(True).decode(result.content,opener.realurl,result.headers)
                 else:
                     content = AutoDecoder(True).decode(result.content,opener.realurl,result.headers)
-                    eqs, ekv = process_eqs(content)
             else:
                 self.log.warn('fetch rss failed(%d):%s'%(result.status_code,url))
-
+                continue
+            
+            eqs, ekv = process_eqs(content)
             url = WEIXIN_URL.format(id=id, eqs=urllib.quote(eqs), ekv=ekv, t=int(time.time()*1000))
 
             result = opener.open(url)

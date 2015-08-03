@@ -221,7 +221,7 @@ class AdvExport(BaseHandler):
         outlines = []
         for feed in Feed.all().filter('book = ', user.ownfeeds):
             outlines.append('    <outline type="rss" text="%s" xmlUrl="%s" isFulltext="%d" />' % 
-                (feed.title, urllib.quote_plus(feed.url), feed.isfulltext))
+                (feed.title, urllib.quote_plus(feed.url.encode('utf8')), feed.isfulltext))
         outlines = '\n'.join(outlines)
         
         opmlfile = opmlTpl % (date, date, outlines)
