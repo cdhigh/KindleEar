@@ -20,7 +20,7 @@ from books import BookClasses, BookClass
 from books.base import BaseFeedBook
 
 class Worker(BaseHandler):
-    """ 实际下载文章和生成电子书并且发送邮件 """
+    #实际下载文章和生成电子书并且发送邮件
     __url__ = "/worker"
     def GET(self):
         username = web.input().get("u")
@@ -37,9 +37,9 @@ class Worker(BaseHandler):
         
         bookid = bookid.split(',') if ',' in bookid else [bookid]
         bks = []
-        for id in bookid:
+        for id_ in bookid:
             try:
-                bks.append(Book.get_by_id(int(id)))
+                bks.append(Book.get_by_id(int(id_)))
             except:
                 continue
                 #return "id of book is invalid or book not exist!<br />"
@@ -66,9 +66,13 @@ class Worker(BaseHandler):
         oeb.container = ServerContainer(main.log)
         
         #guide
-        if len(bks)==1 and bks[0].builtin:
-            mhfile = book4meta.mastheadfile
-            coverfile = book4meta.coverfile
+        if len(bks) == 1:
+            if bks[0].builtin:
+                mhfile = book4meta.mastheadfile
+                coverfile = book4meta.coverfile
+            else: #单独的推送自定义RSS
+                mhfile = DEFAULT_MASTHEAD
+                coverfile = DEFAULT_COVER
         else:
             mhfile = DEFAULT_MASTHEAD
             coverfile = DEFAULT_COVER_BV if user.merge_books else DEFAULT_COVER
@@ -83,11 +87,11 @@ class Worker(BaseHandler):
             item = oeb.manifest.add(id_, href, MimeFromFilename(coverfile))
             oeb.guide.add('cover', 'Cover', href)
             oeb.metadata.add('cover', id_)
-        elif len(bks)>1 and DEFAULT_COVER:
+        elif len(bks) > 1 and DEFAULT_COVER:
             #将所有书籍的封面拼贴成一个
             #如果DEFAULT_COVER=None说明用户不需要封面
             id_, href = oeb.manifest.generate('cover', 'cover.jpg')
-            item = oeb.manifest.add(id_, href, 'image/jpeg', data=self.MergeCovers(bks,opts))
+            item = oeb.manifest.add(id_, href, 'image/jpeg', data=self.MergeCovers(bks, opts))
             oeb.guide.add('cover', 'Cover', href)
             oeb.metadata.add('cover', id_)
             
@@ -167,7 +171,7 @@ class Worker(BaseHandler):
             return rs
             
     def MergeCovers(self, bks, opts):
-        "将所有书籍的封面拼起来，为了更好的效果，请保证图片的大小统一。"
+        #将所有书籍的封面拼起来，为了更好的效果，请保证图片的大小统一。
         from StringIO import StringIO
         from PIL import Image
         import random
@@ -190,7 +194,7 @@ class Worker(BaseHandler):
             try:
                 img = Image.open(StringIO(srvcontainer.read(cv)))
             except Exception as e:
-                continue
+                main.log.warn('Cover file invalid [%s], %s' % (cv, str(e)))
             else:
                 imgs_orig.append(img)
         num_imgs = len(imgs_orig)
@@ -204,33 +208,40 @@ class Worker(BaseHandler):
         if num_imgs == 1:
             pos_info = [(0,0)]
             new_size = (w,h)
-        elif num_imgs <=4:
+        elif num_imgs <= 4: #4等分
             pos_info = [(0,0),(w,0),(0,h),(w,h)]
             new_size = (w*2,h*2)
-        elif num_imgs in (5,6): #1个大的，4个或5个小的
+            if num_imgs < 4: #填满4格
+                imgs_orig += random.sample(imgs_orig, 4 - num_imgs)
+        elif num_imgs in (5,6): #1个大的，5个小的
             pos_info = [[(0,0,w*2,h*2),(w*2,0),(w*2,h),(0,h*2),(w,h*2),(w*2,h*2)],
             [(w,0,w*2,h*2),(0,0),(0,h),(0,h*2),(w,h*2),(w*2,h*2)],
             [(0,h,w*2,h*2),(0,0),(w,0),(w*2,0),(w*2,h),(w*2,h*2)],
             [(0,0),(w,0),(w*2,0),(0,h),(w,h,w*2,h*2),(0,h*2)]]
             pos_info = random.choice(pos_info)
-            if num_imgs == 5:
-                pos_info = [pos_info[0]] + random.sample(pos_info[1:],4)
+            if num_imgs == 5: #填满6格
+                #pos_info = [pos_info[0]] + random.sample(pos_info[1:], 4)
+                imgs_orig.append(random.choice(imgs_orig))
             new_size = (w*3,h*3)
-        else:
+        else: #九宫格
             pos_info = [(0,0),(w,0),(w*2,0),(0,h),(w,h),(w*2,h),(0,h*2),(w,h*2),(w*2,h*2)]
             new_size = (w*3,h*3)
+            if num_imgs < 9:
+                imgs_orig += random.sample(imgs_orig, 9 - num_imgs)
             
         #随机安排每个图片的位置
         random.shuffle(pos_info)
         
+        #拼接图片
         imgnew = Image.new('L' if opts.graying_image else 'RGB', new_size, 'white')
         for idx,img in enumerate(imgs_orig):
             pos = pos_info[idx]
-            if len(pos) > 2:
+            if len(pos) > 2: #如果元素为4个，则前两个是在大图中的位置，后两个是缩小后的图片尺寸
                 img = img.resize(pos[2:])
                 pos = pos[:2]
             imgnew.paste(img, pos)
         
+        #新生成的图片再整体缩小到设定大小
         rw,rh = opts.reduce_image_to
         ratio = min(float(rw)/float(new_size[0]), float(rh)/float(new_size[0]))
         imgnew = imgnew.resize((int(new_size[0]*ratio), int(new_size[1]*ratio)))

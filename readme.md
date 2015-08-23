@@ -42,7 +42,7 @@ Readme of english version refers to Readme_EN.txt
    注：初始用户为admin，密码为admin，建议登陆后及时修改密码。
 7. 更详细一点的说明请参照[FAQ](static/faq.html)。(部署失败，部署后"internal server error"等都有解释)
 8. 或者如果你不想安装python和GAE SDK，可以下载此uploader，将kindleear下载后不需要修改什么，
-   解压后将目录改名为kindleear，放到uploader目录下，
+   解压后将目录改名为KindleEar，放到uploader目录下，
    双击uploader.bat即可上传。
    <https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing>
 

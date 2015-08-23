@@ -1,5 +1,8 @@
 #Changelog for KindleEar
 
+##1.20.24
+  1. bugfix: Cover missing when pushing custom RSS only with option 'merge books' checked.
+
 ##1.20.23
   1. Get rid of options 'title dd/mm' and 'title mm/dd' in title's format for compatibility.
 
