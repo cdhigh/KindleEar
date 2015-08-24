@@ -77,8 +77,11 @@ class AutoDecoder:
                 try:
                     result = content.decode(encoding)
                 except: # 还是出错，则不转换，直接返回
+                    try:
+                        result = content.decode(encoding, 'ignore')
+                    except:
+                        result = content
                     self.encoding = None
-                    result = content
                 else: # 保存下次使用，以节省时间
                     self.encoding = encoding
                     #同时保存到数据库
@@ -118,7 +121,10 @@ class AutoDecoder:
             try:
                 result = content.decode(self.encoding)
             except: # 出错，则不转换，直接返回
-                result = content
+                try:
+                    result = content.decode(self.encoding, 'ignore')
+                except:
+                    result = content
             else:
                 #保存到数据库
                 newurlenc = urlenc if urlenc else UrlEncoding(netloc=netloc)

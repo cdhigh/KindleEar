@@ -16,11 +16,10 @@ from apps.utils import InsertToc, local_time
 from lib.makeoeb import *
 
 from books.base import BaseUrlBook
-
-#import main
+from config import *
 
 class Url2Book(BaseHandler):
-    """ 抓取指定链接，转换成附件推送 """
+    #抓取指定链接，转换成附件推送
     __url__ = "/url2book"
     def GET(self):
         username = web.input().get("u")
@@ -100,12 +99,13 @@ class Url2Book(BaseHandler):
                 hasimage = True
             else:
                 if len(book.feeds) > 1:
-                    sections[subject].append((title,brief,thumbnail,content))
+                    sections[subject].append((title, brief, thumbnail, content))
                 else:
                     id, href = oeb.manifest.generate(id='page', href='page.html')
                     item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=content)
                     oeb.spine.add(item, False)
                     oeb.toc.add(title, href)
+                    
                 itemcnt += 1
             
         if itemcnt > 0:

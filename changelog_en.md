@@ -1,5 +1,8 @@
 #Changelog for KindleEar
 
+##1.20.25
+  1. enhance decode process to avoid some garbled chars.
+
 ##1.20.24
   1. bugfix: Cover missing when pushing custom RSS only with option 'merge books' checked.
 

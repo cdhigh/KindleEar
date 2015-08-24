@@ -61,7 +61,10 @@ def etagged():
         @wraps(func)
         def wrapper(*args, **kwds):
             rsp_data = func(*args, **kwds)
-            etag = '"%s"' % md5(rsp_data.encode('utf-8')).hexdigest()
+            if type(rsp_data) is unicode:
+                etag = '"%s"' % md5(rsp_data.encode('utf-8', 'ignore')).hexdigest()
+            else:
+                etag = '"%s"' % md5(rsp_data).hexdigest()
             #格式参见：<http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.26>
             n = set([x.strip().lstrip('W/') for x in web.ctx.env.get('HTTP_IF_NONE_MATCH', '').split(',')])
             if etag in n:

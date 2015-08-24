@@ -72,9 +72,10 @@ class URLOpener:
                             response.status_code = 450
                         cnt += 1
                         #break
-                    except Exception:
+                    except Exception as e:
                         if response.status_code == 555:
                             response.status_code = 451
+                            default_log.warn('url [%s] failed [%s].' % (url, str(e)))
                         break
                     else:
                         break
