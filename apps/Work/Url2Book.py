@@ -16,11 +16,10 @@ from apps.utils import InsertToc, local_time
 from lib.makeoeb import *
 
 from books.base import BaseUrlBook
-
-#import main
+from config import *
 
 class Url2Book(BaseHandler):
-    """ 抓取指定链接，转换成附件推送 """
+    #抓取指定链接，转换成附件推送
     __url__ = "/url2book"
     def GET(self):
         username = web.input().get("u")
@@ -80,10 +79,10 @@ class Url2Book(BaseHandler):
         else:
             setMetaData(oeb, subject, language, local_time(tz=tz), pubtype='book:book:KindleEar')
         
-        id, href = oeb.manifest.generate('cover', DEFAULT_COVER)
-        item = oeb.manifest.add(id, href, MimeFromFilename(DEFAULT_COVER))
-        oeb.guide.add('cover', 'Cover', href)
-        oeb.metadata.add('cover', id)
+        # id, href = oeb.manifest.generate('cover', DEFAULT_COVER)
+        # item = oeb.manifest.add(id, href, MimeFromFilename(DEFAULT_COVER))
+        # oeb.guide.add('cover', 'Cover', href)
+        # oeb.metadata.add('cover', id)
         
         # 对于html文件，变量名字自文档
         # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
@@ -100,23 +99,24 @@ class Url2Book(BaseHandler):
                 hasimage = True
             else:
                 if len(book.feeds) > 1:
-                    sections[subject].append((title,brief,thumbnail,content))
+                    sections[subject].append((title, brief, thumbnail, content))
                 else:
                     id, href = oeb.manifest.generate(id='page', href='page.html')
                     item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=content)
                     oeb.spine.add(item, False)
                     oeb.toc.add(title, href)
+                    
                 itemcnt += 1
             
         if itemcnt > 0:
             if len(book.feeds) > 1:
                 InsertToc(oeb, sections, toc_thumbnails)
-            elif not hasimage: #单文章没有图片则去掉封面
-                href = oeb.guide['cover'].href
-                oeb.guide.remove('cover')
-                item = oeb.manifest.hrefs[href]
-                oeb.manifest.remove(item)
-                oeb.metadata.clear('cover')
+                # elif not hasimage: #单文章没有图片则去掉封面
+                # href = oeb.guide['cover'].href
+                # oeb.guide.remove('cover')
+                # item = oeb.manifest.hrefs[href]
+                # oeb.manifest.remove(item)
+                # oeb.metadata.clear('cover')
                 
             oIO = byteStringIO()
             o = EPUBOutput() if booktype == "epub" else MOBIOutput()

@@ -12,13 +12,14 @@ import web
 
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
-from apps.utils import new_secret_key
+from apps.utils import new_secret_key, etagged
 
 from config import *
 
 class Admin(BaseHandler):
     __url__ = "/admin"
     # 账户管理页面
+    @etagged()
     def GET(self):
         user = self.getcurrentuser()
         users = KeUser.all() if user.name == 'admin' else None

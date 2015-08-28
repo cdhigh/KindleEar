@@ -17,7 +17,7 @@ MY_FEEDS_TITLE = u'KindleEar'
 MY_FEEDS_DESC = u'RSS delivering from KindleEar'
 
 #default timeout for network connection
-CONNECTION_TIMEOUT = 45
+CONNECTION_TIMEOUT = 60
 
 # True to translate filename in chinese to pinyin
 PINYIN_FILENAME = False
@@ -28,7 +28,7 @@ ALWAYS_CHAR_DETECT = False
 
 #True indicates that any encoding in http header or in html header will be used.
 #False indicates that encoding will be used if the encoding in http header and the one in html header are the same.
-TRUST_ENCODING_IN_HEADER_OR_META = True
+TRUST_ENCODING_IN_HEADER_OR_META = False
 
 #generate brief description for toc item or not.
 GENERATE_TOC_DESC = True

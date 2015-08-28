@@ -60,6 +60,8 @@ class AutoDecoder:
                     return content.decode(encoding)
                 except UnicodeDecodeError:
                     pass #调用最后一条return
+                except Exception as e:
+                    default_log.warn('AutoDecoder failed, changed to chardet: %s [%s]' % (str(e), url))
                     
         return self.decode_by_chardet(content, url)
         
@@ -75,8 +77,11 @@ class AutoDecoder:
                 try:
                     result = content.decode(encoding)
                 except: # 还是出错，则不转换，直接返回
+                    try:
+                        result = content.decode(encoding, 'ignore')
+                    except:
+                        result = content
                     self.encoding = None
-                    result = content
                 else: # 保存下次使用，以节省时间
                     self.encoding = encoding
                     #同时保存到数据库
@@ -116,7 +121,10 @@ class AutoDecoder:
             try:
                 result = content.decode(self.encoding)
             except: # 出错，则不转换，直接返回
-                result = content
+                try:
+                    result = content.decode(self.encoding, 'ignore')
+                except:
+                    result = content
             else:
                 #保存到数据库
                 newurlenc = urlenc if urlenc else UrlEncoding(netloc=netloc)
@@ -129,7 +137,7 @@ class AutoDecoder:
 
 def get_encoding_from_content(content):
     if content[:5] == '<?xml':
-        charset_re = re.compile(r'<\?xml.*?encoding=["\']*(.+?)["\']*\?>', re.I)
+        charset_re = re.compile(r'<\?xml.*?encoding=["\']*(.+?)["\'].*\?>', re.I)
         m = charset_re.search(content[:100])
     else:
         charset_re = re.compile(r'<meta.*?charset=["\']*(.+?)["\'>]', re.I)
@@ -150,6 +158,10 @@ def rectify_encoding(encoding):
     if not encoding:
         return None
     
+    #有空格则取空格前的部分
+    if encoding.find(' ') > 0:
+        encoding = encoding.partition(' ')[0].strip()
+    
     #常见的一些错误写法纠正
     errata = {'8858':'8859','8559':'8859','5889':'8859','2313':'2312','2132':'2312',
             '2321':'2312','gb-2312':'gb2312','gbk2312':'gbk','gbs2312':'gb2312',
@@ -168,12 +180,12 @@ def rectify_encoding(encoding):
         encoding = 'euc_%s' % encoding[4:]
     elif encoding.startswith('windows') and not encoding.startswith('windows-'):
         encoding = 'windows-%s' % encoding[7:]
-    elif encoding.find('iso-88') > 0:
+    elif encoding.find('iso-88') >= 0:
         encoding = encoding[encoding.find('iso-88'):]
     elif encoding.startswith('is0-'):
         encoding = 'iso%s' % encoding[4:]
-    elif encoding.find('ascii') > 0:
-        encoding = 'ascii' 
+    elif encoding.find('ascii') >= 0:
+        encoding = 'ascii'
     
     #调整为python标准编码
     translate = { 'windows-874':'iso-8859-11', 'en_us':'utf8', 'macintosh':'iso-8859-1',

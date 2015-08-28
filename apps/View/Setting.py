@@ -12,13 +12,14 @@ import web
 
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
-
+from apps.utils import etagged
 from config import *
 
 #import main
 
 class Setting(BaseHandler):
     __url__ = "/setting"
+    @etagged()
     def GET(self, tips=None):
         user = self.getcurrentuser()
         return self.render('setting.html',"Setting",

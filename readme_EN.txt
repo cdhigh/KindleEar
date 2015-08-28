@@ -27,7 +27,7 @@
    8.more details can be found in faq.
    9.If you don't want to intall GAE SDK and python, you have another choice, download 'uploader' from:
      https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing
-     put kindleear folder into uploader directory, then double-click uploader.bat.
+     put KindleEar folder into uploader directory, then double-click uploader.bat.
   
 3. License
    KindleEar is Licensed under the AGPLv3 license: http://www.gnu.org/licenses/agpl-3.0.html

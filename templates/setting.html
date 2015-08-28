@@ -68,8 +68,8 @@
                 <option value="" {% if not user.titlefmt %}selected="selected"{% endif %}>{{_("Title Only")}}</option>
                 <option value="%Y-%m-%d" {% if user.titlefmt=='%Y-%m-%d' %}selected="selected"{% endif %}>{{_("Title YYYY-MM-DD")}}</option>
                 <option value="%m-%d" {% if user.titlefmt=='%m-%d' %}selected="selected"{% endif %}>{{_("Title MM-DD")}}</option>
-                <option value="%m/%d" {% if user.titlefmt=='%m/%d' %}selected="selected"{% endif %}>{{_("Title MM/DD")}}</option>
-                <option value="%d/%m" {% if user.titlefmt=='%d/%m' %}selected="selected"{% endif %}>{{_("Title DD/MM")}}</option>
+                {#<option value="%m/%d" {% if user.titlefmt=='%m/%d' %}selected="selected"{% endif %}>{{_("Title MM/DD")}}</option>-#}
+                {#<option value="%d/%m" {% if user.titlefmt=='%d/%m' %}selected="selected"{% endif %}>{{_("Title DD/MM")}}</option>-#}
                 <option value="%b %d" {% if user.titlefmt=='%b %d' %}selected="selected"{% endif %}>{{_("Title MMM DD")}}</option>
                 <option value="%a, %b %d" {% if user.titlefmt=='%a, %b %d' %}selected="selected"{% endif %}>{{_("Title Day, MMM DD")}}</option>
             </select></td></tr>

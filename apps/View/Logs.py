@@ -9,9 +9,11 @@
 import datetime
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
+from apps.utils import etagged
 
 class Mylogs(BaseHandler):
     __url__ = "/logs"
+    @etagged()
     def GET(self):
         user = self.getcurrentuser()
         mylogs = DeliverLog.all().filter("username = ", user.name).order('-time').fetch(limit=10)

@@ -8,6 +8,9 @@
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
+from functools import wraps
+from hashlib import md5
+import web
 from config import *
 import datetime
 import gettext
@@ -50,6 +53,29 @@ def fix_filesizeformat(value, binary=False):
                 return '%.1f %s' % ((base * bytes / unit), prefix)
         return '%.1f %s' % ((base * bytes / unit), prefix)
 
+        
+#将etag应用于具体页面的装饰器
+#此装饰器不能减轻服务器压力，但是可以减小客户端的再次加载页面时间
+def etagged():
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwds):
+            rsp_data = func(*args, **kwds)
+            if type(rsp_data) is unicode:
+                etag = '"%s"' % md5(rsp_data.encode('utf-8', 'ignore')).hexdigest()
+            else:
+                etag = '"%s"' % md5(rsp_data).hexdigest()
+            #格式参见：<http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.26>
+            n = set([x.strip().lstrip('W/') for x in web.ctx.env.get('HTTP_IF_NONE_MATCH', '').split(',')])
+            if etag in n:
+                raise web.notmodified()
+            else:
+                web.header('ETag', etag)
+                web.header('Cache-Control', 'no-cache')
+                return rsp_data
+        return wrapper
+    return decorator
+    
 def InsertToc(oeb, sections, toc_thumbnails):
     """ 创建OEB的两级目录，主要代码由rexdf贡献
     sections为有序字典，关键词为段名，元素为元组列表(title,brief,humbnail,content)

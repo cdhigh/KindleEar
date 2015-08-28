@@ -47,6 +47,9 @@
         <li><a href="#inie6">网站在IE6下显示不正常？</a></li>
         <li><a href="#pushseparate">内置书籍订阅时“Separate”选项是什么意思？</a></li>
         <li><a href="#internalerror">部署应用后打开网页出现“internal server error”如何处理？</a></li>
+        <li><a href="#coverbv">如何修改多本书籍合并后的封面？</a></li>
+        <li><a href="#aboutweixin">如何订阅微信公众号？</a></li>
+        <li><a href="#aboutgfw">有关墙的汇总</a></li>
       </ul>
     </div>
     
@@ -84,7 +87,7 @@
         <li>下载 <a href="https://developers.google.com/appengine/downloads?hl=zh-CN">GAE SDK</a>，这是用来上传GAE程序用的。在此页面中的区段“Google App Engine SDK for Python”中选择你的系统平台对应的版本点击即可下载，然后安装，一路next无话。</li>
         <li>打开资源管理器，进入之前下载的KindleEar目录C:\KindleEar，使用任何文本编辑器打开app.yaml和module-worker.yaml文件，将第一行的kindleear字样修改为你之前申请的GAE程序名（比如kindleear123），保存退出。</li>
         <li>在app.yaml的同一个目录，打开config.py文件，修改SRC_EMAIL为你的gmail账号，DOMAIN为你的应用的域名。其他的选项也可以根据注释有选择性的修改，或者使用默认即可。</li>
-        <li>正式上传KindleEar。可以使用Google App Engine Launcher或使用命令行，因为Launcher不太稳定，这里介绍一下windows下使用命令行的方式。
+        <li>正式上传KindleEar。不能使用Google App Engine Launcher，因为Launcher不支持多module应用，这里介绍一下windows下使用命令行的方式。
             <li>依次点击：开始-运行-输入CMD，打开命令行窗口</li>
             <li>进入到App Engine SDK安装目录；例如：cd "C:\Program Files\Google\google_appengine"</li>
             <li>输入“上传”命令：c:\python27\python.exe appcfg.py update C:\kindleear\app.yaml c:\kindleear\module-worker.yaml</li>
@@ -270,6 +273,32 @@
         <code>python appcfg.py update_queues KindleEar/</code>
         <code>python appcfg.py update_dispatch KindleEar/</code><br />
         如果上面的步骤执行完后还是不行的话，请按照正确步骤重新部署。
+    </p>
+    
+    <span id="coverbv"></span>
+    <h2>如何修改多本书籍合并后的封面？</h2>
+    <p class="answer">默认配置下如果合并多本书籍，则合并后的封面会将所有书籍的封面缩小并拼贴在一起，并且每次推送的排列顺序都不一样，此效果由config.py里面的参数项 DEFAULT_COVER_BV 控制，默认为 None。<br />
+        如果你不喜欢这个效果，设置DEFAULT_COVER_BV为某个文件名则可以取消此效果，比如：
+        <code>DEFAULT_COVER_BV='cv_bound.jpg'</code>
+        </p>
+    
+    <span id="aboutweixin"></span>
+    <h2>如何订阅微信公众号？</h2>
+    <p class="answer">感谢网友 <a href="https://github.com/zhu327">zhu327</a> 的代码贡献，有几个方法可以订阅微信公众号：
+        <ol><li>可以在books目录下添加一个py文件，内容和格式可以仿照 Xiaodaonews.py， 里面写上你需要订阅的公众号信息，更多的说明可以打开weixinbase.py查看。</li>
+        <li>【推荐此方法】通过作者 <a href="https://github.com/zhu327/rss">zhu327</a> 搭建的 <a href="https://diy-devz.rhcloud.com/">https://diy-devz.rhcloud.com/</a> 网站爬取公众号文章并转换为RSS，然后在KindleEar中直接订阅此RSS。</li>
+        <li>还有另一个网站 <a href="http://weirss.me/">WeiRSS</a> 提供微信公众号转RSS服务，可以试用一下，其抓取原理和zhu327的方案基本一致，也是开源方案 <a href="https://github.com/iberryful/weixin_sogou">Weixin_sogou on github</a>，当前版本比较简单，估计不如zhu327的代码好用。</li>
+        </ol>
+    注意事项：因为微信是非常封闭的体系，腾讯和搜狗可能会时不时修改其接口或防爬取措施，不管哪个网站或解决方案，都无法保证永久有效，如果后续发现内容爬取失效，可能你需要升级了，或者你可以到 <a href="https://diy-devz.rhcloud.com/">https://diy-devz.rhcloud.com/</a> 确认 <a href="https://github.com/zhu327">zhu327</a> 有没有更新代码。
+    </p>
+    
+    <span id="#aboutgfw"></span>
+    <h2>有关墙的汇总</h2>
+    <p class="answer">在天朝的网友在部署时和使用时会遇到一个强大的墙，特别google又是特别重要的黑名单，这是几个简单的说明，其他的请自己解决：
+    <ul>
+        <li>在部署时需要开全局代理，单单浏览器代理无法上传代码。</li>
+        <li>在上传之后，如果使用代理还是无法访问appspot，可以将appspot中的字母o改成0（零）试一下，形如：xxx.appsp0t.com，感谢天朝某位网友的默默服务吧。</li>
+    </ul>
     </p>
     
     <div id="footer">

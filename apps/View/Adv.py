@@ -12,7 +12,7 @@ from google.appengine.api import memcache
 
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
-from apps.utils import local_time
+from apps.utils import local_time, etagged
 from config import *
 
 MEMC_ADV_ID = '!#AdvSettings@'
@@ -20,6 +20,7 @@ MEMC_ADV_ID = '!#AdvSettings@'
 class AdvSettings(BaseHandler):
     """ 高级设置的主入口 """
     __url__ = "/advsettings"
+    @etagged()
     def GET(self):
         prevUrl = memcache.get(MEMC_ADV_ID)
         if prevUrl in (AdvShare.__url__, AdvUrlFilter.__url__, AdvWhiteList.__url__, AdvImport.__url__):
@@ -31,6 +32,7 @@ class AdvSettings(BaseHandler):
 class AdvShare(BaseHandler):
     """ 设置归档和分享配置项 """
     __url__ = "/advshare"
+    @etagged()
     def GET(self):
         user = self.getcurrentuser()
         current = 'advsetting'
@@ -85,6 +87,7 @@ class AdvShare(BaseHandler):
 class AdvUrlFilter(BaseHandler):
     """ 设置URL过滤器 """
     __url__ = "/advurlfilter"
+    @etagged()
     def GET(self):
         user = self.getcurrentuser()
         memcache.set(MEMC_ADV_ID, self.__url__, 86400)
@@ -103,6 +106,7 @@ class AdvUrlFilter(BaseHandler):
 class AdvDel(BaseHandler):
     __url__ = "/advdel"
     #删除白名单或URL过滤器项目
+    @etagged()
     def GET(self):
         user = self.getcurrentuser()
         delurlid = web.input().get('delurlid')
@@ -121,6 +125,7 @@ class AdvDel(BaseHandler):
 class AdvWhiteList(BaseHandler):
     """ 设置邮件白名单 """
     __url__ = "/advwhitelist"
+    @etagged()
     def GET(self):
         user = self.getcurrentuser()
         memcache.set(MEMC_ADV_ID, self.__url__, 86400)
@@ -139,6 +144,7 @@ class AdvWhiteList(BaseHandler):
 class AdvImport(BaseHandler):
     """ 导入自定义rss订阅列表，当前支持Opml格式 """
     __url__ = "/advimport"
+    @etagged()
     def GET(self, tips=None):
         user = self.getcurrentuser()
         memcache.set(MEMC_ADV_ID, self.__url__, 86400)
@@ -215,7 +221,7 @@ class AdvExport(BaseHandler):
         outlines = []
         for feed in Feed.all().filter('book = ', user.ownfeeds):
             outlines.append('    <outline type="rss" text="%s" xmlUrl="%s" isFulltext="%d" />' % 
-                (feed.title, urllib.quote_plus(feed.url), feed.isfulltext))
+                (feed.title, urllib.quote_plus(feed.url.encode('utf8')), feed.isfulltext))
         outlines = '\n'.join(outlines)
         
         opmlfile = opmlTpl % (date, date, outlines)
