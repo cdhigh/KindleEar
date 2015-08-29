@@ -8,10 +8,11 @@
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
-import os, datetime, logging, __builtin__, hashlib, time
+import os, datetime, logging, __builtin__, hashlib, time, base64, urlparse, imghdr
 
 import web
 import jinja2
+from bs4 import BeautifulSoup
 from utils import *
 from config import *
 from apps.dbModels import *
@@ -178,4 +179,30 @@ class BaseHandler:
         kwargs.setdefault('nickname', main.session.get('username'))
         kwargs.setdefault('lang', main.session.get('lang', 'en'))
         kwargs.setdefault('version', main.__Version__)
-        return main.jjenv.get_template(templatefile).render(title=title, **kwargs)
+        html = main.jjenv.get_template(templatefile).render(title=title, **kwargs)
+        
+        #将内部的小图像转换为内嵌的base64编码格式，减小http请求数量，提升效率
+        soup = BeautifulSoup(html, 'lxml')
+        for img in soup.find_all('img'):
+            imgurl = img['src'] if 'src' in img.attrs else ''
+            if not imgurl or imgurl.startswith('data:'):
+                continue
+            
+            #假定没有外链的图片，所有的图片都是本站的
+            parts = urlparse.urlparse(imgurl)
+            imgPath = parts.path
+            if imgPath.startswith(r'/'):
+                imgPath = imgPath[1:]
+
+            try: #这个在调试环境是不行的，不过部署好就可以用了
+                with open(imgPath, "rb") as f:
+                    d = f.read()
+            except Exception as e:
+                continue
+            else:
+                mime = imghdr.what(None, d)
+                if mime:
+                    data = 'data:image/%s;base64,%s' % (mime, base64.encodestring(d))
+                    img['src'] = data
+            
+        return unicode(soup)

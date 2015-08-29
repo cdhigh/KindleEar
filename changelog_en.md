@@ -1,5 +1,8 @@
 #Changelog for KindleEar
 
+##1.20.26
+  1. Improve performance of loading webpage via inline base64 image technology.
+
 ##1.20.25
   1. enhance decode process to avoid some garbled chars.
 

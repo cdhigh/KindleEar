@@ -8,10 +8,12 @@
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
-import __builtin__, site
+import __builtin__, sys
+from google.appengine.ext import vendor
 
-__Version__ = '1.20.25'
+__Version__ = '1.20.26'
 
 __builtin__.__dict__['__Version__'] = __Version__
 
-site.addsitedir('lib')
+sys.path.insert(0, 'lib')
+vendor.add('lib')
