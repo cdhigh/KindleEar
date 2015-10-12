@@ -28,13 +28,14 @@ class URLOpener:
             headers={}
         
         response = resp()
-        if url.startswith(r'data:image/'):
-            from base64 import b64decode
+        if url.startswith('data:'):
+            import base64, re
+            rxDataUri = re.compile("^data:(?P<mime>[a-z]+/[a-z]+);base64,(?P<data>.*)$", re.I | re.M | re.DOTALL)
+            m = rxDataUri.match(url)
             try:
-                idx_begin = url.find(';base64,') or url.find(';BASE64,')
-                response.content = b64decode(url[idx_begin+8:])
+                response.content = base64.decodestring(m.group("data"))
                 response.status_code = 200
-            except TypeError:
+            except Exception as e:
                 response.status_code = 404
         else:
             while url and (maxRedirect > 0):

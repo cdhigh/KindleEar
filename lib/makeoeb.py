@@ -35,15 +35,14 @@ class ServerContainer(object):
         if path.endswith((".jpg",".png",".gif",".jpeg")) \
             and r'/' not in path:
             path = os.path.join("images", path)
-        d,f  = '',None
+
+        d = ''
         try:
-            f = open(path, "rb")
-            d = f.read()
-        except Exception,e:
-            self.log.warn("read file '%s' failed : %s" % (path,str(e)))
-        finally:
-            if f:
-                f.close()
+            with open(path, "rb") as f:
+                d = f.read()
+        except Exception as e:
+            self.log.warn("read file '%s' failed : %s" % (path, str(e)))
+        
         return d
     def write(self, path):
         return None
