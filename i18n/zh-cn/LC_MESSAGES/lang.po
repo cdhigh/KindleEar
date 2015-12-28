@@ -202,7 +202,7 @@ msgstr "开源的KindleEar程序"
 
 msgid ""
 ", You can deploy your own server to push news feeds to your kindle dialy or "
-"share with your friends."
+"share the service with your friends."
 msgstr ""
 "，你可以在GAE上搭建自己的推送服务器，下载包含图片的RSS订阅或网页推送到你的"
 "Kindle，并支持多账号，可以提供给三五好友同时使用。"

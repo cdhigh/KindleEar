@@ -1,5 +1,8 @@
 #Changelog for KindleEar
 
+##1.20.27
+  1. An single email of appspotmail supports more links.
+
 ##1.20.26
   1. Improve performance of loading webpage via inline base64 image technology.
 

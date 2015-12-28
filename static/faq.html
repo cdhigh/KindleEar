@@ -40,7 +40,6 @@
         <li><a href="#forgotpwd">忘记密码了怎么办？</a></li>
         <li><a href="#mailservice">xxx@appid.appspotmail.com邮件地址怎么用？</a></li>
         <li><a href="#delaytocn">推送至亚马逊中国邮箱有比较大的延迟？</a></li>
-        <li><a href="#errorcodes">在gae后台时不时有fetch rss failed(450)等错误是什么问题？</a></li>
         <li><a href="#mergebooks">为何合并多本书籍推送后无法查词典？</a></li>
         <li><a href="#share">“高级设置”里的归档和分享功能如何使用？</a></li>
         <li><a href="#needlogin">有的网站需要登陆才能阅读文章的问题如何解决？</a></li>
@@ -207,16 +206,6 @@
     <span id="delaytocn"></span>
     <h2>推送至亚马逊中国邮箱有比较大的延迟？</h2>
     <p class="answer">这个经过网友们试验，和伟大的墙有关系，有一个解决方法：KindleEar先推送至某个个人邮箱，然后此个人邮箱自动转发至中亚的kindle邮箱。<br />不过还面临一个问题：部分邮箱设置自动转发需要发到邮箱的验证，而亚马逊邮箱不能登陆无法验证。其实你需要的是找一个不需要目标邮箱确认的邮箱来设置自动转发，比如outlook.com。</p>
-    
-    <span id="errorcodes"></span>
-    <h2>在gae后台时不时有fetch rss failed(450)等错误是什么问题？</h2>
-    <p class="answer">括号里面的数字表示错误码，除了标准的HTTP错误码外，以下是KindleEar自定义的错误码。
-    <ul><li>504:超时，请适当增加config.py文件里面的超时设置；</li>
-    <li>509:文件超大，GAE限制每个文件不能大于4MB；</li>
-    <li>452:网站不支持HTTPS访问；</li>
-    <li>453:网站需要访问认证；</li>
-    <li>450:下载失败；</li>
-    <li>451:其他异常；</li></ul></p>
     
     <span id="mergebooks"></span>
     <h2>为何合并多本书籍推送后无法查词典？</h2>

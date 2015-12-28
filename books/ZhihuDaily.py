@@ -75,14 +75,14 @@ class ZhihuDaily(BaseFeedBook):
                     urls.append((section, item['title'], self.url4forwarder(urlfeed), None))
                     urladded.add(urlfeed)
         else:
-            self.log.warn('fetch rss failed(%d):%s'%(result.status_code, url))
+            self.log.warn('fetch rss failed(%s):%s' % (URLOpener.CodeMap(result.status_code), url))
         return urls
 
     #def fetcharticle(self, url, opener, decoder):
     #    result = opener.open(self.url4forwarder(url))
     #    status_code, content = result.status_code, result.content
     #    if status_code != 200 or not content:
-    #        self.log.warn('fetch article failed(%d):%s.' % (status_code,url))
+    #        self.log.warn('fetch article failed(%s):%s.' % (URLOpener.CodeMap(status_code),url))
     #        return None
     #    
     #    if self.page_encoding:

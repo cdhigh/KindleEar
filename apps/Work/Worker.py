@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
-#中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 #Author:
 # cdhigh <https://github.com/cdhigh>
 #Contributors:
@@ -182,7 +181,9 @@ class Worker(BaseHandler):
                 book = BookClass(bk.title)
                 if book and book.coverfile:
                     coverfiles.append(book.coverfile)
-                    
+            elif DEFAULT_COVER:
+                coverfiles.append(DEFAULT_COVER)
+                
         num_imgs = len(coverfiles)
         if num_imgs > 9:#大于9个则随机选择9个
             coverfiles = random.sample(coverfiles, 9)

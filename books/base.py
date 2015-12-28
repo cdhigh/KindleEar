@@ -303,7 +303,7 @@ class BaseFeedBook:
                     urls.append((section, e.title, urlfeed, desc))
                     urladded.add(urlfeed)
             else:
-                self.log.warn('fetch rss failed(%d):%s'%(result.status_code,url))
+                self.log.warn('fetch rss failed(%s):%s'%(URLOpener.CodeMap(result.status_code), url))
                 
         return urls
 
@@ -461,7 +461,7 @@ class BaseFeedBook:
         result = opener.open(url)
         status_code, content = result.status_code, result.content
         if status_code not in (200,206) or not content:
-            self.log.warn('fetch page failed(%d):%s.' % (status_code,url))
+            self.log.warn('fetch page failed(%s):%s.' % (URLOpener.CodeMap(status_code), url))
             return None
         
         #debug_mail(content)
@@ -629,7 +629,7 @@ class BaseFeedBook:
                     else:
                         img.decompose()
                 else:
-                    self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
+                    self.log.warn('fetch img failed(%s):%s' % (URLOpener.CodeMap(imgresult.status_code), imgurl))
                     img.decompose()
 
             #去掉图像上面的链接，以免误触后打开浏览器
@@ -678,7 +678,7 @@ class BaseFeedBook:
         try:
             title = soup.html.head.title.string
         except AttributeError:
-            self.log.warn('object soup invalid!(%s)'%url)
+            self.log.warn('object soup invalid!(%s)' % url)
             return
         if not title:
             self.log.warn('article has no title.[%s]' % url)
@@ -784,7 +784,7 @@ class BaseFeedBook:
                     else:
                         img.decompose()
                 else:
-                    self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
+                    self.log.warn('fetch img failed(%s):%s' % (URLOpener.CodeMap(imgresult.status_code), imgurl))
                     img.decompose()
 
             #去掉图像上面的链接，以免误触后打开浏览器
@@ -971,7 +971,7 @@ class WebpageBook(BaseFeedBook):
             result = opener.open(url)
             status_code, content = result.status_code, result.content
             if status_code != 200 or not content:
-                self.log.warn('fetch article failed(%d):%s.' % (status_code,url))
+                self.log.warn('fetch article failed(%s):%s.' % (URLOpener.CodeMap(status_code), url))
                 continue
 
             if self.page_encoding:
@@ -1102,7 +1102,7 @@ class WebpageBook(BaseFeedBook):
                         else:
                             img.decompose()
                     else:
-                        self.log.warn('fetch img failed(err:%d):%s' % (imgresult.status_code,imgurl))
+                        self.log.warn('fetch img failed(%s):%s' % (URLOpener.CodeMap(imgresult.status_code), imgurl))
                         img.decompose()
 
                 #去掉图像上面的链接

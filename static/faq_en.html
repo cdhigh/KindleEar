@@ -39,11 +39,11 @@
         <li><a href="#garbled">Why some articles have garbled characters?</a></li>
         <li><a href="#forgotpwd">What can I do if I forget the password?</a></li>
         <li><a href="#mailservice">How to use mail service xxx@appid.appspotmail.com?</a></li>
-        <li><a href="#errorcodes">There are some logs like 'fetch rss failed(450)' in the gae backend, what's the meaning of them?</a></li>
         <li><a href="#mergebooks">Why I can't lookup words in the delivery books after I chosen 'Merge books into one'?</a></li>
         <li><a href="#needlogin">How to deal with those websites that need login before I can view the articles?</a></li>
         <li><a href="#deletebookschinese">Can I delete/hide books in Chinese?</a></li>
         <li><a href="#pushseparate">What's the meaning of the "Separate" option for the built-in books?</a></li>
+        <li><a href="#internalerror">How to solve it if website shows "internal server error" exception.</a></li>
       </ul>
     </div>
 
@@ -91,12 +91,14 @@
         <li>After successfully uploading KindleEar, use your browser to open the site: http://kindleear123.appspot.com (example only, kindleear123 should be changed to the name of your GAE application). If everything goes fine, then go to the last step.</li>
         <li>Add your gmail account to your kindle email whitelist. You should know how to do it already.</li>
         <li>Then what? Enjoy your own delivery service now!</li>
+        <li>Tips: the initial username of application is admin, default password is admin too.</li>
         </ol>
     <p><strong>The easy way(recommended):</strong>
         <ol>
         <li>Download <a href="https://github.com/cdhigh/KindleEar/archive/master.zip">KindleEar</a> and extract it, get a GAE account, create an application.</li>
         <li>Download <a href="https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing">uploader</a>. (for windows user only)</li>
         <li>Extract 'uploader' to a directory, move the folder of KindleEar into the folder of 'uploader' and rename it to kindleear, then double-click 'uploader.bat' to upload.</li>
+        <li>Tips: the initial username of application is admin, default password is admin too.</li>
         </ol></p>
     </p>
 
@@ -191,16 +193,6 @@
     </ul>
     </p>
 
-    <span id="errorcodes"></span>
-    <h2>There are some logs like 'fetch rss failed(450)' in the gae backend, what's the meaning of them?</h2>
-    <p class="answer">The number in parentheses is an error code. Besides the standard error codes, hereafter shows errorcodes defined by KindleEar.
-    <ul><li>504:timeout.</li>
-    <li>509:file too large, GAE has a limit of 4MB for each file/page.</li>
-    <li>452:the website doesn't support https protocol.</li>
-    <li>453:need authentication.</li>
-    <li>450:fail to download.</li>
-    <li>451:other exceptions.</li></ul></p>
-
     <span id="mergebooks"></span>
     <h2>Why I can't lookup words in the delivery books after I chosen 'Merge books into one'?<a name="mergebooks" id="mergebooks" >&nbsp;</a></h2>
     <p class="answer">With the option 'Merge books in one' checked, KindleEar will set the metadata of the book as Custom Rss. To fix this problem, you have to set the language attribute in the 'Custom Rss Setting' section  manually.</p>
@@ -230,7 +222,19 @@
     <span id="pushseparate"></span>
     <h2>What's the meaning of the "Separate" option for the built-in books?</h2>
     <p class="answer">If you choose this option, the book you chosen will be sent to kindle separately even if the option "Merge books into one" is chosen.</p>
-
+    
+    <span id="internalerror"></span>
+    <h2>How to solve it if website shows "internal server error" exception.</h2>
+    <p class="answer">
+        Open <a href="https://appengine.google.com">appengine.google.com</a>, choose your application, open "Logs", if have <i>“NeedIndexError: no matching index found.”</i> exception, then you can execute command in your computer.
+        <code>python appcfg.py update_indexes YourKindleEarFolder/</code><br />
+        if have <i>“UnknownQueueError”</i> exception, then execute:
+        <code>python appcfg.py update_queues YourKindleEarFolder/</code><br />
+        
+        After command be executed, please wait some miniutes for GAE generate index for you.
+        If the problem still exist, you should deploy KindleEar again.
+    </p>
+    
 
     <p style="font-size:90%;color:gray;margin-top:2em;">I'm sorry for my poor English, please feel free to open an issue on github when you get puzzled, and it will be appreciated if you can help me improve this documentation.</p>
     <div id="footer">

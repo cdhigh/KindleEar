@@ -205,7 +205,7 @@ msgstr "açık kaynak KindleEar uygulaması"
 
 msgid ""
 ", You can deploy your own server to push news feeds to your kindle dialy or "
-"share with your friends."
+"share the service with your friends."
 msgstr ""
 "ile siz de kendi serverınızı kurup Kindle'ınıza RSS'leri günlük gönderebilir "
 "veya arkadaşlarınızla paylaşabilirsiniz."

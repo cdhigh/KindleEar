@@ -1,4 +1,4 @@
-Readme of english version refers to Readme_EN.txt
+Readme of english version refers to [Readme_EN.md](https://github.com/cdhigh/KindleEar/blob/master/readme_EN.md)
 
 #简介
 这是一个运行在Google App Engine(GAE)上的Kindle个人推送服务器，生成排版精美的杂志模式MOBI格式自动每天推送至您的kindle，

@@ -2,13 +2,12 @@
 # -*- coding:utf-8 -*-
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
-#中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 #Author:
 # cdhigh <https://github.com/cdhigh>
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
-import web
+import web, zlib, base64
 import jinja2
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
@@ -33,7 +32,10 @@ class Url2Book(BaseHandler):
         if not all((username,urls,subject,to,language,booktype,tz)):
             return "Some parameter missing!<br />"
         
-        #global log
+        if type(urls) is unicode:
+            urls = urls.encode('utf-8')
+            
+        urls = zlib.decompress(base64.urlsafe_b64decode(urls))
         
         if booktype == 'Download': #直接下载电子书并推送
             from lib.filedownload import Download

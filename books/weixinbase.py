@@ -79,7 +79,7 @@ class WeixinBook(BaseFeedBook):
                 else:
                     content = AutoDecoder(True).decode(result.content,opener.realurl,result.headers)
             else:
-                self.log.warn('fetch rss failed(%d):%s'%(result.status_code,url))
+                self.log.warn('fetch rss failed(%s):%s' % (URLOpener.CodeMap(result.status_code), url))
                 continue
             
             eqs, ekv = process_eqs(content)
@@ -134,6 +134,6 @@ class WeixinBook(BaseFeedBook):
                     urls.append((section, e.title, urlfeed, desc))
                     urladded.add(urlfeed)
             else:
-                self.log.warn('fetch rss failed(%d):%s'%(result.status_code,url))
+                self.log.warn('fetch rss failed(%s):%s' % (URLOpener.CodeMap(result.status_code), url))
 
         return urls

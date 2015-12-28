@@ -5,7 +5,7 @@
 """
 将发到string@appid.appspotmail.com的邮件正文转成附件发往管理员的kindle邮箱。
 """
-import re
+import re, logging, zlib, base64
 from email.Header import decode_header
 from email.utils import parseaddr, collapse_rfc2231_value
 from bs4 import BeautifulSoup
@@ -17,6 +17,8 @@ from apps.dbModels import KeUser, Book, WhiteList
 from apps.BaseHandler import BaseHandler
 from apps.utils import local_time
 from config import *
+
+log = logging.getLogger()
 
 def decode_subject(subject):
     if subject[0:2] == '=?' and subject[-2:] == '?=':
@@ -62,7 +64,7 @@ class HandleMail(InboundMailHandler):
             and not user.whitelist.filter('mail = ', sender.lower()).get()
             and not user.whitelist.filter('mail = ', '@' + mailhost.lower()).get()):
             self.response.out.write("Spam mail!")
-            default_log.warn('Spam mail from : %s' % sender)
+            log.warn('Spam mail from : %s' % sender)
             return
         
         if hasattr(message, 'subject'):
@@ -80,16 +82,16 @@ class HandleMail(InboundMailHandler):
         try:
             allBodies = [body.decode() for ctype, body in html_bodies]
         except:
-            default_log.warn('Decode html bodies of mail failed.')
+            log.warn('Decode html bodies of mail failed.')
             allBodies = []
         
         #此邮件为纯文本邮件
         if len(allBodies) == 0:
-            default_log.info('no html body, use text body.')
+            log.info('no html body, use text body.')
             try:
                 allBodies = [body.decode() for ctype, body in txt_bodies]
             except:
-                default_log.warn('Decode text bodies of mail failed.')
+                log.warn('Decode text bodies of mail failed.')
                 allBodies = []
             bodies = u''.join(allBodies)
             if not bodies:
@@ -148,7 +150,7 @@ class HandleMail(InboundMailHandler):
             isbook = link[-4:].lower() in ('.pdf','.txt','.doc','.rtf') if not isbook else isbook
             
             param = {'u':username,
-                     'urls':'|'.join(links),
+                     'urls':base64.urlsafe_b64encode(zlib.compress('|'.join(links), 9)),
                      'type':'Download' if isbook else user.book_type,
                      'to':user.kindle_email,
                      'tz':user.timezone,
@@ -201,12 +203,12 @@ class HandleMail(InboundMailHandler):
                         img['src'] = img['src'][4:]
                 
                 opts = getOpts()
-                oeb = CreateOeb(default_log, None, opts)
+                oeb = CreateOeb(log, None, opts)
                 
                 setMetaData(oeb, subject[:SUBJECT_WORDCNT_FOR_APMAIL], 
                     user.ownfeeds.language, local_time(tz=user.timezone), 
                     pubtype='book:book:KindleEar')
-                oeb.container = ServerContainer(default_log)
+                oeb.container = ServerContainer(log)
                 id, href = oeb.manifest.generate(id='page', href='page.html')
                 item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=unicode(soup))
                 oeb.spine.add(item, False)
@@ -226,7 +228,7 @@ class HandleMail(InboundMailHandler):
                 
                 oIO = byteStringIO()
                 o = EPUBOutput() if user.book_type == "epub" else MOBIOutput()
-                o.convert(oeb, oIO, opts, default_log)
+                o.convert(oeb, oIO, opts, log)
                 BaseHandler.SendToKindle(username, user.kindle_email, 
                     subject[:SUBJECT_WORDCNT_FOR_APMAIL], 
                     user.book_type, str(oIO.getvalue()), user.timezone)
@@ -260,7 +262,7 @@ class HandleMail(InboundMailHandler):
                 if trigbook:
                     bkids.append(str(trigbook.key().id()))
                 else:
-                    default_log.warn('book not found : %s' % b.strip())
+                    log.warn('book not found : %s' % b.strip())
             if bkids:
                 taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
                     params={'u':username,'id':','.join(bkids)},target='worker')

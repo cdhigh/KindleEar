@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
-#中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
@@ -128,6 +127,8 @@ class Login(BaseHandler):
                 
             raise web.seeother(r'/my')
         else:
+            import time
+            time.sleep(5)
             tips = _("The username not exist or password is wrong!")
             main.session.login = 0
             main.session.username = ''
