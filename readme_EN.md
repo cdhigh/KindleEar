@@ -27,7 +27,9 @@ KindleEar is a web application to aggregate rss for generating periodical mobi f
  
 7. Execute command in directory GAE SDK(default is C:\Program Files\Google\google_appengine)
 
-	c:\python27\python.exe appcfg.py update KindleEarFolder\app.yaml KindleEarFolder\module-worker.yaml'
+	c:\python27\python.exe appcfg.py update KindleEarFolder\app.yaml KindleEarFolder\module-worker.yaml
+
+	c:\python27\python.exe appcfg.py update KindleEarFolder
 
 8. After finished, you can open the website 'http://appid.appspot.com' (appid is name of your application), for example the author's site: <http://kindleear.appspot.com>
 

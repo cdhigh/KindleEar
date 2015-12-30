@@ -1,5 +1,8 @@
 #Changelog for KindleEar
 
+##1.20.28
+  1. update book "xueqiu".
+
 ##1.20.27
   1. An single email of appspotmail supports more links.
 

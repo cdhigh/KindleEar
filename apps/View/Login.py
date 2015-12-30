@@ -124,8 +124,10 @@ class Login(BaseHandler):
                         fd.delete()
                     bk.delete()
                     
-                
-            raise web.seeother(r'/my')
+            if u.kindle_email:
+                raise web.seeother(r'/my')
+            else:
+                raise web.seeother(r'/setting')
         else:
             import time
             time.sleep(5)
