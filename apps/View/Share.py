@@ -5,7 +5,7 @@
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
-import web
+import web, urllib, urlparse
 
 from google.appengine.api import mail
 from apps.BaseHandler import BaseHandler
@@ -14,9 +14,9 @@ from apps.utils import hide_email, etagged
 
 from bs4 import BeautifulSoup
 from books.base import BaseUrlBook
-from config import SHARE_FUCK_GFW_SRV
+from lib.pocket import Pocket
 
-#import main
+from config import SHARE_FUCK_GFW_SRV, POCKET_CONSUMER_KEY
 
 class Share(BaseHandler):
     """ 保存到evernote或分享到社交媒体 """
@@ -39,12 +39,8 @@ class Share(BaseHandler):
         #global log
         
         url = urllib.unquote(url)
-        
-        #因为知乎好文章比较多，特殊处理一下知乎
-        #if urlparse.urlsplit(url)[1].endswith('zhihu.com'):
-        #    url = SHARE_FUCK_GFW_SRV % urllib.quote(url.encode('utf-8'))
-            
-        if action in ('evernote','wiz'): #保存至evernote/wiz
+                
+        if action in ('evernote', 'wiz'): #保存至evernote/wiz
             if action=='evernote' and (not user.evernote or not user.evernote_mail):
                 main.log.warn('No have evernote mail yet.')
                 return "No have evernote mail yet."
@@ -104,16 +100,47 @@ class Share(BaseHandler):
                     
             to = user.wiz_mail if action=='wiz' else user.evernote_mail
             if html:
-                self.SendHtmlMail(username,to,title,html,attachments,user.timezone)
-                info = u'"%s" saved to %s (%s).' % (title,action,hide_email(to))
+                self.SendHtmlMail(username, to, title, html.encode('utf-8'), attachments, user.timezone)
+                info = _("'%(title)s'<br/><br/>Saved to %(act)s [%(email)s] success.") % ({'title':title,'act':action,'email':hide_email(to)})
+                info += '<br/><p style="text-align:right;color:silver;">by KindleEar </p>'
                 main.log.info(info)
                 web.header('Content-type', "text/html; charset=utf-8")
                 info = u"""<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
                     <title>%s</title></head><body><p style="text-align:center;font-size:1.5em;">%s</p></body></html>""" % (title, info)
                 return info.encode('utf-8')
             else:
-                self.deliverlog(username,to,title,0,status='fetch failed',tz=user.timezone)
+                self.deliverlog(username, to, title, 0, status='fetch failed', tz=user.timezone)
                 main.log.info("[Share]Fetch url failed.")
                 return "[Share]Fetch url failed."
+        elif action == 'xpocket': #保存到pocket
+            web.header('Content-type', "text/html; charset=utf-8")
+            
+            T_INFO = u"""<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+                <title>%s</title></head><body><p style="text-align:center;font-size:1.5em;">%s</p></body></html>"""
+            if not user.xpocket_access_token:
+                info = T_INFO % ('Pocket unauthorized', 'Unauthorized Pocket!<br/>Please authorize your KindleEar application firstly.')
+                return info.encode('utf-8')
+                
+            title = web.input().get('t', '') 
+            tkHash = web.input().get("h", '')
+            if user.xpocket_acc_token_hash != tkHash:
+                info = T_INFO % ('Action rejected', 'Hash not match!<br/>KindleEar refuse to execute your command.')
+                return info.encode('utf-8')
+                
+            pocket = Pocket(POCKET_CONSUMER_KEY)
+            pocket.set_access_token(user.xpocket_access_token)
+            try:
+                item = pocket.add(url=url, title=title, tags='KindleEar')
+            except Exception as e:
+                info = T_INFO % ('Failed to save', _('Failed save to Pocket.<br/>') + str(e))
+            else:
+                info = _("'%s'<br/><br/>Saved to your Pocket account.") % title
+                info += u'''<br/><p style="text-align:right;color:red;">by KindleEar &nbsp;</p>
+                    <br/><hr/><p style="color:silver;">'''
+                info += _('See details below:<br/><br/>%s') % repr(item)
+                info = T_INFO % ('Saved to pocket', info)
+            
+            return info.encode('utf-8')
         else:
-            return "Unknown parameter 'action'!"
+            return "Unknown action type : %s !" % action
+        

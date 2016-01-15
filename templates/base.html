@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="KindleEar is a service for Amazon Kindle owners that lets you aggregate feeds you chosen and have them delivered to your Kindle in a convenient, easy-to-navigate format." />    
     <title>{{title}} - Kindle's Ear</title>
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
     <link rel="stylesheet" href="/static/pure-min.css" type="text/css" charset="utf-8"/>
     <link rel="stylesheet" href="/static/base.css" type="text/css" charset="utf-8"/>
     {% block cssfiles %}{% endblock -%}
@@ -18,6 +19,7 @@
     <div id="header">
         {% block header -%}
         <h1><a href="/">KindleEar</a></h1>
+        {% block header_loginfo -%}
         {% if nickname -%}
           <a class="nav" href="/logout">{{_("Logout")}}</a>
           <span style="color: #ccc;">&bull;</span>
@@ -29,6 +31,7 @@
             <input type="submit" class="pure-button pure-button-small" value={{_("Login")}} />
         </form>
         {% endif -%}
+        {% endblock -%}
         <div class="clear"></div>
         {% endblock -%}
     </div>

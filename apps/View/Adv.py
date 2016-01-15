@@ -4,14 +4,14 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #Contributors:
 # rexdf <https://github.com/rexdf>
-import datetime, urllib
+import datetime, urllib, urlparse, hashlib
 import web
 
 from google.appengine.api import memcache
-
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
 from apps.utils import local_time, etagged
+from lib.pocket import Pocket
 from config import *
 
 MEMC_ADV_ID = '!#AdvSettings@'
@@ -38,6 +38,7 @@ class AdvShare(BaseHandler):
         advcurr = 'share'
         savetoevernote = SAVE_TO_EVERNOTE
         savetowiz = SAVE_TO_WIZ
+        savetopocket = SAVE_TO_POCKET
         shareonxweibo = SHARE_ON_XWEIBO
         shareontweibo = SHARE_ON_TWEIBO
         shareonfacebook = SHARE_ON_FACEBOOK
@@ -61,6 +62,7 @@ class AdvShare(BaseHandler):
         wiz_mail = web.input().get('wiz_mail', '')
         if not wiz_mail:
             wiz = False
+        xpocket = bool(web.input().get('xpocket'))
         xweibo = bool(web.input().get('xweibo'))
         tweibo = bool(web.input().get('tweibo'))
         facebook = bool(web.input().get('facebook'))
@@ -73,6 +75,7 @@ class AdvShare(BaseHandler):
         user.evernote_mail = evernote_mail
         user.wiz = wiz
         user.wiz_mail = wiz_mail
+        user.xpocket = xpocket
         user.xweibo = xweibo
         user.tweibo = tweibo
         user.facebook = facebook
@@ -228,3 +231,52 @@ class AdvExport(BaseHandler):
         web.header("Content-Disposition","attachment;filename=KindleEar_subscription.xml")
         return opmlfile.encode('utf-8')
 
+#集成各种网络服务OAuth2认证的相关处理
+class AdvOAuth2(BaseHandler):
+    __url__ = "/oauth2/(.*)"
+    
+    def GET(self, authType):
+        if authType.lower() != 'pocket':
+            return 'Auth Type(%s) Unsupported!' % authType
+            
+        user = self.getcurrentuser()
+        cbUrl = urlparse.urljoin(DOMAIN, '/oauth2cb/pocket?redirect=/advshare')
+        pocket = Pocket(POCKET_CONSUMER_KEY, cbUrl)
+        try:
+            request_token = pocket.get_request_token()
+            url = pocket.get_authorize_url(request_token)
+        except Exception as e:
+            return self.render('tipsback.html', 'Authorization Error', urltoback='/advshare', tips=_('Authorization Error!<br/>%s') % str(e))
+        
+        main.session['pocket_request_token'] = request_token
+        raise web.seeother(url)
+        
+#OAuth2认证过程的回调
+class AdvOAuth2Callback(BaseHandler):
+    __url__ = "/oauth2cb/(.*)"
+    
+    def GET(self, authType):
+        if authType.lower() != 'pocket':
+            return 'Auth Type(%s) Unsupported!' % authType
+            
+        user = self.getcurrentuser()
+        reUrl = web.input().get('redirect')
+        if not reUrl:
+            reUrl = '/advsettings'
+            
+        pocket = Pocket(POCKET_CONSUMER_KEY)
+        request_token = main.session.get('pocket_request_token', '')
+        try:
+            resp = pocket.get_access_token(request_token)
+            user.xpocket_access_token = resp.get('access_token', '')
+            user.xpocket_acc_token_hash = hashlib.md5(user.xpocket_access_token).hexdigest()
+            user.put()
+            return self.render('tipsback.html', 'Success authorized', urltoback='/advshare', tips=_('Success authorized by Pocket!'))
+        except Exception as e:
+            user.xpocket_access_token = ''
+            user.xpocket_acc_token_hash = ''
+            user.xpocket = False
+            user.put()
+            return self.render('tipsback.html', 'Failed to authorzi', urltoback='/advshare', 
+                tips=_('Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>%s') % str(e))
+        

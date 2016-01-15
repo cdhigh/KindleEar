@@ -27,6 +27,18 @@
     </div>
     <hr style="width:90%;color:silver;margin:1em auto;" />
     <div class="pure-control-group">
+        <label for="enable_pocket" class="pure-checkbox">
+            <input id="enable_pocket" name="xpocket", type="checkbox" 
+                {% if user and user.xpocket and user.xpocket_access_token %} checked="1" {% endif %}
+                {% if user and not user.xpocket_access_token %} disabled="1" {% endif %}
+            />
+            {{_("Append hyperlink '%s' to article")|format(savetopocket)}}&nbsp;&nbsp;&nbsp;&nbsp;
+            {%if user and user.xpocket_access_token -%}
+            [<a href="/oauth2/pocket" style="text-decoration:none;color:silver;">{{_("Authorized")}}</a>]
+            {%else -%}
+            [<a href="/oauth2/pocket">{{_("Authorize")}}</a>]
+            {%endif -%}
+        </label>
         <label for="enable_xweibo" class="pure-checkbox">
             <input id="enable_xweibo" name="xweibo", type="checkbox" 
                 {% if user and user.xweibo %}checked="1"{% endif %} />

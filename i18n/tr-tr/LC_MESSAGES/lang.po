@@ -500,3 +500,30 @@ msgstr "Web sitesi"
 
 msgid "Feed"
 msgstr "Feed"
+
+msgid "Authorize"
+msgstr "Authorize"
+
+msgid "Authorized"
+msgstr "Authorized"
+
+msgid "Authorization Error!<br/>%s"
+msgstr "Authorization Error!<br/>%s"
+
+msgid "Success authorized by Pocket!"
+msgstr "Success authorized by Pocket!"
+
+msgid "Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>%s"
+msgstr "Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>%s"
+
+msgid "'%(title)s'<br/><br/>Saved to %(act)s [%(email)s] success."
+msgstr "'%(title)s'<br/><br/>Saved to %(act)s [%(email)s] success."
+
+msgid "Failed save to Pocket.<br/>"
+msgstr "Failed save to Pocket.<br/>"
+
+msgid "'%s'<br/><br/>Saved to your Pocket account."
+msgstr "'%s'<br/><br/>Saved to your Pocket account."
+
+msgid "See details below:<br/><br/>%s"
+msgstr "See details below:<br/><br/>%s"

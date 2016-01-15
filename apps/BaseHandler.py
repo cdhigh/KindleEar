@@ -133,15 +133,22 @@ class BaseHandler:
                 break
     
     @classmethod
-    def SendHtmlMail(self, name, to, title, html, attachments, tz=TIMEZONE):
+    def SendHtmlMail(self, name, to, title, html, attachments, tz=TIMEZONE, textcontent=None):
+        if not textcontent or not isinstance(textcontent, basestring):
+            textcontent = "Deliver from KindlerEar, refers to html part."
+            
         for i in range(SENDMAIL_RETRY_CNT+1):
             try:
                 if attachments:
-                    mail.send_mail(SRC_EMAIL, to, title, "Deliver from KindlerEar, refers to html part.",
-                        html=html, attachments=attachments)
+                    if html:
+                        mail.send_mail(SRC_EMAIL, to, title, textcontent, html=html, attachments=attachments)
+                    else:
+                        mail.send_mail(SRC_EMAIL, to, title, textcontent, attachments=attachments)
                 else:
-                    mail.send_mail(SRC_EMAIL, to, title, "Deliver from KindlerEar, refers to html part.",
-                        html=html)
+                    if html:
+                        mail.send_mail(SRC_EMAIL, to, title, textcontent, html=html)
+                    else:
+                        mail.send_mail(SRC_EMAIL, to, title, textcontent)
             except OverQuotaError as e:
                 default_log.warn('overquota when sendmail to %s:%s' % (to, str(e)))
                 self.deliverlog(name, to, title, 0, tz=tz, status='over quota')
@@ -168,9 +175,9 @@ class BaseHandler:
                 break
             else:
                 if attachments:
-                    size = len(html) + sum([len(c) for f,c in attachments])
+                    size = len(html or textcontent) + sum([len(c) for f,c in attachments])
                 else:
-                    size = len(html)
+                    size = len(html or textcontent)
                 self.deliverlog(name, to, title, size, tz=tz)
                 break
     

@@ -495,3 +495,30 @@ msgstr "网页"
 
 msgid "Feed"
 msgstr "Feed"
+
+msgid "Authorize"
+msgstr "申请授权"
+
+msgid "Authorized"
+msgstr "已授权"
+
+msgid "Authorization Error!<br/>%s"
+msgstr "申请授权过程失败！<br/>%s"
+
+msgid "Success authorized by Pocket!"
+msgstr "已经成功获得Pocket的授权！"
+
+msgid "Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>%s"
+msgstr "申请Pocket授权失败!<hr/>错误信息参考如下：<br/><br/>%s"
+
+msgid "'%(title)s'<br/><br/>Saved to %(act)s [%(email)s] success."
+msgstr "《%(title)s》<br/><br/>成功被保存至 %(act)s [%(email)s]。"
+
+msgid "Failed save to Pocket.<br/>"
+msgstr "保存到 Pocket 失败。<br/>"
+
+msgid "'%s'<br/><br/>Saved to your Pocket account."
+msgstr "'%s'<br/><br/>已经成功被保存到你的Pocket账户。"
+
+msgid "See details below:<br/><br/>%s"
+msgstr "下面是一些技术细节：<br/><br/>%s"

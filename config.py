@@ -74,11 +74,15 @@ SENDMAIL_ALL_POSTFIX = False
 #翻墙转发服务器源码：http://github.com/cdhigh/forwarder
 #SHARE_FUCK_GFW_SRV = "http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u=%s"
 SHARE_FUCK_GFW_SRV = "http://kforwarder.herokuapp.com/?k=xzSlE&t=60&u=%s"
-SAVE_TO_EVERNOTE = u"Save to evernote"
+SAVE_TO_EVERNOTE = u"Save to Evernote"
 SAVE_TO_WIZ = u"Save to Wiz"
+SAVE_TO_POCKET = u"Save to Pocket"
 SHARE_ON_XWEIBO = u"Share on Sina Weibo"
 SHARE_ON_TWEIBO = u"Share on Tencent Weibo"
-SHARE_ON_FACEBOOK = u"Share on facebook"
+SHARE_ON_FACEBOOK = u"Share on Facebook"
 SHARE_ON_TWITTER = u"Tweet it"
-SHARE_ON_TUMBLR = u"Share on tumblr"
+SHARE_ON_TUMBLR = u"Share on Tumblr"
 OPEN_IN_BROWSER = u"Open in Browser"
+
+POCKET_CONSUMER_KEY = '50188-e221424f1c9ed0c010058aef'
+

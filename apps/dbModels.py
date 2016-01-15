@@ -68,6 +68,9 @@ class KeUser(db.Model): # kindleEar User
     evernote_mail = db.StringProperty() #evernote邮件地址
     wiz = db.BooleanProperty() #为知笔记
     wiz_mail = db.StringProperty()
+    xpocket = db.BooleanProperty(default=False) #send to add@getpocket.com
+    xpocket_access_token = db.StringProperty(default='')
+    xpocket_acc_token_hash = db.StringProperty(default='')
     xweibo = db.BooleanProperty()
     tweibo = db.BooleanProperty()
     facebook = db.BooleanProperty() #分享链接到facebook

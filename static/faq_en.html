@@ -44,6 +44,7 @@
         <li><a href="#deletebookschinese">Can I delete/hide books in Chinese?</a></li>
         <li><a href="#pushseparate">What's the meaning of the "Separate" option for the built-in books?</a></li>
         <li><a href="#internalerror">How to solve it if website shows "internal server error" exception.</a></li>
+        <li><a href="#savetopocket">How to use the feature 'Save to Pocket'?</a></li>
       </ul>
     </div>
 
@@ -237,8 +238,25 @@
         If the problem still exist, you should deploy KindleEar again.
     </p>
     
-
-    <p style="font-size:90%;color:gray;margin-top:2em;">I'm sorry for my poor English, please feel free to open an issue on github when you get puzzled, and it will be appreciated if you can help me improve this documentation.</p>
+    <span id="savetopocket"></span>
+    <h2>How to use the feature 'Save to Pocket'?</h2>
+    <p class="answer">The <a href="https://getpocket.com/">Pocket</a> is a popular 'Read It Later' service.
+    The service allows the user to save an article or web page to the cloud for later reading. The article is then sent to the user's Pocket list (synced to all of their devices) for offline reading. Pocket removes clutter from articles and allows the user to adjust text settings for easier reading.<br/>
+    Now you can save an article of your Kindle to your pocket's account, and then you can read it in other devices later.<br/><br/>
+    Follows steps to enjoy this feature:
+    <ul>
+        <li>Get an account of pocket;</li>
+        <li>Click [Authorize] of section 'Save to Pocket' in KindleEar's page 'Advance' |' Share';</li>
+        <li>Choose "Append hyperlink 'Save to Pocket' to article" in KindleEar's page 'Advance' | 'Share'.</li>
+    </ul>
+    Remarks:
+    <ul>
+        <li>This application requests 'Add' permission only, asks for neither 'Modify' nor 'Delete', can't retrieve your article list too.</li>
+        <li>The Pocket's access token stored in your database, KindleEar application of other guys do not have permission to access your Pocket account;</li>
+        <li>If you worry about privacy and security, you can apply an new developer Consumer Key in Pocket website, and then change variable POCKET_CONSUMER_KEY in config.py.</li>
+    </ul>
+    </p>
+    
     <div id="footer">
         <div class="clear"></div>
         2013 &copy; KindleEar&nbsp;&nbsp;|&nbsp;&nbsp;

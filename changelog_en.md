@@ -1,4 +1,6 @@
 #Changelog for KindleEar
+##1.21
+  1. Add a feature to save an article to Pocket.
 
 ##1.20.28
   1. update book "xueqiu".

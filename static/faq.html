@@ -49,6 +49,7 @@
         <li><a href="#coverbv">如何修改多本书籍合并后的封面？</a></li>
         <li><a href="#aboutweixin">如何订阅微信公众号？</a></li>
         <li><a href="#aboutgfw">有关墙的汇总</a></li>
+        <li><a href="#savetopocket">保存到Pocket功能如何使用？</a></li>
       </ul>
     </div>
     
@@ -281,12 +282,28 @@
     注意事项：因为微信是非常封闭的体系，腾讯和搜狗可能会时不时修改其接口或防爬取措施，不管哪个网站或解决方案，都无法保证永久有效，如果后续发现内容爬取失效，可能你需要升级了，或者你可以到 <a href="https://diy-devz.rhcloud.com/">https://diy-devz.rhcloud.com/</a> 确认 <a href="https://github.com/zhu327">zhu327</a> 有没有更新代码。
     </p>
     
-    <span id="#aboutgfw"></span>
+    <span id="aboutgfw"></span>
     <h2>有关墙的汇总</h2>
     <p class="answer">在天朝的网友在部署时和使用时会遇到一个强大的墙，特别google又是特别重要的黑名单，这是几个简单的说明，其他的请自己解决：
     <ul>
         <li>在部署时需要开全局代理，单单浏览器代理无法上传代码。</li>
         <li>在上传之后，如果使用代理还是无法访问appspot，可以将appspot中的字母o改成0（零）试一下，形如：xxx.appsp0t.com，感谢天朝某位网友的默默服务吧。</li>
+    </ul>
+    </p>
+    
+    <span id="savetopocket"></span>
+    <h2>保存到Pocket功能如何使用？</h2>
+    <p class="answer"><a href="https://getpocket.com/">Pocket</a> 是一个比较流行的稍后阅读应用，你在电子书上读到有趣或有用的文章后，可以选择将其发送到你的Pocket账号，然后就可以通过跨平台的Pocket应用来继续阅读。<br/>要启动此功能，请按如下步骤打开：
+    <ul>
+        <li>申请Pocket账号；</li>
+        <li>点击网站上的"高级设置" | "归档与分享"页面中的 'Save to Pocket' 区段的[申请授权]，然后浏览器会跳转到Pocket的页面进行授权，在你确认授权后会自动跳转回来，则完成申请授权过程；</li>
+        <li>在KindleEar的“高级设置” | "归档与分享"页面中，勾选“在每篇文章后附加 'Save to Pocket' 超链接”。</li>
+    </ul>
+    备注：
+    <ul>
+        <li>此应用仅申请了添加文章权限，没有权限修改和删除你的账户中的已有文章，也没有权限查看你的文章列表；</li>
+        <li>在Pocket申请到的授权码保存在你自己的应用数据库中，其他人搭建的KindleEar没有权限访问你的账户；</li>
+        <li>如果你更注重隐私和安全，你也可以自己在Pocket上申请一个开发者的Consumer Key，然后修改config.py中的POCKET_CONSUMER_KEY。</li>
     </ul>
     </p>
     

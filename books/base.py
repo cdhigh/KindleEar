@@ -859,13 +859,13 @@ class BaseFeedBook:
             return None
 
     def AppendShareLinksToArticle(self, soup, user, url):
-        " 在文章末尾添加分享链接 "
+        #在文章末尾添加分享链接
         if not user or not soup:
             return
         FirstLink = True
         body = soup.html.body
         if user.evernote and user.evernote_mail:
-            href = self.MakeShareLink('evernote', user, url)
+            href = self.MakeShareLink('evernote', user, url, soup)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SAVE_TO_EVERNOTE
             body.append(ashare)
@@ -873,15 +873,23 @@ class BaseFeedBook:
         if user.wiz and user.wiz_mail:
             if not FirstLink:
                 self.AppendSeperator(soup)
-            href = self.MakeShareLink('wiz', user, url)
+            href = self.MakeShareLink('wiz', user, url, soup)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SAVE_TO_WIZ
+            body.append(ashare)
+            FirstLink = False
+        if user.xpocket:
+            if not FirstLink:
+                self.AppendSeperator(soup)
+            href = self.MakeShareLink('xpocket', user, url, soup)
+            ashare = soup.new_tag('a', href=href)
+            ashare.string = SAVE_TO_POCKET
             body.append(ashare)
             FirstLink = False
         if user.xweibo:
             if not FirstLink:
                 self.AppendSeperator(soup)
-            href = self.MakeShareLink('xweibo', user, url)
+            href = self.MakeShareLink('xweibo', user, url, soup)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_XWEIBO
             body.append(ashare)
@@ -889,7 +897,7 @@ class BaseFeedBook:
         if user.tweibo:
             if not FirstLink:
                 self.AppendSeperator(soup)
-            href = self.MakeShareLink('tweibo', user, url)
+            href = self.MakeShareLink('tweibo', user, url, soup)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_TWEIBO
             body.append(ashare)
@@ -897,7 +905,7 @@ class BaseFeedBook:
         if user.facebook:
             if not FirstLink:
                 self.AppendSeperator(soup)
-            href = self.MakeShareLink('facebook', user, url)
+            href = self.MakeShareLink('facebook', user, url, soup)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_FACEBOOK
             body.append(ashare)
@@ -905,7 +913,7 @@ class BaseFeedBook:
         if user.twitter:
             if not FirstLink:
                 self.AppendSeperator(soup)
-            href = self.MakeShareLink('twitter', user, url)
+            href = self.MakeShareLink('twitter', user, url, soup)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_TWITTER
             body.append(ashare)
@@ -913,7 +921,7 @@ class BaseFeedBook:
         if user.tumblr:
             if not FirstLink:
                 self.AppendSeperator(soup)
-            href = self.MakeShareLink('tumblr', user, url)
+            href = self.MakeShareLink('tumblr', user, url, soup)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_TUMBLR
             body.append(ashare)
@@ -925,10 +933,12 @@ class BaseFeedBook:
             ashare.string = OPEN_IN_BROWSER
             body.append(ashare)
 
-    def MakeShareLink(self, sharetype, user, url):
+    def MakeShareLink(self, sharetype, user, url, soup):
         " 生成保存内容或分享文章链接的KindleEar调用链接 "
         if sharetype in ('evernote','wiz'):
-            href = "%s/share?act=%s&u=%s&url="%(DOMAIN,sharetype,user.name)
+            href = "%s/share?act=%s&u=%s&url=" % (DOMAIN, sharetype, user.name)
+        elif sharetype == 'xpocket':
+            href = '%s/share?act=xpocket&u=%s&h=%s&t=%s&url=' % (DOMAIN, user.name, (user.xpocket_acc_token_hash or ''), soup.html.head.title.string)
         elif sharetype == 'xweibo':
             href = 'http://v.t.sina.com.cn/share/share.php?url='
         elif sharetype == 'tweibo':
@@ -941,8 +951,8 @@ class BaseFeedBook:
             href = 'http://www.tumblr.com/share/link?url='
         else:
             href = ''
-        if user.share_fuckgfw and sharetype in ('evernote','wiz','facebook','twitter'):
-            href = SHARE_FUCK_GFW_SRV % urllib.quote((href+url).encode('utf-8'))
+        if user.share_fuckgfw and sharetype in ('evernote', 'wiz', 'facebook', 'twitter', 'xpocket'):
+            href = SHARE_FUCK_GFW_SRV % urllib.quote((href + url).encode('utf-8'))
         else:
             href += urllib.quote(url.encode('utf-8'))
         return href

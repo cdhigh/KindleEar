@@ -47,7 +47,7 @@ from apps.utils import fix_filesizeformat
 
 application = web.application(main.urls, globals())
 store = MemcacheStore(memcache)
-session = web.session.Session(application, store, initializer={'username':'','login':0,"lang":''})
+session = web.session.Session(application, store, initializer={'username':'', 'login':0, 'lang':'', 'pocket_request_token':''})
 jjenv = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'),
                             extensions=["jinja2.ext.do",'jinja2.ext.i18n'])
 jjenv.filters['filesizeformat'] = fix_filesizeformat

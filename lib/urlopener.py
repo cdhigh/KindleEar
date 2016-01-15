@@ -64,7 +64,7 @@ class URLOpener:
         return '%d %s' % (errCode, des) if des else str(errCode)
     
     def __init__(self, host=None, maxfetchcount=2, maxredirect=5, 
-              timeout=CONNECTION_TIMEOUT, addreferer=True):
+              timeout=CONNECTION_TIMEOUT, addreferer=True, headers=None):
         self.cookie = Cookie.SimpleCookie()
         self.maxFetchCount = maxfetchcount
         self.maxRedirect = maxredirect
@@ -72,8 +72,9 @@ class URLOpener:
         self.addReferer = addreferer
         self.timeout = timeout
         self.realurl = ''
+        self.initHeaders = headers
     
-    def open(self, url, data=None):
+    def open(self, url, data=None, headers=None):
         method = urlfetch.GET if data is None else urlfetch.POST
         self.realurl = url
         maxRedirect = self.maxRedirect
@@ -101,7 +102,7 @@ class URLOpener:
                         if data and isinstance(data, dict):
                             data = urllib.urlencode(data)
                         response = urlfetch.fetch(url=url, payload=data, method=method,
-                            headers=self._getHeaders(url),
+                            headers=self._getHeaders(url, headers),
                             allow_truncated=False, follow_redirects=False, 
                             deadline=self.timeout, validate_certificate=False)
                     except urlfetch.DeadlineExceededError:
@@ -167,7 +168,7 @@ class URLOpener:
         self.realurl = url
         return response
         
-    def _getHeaders(self, url=None):
+    def _getHeaders(self, url=None, extheaders=None):
         headers = {
              'User-Agent':"Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)",
              'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -177,6 +178,11 @@ class URLOpener:
             headers['Cookie'] = cookie
         if self.addReferer and (self.host or url):
             headers['Referer'] = self.host if self.host else url
+        
+        if self.initHeaders:
+            headers.update(self.initHeaders)
+        if extheaders:
+            headers.update(extheaders)
         return headers
         
     def SaveCookies(self, cookies):
