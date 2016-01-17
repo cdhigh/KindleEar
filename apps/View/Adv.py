@@ -5,50 +5,57 @@
 #Contributors:
 # rexdf <https://github.com/rexdf>
 import datetime, urllib, urlparse, hashlib
+try:
+    import json
+except ImportError:
+    import simplejson as json
+    
 import web
 
-from google.appengine.api import memcache
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
-from apps.utils import local_time, etagged
+from apps.utils import local_time, etagged, ke_encrypt, ke_decrypt
 from lib.pocket import Pocket
+from lib.urlopener import URLOpener
 from config import *
-
-MEMC_ADV_ID = '!#AdvSettings@'
 
 class AdvSettings(BaseHandler):
     """ 高级设置的主入口 """
-    __url__ = "/advsettings"
-    @etagged()
+    __url__ = "/adv"
+    #@etagged()
     def GET(self):
-        prevUrl = memcache.get(MEMC_ADV_ID)
-        if prevUrl in (AdvShare.__url__, AdvUrlFilter.__url__, AdvWhiteList.__url__, AdvImport.__url__):
-            raise web.seeother(prevUrl)
-        else:
-            memcache.set(MEMC_ADV_ID, AdvWhiteList.__url__, 86400)
-            raise web.seeother(AdvWhiteList.__url__)
+        raise web.seeother(AdvWhiteList.__url__)
 
-class AdvShare(BaseHandler):
-    """ 设置归档和分享配置项 """
-    __url__ = "/advshare"
+class AdvWhiteList(BaseHandler):
+    """ 设置邮件白名单 """
+    __url__ = "/advwhitelist"
     @etagged()
     def GET(self):
         user = self.getcurrentuser()
-        current = 'advsetting'
-        advcurr = 'share'
-        savetoevernote = SAVE_TO_EVERNOTE
-        savetowiz = SAVE_TO_WIZ
-        savetopocket = SAVE_TO_POCKET
-        shareonxweibo = SHARE_ON_XWEIBO
-        shareontweibo = SHARE_ON_TWEIBO
-        shareonfacebook = SHARE_ON_FACEBOOK
-        shareontwitter = SHARE_ON_TWITTER
-        shareontumblr = SHARE_ON_TUMBLR
-        openinbrowser = OPEN_IN_BROWSER
-        args = locals()
-        args.pop('self')
-        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
-        return self.render('advshare.html',"Share",**args)
+        return self.render('advwhitelist.html',"White List",current='advsetting',
+            user=user,advcurr='whitelist')
+        
+    def POST(self):
+        user = self.getcurrentuser()
+        
+        wlist = web.input().get('wlist')
+        if wlist:
+            WhiteList(mail=wlist,user=user).put()
+        raise web.seeother('')
+
+class AdvArchive(BaseHandler):
+    """ 设置归档和分享配置项 """
+    __url__ = "/advarchive"
+    
+    @etagged()
+    def GET(self):
+        user = self.getcurrentuser()
+        
+        return self.render('advarchive.html', "Share", current='advsetting', user=user, advcurr='share',
+            savetoevernote=SAVE_TO_EVERNOTE, savetowiz=SAVE_TO_WIZ, savetopocket=SAVE_TO_POCKET, 
+            savetoinstapaper=SAVE_TO_INSTAPAPER, ke_decrypt=ke_decrypt,
+            shareonxweibo=SHARE_ON_XWEIBO, shareontweibo=SHARE_ON_TWEIBO, shareonfacebook=SHARE_ON_FACEBOOK,
+            shareontwitter=SHARE_ON_TWITTER, shareontumblr=SHARE_ON_TUMBLR, openinbrowser=OPEN_IN_BROWSER)
         
     def POST(self):
         user = self.getcurrentuser()
@@ -62,7 +69,11 @@ class AdvShare(BaseHandler):
         wiz_mail = web.input().get('wiz_mail', '')
         if not wiz_mail:
             wiz = False
-        xpocket = bool(web.input().get('xpocket'))
+        pocket = bool(web.input().get('pocket'))
+        instapaper = bool(web.input().get('instapaper'))
+        instapaper_username = web.input().get('instapaper_username', '')
+        instapaper_password = web.input().get('instapaper_password', '')
+        
         xweibo = bool(web.input().get('xweibo'))
         tweibo = bool(web.input().get('tweibo'))
         facebook = bool(web.input().get('facebook'))
@@ -70,12 +81,22 @@ class AdvShare(BaseHandler):
         tumblr = bool(web.input().get('tumblr'))
         browser = bool(web.input().get('browser'))
         
+        #将instapaper的密码加密
+        if instapaper_username and instapaper_password:
+            instapaper_password = ke_encrypt(instapaper_password, user.secret_key or '')
+        else:
+            instapaper_username = ''
+            instapaper_password = ''
+        
         user.share_fuckgfw = fuckgfw
         user.evernote = evernote
         user.evernote_mail = evernote_mail
         user.wiz = wiz
         user.wiz_mail = wiz_mail
-        user.xpocket = xpocket
+        user.pocket = pocket
+        user.instapaper = instapaper
+        user.instapaper_username = instapaper_username
+        user.instapaper_password = instapaper_password
         user.xweibo = xweibo
         user.tweibo = tweibo
         user.facebook = facebook
@@ -83,7 +104,6 @@ class AdvShare(BaseHandler):
         user.tumblr = tumblr
         user.browser = browser
         user.put()
-        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
         raise web.seeother('')
 
 class AdvUrlFilter(BaseHandler):
@@ -92,7 +112,6 @@ class AdvUrlFilter(BaseHandler):
     @etagged()
     def GET(self):
         user = self.getcurrentuser()
-        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
         return self.render('advurlfilter.html',"Url Filter",current='advsetting',
             user=user,advcurr='urlfilter')
         
@@ -102,7 +121,6 @@ class AdvUrlFilter(BaseHandler):
         url = web.input().get('url')
         if url:
             UrlFilter(url=url,user=user).put()
-        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
         raise web.seeother('')
         
 class AdvDel(BaseHandler):
@@ -124,39 +142,18 @@ class AdvDel(BaseHandler):
                 wlist.delete()
             raise web.seeother('/advwhitelist')
 
-class AdvWhiteList(BaseHandler):
-    """ 设置邮件白名单 """
-    __url__ = "/advwhitelist"
-    @etagged()
-    def GET(self):
-        user = self.getcurrentuser()
-        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
-        return self.render('advwhitelist.html',"White List",current='advsetting',
-            user=user,advcurr='whitelist')
-        
-    def POST(self):
-        user = self.getcurrentuser()
-        
-        wlist = web.input().get('wlist')
-        if wlist:
-            WhiteList(mail=wlist,user=user).put()
-        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
-        raise web.seeother('')
-
 class AdvImport(BaseHandler):
     """ 导入自定义rss订阅列表，当前支持Opml格式 """
     __url__ = "/advimport"
     @etagged()
     def GET(self, tips=None):
         user = self.getcurrentuser()
-        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
         return self.render('advimport.html',"Import",current='advsetting',
             user=user,advcurr='import',tips=tips)
 
     def POST(self):
         import opml
         x = web.input(importfile={})
-        memcache.set(MEMC_ADV_ID, self.__url__, 86400)
         if 'importfile' in x:
             user = self.getcurrentuser()
             try:
@@ -177,7 +174,6 @@ class AdvImport(BaseHandler):
                         Feed(title=title,url=url,book=user.ownfeeds,isfulltext=isfulltext,
                             time=datetime.datetime.utcnow()).put()
                             
-            memcache.delete('%d.feedscount'%user.ownfeeds.key().id())
             raise web.seeother('/my')
         else:
             raise web.seeother('')
@@ -194,7 +190,6 @@ class AdvImport(BaseHandler):
                 for subOutline in self.walkOutline(o):
                     yield subOutline
             yield o
-
 
 class AdvExport(BaseHandler):
     """ 生成自定义rss订阅列表的Opml格式文件，让用户下载保存 """
@@ -240,13 +235,13 @@ class AdvOAuth2(BaseHandler):
             return 'Auth Type(%s) Unsupported!' % authType
             
         user = self.getcurrentuser()
-        cbUrl = urlparse.urljoin(DOMAIN, '/oauth2cb/pocket?redirect=/advshare')
+        cbUrl = urlparse.urljoin(DOMAIN, '/oauth2cb/pocket?redirect=/advarchive')
         pocket = Pocket(POCKET_CONSUMER_KEY, cbUrl)
         try:
             request_token = pocket.get_request_token()
             url = pocket.get_authorize_url(request_token)
         except Exception as e:
-            return self.render('tipsback.html', 'Authorization Error', urltoback='/advshare', tips=_('Authorization Error!<br/>%s') % str(e))
+            return self.render('tipsback.html', 'Authorization Error', urltoback='/advarchive', tips=_('Authorization Error!<br/>%s') % str(e))
         
         main.session['pocket_request_token'] = request_token
         raise web.seeother(url)
@@ -268,15 +263,44 @@ class AdvOAuth2Callback(BaseHandler):
         request_token = main.session.get('pocket_request_token', '')
         try:
             resp = pocket.get_access_token(request_token)
-            user.xpocket_access_token = resp.get('access_token', '')
-            user.xpocket_acc_token_hash = hashlib.md5(user.xpocket_access_token).hexdigest()
+            user.pocket_access_token = resp.get('access_token', '')
+            user.pocket_acc_token_hash = hashlib.md5(user.pocket_access_token).hexdigest()
             user.put()
-            return self.render('tipsback.html', 'Success authorized', urltoback='/advshare', tips=_('Success authorized by Pocket!'))
+            return self.render('tipsback.html', 'Success authorized', urltoback='/advarchive', tips=_('Success authorized by Pocket!'))
         except Exception as e:
-            user.xpocket_access_token = ''
-            user.xpocket_acc_token_hash = ''
-            user.xpocket = False
+            user.pocket_access_token = ''
+            user.pocket_acc_token_hash = ''
+            user.pocket = False
             user.put()
-            return self.render('tipsback.html', 'Failed to authorzi', urltoback='/advshare', 
+            return self.render('tipsback.html', 'Failed to authorzi', urltoback='/advarchive', 
                 tips=_('Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>%s') % str(e))
+
+#通过AJAX验证密码等信息的函数
+class VerifyAjax(BaseHandler):
+    __url__ = "/verifyajax/(.*)"
+    
+    def POST(self, verType):
+        INSTAPAPER_API_AUTH_URL = "https://www.instapaper.com/api/authenticate"
+        web.header('Content-Type', 'application/json')
+        
+        respDict = {'status':'ok', 'correct':0}
+        if verType.lower() != 'instapaper':
+            respDict['status'] = _('Request type[%s] unsupported') % verType
+            return json.dumps(respDict)
+        
+        user = self.getcurrentuser()
+        
+        username = web.input().get('username', '')
+        password = web.input().get('password', '')
+        opener = URLOpener()
+        apiParameters = {'username': username, 'password':password}
+        ret = opener.open(INSTAPAPER_API_AUTH_URL, data=apiParameters)
+        if ret.status_code in (200, 201):
+            respDict['correct'] = 1
+        elif ret.status_code == 403:
+            respDict['correct'] = 0
+        else:
+            respDict['status'] = _("The Instapaper service encountered an error. Please try again later.")
+        
+        return json.dumps(respDict)
         

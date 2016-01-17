@@ -518,7 +518,34 @@ msgid "Failed save to Pocket.<br/>"
 msgstr "保存到 Pocket 失败。<br/>"
 
 msgid "'%s'<br/><br/>Saved to your Pocket account."
-msgstr "'%s'<br/><br/>已经成功被保存到你的Pocket账户。"
+msgstr "《%s》<br/><br/>已经成功被保存到你的Pocket账户。"
 
 msgid "See details below:<br/><br/>%s"
 msgstr "下面是一些技术细节：<br/><br/>%s"
+
+msgid "Request type[%s] unsupported"
+msgstr "不支持你请求的命令类型[%s]"
+
+msgid "The Instapaper service encountered an error. Please try again later."
+msgstr "Instapaper服务器异常，请稍候再试。"
+
+msgid "Verify"
+msgstr "校验"
+
+msgid "Verifying"
+msgstr "校验中"
+
+msgid "Verified"
+msgstr "已校验"
+
+msgid "Congratulation : the username and password are correct."
+msgstr "恭喜：你提供的账号和密码都正确。"
+
+msgid "Unhappily : the username or password is incorrect!"
+msgstr "非常遗憾：你提供的账号或密码有误！"
+
+msgid "Error when verify the username and password for Instapaper. Status:"
+msgstr "在校验Instapaper的账号和密码时发生错误。错误码："
+
+msgid "'%s'<br/><br/>Saved to your Instapaper account."
+msgstr "《%s》<br/><br/>已经成功被保存到你的Instapaper账户。"

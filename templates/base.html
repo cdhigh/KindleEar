@@ -8,6 +8,66 @@
     <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
     <link rel="stylesheet" href="/static/pure-min.css" type="text/css" charset="utf-8"/>
     <link rel="stylesheet" href="/static/base.css" type="text/css" charset="utf-8"/>
+    <script type="text/javascript">
+        function formatParams(data) {
+            var arr = [];
+            for (var name in data) {
+                arr.push(encodeURIComponent(name) + "=" + encodeURIComponent(data[name]));
+            }
+            arr.push(("v=" + Math.random()).replace(".", ""));
+            return arr.join("&");
+        }
+        //Usage:
+        //ajax({
+        //    url: "./TestXHR.aspx",              //请求地址
+        //    type: "POST",                       //请求方式
+        //    data: { name: "super", age: 20 },   //请求参数
+        //    dataType: "json",                   //可选,'json'/'text'/'xml'
+        //    success: function (response, xml) {
+        //        // obj.innerHTML = response or response.name
+        //    },
+        //    fail: function (status) {           //可选
+        //        // 此处放失败后执行的代码
+        //    }
+        //});
+
+        function ajax(options) {
+            options = options || {};
+            options.type = (options.type || "GET").toUpperCase();
+            options.dataType = options.dataType || "json";
+            var params = formatParams(options.data);
+            
+            if (window.XMLHttpRequest) {
+                var xhr = new XMLHttpRequest();
+            } else {
+                var xhr = new ActiveXObject('Microsoft.XMLHTTP');
+            }
+            
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    var status = xhr.status;
+                    if (status >= 200 && status < 300) {
+                        if (options.dataType == "json" || options.dataType=="JSON") {
+                            options.success && options.success(eval("(" + xhr.responseText + ")"), xhr.responseXML);
+                        } else {
+                            options.success && options.success(xhr.responseText, xhr.responseXML);
+                        }
+                    } else {
+                        options.fail && options.fail(status);
+                    }
+                }
+            }
+            
+            if (options.type == "GET") {
+                xhr.open("GET", options.url + "?" + params, true);
+                xhr.send(null);
+            } else if (options.type == "POST") {
+                xhr.open("POST", options.url, true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.send(params);
+            }
+        }
+    </script>
     {% block cssfiles %}{% endblock -%}
     {% block css %}{% endblock -%}
     {% block jsfiles %}{% endblock -%}
@@ -63,7 +123,7 @@
         {% if current == "advsetting" -%}
         <li class="pure-menu-selected"><a href="#">{{_("Advance")}}</a></li>
         {% else -%}
-        <li><a href="/advsettings">{{_("Advance")}}</a></li>
+        <li><a href="/adv">{{_("Advance")}}</a></li>
         {% endif -%}
         </ul>
     </div>

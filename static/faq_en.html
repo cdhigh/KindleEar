@@ -70,14 +70,16 @@
 
     <span id="needserver"></span>
     <h2>Dows this application require its own server?</h2>
-    <p class="answer">This application is hosted on Google App Engine, it's fine if you don't own a server.</p>
-
+    <p class="answer">This application is hosted on Google App Engine (GAE), GAE has free quotas enough for small applications like KindleEar, you don't need to pay a penny to run KindleEar in GAE, it's fine if you don't own a server(VPS or other infrastructure).<br/><br/>
+    <strong>Remember:</strong> GAE(Google App Engine) is not GCE (Google Computer Engine), GAE is free forever (with limit of quotas of resources), GCE is free only within 60 days trial. you don't need to start a GCE trial.
+    </p>
+    
     <span id="ownserver"></span>
     <h2>How to deploy my own delivery server?</h2>
     <p class="answer"><strong>The formal way:</strong>
         <ol>
         <li><a href="https://github.com/cdhigh/KindleEar/archive/master.zip">Download</a> the latest version of KindleEar on github and then extract it to somewhere, for example C:\KindleEar (we'll use it in the following steps).</li>
-        <li>You need a GAE account, please visit the <a href="https://appengine.google.com/">Google AppEngine</a> page. Use your gmail account to login, click on "Create Application", select "others" in the account activation SMS page, enter your cellphone number with your country code (+nn), click "Send". You will receive an activation message on the phone in a while, after activating your account, click "Create Application" again, in the "Application Identifier" field, enter a name of your applications (e.g. Kindleear123). The remaining options can be kept as default , click on the "Create Application" button to create a GAE application.</li>
+        <li>You need a google account, please visit the <a href="https://console.developers.google.com">Google Developers Console</a> page. Use your gmail account to login, click on "Create an empty Project", follow steps to create a GAE application.</li>
         <li>Install Python 2.7.x. <a href="https://www.python.org/downloads/">Download</a> the latest 2.7.x source release and then install it.  Do not install a Python 3.x version, because GAE does not support it now.</li>
         <li>Install GAE SDK, which will be used to upload a GAE program. In section on <a href="https://developers.google.com/appengine/downloads">this page</a>, click "Google App Engine SDK for Python", choose your platform, click to download the corresponding version, then install, all the way "next" without words.</li>
         <li>Go to the previously downloaded KindleEar directory (e.g. C:\KindleEar), use a text editor to open app.yaml and module-worker.yaml file, modify the word 'kindleear' in the first line to your GAE application name (e.g. kindleear123), then save and exit.</li>
@@ -251,9 +253,11 @@
     </ul>
     Remarks:
     <ul>
+        <li>Authorization use OAuth v2 technology, only Pocket knows your username and password;</li>
         <li>This application requests 'Add' permission only, asks for neither 'Modify' nor 'Delete', can't retrieve your article list too.</li>
         <li>The Pocket's access token stored in your database, KindleEar application of other guys do not have permission to access your Pocket account;</li>
         <li>If you worry about privacy and security, you can apply an new developer Consumer Key in Pocket website, and then change variable POCKET_CONSUMER_KEY in config.py.</li>
+        <li>Both username and password are requested to active the feature 'Save to <a href="https://www.instapaper.com">Instapaper</a>', but the password is encrypted before be saved to database. </li>
     </ul>
     </p>
     

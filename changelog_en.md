@@ -1,4 +1,7 @@
 #Changelog for KindleEar
+##1.21.1
+  1. Add a feature to save an article to Instapaper.
+
 ##1.21
   1. Add a feature to save an article to Pocket.
 

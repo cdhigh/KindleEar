@@ -527,3 +527,30 @@ msgstr "'%s'<br/><br/>Saved to your Pocket account."
 
 msgid "See details below:<br/><br/>%s"
 msgstr "See details below:<br/><br/>%s"
+
+msgid "Request type[%s] unsupported"
+msgstr "Request type[%s] unsupported"
+
+msgid "The Instapaper service encountered an error. Please try again later."
+msgstr "The Instapaper service encountered an error. Please try again later."
+
+msgid "Verify"
+msgstr "Verify"
+
+msgid "Verifying"
+msgstr "Verifying"
+
+msgid "Verified"
+msgstr "Verified"
+
+msgid "Congratulation : the username and password are correct."
+msgstr "Congratulation : the username and password are correct."
+
+msgid "Unhappily : the username or password is incorrect!"
+msgstr "Unhappily : the username or password is incorrect!"
+
+msgid "Error when verify the username and password for Instapaper. Status:"
+msgstr "Error when verify the username and password for Instapaper. Status:"
+
+msgid "'%s'<br/><br/>Saved to your Instapaper account."
+msgstr "'%s'<br/><br/>Saved to your Instapaper account."

@@ -75,14 +75,16 @@
     
     <span id="needserver"></span>
     <h2>此应用需要自己的服务器吗？</h2>
-    <p class="answer">此应用托管在Google App Engine服务器上，不需要你自己的服务器。</p>
+    <p class="answer">此应用托管在Google App Engine(GAE)服务器上，不需要你自己的服务器。<br/><br/>
+    注意：GAE(Google App Engine)不是GCE(Google Computer Engine)，只要应用使用的资源不超其免费额度，则GAE永久免费，但是GCE仅提供60天试用免费。
+    </p>
     
     <span id="ownserver"></span>
     <h2>如何搭建自己的推送服务器？</h2>
     <p class="answer"><strong>以下是正规的搭建步骤：</strong>
         <ol>
         <li>在 <a href="http://www.github.com/cdhigh/kindleear">Github</a> 页面上下载KindleEar的最新版本，在页面的右下角有一个按钮"Download ZIP"，点击即可下载一个包含全部源码的ZIP文档，然后解压到你喜欢的目录，比如C:\KindleEar（下面以这个为例）。</li>
-        <li>你需要一个GAE账号，请移步 <a href="https://appengine.google.com/">Google AppEngine</a> 申请。使用G你的gmail账号登陆后，点击"Create Application"，进入到帐号短信激活界面，选择Others，输入你自己的手机号（中国手机国家号：+86），输入完毕点击Send，稍后就可以在手机上收到激活信息，待激活后再次点击Create Application，在Application Identifier一栏输入你选择的应用名字（如：KindleEar123）。其余选项保持默认即可，点击页尾的Create Application即成功创建了一个GAE程序（用来上传KinldeEar之用）。</li>
+        <li>首先你需要一个google账号，然后访问 <a href="https://console.developers.google.com">Google Developers Console</a>，点击左下角的“Create an empty Project”，根据提示来新建一个Application。（用来上传KinldeEar用）。</li>
         <li>安装 <a href="http://www.python.org/getit/">Python 2.7.x</a>，在此页面中选择你的系统平台对应的2.7.x版本下载，然后直接双击安装。注意不要安装成Python 3.x版本，GAE暂不支持。</li>
         <li>下载 <a href="https://developers.google.com/appengine/downloads?hl=zh-CN">GAE SDK</a>，这是用来上传GAE程序用的。在此页面中的区段“Google App Engine SDK for Python”中选择你的系统平台对应的版本点击即可下载，然后安装，一路next无话。</li>
         <li>打开资源管理器，进入之前下载的KindleEar目录C:\KindleEar，使用任何文本编辑器打开app.yaml和module-worker.yaml文件，将第一行的kindleear字样修改为你之前申请的GAE程序名（比如kindleear123），保存退出。</li>
@@ -301,9 +303,11 @@
     </ul>
     备注：
     <ul>
+        <li>Pocket对应用授权采用Oauth v2技术，只有Pocket才知道你的账号和密码；</li>
         <li>此应用仅申请了添加文章权限，没有权限修改和删除你的账户中的已有文章，也没有权限查看你的文章列表；</li>
         <li>在Pocket申请到的授权码保存在你自己的应用数据库中，其他人搭建的KindleEar没有权限访问你的账户；</li>
         <li>如果你更注重隐私和安全，你也可以自己在Pocket上申请一个开发者的Consumer Key，然后修改config.py中的POCKET_CONSUMER_KEY。</li>
+        <li>而 'Save to <a href="https://www.instapaper.com">Instapaper</a>' 功能需要输入账号和密码，但是密码是加密后保存在你自己的应用的数据库中的。</li>
     </ul>
     </p>
     

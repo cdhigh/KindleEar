@@ -1,7 +1,9 @@
 #Changelog for KindleEar
+##1.21.1
+  1. 增加保存到Instapaper的归档功能。
 
 ##1.21
-  1. 增加保存到Pocket的分享功能。
+  1. 增加保存到Pocket的归档功能。
 
 ##1.20.28
   1. 《雪球网》屏蔽了gae的IP段的网络请求，此版本通过中转器获取。

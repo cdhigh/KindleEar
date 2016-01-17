@@ -1,6 +1,6 @@
 {% extends "advbase.html" %}
 {% block advcontent -%}
-<form class="pure-form pure-form-stacked" action="" method="POST">
+<form class="pure-form" action="" method="POST">
   <fieldset>
     <legend>{{_("Share")}}</legend>
     <p style="font-size:0.8em;color:grey;">
@@ -28,17 +28,34 @@
     <hr style="width:90%;color:silver;margin:1em auto;" />
     <div class="pure-control-group">
         <label for="enable_pocket" class="pure-checkbox">
-            <input id="enable_pocket" name="xpocket", type="checkbox" 
-                {% if user and user.xpocket and user.xpocket_access_token %} checked="1" {% endif %}
-                {% if user and not user.xpocket_access_token %} disabled="1" {% endif %}
+            <input id="enable_pocket" name="pocket", type="checkbox" 
+                {% if user and user.pocket and user.pocket_access_token %} checked="1" {% endif %}
+                {% if user and not user.pocket_access_token %} disabled="1" {% endif %}
             />
             {{_("Append hyperlink '%s' to article")|format(savetopocket)}}&nbsp;&nbsp;&nbsp;&nbsp;
-            {%if user and user.xpocket_access_token -%}
+            {%if user and user.pocket_access_token -%}
             [<a href="/oauth2/pocket" style="text-decoration:none;color:silver;">{{_("Authorized")}}</a>]
             {%else -%}
             [<a href="/oauth2/pocket">{{_("Authorize")}}</a>]
             {%endif -%}
         </label>
+    </div>
+    <div class="pure-control-group">
+        <label for="enable_instapaper" class="pure-checkbox">
+            <input id="enable_instapaper" name="instapaper", type="checkbox" 
+                {% if user and user.instapaper %}checked="1"{% endif %} />
+            {{_("Append hyperlink '%s' to article")|format(savetoinstapaper)}}
+        </label>
+        <input type="text" name="instapaper_username" id="instapaper_username" placeholder="Email or Username" 
+                value="{% if user and user.instapaper_username %}{{ user.instapaper_username }}{% endif %}" 
+                onchange="notifyInstapaperVerify();" />
+        <input type="password" name="instapaper_password" id="instapaper_password" placeholder="Password" 
+                value="{% if user and user.instapaper_password %}{{ ke_decrypt(user.instapaper_password, user.secret_key or '') }}{% endif %}" 
+                onchange="notifyInstapaperVerify();" />
+        [<a href="#" id="averInstapaper" onclick="verifyInstapaper();return false;">{{_("Verify")}}</a>]
+    </div>
+    <hr style="width:90%;color:silver;margin:1em auto;" />
+    <div class="pure-control-group">
         <label for="enable_xweibo" class="pure-checkbox">
             <input id="enable_xweibo" name="xweibo", type="checkbox" 
                 {% if user and user.xweibo %}checked="1"{% endif %} />
@@ -80,3 +97,36 @@
   </fieldset>    
 </form>
 {% endblock -%}
+{% block js %}
+<script type="text/javascript">
+    function notifyInstapaperVerify() {
+        document.getElementById("averInstapaper").innerHTML = "{{_('Verify')}}";
+    };
+    function verifyInstapaper() {
+        document.getElementById("averInstapaper").innerHTML = "{{_('Verifying')}}";
+        var instauser = document.getElementById("instapaper_username").value;
+        var instapass = document.getElementById("instapaper_password").value;
+        ajax({url:"/verifyajax/instapaper", type: "POST", 
+            data: {username: instauser, password: instapass},
+            success: function (resp, xml) {
+                if (resp.status != "ok") {
+                    alert("Error:" + resp.status);
+                    document.getElementById("averInstapaper").innerHTML = "{{_('Verify')}}";
+                }
+                else if (resp.correct == 1) {
+                    alert("{{_('Congratulation : the username and password are correct.')}}");
+                    document.getElementById("averInstapaper").innerHTML = "{{_('Verified')}}";
+                } else {
+                    alert("{{_('Unhappily : the username or password is incorrect!')}}");
+                    document.getElementById("averInstapaper").innerHTML = "{{_('Verify')}}";
+                }
+                
+            },
+            fail: function (status) {
+                alert("{{_('Error when verify the username and password for Instapaper. Status:')}}" + status);
+                document.getElementById("averInstapaper").innerHTML = "{{_('Verify')}}";
+            }
+        });
+    };
+</script>
+{% endblock %}

@@ -878,12 +878,20 @@ class BaseFeedBook:
             ashare.string = SAVE_TO_WIZ
             body.append(ashare)
             FirstLink = False
-        if user.xpocket:
+        if user.pocket:
             if not FirstLink:
                 self.AppendSeperator(soup)
-            href = self.MakeShareLink('xpocket', user, url, soup)
+            href = self.MakeShareLink('pocket', user, url, soup)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SAVE_TO_POCKET
+            body.append(ashare)
+            FirstLink = False
+        if user.instapaper:
+            if not FirstLink:
+                self.AppendSeperator(soup)
+            href = self.MakeShareLink('instapaper', user, url, soup)
+            ashare = soup.new_tag('a', href=href)
+            ashare.string = SAVE_TO_INSTAPAPER
             body.append(ashare)
             FirstLink = False
         if user.xweibo:
@@ -937,8 +945,10 @@ class BaseFeedBook:
         " 生成保存内容或分享文章链接的KindleEar调用链接 "
         if sharetype in ('evernote','wiz'):
             href = "%s/share?act=%s&u=%s&url=" % (DOMAIN, sharetype, user.name)
-        elif sharetype == 'xpocket':
-            href = '%s/share?act=xpocket&u=%s&h=%s&t=%s&url=' % (DOMAIN, user.name, (user.xpocket_acc_token_hash or ''), soup.html.head.title.string)
+        elif sharetype == 'pocket':
+            href = '%s/share?act=pocket&u=%s&h=%s&t=%s&url=' % (DOMAIN, user.name, (user.pocket_acc_token_hash or ''), soup.html.head.title.string)
+        elif sharetype == 'instapaper':
+            href = '%s/share?act=instapaper&u=%s&n=%s&t=%s&url=' % (DOMAIN, user.name, user.instapaper_username or '', soup.html.head.title.string)
         elif sharetype == 'xweibo':
             href = 'http://v.t.sina.com.cn/share/share.php?url='
         elif sharetype == 'tweibo':
@@ -951,7 +961,7 @@ class BaseFeedBook:
             href = 'http://www.tumblr.com/share/link?url='
         else:
             href = ''
-        if user.share_fuckgfw and sharetype in ('evernote', 'wiz', 'facebook', 'twitter', 'xpocket'):
+        if user.share_fuckgfw and sharetype in ('evernote', 'wiz', 'facebook', 'twitter', 'pocket', 'instapaper'):
             href = SHARE_FUCK_GFW_SRV % urllib.quote((href + url).encode('utf-8'))
         else:
             href += urllib.quote(url.encode('utf-8'))
