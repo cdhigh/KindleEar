@@ -1,4 +1,8 @@
 #Changelog for KindleEar
+
+##1.22
+  1. 用AJAX技术重新实现“我的订阅”前后台，实现不重新加载页面增删订阅或RSS。
+
 ##1.21.1
   1. 增加保存到Instapaper的归档功能。
 

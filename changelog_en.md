@@ -1,4 +1,8 @@
 #Changelog for KindleEar
+
+##1.22
+  1. Rewrite manager of "Feed" via AJAX technology, provide better user experience.
+
 ##1.21.1
   1. Add a feature to save an article to Instapaper.
 

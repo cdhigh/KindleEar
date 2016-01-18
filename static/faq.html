@@ -50,6 +50,7 @@
         <li><a href="#aboutweixin">如何订阅微信公众号？</a></li>
         <li><a href="#aboutgfw">有关墙的汇总</a></li>
         <li><a href="#savetopocket">保存到Pocket功能如何使用？</a></li>
+        <li><a href="#wrongemail">投递日志状态wrong SRC_EMAIL的解决方案。</a></li>
       </ul>
     </div>
     
@@ -307,8 +308,14 @@
         <li>此应用仅申请了添加文章权限，没有权限修改和删除你的账户中的已有文章，也没有权限查看你的文章列表；</li>
         <li>在Pocket申请到的授权码保存在你自己的应用数据库中，其他人搭建的KindleEar没有权限访问你的账户；</li>
         <li>如果你更注重隐私和安全，你也可以自己在Pocket上申请一个开发者的Consumer Key，然后修改config.py中的POCKET_CONSUMER_KEY。</li>
+        <li>如果需要反向将Pocket的文章推送至Kindle，可以打开Pocket的自定义RSS功能，在Pocket控制面板的“隐私控制”|“RSS 订阅源”可以找到你的专有RSS订阅地址，把它加入KindleEar的订阅列表中即可。</li>
         <li>而 'Save to <a href="https://www.instapaper.com">Instapaper</a>' 功能需要输入账号和密码，但是密码是加密后保存在你自己的应用的数据库中的。</li>
     </ul>
+    </p>
+    
+    <span id="wrongemail"></span>
+    <h2>投递日志状态wrong SRC_EMAIL的解决方案。</h2>
+    <p class="answer">到Gae后台的Settings页面，看看email已经授权的账号里面有没有你的发送邮箱账号，如果没有就添加即可。
     </p>
     
     <div id="footer">

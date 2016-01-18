@@ -9,29 +9,30 @@
             <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" />{% endif %}
         </div>
         <div class="cornerControls">
-            <a href="/delfeed/{{feed.key().id()}}" class="actionButton">{{_("Delete")}}</a>
+            {#<a href="/delfeed/{{feed.key().id()}}" class="actionButton">{{_("Delete")}}</a>#}
+            <a href="#" onclick="delFeed(this, {{feed.key().id()}});return false;" class="actionButton">{{_("Delete")}}</a>
         </div>
         <div class="summaryRow">
-            <a href="{{feed.url}}" target="_blank" style="text-decoration:none;color:grey;" 
-                {%if feed.url|length>80%}title="{{feed.url}}"{%endif%}>
+            <a href="{{feed.url}}" target="_blank" style="text-decoration:none;color:grey;">
             {%if feed.url|length>80%}{{feed.url[:80]}}...{%else%}{{feed.url}}{%endif%}</a>
         </div>
     </div>
     {% endfor -%}
-    <form class="pure-form" action="" method="POST">
-    <div class="book" style="border-bottom:0;">
+    {#<form class="pure-form" action="" method="POST">#}
+    <div class="book" style="border-bottom:0;" id="divAddFeedCmdPanel">
         <div class="titleRow">
-            <input type="text" name="t" placeholder={{_("Title")}} style="width:250px;" />
+            <input type="text" name="t" id="title_to_add" placeholder={{_("Title")}} style="width:250px;" />
             <input type="checkbox" name="fulltext" id="fulltext" />
             <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" onclick="toggleFulltext();" />
         </div>
         <div class="summaryRow">
-            <input type="text" name="url" style="width:600px;margin-top:8px;" placeholder="URL" />
+            <input type="text" name="url" id="url_to_add" style="width:600px;margin-top:8px;" placeholder="URL" />
         </div>
-        <input type="submit" value="{{_("Add")}}" class="pure-button pure-button-primary" style="margin-top:8px;" />
+        <input type="button" value="{{_("Add")}}" class="pure-button pure-button-primary" style="margin-top:8px;" 
+            onclick="addFeed();return false;" />
         {% if tips %}<p style="color:red;font-size:0.7em;">{{tips}}</p>{% endif %}
     </div>
-    </form>
+    {#</form>#}
 </fieldset>
 {% endif -%}
 <fieldset id="mybooks" style="margin-top:10px;">
@@ -50,7 +51,7 @@
             {% if not user.subscription_info(book.title) %}style="color:red;"{% endif %}
             >{{_("Login Info")}}</a>
           {% endif -%}
-            <a href="/unsubscribe/{{book.key().id()}}" class="actionButton">{{_("Unsubscribe")}}</a>
+            <a href="#" onclick="doUnsubscribe(this,{{book.key().id()}});return false;" class="actionButton">{{_("Unsubscribe")}}</a>
         </div>
         <div class="summaryRow">
             {%if book.description|length>80%}{{book.description[:80]}}...<span>{{book.description}}</span>{%else%}{{book.description}}{%endif%}
@@ -69,8 +70,7 @@
             <img alt="{{_("Separate")}}" src="static/separate.gif" border="0" onclick="toggleSeparate('{{book.key().id()}}');" />
         </div>
         <div class="cornerControls">
-            <!--<a href="/subscribe/{{book.key().id()}}" class="actionButton">{{_("Subscribe")}}</a>-->
-            <a href="javascript:void(0)" onclick="doSubscribe('{{book.key().id()}}')" class="actionButton">{{_("Subscribe")}}</a>
+            <a href="#" onclick="doSubscribe(this,{{book.key().id()}});return false;" class="actionButton">{{_("Subscribe")}}</a>
         </div>
         <div class="summaryRow">
             {%if book.description|length>80%}{{book.description[:80]}}...<span>{{book.description}}</span>{%else%}{{book.description}}{%endif%}
@@ -92,12 +92,234 @@ function toggleSeparate(id) {
   btnft.checked = !btnft.checked;
 }
 
-function doSubscribe(id) {
-  var btnSeparate = document.getElementById("separate_" + id);
-  target = "/subscribe/" + id
-  if (btnSeparate.checked)
-    target += "?separate=true"
-  window.location.href = target
+//点击了订阅内置书籍
+function doSubscribe(obj, id_) {
+    var separate = document.getElementById("separate_" + id_).checked;
+    
+    ajax({url:"/books/subscribe", type: "POST", 
+        data: {id_: id_, separate: separate},
+        success: function (resp, xml) {
+            if (resp.status == "ok") {
+                appendSubscribedBook(id_, resp.title, resp.desc, resp.separate, resp.needs_subscription, resp.subscription_info);
+                var thisDiv = obj.parentNode.parentNode;
+                thisDiv.parentNode.removeChild(thisDiv);
+            } else {
+                alert("{{_('Unhappily : cannot subscribe this book, Error:')}}" + resp.status);
+            }
+        },
+        fail: function (status) {
+            alert("{{_('Error when try to subscribe this book. Status:')}}" + status);
+        }
+    });
 }
+
+//点击了退订内置书籍
+function doUnsubscribe(obj, id_) {
+    ajax({url:"/books/unsubscribe", type: "POST", 
+        data: {id_: id_},
+        success: function (resp, xml) {
+            if (resp.status == "ok") {
+                appendBookToBooks(id_, resp.title, resp.desc);
+                var thisDiv = obj.parentNode.parentNode;
+                thisDiv.parentNode.removeChild(thisDiv);
+            } else {
+                alert("{{_('Unhappily : cannot unsubscribe this book, Error:')}}" + resp.status);
+            }
+        },
+        fail: function (status) {
+            alert("{{_('Error when try to unsubscribe this book. Status:')}}" + status);
+        }
+    });
+}
+
+//用户点击了删除自定义RSS按钮
+function delFeed(obj, feedid) {
+    ajax({url:"/feeds/delete", type: "POST", 
+        data: {feedid: feedid},
+        success: function (resp, xml) {
+            if (resp.status == "ok") {
+                var thisDiv = obj.parentNode.parentNode;
+                thisDiv.parentNode.removeChild(thisDiv);
+            }
+            else {
+                alert("{{_('Unhappily : cannot delete this feed, Error:')}}" + resp.status);
+            }
+        },
+        fail: function (status) {
+            alert("{{_('Error when try to delete this feed. Status:')}}" + status);
+        }
+    });
+}
+
+//用户点击了添加自定义RSS按钮
+function addFeed() {
+    var title_to_add = document.getElementById('title_to_add');
+    var isfulltext = document.getElementById('fulltext');
+    var url_to_add = document.getElementById('url_to_add');
+    ajax({url: "/feeds/add", type: "POST",
+        data: {title: title_to_add.value, fulltext: fulltext.checked, url: url_to_add.value},
+        success: function (resp, xml) {
+            if (resp.status == "ok") {
+                appendFeedDiv(resp.title, resp.isfulltext, resp.url, resp.feedid);
+                title_to_add.value = "";
+                url_to_add.value = "";
+            } else {
+                alert("{{_('Unhappily : cannot add this feed, Error:')}}" + resp.status);
+            }
+        },
+        fail: function (status) {
+            alert("{{_('Error when try to add this feed. Status:')}}" + status);
+        }
+    });
+}
+
+//新建一个自定义RSS书籍，添加到订阅列表
+function appendFeedDiv(title, isfulltext, url, feedid) {
+    var newFeedDiv = document.createElement("div");
+    newFeedDiv.className = "book";
+    
+    var newTitleDiv = document.createElement("div");
+    newTitleDiv.className = "titleRow";
+    
+    var titleNode = document.createTextNode(title);
+    newTitleDiv.appendChild(titleNode);
+    if (isfulltext) {
+        newTitleDiv.appendChild(document.createTextNode(' '));
+        var imgNode = document.createElement("img");
+        imgNode.setAttribute("alt", {{'"' + _("Fulltext") + '"'}});
+        imgNode.setAttribute("src", "static/fulltext.gif");
+        imgNode.setAttribute("border", "0");
+        newTitleDiv.appendChild(imgNode);
+    }
+    newFeedDiv.appendChild(newTitleDiv);
+    
+    var newCornerDiv = document.createElement("div");
+    newCornerDiv.className = "cornerControls";
+    var atoDel = document.createElement("a");
+    atoDel.className = "actionButton";
+    atoDel.setAttribute("href", "#");
+    atoDel.setAttribute("onclick", "delFeed(this, " + feedid + ");return false;");
+    atoDel.appendChild(document.createTextNode({{'"' + _("Delete") + '"'}}));
+    newCornerDiv.appendChild(atoDel);
+    newFeedDiv.appendChild(newCornerDiv);
+    
+    var sumRowDiv = document.createElement("div");
+    sumRowDiv.className = "summaryRow";
+    var aa =   document.createElement("a");
+    aa.setAttribute("href", url);
+    aa.setAttribute("target", "_blank");
+    aa.style.textDecoration = "none";
+    aa.style.color = "grey";
+    if (url.length > 80) {
+        aa.appendChild(document.createTextNode(url.substr(0, 80)));
+    } else {
+        aa.appendChild(document.createTextNode(url));
+    }
+    sumRowDiv.appendChild(aa);
+    newFeedDiv.appendChild(sumRowDiv);
+    
+    var cmdPanel = document.getElementById("divAddFeedCmdPanel");
+    cmdPanel.parentNode.insertBefore(newFeedDiv, cmdPanel);
+}
+
+//添加一个内置书籍订阅
+
+function appendSubscribedBook(id_, title, desc, separate, needs_subscription, subscription_info) {
+    var sBookDiv = document.createElement("div");
+    sBookDiv.className = "book";
+    
+    var titleDiv = document.createElement("div");
+    titleDiv.className = "titleRow";
+    titleDiv.appendChild(document.createTextNode(title));
+    if (separate) {
+        titleDiv.appendChild(document.createTextNode(' '));
+        var img = document.createElement("img");
+        img.setAttribute("alt", {{'"' + _("Separate") + '"'}});
+        img.setAttribute("src", "static/separate.gif");
+        img.setAttribute("border", "0");
+        titleDiv.appendChild(img);
+    }
+    sBookDiv.appendChild(titleDiv);
+    
+    var cornDiv = document.createElement("div");
+    cornDiv.className = "cornerControls";
+    if (needs_subscription) {
+        var a = document.createElement("a");
+        a.setAttribute("href", "/booklogininfo/" + id_);
+        a.className = "actionButton";
+        a.appendChild(document.createTextNode({{'"' + _("Login Info") + '"'}}));
+        if (!subscription_info) {
+            a.style.color = "red";
+        }
+        cornDiv.appendChild(a);
+    }
+    var aa = document.createElement("a");
+    aa.className = "actionButton";
+    aa.setAttribute("href", "#");
+    aa.setAttribute("onclick", "doUnsubscribe(this," + id_ + ");return false;");
+    aa.appendChild(document.createTextNode({{'"' + _("Unsubscribe") + '"'}}));
+    cornDiv.appendChild(aa);
+    sBookDiv.appendChild(cornDiv);
+    
+    var sumDiv = document.createElement("div");
+    sumDiv.className = "summaryRow";
+    if (desc.length > 80) {
+        sumDiv.appendChild(document.createTextNode(desc.substr(0, 80) + '...'));
+        var spanD = document.createElement("span");
+        spanD.appendChild(document.createTextNode(desc));
+        sumDiv.appendChild(spanD);
+    } else {
+        sumDiv.appendChild(document.createTextNode(desc));
+    }
+    sBookDiv.appendChild(sumDiv);
+    
+    document.getElementById("mybooks").appendChild(sBookDiv);
+}
+
+function appendBookToBooks(id_, title, desc) {
+    var bookDiv = document.createElement("div");
+    bookDiv.className = "book";
+    
+    var titleDiv = document.createElement("div");
+    titleDiv.appendChild(document.createTextNode(title));
+    var objIn = document.createElement("input");
+    objIn.setAttribute("type", "checkbox");
+    objIn.setAttribute("id", "separate_" + id_);
+    objIn.style.marginLeft = "1em";
+    titleDiv.appendChild(objIn);
+    var img = document.createElement("img");
+    img.setAttribute("alt", {{'"' + _("Separate") + '"'}});
+    img.setAttribute("src", "static/separate.gif");
+    img.setAttribute("border", "0");
+    img.setAttribute("onclick", "toggleSeparate(" + id_ + ");");
+    titleDiv.appendChild(img);
+    bookDiv.appendChild(titleDiv);
+    
+    var cornDiv = document.createElement("div");
+    cornDiv.className = "cornerControls";
+    var a = document.createElement("a");
+    a.className = "actionButton";
+    a.setAttribute("href", "#");
+    a.setAttribute("onclick", "doSubscribe(this," + id_ + ");return false;");
+    a.appendChild(document.createTextNode({{'"' + _("Subscribe") + '"'}}));
+    cornDiv.appendChild(a);
+    bookDiv.appendChild(cornDiv);
+    
+    var sumDiv =  document.createElement("div");
+    sumDiv.className = "summaryRow";
+    if (desc.length > 80) {
+        sumDiv.appendChild(document.createTextNode(desc.substr(0, 80) + "..."));
+        var spanD = document.createElement("span");
+        spanD.appendChild(document.createTextNode(desc));
+        sumDiv.appendChild(spanD);
+    } else {
+        sumDiv.appendChild(document.createTextNode(desc));
+    }
+    
+    bookDiv.appendChild(sumDiv);
+    
+    document.getElementById("books").appendChild(bookDiv);
+}
+
 </script>
 {% endblock -%}

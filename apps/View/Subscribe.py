@@ -8,6 +8,10 @@
 import datetime
 
 import web
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 from google.appengine.api import memcache
 from apps.utils import etagged
@@ -39,19 +43,116 @@ class MySubscription(BaseHandler):
             time=datetime.datetime.utcnow()).put()
         memcache.delete('%d.feedscount'%user.ownfeeds.key().id())
         raise web.seeother('/my')
+
+class FeedsAjax(BaseHandler):
+    __url__ = "/feeds/(.*)"
+    
+    def POST(self, mgrType):
+        web.header('Content-Type', 'application/json')
+        user = self.getcurrentuser()
         
+        if mgrType.lower() == 'delete':
+            feedid = web.input().get('feedid')
+            try:
+                feedid = int(feedid)
+            except:
+                return json.dumps({'status': 'Id of feed invalid!'})
+            
+            feed = Feed.get_by_id(feedid)
+            if feed:
+                feed.delete()
+                return json.dumps({'status':'ok'})
+            else:
+                return json.dumps({'status': 'Feed not exist!'})
+        elif mgrType.lower() == 'add':
+            title = web.input().get('title')
+            url = web.input().get('url')
+            isfulltext = bool(web.input().get('fulltext','').lower() == 'true')
+            respDict = {'status':'ok', 'title':title, 'url':url, 'isfulltext':isfulltext}
+            
+            if not title or not url:
+                respDict['status'] = _("Title or Url is empty!")
+                return json.dumps(respDict)
+            
+            if not url.lower().startswith('http'):
+                url = 'http://' + url
+                respDict['url'] = url
+            
+            fd = Feed(title=title, url=url, book=user.ownfeeds, isfulltext=isfulltext,
+                time=datetime.datetime.utcnow())
+            fd.put()
+            respDict['feedid'] = fd.key().id()
+            memcache.delete('%d.feedscount' % user.ownfeeds.key().id())
+            return json.dumps(respDict)
+
+class BooksAjax(BaseHandler):
+    __url__ = "/books/(.*)"
+    
+    def POST(self, mgrType):
+        web.header('Content-Type', 'application/json')
+        user = self.getcurrentuser()
+        
+        if mgrType.lower() == 'unsubscribe':
+            id_ = web.input().get('id_')
+            try:
+                id_ = int(id_)
+            except:
+                return json.dumps({'status': 'Id of book invalid!'})
+            
+            bk = Book.get_by_id(id_)
+            if not bk:
+                return json.dumps({'status': 'the book(%d) not exist!' % id_})
+            
+            if user.name in bk.users:
+                bk.users.remove(user.name)
+                bk.separate = False
+                bk.put()
+                
+            #为安全起见，退订后也删除网站登陆信息（如果有的话）
+            subs_info = user.subscription_info(bk.title)
+            if subs_info:
+                subs_info.delete()
+                
+            return json.dumps({'status':'ok', 'title': bk.title, 'desc': bk.description})
+        elif mgrType.lower() == 'subscribe':
+            id_ = web.input().get('id_')
+            separate = web.input().get('separate', '')
+            
+            respDict = {'status':'ok'}
+            
+            try:
+                id_ = int(id_)
+            except:
+                return json.dumps({'status': _('the id is invalid!')})
+            
+            bk = Book.get_by_id(id_)
+            if not bk:
+                return json.dumps({'status': 'the book(%d) not exist!' % id_})
+            
+            if user.name not in bk.users:
+                bk.users.append(user.name)
+                bk.separate = bool(separate.lower() in ('true','1'))
+                bk.put()
+                
+            respDict['title'] = bk.title
+            respDict['desc'] = bk.description
+            respDict['needs_subscription'] = bk.needs_subscription
+            respDict['subscription_info'] = bool(user.subscription_info(bk.title))
+            respDict['separate'] = bk.separate
+            return json.dumps(respDict)
+            
 class Subscribe(BaseHandler):
     __url__ = "/subscribe/(.*)"
-    def GET(self, id):
+    def GET(self, id_):
         self.login_required()
         try:
-            id = int(id)
+            id_ = int(id_)
         except:
             return "the id is invalid!<br />"
         
-        bk = Book.get_by_id(id)
+        bk = Book.get_by_id(id_)
         if not bk:
-            return "the book(%d) not exist!<br />" % id
+            return "the book(%d) not exist!<br />" % id_
         
         if main.session.username not in bk.users:
             bk.users.append(main.session.username)
@@ -61,16 +162,16 @@ class Subscribe(BaseHandler):
         
 class Unsubscribe(BaseHandler):
     __url__ = "/unsubscribe/(.*)"
-    def GET(self, id):
+    def GET(self, id_):
         user = self.getcurrentuser()
         try:
-            id = int(id)
+            id_ = int(id_)
         except:
             return "the id is invalid!<br />"
             
-        bk = Book.get_by_id(id)
+        bk = Book.get_by_id(id_)
         if not bk:
-            return "the book(%d) not exist!<br />" % id
+            return "the book(%d) not exist!<br />" % id_
         
         if main.session.username in bk.users:
             bk.users.remove(main.session.username)
@@ -86,14 +187,14 @@ class Unsubscribe(BaseHandler):
 
 class DelFeed(BaseHandler):
     __url__ = "/delfeed/(.*)"
-    def GET(self, id):
+    def GET(self, id_):
         user = self.getcurrentuser()
         try:
-            id = int(id)
+            id_ = int(id_)
         except:
             return "the id is invalid!<br />"
         
-        feed = Feed.get_by_id(id)
+        feed = Feed.get_by_id(id_)
         if feed:
             feed.delete()
         
@@ -102,10 +203,10 @@ class DelFeed(BaseHandler):
 class BookLoginInfo(BaseHandler):
     __url__ = "/booklogininfo/(.*)"
     #修改书籍的网站登陆信息
-    def GET(self, id, tips=None):
+    def GET(self, id_, tips=None):
         user = self.getcurrentuser()
         try:
-            bk = Book.get_by_id(int(id))
+            bk = Book.get_by_id(int(id_))
         except:
             bk = None
         if not bk:
@@ -114,13 +215,13 @@ class BookLoginInfo(BaseHandler):
         subs_info = user.subscription_info(bk.title)
         return self.render('booklogininfo.html', "Book Login Infomation",bk=bk,subs_info=subs_info,tips=tips)
     
-    def POST(self,id):
+    def POST(self, id_):
         user = self.getcurrentuser()
         account = web.input().get('account')
         password = web.input().get('password')
         
         try:
-            bk = Book.get_by_id(int(id))
+            bk = Book.get_by_id(int(id_))
         except:
             bk = None
         if not bk:
