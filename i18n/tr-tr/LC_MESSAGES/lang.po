@@ -554,3 +554,36 @@ msgstr "Error when verify the username and password for Instapaper. Status:"
 
 msgid "'%s'<br/><br/>Saved to your Instapaper account."
 msgstr "'%s'<br/><br/>Saved to your Instapaper account."
+
+msgid "The id is invalid!"
+msgstr "The id is invalid!"
+
+msgid "The feed(%d) not exist!"
+msgstr "The feed(%d) not exist!"
+
+msgid "The book(%d) not exist!"
+msgstr "The book(%d) not exist!"
+
+msgid "Unhappily : cannot subscribe this book, Error:"
+msgstr "Unhappily : cannot subscribe this book, Error:"
+
+msgid "Error when try to subscribe this book. Status:"
+msgstr "Error when try to subscribe this book. Status:"
+
+msgid "Unhappily : cannot unsubscribe this book, Error:"
+msgstr "Unhappily : cannot unsubscribe this book, Error:"
+
+msgid "Error when try to unsubscribe this book. Status:"
+msgstr "Error when try to unsubscribe this book. Status:"
+
+msgid "Unhappily : cannot delete this feed, Error:"
+msgstr "Unhappily : cannot delete this feed, Error:"
+
+msgid "Error when try to delete this feed. Status:"
+msgstr "Error when try to delete this feed. Status:"
+
+msgid "Unhappily : cannot add this feed, Error:"
+msgstr "Unhappily : cannot add this feed, Error:"
+
+msgid "Error when try to add this feed. Status:"
+msgstr "Error when try to add this feed. Status:"

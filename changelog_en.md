@@ -1,5 +1,8 @@
 #Changelog for KindleEar
 
+##1.22.1
+  1. Replace some modules with lastest version.
+
 ##1.22
   1. Rewrite manager of "Feed" via AJAX technology, provide better user experience.
 

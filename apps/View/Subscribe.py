@@ -56,14 +56,14 @@ class FeedsAjax(BaseHandler):
             try:
                 feedid = int(feedid)
             except:
-                return json.dumps({'status': 'Id of feed invalid!'})
+                return json.dumps({'status': _('The id is invalid!')})
             
             feed = Feed.get_by_id(feedid)
             if feed:
                 feed.delete()
                 return json.dumps({'status':'ok'})
             else:
-                return json.dumps({'status': 'Feed not exist!'})
+                return json.dumps({'status': _('The feed(%d) not exist!') % feedid})
         elif mgrType.lower() == 'add':
             title = web.input().get('title')
             url = web.input().get('url')
@@ -97,11 +97,11 @@ class BooksAjax(BaseHandler):
             try:
                 id_ = int(id_)
             except:
-                return json.dumps({'status': 'Id of book invalid!'})
+                return json.dumps({'status': _('The id is invalid!')})
             
             bk = Book.get_by_id(id_)
             if not bk:
-                return json.dumps({'status': 'the book(%d) not exist!' % id_})
+                return json.dumps({'status': _('The book(%d) not exist!') % id_})
             
             if user.name in bk.users:
                 bk.users.remove(user.name)
@@ -123,11 +123,11 @@ class BooksAjax(BaseHandler):
             try:
                 id_ = int(id_)
             except:
-                return json.dumps({'status': _('the id is invalid!')})
+                return json.dumps({'status': _('The id is invalid')})
             
             bk = Book.get_by_id(id_)
             if not bk:
-                return json.dumps({'status': 'the book(%d) not exist!' % id_})
+                return json.dumps({'status': 'The book(%d) not exist!' % id_})
             
             if user.name not in bk.users:
                 bk.users.append(user.name)

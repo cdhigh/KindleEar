@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Pocketd V3 API封装，使用OAuth 2.
+Author: cdhigh
 用法：
 Step 1: Obtain a platform consumer key
 Step 2: Obtain a request token

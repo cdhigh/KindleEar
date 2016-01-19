@@ -25,7 +25,9 @@
 # 02110-1301  USA
 ######################### END LICENSE BLOCK #########################
 
-from constants import eStart, eError, eItsMe
+from .constants import eStart
+from .compat import wrap_ord
+
 
 class CodingStateMachine:
     def __init__(self, sm):
@@ -40,15 +42,15 @@ class CodingStateMachine:
     def next_state(self, c):
         # for each byte we get its class
         # if it is first byte, we also get byte length
-        try:
-            byteCls = self._mModel['classTable'][ord(c)]
-        except IndexError:
-            return eError
+        # PY3K: aBuf is a byte stream, so c is an int, not a byte
+        byteCls = self._mModel['classTable'][wrap_ord(c)]
         if self._mCurrentState == eStart:
             self._mCurrentBytePos = 0
             self._mCurrentCharLen = self._mModel['charLenTable'][byteCls]
         # from byte's class and stateTable, we get its next state
-        self._mCurrentState = self._mModel['stateTable'][self._mCurrentState * self._mModel['classFactor'] + byteCls]
+        curr_state = (self._mCurrentState * self._mModel['classFactor']
+                      + byteCls)
+        self._mCurrentState = self._mModel['stateTable'][curr_state]
         self._mCurrentBytePos += 1
         return self._mCurrentState
 
