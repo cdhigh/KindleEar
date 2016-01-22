@@ -1,0 +1,7 @@
+gcloud shell
+
+1. edit in github
+2. in gcloud shell: cd $HOME/src/loyalwong2kindleear/master
+3. git pull
+3. appcfg.py update ./app.yaml ./module-work.yaml
+4. appcfg.py update ./
