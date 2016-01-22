@@ -1,4 +1,4 @@
-application: kindleear
+application: loyalwong2kindleear
 module: worker
 version: 1
 runtime: python27
