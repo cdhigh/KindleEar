@@ -32,6 +32,9 @@ class Url2Book(BaseHandler):
         if not all((username,urls,subject,to,language,booktype,tz)):
             return "Some parameter missing!<br />"
         
+        if (';' in to) or (',' in to):
+            to = to.replace(',', ';').replace(' ', '').split(';')
+        
         if type(urls) is unicode:
             urls = urls.encode('utf-8')
             
@@ -50,7 +53,7 @@ class Url2Book(BaseHandler):
                 else:
                     if not dlinfo:
                         dlinfo = 'download failed'
-                    self.deliverlog(username, to, filename, 0, status=dlinfo,tz=tz)
+                    self.deliverlog(username, str(to), filename, 0, status=dlinfo,tz=tz)
                 main.log.info("%s Sent!" % filename)
             return "%s Sent!" % filename
             
@@ -128,7 +131,7 @@ class Url2Book(BaseHandler):
             main.log.info(rs)
             return rs
         else:
-            self.deliverlog(username, to, book.title, 0, status='fetch failed',tz=tz)
+            self.deliverlog(username, str(to), book.title, 0, status='fetch failed',tz=tz)
             rs = "[Url2Book]Fetch url failed."
             main.log.info(rs)
             return rs

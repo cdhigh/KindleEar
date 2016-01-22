@@ -28,7 +28,7 @@ ALWAYS_CHAR_DETECT = False
 
 #True indicates that any encoding in http header or in html header will be used.
 #False indicates that encoding will be used if the encoding in http header and the one in html header are the same.
-TRUST_ENCODING_IN_HEADER_OR_META = False
+TRUST_ENCODING_IN_HEADER_OR_META = True
 
 #generate brief description for toc item or not.
 GENERATE_TOC_DESC = True

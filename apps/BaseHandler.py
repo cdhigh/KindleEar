@@ -75,6 +75,7 @@ class BaseHandler:
         except Exception as e:
             default_log.warn('DeliverLog failed to save:%s',str(e))
     
+    #TO可以是一个单独的字符串，或一个字符串列表，对应发送到多个地址
     @classmethod
     def SendToKindle(self, name, to, title, booktype, attachment, tz=TIMEZONE, filewithtime=True):
         if PINYIN_FILENAME: # 将中文文件名转换为拼音
@@ -99,14 +100,14 @@ class BaseHandler:
                     attachments=[(filename, attachment),])
             except OverQuotaError as e:
                 default_log.warn('overquota when sendmail to %s:%s' % (to, str(e)))
-                self.deliverlog(name, to, title, len(attachment), tz=tz, status='over quota')
+                self.deliverlog(name, str(to), title, len(attachment), tz=tz, status='over quota')
                 default_log.warn('overquota when sendmail to %s:%s, retry!' % (to, str(e)))
                 time.sleep(10)
                 if i>2:
                     break
             except InvalidSenderError as e:
                 default_log.warn('UNAUTHORIZED_SENDER when sendmail to %s:%s' % (to, str(e)))
-                self.deliverlog(name, to, title, len(attachment), tz=tz, status='wrong SRC_EMAIL')
+                self.deliverlog(name, str(to), title, len(attachment), tz=tz, status='wrong SRC_EMAIL')
                 break
             except InvalidAttachmentTypeError as e: #继续发送一次
                 if SENDMAIL_ALL_POSTFIX:
@@ -114,7 +115,7 @@ class BaseHandler:
                     title = title.replace('.', '_')
                 else:
                     default_log.warn('InvalidAttachmentTypeError when sendmail to %s:%s' % (to, str(e)))
-                    self.deliverlog(name, to, title, len(attachment), tz=tz, status='invalid postfix')
+                    self.deliverlog(name, str(to), title, len(attachment), tz=tz, status='invalid postfix')
                     break
             except DeadlineExceededError as e:
                 if i < SENDMAIL_RETRY_CNT:
@@ -122,16 +123,17 @@ class BaseHandler:
                     time.sleep(5)
                 else:
                     default_log.warn('timeout when sendmail to %s:%s, abort!' % (to, str(e)))
-                    self.deliverlog(name, to, title, len(attachment), tz=tz, status='timeout')
+                    self.deliverlog(name, str(to), title, len(attachment), tz=tz, status='timeout')
                     break
             except Exception as e:
                 default_log.warn('sendmail to %s failed:%s.<%s>' % (to, str(e), type(e)))
-                self.deliverlog(name, to, title, len(attachment), tz=tz, status='send failed')
+                self.deliverlog(name, str(to), title, len(attachment), tz=tz, status='send failed')
                 break
             else:
-                self.deliverlog(name, to, title, len(attachment), tz=tz)
+                self.deliverlog(name, str(to), title, len(attachment), tz=tz)
                 break
     
+    #TO可以是一个单独的字符串，或一个字符串列表，对应发送到多个地址
     @classmethod
     def SendHtmlMail(self, name, to, title, html, attachments, tz=TIMEZONE, textcontent=None):
         if not textcontent or not isinstance(textcontent, basestring):
@@ -151,15 +153,15 @@ class BaseHandler:
                         mail.send_mail(SRC_EMAIL, to, title, textcontent)
             except OverQuotaError as e:
                 default_log.warn('overquota when sendmail to %s:%s' % (to, str(e)))
-                self.deliverlog(name, to, title, 0, tz=tz, status='over quota')
+                self.deliverlog(name, str(to), title, 0, tz=tz, status='over quota')
                 break
             except InvalidSenderError as e:
                 default_log.warn('UNAUTHORIZED_SENDER when sendmail to %s:%s' % (to, str(e)))
-                self.deliverlog(name, to, title, 0, tz=tz, status='wrong SRC_EMAIL')
+                self.deliverlog(name, str(to), title, 0, tz=tz, status='wrong SRC_EMAIL')
                 break
             except InvalidAttachmentTypeError as e:
                 default_log.warn('InvalidAttachmentTypeError when sendmail to %s:%s' % (to, str(e)))
-                self.deliverlog(name, to, title, 0, tz=tz, status='invalid postfix')
+                self.deliverlog(name, str(to), title, 0, tz=tz, status='invalid postfix')
                 break
             except DeadlineExceededError as e:
                 if i < SENDMAIL_RETRY_CNT:
@@ -167,18 +169,18 @@ class BaseHandler:
                     time.sleep(5)
                 else:
                     default_log.warn('timeout when sendmail to %s:%s, abort!' % (to, str(e)))
-                    self.deliverlog(name, to, title, 0, tz=tz, status='timeout')
+                    self.deliverlog(name, str(to), title, 0, tz=tz, status='timeout')
                     break
             except Exception as e:
                 default_log.warn('sendmail to %s failed:%s.<%s>' % (to, str(e), type(e)))
-                self.deliverlog(name, to, title, 0, tz=tz, status='send failed')
+                self.deliverlog(name, str(to), title, 0, tz=tz, status='send failed')
                 break
             else:
                 if attachments:
                     size = len(html or textcontent) + sum([len(c) for f,c in attachments])
                 else:
                     size = len(html or textcontent)
-                self.deliverlog(name, to, title, size, tz=tz)
+                self.deliverlog(name, str(to), title, size, tz=tz)
                 break
     
     def render(self, templatefile, title='KindleEar', **kwargs):

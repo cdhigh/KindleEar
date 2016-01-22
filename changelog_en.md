@@ -1,4 +1,7 @@
 #Changelog for KindleEar
+##1.22.2
+  1. Mail-transfer module suppoorts '!links' and '!article' that indicate crawl links in mail or send text only.
+  2. kindle_email field suppoorts multiple email address separated with comma or semicolon.
 
 ##1.22.1
   1. Replace some modules with lastest version.

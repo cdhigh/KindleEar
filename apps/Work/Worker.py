@@ -30,6 +30,9 @@ class Worker(BaseHandler):
             return "User not exist!<br />"
         
         to = user.kindle_email
+        if (';' in to) or (',' in to):
+            to = to.replace(',', ';').replace(' ', '').split(';')
+        
         booktype = user.book_type
         titlefmt = user.titlefmt
         tz = user.timezone
@@ -164,7 +167,7 @@ class Worker(BaseHandler):
             main.log.info(rs)
             return rs
         else:
-            self.deliverlog(username, to, book4meta.title, 0, status='nonews',tz=tz)
+            self.deliverlog(username, str(to), book4meta.title, 0, status='nonews',tz=tz)
             rs = "No new feeds."
             main.log.info(rs)
             return rs

@@ -5,7 +5,7 @@
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
-import web, urllib, urlparse
+import web, urllib
 
 from google.appengine.api import mail
 from apps.BaseHandler import BaseHandler
@@ -19,16 +19,13 @@ from lib.urlopener import URLOpener
 
 from config import SHARE_FUCK_GFW_SRV, POCKET_CONSUMER_KEY
 
-INSTAPAPER_API_ADD_URL = 'https://www.instapaper.com/api/add'
-
 class Share(BaseHandler):
-    """ 保存到evernote或分享到社交媒体 """
+    #保存到evernote或分享到社交媒体
     __url__ = "/share"
     SHARE_IMAGE_EMBEDDED = True
     
     @etagged()
     def GET(self):
-        import urlparse,urllib
         action = web.input().get('act')
         username = web.input().get("u")
         url = web.input().get("url")
@@ -42,7 +39,9 @@ class Share(BaseHandler):
         #global log
         
         url = urllib.unquote(url)
-                
+        
+        #debug_mail(content)
+        
         if action in ('evernote', 'wiz'): #保存至evernote/wiz
             return self.SaveToEvernoteWiz(user, action, url)    
         elif action == 'pocket': #保存到pocket
@@ -110,6 +109,9 @@ class Share(BaseHandler):
                 html = unicode(soup)
                 
         to = user.wiz_mail if action == 'wiz' else user.evernote_mail
+        if (';' in to) or (',' in to):
+            to = to.replace(',', ';').replace(' ', '').split(';')
+        
         if html:
             self.SendHtmlMail(user.name, to, title, html.encode('utf-8'), attachments, user.timezone)
             info = _("'%(title)s'<br/><br/>Saved to %(act)s [%(email)s] success.") % ({'title':title,'act':action,'email':hide_email(to)})
@@ -120,11 +122,13 @@ class Share(BaseHandler):
                 <title>%s</title></head><body><p style="text-align:center;font-size:1.5em;">%s</p></body></html>""" % (title, info)
             return info.encode('utf-8')
         else:
-            self.deliverlog(user.name, to, title, 0, status='fetch failed', tz=user.timezone)
+            self.deliverlog(user.name, str(to), title, 0, status='fetch failed', tz=user.timezone)
             main.log.info("[Share]Fetch url failed.")
             return "[Share]Fetch url failed."
     
     def SaveToPocket(self, user, action, orgUrl):
+        INSTAPAPER_API_ADD_URL = 'https://www.instapaper.com/api/add'
+
         web.header('Content-type', "text/html; charset=utf-8")
         
         T_INFO = u"""<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>

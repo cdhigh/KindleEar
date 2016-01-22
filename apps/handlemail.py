@@ -5,7 +5,7 @@
 """
 将发到string@appid.appspotmail.com的邮件正文转成附件发往管理员的kindle邮箱。
 """
-import re, logging, zlib, base64
+import re, logging, zlib, base64, urllib
 from email.Header import decode_header
 from email.utils import parseaddr, collapse_rfc2231_value
 from bs4 import BeautifulSoup
@@ -68,10 +68,27 @@ class HandleMail(InboundMailHandler):
             return
         
         if hasattr(message, 'subject'):
-            subject = decode_subject(message.subject)
+            subject = decode_subject(message.subject).strip()
         else:
             subject = u"NoSubject"
         
+        #邮件主题中如果在最后添加一个 !links，则强制提取邮件中的链接然后生成电子书
+        forceToLinks = False
+        forceToArticle = False
+        if subject.endswith('!links'):
+            subject = subject.replace('!links', '').rstrip()
+            forceToLinks = True
+        elif subject.find(' !links ') >= 0:
+            subject = subject.replace(' !links ', '')
+            forceToLinks = True
+        
+        if subject.endswith('!article'):
+            subject = subject.replace('!article', '').rstrip()
+            forceToArticle = True
+        elif subject.find(' !article ') >= 0:
+            subject = subject.replace(' !article ', '')
+            forceToArticle = True
+            
         #通过邮件触发一次“现在投递”
         if to.lower() == 'trigger':
             return self.TrigDeliver(subject, username)
@@ -128,19 +145,37 @@ class HandleMail(InboundMailHandler):
         #判断邮件内容是文本还是链接（包括多个链接的情况）
         links = []
         body = soup.body if soup.find('body') else soup
-        for s in body.stripped_strings:
-            link = IsHyperLink(s)
-            if link:
-                links.append(link)
-            else: #如果是多个链接，则必须一行一个
-                break
-        if not links: #正常字符判断没有链接，看html的a标签
-            links = list(soup.find_all('a',attrs={'href':True}))
-            link = links[0]['href'] if links else ''
+        if not forceToArticle:
+            for s in body.stripped_strings:
+                link = IsHyperLink(s)
+                if link:
+                    if link not in links:
+                        links.append(link)
+                elif not forceToLinks: #如果是多个链接，则必须一行一个，除非强制提取链接
+                    break
+                
+        if not links and not forceToArticle: #正常字符判断没有链接，看html的a标签
+            links = [link['href'] for link in soup.find_all('a', attrs={'href':True})]
+            
             text = ' '.join([s for s in body.stripped_strings])
-            text = text.replace(link, '')
+            
+            #如果有相对路径，则在里面找一个绝对路径，然后转换其他
+            hasRelativePath = False
+            fullPath = ''
+            for link in links:
+                text = text.replace(link, '')
+                if not link.startswith('http'):
+                    hasRelativePath = True
+                if not fullPath and link.startswith('http'):
+                    fullPath = link
+            
+            if hasRelativePath and fullPath:
+                for idx, link in enumerate(links):
+                    if not link.startswith('http'):
+                        links[idx] = urllib.urljoin(fullPath, link)
+            
             #如果字数太多，则认为直接推送正文内容
-            if len(links) != 1 or len(text) > WORDCNT_THRESHOLD_FOR_APMAIL:
+            if not forceToLinks and (len(links) != 1 or len(text) > WORDCNT_THRESHOLD_FOR_APMAIL):
                 links = []
             
         if links:

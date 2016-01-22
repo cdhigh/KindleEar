@@ -47,22 +47,29 @@ class AutoDecoder:
         #因为有些网页的chardet检测编码是错误的，使用html头可以避免此错误
         #但是html头其实也不可靠，所以再提取文件内的meta信息比对，两者一致才通过(有开关控制)
         #否则的话，还是相信chardet的结果吧
-        if headers:
-            encoding_h = get_encoding_from_headers(headers)
-            encoding_m = get_encoding_from_content(content)
+        encoding_m = get_encoding_from_content(content)
+        encoding_h = get_encoding_from_headers(headers) if headers else None
+        
+        if encoding_m or encoding_h:
             if TRUST_ENCODING_IN_HEADER_OR_META:
-                encoding = encoding_h if encoding_h else encoding_m
-            else:
-                encoding = encoding_h if encoding_h==encoding_m else None
-            
-            if encoding:
+                if encoding_m:
+                    try:
+                        return content.decode(encoding_m)
+                    except:
+                        pass
+                if encoding_h:
+                    try:
+                        return content.decode(encoding_h)
+                    except:
+                        pass
+            elif encoding_h == encoding_m:
                 try:
-                    return content.decode(encoding)
-                except UnicodeDecodeError:
-                    pass #调用最后一条return
-                except Exception as e:
-                    default_log.warn('AutoDecoder failed, changed to chardet: %s [%s]' % (str(e), url))
-                    
+                    return content.decode(encoding_m)
+                except:
+                    pass
+        
+        default_log.warn('Decoded by chardet: [%s]' % url)
+        
         return self.decode_by_chardet(content, url)
         
     def decode_by_chardet(self, content, url):

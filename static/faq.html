@@ -51,6 +51,8 @@
         <li><a href="#aboutgfw">有关墙的汇总</a></li>
         <li><a href="#savetopocket">保存到Pocket功能如何使用？</a></li>
         <li><a href="#wrongemail">投递日志状态wrong SRC_EMAIL的解决方案。</a></li>
+        <li><a href="#tips">其他的一些小Tips。</a></li>
+        <li><a href="#issues">我还有更多问题，到哪里去问？</a></li>
       </ul>
     </div>
     
@@ -86,24 +88,26 @@
     <p class="answer"><strong>以下是正规的搭建步骤：</strong>
         <ol>
         <li>在 <a href="http://www.github.com/cdhigh/kindleear">Github</a> 页面上下载KindleEar的最新版本，在页面的右下角有一个按钮"Download ZIP"，点击即可下载一个包含全部源码的ZIP文档，然后解压到你喜欢的目录，比如C:\KindleEar（下面以这个为例）。</li>
-        <li>首先你需要一个google账号，然后访问 <a href="https://console.developers.google.com">Google Developers Console</a>，点击左下角的“Create an empty Project”，根据提示来新建一个Application。（用来上传KinldeEar用）。</li>
-        <li>安装 <a href="http://www.python.org/getit/">Python 2.7.x</a>，在此页面中选择你的系统平台对应的2.7.x版本下载，然后直接双击安装。注意不要安装成Python 3.x版本，GAE暂不支持。</li>
-        <li>下载 <a href="https://developers.google.com/appengine/downloads?hl=zh-CN">GAE SDK</a>，这是用来上传GAE程序用的。在此页面中的区段“Google App Engine SDK for Python”中选择你的系统平台对应的版本点击即可下载，然后安装，一路next无话。</li>
+        <li>首先你需要一个google账号，然后访问 <a href="https://console.developers.google.com/project">Google Developers Console</a>，新建一个Application。（用来上传KinldeEar用）。</li>
+        <li>安装 <a href="http://www.python.org/getit/">Python 2.7.x</a>，在此页面中选择你的系统平台对应的2.7.x版本下载，然后直接双击安装。注意不要安装成Python 3.x版本，GAE和KindleEar都暂不支持。</li>
+        <li>下载 <a href="https://cloud.google.com/appengine/downloads?hl=zh-CN">GAE SDK</a>，这是用来上传GAE程序用的。在此页面中的区段“Google App Engine SDK for Python”中选择你的系统平台对应的版本点击即可下载，然后安装，一路next无话。</li>
         <li>打开资源管理器，进入之前下载的KindleEar目录C:\KindleEar，使用任何文本编辑器打开app.yaml和module-worker.yaml文件，将第一行的kindleear字样修改为你之前申请的GAE程序名（比如kindleear123），保存退出。</li>
         <li>在app.yaml的同一个目录，打开config.py文件，修改SRC_EMAIL为你的gmail账号，DOMAIN为你的应用的域名。其他的选项也可以根据注释有选择性的修改，或者使用默认即可。</li>
-        <li>正式上传KindleEar。不能使用Google App Engine Launcher，因为Launcher不支持多module应用，这里介绍一下windows下使用命令行的方式。
+        <li>正式上传KindleEar。不能使用Google App Engine Launcher，因为Launcher默认不支持多module应用，这里介绍一下windows下使用命令行的方式。
             <li>依次点击：开始-运行-输入CMD，打开命令行窗口</li>
-            <li>进入到App Engine SDK安装目录；例如：cd "C:\Program Files\Google\google_appengine"</li>
-            <li>输入“上传”命令：c:\python27\python.exe appcfg.py update C:\kindleear\app.yaml c:\kindleear\module-worker.yaml</li>
-            <li>依次输入gmail账号及密码（密码输入时屏幕不显示）既可成功上传。</li></li>
-        <li>显示上传成功后使用你的浏览器打开域名：kindleear123.appspot.com（举例而已，kindleear123要改为你申请的GAE程序名称），如果能正常打开，则还有最后一步。</li>
+            <li>进入到App Engine SDK安装目录；例如：<br/><code>cd "C:\Program Files\Google\google_appengine"</code></li>
+            <li>输入“上传”命令：<br/><code>c:\python27\python.exe appcfg.py update C:\kindleear\app.yaml c:\kindleear\module-worker.yaml</code></li>
+            <li>依次输入gmail账号及密码（密码输入时屏幕不显示）。</li>
+            <li>再输入“上传”命令：<br/><code>c:\python27\python.exe appcfg.py update C:\kindleear\</code></li>
+            </li>
+        <li>显示上传成功后使用你的浏览器打开域名：kindleear123.appspot.com （举例而已，kindleear123要改为你申请的GAE程序名称），如果能正常打开，则还有最后一步。</li>
         <li>将你的gmail账号加入kindle推送邮箱的白名单。这一步你应该早就会了吧。</li>
         <li>然后呢？享受你自己的推送服务吧！</li>
         </ol>
     <p><strong>以下是推荐的简化搭建步骤（使用uploader）：</strong>
         <ol>
         <li>下载<a href="http://www.github.com/cdhigh/kindleear">KindleEar</a>和申请GAE账号，并创建一个application。</li>
-        <li>下载<a href="https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing">uploader</a>。如果此链接被墙，可以使用此 <a href="http://yunpan.cn/QGiHjKRZ6EreW">墙内地址</a>（提取密码：beaa）。</li>
+        <li>下载<a href="https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing">uploader</a>。</li>
         <li>解压uploader到特定目录，将之前下载并解压的KindleEar目录拷贝到此目录下，改名为kindleear，然后双击执行uploader.bat后根据提示输入appid/email/timezone后会正式启动上传程序，输入email和密码即可上传代码。</li>
         </ol></p>
     </p>
@@ -112,9 +116,10 @@
     <h2>为什么我收不到推送的RSS？</h2>
     <p class="answer">收不到推送的RSS原因很多，如下是几种可能：
     <ol>
+    <li>部署时仅部署了default模块，而没有部署worker模块。比如使用Launcher默认配置上传则导致此情况。</li>
     <li>没有打开"自定义RSS"的投递开关，此开关在设置网页的最下面。</li>
     <li>没有在kindle邮箱的白名单中加入你的gmail地址:</li>
-        <ul><li>解决方案：登陆http://www.amazon.com/,增加白名单即可</li></ul>
+        <ul><li>解决方案：登录 <a href="https://www.amazon.com/gp/digital/fiona/manage#pdocSettings">Personal Document Settings</a>，增加白名单即可</li></ul>
     <li>添加RSS过多导致内存占用过大，程序被自动终止。
         <ul><li>打开module-worker.yaml，将instance_class值修改为B4，然后重新上传。</li></ul>
     </li>
@@ -134,7 +139,7 @@
     <p class="answer">有些RSS每周更新，这样每天推送同样的内容就蛋疼了点，碰到这种情况，有两种处理方法：
     <ol>
     <li>在books目录下添加一个py文件，将参数deliver_days设置为你需要推送的星期（英文星期单词），注意deliver_days是一个列表，你也可以设置为几个单词，这样的话，其实也可以设置为哪天不推送。
-    <br />比如：<code>deliver_days=['Friday']</code></li>
+    <br />比如：<br/><code>deliver_days=['Friday']</code></li>
     <li>使用管理员登陆，新增一个账号，退出，使用新账号登陆，添加需要的RSS，然后在“设置”页面仅选择你需要的其中一个“投递日”，在页面下方的“最旧文章”中选择“一个星期”。</li></ol></p>
     
     <span id="moretimesperday"></span>
@@ -143,17 +148,17 @@
     <ol>
       <li>在books目录下添加一个py文件。</li>
       <li>deliver_times设置为你需要推送的整点时间列表。
-        <br />比如：<code>deliver_times=[6,14,22] #6:00,14:00,22:00三次推送</code>
+        <br />比如：<br/><code>deliver_times=[6,14,22] #6:00,14:00,22:00三次推送</code>
       </li>
       <li>如果需要，oldest_article设置为多次推送的间隔秒数，这样就不推送重复文章了。
-        <br />比如：<code>oldest_article=28800 #8*60*60</code>
+        <br/>比如：<br/><code>oldest_article=28800 #8*60*60</code>
       </li>
     </ol>
     </p>
     
     <span id="urlfilter"></span>
     <h2>URL过滤器功能如何使用？</h2>
-    <p class="answer">URL过滤器为高级功能，面向懂python正则表达式的同学，应用场景是这样的：有一些RSS的一部分固定的图像会一直下载不了，为了节省时间支持更多的RSS，则建议过滤这些图像URL，不再下载。URL过滤器支持正则表达式，请严格按python正则表达式的语法编写URL过滤器。</p>
+    <p class="answer">URL过滤器为高级功能，面向懂python正则表达式的同学，应用场景是这样的：有一些RSS的一部分固定的图像会一直下载不了或者其本身就是烦人的广告图像，为了节省时间支持更多的RSS或更好的阅读体验，则可以过滤这些图像URL，不再下载。URL过滤器支持正则表达式，请严格按python正则表达式的语法编写URL过滤器。</p>
     
     <span id="gfwblock"></span>
     <h2>部分RSS有敏感内容，被墙屏蔽了怎么办？</h2>
@@ -161,9 +166,9 @@
     
     <span id="imagesfolder"></span>
     <h2>自定义书籍py文件，如何将封面/报头放到py同一目录？</h2>
-    <p class="answer">升级到1.5及以上版本，在封面/报头文件设置中有全路径信息即可，如下：<ul>
-        <li>mastheadfile = 'books/xxxx.gif'</li>
-        <li>coverfile = 'books/xxxx.jpg'</li></ul></p>
+    <p class="answer">升级到1.5及以上版本，在封面/报头文件设置中有全路径信息即可，如下：<br/>
+        <code>mastheadfile = 'books/xxxx.gif'<br/>
+        coverfile = 'books/xxxx.jpg'</code></p>
     
     <span id="sslerror"></span>
     <h2>GAE上传遇到SSL出错，如何解决？</h2>
@@ -197,14 +202,17 @@
     <span id="mailservice"></span>
     <h2>xxx@appid.appspotmail.com邮件地址怎么用？</h2>
     <p class="answer">xxx@appid.appspotmail.com是KindleEar附送的邮件服务，在部署好KindleEar后，你自动拥有了无数个EMAIL邮箱地址，格式为：xxx@appid.appspotmail.com，xxx为任意合法字符串，appid为你的应用名。<br />
-    <ul> <li>此邮箱将收到的邮件正文转换为邮件附件推送至你注册的Email邮箱。如果邮件中只有链接（多个链接则每行一个），则抓取链接的网页内容制作成电子书然后再推送。</li>
-       <li>要使用此功能，先要添加白名单，如果为'*'则允许所有邮件，否则格式为'xx@xx.xx'或'@xx.xx'。</li>
-       <li>默认推送至管理员注册的邮箱，如果要推送至其他用户的邮箱，则使用格式：username__xxx@appid.appspotmail.com。（注意是双下划线）</li>
-       <li>如果将电子书下载链接发送至book@appid.appspotmail.com 或 username__book@appid.appspotmail.com则KindleEar直接下载对应的电子书并转发至注册的邮箱（注意GAE对后缀名有限制，不能发送可能有安全隐患的文件后缀比如exe等，zip文件能发送，但是zip文件内不能包含可能有安全隐患的文件）。<br />
-        GAE可邮件发送的后缀名列表参见：<a href="https://developers.google.com/appengine/docs/python/mail#Python_Sending_mail_with_attachments">Mail Python API Overview</a><br />
+    <ul> 
+        <li>要使用此功能，先要添加白名单，如果为 '*' 则允许所有邮件，否则格式为 'xx@xx.xx' 或 '@xx.xx' 。</li>
+        <li>此邮箱将收到的邮件正文转换为邮件附件推送至你注册的Email邮箱，。如果邮件中只有链接（多个链接则每行一个），则抓取链接的网页内容制作成电子书然后再推送。</li>
+        <li>如果在邮件主题最后添加了标识 !links，则不论邮件内容如何，KindleEar都只会提取邮件中的链接，然后抓取网页，制作成电子书发送至你的Kindle。这个功能最适合将网络连载直接发送至Kindle观看。</li>
+        <li>如果在邮件主题后添加了标识 !article，则忽略所有链接，直接将内容转换为电子书发送。</li>
+        <li>默认推送至管理员注册的邮箱，如果要推送至其他用户的邮箱，则使用格式：username__xxx@appid.appspotmail.com。（注意是双下划线）</li>
+        <li>如果将电子书下载链接发送至book@appid.appspotmail.com 或 username__book@appid.appspotmail.com则KindleEar直接下载对应的电子书并转发至注册的邮箱（注意GAE对后缀名有限制，不能发送可能有安全隐患的文件后缀比如exe等，zip文件能发送，但是zip文件内不能包含可能有安全隐患的文件）。<br />
+        GAE可邮件发送的后缀名列表参见：<a href="https://cloud.google.com/appengine/docs/python/mail/#Python_Sending_mail_with_attachments">Mail Python API Overview</a><br />
         （book/file/download邮件地址保留为下载电子书使用）
         </li>
-       <li>发送至trigger@appid.appspotmail.com 或 username__trigger@appid.appspotmail.com，则触发一次手动投递。邮件标题为空或为all则完全等同于网页上的“现在投递”按钮。如果需要推送特定书籍，则在标题上写书籍名字，多个书籍名字使用逗号分隔。<br />注意：邮件标题上写多个书籍名字则自动合并推送为一本书。</li>
+        <li>发送至trigger@appid.appspotmail.com 或 username__trigger@appid.appspotmail.com，则触发一次手动投递。邮件标题为空或为all则完全等同于网页上的“现在投递”按钮。如果需要推送特定书籍，则在标题上写书籍名字，多个书籍名字使用逗号分隔。<br />注意：邮件标题上写多个书籍名字则自动合并推送为一本书。</li>
     </ul>
     </p>
     
@@ -262,10 +270,12 @@
         在终端窗口执行此命令，注意最后一个KindleEar是你保存的此应用的目录名。<br />
         如果出现的异常信息中有“UnknownQueueError”，则说明部署有问题，可以先单独执行此命令上传更新队列配置信息：<br />
         <code>python appcfg.py update_queues KindleEar/</code><br />
-        这几个命令也可以执行一遍试试。
-        <code>python appcfg.py update_cron KindleEar/</code>
-        <code>python appcfg.py update_queues KindleEar/</code>
-        <code>python appcfg.py update_dispatch KindleEar/</code><br />
+        这几个命令也可以执行一遍试试。(比如手动可以推送无法自动推送则执行 update_cron)<br/>
+        <code>
+        python appcfg.py update_cron KindleEar/<br/>
+        python appcfg.py update_queues KindleEar/<br/>
+        python appcfg.py update_dispatch KindleEar/
+        </code><br />
         如果上面的步骤执行完后还是不行的话，请按照正确步骤重新部署。
     </p>
     
@@ -310,13 +320,31 @@
         <li>在Pocket申请到的授权码保存在你自己的应用数据库中，其他人搭建的KindleEar没有权限访问你的账户；</li>
         <li>如果你更注重隐私和安全，你也可以自己在Pocket上申请一个开发者的Consumer Key，然后修改config.py中的POCKET_CONSUMER_KEY。</li>
         <li>如果需要反向将Pocket的文章推送至Kindle，可以打开Pocket的自定义RSS功能，在Pocket控制面板的“隐私控制”|“RSS 订阅源”可以找到你的专有RSS订阅地址，把它加入KindleEar的订阅列表中即可。</li>
-        <li>而 'Save to <a href="https://www.instapaper.com">Instapaper</a>' 功能需要输入账号和密码，但是密码是加密后保存在你自己的应用的数据库中的。</li>
+        <li>而因Instapaper仅提供了简单的认证API，所以 'Save to <a href="https://www.instapaper.com">Instapaper</a>' 功能需要输入账号和密码，但是密码是加密后保存在你自己的应用的数据库中的。</li>
     </ul>
     </p>
     
     <span id="wrongemail"></span>
     <h2>投递日志状态wrong SRC_EMAIL的解决方案。</h2>
-    <p class="answer">到Gae后台的Settings页面，看看email已经授权的账号里面有没有你的发送邮箱账号，如果没有就添加即可。
+    <p class="answer">到Gae后台的Settings页面，看看 已经授权的Email列表里面有没有你的发送邮箱地址，如果没有就添加即可。
+    </p>
+    
+    <span id="tips"></span>
+    <h2>其他的一些小Tips。</h2>
+    <p class="answer">
+        <ul>
+            <li>设置界面上的邮箱地址可以设置为多个，用分号隔开即可。同样，分享界面上的邮箱地址也可以设置为多个。</li>
+            <li>如果推送到手机上观看，可以设置config.py里面的COLOR_TO_GRAY=False，以便查看彩色图像。</li>
+            <li>自定义书籍中的属性 extra_css 可以自定义投递文章的样式。</li>
+            <li>在高级设置中可以批量导入和导出OPML格式的订阅列表，这功能比较适合从其他RSS软件中转移数据。</li>
+            <li>因Evernote的免费政策，通过邮件保存到Evernote仅支持5个邮件，需要更多则需要升级Evernote账户。</li>
+        </ul>
+    </p>
+    
+    <span id="issues"></span>
+    <h2>我还有更多问题，到哪里去问？</h2>
+    <p class="answer">如果你碰到更多问题，可以到 <a href="https://github.com/cdhigh/KindleEar/issues">https://github.com/cdhigh/KindleEar/issues</a> 去提交一个issue，然后等待答复，不过在提交问题之前，还是建议先搜索一下别人先前提交的issues，说不定已经有人重复提过了相关问题呢？<br/>
+    如果没有别人提过类似问题，你在提交新问题的时候，建议附上 <a href="https://appengine.google.com/">GAE后台</a> 的Logs信息，以便定位问题，也可以得到更快的答复。
     </p>
     
     <div id="footer">
