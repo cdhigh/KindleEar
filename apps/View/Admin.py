@@ -71,7 +71,7 @@ class Admin(BaseHandler):
                     au = KeUser(name=u, passwd=pwd, kindle_email='', enable_send=False,
                         send_time=7, timezone=TIMEZONE, book_type="mobi",
                         ownfeeds=myfeeds, merge_books=False, secret_key=secret_key)
-                    au.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
+                    au.expires = datetime.datetime.utcnow()+datetime.timedelta(days=36500)
                     au.put()
                     users = KeUser.all() if user.name == 'admin' else None
                     tips = _("Add a account success!")
