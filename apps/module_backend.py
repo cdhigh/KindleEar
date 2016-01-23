@@ -45,6 +45,12 @@ from apps.Work import *
 
 from apps.utils import fix_filesizeformat
 
+try:
+  import googleclouddebugger
+  googleclouddebugger.AttachDebugger()
+except ImportError:
+  pass
+
 application = web.application(main.urls, globals())
 store = MemcacheStore(memcache)
 session = web.session.Session(application, store, initializer={'username':'', 'login':0, 'lang':'', 'pocket_request_token':''})
