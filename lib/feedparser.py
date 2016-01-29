@@ -1997,8 +1997,11 @@ if _XML_AVAILABLE:
             prefix = self._matchnamespaces.get(lowernamespace, givenprefix)
             if givenprefix and (prefix == None or (prefix == '' and lowernamespace == '')) and givenprefix not in self.namespacesInUse:
                 raise UndeclaredNamespace, "'%s' is not associated with a namespace" % givenprefix
-            localname = str(localname).lower()
-
+            try:
+                localname = str(localname).lower()
+            except:
+                pass
+                
             # qname implementation is horribly broken in Python 2.1 (it
             # doesn't report any), and slightly broken in Python 2.2 (it
             # doesn't report the xml: namespace). So we match up namespaces
@@ -2028,7 +2031,10 @@ if _XML_AVAILABLE:
                 attrsD[str(attrlocalname).lower()] = attrvalue
             for qname in attrs.getQNames():
                 attrsD[str(qname).lower()] = attrs.getValueByQName(qname)
-            localname = str(localname).lower()
+            try:
+                localname = str(localname).lower()
+            except:
+                pass
             self.unknown_starttag(localname, attrsD.items())
 
         def characters(self, text):

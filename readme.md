@@ -21,9 +21,9 @@ Readme of english version refers to [Readme_EN.md](https://github.com/cdhigh/Kin
 
 2. [创建一个Application](https://console.developers.google.com/project)，注意不用申请GCE，那个是60天试用的，而GAE是限额范围内永久免费的。  
 
-3. 安装 [GAE SDK](https://cloud.google.com/appengine/downloads)。  
+3. 安装 [Python 2.7.x](https://www.python.org/downloads/)。  
 
-4. 安装 [Python 2.7.x](https://www.python.org/downloads/)。  
+4. 安装 [GAE SDK](https://cloud.google.com/appengine/downloads)。  
 
 5. 下载 [KindleEar](https://github.com/cdhigh/KindleEar/archive/master.zip) ，解压到一个特定的目录。
 

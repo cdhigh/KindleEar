@@ -68,8 +68,6 @@ class AutoDecoder:
                 except:
                     pass
         
-        default_log.warn('Decoded by chardet: [%s]' % url)
-        
         return self.decode_by_chardet(content, url)
         
     def decode_by_chardet(self, content, url):
@@ -118,6 +116,7 @@ class AutoDecoder:
                         self.encoding = chardet.detect(content)['encoding']
                     else:
                         self.encoding = enc
+                        default_log.warn('Decoded by buffered encoding(%s): [%s]' % (enc, url))
                         return result
                 else: #数据库暂时没有数据
                     self.encoding = chardet.detect(content)['encoding']
@@ -140,6 +139,9 @@ class AutoDecoder:
                 else:
                     newurlenc.pageenc = self.encoding
                 newurlenc.put()
+        
+        default_log.warn('Decoded (%s) by chardet: [%s]' % (self.encoding or 'Unknown Encoding', url))
+        
         return result
 
 def get_encoding_from_content(content):

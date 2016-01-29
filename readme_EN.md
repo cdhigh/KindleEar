@@ -16,9 +16,9 @@ KindleEar is a web application to aggregate RSS for generating periodical mobi/e
 
 2. [Create an application](https://console.developers.google.com/project).  
 
-3. Install [GAE SDK](https://cloud.google.com/appengine/downloads).  
+3. Install [Python 2.7.x](https://www.python.org/downloads/).  
 
-4. Install [Python 2.7.x](https://www.python.org/downloads/).  
+4. Install [GAE SDK](https://cloud.google.com/appengine/downloads).  
 
 5. [Download KindleEar](https://github.com/cdhigh/KindleEar/archive/master.zip) and uncompress it into a directory for example: *c:\kindleear*.  
 

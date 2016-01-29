@@ -83,7 +83,7 @@
         {% if nickname -%}
           <a class="nav" href="/logout">{{_("Logout")}}</a>
           <span style="color: #ccc;">&bull;</span>
-        <span>Hello, <a href="/admin"><strong>{{nickname}}</strong></a></span>
+        <span><a href="/admin"><strong>{{nickname}}</strong></a></span>
         {% else -%}
         <form class="pure-form headerloginform" action="/login" method="POST">
             <input type="text" class="pure-u-1-6" style="min-width:100px;" placeholder={{_("Name")}} name="u" id="u" />
