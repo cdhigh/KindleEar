@@ -240,6 +240,8 @@ class BaseFeedBook:
             opener = URLOpener(self.host, timeout=timeout)
             result = opener.open(url)
             if result.status_code == 200 and result.content:
+                #debug_mail(result.content, 'feed.xml')
+                
                 if self.feed_encoding:
                     try:
                         content = result.content.decode(self.feed_encoding)
