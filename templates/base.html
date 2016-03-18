@@ -5,8 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="KindleEar is a service for Amazon Kindle owners that lets you aggregate feeds you chosen and have them delivered to your Kindle in a convenient, easy-to-navigate format." />    
     <title>{{title}} - Kindle's Ear</title>
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
     <link rel="stylesheet" href="/static/pure-min.css" type="text/css" charset="utf-8"/>
     <link rel="stylesheet" href="/static/base.css" type="text/css" charset="utf-8"/>
+    <script type="text/javascript">
+        function formatParams(data) {
+            var arr = [];
+            for (var name in data) {
+                arr.push(encodeURIComponent(name) + "=" + encodeURIComponent(data[name]));
+            }
+            arr.push(("v=" + Math.random()).replace(".", ""));
+            return arr.join("&");
+        }
+        //Usage:
+        //ajax({
+        //    url: "./TestXHR.aspx",              //请求地址
+        //    type: "POST",                       //请求方式
+        //    data: { name: "super", age: 20 },   //请求参数
+        //    dataType: "json",                   //可选,'json'/'text'/'xml'
+        //    success: function (response, xml) {
+        //        // obj.innerHTML = response or response.name
+        //    },
+        //    fail: function (status) {           //可选
+        //        // 此处放失败后执行的代码
+        //    }
+        //});
+
+        function ajax(options) {
+            options = options || {};
+            options.type = (options.type || "GET").toUpperCase();
+            options.dataType = options.dataType || "json";
+            var params = formatParams(options.data);
+            
+            if (window.XMLHttpRequest) {
+                var xhr = new XMLHttpRequest();
+            } else {
+                var xhr = new ActiveXObject('Microsoft.XMLHTTP');
+            }
+            
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    var status = xhr.status;
+                    if (status >= 200 && status < 300) {
+                        if (options.dataType == "json" || options.dataType=="JSON") {
+                            options.success && options.success(eval("(" + xhr.responseText + ")"), xhr.responseXML);
+                        } else {
+                            options.success && options.success(xhr.responseText, xhr.responseXML);
+                        }
+                    } else {
+                        options.fail && options.fail(status);
+                    }
+                }
+            }
+            
+            if (options.type == "GET") {
+                xhr.open("GET", options.url + "?" + params, true);
+                xhr.send(null);
+            } else if (options.type == "POST") {
+                xhr.open("POST", options.url, true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.send(params);
+            }
+        }
+    </script>
     {% block cssfiles %}{% endblock -%}
     {% block css %}{% endblock -%}
     {% block jsfiles %}{% endblock -%}
@@ -18,10 +79,11 @@
     <div id="header">
         {% block header -%}
         <h1><a href="/">KindleEar</a></h1>
+        {% block header_loginfo -%}
         {% if nickname -%}
           <a class="nav" href="/logout">{{_("Logout")}}</a>
           <span style="color: #ccc;">&bull;</span>
-        <span>Hello, <a href="/admin"><strong>{{nickname}}</strong></a></span>
+        <span><a href="/admin"><strong>{{nickname}}</strong></a></span>
         {% else -%}
         <form class="pure-form headerloginform" action="/login" method="POST">
             <input type="text" class="pure-u-1-6" style="min-width:100px;" placeholder={{_("Name")}} name="u" id="u" />
@@ -29,6 +91,7 @@
             <input type="submit" class="pure-button pure-button-small" value={{_("Login")}} />
         </form>
         {% endif -%}
+        {% endblock -%}
         <div class="clear"></div>
         {% endblock -%}
     </div>
@@ -60,7 +123,7 @@
         {% if current == "advsetting" -%}
         <li class="pure-menu-selected"><a href="#">{{_("Advance")}}</a></li>
         {% else -%}
-        <li><a href="/advwhitelist">{{_("Advance")}}</a></li>
+        <li><a href="/adv">{{_("Advance")}}</a></li>
         {% endif -%}
         </ul>
     </div>
@@ -78,7 +141,7 @@
     <div id="footer">
         {% block footer -%}
         <div class="clear"></div>
-        2013 &copy; KindleEar&nbsp;@{{version}}&nbsp;&nbsp;|&nbsp;&nbsp;
+        2013 - 2016 &copy; KindleEar&nbsp;@{{version}}&nbsp;&nbsp;|&nbsp;&nbsp;
         <a href="/static/faq{%if lang and not lang.startswith('zh')%}_en{%endif%}.html" target="_blank" style="text-decoration:none;">FAQ</a>
         &nbsp;&nbsp;|&nbsp;&nbsp;
         <a href="https://github.com/cdhigh/kindleear" target="_blank" style="text-decoration:none;">Github page</a>

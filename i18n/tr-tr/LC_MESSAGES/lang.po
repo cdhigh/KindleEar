@@ -205,7 +205,7 @@ msgstr "açık kaynak KindleEar uygulaması"
 
 msgid ""
 ", You can deploy your own server to push news feeds to your kindle dialy or "
-"share with your friends."
+"share the service with your friends."
 msgstr ""
 "ile siz de kendi serverınızı kurup Kindle'ınıza RSS'leri günlük gönderebilir "
 "veya arkadaşlarınızla paylaşabilirsiniz."
@@ -476,3 +476,114 @@ msgstr "Hesap"
 
 msgid "Submit"
 msgstr "Gönder"
+
+msgid "Import Feeds"
+msgstr "feedleri içeri aktar"
+
+msgid "Import"
+msgstr "İçeri aktar"
+
+msgid "Import custom rss from a OPML file."
+msgstr "Bir OPML dosyasındaki rss'leri içeri aktar."
+
+msgid "Download"
+msgstr "İndir"
+
+msgid "Separate"
+msgstr "Ayır"
+
+msgid "Title from"
+msgstr "Başlığın alınacağı yer"
+
+msgid "Webpage"
+msgstr "Web sitesi"
+
+msgid "Feed"
+msgstr "Feed"
+
+msgid "Authorize"
+msgstr "Authorize"
+
+msgid "Authorized"
+msgstr "Authorized"
+
+msgid "Authorization Error!<br/>%s"
+msgstr "Authorization Error!<br/>%s"
+
+msgid "Success authorized by Pocket!"
+msgstr "Success authorized by Pocket!"
+
+msgid "Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>%s"
+msgstr "Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>%s"
+
+msgid "'%(title)s'<br/><br/>Saved to %(act)s [%(email)s] success."
+msgstr "'%(title)s'<br/><br/>Saved to %(act)s [%(email)s] success."
+
+msgid "Failed save to Pocket.<br/>"
+msgstr "Failed save to Pocket.<br/>"
+
+msgid "'%s'<br/><br/>Saved to your Pocket account."
+msgstr "'%s'<br/><br/>Saved to your Pocket account."
+
+msgid "See details below:<br/><br/>%s"
+msgstr "See details below:<br/><br/>%s"
+
+msgid "Request type[%s] unsupported"
+msgstr "Request type[%s] unsupported"
+
+msgid "The Instapaper service encountered an error. Please try again later."
+msgstr "The Instapaper service encountered an error. Please try again later."
+
+msgid "Verify"
+msgstr "Verify"
+
+msgid "Verifying"
+msgstr "Verifying"
+
+msgid "Verified"
+msgstr "Verified"
+
+msgid "Congratulation : the username and password are correct."
+msgstr "Congratulation : the username and password are correct."
+
+msgid "Unhappily : the username or password is incorrect!"
+msgstr "Unhappily : the username or password is incorrect!"
+
+msgid "Error when verify the username and password for Instapaper. Status:"
+msgstr "Error when verify the username and password for Instapaper. Status:"
+
+msgid "'%s'<br/><br/>Saved to your Instapaper account."
+msgstr "'%s'<br/><br/>Saved to your Instapaper account."
+
+msgid "The id is invalid!"
+msgstr "The id is invalid!"
+
+msgid "The feed(%d) not exist!"
+msgstr "The feed(%d) not exist!"
+
+msgid "The book(%d) not exist!"
+msgstr "The book(%d) not exist!"
+
+msgid "Unhappily : cannot subscribe this book, Error:"
+msgstr "Unhappily : cannot subscribe this book, Error:"
+
+msgid "Error when try to subscribe this book. Status:"
+msgstr "Error when try to subscribe this book. Status:"
+
+msgid "Unhappily : cannot unsubscribe this book, Error:"
+msgstr "Unhappily : cannot unsubscribe this book, Error:"
+
+msgid "Error when try to unsubscribe this book. Status:"
+msgstr "Error when try to unsubscribe this book. Status:"
+
+msgid "Unhappily : cannot delete this feed, Error:"
+msgstr "Unhappily : cannot delete this feed, Error:"
+
+msgid "Error when try to delete this feed. Status:"
+msgstr "Error when try to delete this feed. Status:"
+
+msgid "Unhappily : cannot add this feed, Error:"
+msgstr "Unhappily : cannot add this feed, Error:"
+
+msgid "Error when try to add this feed. Status:"
+msgstr "Error when try to add this feed. Status:"

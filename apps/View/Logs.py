@@ -2,16 +2,17 @@
 # -*- coding:utf-8 -*-
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
-#中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
 import datetime
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
+from apps.utils import etagged
 
 class Mylogs(BaseHandler):
     __url__ = "/logs"
+    @etagged()
     def GET(self):
         user = self.getcurrentuser()
         mylogs = DeliverLog.all().filter("username = ", user.name).order('-time').fetch(limit=10)

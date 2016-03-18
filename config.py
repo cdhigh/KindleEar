@@ -17,7 +17,7 @@ MY_FEEDS_TITLE = u'KindleEar'
 MY_FEEDS_DESC = u'RSS delivering from KindleEar'
 
 #default timeout for network connection
-CONNECTION_TIMEOUT = 45
+CONNECTION_TIMEOUT = 60
 
 # True to translate filename in chinese to pinyin
 PINYIN_FILENAME = False
@@ -28,7 +28,7 @@ ALWAYS_CHAR_DETECT = False
 
 #True indicates that any encoding in http header or in html header will be used.
 #False indicates that encoding will be used if the encoding in http header and the one in html header are the same.
-TRUST_ENCODING_IN_HEADER_OR_META = False
+TRUST_ENCODING_IN_HEADER_OR_META = True
 
 #generate brief description for toc item or not.
 GENERATE_TOC_DESC = True
@@ -74,11 +74,16 @@ SENDMAIL_ALL_POSTFIX = False
 #翻墙转发服务器源码：http://github.com/cdhigh/forwarder
 #SHARE_FUCK_GFW_SRV = "http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u=%s"
 SHARE_FUCK_GFW_SRV = "http://kforwarder.herokuapp.com/?k=xzSlE&t=60&u=%s"
-SAVE_TO_EVERNOTE = u"Save to evernote"
+SAVE_TO_EVERNOTE = u"Save to Evernote"
 SAVE_TO_WIZ = u"Save to Wiz"
+SAVE_TO_POCKET = u"Save to Pocket"
+SAVE_TO_INSTAPAPER = u"Save to Instapaper"
 SHARE_ON_XWEIBO = u"Share on Sina Weibo"
 SHARE_ON_TWEIBO = u"Share on Tencent Weibo"
-SHARE_ON_FACEBOOK = u"Share on facebook"
+SHARE_ON_FACEBOOK = u"Share on Facebook"
 SHARE_ON_TWITTER = u"Tweet it"
-SHARE_ON_TUMBLR = u"Share on tumblr"
+SHARE_ON_TUMBLR = u"Share on Tumblr"
 OPEN_IN_BROWSER = u"Open in Browser"
+
+POCKET_CONSUMER_KEY = '50188-e221424f1c9ed0c010058aef'
+

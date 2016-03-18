@@ -1,44 +1,113 @@
 #Changelog for KindleEar
 
+##1.22.3
+  1. 修正遇到xml文件中的非法tag（中文tag）导致推送失败的问题。
+
+##1.22.2
+  1. 邮件中转模块升级，在邮件标题中添加 !links则强制抓取文章链接，!article则强制发送文本。
+  2. Kindle邮件地址支持多个收件人地址，用分号分隔。
+
+##1.22.1
+  1. 升级内部一些模块。
+
+##1.22
+  1. 用AJAX技术重新实现“我的订阅”前后台，实现不重新加载页面增删订阅或RSS。
+
+##1.21.1
+  1. 增加保存到Instapaper的归档功能。
+
+##1.21
+  1. 增加保存到Pocket的归档功能。
+
+##1.20.28
+  1. 《雪球网》屏蔽了gae的IP段的网络请求，此版本通过中转器获取。
+
+##1.20.27
+  1. 邮件中转功能中引入字符串压缩，支持一封邮件内包含更多链接，以便更好的通过发送链接生成电子书。
+  
+##1.20.26
+  1. 引入html内嵌base64图像技术，减小http请求数量，提升网页加速效率。
+  
+##1.20.25
+  1. 增强网页解码，容忍部分字符解码错误，减小了网页乱码可能。
+
+##1.20.24
+  1. 修改选择了合并推送但仅有自定义RSS推送时无封面问题。
+
+##1.20.23
+  1. 去掉标题格式中的 “标题 日/月” 和 “标题 月/日” 格式，因为会导致推送失败。
+
+##1.20.22
+  1. 解决URL中有unicode字符时无法导出OPML文件的文件。
+  2. 解决微信公众号获取失败后导致其他书籍推送异常的问题。
+  
+##1.20.21
+  1. 添加ETAG机制，减小需要的网络流量。
+
+##1.20.20
+  1. 修正部分XML文件获取文件编码失败问题。
+
+##1.20.19
+  1. 修正pycrypto模块加载失败问题。
+
+##1.20.18
+  1. 微信公众号突破一次防爬取 [zhu327](https://github.com/zhu327/rss)。
+  2. 通过邮件链接抓取的文章不添加封面。
+  
+##1.20.17
+  1. 在目录中添加各个源的文章篇数。
+  2. 增加对书籍异常的处理，避免一本书籍的异常而影响其他书籍的推送。
+
+##1.20.16
+  1. 增加一个选项，可选择使用网页标题还是feed标题做为文章标题。
+
+##1.20.15
+  1. bugfix: weixinbase部分解码失败问题。
+
+##1.20.14
+  1. bugfix: 喷嚏图啩原RSS地址已经失效，更换为另一个地址。
+
+##1.20.13
+  1. bugfix: 修改有部分RSS将一个图片做为一篇文章（没有html包装）导致推送失败的问题。
+
+##1.20.12
+  1. 导出opml时将url转义。
+
+##1.20.11
+  1. "导入订阅列表"功能支持OPML元素Outline嵌套。
+
+##1.20.10
+  1. bugfix: 修正有部分文章无法提取正文导致推送失败的问题。
+
+##1.20.9
+  1. 增加从opml文件导入订阅列表的功能。
+  2. 网友seff增加特性：可选部分书籍单独推送。
+
+##1.20.8
+  1. 网友mcfloundinho增加《共识网》
+
+##1.20.7
+  1. bugfix:修正trigger@appid.appspotmail.com触发投递失败的问题。
+
 ##1.20.6
   1. bugfix:继续修改urlopener处理cookie的一个bug.
 
-##1.20.6
-  1. bugfix: refix a bug in process cookie of module urlopener.
-  
 ##1.20.5
   1. 增加网友mcfloundinho提供的《南方周末》。
   2. bugfix:修改urlopener处理cookie的一个bug.
 
-##1.20.5
-  1. Add book nfzm written by mcfloundinho.
-  2. bugfix: fix a bug in process cookie of module urlopener.
-
 ##1.20.4
   1. 更新土耳其语翻译。
-
-##1.20.4
-  1. Update Turkish translation.
 
 ##1.20.3
   1. 修改内置书籍TED渤海湾以适应其网站改版。
 
-##1.20.3
-  1. fix book 'TEDxBohaiBay'.
-
 ##1.20.2
   1. 针对使用图片延迟加载技术的网页特殊处理，可以获取部分此类网页的图片。
 
-##1.20.2
-  1. Supports some webpage which images take a 'data-src' attribute to load asynchronous content.
-  
 ##1.20.1
   1. 新特性，在合并推送时将各书籍的封面拼贴起来。默认已经开启，如果你使用以前的config.py，请设置DEFAULT_COVER_BV=None，如果不喜欢此效果，可以设置DEFAULT_COVER_BV='cv_bound.jpg'
   2. bugfix: 修正保存到evernote不成功的问题（1.13引入）
-  
-##1.20.1
-  1. Paste all covers into one when merge books into one. DEFAULT_COVER_BV=None (default value) to enable the feature.
-  2. bugfix: send mail to evernote failed. (bug from version 1.13)
   
 ##1.20
   1. 增加一个简单的正文提取模块，在readability失败后启用。
@@ -51,14 +120,3 @@
   7. 其他一些小的可用性增强。
   > 升级注意:书籍的fetcharticle()增加了一个参数，如果你定制的书籍使用到此接口，需要修改。
   
-##1.20
-  1. a new simple algorithm to extract content of webpage when module readability failed.
-  2. a new enhanced decoder for webpage which detection algorithm includes more parameters:
-    http response header, meta of html, result of chardet.
-  3. support site that need subscription, refers to FAQ for more detail.
-  4. use *second* as unit when value of property 'oldest_article' of book more than 365.
-  5. Enhanced password encryption with salt, more safe when face a brute force attack.
-    (for new account only, you can delete account admin and login again for enjoy it.)
-  6. neaten folder structure, put all libs into folder 'lib'.
-  7. some minor improves for usability.
-  > Note:interface fetcharticle() in base.py modified (a new parameter added), if your book implemented it, please modify it to work.

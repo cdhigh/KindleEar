@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
-#中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
@@ -12,13 +11,14 @@ import web
 
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
-from apps.utils import new_secret_key
+from apps.utils import new_secret_key, etagged
 
 from config import *
 
 class Admin(BaseHandler):
     __url__ = "/admin"
     # 账户管理页面
+    @etagged()
     def GET(self):
         user = self.getcurrentuser()
         users = KeUser.all() if user.name == 'admin' else None
@@ -64,12 +64,13 @@ class Admin(BaseHandler):
                 except:
                     tips = _("The password includes non-ascii chars!")
                 else:
-                    myfeeds = Book(title=MY_FEEDS_TITLE,description=MY_FEEDS_DESC,
-                        builtin=False,keep_image=True,oldest_article=7,needs_subscription=False)
+                    myfeeds = Book(title=MY_FEEDS_TITLE, description=MY_FEEDS_DESC,
+                        builtin=False, keep_image=True, oldest_article=7, 
+                        needs_subscription=False, separate=False)
                     myfeeds.put()
-                    au = KeUser(name=u,passwd=pwd,kindle_email='',enable_send=False,
-                        send_time=7,timezone=TIMEZONE,book_type="mobi",
-                        ownfeeds=myfeeds,merge_books=False,secret_key=secret_key)
+                    au = KeUser(name=u, passwd=pwd, kindle_email='', enable_send=False,
+                        send_time=7, timezone=TIMEZONE, book_type="mobi",
+                        ownfeeds=myfeeds, merge_books=False, secret_key=secret_key)
                     au.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
                     au.put()
                     users = KeUser.all() if user.name == 'admin' else None

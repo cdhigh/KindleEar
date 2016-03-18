@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
-#中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 #Author:
 # cdhigh <https://github.com/cdhigh>
 #Contributors:
@@ -48,7 +47,7 @@ from apps.utils import fix_filesizeformat
 
 application = web.application(main.urls, globals())
 store = MemcacheStore(memcache)
-session = web.session.Session(application, store, initializer={'username':'','login':0,"lang":''})
+session = web.session.Session(application, store, initializer={'username':'', 'login':0, 'lang':'', 'pocket_request_token':''})
 jjenv = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'),
                             extensions=["jinja2.ext.do",'jinja2.ext.i18n'])
 jjenv.filters['filesizeformat'] = fix_filesizeformat

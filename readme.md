@@ -1,45 +1,63 @@
-﻿Readme of english version refers to Readme_EN.txt
+Readme of english version refers to [Readme_EN.md](https://github.com/cdhigh/KindleEar/blob/master/readme_EN.md)
 
 #简介
-这是一个运行在Google App Engine(GAE)上的Kindle个人推送服务器，生成排版精美的杂志模式MOBI格式自动每天推送至您的kindle，
+这是一个运行在Google App Engine(GAE)上的Kindle个人推送服务应用，生成排版精美的杂志模式mobi/epub格式自动每天推送至您的Kindle或其他邮箱。
 
-此网站应用目前的功能有：
+此应用目前的主要功能有：  
 
-1. 支持类似calibre的recipe格式的自定义RSS收集，需要写代码，需要有一点点python基础
-2. 自定义RSS，不需要python基础，直接输入RSS链接和标题即可自动推送
-3. 多账号管理，也就是支持多kindle
-4. 带图的杂志格式MOBI
-5. 自动每天定时推送
-6. 强大而且方便的邮件中转服务
+* 支持类似Calibre的recipe格式的不限量RSS/ATOM或网页内容收集
+* 不限量自定义RSS，直接输入RSS/ATOM链接和标题即可自动推送
+* 多账号管理，支持多用户和多Kindle
+* 生成带图的杂志格式mobi或带图的有目录epub
+* 自动每天定时推送
+* 强大而且方便的邮件中转服务
+* 和Evernote/Pocket/Instapaper等系统的集成
 
-> 注：如果您要求不高，自定义RSS推送功能能应付一般应用，如果要求排版和完美，可以参照books目录下的文件自己增加一个文件，
-在您懂python的前提下，您可以完全的操控网页，可以生成您需要的最完美的MOBI文件。
+> 注：如果您要求不高，自定义RSS推送功能足以应付一般应用，如果要求排版和完美，可以参照books目录下的文件范本自己添加一个文件再重新上传即可，books目录下的书籍文件都不是随意预置的，每个文件都至少演示一个适用的books编写技巧。
+在您懂python的前提下，您可以完全的操控网页，可以生成您需要的最完美的MOBI/EPUB文件。
 
-#部署步骤
-1. 申请GAE账号并创建一个application。 <https://appengine.google.com/>
-2. 下载GAE SDK。 <https://developers.google.com/appengine/downloads?hl=zh-CN>
-3. 安装Python 2.7 如果已经安装了，跳过此步骤
-4. 下载本应用的所有文件，放到一个特定的目录。
-5. 修改app.yaml/module-worker.yaml的第一行：将kindleear修改为你申请的application名字
-6. 修改config.py中的这几个变量
-   SRC_EMAIL ：你申请GAE账号时的GMAIL邮箱
-   DOMAIN ：你申请的应用的域名
-7. 转到GAE SDK安装目录（默认为：C:\Program Files\Google\google_appengine）
-   执行CMD命令：
-   `c:\python27\python.exe appcfg.py update kindleear目录\app.yaml kindleear目录\module-worker.yaml`
-   <br />比如：<br />
-   `c:\python27\python.exe appcfg.py update c:\kindleear\app.yaml c:\kindleear\module-worker.yaml`
-   <br />依次输入邮箱和密码，等结束后就可以打开域名：
-   app_name.appspot.com (app_name是你申请的application名字)
-   比如作者的网站域名为：kindleear.appspot.com
-   开始您的个人推送服务了。
-   注：初始用户为admin，密码为admin，建议登陆后及时修改密码。
-8. 更详细一点的说明请参照FAQ。
-9. 或者如果你不想安装python和GAE SDK，可以下载此uploader，将kindleear下载后不需要修改什么，
-   解压后将目录改名为kindleear，放到uploader目录下，
-   双击uploader.bat即可上传。
-   <https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing>
+#标准部署步骤
+1. [申请google账号](https://accounts.google.com/SignUp) 并暂时 [启用不够安全的应用的访问权限](https://www.google.com/settings/security/lesssecureapps) 以便上传程序。  
 
-#许可
-KindleEar is Licensed under the GPL license: [http://www.gnu.org/licenses/gpl.html](http://www.gnu.org/licenses/gpl.html)
-大体的许可框架是此应用代码你可以任意使用任意修改，可以商用，但是也必须开源并保留版权声明。
+2. [创建一个Application](https://console.developers.google.com/project)，注意不用申请GCE，那个是60天试用的，而GAE是限额范围内永久免费的。  
+
+3. 安装 [Python 2.7.x](https://www.python.org/downloads/)。  
+
+4. 安装 [GAE SDK](https://cloud.google.com/appengine/downloads)。  
+
+5. 下载 [KindleEar](https://github.com/cdhigh/KindleEar/archive/master.zip) ，解压到一个特定的目录。
+
+6. 在以下三个文件中修改一些参数：  
+
+  文件              |  待修改内容  | 说明                   |  
+-------------------|-------------|-----------------------|  
+app.yaml           | application | 你的ApplicationId      |  
+module-worker.yaml | application | 你的ApplicationId      |  
+config.py          | SRC_EMAIL   | 创建GAE工程的GMAIL邮箱   |  
+config.py          | DOMAIN      | 你申请的应用的域名        |  
+
+7. 转到GAE SDK安装目录(默认为：*C:\Program Files\Google\google_appengine*) 
+
+8. 执行两条Cmd命令：  
+	* `c:\python27\python.exe appcfg.py update kindleear目录\app.yaml kindleear目录\module-worker.yaml`  
+	* `c:\python27\python.exe appcfg.py update kindleear目录`
+
+9. 全部完成后就可以尝试打开域名：  
+*http://appid.appspot.com*  (appid是你申请的application名字)  
+比如作者的网站域名为：<http://kindleear.appspot.com/>  
+**注：初始用户名为 admin，密码为 admin，建议登录后及时修改密码。**
+
+10. 更详细一点的说明请参照Github上的 [FAQ](http://htmlpreview.github.io/?https://github.com/cdhigh/KindleEar/blob/master/static/faq.html) 或作者网站的 [FAQ](http://kindleear.appspot.com/static/faq.html) 链接。有关部署失败，部署后"internal server error"等问题都有解释。  
+**不建议使用GAE Launcher部署KindleEar，除非你知道怎么设置Extra Flags等参数。**
+
+#简化的部署步骤（推荐）
+  假如你不想安装python和GAE SDK，则可以：  
+
+1. [下载KindleEar](https://github.com/cdhigh/KindleEar/archive/master.zip) 并解压（改目录名为KindleEar）。  
+2. [下载KindleEar-Uploader](https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing) 并解压。  
+3. 将KindleEar目录放到Uploader目录下，双击uploader.bat即开始上传，根据提示输入你的相关信息即可，在第一次成功部署之后，适用uploader再次升级KindleEar则不需要再次输入。  
+**此uploader仅适用于Windows系统。**
+
+#许可协议
+KindleEar is licensed under the [AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html) license.  
+大体的许可框架是此应用代码你可以任意使用，任意修改，可以商用，但是必须将你修改后的代码开源并保留原始版权声明。

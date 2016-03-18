@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
-#中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
@@ -21,10 +20,10 @@ from books import BookClasses, BookClass
 class Deliver(BaseHandler):
     """ 判断需要推送哪些书籍 """
     __url__ = "/deliver"
-    def queueit(self, usr, bookid):
+    def queueit(self, usr, bookid, separate):
         param = {"u":usr.name, "id":bookid}
         
-        if usr.merge_books:
+        if usr.merge_books and not separate:
             self.queue2push[usr.name].append(str(bookid))
         else:
             taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
@@ -53,7 +52,7 @@ class Deliver(BaseHandler):
                     continue
                 user = KeUser.all().filter("name = ", username).get()
                 if user and user.kindle_email:
-                    self.queueit(user, book.key().id())
+                    self.queueit(user, book.key().id(), book.separate)
                     sent.append(book.title)
             self.flushqueue()
             if len(sent):
@@ -106,7 +105,7 @@ class Deliver(BaseHandler):
                     continue
                 
                 #到了这里才是需要推送的
-                self.queueit(user, book.key().id())
+                self.queueit(user, book.key().id(), book.separate)
                 sentcnt += 1
         self.flushqueue()
         return "Put <strong>%d</strong> books to queue!" % sentcnt

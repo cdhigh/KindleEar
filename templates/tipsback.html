@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block menubar -%}
+{% endblock -%}
+{% block content -%}
+    {% if tips -%}
+    <p style="font-size:0.9em;">{{tips}}</p>
+    {% endif -%}
+    <p>
+    <a href="{% if urltoback is defined and urltoback %}{{urltoback}}{%else%}javascript:history.go(-1);{%endif%}">
+        {{_("Click to back")}}
+    </a>
+    </p><br />
+{% endblock -%}

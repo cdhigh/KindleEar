@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
-#中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 #Author:
 # cdhigh <https://github.com/cdhigh>
 #Contributors:
@@ -18,7 +17,8 @@ class Book(db.Model):
     description = db.StringProperty()
     users = db.StringListProperty()
     builtin = db.BooleanProperty()
-    needs_subscription = db.BooleanProperty()
+    needs_subscription = db.BooleanProperty() #是否需要登陆网页
+    separate = db.BooleanProperty() #是否单独推送
     
     #====自定义书籍
     language = db.StringProperty()
@@ -59,6 +59,7 @@ class KeUser(db.Model): # kindleEar User
     device = db.StringProperty()
     expires = db.DateTimeProperty()
     ownfeeds = db.ReferenceProperty(Book) # 每个用户都有自己的自定义RSS
+    use_title_in_feed = db.BooleanProperty() # 文章标题优先选择订阅源中的还是网页中的
     titlefmt = db.StringProperty() #在元数据标题中添加日期的格式
     merge_books = db.BooleanProperty() #是否合并书籍成一本
     
@@ -67,6 +68,12 @@ class KeUser(db.Model): # kindleEar User
     evernote_mail = db.StringProperty() #evernote邮件地址
     wiz = db.BooleanProperty() #为知笔记
     wiz_mail = db.StringProperty()
+    pocket = db.BooleanProperty(default=False) #send to add@getpocket.com
+    pocket_access_token = db.StringProperty(default='')
+    pocket_acc_token_hash = db.StringProperty(default='')
+    instapaper = db.BooleanProperty()
+    instapaper_username = db.StringProperty()
+    instapaper_password = db.StringProperty()
     xweibo = db.BooleanProperty()
     tweibo = db.BooleanProperty()
     facebook = db.BooleanProperty() #分享链接到facebook

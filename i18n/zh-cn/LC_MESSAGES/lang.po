@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.6\n"
 "POT-Creation-Date: 2013-08-06 14:16+China Standard Time\n"
-"PO-Revision-Date: 2014-04-04 15:00+0800\n"
-"Last-Translator: rexdf <rexdf@rexdf.rexdf>\n"
+"PO-Revision-Date: 2016-01-18 15:00+0800\n"
+"Last-Translator: cdhigh <cdhigh@sohu.com>\n"
 "Language-Team: Arroz <akindleear@gmail.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -38,7 +38,7 @@ msgid "Add a account success!"
 msgstr "添加用户账号成功！"
 
 msgid "Please use admin/admin to login at first time."
-msgstr "初次登陆请使用用户名'admin'/密码'admin'登陆。"
+msgstr "初次登录请使用用户名'admin'/密码'admin'。"
 
 msgid "Please input username and password."
 msgstr "请输入正确的用户名和密码。"
@@ -95,7 +95,7 @@ msgid "Advance"
 msgstr "高级设置"
 
 msgid "Please Login"
-msgstr "请先登陆"
+msgstr "请先登录"
 
 msgid "Change Password"
 msgstr "修改密码"
@@ -202,13 +202,13 @@ msgstr "开源的KindleEar程序"
 
 msgid ""
 ", You can deploy your own server to push news feeds to your kindle dialy or "
-"share with your friends."
+"share the service with your friends."
 msgstr ""
 "，你可以在GAE上搭建自己的推送服务器，下载包含图片的RSS订阅或网页推送到你的"
 "Kindle，并支持多账号，可以提供给三五好友同时使用。"
 
 msgid "Login"
-msgstr "登陆"
+msgstr "登录"
 
 msgid "The website dont allow register, you can ask owner for a account."
 msgstr ""
@@ -263,7 +263,7 @@ msgid "Your account will pause after"
 msgstr "你的投递将于"
 
 msgid ", Please login before expire."
-msgstr "自动停止，每次登陆后自动延期。"
+msgstr "自动停止，每次登录后自动延期。"
 
 msgid "Delete Account"
 msgstr "删除此账户"
@@ -458,16 +458,127 @@ msgid "Others"
 msgstr "其他"
 
 msgid "Login Info"
-msgstr "登陆信息"
+msgstr "登录信息"
 
 msgid "Input website login info for book '%s'"
-msgstr "请提供书籍 '%s' 的网站登陆信息"
+msgstr "请提供书籍 '%s' 的网站登录信息"
 
 msgid "Leave any field empty to delete info from database."
-msgstr "留空任何一项则从数据库中删除网站登陆信息。"
+msgstr "留空任何一项则从数据库中删除网站登录信息。"
 
 msgid "Account"
 msgstr "账号"
 
 msgid "Submit"
 msgstr "提交"
+
+msgid "Import Feeds"
+msgstr "导入订阅列表"
+
+msgid "Import"
+msgstr "导入"
+
+msgid "Import custom rss from a OPML file."
+msgstr "从OPML文件中导入订阅列表"
+
+msgid "Download"
+msgstr "下载"
+
+msgid "Separate"
+msgstr "单独推送"
+
+msgid "Title from"
+msgstr "标题来源"
+
+msgid "Webpage"
+msgstr "网页"
+
+msgid "Feed"
+msgstr "Feed"
+
+msgid "Authorize"
+msgstr "申请授权"
+
+msgid "Authorized"
+msgstr "已授权"
+
+msgid "Authorization Error!<br/>%s"
+msgstr "申请授权过程失败！<br/>%s"
+
+msgid "Success authorized by Pocket!"
+msgstr "已经成功获得Pocket的授权！"
+
+msgid "Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>%s"
+msgstr "申请Pocket授权失败!<hr/>错误信息参考如下：<br/><br/>%s"
+
+msgid "'%(title)s'<br/><br/>Saved to %(act)s [%(email)s] success."
+msgstr "《%(title)s》<br/><br/>成功被保存至 %(act)s [%(email)s]。"
+
+msgid "Failed save to Pocket.<br/>"
+msgstr "保存到 Pocket 失败。<br/>"
+
+msgid "'%s'<br/><br/>Saved to your Pocket account."
+msgstr "《%s》<br/><br/>已经成功被保存到你的Pocket账户。"
+
+msgid "See details below:<br/><br/>%s"
+msgstr "下面是一些技术细节：<br/><br/>%s"
+
+msgid "Request type[%s] unsupported"
+msgstr "不支持你请求的命令类型[%s]"
+
+msgid "The Instapaper service encountered an error. Please try again later."
+msgstr "Instapaper服务器异常，请稍候再试。"
+
+msgid "Verify"
+msgstr "校验"
+
+msgid "Verifying"
+msgstr "校验中"
+
+msgid "Verified"
+msgstr "已校验"
+
+msgid "Congratulation : the username and password are correct."
+msgstr "恭喜：你提供的账号和密码都正确。"
+
+msgid "Unhappily : the username or password is incorrect!"
+msgstr "非常遗憾：你提供的账号或密码有误！"
+
+msgid "Error when verify the username and password for Instapaper. Status:"
+msgstr "在校验Instapaper的账号和密码时发生错误。错误码："
+
+msgid "'%s'<br/><br/>Saved to your Instapaper account."
+msgstr "《%s》<br/><br/>已经成功被保存到你的Instapaper账户。"
+
+msgid "The id is invalid!"
+msgstr "ID不是合法的数值!"
+
+msgid "The feed(%d) not exist!"
+msgstr "订阅源(数据库ID: %d)不存在!"
+
+msgid "The book(%d) not exist!"
+msgstr "内置书籍(数据库ID: %d)不存在!"
+
+msgid "Unhappily : cannot subscribe this book, Error:"
+msgstr "非常遗憾：无法订阅此书籍，错误描述："
+
+msgid "Error when try to subscribe this book. Status:"
+msgstr "试图订阅此书籍时出错。错误码："
+
+msgid "Unhappily : cannot unsubscribe this book, Error:"
+msgstr "非常遗憾：无法退订此书籍，错误描述："
+
+msgid "Error when try to unsubscribe this book. Status:"
+msgstr "试图退订此书籍时出错。错误码："
+
+msgid "Unhappily : cannot delete this feed, Error:"
+msgstr "非常遗憾：无法删除此订阅源，错误描述："
+
+msgid "Error when try to delete this feed. Status:"
+msgstr "试图删除此订阅源时出错，错误码："
+
+msgid "Unhappily : cannot add this feed, Error:"
+msgstr "非常遗憾：无法添加此订阅源，错误描述："
+
+msgid "Error when try to add this feed. Status:"
+msgstr "试图添加此订阅源时出错，错误码："
