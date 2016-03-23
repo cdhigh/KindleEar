@@ -145,6 +145,9 @@ class DelAccount(BaseHandler):
                         book.users.remove(name)
                         book.put()
                 
+                #删掉推送记录
+                db.delete(DeliverLog.all().filter('username = ', name))
+                
                 #删掉书籍登陆信息
                 for subs_info in SubscriptionInfo.all().filter('user = ', u.key()):
                     subs_info.delete()

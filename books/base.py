@@ -327,7 +327,11 @@ class BaseFeedBook:
                     prevsection = section
                     opener = URLOpener(self.host, timeout=self.timeout)
                     if self.needs_subscription:
-                        self.login(opener, decoder)
+                        result = self.login(opener, decoder)
+                        #if result:
+                        #    debug_mail(result.content, 'login_result.html')
+                        #else:
+                        #    self.log.warn('func login return none!')                        
         
                 article = self.fetcharticle(url, opener, decoder)
                 if not article:
@@ -450,7 +454,7 @@ class BaseFeedBook:
                         #根据名字或提交地址猜测
                         fname = (f.get('id','') or ''.join(f.get('class',[]))).lower()
                         action = f.get('action','').lower()
-                        if 'login' in identify or 'login' in action:
+                        if ('log' in fname) or ('log' in action):
                             form = f
                             break
                         
