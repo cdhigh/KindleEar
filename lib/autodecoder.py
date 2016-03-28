@@ -51,6 +51,11 @@ class AutoDecoder:
         encoding_h = get_encoding_from_headers(headers) if headers else None
         
         if encoding_m or encoding_h:
+            if encoding_h == encoding_m:
+                try: #'ignore'表明即使有部分解码出错，但是因为http和html都声明为此编码，则可信度已经很高了
+                    return content.decode(encoding_h, 'ignore')
+                except:
+                    pass
             if TRUST_ENCODING_IN_HEADER_OR_META:
                 if encoding_m:
                     try:
@@ -62,11 +67,6 @@ class AutoDecoder:
                         return content.decode(encoding_h)
                     except:
                         pass
-            elif encoding_h == encoding_m:
-                try:
-                    return content.decode(encoding_m)
-                except:
-                    pass
         
         return self.decode_by_chardet(content, url)
         

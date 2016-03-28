@@ -5,7 +5,7 @@
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
-import web, urllib
+import web, urllib, hashlib
 
 from google.appengine.api import mail
 from apps.BaseHandler import BaseHandler
@@ -139,7 +139,7 @@ class Share(BaseHandler):
             
         title = web.input().get('t', '')
         tkHash = web.input().get("h", '')
-        if user.pocket_acc_token_hash != tkHash:
+        if hashlib.md5(user.pocket_acc_token_hash).hexdigest() != tkHash:
             info = T_INFO % ('Action rejected', 'Hash not match!<br/>KindleEar refuse to execute your command.')
             return info.encode('utf-8')
             

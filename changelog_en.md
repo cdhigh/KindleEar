@@ -1,5 +1,10 @@
 #Changelog for KindleEar
 
+##1.23
+  1. New feature: Split very long image to some smaller images.
+  2. Improve decoder of page.
+  3. bugfix: unicode url in OPML cause crash of app. 
+
 ##1.22.3
   1. bugfix: ilegal tag name (unicode name) in xml cause failure in parsing a xml file.
 

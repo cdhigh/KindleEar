@@ -46,6 +46,11 @@ GENERATE_HTML_TOC = True
 
 #if convert color image to gray or not, good for reducing size of book if you read it in Kindle only
 COLOR_TO_GRAY = True
+
+#Split long image(height of image is bigger than some value) to multiple images or not?
+#This feature is disabled if it be set to None or 0.
+THRESHOLD_SPLIT_LONG_IMAGE = 800
+
 #----------------end of add by rexdf-------
 
 #reduce dimension of image to (Width,Height)
