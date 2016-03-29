@@ -32,6 +32,9 @@ class BaseFeedBook:
     fetch_img_via_ssl     = False # 当网页为https时，其图片是否也转换成https
     language = 'und' #最终书籍的语言定义，比如zh-cn,en等
 
+    extra_header = {}# 设置请求头包含的额外数据
+    # 例如设置 Accept-Language：extra_header['Accept-Language'] = 'zh-CN,zh;q=0.8,en;q=0.6,ja;q=0.4'
+
     #下面这两个编码建议设置，如果留空，则使用自动探测解码，稍耗费CPU
     feed_encoding = '' # RSS编码，一般为XML格式，直接打开源码看头部就有编码了
     page_encoding = '' # 页面编码，获取全文信息时的网页编码
@@ -239,7 +242,7 @@ class BaseFeedBook:
             section, url = feed[0], feed[1]
             isfulltext = feed[2] if len(feed) > 2 else False
             timeout = self.timeout+10 if isfulltext else self.timeout
-            opener = URLOpener(self.host, timeout=timeout)
+            opener = URLOpener(self.host, timeout=timeout, headers=self.extra_header)
             result = opener.open(url)
             if result.status_code == 200 and result.content:
                 #debug_mail(result.content, 'feed.xml')
@@ -320,14 +323,14 @@ class BaseFeedBook:
         urls = self.ParseFeedUrls()
         readability = self.readability if self.fulltext_by_readability else self.readability_by_soup
         prevsection = ''
-        opener = URLOpener(self.host, timeout=self.timeout)
+        opener = URLOpener(self.host, timeout=self.timeout, headers=self.extra_header)
         decoder = AutoDecoder(False)
         for section, ftitle, url, desc in urls:
             if not desc: #非全文RSS
                 if section != prevsection or prevsection == '':
                     decoder.encoding = '' #每个小节都重新检测编码
                     prevsection = section
-                    opener = URLOpener(self.host, timeout=self.timeout)
+                    opener = URLOpener(self.host, timeout=self.timeout, headers=self.extra_header)
                     if self.needs_subscription:
                         result = self.login(opener, decoder)
                         #if result:
@@ -592,7 +595,7 @@ class BaseFeedBook:
         thumbnail = None
 
         if self.keep_image:
-            opener = URLOpener(self.host, timeout=self.timeout)
+            opener = URLOpener(self.host, timeout=self.timeout, headers=self.extra_header)
             for img in soup.find_all('img'):
                 #现在使用延迟加载图片技术的网站越来越多了，这里处理一下
                 #注意：如果data-src之类的属性保存的不是真实url就没辙了
@@ -769,7 +772,7 @@ class BaseFeedBook:
         thumbnail = None
 
         if self.keep_image:
-            opener = URLOpener(self.host, timeout=self.timeout)
+            opener = URLOpener(self.host, timeout=self.timeout, headers=self.extra_header)
             for img in soup.find_all('img'):
                 #现在使用延迟加载图片技术的网站越来越多了，这里处理一下
                 #注意：如果data-src之类的属性保存的不是真实url就没辙了
@@ -1085,7 +1088,7 @@ class WebpageBook(BaseFeedBook):
         decoder = AutoDecoder(False)
         timeout = self.timeout
         for section, url in self.feeds:
-            opener = URLOpener(self.host, timeout=timeout)
+            opener = URLOpener(self.host, timeout=timeout, headers=self.extra_header)
             result = opener.open(url)
             status_code, content = result.status_code, result.content
             if status_code != 200 or not content:
