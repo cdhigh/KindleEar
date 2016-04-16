@@ -306,7 +306,7 @@ class BaseFeedBook:
                             if not urlfeed:
                                 continue
                             else:
-                                self.log.warn('fulltext feed item no has desc,link to webpage for article.(%s)'%e.title)
+                                self.log.warn('Fulltext feed item no has desc,link to webpage for article.(%s)' % e.title)
                     urls.append((section, e.title, urlfeed, desc))
                     urladded.add(urlfeed)
             else:

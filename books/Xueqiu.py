@@ -34,6 +34,10 @@ class Xueqiu(BaseFeedBook):
         #生成经过转发器的URL
         return SHARE_FUCK_GFW_SRV % urllib.quote(url)
     
+    def fetcharticle(self, url, opener, decoder):
+        #链接网页获取一篇文章
+        return BaseFeedBook.fetcharticle(self, self.url4forwarder(url), opener, decoder)
+        
     def soupbeforeimage(self, soup):
         for img in soup.find_all('img'):
             imgurl = img['src'] if 'src' in img.attrs else ''

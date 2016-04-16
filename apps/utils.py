@@ -80,8 +80,11 @@ def InsertToc(oeb, sections, toc_thumbnails):
     sections为有序字典，关键词为段名，元素为元组列表(title,brief,humbnail,content)
     toc_thumbnails为字典，关键词为图片原始URL，元素为其在oeb内的href。
     """
+    css_pat = r'<style type="text/css">(.*?)</style>'
+    css_ex = re.compile(css_pat, re.M | re.S)
     body_pat = r'(?<=<body>).*?(?=</body>)'
-    body_ex = re.compile(body_pat,re.M|re.S)
+    body_ex = re.compile(body_pat, re.M | re.S)
+    
     num_articles = 1
     num_sections = 0
     
@@ -90,31 +93,41 @@ def InsertToc(oeb, sections, toc_thumbnails):
     html_toc_2 = []
     name_section_list = []
     for sec in sections.keys():
-        htmlcontent = ['<html><head><title>%s</title><style type="text/css">.pagebreak{page-break-before:always;}h1{font-size:2.0em;}h2{font-size:1.5em;}h3{font-size:1.4em;} h4{font-size:1.2em;}h5{font-size:1.1em;}h6{font-size:1.0em;} </style></head><body>' % (sec)]
+        css = ['.pagebreak{page-break-before:always;}h1{font-size:2.0em;}h2{font-size:1.5em;}h3{font-size:1.4em;}h4{font-size:1.2em;}h5{font-size:1.1em;}h6{font-size:1.0em;}']
+        html_content = []
         secondary_toc_list = []
         first_flag = False
         sec_toc_thumbnail = None
         for title, brief, thumbnail, content in sections[sec]:
+            #获取自定义的CSS
+            for css_obj in css_ex.finditer(content):
+                if css_obj and css_obj.group(1) and css_obj.group(1) not in css:
+                    css.append(css_obj.group(1))
+                
             if first_flag:
-                htmlcontent.append('<div id="%d" class="pagebreak">' % (num_articles)) #insert anchor && pagebreak
+                html_content.append('<div id="%d" class="pagebreak">' % (num_articles)) #insert anchor && pagebreak
             else:
-                htmlcontent.append('<div id="%d">' % (num_articles)) #insert anchor && pagebreak
+                html_content.append('<div id="%d">' % (num_articles)) #insert anchor && pagebreak
                 first_flag = True
                 if thumbnail:
                     sec_toc_thumbnail = thumbnail #url
+            
+            #将body抽取出来
             body_obj = re.search(body_ex, content)
             if body_obj:
-                htmlcontent.append(body_obj.group()+'</div>') #insect article
+                html_content.append(body_obj.group()+'</div>') #insect article
                 secondary_toc_list.append((title, num_articles, brief, thumbnail))
                 num_articles += 1
             else:
-                htmlcontent.pop()
-        htmlcontent.append('</body></html>')
+                html_content.pop()
+        html_content.append('</body></html>')
+        
+        html_content.insert(0, '<html><head><title>%s</title><style type="text/css">%s</style></head><body>' % (sec, ''.join(css)))
         
         #add section.html to maninfest and spine
         #We'd better not use id as variable. It's a python builtin function.
-        id_, href = oeb.manifest.generate(id='feed', href='feed%d.html'%num_sections)
-        item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(htmlcontent))
+        id_, href = oeb.manifest.generate(id='feed', href='feed%d.html' % num_sections)
+        item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=''.join(html_content))
         oeb.spine.add(item, True)
         
         #在目录分类中添加每个目录下的文章篇数

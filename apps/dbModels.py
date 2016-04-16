@@ -6,9 +6,10 @@
 # cdhigh <https://github.com/cdhigh>
 #Contributors:
 # rexdf <https://github.com/rexdf>
-
+from operator import attrgetter
 from google.appengine.ext import db
 from google.appengine.api import memcache
+from google.appengine.api.datastore_errors import NeedIndexError
 from apps.utils import ke_encrypt,ke_decrypt
 
 #--------------db models----------------
@@ -30,8 +31,11 @@ class Book(db.Model):
     #这三个属性只有自定义RSS才有意义
     @property
     def feeds(self):
-        return Feed.all().filter('book = ', self.key()).order('time')
-        
+        try:
+            return Feed.all().filter('book = ', self.key()).order('time')
+        except NeedIndexError: #很多人不会部署，经常出现没有建立索引的情况，干脆碰到这种情况直接消耗CPU时间自己排序得了
+            return sorted(Feed.all().filter("book = ", self.key()), key=attrgetter('time'))
+            
     @property
     def feedscount(self):
         mkey = '%d.feedscount'%self.key().id()

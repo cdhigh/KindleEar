@@ -9,7 +9,8 @@ Required: Python 2.4 or later
 Recommended: iconv_codec <http://cjkpython.i18n.org/>
 """
 
-__version__ = "5.2.1"
+#modified by cdhigh 2016.04.15, set RESOLVE_RELATIVE_URIS=0 (origin is RESOLVE_RELATIVE_URIS=1)
+__version__ = "5.2.1.001"
 __license__ = """
 Copyright 2010-2015 Kurt McKee <contactme@kurtmckee.org>
 Copyright 2002-2008 Mark Pilgrim
@@ -63,7 +64,7 @@ PREFERRED_XML_PARSERS = ["drv_libxml2"]
 
 # If you want feedparser to automatically resolve all relative URIs, set this
 # to 1.
-RESOLVE_RELATIVE_URIS = 1
+RESOLVE_RELATIVE_URIS = 0
 
 # If you want feedparser to automatically sanitize all potentially unsafe
 # HTML content, set this to 1.

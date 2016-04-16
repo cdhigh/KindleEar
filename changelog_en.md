@@ -1,5 +1,9 @@
 #Changelog for KindleEar
 
+##1.23.1
+  1. Bugfix: extra_css didnot been applied to html content.
+  2. Bugfix: cannot parse summary of some fulltext RSS.
+
 ##1.23
   1. New feature: Split very long image to some smaller images.
   2. Improve decoder of page.

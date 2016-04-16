@@ -77,7 +77,7 @@ class BaseHandler:
     
     #TO可以是一个单独的字符串，或一个字符串列表，对应发送到多个地址
     @classmethod
-    def SendToKindle(self, name, to, title, booktype, attachment, tz=TIMEZONE, filewithtime=False):
+    def SendToKindle(self, name, to, title, booktype, attachment, tz=TIMEZONE, filewithtime=True):
         if PINYIN_FILENAME: # 将中文文件名转换为拼音
             from calibre.ebooks.unihandecode.unidecoder import Unidecoder
             decoder = Unidecoder()
