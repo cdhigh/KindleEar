@@ -11,8 +11,8 @@ class Dapenti(BaseFeedBook):
     language              = 'zh-cn'
     feed_encoding         = "utf-8"
     page_encoding         = "utf-8"
-    #max_articles_per_feed = 1
-    oldest_article        = 1
+    max_articles_per_feed = 1
+    oldest_article        = 2
     mastheadfile          = "mh_dapenti.gif"
     coverfile             = "cv_dapenti.jpg"
     network_timeout       = 60

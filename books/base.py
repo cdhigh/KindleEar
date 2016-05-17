@@ -264,7 +264,7 @@ class BaseFeedBook:
                         updated = e.published_parsed
                     elif hasattr(e, 'created_parsed'):
                         updated = e.created_parsed
-
+                    
                     if self.oldest_article > 0 and updated:
                         updated = datetime.datetime(*(updated[0:6]))
                         delta = tnow - updated
@@ -617,8 +617,9 @@ class BaseFeedBook:
                         self.log.warn('img filtered : %s' % imgurl)
                         img.decompose()
                         continue
+                
                 imgresult = opener.open(imgurl)
-                imgcontent = self.process_image(imgresult.content,opts) if imgresult.status_code==200 else None
+                imgcontent = self.process_image(imgresult.content, opts) if imgresult.status_code == 200 else None
                 if imgcontent:
                     if isinstance(imgcontent, list): #一个图片分隔为多个图片
                         imgIndex = self.imgindex
@@ -794,8 +795,9 @@ class BaseFeedBook:
                         self.log.warn('img filtered:%s' % imgurl)
                         img.decompose()
                         continue
+                
                 imgresult = opener.open(imgurl)
-                imgcontent = self.process_image(imgresult.content,opts) if imgresult.status_code==200 else None
+                imgcontent = self.process_image(imgresult.content, opts) if imgresult.status_code == 200 else None
                 if imgcontent:
                     if isinstance(imgcontent, list): #一个图片分隔为多个图片
                         imgIndex = self.imgindex
@@ -902,6 +904,9 @@ class BaseFeedBook:
     
     #根据一些配置，对图像进行处理，比如缩小，转灰度图，转格式，图像分隔等
     def process_image(self, data, opts):
+        if not data:
+            return
+            
         try:
             if not opts or not opts.process_images or not opts.process_images_immediately:
                 return data

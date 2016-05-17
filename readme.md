@@ -49,6 +49,7 @@ config.py          | DOMAIN      | 你申请的应用的域名        |
 
 10. 更详细一点的说明请参照Github上的 [FAQ](http://htmlpreview.github.io/?https://github.com/cdhigh/KindleEar/blob/master/static/faq.html) 或作者网站的 [FAQ](http://kindleear.appspot.com/static/faq.html) 链接。有关部署失败，部署后"internal server error"等问题都有解释。  
 **不建议使用GAE Launcher部署KindleEar，除非你知道怎么设置Extra Flags等参数。**
+11. 步骤已经说的很详细了，如果自己还是部署不成功，也可以选择直接捐赠给作者50块钱 ([Wiki捐赠页面](https://github.com/cdhigh/KindleEar/wiki/Donate))，然后将gmail地址和密码发给作者（先要提前关闭密码二步验证），作者负责帮你部署成功，并且设置好需要的RSS订阅源（如果后续有代码升级，可以免费帮忙升级）。有需要自定义抓取和分析其他网站的需求，也可以联系作者有偿实现。
 
 #简化的部署步骤（推荐）
   假如你不想安装python和GAE SDK，则可以：  
