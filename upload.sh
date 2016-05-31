@@ -1,2 +1,2 @@
-appcfg.py update KindleEar/app.yaml KindleEar/module-worker.yaml
-appcfg.py update KindleEar/
+appcfg.py update app.yaml module-worker.yaml
+appcfg.py update .
