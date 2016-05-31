@@ -18,7 +18,7 @@ class Dapenti(BaseFeedBook):
     network_timeout       = 60
     fetch_img_via_ssl     = False
     feeds = [
-            (u'喷嚏图卦', 'http://www.pentitugua.com/rss.xml', True),
+            (u'喷嚏图卦', 'http://tugua.daoapp.io/rss.xml', True),
            ]
     
     def soupbeforeimage(self, soup):
