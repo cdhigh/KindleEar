@@ -47,20 +47,27 @@ class AutoDecoder:
         #因为有些网页的chardet检测编码是错误的，使用html头可以避免此错误
         #但是html头其实也不可靠，所以再提取文件内的meta信息比对，两者一致才通过(有开关控制)
         #否则的话，还是相信chardet的结果吧
-        if headers:
-            encoding_h = get_encoding_from_headers(headers)
-            encoding_m = get_encoding_from_content(content)
+        encoding_m = get_encoding_from_content(content)
+        encoding_h = get_encoding_from_headers(headers) if headers else None
+        
+        if encoding_m or encoding_h:
+            if encoding_h == encoding_m:
+                try: #'ignore'表明即使有部分解码出错，但是因为http和html都声明为此编码，则可信度已经很高了
+                    return content.decode(encoding_h, 'ignore')
+                except:
+                    pass
             if TRUST_ENCODING_IN_HEADER_OR_META:
-                encoding = encoding_h if encoding_h else encoding_m
-            else:
-                encoding = encoding_h if encoding_h==encoding_m else None
-            
-            if encoding:
-                try:
-                    return content.decode(encoding)
-                except UnicodeDecodeError:
-                    pass #调用最后一条return
-                    
+                if encoding_m:
+                    try:
+                        return content.decode(encoding_m)
+                    except:
+                        pass
+                if encoding_h:
+                    try:
+                        return content.decode(encoding_h)
+                    except:
+                        pass
+        
         return self.decode_by_chardet(content, url)
         
     def decode_by_chardet(self, content, url):
@@ -74,9 +81,12 @@ class AutoDecoder:
                 encoding = chardet.detect(content)['encoding']
                 try:
                     result = content.decode(encoding)
-                except UnicodeDecodeError: # 还是出错，则不转换，直接返回
+                except: # 还是出错，则不转换，直接返回
+                    try:
+                        result = content.decode(encoding, 'ignore')
+                    except:
+                        result = content
                     self.encoding = None
-                    result = content
                 else: # 保存下次使用，以节省时间
                     self.encoding = encoding
                     #同时保存到数据库
@@ -106,6 +116,7 @@ class AutoDecoder:
                         self.encoding = chardet.detect(content)['encoding']
                     else:
                         self.encoding = enc
+                        default_log.warn('Decoded by buffered encoding(%s): [%s]' % (enc, url))
                         return result
                 else: #数据库暂时没有数据
                     self.encoding = chardet.detect(content)['encoding']
@@ -115,8 +126,11 @@ class AutoDecoder:
             #使用检测到的编码解压
             try:
                 result = content.decode(self.encoding)
-            except UnicodeDecodeError: # 出错，则不转换，直接返回
-                result = content
+            except: # 出错，则不转换，直接返回
+                try:
+                    result = content.decode(self.encoding, 'ignore')
+                except:
+                    result = content
             else:
                 #保存到数据库
                 newurlenc = urlenc if urlenc else UrlEncoding(netloc=netloc)
@@ -125,11 +139,14 @@ class AutoDecoder:
                 else:
                     newurlenc.pageenc = self.encoding
                 newurlenc.put()
+        
+        default_log.warn('Decoded (%s) by chardet: [%s]' % (self.encoding or 'Unknown Encoding', url))
+        
         return result
 
 def get_encoding_from_content(content):
     if content[:5] == '<?xml':
-        charset_re = re.compile(r'<\?xml.*?encoding=["\']*(.+?)["\']*\?>', re.I)
+        charset_re = re.compile(r'<\?xml.*?encoding=["\']*(.+?)["\'].*\?>', re.I)
         m = charset_re.search(content[:100])
     else:
         charset_re = re.compile(r'<meta.*?charset=["\']*(.+?)["\'>]', re.I)
@@ -150,6 +167,10 @@ def rectify_encoding(encoding):
     if not encoding:
         return None
     
+    #有空格则取空格前的部分
+    if encoding.find(' ') > 0:
+        encoding = encoding.partition(' ')[0].strip()
+    
     #常见的一些错误写法纠正
     errata = {'8858':'8859','8559':'8859','5889':'8859','2313':'2312','2132':'2312',
             '2321':'2312','gb-2312':'gb2312','gbk2312':'gbk','gbs2312':'gb2312',
@@ -168,12 +189,12 @@ def rectify_encoding(encoding):
         encoding = 'euc_%s' % encoding[4:]
     elif encoding.startswith('windows') and not encoding.startswith('windows-'):
         encoding = 'windows-%s' % encoding[7:]
-    elif encoding.find('iso-88') > 0:
+    elif encoding.find('iso-88') >= 0:
         encoding = encoding[encoding.find('iso-88'):]
     elif encoding.startswith('is0-'):
         encoding = 'iso%s' % encoding[4:]
-    elif encoding.find('ascii') > 0:
-        encoding = 'ascii' 
+    elif encoding.find('ascii') >= 0:
+        encoding = 'ascii'
     
     #调整为python标准编码
     translate = { 'windows-874':'iso-8859-11', 'en_us':'utf8', 'macintosh':'iso-8859-1',

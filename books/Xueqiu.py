@@ -3,10 +3,11 @@
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 
 from base import BaseFeedBook
-import re
+import re, urllib
 from lib.urlopener import URLOpener
 from bs4 import BeautifulSoup
 import json
+from config import SHARE_FUCK_GFW_SRV
 
 __author__ = 'henryouly'
 
@@ -27,11 +28,25 @@ class Xueqiu(BaseFeedBook):
     remove_tags = ['meta']
     remove_attrs = ['xmlns']
 
-    feeds = [ (u'今日话题', 'http://xueqiu.com/hots/topic/rss', True) ]
-
+    feeds = [ (u'今日话题', SHARE_FUCK_GFW_SRV % urllib.quote('http://xueqiu.com/hots/topic/rss'), True) ]
+    
+    def url4forwarder(self, url):
+        #生成经过转发器的URL
+        return SHARE_FUCK_GFW_SRV % urllib.quote(url)
+    
+    def fetcharticle(self, url, opener, decoder):
+        #链接网页获取一篇文章
+        return BaseFeedBook.fetcharticle(self, self.url4forwarder(url), opener, decoder)
+        
+    def soupbeforeimage(self, soup):
+        for img in soup.find_all('img'):
+            imgurl = img['src'] if 'src' in img.attrs else ''
+            if imgurl.startswith('http'):
+                img['src'] = self.url4forwarder(imgurl)
+                
     def postprocess(self, content):
-        pn = re.compile(ur'<a href="(\S*?)">本话题在雪球有.*?条讨论，点击查看。</a>',
-                        re.I)
+        pn = re.compile(ur'<a href="(\S*?)">本话题在雪球有.*?条讨论，点击查看。</a>', re.I)
+        comment = ''
         mt = pn.search(content)
         url = mt.group(1) if mt else None
         if url:
@@ -46,15 +61,16 @@ class Xueqiu(BaseFeedBook):
 
         pn = re.compile(r'SNB.data.goodComments\ =\ ({.*?});', re.S | re.I)
         mt = pn.search(comment)
-        comment_json = mt.group(1) if mt else None
-        j = json.loads(comment_json)
-        soup = BeautifulSoup(content, "lxml")
-        for c in j['comments']:
-            u = c['user']['screen_name']
-            t = BeautifulSoup('<p>@%s:%s</p>' % (u, c['text']))
-            for img in t.find_all('img', alt=True):
-                img.replace_with(t.new_string(img['alt']))
-            soup.html.body.append(t.p)
+        if mt:
+            comment_json = mt.group(1)
+            j = json.loads(comment_json)
+            soup = BeautifulSoup(content, "lxml")
+            for c in j['comments']:
+                u = c['user']['screen_name']
+                t = BeautifulSoup('<p>@%s:%s</p>' % (u, c['text']))
+                for img in t.find_all('img', alt=True):
+                    img.replace_with(t.new_string(img['alt']))
+                soup.html.body.append(t.p)
 
-        content = unicode(soup)
+            content = unicode(soup)
         return content

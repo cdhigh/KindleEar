@@ -8,6 +8,7 @@ import urllib
 import json
 from base import BaseFeedBook
 from lib.urlopener import URLOpener
+from config import SHARE_FUCK_GFW_SRV
 
 # 知乎屏蔽了 GAE 访问 API，所以需要一个中转服务器来获取知乎日报的 Feed 内容
 # nodejs 版本可以参考：https://github.com/ohdarling/ZhihuDailyForwarder
@@ -42,7 +43,7 @@ class ZhihuDaily(BaseFeedBook):
         .meta {font-size:0.9em;color:#808080;}
     """
     
-    http_forwarder = 'http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u=%s'
+    #http_forwarder = 'http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u=%s'
     
     feeds = [
             (u'今日头条', 'http://news.at.zhihu.com/api/1.2/news/latest'),
@@ -52,7 +53,7 @@ class ZhihuDaily(BaseFeedBook):
     
     def url4forwarder(self, url):
         ' 生成经过转发器的URL '
-        return self.http_forwarder % urllib.quote(url)
+        return SHARE_FUCK_GFW_SRV % urllib.quote(url)
         
     def ParseFeedUrls(self):
         """ return list like [(section,title,url,desc),..] """
@@ -68,24 +69,24 @@ class ZhihuDaily(BaseFeedBook):
                 for item in feed[partition]:
                     urlfeed = item['share_url']
                     if urlfeed in urladded:
-                        self.log.info('skipped %s' % urlfeed)
+                        self.log.info('duplicated, skipped %s' % urlfeed)
                         continue
                         
-                    urls.append((section, item['title'], urlfeed, None))
+                    urls.append((section, item['title'], self.url4forwarder(urlfeed), None))
                     urladded.add(urlfeed)
         else:
-            self.log.warn('fetch rss failed(%d):%s'%(result.status_code,url))
+            self.log.warn('fetch rss failed(%s):%s' % (URLOpener.CodeMap(result.status_code), url))
         return urls
 
-    def fetcharticle(self, url, opener, decoder):
-        result = opener.open(self.url4forwarder(url))
-        status_code, content = result.status_code, result.content
-        if status_code != 200 or not content:
-            self.log.warn('fetch article failed(%d):%s.' % (status_code,url))
-            return None
-        
-        if self.page_encoding:
-            return content.decode(self.page_encoding)
-        else:
-            return decoder.decode(content,url,result.headers)
+    #def fetcharticle(self, url, opener, decoder):
+    #    result = opener.open(self.url4forwarder(url))
+    #    status_code, content = result.status_code, result.content
+    #    if status_code != 200 or not content:
+    #        self.log.warn('fetch article failed(%s):%s.' % (URLOpener.CodeMap(status_code),url))
+    #        return None
+    #    
+    #    if self.page_encoding:
+    #        return content.decode(self.page_encoding)
+    #    else:
+    #        return decoder.decode(content,url,result.headers)
             

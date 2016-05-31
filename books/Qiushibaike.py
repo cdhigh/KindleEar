@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 import re
-
 from base import *
-from StringIO import StringIO
-from PIL import Image
 
 def getBook():
     return Qiushibaike
 
-class Qiushibaike(WebpageBook):
+class Qiushibaike(BaseFeedBook):
     title                 = u'糗事百科'
     description           = u'快乐就是要建立在别人的痛苦之上，额外赠送哈哈.MX'
     language = 'zh-cn'
@@ -26,7 +23,7 @@ class Qiushibaike(WebpageBook):
     remove_classes = ['sharebox','comment','share','up','down', #qiushibaike
             'backtop','close','author','col2','sponsor','pagebar', #qiushibaike
             'seconday-nav fl','toolkit fr','fr','info clearfix', # haha.mx
-            'clearfix mt-15 joke-item-footer','pagination',] # haha.mx
+            'joke-item-footer','pagination','pos-ab','praise-box',] # haha.mx
     remove_attrs = []
     
     feeds = [
@@ -44,7 +41,7 @@ class Qiushibaike(WebpageBook):
         return title.replace(u'——分享所有好笑的事情', u'')
         
     def soupbeforeimage(self, soup):
-        if soup.html.head.title.string.startswith(u'哈哈'):
+        if soup.html.head.title.string.find(u'哈哈') > 0:
             for img in list(soup.find_all('img')): #HAHA.MX切换为大图链接
                 src = img['src']
                 if src.find(r'/small/') > 0:
@@ -72,97 +69,3 @@ class Qiushibaike(WebpageBook):
                     item.insert(0, hr)
                 first = False
             
-    def process_image(self, data, opts):
-        try:
-            if not opts or not opts.process_images or not opts.process_images_immediately:
-                return data
-            elif opts.mobi_keep_original_images:
-                return mobify_image(data)
-            else:
-                return rescale_image_QSBK(data, png2jpg=opts.image_png_to_jpg,
-                                graying=opts.graying_image,
-                                reduceto=opts.reduce_image_to)
-        except Exception:
-            return None
-
-def rescale_image_QSBK(data, maxsizeb=4000000, dimen=None, 
-                png2jpg=False, graying=True, reduceto=(600,800)):
-    if not isinstance(data, StringIO):
-        data = StringIO(data)
-    img = Image.open(data)
-    width, height = img.size
-    fmt = img.format
-    if graying and img.mode != "L":
-        img = img.convert("L")
-    
-    reducewidth, reduceheight = reduceto
-    
-    if dimen is not None:
-        if hasattr(dimen, '__len__'):
-            width, height = dimen
-        else:
-            width = height = dimen
-        img.thumbnail((width, height))
-        if png2jpg and fmt == 'PNG':
-            fmt = 'JPEG'
-        data = StringIO()
-        img.save(data, fmt)
-    elif width > reducewidth or height > reduceheight:
-        ratio = min(float(reducewidth)/float(width), float(reduceheight)/float(height))
-        neww,newh = int(width*ratio),int(height*ratio)
-        if newh >= reduceheight-1 and float(height)/float(width) >= 18.0:
-            imgnew = Image.new('L' if graying else 'RGB', (int(width*4), int(height/4)), 'white')
-            region1 = img.crop((0,0,width,int(height/4)))
-            region2 = img.crop((0,int(height/4),width,int(height/2)))
-            region3 = img.crop((0,int(height/2),width,int(height*3/4)))
-            region4 = img.crop((0,int(height*3/4),width,height))
-            region1.load()
-            region2.load()
-            region3.load()
-            region4.load()
-            imgnew.paste(region1,(0,0))
-            imgnew.paste(region2,(width,0))
-            imgnew.paste(region3,(width*2,0))
-            imgnew.paste(region4,(width*3,0))
-            ratio = min(float(reducewidth)/float(width*4), float(reduceheight)/float(height/4))
-            neww,newh = int(width*4*ratio),int(height/4*ratio)
-            img = imgnew.resize((neww, newh))
-        elif newh >= reduceheight-1 and float(height)/float(width) >= 11.0:
-            imgnew = Image.new('L' if graying else 'RGB', (int(width*3), int(height/3)), 'white')
-            region1 = img.crop((0,0,width,int(height/3)))
-            region2 = img.crop((0,int(height/3),width,int(height*2/3)))
-            region3 = img.crop((0,int(height*2/3),width,height))
-            region1.load()
-            region2.load()
-            region3.load()
-            imgnew.paste(region1,(0,0))
-            imgnew.paste(region2,(width,0))
-            imgnew.paste(region3,(width*2,0))
-            ratio = min(float(reducewidth)/float(width*3), float(reduceheight)/float(height/3))
-            neww,newh = int(width*3*ratio),int(height/3*ratio)
-            img = imgnew.resize((neww, newh))
-        elif newh >= reduceheight-1 and float(height)/float(width) >= 4.0:
-            imgnew = Image.new('L' if graying else 'RGB', (int(width*2), int(height/2)), 'white')
-            region1 = img.crop((0,0,width,int(height/2)))
-            region2 = img.crop((0,int(height/2),width,height))
-            region1.load()
-            region2.load()
-            imgnew.paste(region1,(0,0))
-            imgnew.paste(region2,(width,0))
-            ratio = min(float(reducewidth)/float(width*2), float(reduceheight)/float(height/2))
-            neww,newh = int(width*2*ratio),int(height/2*ratio)
-            img = imgnew.resize((neww, newh))
-        else:
-            img = img.resize((neww, newh))
-        if png2jpg and fmt == 'PNG':
-            fmt = 'JPEG'
-        data = StringIO()
-        img.save(data, fmt)
-    elif png2jpg and fmt == 'PNG':
-        data = StringIO()
-        img.save(data, 'JPEG')
-    else:
-        data = StringIO()
-        img.save(data, fmt)
-    
-    return data.getvalue()

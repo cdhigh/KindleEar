@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
-#中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
@@ -23,13 +22,15 @@ class Login(BaseHandler):
         #如果管理员账号不存在，创建一个，并返回False，否则返回True
         u = KeUser.all().filter("name = ", 'admin').get()
         if not u:            
-            myfeeds = Book(title=MY_FEEDS_TITLE,description=MY_FEEDS_DESC,
-                    builtin=False,keep_image=True,oldest_article=7,needs_subscription=False)
+            myfeeds = Book(title=MY_FEEDS_TITLE, description=MY_FEEDS_DESC,
+                    builtin=False, keep_image=True, oldest_article=7,
+                    needs_subscription=False, separate=False)
             myfeeds.put()
             secret_key = new_secret_key()
-            au = KeUser(name='admin',passwd=hashlib.md5('admin'+secret_key).hexdigest(),
-                kindle_email='',enable_send=False,send_time=8,timezone=TIMEZONE,
-                book_type="mobi",device='kindle',expires=None,ownfeeds=myfeeds,merge_books=False,secret_key=secret_key)
+            au = KeUser(name='admin', passwd=hashlib.md5('admin'+secret_key).hexdigest(),
+                kindle_email='', enable_send=False, send_time=8, timezone=TIMEZONE,
+                book_type="mobi", device='kindle', expires=None, ownfeeds=myfeeds, 
+                merge_books=False, secret_key=secret_key)
             au.put()
             return False
         else:
@@ -123,9 +124,13 @@ class Login(BaseHandler):
                         fd.delete()
                     bk.delete()
                     
-                
-            raise web.seeother(r'/my')
+            if u.kindle_email:
+                raise web.seeother(r'/my')
+            else:
+                raise web.seeother(r'/setting')
         else:
+            import time
+            time.sleep(5)
             tips = _("The username not exist or password is wrong!")
             main.session.login = 0
             main.session.username = ''

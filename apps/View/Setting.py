@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
-#中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
@@ -12,13 +11,14 @@ import web
 
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
-
+from apps.utils import etagged
 from config import *
 
 #import main
 
 class Setting(BaseHandler):
     __url__ = "/setting"
+    @etagged()
     def GET(self, tips=None):
         user = self.getcurrentuser()
         return self.render('setting.html',"Setting",
@@ -39,6 +39,7 @@ class Setting(BaseHandler):
             user.enable_send = bool(web.input().get('enablesend'))
             user.book_type = web.input().get('booktype')
             user.device = web.input().get('devicetype') or 'kindle'
+            user.use_title_in_feed = bool(web.input().get('titlefrom') == 'feed')
             user.titlefmt = web.input().get('titlefmt')
             alldays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
             user.send_days = [day for day in alldays if web.input().get(day)]

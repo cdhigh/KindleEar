@@ -2,16 +2,16 @@
 # -*- coding:utf-8 -*-
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
-#中文讨论贴：http://www.hi-pda.com/forum/viewthread.php?tid=1213082
 #Author:
 # cdhigh <https://github.com/cdhigh>
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
-import os, datetime, logging, __builtin__, hashlib, time
+import os, datetime, logging, __builtin__, hashlib, time, base64, urlparse, imghdr
 
 import web
 import jinja2
+from bs4 import BeautifulSoup
 from utils import *
 from config import *
 from apps.dbModels import *
@@ -75,6 +75,7 @@ class BaseHandler:
         except Exception as e:
             default_log.warn('DeliverLog failed to save:%s',str(e))
     
+    #TO可以是一个单独的字符串，或一个字符串列表，对应发送到多个地址
     @classmethod
     def SendToKindle(self, name, to, title, booktype, attachment, tz=TIMEZONE, filewithtime=True):
         if PINYIN_FILENAME: # 将中文文件名转换为拼音
@@ -99,14 +100,14 @@ class BaseHandler:
                     attachments=[(filename, attachment),])
             except OverQuotaError as e:
                 default_log.warn('overquota when sendmail to %s:%s' % (to, str(e)))
-                self.deliverlog(name, to, title, len(attachment), tz=tz, status='over quota')
+                self.deliverlog(name, str(to), title, len(attachment), tz=tz, status='over quota')
                 default_log.warn('overquota when sendmail to %s:%s, retry!' % (to, str(e)))
                 time.sleep(10)
                 if i>2:
                     break
             except InvalidSenderError as e:
                 default_log.warn('UNAUTHORIZED_SENDER when sendmail to %s:%s' % (to, str(e)))
-                self.deliverlog(name, to, title, len(attachment), tz=tz, status='wrong SRC_EMAIL')
+                self.deliverlog(name, str(to), title, len(attachment), tz=tz, status='wrong SRC_EMAIL')
                 break
             except InvalidAttachmentTypeError as e: #继续发送一次
                 if SENDMAIL_ALL_POSTFIX:
@@ -114,7 +115,7 @@ class BaseHandler:
                     title = title.replace('.', '_')
                 else:
                     default_log.warn('InvalidAttachmentTypeError when sendmail to %s:%s' % (to, str(e)))
-                    self.deliverlog(name, to, title, len(attachment), tz=tz, status='invalid postfix')
+                    self.deliverlog(name, str(to), title, len(attachment), tz=tz, status='invalid postfix')
                     break
             except DeadlineExceededError as e:
                 if i < SENDMAIL_RETRY_CNT:
@@ -122,37 +123,45 @@ class BaseHandler:
                     time.sleep(5)
                 else:
                     default_log.warn('timeout when sendmail to %s:%s, abort!' % (to, str(e)))
-                    self.deliverlog(name, to, title, len(attachment), tz=tz, status='timeout')
+                    self.deliverlog(name, str(to), title, len(attachment), tz=tz, status='timeout')
                     break
             except Exception as e:
                 default_log.warn('sendmail to %s failed:%s.<%s>' % (to, str(e), type(e)))
-                self.deliverlog(name, to, title, len(attachment), tz=tz, status='send failed')
+                self.deliverlog(name, str(to), title, len(attachment), tz=tz, status='send failed')
                 break
             else:
-                self.deliverlog(name, to, title, len(attachment), tz=tz)
+                self.deliverlog(name, str(to), title, len(attachment), tz=tz)
                 break
     
+    #TO可以是一个单独的字符串，或一个字符串列表，对应发送到多个地址
     @classmethod
-    def SendHtmlMail(self, name, to, title, html, attachments, tz=TIMEZONE):
+    def SendHtmlMail(self, name, to, title, html, attachments, tz=TIMEZONE, textcontent=None):
+        if not textcontent or not isinstance(textcontent, basestring):
+            textcontent = "Deliver from KindlerEar, refers to html part."
+            
         for i in range(SENDMAIL_RETRY_CNT+1):
             try:
                 if attachments:
-                    mail.send_mail(SRC_EMAIL, to, title, "Deliver from KindlerEar, refers to html part.",
-                        html=html, attachments=attachments)
+                    if html:
+                        mail.send_mail(SRC_EMAIL, to, title, textcontent, html=html, attachments=attachments)
+                    else:
+                        mail.send_mail(SRC_EMAIL, to, title, textcontent, attachments=attachments)
                 else:
-                    mail.send_mail(SRC_EMAIL, to, title, "Deliver from KindlerEar, refers to html part.",
-                        html=html)
+                    if html:
+                        mail.send_mail(SRC_EMAIL, to, title, textcontent, html=html)
+                    else:
+                        mail.send_mail(SRC_EMAIL, to, title, textcontent)
             except OverQuotaError as e:
                 default_log.warn('overquota when sendmail to %s:%s' % (to, str(e)))
-                self.deliverlog(name, to, title, 0, tz=tz, status='over quota')
+                self.deliverlog(name, str(to), title, 0, tz=tz, status='over quota')
                 break
             except InvalidSenderError as e:
                 default_log.warn('UNAUTHORIZED_SENDER when sendmail to %s:%s' % (to, str(e)))
-                self.deliverlog(name, to, title, 0, tz=tz, status='wrong SRC_EMAIL')
+                self.deliverlog(name, str(to), title, 0, tz=tz, status='wrong SRC_EMAIL')
                 break
             except InvalidAttachmentTypeError as e:
                 default_log.warn('InvalidAttachmentTypeError when sendmail to %s:%s' % (to, str(e)))
-                self.deliverlog(name, to, title, 0, tz=tz, status='invalid postfix')
+                self.deliverlog(name, str(to), title, 0, tz=tz, status='invalid postfix')
                 break
             except DeadlineExceededError as e:
                 if i < SENDMAIL_RETRY_CNT:
@@ -160,22 +169,48 @@ class BaseHandler:
                     time.sleep(5)
                 else:
                     default_log.warn('timeout when sendmail to %s:%s, abort!' % (to, str(e)))
-                    self.deliverlog(name, to, title, 0, tz=tz, status='timeout')
+                    self.deliverlog(name, str(to), title, 0, tz=tz, status='timeout')
                     break
             except Exception as e:
                 default_log.warn('sendmail to %s failed:%s.<%s>' % (to, str(e), type(e)))
-                self.deliverlog(name, to, title, 0, tz=tz, status='send failed')
+                self.deliverlog(name, str(to), title, 0, tz=tz, status='send failed')
                 break
             else:
                 if attachments:
-                    size = len(html) + sum([len(c) for f,c in attachments])
+                    size = len(html or textcontent) + sum([len(c) for f,c in attachments])
                 else:
-                    size = len(html)
-                self.deliverlog(name, to, title, size, tz=tz)
+                    size = len(html or textcontent)
+                self.deliverlog(name, str(to), title, size, tz=tz)
                 break
     
     def render(self, templatefile, title='KindleEar', **kwargs):
         kwargs.setdefault('nickname', main.session.get('username'))
         kwargs.setdefault('lang', main.session.get('lang', 'en'))
         kwargs.setdefault('version', main.__Version__)
-        return main.jjenv.get_template(templatefile).render(title=title, **kwargs)
+        html = main.jjenv.get_template(templatefile).render(title=title, **kwargs)
+        
+        #将内部的小图像转换为内嵌的base64编码格式，减小http请求数量，提升效率
+        soup = BeautifulSoup(html, 'lxml')
+        for img in soup.find_all('img'):
+            imgurl = img['src'] if 'src' in img.attrs else ''
+            if not imgurl or imgurl.startswith('data:'):
+                continue
+            
+            #假定没有外链的图片，所有的图片都是本站的
+            parts = urlparse.urlparse(imgurl)
+            imgPath = parts.path
+            if imgPath.startswith(r'/'):
+                imgPath = imgPath[1:]
+
+            try: #这个在调试环境是不行的，不过部署好就可以用了
+                with open(imgPath, "rb") as f:
+                    d = f.read()
+            except Exception as e:
+                continue
+            else:
+                mime = imghdr.what(None, d)
+                if mime:
+                    data = 'data:image/%s;base64,%s' % (mime, base64.encodestring(d))
+                    img['src'] = data
+            
+        return unicode(soup)

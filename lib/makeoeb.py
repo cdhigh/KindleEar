@@ -35,15 +35,14 @@ class ServerContainer(object):
         if path.endswith((".jpg",".png",".gif",".jpeg")) \
             and r'/' not in path:
             path = os.path.join("images", path)
-        d,f  = '',None
+
+        d = ''
         try:
-            f = open(path, "rb")
-            d = f.read()
-        except Exception,e:
-            self.log.warn("read file '%s' failed : %s" % (path,str(e)))
-        finally:
-            if f:
-                f.close()
+            with open(path, "rb") as f:
+                d = f.read()
+        except Exception as e:
+            self.log.warn("read file '%s' failed : %s" % (path, str(e)))
+        
         return d
     def write(self, path):
         return None
@@ -91,7 +90,7 @@ def getOpts(output_type='kindle'):
     setattr(opts, "process_images", True)
     setattr(opts, "mobi_keep_original_images", False)
     setattr(opts, "graying_image", COLOR_TO_GRAY) #changed
-    setattr(opts, "image_png_to_jpg", COLOR_TO_GRAY) #changed
+    setattr(opts, "image_png_to_jpg", False) #changed
     setattr(opts, "fix_indents", False)
     setattr(opts, "reduce_image_to", REDUCE_IMAGE_TO or OutputDevice.screen_size)
     

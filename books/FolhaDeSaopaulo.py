@@ -45,11 +45,18 @@ class FolhaDeSaopaulo(BaseFeedBook):
     #    return BaseFeedBook.fetcharticle(self, url, opener, decoder)
         
     def processtitle(self, title):
-        pn = re.compile(r'^(.*?) - \d\d/\d\d/\d\d\d\d - .*? - (Folha de S\.Paulo|F5)$', re.I)
-        mt = pn.match(title)
-        if mt:
-            title = mt.group(1)
-        elif title.endswith('Folha de S.Paulo'):
+        pn1 = re.compile(r'^(.*?) - \d\d/\d\d/\d\d\d\d - .*? - (Folha de S\.Paulo|F5)$', re.I)
+        pn2 = re.compile(r'^Folha de S\.Paulo - .*? - .*? - (.*?) - \d\d/\d\d/\d\d\d\d$', re.I)
+        mt1 = pn1.match(title)
+        if mt1:
+            return mt1.group(1)
+        else:
+            mt2 = pn2.match(title)
+            if mt2:
+                return mt2.group(1)
+                
+        if title.endswith('Folha de S.Paulo'):
             title = title.replace('Folha de S.Paulo', '')
+            
         return title
     

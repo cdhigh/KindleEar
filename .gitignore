@@ -1,4 +1,5 @@
 *.pyc
+.DS_Store
 Correio.py
 oGlobo.py
 mh_correio.gif

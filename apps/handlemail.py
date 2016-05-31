@@ -5,7 +5,7 @@
 """
 将发到string@appid.appspotmail.com的邮件正文转成附件发往管理员的kindle邮箱。
 """
-import re
+import re, logging, zlib, base64, urllib
 from email.Header import decode_header
 from email.utils import parseaddr, collapse_rfc2231_value
 from bs4 import BeautifulSoup
@@ -17,6 +17,8 @@ from apps.dbModels import KeUser, Book, WhiteList
 from apps.BaseHandler import BaseHandler
 from apps.utils import local_time
 from config import *
+
+log = logging.getLogger()
 
 def decode_subject(subject):
     if subject[0:2] == '=?' and subject[-2:] == '?=':
@@ -62,14 +64,31 @@ class HandleMail(InboundMailHandler):
             and not user.whitelist.filter('mail = ', sender.lower()).get()
             and not user.whitelist.filter('mail = ', '@' + mailhost.lower()).get()):
             self.response.out.write("Spam mail!")
-            default_log.warn('Spam mail from : %s' % sender)
+            log.warn('Spam mail from : %s' % sender)
             return
         
         if hasattr(message, 'subject'):
-            subject = decode_subject(message.subject)
+            subject = decode_subject(message.subject).strip()
         else:
             subject = u"NoSubject"
         
+        #邮件主题中如果在最后添加一个 !links，则强制提取邮件中的链接然后生成电子书
+        forceToLinks = False
+        forceToArticle = False
+        if subject.endswith('!links'):
+            subject = subject.replace('!links', '').rstrip()
+            forceToLinks = True
+        elif subject.find(' !links ') >= 0:
+            subject = subject.replace(' !links ', '')
+            forceToLinks = True
+        
+        if subject.endswith('!article'):
+            subject = subject.replace('!article', '').rstrip()
+            forceToArticle = True
+        elif subject.find(' !article ') >= 0:
+            subject = subject.replace(' !article ', '')
+            forceToArticle = True
+            
         #通过邮件触发一次“现在投递”
         if to.lower() == 'trigger':
             return self.TrigDeliver(subject, username)
@@ -80,16 +99,16 @@ class HandleMail(InboundMailHandler):
         try:
             allBodies = [body.decode() for ctype, body in html_bodies]
         except:
-            default_log.warn('Decode html bodies of mail failed.')
+            log.warn('Decode html bodies of mail failed.')
             allBodies = []
         
         #此邮件为纯文本邮件
         if len(allBodies) == 0:
-            default_log.info('no html body, use text body.')
+            log.info('no html body, use text body.')
             try:
                 allBodies = [body.decode() for ctype, body in txt_bodies]
             except:
-                default_log.warn('Decode text bodies of mail failed.')
+                log.warn('Decode text bodies of mail failed.')
                 allBodies = []
             bodies = u''.join(allBodies)
             if not bodies:
@@ -126,19 +145,37 @@ class HandleMail(InboundMailHandler):
         #判断邮件内容是文本还是链接（包括多个链接的情况）
         links = []
         body = soup.body if soup.find('body') else soup
-        for s in body.stripped_strings:
-            link = IsHyperLink(s)
-            if link:
-                links.append(link)
-            else: #如果是多个链接，则必须一行一个
-                break
-        if not links: #正常字符判断没有链接，看html的a标签
-            links = list(soup.find_all('a',attrs={'href':True}))
-            link = links[0]['href'] if links else ''
+        if not forceToArticle:
+            for s in body.stripped_strings:
+                link = IsHyperLink(s)
+                if link:
+                    if link not in links:
+                        links.append(link)
+                elif not forceToLinks: #如果是多个链接，则必须一行一个，除非强制提取链接
+                    break
+                
+        if not links and not forceToArticle: #正常字符判断没有链接，看html的a标签
+            links = [link['href'] for link in soup.find_all('a', attrs={'href':True})]
+            
             text = ' '.join([s for s in body.stripped_strings])
-            text = text.replace(link, '')
+            
+            #如果有相对路径，则在里面找一个绝对路径，然后转换其他
+            hasRelativePath = False
+            fullPath = ''
+            for link in links:
+                text = text.replace(link, '')
+                if not link.startswith('http'):
+                    hasRelativePath = True
+                if not fullPath and link.startswith('http'):
+                    fullPath = link
+            
+            if hasRelativePath and fullPath:
+                for idx, link in enumerate(links):
+                    if not link.startswith('http'):
+                        links[idx] = urllib.urljoin(fullPath, link)
+            
             #如果字数太多，则认为直接推送正文内容
-            if len(links) != 1 or len(text) > WORDCNT_THRESHOLD_FOR_APMAIL:
+            if not forceToLinks and (len(links) != 1 or len(text) > WORDCNT_THRESHOLD_FOR_APMAIL):
                 links = []
             
         if links:
@@ -148,7 +185,7 @@ class HandleMail(InboundMailHandler):
             isbook = link[-4:].lower() in ('.pdf','.txt','.doc','.rtf') if not isbook else isbook
             
             param = {'u':username,
-                     'urls':'|'.join(links),
+                     'urls':base64.urlsafe_b64encode(zlib.compress('|'.join(links), 9)),
                      'type':'Download' if isbook else user.book_type,
                      'to':user.kindle_email,
                      'tz':user.timezone,
@@ -201,12 +238,12 @@ class HandleMail(InboundMailHandler):
                         img['src'] = img['src'][4:]
                 
                 opts = getOpts()
-                oeb = CreateOeb(default_log, None, opts)
+                oeb = CreateOeb(log, None, opts)
                 
                 setMetaData(oeb, subject[:SUBJECT_WORDCNT_FOR_APMAIL], 
                     user.ownfeeds.language, local_time(tz=user.timezone), 
                     pubtype='book:book:KindleEar')
-                oeb.container = ServerContainer(default_log)
+                oeb.container = ServerContainer(log)
                 id, href = oeb.manifest.generate(id='page', href='page.html')
                 item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=unicode(soup))
                 oeb.spine.add(item, False)
@@ -226,7 +263,7 @@ class HandleMail(InboundMailHandler):
                 
                 oIO = byteStringIO()
                 o = EPUBOutput() if user.book_type == "epub" else MOBIOutput()
-                o.convert(oeb, oIO, opts, default_log)
+                o.convert(oeb, oIO, opts, log)
                 BaseHandler.SendToKindle(username, user.kindle_email, 
                     subject[:SUBJECT_WORDCNT_FOR_APMAIL], 
                     user.book_type, str(oIO.getvalue()), user.timezone)
@@ -251,7 +288,7 @@ class HandleMail(InboundMailHandler):
         """
         if subject.lower() in (u'nosubject', u'all'):
             taskqueue.add(url='/deliver',queue_name="deliverqueue1",method='GET',
-                params={'u':username},target='worker')
+                params={'u':username},target='default')
         else:
             bkids = []
             booklist = subject.split(',')
@@ -260,7 +297,7 @@ class HandleMail(InboundMailHandler):
                 if trigbook:
                     bkids.append(str(trigbook.key().id()))
                 else:
-                    default_log.warn('book not found : %s' % b.strip())
+                    log.warn('book not found : %s' % b.strip())
             if bkids:
                 taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
                     params={'u':username,'id':','.join(bkids)},target='worker')

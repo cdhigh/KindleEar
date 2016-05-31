@@ -4,7 +4,7 @@ version: 1
 runtime: python27
 api_version: 1
 threadsafe: true
-instance_class: B2
+instance_class: B4
 basic_scaling:
   max_instances: 3
   idle_timeout: 30m
@@ -19,6 +19,9 @@ libraries:
 - name: jinja2
   version: "latest"
 
+- name: pycrypto
+  version: "latest"
+
 inbound_services:
 - mail
 
@@ -30,6 +33,7 @@ handlers:
 
 - url: /static
   static_dir: static
+  application_readable: true
 
 - url: /_ah/mail/.+
   script: apps.handlemail.appmail
