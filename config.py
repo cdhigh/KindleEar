@@ -4,8 +4,8 @@
 KindleEar配置文件，请务必修改开始两个配置（如果使用uploader，则uploader自动帮你修改）
 """
 
-SRC_EMAIL = "deping.ming@gmail.com"   #Your gmail account for sending mail to Kindle
-DOMAIN =  "https://mingdekindle.appspot.com" #Your domain of app
+SRC_EMAIL = "deping.ming@gmail.com"  #Your gmail account for sending mail to Kindle
+DOMAIN = "https://mingdekindle.appspot.com" #Your domain of app
 
 TIMEZONE = 8  #Default timezone, you can modify it in webpage after deployed
 
@@ -78,7 +78,6 @@ SENDMAIL_ALL_POSTFIX = False
 #SHARE_FUCK_GFW_SRV: (For users in China)如果你要翻墙的话，请设置为其中一个转发服务器
 #翻墙转发服务器源码：http://github.com/cdhigh/forwarder
 #SHARE_FUCK_GFW_SRV = "http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u=%s"
-#SHARE_FUCK_GFW_SRV = "http://kforwarder.herokuapp.com/?k=xzSlE&t=60&u=%s"
 SHARE_FUCK_GFW_SRV = "http://myforwarder.herokuapp.com/?k=xzSlE&t=60&u=%s"
 SAVE_TO_EVERNOTE = u"Save to Evernote"
 SAVE_TO_WIZ = u"Save to Wiz"
@@ -92,3 +91,4 @@ SHARE_ON_TUMBLR = u"Share on Tumblr"
 OPEN_IN_BROWSER = u"Open in Browser"
 
 POCKET_CONSUMER_KEY = '50188-e221424f1c9ed0c010058aef'
+
