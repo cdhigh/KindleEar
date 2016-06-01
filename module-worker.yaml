@@ -40,4 +40,3 @@ handlers:
   
 - url: /.*
   script: apps.module_backend.app
-  
