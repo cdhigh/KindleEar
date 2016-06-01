@@ -46,6 +46,11 @@ GENERATE_HTML_TOC = True
 
 #if convert color image to gray or not, good for reducing size of book if you read it in Kindle only
 COLOR_TO_GRAY = True
+
+#Split long image(height of image is bigger than some value) to multiple images or not?
+#This feature is disabled if it be set to None or 0.
+THRESHOLD_SPLIT_LONG_IMAGE = 750
+
 #----------------end of add by rexdf-------
 
 #reduce dimension of image to (Width,Height)
@@ -73,7 +78,7 @@ SENDMAIL_ALL_POSTFIX = False
 #SHARE_FUCK_GFW_SRV: (For users in China)如果你要翻墙的话，请设置为其中一个转发服务器
 #翻墙转发服务器源码：http://github.com/cdhigh/forwarder
 #SHARE_FUCK_GFW_SRV = "http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u=%s"
-SHARE_FUCK_GFW_SRV = "http://myforwarder.herokuapp.com/?k=xzSlE&t=60&u=%s"
+SHARE_FUCK_GFW_SRV = "http://kforwarder.herokuapp.com/?k=xzSlE&t=60&u=%s"
 SAVE_TO_EVERNOTE = u"Save to Evernote"
 SAVE_TO_WIZ = u"Save to Wiz"
 SAVE_TO_POCKET = u"Save to Pocket"
@@ -86,4 +91,3 @@ SHARE_ON_TUMBLR = u"Share on Tumblr"
 OPEN_IN_BROWSER = u"Open in Browser"
 
 POCKET_CONSUMER_KEY = '50188-e221424f1c9ed0c010058aef'
-
