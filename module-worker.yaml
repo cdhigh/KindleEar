@@ -1,4 +1,4 @@
-application: kindleear
+application: PushToKindle
 module: worker
 version: 1
 runtime: python27
