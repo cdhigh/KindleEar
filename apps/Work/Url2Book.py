@@ -56,6 +56,17 @@ class Url2Book(BaseHandler):
                     self.deliverlog(username, str(to), filename, 0, status=dlinfo,tz=tz)
                 main.log.info("%s Sent!" % filename)
             return "%s Sent!" % filename
+        elif booktype == 'Debug': #调试目的，将链接直接下载，发送到管理员邮箱
+            from books.base import debug_fetch
+            #如果标题已经给定了文件名，则使用标题文件名，否则为默认文件名(page.html)
+            filename = None
+            if '.' in subject and (1 < len(subject.split('.')[-1]) < 5):
+                filename = subject
+
+            for url in urls.split('|'):
+                debug_fetch(url, filename)
+            main.log.info('[DEBUG] debug file sent!')
+            return 'Debug file sent!'
             
         user = KeUser.all().filter("name = ", username).get()
         if not user or not user.kindle_email:

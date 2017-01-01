@@ -134,10 +134,17 @@ class DelAccount(BaseHandler):
                 tips = _("The username '%s' not exist!") % name
             else:
                 if u.ownfeeds:
-                    for feed in u.ownfeeds.feeds:
+                    for feed in list(u.ownfeeds.feeds):
                         feed.delete()
                     u.ownfeeds.delete()
-                u.delete()
+                    
+                #删掉白名单和过滤器
+                whitelists = list(u.whitelist)
+                urlfilters = list(u.urlfilter)
+                for d in whitelists:
+                    d.delete()
+                for d in urlfilters:
+                    d.delete()
                 
                 # 删掉订阅记录
                 for book in Book.all():
@@ -151,7 +158,9 @@ class DelAccount(BaseHandler):
                 #删掉书籍登陆信息
                 for subs_info in SubscriptionInfo.all().filter('user = ', u.key()):
                     subs_info.delete()
-                    
+                
+                u.delete()
+                
                 if main.session.username == name:
                     raise web.seeother('/logout')
                 else:

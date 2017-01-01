@@ -587,3 +587,6 @@ msgstr "Unhappily : cannot add this feed, Error:"
 
 msgid "Error when try to add this feed. Status:"
 msgstr "Error when try to add this feed. Status:"
+
+msgid "Append qrcode of url to article"
+msgstr "Append qrcode of url to article"

@@ -93,13 +93,19 @@ class Login(BaseHandler):
             #1.7新增各用户独立的白名单和URL过滤器，这些处理是为了兼容以前的版本
             if name == 'admin':
                 for wl in WhiteList.all():
-                    if not wl.user:
-                        wl.user = u
-                        wl.put()
+                    try:
+                        if not wl.user:
+                            wl.user = u
+                            wl.put()
+                    except:
+                        pass
                 for uf in UrlFilter.all():
-                    if not uf.user:
-                        uf.user = u
-                        uf.put()
+                    try:
+                        if not uf.user:
+                            uf.user = u
+                            uf.put()
+                    except:
+                        pass
             
             #同步书籍数据库
             for bk in Book.all().filter('builtin = ', True):

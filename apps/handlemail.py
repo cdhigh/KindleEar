@@ -3,7 +3,7 @@
 #Author:
 # cdhigh <https://github.com/cdhigh>
 """
-将发到string@appid.appspotmail.com的邮件正文转成附件发往管理员的kindle邮箱。
+将发到string@appid.appspotmail.com的邮件正文转成附件发往kindle邮箱。
 """
 import re, logging, zlib, base64, urllib
 from email.Header import decode_header
@@ -28,7 +28,7 @@ def decode_subject(subject):
     return subject
 
 def IsHyperLink(txt):
-    """ 判断一个字符串是否是超链接，返回链接本身，否则空串 """
+    #判断一个字符串是否是超链接，返回链接本身，否则空串
     R = r"""^(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>???“”‘’]))"""
     M = re.match(R, txt)
     if M is not None:
@@ -82,12 +82,14 @@ class HandleMail(InboundMailHandler):
             subject = subject.replace(' !links ', '')
             forceToLinks = True
         
-        if subject.endswith('!article'):
-            subject = subject.replace('!article', '').rstrip()
-            forceToArticle = True
-        elif subject.find(' !article ') >= 0:
-            subject = subject.replace(' !article ', '')
-            forceToArticle = True
+        #如果邮件主题在最后添加一个 !article，则强制转换邮件内容为电子书，忽略其中的链接
+        if not forceToLinks:
+            if subject.endswith('!article'):
+                subject = subject.replace('!article', '').rstrip()
+                forceToArticle = True
+            elif subject.find(' !article ') >= 0:
+                subject = subject.replace(' !article ', '')
+                forceToArticle = True
             
         #通过邮件触发一次“现在投递”
         if to.lower() == 'trigger':
@@ -145,16 +147,18 @@ class HandleMail(InboundMailHandler):
         #判断邮件内容是文本还是链接（包括多个链接的情况）
         links = []
         body = soup.body if soup.find('body') else soup
-        if not forceToArticle:
+        if not forceToArticle: #如果强制转正文就不分析链接了，否则先分析和提取链接
             for s in body.stripped_strings:
                 link = IsHyperLink(s)
                 if link:
                     if link not in links:
                         links.append(link)
-                elif not forceToLinks: #如果是多个链接，则必须一行一个，除非强制提取链接
+                #如果是多个链接，则必须一行一个，不能留空，除非强制提取链接
+                #这个处理是为了去除部分邮件客户端在邮件末尾添加的一个广告链接
+                elif not forceToLinks:
                     break
                 
-        if not links and not forceToArticle: #正常字符判断没有链接，看html的a标签
+        if not links and not forceToArticle: #如果通过正常字符（显示出来的）判断没有链接，则看html的a标签
             links = [link['href'] for link in soup.find_all('a', attrs={'href':True})]
             
             text = ' '.join([s for s in body.stripped_strings])
@@ -180,21 +184,31 @@ class HandleMail(InboundMailHandler):
             
         if links:
             #判断是下载文件还是转发内容
-            isbook = bool(to.lower() in ('book', 'file', 'download'))
-            isbook = link[-5:].lower() in ('.mobi','.epub','.docx') if not isbook else isbook
-            isbook = link[-4:].lower() in ('.pdf','.txt','.doc','.rtf') if not isbook else isbook
+            isBook = bool(to.lower() in ('book', 'file', 'download'))
+            if not isBook:
+                isBook = bool(link[-5:].lower() in ('.mobi','.epub','.docx'))
+            if not isBook:
+                isBook = bool(link[-4:].lower() in ('.pdf','.txt','.doc','.rtf'))
+            isDebug = bool(to.lower() == 'debug')
+
+            if isDebug:
+                bookType = 'Debug'
+            elif isbook:
+                bookType = 'Download'
+            else:
+                bookType = user.book_type
             
-            param = {'u':username,
-                     'urls':base64.urlsafe_b64encode(zlib.compress('|'.join(links), 9)),
-                     'type':'Download' if isbook else user.book_type,
-                     'to':user.kindle_email,
-                     'tz':user.timezone,
-                     'subject':subject[:SUBJECT_WORDCNT_FOR_APMAIL],
-                     'lng':user.ownfeeds.language,
-                     'keepimage':'1' if user.ownfeeds.keep_image else '0'
+            param = {'u': username,
+                     'urls': base64.urlsafe_b64encode(zlib.compress('|'.join(links), 9)),
+                     'type': bookType,
+                     'to': user.kindle_email,
+                     'tz': user.timezone,
+                     'subject': subject[:SUBJECT_WORDCNT_FOR_APMAIL],
+                     'lng': user.ownfeeds.language,
+                     'keepimage': '1' if user.ownfeeds.keep_image else '0'
                     }
-            taskqueue.add(url='/url2book',queue_name="deliverqueue1",method='GET',
-                params=param,target='worker')
+            taskqueue.add(url='/url2book', queue_name="deliverqueue1", method='GET',
+                params=param, target='worker')
         else: #直接转发邮件正文
             #先判断是否有图片
             from lib.makeoeb import MimeFromFilename

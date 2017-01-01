@@ -1,5 +1,9 @@
 #Changelog for KindleEar
 
+##1.23.3
+  1. New feature: append a qrcode to an article.
+  2. New feature: crawl a page and send it to admin if an email received in address 'debug@xxx.appspotmail.com'. 
+
 ##1.23.1
   1. Bugfix: extra_css didnot been applied to html content.
   2. Bugfix: cannot parse summary of some fulltext RSS.

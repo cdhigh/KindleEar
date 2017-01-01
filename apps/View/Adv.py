@@ -19,15 +19,15 @@ from lib.pocket import Pocket
 from lib.urlopener import URLOpener
 from config import *
 
+#高级设置的主入口
 class AdvSettings(BaseHandler):
-    """ 高级设置的主入口 """
     __url__ = "/adv"
     #@etagged()
     def GET(self):
         raise web.seeother(AdvWhiteList.__url__)
 
+#设置邮件白名单
 class AdvWhiteList(BaseHandler):
-    """ 设置邮件白名单 """
     __url__ = "/advwhitelist"
     @etagged()
     def GET(self):
@@ -40,11 +40,17 @@ class AdvWhiteList(BaseHandler):
         
         wlist = web.input().get('wlist')
         if wlist:
-            WhiteList(mail=wlist,user=user).put()
+            if len(wlist) > 2: #预防有的人输入的过滤器带有单引号或双引号
+                if wlist[0] in ('"', "'") and wlist[-1] in ('"', "'"):
+                    wlist = wlist[1:-1]
+            if wlist.startswith('*@'): #输入*@xx.xx则修改为@xx.xx
+                wlist = wlist[2:]
+            if wlist:
+                WhiteList(mail=wlist, user=user).put()
         raise web.seeother('')
 
+#设置归档和分享配置项
 class AdvArchive(BaseHandler):
-    """ 设置归档和分享配置项 """
     __url__ = "/advarchive"
     
     @etagged()
@@ -80,6 +86,7 @@ class AdvArchive(BaseHandler):
         twitter = bool(web.input().get('twitter'))
         tumblr = bool(web.input().get('tumblr'))
         browser = bool(web.input().get('browser'))
+        qrcode = bool(web.input().get('qrcode'))
         
         #将instapaper的密码加密
         if instapaper_username and instapaper_password:
@@ -103,11 +110,12 @@ class AdvArchive(BaseHandler):
         user.twitter = twitter
         user.tumblr = tumblr
         user.browser = browser
+        user.qrcode = qrcode
         user.put()
         raise web.seeother('')
 
+#设置URL过滤器
 class AdvUrlFilter(BaseHandler):
-    """ 设置URL过滤器 """
     __url__ = "/advurlfilter"
     @etagged()
     def GET(self):
@@ -122,10 +130,10 @@ class AdvUrlFilter(BaseHandler):
         if url:
             UrlFilter(url=url,user=user).put()
         raise web.seeother('')
-        
+
+#删除白名单或URL过滤器项目
 class AdvDel(BaseHandler):
     __url__ = "/advdel"
-    #删除白名单或URL过滤器项目
     @etagged()
     def GET(self):
         user = self.getcurrentuser()
@@ -142,8 +150,8 @@ class AdvDel(BaseHandler):
                 wlist.delete()
             raise web.seeother('/advwhitelist')
 
+#导入自定义rss订阅列表，当前支持Opml格式
 class AdvImport(BaseHandler):
-    """ 导入自定义rss订阅列表，当前支持Opml格式 """
     __url__ = "/advimport"
     @etagged()
     def GET(self, tips=None):
