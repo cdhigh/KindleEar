@@ -11,7 +11,7 @@
 import __builtin__, sys
 from google.appengine.ext import vendor
 
-__Version__ = '1.23.3'
+__Version__ = '1.23.4'
 
 __builtin__.__dict__['__Version__'] = __Version__
 

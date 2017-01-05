@@ -193,7 +193,7 @@ class HandleMail(InboundMailHandler):
 
             if isDebug:
                 bookType = 'Debug'
-            elif isbook:
+            elif isBook:
                 bookType = 'Download'
             else:
                 bookType = user.book_type
