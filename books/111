@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+from weixinbase import WeixinBook
+
+def getBook():
+    return yinchengyikao
+class yinchengyikao(WeixinBook):
+    title                 = u'微信公众号：银成医考'
+    description           = u'过医考，找银成！银成医考！'
+    language              = 'zh-cn'
+    feed_encoding         = "utf-8"
+    page_encoding         = "utf-8"
+    oldest_article        = 7
+    deliver_days = ['Friday','Sunday']
+    feeds = [
+            (u'银成医考', 'http://weixin.sogou.com/home?stype=3&ie=utf-8&query=%E9%93%B6%E6%88%90%E5%8C%BB%E8%80%83&oi=300493'),
+            ]
