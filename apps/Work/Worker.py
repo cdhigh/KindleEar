@@ -7,7 +7,7 @@
 #Contributors:
 # rexdf <https://github.com/rexdf>
 
-import datetime,time
+import datetime, time, imghdr
 import web
 
 from collections import OrderedDict
@@ -85,8 +85,30 @@ class Worker(BaseHandler):
             oeb.guide.add('masthead', 'Masthead Image', href)
         
         if coverfile:
-            id_, href = oeb.manifest.generate('cover', coverfile)
-            item = oeb.manifest.add(id_, href, MimeFromFilename(coverfile))
+            imgData = None
+            imgMime = ''
+            if callable(coverfile): #如果封面需要回调的话
+                try:
+                    imgData = coverfile()
+                    if imgData:
+                        imgType = imghdr.what(None, imgData)
+                        if imgType: #如果是合法图片
+                            imgMime = r"image/" + imgType
+                        else:
+                            self.log.warn('content of cover is invalid : [%s].' % title)
+                            imgData = None
+                except Exception as e:
+                    self.log.warn('Failed to fetch cover for book [%s]. [Error: %s]' % (title, str(e)))
+                    coverfile = DEFAULT_COVER
+                    imgData = None
+                    imgMime = ''
+            
+            if imgData and imgMime:
+                id_, href = oeb.manifest.generate('cover', 'cover.jpg')
+                item = oeb.manifest.add(id_, href, imgMime, data=imgData)
+            else:
+                id_, href = oeb.manifest.generate('cover', coverfile)
+                item = oeb.manifest.add(id_, href, MimeFromFilename(coverfile))
             oeb.guide.add('cover', 'Cover', href)
             oeb.metadata.add('cover', id_)
         elif len(bks) > 1 and DEFAULT_COVER:
@@ -199,10 +221,23 @@ class Worker(BaseHandler):
         imgs_orig = []
         srvcontainer = ServerContainer()
         for cv in coverfiles:
+            img = None
+            if callable(cv): #如果封面需要回调的话
+                try:
+                    data = cv()
+                    if data:
+                        img = Image.open(StringIO(data))
+                    else:
+                        cv = DEFAULT_COVER
+                        img = None
+                except:
+                    cv = DEFAULT_COVER
+                    img = None
             try:
-                img = Image.open(StringIO(srvcontainer.read(cv)))
+                if not img:
+                    img = Image.open(StringIO(srvcontainer.read(cv)))
             except Exception as e:
-                main.log.warn('Cover file invalid [%s], %s' % (cv, str(e)))
+                main.log.warn('Cover file invalid [%s], %s' % (str(cv), str(e)))
             else:
                 imgs_orig.append(img)
         num_imgs = len(imgs_orig)

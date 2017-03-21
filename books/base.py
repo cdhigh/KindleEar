@@ -3,6 +3,7 @@
 """
 KindleEar电子书基类，每本投递到kindle的书籍抽象为这里的一个类。
 可以继承BaseFeedBook类而实现自己的定制书籍。
+cdhigh <https://github.com/cdhigh>
 """
 import os, re, urllib, urlparse, imghdr, datetime, hashlib
 from urllib2 import *
@@ -43,9 +44,12 @@ class BaseFeedBook:
     # 如果不提供此图片，软件使用PIL生成一个，但是因为GAE不能使用ImageFont组件
     # 所以字体很小，而且不支持中文标题，使用中文会出错
     mastheadfile = DEFAULT_MASTHEAD
-
-    coverfile = DEFAULT_COVER #封面图片文件
-
+    
+    #封面图片文件，如果值为一个字符串，则对应到images目录下的文件
+    #如果需要在线获取封面或自己定制封面（比如加日期之类的），则可以自己写一个回调函数，无参数，返回图片的二进制数据（支持gif/jpg/png格式）
+    #如果回调函数返回的不是图片或为None，则还是直接使用DEFAULT_COVER
+    coverfile = DEFAULT_COVER
+    
     keep_image = True #生成的MOBI是否需要图片
 
     #是否按星期投递，留空则每天投递，否则是一个星期字符串列表
@@ -274,21 +278,23 @@ class BaseFeedBook:
                             threshold = 86400*self.oldest_article #以天为单位
                         
                         if delta.days*86400+delta.seconds > threshold:
-                            self.log.info("Skip old article(%s): %s" % (updated.strftime('%Y-%m-%d %H:%M:%S'),e.link))
+                            self.log.info("Skip old article(%s): %s" % (updated.strftime('%Y-%m-%d %H:%M:%S'), e.link))
                             continue
-                            
+                    
+                    title = e.title if hasattr(e, 'title') else 'Untitled'
+                    
                     #支持HTTPS
                     if hasattr(e, 'link'):
                         if url.startswith('https://'):
                             urlfeed = e.link.replace('http://','https://')
                         else:
                             urlfeed = e.link
-
+                            
                         if urlfeed in urladded:
                             continue
                     else:
                         urlfeed = ''
-
+                    
                     desc = None
                     if isfulltext:
                         summary = e.summary if hasattr(e, 'summary') else None
@@ -306,11 +312,11 @@ class BaseFeedBook:
                             if not urlfeed:
                                 continue
                             else:
-                                self.log.warn('Fulltext feed item no has desc,link to webpage for article.(%s)' % e.title)
-                    urls.append((section, e.title, urlfeed, desc))
+                                self.log.warn('Fulltext feed item no has desc,link to webpage for article.(%s)' % title)
+                    urls.append((section, title, urlfeed, desc))
                     urladded.add(urlfeed)
             else:
-                self.log.warn('fetch rss failed(%s):%s'%(URLOpener.CodeMap(result.status_code), url))
+                self.log.warn('fetch rss failed(%s):%s' % (URLOpener.CodeMap(result.status_code), url))
                 
         return urls
 
@@ -522,7 +528,7 @@ class BaseFeedBook:
         #如果readability解析失败，则启用备用算法（不够好，但有全天候适应能力）
         body = soup.find('body')
         head = soup.find('head')
-        if len(body.contents) == 0:
+        if not body or len(body.contents) == 0:
             from simpleextract import simple_extract
             summary = simple_extract(content)
             soup = BeautifulSoup(summary, "lxml")

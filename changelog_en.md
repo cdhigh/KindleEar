@@ -1,4 +1,7 @@
 #Changelog for KindleEar
+##1.23.5
+  1. Now you can fetch a cover image from some sites if you want. 
+  2. bugfix: KindleEar crashed when has no title on RSS.
 
 ##1.23.3
   1. New feature: append a qrcode to an article.
