@@ -47,6 +47,7 @@ class BaseFeedBook:
     
     #封面图片文件，如果值为一个字符串，则对应到images目录下的文件
     #如果需要在线获取封面或自己定制封面（比如加日期之类的），则可以自己写一个回调函数，无参数，返回图片的二进制数据（支持gif/jpg/png格式）
+    #回调函数需要定义为类方法（使用@classmethod装饰器）
     #如果回调函数返回的不是图片或为None，则还是直接使用DEFAULT_COVER
     coverfile = DEFAULT_COVER
     

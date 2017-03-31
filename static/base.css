@@ -45,8 +45,9 @@ a:active{ color:#00498d; }
 }
 
 #header h1 a{
-    color:#000;
+    color:#333333;
     text-decoration:none;
+    text-shadow: rgb(200, 200, 200) 2px 3px 1px;
 }
 
 #header span,#header a.nav{
@@ -55,7 +56,6 @@ a:active{ color:#00498d; }
     text-align:right;
     margin-left:4px;
 }
-
 .grey{
     font-size: 13px; 
     padding: 5px 0 10px 0;
@@ -133,7 +133,7 @@ a:active{ color:#00498d; }
     font-size:0.9em;
     font-weight:bold;
     float: left;
-    width:400px;
+    width:90%;
     clear:both;
 }
 .summaryRow {

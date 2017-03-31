@@ -1,4 +1,9 @@
 #Changelog for KindleEar
+
+##1.24
+  1. New feature: users can upload cover image via by web page directly.
+  2. bugfix: fix a bug that anti 'anti-pirate-link' feature can't deal with urls which contain unicode characters.
+
 ##1.23.5
   1. Now you can fetch a cover image from some sites if you want. 
   2. bugfix: KindleEar crashed when has no title on RSS.

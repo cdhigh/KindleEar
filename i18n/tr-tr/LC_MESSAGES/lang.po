@@ -590,3 +590,33 @@ msgstr "Error when try to add this feed. Status:"
 
 msgid "Append qrcode of url to article"
 msgstr "Append qrcode of url to article"
+
+msgid "Cover Image"
+msgstr "Cover Image"
+
+msgid "Upload cover image"
+msgstr "Upload cover image"
+
+msgid "Upload a cover image from local."
+msgstr "Upload a cover image from local."
+
+msgid "Upload"
+msgstr "Upload"
+
+msgid "Size of image file must be smaller than 500KB."
+msgstr "Size of image file must be smaller than 500KB."
+
+msgid "The file you chosen is not an image."
+msgstr "The file you chosen is not an image."
+
+msgid "The cover image have been uploaded successfully."
+msgstr "The cover image have been uploaded successfully."
+
+msgid "Failed to upload the cover image. Error:"
+msgstr "Failed to upload the cover image. Error:"
+
+msgid "Failed to delete the cover image. Error:"
+msgstr "Failed to delete the cover image. Error:"
+
+msgid "Error when try to delete the cover image. Status:"
+msgstr "Error when try to delete the cover image. Status:"

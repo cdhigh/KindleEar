@@ -3,12 +3,19 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="KindleEar is a service for Amazon Kindle owners that lets you aggregate feeds you chosen and have them delivered to your Kindle in a convenient, easy-to-navigate format." />    
+    <meta name="description" content="KindleEar is a service for Amazon Kindle owners that aggregates feeds and deliver them to your Kindle." />    
     <title>{{title}} - Kindle's Ear</title>
     <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
     <link rel="stylesheet" href="/static/pure-min.css" type="text/css" charset="utf-8"/>
     <link rel="stylesheet" href="/static/base.css" type="text/css" charset="utf-8"/>
     <script type="text/javascript">
+        function $(id_){return document.getElementById(id_);}
+        function displayElement(id_) {
+            document.getElementById(id_).style.display = "";
+        }
+        function hideElement(id_) {
+            document.getElementById(id_).style.display = "none";
+        }
         function formatParams(data) {
             var arr = [];
             for (var name in data) {
@@ -30,7 +37,6 @@
         //        // 此处放失败后执行的代码
         //    }
         //});
-
         function ajax(options) {
             options = options || {};
             options.type = (options.type || "GET").toUpperCase();
@@ -70,8 +76,6 @@
     </script>
     {% block cssfiles %}{% endblock -%}
     {% block css %}{% endblock -%}
-    {% block jsfiles %}{% endblock -%}
-    {% block js %}{% endblock -%}
 </head>
 {% block bodytag -%}
 <body>
@@ -152,5 +156,7 @@
         <a href="/lang/tr-tr"><img src="/static/tr.gif" alt="TR" /></a></div>
         {% endblock -%}
     </div>
+{% block jsfiles %}{% endblock -%}
+{% block js %}{% endblock -%}
 </body>
 </html>

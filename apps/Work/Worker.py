@@ -9,6 +9,9 @@
 
 import datetime, time, imghdr
 import web
+import StringIO
+from PIL import Image
+import random
 
 from collections import OrderedDict
 from apps.BaseHandler import BaseHandler
@@ -46,17 +49,28 @@ class Worker(BaseHandler):
                 continue
                 #return "id of book is invalid or book not exist!<br />"
         
+        book4meta = None
         if len(bks) == 0:
             return "No have book to push!"
         elif len(bks) == 1:
-            book4meta = BookClass(bks[0].title) if bks[0].builtin else bks[0]
+            if bks[0].builtin:
+                book4meta = BookClass(bks[0].title)
+                mhfile = book4meta.mastheadfile
+                coverfile = book4meta.coverfile
+            else: #单独的推送自定义RSS
+                book4meta = bks[0]
+                mhfile = DEFAULT_MASTHEAD
+                coverfile = DEFAULT_COVER
         else: #多本书合并推送时使用“自定义RSS”的元属性
             book4meta = user.ownfeeds
+            mhfile = DEFAULT_MASTHEAD
+            coverfile = DEFAULT_COVER_BV if user.merge_books else DEFAULT_COVER
         
         if not book4meta:
             return "No have book to push.<br />"
             
-        opts = oeb = None
+        opts = None
+        oeb = None
         
         # 创建 OEB
         #global log
@@ -68,17 +82,6 @@ class Worker(BaseHandler):
         oeb.container = ServerContainer(main.log)
         
         #guide
-        if len(bks) == 1:
-            if bks[0].builtin:
-                mhfile = book4meta.mastheadfile
-                coverfile = book4meta.coverfile
-            else: #单独的推送自定义RSS
-                mhfile = DEFAULT_MASTHEAD
-                coverfile = DEFAULT_COVER
-        else:
-            mhfile = DEFAULT_MASTHEAD
-            coverfile = DEFAULT_COVER_BV if user.merge_books else DEFAULT_COVER
-        
         if mhfile:
             id_, href = oeb.manifest.generate('masthead', mhfile) # size:600*60
             oeb.manifest.add(id_, href, MimeFromFilename(mhfile))
@@ -87,7 +90,11 @@ class Worker(BaseHandler):
         if coverfile:
             imgData = None
             imgMime = ''
-            if callable(coverfile): #如果封面需要回调的话
+            #使用保存在数据库的用户上传的封面
+            if coverfile == DEFAULT_COVER and user.cover:
+                imgData = user.cover
+                imgMime = 'image/jpeg' #保存在数据库中的只可能是jpeg格式
+            elif callable(coverfile): #如果封面需要回调的话
                 try:
                     imgData = coverfile()
                     if imgData:
@@ -115,7 +122,7 @@ class Worker(BaseHandler):
             #将所有书籍的封面拼贴成一个
             #如果DEFAULT_COVER=None说明用户不需要封面
             id_, href = oeb.manifest.generate('cover', 'cover.jpg')
-            item = oeb.manifest.add(id_, href, 'image/jpeg', data=self.MergeCovers(bks, opts))
+            item = oeb.manifest.add(id_, href, 'image/jpeg', data=self.MergeCovers(bks, opts, user))
             oeb.guide.add('cover', 'Cover', href)
             oeb.metadata.add('cover', id_)
             
@@ -198,12 +205,8 @@ class Worker(BaseHandler):
             main.log.info(rs)
             return rs
             
-    def MergeCovers(self, bks, opts):
+    def MergeCovers(self, bks, opts, user):
         #将所有书籍的封面拼起来，为了更好的效果，请保证图片的大小统一。
-        from StringIO import StringIO
-        from PIL import Image
-        import random
-        
         coverfiles = []
         for bk in bks:
             if bk.builtin:
@@ -222,11 +225,17 @@ class Worker(BaseHandler):
         srvcontainer = ServerContainer()
         for cv in coverfiles:
             img = None
-            if callable(cv): #如果封面需要回调的话
+            #使用用户上传的保存在数据库的封面
+            if cv == DEFAULT_COVER and user.cover:
+                try:
+                    img = Image.open(StringIO.StringIO(user.cover))
+                except:
+                    img = None
+            elif callable(cv): #如果封面需要回调的话
                 try:
                     data = cv()
                     if data:
-                        img = Image.open(StringIO(data))
+                        img = Image.open(StringIO.StringIO(data))
                     else:
                         cv = DEFAULT_COVER
                         img = None
@@ -235,7 +244,7 @@ class Worker(BaseHandler):
                     img = None
             try:
                 if not img:
-                    img = Image.open(StringIO(srvcontainer.read(cv)))
+                    img = Image.open(StringIO.StringIO(srvcontainer.read(cv)))
             except Exception as e:
                 main.log.warn('Cover file invalid [%s], %s' % (str(cv), str(e)))
             else:
@@ -288,7 +297,7 @@ class Worker(BaseHandler):
         rw,rh = opts.reduce_image_to
         ratio = min(float(rw)/float(new_size[0]), float(rh)/float(new_size[0]))
         imgnew = imgnew.resize((int(new_size[0]*ratio), int(new_size[1]*ratio)))
-        data = StringIO()
+        data = StringIO.StringIO()
         imgnew.save(data, 'JPEG')
         return data.getvalue()
         

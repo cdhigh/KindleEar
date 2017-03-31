@@ -4,14 +4,14 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #Contributors:
 # rexdf <https://github.com/rexdf>
-import datetime, urllib, urlparse, hashlib
+import datetime, urllib, urlparse, hashlib, StringIO
 try:
     import json
 except ImportError:
     import simplejson as json
     
 import web
-
+from PIL import Image
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
 from apps.utils import local_time, etagged, ke_encrypt, ke_decrypt
@@ -238,6 +238,59 @@ class AdvExport(BaseHandler):
         web.header("Content-Disposition","attachment;filename=KindleEar_subscription.xml")
         return opmlfile.encode('utf-8')
 
+#在本地选择一个图片上传做为自定义RSS书籍的封面
+class AdvUploadCoverImage(BaseHandler):
+    __url__ = "/advuploadcoverimage"
+    @etagged()
+    def GET(self, tips=None):
+        user = self.getcurrentuser()
+        return self.render('advcoverimage.html', "Cover Image", current='advsetting',
+            user=user, advcurr='uploadcoverimage', formaction=AdvUploadCoverImageAjax.__url__, 
+            deletecoverhref=AdvDeleteCoverImageAjax.__url__, tips=tips)
+
+#AJAX接口的上传封面图片处理函数
+class AdvUploadCoverImageAjax(BaseHandler):
+    __url__ = "/advuploadcoverimageajax"
+    MAX_IMAGE_PIXEL = 1024
+    def POST(self):
+        ret = 'ok'
+        try:
+            x = web.input(coverfile={})
+            user = self.getcurrentuser()
+            file_ = x['coverfile'].file
+            if user and file_:
+                #将图像转换为JPEG格式，同时限制分辨率不超过1024
+                img = Image.open(file_)
+                width, height = img.size
+                fmt = img.format
+                if (width > self.MAX_IMAGE_PIXEL) or (height > self.MAX_IMAGE_PIXEL):
+                    ratio = min(float(self.MAX_IMAGE_PIXEL)/float(width), float(self.MAX_IMAGE_PIXEL)/float(height))
+                    img = img.resize((int(width*ratio), int(height*ratio)))
+                data = StringIO.StringIO()
+                img.save(data, 'JPEG')
+                user.cover = db.Blob(data.getvalue())
+                user.put()
+        except Exception as e:
+            ret = str(e)
+            
+        return ret
+
+#删除上传的封面图片
+class AdvDeleteCoverImageAjax(BaseHandler):
+    __url__ = "/advdeletecoverimageajax"
+    def POST(self):
+        ret = {'status': 'ok'}
+        try:
+            confirmKey = web.input().get('action')
+            user = self.getcurrentuser()
+            if user and confirmKey == 'delete':
+                user.cover = None
+                user.put()
+        except Exception as e:
+            ret['status'] = str(e)
+            
+        return json.dumps(ret)
+        
 #集成各种网络服务OAuth2认证的相关处理
 class AdvOAuth2(BaseHandler):
     __url__ = "/oauth2/(.*)"

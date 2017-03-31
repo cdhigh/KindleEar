@@ -585,3 +585,33 @@ msgstr "试图添加此订阅源时出错，错误码："
 
 msgid "Append qrcode of url to article"
 msgstr "在每篇文章后附加文章地址的二维码"
+
+msgid "Cover Image"
+msgstr "封面图片"
+
+msgid "Upload cover image"
+msgstr "上传封面图片"
+
+msgid "Upload a cover image from local."
+msgstr "从本机上传一个封面图片。"
+
+msgid "Upload"
+msgstr "上传"
+
+msgid "Size of image file must be smaller than 500KB."
+msgstr "封面图片大小必须要小于500KB。"
+
+msgid "The file you chosen is not an image."
+msgstr "你选择的文件不是一个图像文件。"
+
+msgid "The cover image have been uploaded successfully."
+msgstr "封面图片已经成功上传。"
+
+msgid "Failed to upload the cover image. Error:"
+msgstr "上传封面图片失败。错误信息："
+
+msgid "Failed to delete the cover image. Error:"
+msgstr "删除封面图片失败。错误信息："
+
+msgid "Error when try to delete the cover image. Status:"
+msgstr "在试图删除封面图片时出现异常。状态码："
