@@ -1,6 +1,6 @@
 Readme of english version refers to [Readme_EN.md](https://github.com/cdhigh/KindleEar/blob/master/readme_EN.md)
 
-#简介
+# 简介
 这是一个运行在Google App Engine(GAE)上的Kindle个人推送服务应用，生成排版精美的杂志模式mobi/epub格式自动每天推送至您的Kindle或其他邮箱。
 
 此应用目前的主要功能有：  
@@ -16,7 +16,7 @@ Readme of english version refers to [Readme_EN.md](https://github.com/cdhigh/Kin
 > 注：如果您要求不高，自定义RSS推送功能足以应付一般应用，如果要求排版和完美，可以参照books目录下的文件范本自己添加一个文件再重新上传即可，books目录下的书籍文件都不是随意预置的，每个文件都至少演示一个适用的books编写技巧。
 在您懂python的前提下，您可以完全的操控网页，可以生成您需要的最完美的MOBI/EPUB文件。
 
-#标准部署步骤
+# 标准部署步骤
 1. [申请google账号](https://accounts.google.com/SignUp) 并暂时 [启用不够安全的应用的访问权限](https://www.google.com/settings/security/lesssecureapps) 以便上传程序。  
 
 2. [创建一个Application](https://console.developers.google.com/project)，注意不用申请GCE，那个是60天试用的，而GAE是限额范围内永久免费的。  
@@ -51,7 +51,7 @@ config.py          | DOMAIN      | 你申请的应用的域名        |
 **不建议使用GAE Launcher部署KindleEar，除非你知道怎么设置Extra Flags等参数。**
 11. 步骤已经说的很详细了，如果自己还是部署不成功，也可以选择直接捐赠给作者50块钱 ([Wiki捐赠页面](https://github.com/cdhigh/KindleEar/wiki/Donate))，然后将gmail地址和密码发给作者（先要提前关闭密码二步验证），作者负责帮你部署成功。有需要自定义抓取和分析其他网站的需求，也可以联系作者有偿实现。
 
-#简化的部署步骤（推荐）
+# 简化的部署步骤（推荐）
   假如你不想安装python和GAE SDK，则可以：  
 
 1. [下载KindleEar](https://github.com/cdhigh/KindleEar/archive/master.zip) 并解压（改目录名为KindleEar）。  
@@ -59,9 +59,9 @@ config.py          | DOMAIN      | 你申请的应用的域名        |
 3. 将KindleEar目录放到Uploader目录下，双击uploader.bat即开始上传，根据提示输入你的相关信息即可，在第一次成功部署之后，适用uploader再次升级KindleEar则不需要再次输入。  
 **此uploader仅适用于Windows系统。**
 
-#许可协议
+# 许可协议
 KindleEar is licensed under the [AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html) license.  
 大体的许可框架是此应用代码你可以任意使用，任意修改，可以商用，但是必须将你修改后的代码开源并保留原始版权声明。
 
-#捐赠
+# 捐赠
 如果你希望支持一下KindleEar，可以戳 [Wiki捐赠页面](https://github.com/cdhigh/KindleEar/wiki/Donate)
