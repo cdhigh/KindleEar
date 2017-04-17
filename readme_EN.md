@@ -1,4 +1,4 @@
-#Brief Introduction
+# Brief Introduction
 KindleEar is a web application to aggregate RSS for generating periodical mobi/epub file with images and send it to your kindle or your email automatically.
 
 ## The features included:
@@ -11,7 +11,7 @@ KindleEar is a web application to aggregate RSS for generating periodical mobi/e
 * Powerful and convenient mail-transfering service.
 * Integration with Evernote/Pocket/Instapaper.
 
-#Deployment
+# Deployment
 1. [Create a Google account](https://accounts.google.com/SignUp) and [Turn on Access for less secure apps](https://www.google.com/settings/security/lesssecureapps).  
 
 2. [Create an application](https://console.developers.google.com/project).  
@@ -43,12 +43,12 @@ For example the author's site: <http://kindleear.appspot.com>
 
 9. More details could be found in [FAQ](http://htmlpreview.github.io/?https://github.com/cdhigh/KindleEar/blob/master/static/faq.html).
 
-#Deployment simplified
+# Deployment simplified
 If you don't want to intall GAE SDK and python, you have another choice.  
 
 1. [Download KindleEar](https://github.com/cdhigh/KindleEar/archive/master.zip) and uncompress it (Change the name of folder to 'KindleEar').  
 2. [Download KindleEar-Uploader](https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing) and unzip it.  
 3. Put KindleEar folder into Uploader directory, double-click uploader.bat to start process of deployment.  
 
-#License
+# License
    KindleEar is Licensed under the [AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html) license.
