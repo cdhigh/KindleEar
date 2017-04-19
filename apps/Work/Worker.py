@@ -18,11 +18,14 @@ from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
 from apps.utils import InsertToc, local_time
 from lib.makeoeb import *
+from calibre.ebooks.conversion.mobioutput import MOBIOutput
+from calibre.ebooks.conversion.epuboutput import EPUBOutput
+from calibre.utils.bytestringio import byteStringIO
 from books import BookClasses, BookClass
 from books.base import BaseFeedBook
 
+#实际下载文章和生成电子书并且发送邮件
 class Worker(BaseHandler):
-    #实际下载文章和生成电子书并且发送邮件
     __url__ = "/worker"
     def GET(self):
         username = web.input().get("u")
@@ -102,10 +105,10 @@ class Worker(BaseHandler):
                         if imgType: #如果是合法图片
                             imgMime = r"image/" + imgType
                         else:
-                            self.log.warn('content of cover is invalid : [%s].' % title)
+                            main.log.warn('content of cover is invalid : [%s].' % title)
                             imgData = None
                 except Exception as e:
-                    self.log.warn('Failed to fetch cover for book [%s]. [Error: %s]' % (title, str(e)))
+                    main.log.warn('Failed to fetch cover for book [%s]. [Error: %s]' % (title, str(e)))
                     coverfile = DEFAULT_COVER
                     imgData = None
                     imgMime = ''
@@ -204,9 +207,9 @@ class Worker(BaseHandler):
             rs = "No new feeds."
             main.log.info(rs)
             return rs
-            
+    
+    #将所有书籍的封面拼起来，为了更好的效果，请保证图片的大小统一。
     def MergeCovers(self, bks, opts, user):
-        #将所有书籍的封面拼起来，为了更好的效果，请保证图片的大小统一。
         coverfiles = []
         for bk in bks:
             if bk.builtin:

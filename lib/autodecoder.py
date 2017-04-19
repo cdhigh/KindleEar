@@ -3,6 +3,7 @@
 """
 KindleEar网页解码器，综合判断HTTP响应包头，HTML文件META信息，chardet检测编码来解码
 对于chardet检测的情况，则通过缓存解码结果到数据库，实现准确性和效率的平衡。
+Author: cdhigh <https://github.com/cdhigh>
 """
 import urlparse, re
 from google.appengine.ext import db
@@ -172,9 +173,9 @@ def rectify_encoding(encoding):
         encoding = encoding.partition(' ')[0].strip()
     
     #常见的一些错误写法纠正
-    errata = {'8858':'8859','8559':'8859','5889':'8859','2313':'2312','2132':'2312',
-            '2321':'2312','gb-2312':'gb2312','gbk2312':'gbk','gbs2312':'gb2312',
-            '.gb2312':'gb2312','.gbk':'gbk','uft-8':'uft-8','x-euc':'euc'}
+    errata = {'8858':'8859', '8559':'8859', '5889':'8859', '2313':'2312', '2132':'2312',
+            '2321':'2312', 'gb-2312':'gb2312', 'gbk2312':'gbk', 'gbs2312':'gb2312',
+            '.gb2312':'gb2312', '.gbk':'gbk', 'uft-8':'utf-8', 'utf8':'utf-8', 'x-euc':'euc'}
     for e in errata:
         if e in encoding:
             encoding = encoding.replace(e, errata[e])
@@ -198,9 +199,9 @@ def rectify_encoding(encoding):
     
     #调整为python标准编码
     translate = { 'windows-874':'iso-8859-11', 'en_us':'utf8', 'macintosh':'iso-8859-1',
-        'euc_tw':'big5_tw', 'th':'tis-620','zh-cn':'gbk','gb_2312-80':'gb2312',
-        'iso-latin-1':'iso-8859-1','windows-31j':'shift_jis','x-sjis':'shift_jis',
-        'none': 'null','no':'null','0ff':'null'}
+        'euc_tw':'big5_tw', 'th':'tis-620', 'zh-cn':'gbk', 'gb_2312-80':'gb2312',
+        'iso-latin-1':'iso-8859-1', 'windows-31j':'shift_jis', 'x-sjis':'shift_jis',
+        'none':'null', 'no':'null', '0ff':'null'}
     for t in translate:
         if encoding == t:
             encoding = translate[t]

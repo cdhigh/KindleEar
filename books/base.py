@@ -20,14 +20,13 @@ from StringIO import StringIO
 
 from config import *
 
+#base class of Book
 class BaseFeedBook:
-    """ base class of Book """
     title                 = ''
     __author__            = ''
     description           = ''
     max_articles_per_feed = 30
-    #下载多长时间之内的文章，小于等于365则单位为天，大于365则单位为秒，0为不限制
-    oldest_article        = 7
+    oldest_article        = 7    #下载多长时间之内的文章，小于等于365则单位为天，大于365则单位为秒，0为不限制
     host                  = None # 有些网页的图像下载需要请求头里面包含Referer,使用此参数配置
     network_timeout       = None  # None则使用默认
     fetch_img_via_ssl     = False # 当网页为https时，其图片是否也转换成https
@@ -47,16 +46,16 @@ class BaseFeedBook:
     
     #封面图片文件，如果值为一个字符串，则对应到images目录下的文件
     #如果需要在线获取封面或自己定制封面（比如加日期之类的），则可以自己写一个回调函数，无参数，返回图片的二进制数据（支持gif/jpg/png格式）
-    #回调函数需要定义为类方法（使用@classmethod装饰器）
+    #回调函数为独立的函数，不能为类方法或实例方法。
     #如果回调函数返回的不是图片或为None，则还是直接使用DEFAULT_COVER
     coverfile = DEFAULT_COVER
     
     keep_image = True #生成的MOBI是否需要图片
 
     #是否按星期投递，留空则每天投递，否则是一个星期字符串列表
-    #一旦设置此属性，则网页上设置的星期推送对此书无效
+    #一旦设置此属性，则网页上设置的“星期推送”对此书无效
     #'Monday','Tuesday',...,'Sunday'，大小写敏感
-    #比如设置为['Friday']
+    #比如设置为['Friday'] 或 ['Monday', 'Friday', 'Sunday']
     deliver_days = []
 
     #自定义书籍推送时间，一旦设置了此时间，则网页上设置的时间对此书无效
@@ -90,15 +89,18 @@ class BaseFeedBook:
     # 背景知识：下面所说的标签为HTML标签，比如'body','h1','div','p'等都是标签
 
     # 仅抽取网页中特定的标签段，在一个复杂的网页中抽取正文，这个工具效率最高
+    # 内容为字典列表
     # 比如：keep_only_tags = [dict(name='div', attrs={'id':'article'}),]
     # 这个优先级最高，先处理了这个标签再处理其他标签。
     keep_only_tags = []
 
     # 顾名思义，删除特定标签前/后的所有内容，格式和keep_only_tags相同
+    # 内容为字典列表
     remove_tags_after = []
     remove_tags_before = []
 
     # 内置的几个必须删除的标签，不建议子类修改
+    # 内容为字符串列表
     insta_remove_tags = ['script','object','video','embed','noscript','style','link']
     insta_remove_attrs = ['width','height','onclick','onload','style']
     insta_remove_classes = []
@@ -114,10 +116,10 @@ class BaseFeedBook:
     #---------------end----------------------
 
     # 子类定制的HTML标签清理内容
-    remove_tags = [] # 完全清理此标签
-    remove_ids = [] # 清除标签的id属性为列表中内容的标签
-    remove_classes = [] # 清除标签的class属性为列表中内容的标签
-    remove_attrs = [] # 清除所有标签的特定属性，不清除标签内容
+    remove_tags = [] # 完全清理此标签，为字符串列表
+    remove_ids = [] # 清除标签的id属性为列表中内容的标签，为字符串列表
+    remove_classes = [] # 清除标签的class属性为列表中内容的标签，为字符串列表
+    remove_attrs = [] # 清除所有标签的特定属性，不清除标签内容，为字符串列表
 
     # 添加到每篇文章的CSS，可以更完美的控制文章呈现
     # 仅需要CSS内容，不要包括<style type="text/css"></style>标签
