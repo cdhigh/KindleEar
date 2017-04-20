@@ -99,7 +99,7 @@ class Worker(BaseHandler):
                 imgMime = 'image/jpeg' #保存在数据库中的只可能是jpeg格式
             elif callable(coverfile): #如果封面需要回调的话
                 try:
-                    imgData = coverfile()
+                    imgData = book4meta().coverfile()
                     if imgData:
                         imgType = imghdr.what(None, imgData)
                         if imgType: #如果是合法图片
@@ -211,11 +211,17 @@ class Worker(BaseHandler):
     #将所有书籍的封面拼起来，为了更好的效果，请保证图片的大小统一。
     def MergeCovers(self, bks, opts, user):
         coverfiles = []
+        callableInstances = []
         for bk in bks:
             if bk.builtin:
                 book = BookClass(bk.title)
                 if book and book.coverfile:
-                    coverfiles.append(book.coverfile)
+                    if callable(book.coverfile):
+                        instan = book()
+                        callableInstances.append(instan)
+                        coverfiles.append(instan.coverfile)
+                    else:
+                        coverfiles.append(book.coverfile)
             elif DEFAULT_COVER:
                 coverfiles.append(DEFAULT_COVER)
                 
@@ -242,14 +248,15 @@ class Worker(BaseHandler):
                     else:
                         cv = DEFAULT_COVER
                         img = None
-                except:
+                except Exception as e:
+                    main.log.warn('[MergeCovers] Content of cover is invalid : [%s].' % str(e))
                     cv = DEFAULT_COVER
                     img = None
             try:
                 if not img:
                     img = Image.open(StringIO.StringIO(srvcontainer.read(cv)))
             except Exception as e:
-                main.log.warn('Cover file invalid [%s], %s' % (str(cv), str(e)))
+                main.log.warn('[MergeCovers] Cover file invalid [%s], %s' % (str(cv), str(e)))
             else:
                 imgs_orig.append(img)
         num_imgs = len(imgs_orig)
