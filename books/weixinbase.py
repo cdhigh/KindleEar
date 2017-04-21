@@ -12,6 +12,7 @@ from lib.urlopener import URLOpener
 from lib.autodecoder import AutoDecoder
 from lib.weixin import process_eqs
 from base import BaseFeedBook
+from lib.autodecoder import AutoDecoder
 
 WEIXIN_URL = 'http://weixin.sogou.com/gzhjs?cb=sogou.weixin.gzhcb&openid={id}&eqs={eqs}&ekv={ekv}&page=1&t={t}'
 
