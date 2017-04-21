@@ -37,9 +37,12 @@ class Url2Book(BaseHandler):
         
         if type(urls) is unicode:
             urls = urls.encode('utf-8')
-            
-        urls = zlib.decompress(base64.urlsafe_b64decode(urls))
-        
+
+        if bool(web.input().get("nozlib") == '1'):
+            urls = base64.urlsafe_b64decode(urls)
+        else:
+            urls = zlib.decompress(base64.urlsafe_b64decode(urls))
+
         if booktype == 'Download': #直接下载电子书并推送
             from lib.filedownload import Download
             for url in urls.split('|'):
