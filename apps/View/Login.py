@@ -75,7 +75,7 @@ class Login(BaseHandler):
             main.session.login = 1
             main.session.username = name
             if u.expires: #用户登陆后自动续期
-                u.expires = datetime.datetime.utcnow()+datetime.timedelta(days=180)
+                u.expires = datetime.datetime.utcnow()+datetime.timedelta(days=36500)
                 u.put()
             
             #为了兼容性，对于新账号才一次性设置secret_key

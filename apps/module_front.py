@@ -53,6 +53,12 @@ from apps.utils import fix_filesizeformat
 #reload(sys)
 #sys.setdefaultencoding('utf-8')
 
+try:
+  import googleclouddebugger
+  googleclouddebugger.AttachDebugger()
+except ImportError:
+  pass
+
 for book in BookClasses():  #添加内置书籍
     if memcache.get(book.title): #使用memcache加速
         continue
