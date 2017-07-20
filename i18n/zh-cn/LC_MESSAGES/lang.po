@@ -88,6 +88,9 @@ msgstr "设置"
 msgid "Logs"
 msgstr "投递日志"
 
+msgid "UpdateLogs"
+msgstr "更新日志"
+
 msgid "Admin"
 msgstr "账户管理"
 

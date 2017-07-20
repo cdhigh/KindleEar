@@ -19,7 +19,7 @@ from PIL import Image
 from StringIO import StringIO
 
 from config import *
-
+from apps.dbModels import UpdateLog
 #base class of Book
 class BaseFeedBook:
     title                 = ''
@@ -137,6 +137,82 @@ class BaseFeedBook:
     #(u'8小时最热', 'http://www.qiushibaike.com'),
     feeds = []
 
+    def updatelog(self, name, count):
+        try:
+            mylogs = UpdateLog.all().filter("comicname = ", name)
+            for log in mylogs:
+                log.delete()
+            dl = UpdateLog(comicname=name, updatecount=count)
+            dl.put()
+        except Exception as e:
+            print('UpdateLog failed to save:%s',str(e))
+        return None
+
+    def GetNewComic(self, title, mainurl):
+        href = ""
+        
+        if (title == "") or (mainurl == "") :
+            return href
+       
+        mhlog = UpdateLog.all().filter("comicname = ", title).get()
+	if mhlog is None:
+            print "mhlog is none, set to 1"
+            oldNum = 1
+        else:
+	    oldNum = mhlog.updatecount
+
+        opener = URLOpener(self.host, timeout=60)
+        result = opener.open(mainurl)
+        if result.status_code != 200:
+            self.log.warn('fetch rss failed:%s' % mainurl)
+            return href
+        
+        content = result.content.decode(self.feed_encoding, 'ignore')
+        soup = BeautifulSoup(content, "lxml")
+        
+        mhs = soup.findAll("table", {"width": '688'})
+        for mh in mhs:
+            comics = mh.findAll("a", {"target": '_blank'})
+            for comic in comics:
+                num = int(comic.text.split(" ")[1])
+                if num > oldNum :
+                    oldNum = num
+                    href = "http://www.cartoonmad.com" + comic.get("href")
+
+        if href != "" :
+            self.updatelog(title, oldNum)
+
+        return href
+
+    def GetComicUrls(self, title, href):
+        urls = []
+
+        comic_opener = URLOpener(self.host, timeout=60)
+        comic_page = comic_opener.open(href)
+        if comic_page.status_code != 200:
+            self.log.warn('fetch rss failed:%s' % href)
+            return []
+
+        comic_content = comic_page.content.decode(self.feed_encoding, 'ignore')
+        comic_body = BeautifulSoup(comic_content, "lxml")
+        ul = comic_body.find("select").findAll("option")
+        if ul is None :
+            return[]
+        else:
+            for mh in ul:
+                mhhref = mh.get("value")
+                if mhhref:
+                    pagehref = "http://www.cartoonmad.com/comic/" + mhhref
+                    pageopener = URLOpener(self.host, timeout=60)
+                    pageresult = pageopener.open(pagehref)
+                    if pageresult.status_code != 200:
+                        self.log.warn('fetch rss failed:%s' % pagehref)
+                        return []
+                    body = pageresult.content.decode(self.feed_encoding, 'ignore')
+                    sp = BeautifulSoup(body, "lxml")
+                    mhpic = sp.find("img", {"oncontextmenu": 'return false'}).get("src")
+                    urls.append( (title, mh.text, mhpic, None))
+        return urls
     #几个钩子函数，基类在适当的时候会调用，
     #子类可以使用钩子函数进一步定制
 
