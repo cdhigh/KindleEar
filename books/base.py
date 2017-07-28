@@ -19,7 +19,7 @@ from PIL import Image
 from StringIO import StringIO
 
 from config import *
-
+from apps.dbModels import UpdateLog
 #base class of Book
 class BaseFeedBook:
     title                 = ''
@@ -1320,6 +1320,129 @@ class BaseUrlBook(BaseFeedBook):
     def ParseFeedUrls(self):
         """ return list like [(section,title,url,desc),..] """
         return [(sec,sec,url,'') for sec, url in self.feeds]
+
+class BaseComicBook(BaseFeedBook):
+    """ 漫画专用
+    """
+    title               = u''
+    description         = u''
+    language            = 'zh-tw'
+    feed_encoding       = 'big5'
+    page_encoding       = 'big5'
+    mastheadfile        = 'mh_comic.gif'
+    coverfile           = ''
+    mainurl             = ''
+
+    def Items(self, opts=None, user=None):
+        """
+        生成器，返回一个图片元组，mime,url,filename,content,brief,thumbnail
+        """
+        urls = self.ParseFeedUrls()
+        opener = URLOpener(self.host, timeout=self.timeout, headers=self.extra_header)
+        imgs = []
+        for section, ftitle, url, desc in urls:
+            opener = URLOpener(self.host, timeout=self.timeout, headers=self.extra_header)
+            result = opener.open(url)
+            article = result.content 
+            if not article:
+                continue
+           
+            imgtype = imghdr.what(None, article)
+            imgmime = r"image/" + imgtype
+            fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
+            imgs.append(fnimg)
+            yield (imgmime, url, fnimg, article, None, None)
+
+	if len(imgs)> 0:
+            tmphtml = '<html><head><title>Picture</title></head><body>'
+            for img in imgs:
+                tmphtml = tmphtml + '<img src="' + img + '"/>'
+            tmphtml = tmphtml + '</body><html>'
+            yield (self.title, url, ftitle, tmphtml, '', None)
+
+    def updatelog(self, name, count):
+        try:
+            mylogs = UpdateLog.all().filter("comicname = ", name)
+            for log in mylogs:
+                log.delete()
+            dl = UpdateLog(comicname=name, updatecount=count)
+            dl.put()
+        except Exception as e:
+            print('UpdateLog failed to save:%s',str(e))
+        return None
+
+    def GetNewComic(self):
+        href = ""
+        
+        if (self.title == "") or (self.mainurl == "") :
+            return href
+       
+        mhlog = UpdateLog.all().filter("comicname = ", self.title).get()
+	if mhlog is None:
+            print "mhlog is none, set to 1"
+            oldNum = 1
+        else:
+	    oldNum = mhlog.updatecount
+
+        opener = URLOpener(self.host, timeout=60)
+        result = opener.open(self.mainurl)
+        if result.status_code != 200:
+            self.log.warn('fetch rss failed:%s' % self.mainurl)
+            return href
+        
+        content = result.content.decode(self.feed_encoding, 'ignore')
+        soup = BeautifulSoup(content, "lxml")
+        
+        mhs = soup.findAll("table", {"width": '688'})
+        for mh in mhs:
+            comics = mh.findAll("a", {"target": '_blank'})
+            for comic in comics:
+                num = int(comic.text.split(" ")[1])
+                if num > oldNum :
+                    oldNum = num
+                    href = "http://www.cartoonmad.com" + comic.get("href")
+
+        if href != "" :
+            self.updatelog(self.title, oldNum)
+
+        return href
+
+    def GetComicUrls(self, href):
+        urls = []
+
+        comic_opener = URLOpener(self.host, timeout=60)
+        comic_page = comic_opener.open(href)
+        if comic_page.status_code != 200:
+            self.log.warn('fetch rss failed:%s' % href)
+            return []
+
+        comic_content = comic_page.content.decode(self.feed_encoding, 'ignore')
+        comic_body = BeautifulSoup(comic_content, "lxml")
+        ul = comic_body.find("select").findAll("option")
+        if ul is None :
+            return[]
+        else:
+            for mh in ul:
+                mhhref = mh.get("value")
+                if mhhref:
+                    pagehref = "http://www.cartoonmad.com/comic/" + mhhref
+                    pageopener = URLOpener(self.host, timeout=60)
+                    pageresult = pageopener.open(pagehref)
+                    if pageresult.status_code != 200:
+                        self.log.warn('fetch rss failed:%s' % pagehref)
+                        return []
+                    body = pageresult.content.decode(self.feed_encoding, 'ignore')
+                    sp = BeautifulSoup(body, "lxml")
+                    mhpic = sp.find("img", {"oncontextmenu": 'return false'}).get("src")
+                    urls.append( (self.title, mh.text, mhpic, None))
+        return urls
+
+    def ParseFeedUrls(self):
+        href = self.GetNewComic()
+        if href == "":
+            return []
+
+        return self.GetComicUrls(href)
 
 
 #几个小工具函数

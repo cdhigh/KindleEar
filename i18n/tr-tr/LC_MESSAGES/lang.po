@@ -88,6 +88,9 @@ msgstr "Ayarlar"
 msgid "Logs"
 msgstr "Kayıtlar"
 
+msgid "UpdateLogs"
+msgstr "Kayıtlar"
+
 msgid "Admin"
 msgstr "Yönetim"
 
