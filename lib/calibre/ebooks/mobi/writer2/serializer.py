@@ -305,10 +305,6 @@ class Serializer(object):
         tag = prefixname(elem.tag, nsrmap)
         # Previous layers take care of @name
         id_ = elem.attrib.pop('id', None)
-		# Add for comic blank page
-        self.logger.warn(tag)
-        if tag == "mbp:pagebreak":
-            return
             
         if id_:
             href = '#'.join((item.href, id_))
