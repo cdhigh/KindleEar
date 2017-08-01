@@ -76,7 +76,7 @@ class KF8Writer(object):
         self._data_cache = {}
         # Suppress cssutils logging output as it is duplicated anyway earlier
         # in the pipeline
-        cssutils.log.setLevel(logging.CRITICAL)
+#        cssutils.log.setLevel(logging.CRITICAL)
         for item in self.oeb.manifest:
             if item.media_type in XML_DOCS:
                 self._data_cache[item.href] = copy.deepcopy(item.data)
@@ -433,5 +433,5 @@ class KF8Writer(object):
 
 def create_kf8_book(oeb, opts, resources, for_joint=False):
     writer = KF8Writer(oeb, opts, resources)
-    return KF8Book(writer, for_joint=for_joint)
+    return KF8Book(oeb, writer, for_joint=for_joint)
 
