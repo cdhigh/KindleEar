@@ -1326,10 +1326,10 @@ class BaseComicBook(BaseFeedBook):
     """
     title               = u''
     description         = u''
-    language            = 'zh-tw'
-    feed_encoding       = 'big5'
-    page_encoding       = 'big5'
-    mastheadfile        = 'mh_comic.gif'
+    language            = ''
+    feed_encoding       = ''
+    page_encoding       = ''
+    mastheadfile        = ''
     coverfile           = ''
     mainurl             = ''
 
