@@ -1354,10 +1354,7 @@ class BaseComicBook(BaseFeedBook):
             yield (imgmime, url, fnimg, article, None, None)
 
 	if len(imgs)> 0:
-            tmphtml = '<html><head><title>Picture</title></head><body>'
-            for img in imgs:
-                tmphtml = tmphtml + '<img src="' + img + '"/>'
-            tmphtml = tmphtml + '</body><html>'
+            tmphtml = '<html><head><title>Picture</title></head><body><img src="'+ '"/><img src="'.join(imgs) + '"/></body></html>'
             yield (self.title, url, ftitle, tmphtml, '', None)
 
     def updatelog(self, name, count):
@@ -1368,7 +1365,7 @@ class BaseComicBook(BaseFeedBook):
             dl = UpdateLog(comicname=name, updatecount=count)
             dl.put()
         except Exception as e:
-            print('UpdateLog failed to save:%s',str(e))
+            default_log.warn("Updatelog failed to save: %s" % str(e))
         return None
 
     def GetNewComic(self):
@@ -1379,7 +1376,7 @@ class BaseComicBook(BaseFeedBook):
        
         mhlog = UpdateLog.all().filter("comicname = ", self.title).get()
 	if mhlog is None:
-            print "mhlog is none, set to 1"
+            default_log.warn("These is no log in db, set to 1")
             oldNum = 1
         else:
 	    oldNum = mhlog.updatecount

@@ -31,7 +31,7 @@ ALWAYS_CHAR_DETECT = False
 TRUST_ENCODING_IN_HEADER_OR_META = True
 
 #generate brief description for toc item or not.
-GENERATE_TOC_DESC = True
+GENERATE_TOC_DESC = False
 TOC_DESC_WORD_LIMIT = 500
 
 #-------------------add by rexdf-----------
@@ -39,10 +39,10 @@ TOC_DESC_WORD_LIMIT = 500
 TABLE_OF_CONTENTS = u'Table Of Contents'
 
 #description of toc contains image or not
-GENERATE_TOC_THUMBNAIL = True
+GENERATE_TOC_THUMBNAIL = False
 
 #if generate other html toc or not, just for reading in pc
-GENERATE_HTML_TOC = True
+GENERATE_HTML_TOC = False
 
 #if convert color image to gray or not, good for reducing size of book if you read it in Kindle only
 COLOR_TO_GRAY = True

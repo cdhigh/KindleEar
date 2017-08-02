@@ -23,7 +23,6 @@ class Uplogs(BaseHandler):
         for log in uplogs:
             name = log.comicname
             count = int(web.input().get(name.encode("utf")))
-            print name.encode("utf") + ":" + str(count)
             if count == 0:
                 log.delete()
             elif count != log.updatecount:
