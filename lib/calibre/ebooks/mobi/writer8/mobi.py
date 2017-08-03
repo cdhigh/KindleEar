@@ -311,12 +311,15 @@ class KF8Book(object):
     def write(self, outpath):
         records = [self.record0] + self.records[1:]
 
-        with open(outpath, 'wb') as f:
+#        with open(outpath, 'wb') as f:
+        if outpath != None:
+            f = outpath
 
             # Write PalmDB Header
 
-            title = ascii_filename(self.full_title.decode('utf-8')).replace(
-                    ' ', '_')[:31]
+            title = ascii_filename(self.full_title.decode('utf-8'))
+#            title = ascii_filename(self.full_title.decode('utf-8')).replace(
+#                    ' ', '_')[:31]
             title += (b'\0' * (32 - len(title)))
             now = int(time.time())
             nrecords = len(records)
