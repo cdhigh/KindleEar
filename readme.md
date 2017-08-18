@@ -14,7 +14,6 @@ Readme of english version refers to [Readme_EN.md](https://github.com/cdhigh/Kin
 * 和Evernote/Pocket/Instapaper等系统的集成
 
 > 注：如果您要求不高，自定义RSS推送功能足以应付一般应用，如果要求排版和完美，可以参照books目录下的文件范本自己添加一个文件再重新上传即可，books目录下的书籍文件都不是随意预置的，每个文件都至少演示一个适用的books编写技巧。
-在您懂python的前提下，您可以完全的操控网页，可以生成您需要的最完美的MOBI/EPUB文件。
 
 # 标准部署步骤
 1. [申请google账号](https://accounts.google.com/SignUp) 并暂时 [启用不够安全的应用的访问权限](https://www.google.com/settings/security/lesssecureapps) 以便上传程序。  
