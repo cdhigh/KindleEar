@@ -115,6 +115,10 @@ class DeliverLog(db.Model):
     book = db.StringProperty()
     status = db.StringProperty()
 
+class UpdateLog(db.Model):
+    comicname = db.StringProperty()
+    updatecount = db.IntegerProperty()
+
 class WhiteList(db.Model):
     mail = db.StringProperty()
     user = db.ReferenceProperty(KeUser)
