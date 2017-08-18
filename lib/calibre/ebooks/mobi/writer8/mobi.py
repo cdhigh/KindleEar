@@ -210,7 +210,6 @@ HEADER_FIELDS = {'compression', 'text_length', 'last_text_record', 'book_type',
 
 class KF8Book(object):
 
-#    def __init__(self, writer, for_joint=False):
     def __init__(self, oeb, writer, for_joint=False):
         self.oeb, self.for_joint, self.writer = oeb, for_joint, writer
 		self.build_records(oeb, writer, for_joint)
@@ -312,12 +311,15 @@ class KF8Book(object):
     def write(self, outpath):
         records = [self.record0] + self.records[1:]
 
-        with open(outpath, 'wb') as f:
+#        with open(outpath, 'wb') as f:
+        if outpath != None:
+            f = outpath
 
             # Write PalmDB Header
 
-            title = ascii_filename(self.full_title.decode('utf-8')).replace(
-                    ' ', '_')[:31]
+            title = ascii_filename(self.full_title.decode('utf-8'))
+#            title = ascii_filename(self.full_title.decode('utf-8')).replace(
+#                    ' ', '_')[:31]
             title += (b'\0' * (32 - len(title)))
             now = int(time.time())
             nrecords = len(records)
