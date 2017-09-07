@@ -93,6 +93,7 @@
 {% else -%}
 <p>{{_("Has no log")}}</p>
 {% endif -%}
+
 {% if logs -%}
 <br />
 <em class="required">*</em> {{_("Logs of other users")}}<br />
@@ -123,5 +124,89 @@
     {% endfor -%}
     </tbody>
 </table>
-{% endif -%}
+{% endif -%} {# endif of if logs -#}
+
+{% if lastDelivered -%}
+<br />
+<em class="required">*</em> {{_("Last delivered")}}<br />
+<table class="pure-table pure-table-striped logs_list">
+    <thead><tr>
+        <th class="center">{{_("Username")}}</th>
+        <th class="center">{{_("Time")}}</th>
+        <th class="center">{{_("Title")}}</th>
+        <th class="center">{{_("Num")}}</th>
+        <th class="center">{{_("Record")}}</th>
+        <th class="center" colspan="2">{{_("Operation")}}</th>
+    </tr></thead>
+    <tbody>
+    {% for log in lastDelivered -%}
+    <tr id="lastDelivered_{{log.key().id()}}">
+        <td class="center">{{ log.username }}</td>
+        <td class="center">{{ log.datetime.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td class="center">{{ log.bookname }}</td>
+        <td class="center" id="lastDelivered_num_{{log.key().id()}}">{%if log.num %} {{ log.num }} {% else %} - {% endif %}</td>
+        <td class="center" id="lastDelivered_rec_{{log.key().id()}}">{%if log.record %} {{ log.record }} {% else %} - {% endif %}</td>
+        {% if log.num -%}
+        <th><a href="#" onclick="ChangeLastDelivered({{log.key().id()}});return false;" class="actionButton">{{_("Change")}}</a></th>
+        {% else -%}
+        <th>-</th>
+        {% endif -%}
+        <th><a href="#" onclick="DeleteLastDelivered({{log.key().id()}});return false;" class="actionButton">{{_("Delete")}}</a></th>
+    </tr>
+    {% endfor -%}
+    </tbody>
+</table>
+{% endif -%} {# endif of if lastDelivered -#}
+
+{% endblock -%}
+
+{% block js -%}
+<script type="text/javascript">
+
+//用户点击了修改已推送期号按钮
+function ChangeLastDelivered(id_) {
+    var numObj = $('lastDelivered_num_' + id_);
+    var recObj = $('lastDelivered_rec_' + id_);
+    var sStr = prompt("{{_('Please input a new number')}}", numObj.textContent);
+    if (sStr != null && sStr != "") {
+        if (isNaN(parseInt(sStr))) {
+            alert("{{_('The number is invalid')}}");
+        } else {
+            ajax({url:"/lastdelivered/change", type: "POST", 
+            data: {id_: id_, num: sStr},
+            success: function (resp, xml) {
+                if (resp.status == "ok") {
+                    numObj.innerHTML = resp.num;
+                    recObj.innerHTML = '-';
+                } else {
+                    alert("{{_('Unhappily : cannot change this record, Error:')}}" + resp.status);
+                }
+            },
+            fail: function (status) {
+                alert("{{_('Error when try to change this record. Status:')}}" + status);
+            }
+        });
+        }
+    }
+}
+
+//用户点击了删除已推送期号按钮
+function DeleteLastDelivered(id_) {
+    ajax({url:"/lastdelivered/delete", type: "POST", 
+        data: {id_: id_},
+        success: function (resp, xml) {
+            if (resp.status == "ok") {
+                var thisRow = $('lastDelivered_' + id_);
+                thisRow.parentNode.removeChild(thisRow);
+            } else {
+                alert("{{_('Unhappily : cannot delete this record, Error:')}}" + resp.status);
+            }
+        },
+        fail: function (status) {
+            alert("{{_('Error when try to delete this record. Status:')}}" + status);
+        }
+    });
+}
+
+</script>
 {% endblock -%}

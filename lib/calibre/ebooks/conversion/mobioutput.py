@@ -123,8 +123,8 @@ class MOBIOutput:
         self.log, self.opts, self.oeb = log, opts, oeb
 
         mobi_type = opts.mobi_file_type
-#        if self.is_periodical:
-#            mobi_type = 'old' # Amazon does not support KF8 periodicals
+        if self.is_periodical:
+            mobi_type = 'old' # Amazon does not support KF8 periodicals
         create_kf8 = mobi_type in ('new', 'both')
 
         remove_html_cover(self.oeb, self.log)

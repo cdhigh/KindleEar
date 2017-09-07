@@ -1,3 +1,5 @@
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 __all__ = [
     'LXMLTreeBuilderForXML',
     'LXMLTreeBuilder',
@@ -12,6 +14,7 @@ from bs4.element import (
     Doctype,
     NamespacedAttribute,
     ProcessingInstruction,
+    XMLProcessingInstruction,
 )
 from bs4.builder import (
     FAST,
@@ -29,6 +32,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
     DEFAULT_PARSER_CLASS = etree.XMLParser
 
     is_xml = True
+    processing_instruction_class = XMLProcessingInstruction
 
     NAME = "lxml-xml"
     ALTERNATE_NAMES = ["xml"]
@@ -87,6 +91,16 @@ class LXMLTreeBuilderForXML(TreeBuilder):
 
         Each 4-tuple represents a strategy for parsing the document.
         """
+        # Instead of using UnicodeDammit to convert the bytestring to
+        # Unicode using different encodings, use EncodingDetector to
+        # iterate over the encodings, and tell lxml to try to parse
+        # the document as each one in turn.
+        is_html = not self.is_xml
+        if is_html:
+            self.processing_instruction_class = ProcessingInstruction
+        else:
+            self.processing_instruction_class = XMLProcessingInstruction
+
         if isinstance(markup, unicode):
             # We were given Unicode. Maybe lxml can parse Unicode on
             # this system?
@@ -98,11 +112,6 @@ class LXMLTreeBuilderForXML(TreeBuilder):
             yield (markup.encode("utf8"), "utf8",
                    document_declared_encoding, False)
 
-        # Instead of using UnicodeDammit to convert the bytestring to
-        # Unicode using different encodings, use EncodingDetector to
-        # iterate over the encodings, and tell lxml to try to parse
-        # the document as each one in turn.
-        is_html = not self.is_xml
         try_encodings = [user_specified_encoding, document_declared_encoding]
         detector = EncodingDetector(
             markup, try_encodings, is_html, exclude_encodings)
@@ -201,7 +210,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
     def pi(self, target, data):
         self.soup.endData()
         self.soup.handle_data(target + ' ' + data)
-        self.soup.endData(ProcessingInstruction)
+        self.soup.endData(self.processing_instruction_class)
 
     def data(self, content):
         self.soup.handle_data(content)
@@ -229,6 +238,7 @@ class LXMLTreeBuilder(HTMLTreeBuilder, LXMLTreeBuilderForXML):
 
     features = ALTERNATE_NAMES + [NAME, HTML, FAST, PERMISSIVE]
     is_xml = False
+    processing_instruction_class = ProcessingInstruction
 
     def default_parser(self, encoding):
         return etree.HTMLParser

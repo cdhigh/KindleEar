@@ -24,10 +24,10 @@ class Deliver(BaseHandler):
         param = {"u":usr.name, "id":bookid}
         
         if usr.merge_books and not separate:
-            self.queue2push[usr.name].append(str(bookid))
+            self.queue2push[usr.name].append(str(bookid)) #合并推送
         else:
-            taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
-                params=param,target="worker")
+            taskqueue.add(url='/worker', queue_name="deliverqueue1", method='GET',
+                params=param, target="worker")
         
     def flushqueue(self):
         for name in self.queue2push:
@@ -38,17 +38,17 @@ class Deliver(BaseHandler):
         
     def GET(self):
         username = web.input().get('u')
-        id = web.input().get('id') #for debug
+        id_ = web.input().get('id') #for debug
         
         self.queue2push = defaultdict(list)
         
         books = Book.all()
-        if username: #现在投递，不判断时间和星期
+        if username: #现在投递【测试使用】，不需要判断时间和星期
             sent = []
-            books2push = Book.get_by_id(int(id)) if id and id.isdigit() else None
+            books2push = Book.get_by_id(int(id_)) if id_ and id_.isdigit() else None
             books2push = [books2push] if books2push else books
             for book in books2push:
-                if not id and username not in book.users:
+                if not id_ and username not in book.users:
                     continue
                 user = KeUser.all().filter("name = ", username).get()
                 if user and user.kindle_email:

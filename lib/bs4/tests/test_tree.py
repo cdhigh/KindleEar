@@ -222,6 +222,17 @@ class TestFindAllByName(TreeTest):
         self.assertSelects(
             tree.find_all(id_matches_name), ["Match 1.", "Match 2."])
 
+    def test_find_with_multi_valued_attribute(self):
+        soup = self.soup(
+            "<div class='a b'>1</div><div class='a c'>2</div><div class='a d'>3</div>"
+        )
+        r1 = soup.find('div', 'a d');
+        r2 = soup.find('div', re.compile(r'a d'));
+        r3, r4 = soup.find_all('div', ['a b', 'a d']);
+        self.assertEqual('3', r1.string)
+        self.assertEqual('3', r2.string)
+        self.assertEqual('1', r3.string)
+        self.assertEqual('3', r4.string)
 
 class TestFindAllByAttribute(TreeTest):
 
@@ -294,10 +305,10 @@ class TestFindAllByAttribute(TreeTest):
         f = tree.find_all("gar", class_=re.compile("a"))
         self.assertSelects(f, ["Found it"])
 
-        # Since the class is not the string "foo bar", but the two
-        # strings "foo" and "bar", this will not find anything.
+        # If the search fails to match the individual strings "foo" and "bar",
+        # it will be tried against the combined string "foo bar".
         f = tree.find_all("gar", class_=re.compile("o b"))
-        self.assertSelects(f, [])
+        self.assertSelects(f, ["Found it"])
 
     def test_find_all_with_non_dictionary_for_attrs_finds_by_class(self):
         soup = self.soup("<a class='bar'>Found it</a>")
@@ -335,7 +346,7 @@ class TestFindAllByAttribute(TreeTest):
         strainer = SoupStrainer(attrs={'id' : 'first'})
         self.assertSelects(tree.find_all(strainer), ['Match.'])
 
-    def test_find_all_with_missing_atribute(self):
+    def test_find_all_with_missing_attribute(self):
         # You can pass in None as the value of an attribute to find_all.
         # This will match tags that do not have that attribute set.
         tree = self.soup("""<a id="1">ID present.</a>
@@ -1328,6 +1339,13 @@ class TestPersistence(SoupTest):
         copied = copy.deepcopy(self.tree)
         self.assertEqual(copied.decode(), self.tree.decode())
 
+    def test_copy_preserves_encoding(self):
+        soup = BeautifulSoup(b'<p>&nbsp;</p>', 'html.parser')
+        encoding = soup.original_encoding
+        copy = soup.__copy__()
+        self.assertEqual(u"<p> </p>", unicode(copy))
+        self.assertEqual(encoding, copy.original_encoding)
+
     def test_unicode_pickle(self):
         # A tree containing Unicode characters can be pickled.
         html = u"<b>\N{SNOWMAN}</b>"
@@ -1676,8 +1694,8 @@ class TestSoupSelector(TreeTest):
     def setUp(self):
         self.soup = BeautifulSoup(self.HTML, 'html.parser')
 
-    def assertSelects(self, selector, expected_ids):
-        el_ids = [el['id'] for el in self.soup.select(selector)]
+    def assertSelects(self, selector, expected_ids, **kwargs):
+        el_ids = [el['id'] for el in self.soup.select(selector, **kwargs)]
         el_ids.sort()
         expected_ids.sort()
         self.assertEqual(expected_ids, el_ids,
@@ -1719,6 +1737,13 @@ class TestSoupSelector(TreeTest):
     def test_tag_in_tag_many(self):
         for selector in ('html div', 'html body div', 'body div'):
             self.assertSelects(selector, ['data1', 'main', 'inner', 'footer'])
+
+
+    def test_limit(self):
+        self.assertSelects('html div', ['main'], limit=1)
+        self.assertSelects('html body div', ['inner', 'main'], limit=2)
+        self.assertSelects('body div', ['data1', 'main', 'inner', 'footer'],
+                           limit=10)
 
     def test_tag_no_match(self):
         self.assertEqual(len(self.soup.select('del')), 0)
@@ -1901,6 +1926,14 @@ class TestSoupSelector(TreeTest):
             ('p[blah]', []),
             ('div[data-tag]', ['data1'])
         )
+
+    def test_quoted_space_in_selector_name(self):
+        html = """<div style="display: wrong">nope</div>
+        <div style="display: right">yes</div>
+        """
+        soup = BeautifulSoup(html, 'html.parser')
+        [chosen] = soup.select('div[style="display: right"]')
+        self.assertEqual("yes", chosen.string)
 
     def test_unsupported_pseudoclass(self):
         self.assertRaises(

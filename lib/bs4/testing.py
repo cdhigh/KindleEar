@@ -1,5 +1,7 @@
 """Helper classes for tests."""
 
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 __license__ = "MIT"
 
 import pickle
@@ -137,6 +139,14 @@ class HTMLTreeBuilderSmokeTest(object):
             markup.replace(b"\n", b""))
 
     def test_processing_instruction(self):
+        # We test both Unicode and bytestring to verify that
+        # process_markup correctly sets processing_instruction_class
+        # even when the markup is already Unicode and there is no
+        # need to process anything.
+        markup = u"""<?PITarget PIContent?>"""
+        soup = self.soup(markup)
+        self.assertEqual(markup, soup.decode())
+
         markup = b"""<?PITarget PIContent?>"""
         soup = self.soup(markup)
         self.assertEqual(markup, soup.encode("utf8"))
@@ -215,9 +225,22 @@ Hello, world!
         self.assertEqual(comment, baz.previous_element)
 
     def test_preserved_whitespace_in_pre_and_textarea(self):
-        """Whitespace must be preserved in <pre> and <textarea> tags."""
-        self.assertSoupEquals("<pre>   </pre>")
-        self.assertSoupEquals("<textarea> woo  </textarea>")
+        """Whitespace must be preserved in <pre> and <textarea> tags,
+        even if that would mean not prettifying the markup.
+        """
+        pre_markup = "<pre>   </pre>"
+        textarea_markup = "<textarea> woo\nwoo  </textarea>"
+        self.assertSoupEquals(pre_markup)
+        self.assertSoupEquals(textarea_markup)
+
+        soup = self.soup(pre_markup)
+        self.assertEqual(soup.pre.prettify(), pre_markup)
+
+        soup = self.soup(textarea_markup)
+        self.assertEqual(soup.textarea.prettify(), textarea_markup)
+
+        soup = self.soup("<textarea></textarea>")
+        self.assertEqual(soup.textarea.prettify(), "<textarea></textarea>")
 
     def test_nested_inline_elements(self):
         """Inline elements can be nested indefinitely."""
@@ -480,7 +503,9 @@ Hello, world!
         hebrew_document = b'<html><head><title>Hebrew (ISO 8859-8) in Visual Directionality</title></head><body><h1>Hebrew (ISO 8859-8) in Visual Directionality</h1>\xed\xe5\xec\xf9</body></html>'
         soup = self.soup(
             hebrew_document, from_encoding="iso8859-8")
-        self.assertEqual(soup.original_encoding, 'iso8859-8')
+        # Some tree builders call it iso8859-8, others call it iso-8859-9.
+        # That's not a difference we really care about.
+        assert soup.original_encoding in ('iso8859-8', 'iso-8859-8')
         self.assertEqual(
             soup.encode('utf-8'),
             hebrew_document.decode("iso8859-8").encode("utf-8"))
@@ -560,6 +585,11 @@ class XMLTreeBuilderSmokeTest(object):
 
     def test_xml_declaration(self):
         markup = b"""<?xml version="1.0" encoding="utf8"?>\n<foo/>"""
+        soup = self.soup(markup)
+        self.assertEqual(markup, soup.encode("utf8"))
+
+    def test_processing_instruction(self):
+        markup = b"""<?xml version="1.0" encoding="utf8"?>\n<?PITarget PIContent?>"""
         soup = self.soup(markup)
         self.assertEqual(markup, soup.encode("utf8"))
 

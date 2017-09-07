@@ -25,3 +25,9 @@ indexes:
   properties:
   - name: book
   - name: time
+
+- kind: LastDelivered
+  properties:
+  - name: username
+  - name: datetime
+    direction: desc

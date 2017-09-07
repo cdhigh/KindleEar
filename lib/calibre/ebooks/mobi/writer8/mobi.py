@@ -300,7 +300,8 @@ class KF8Book(object):
                 thumbnail_offset=self.thumbnail_offset,
                 num_of_resources=self.num_of_resources,
                 kf8_unknown_count=self.kuc, be_kindlegen2=True,
-                start_offset=self.start_offset, mobi_doctype=self.book_type)
+                start_offset=self.start_offset, mobi_doctype=self.book_type,
+                opts=opts)
 
         kwargs = {field:getattr(self, field) for field in HEADER_FIELDS}
         return MOBIHeader()(**kwargs)

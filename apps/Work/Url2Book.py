@@ -29,7 +29,7 @@ class Url2Book(BaseHandler):
         keepimage = bool(web.input().get("keepimage") == '1')
         booktype = web.input().get("type", "mobi")
         tz = int(web.input().get("tz", TIMEZONE))
-        if not all((username,urls,subject,to,language,booktype,tz)):
+        if not all((username, urls, subject, to, language, booktype, tz)):
             return "Some parameter missing!<br />"
         
         if (';' in to) or (',' in to):
@@ -53,7 +53,7 @@ class Url2Book(BaseHandler):
                 else:
                     if not dlinfo:
                         dlinfo = 'download failed'
-                    self.deliverlog(username, str(to), filename, 0, status=dlinfo,tz=tz)
+                    self.deliverlog(username, str(to), filename, 0, status=dlinfo, tz=tz)
                 main.log.info("%s Sent!" % filename)
             return "%s Sent!" % filename
         elif booktype == 'Debug': #调试目的，将链接直接下载，发送到管理员邮箱
@@ -71,8 +71,10 @@ class Url2Book(BaseHandler):
         user = KeUser.all().filter("name = ", username).get()
         if not user or not user.kindle_email:
             return "User not exist!<br />"
-            
-        book = BaseUrlBook()
+        
+        opts = getOpts(user.device)
+        
+        book = BaseUrlBook(opts=opts, user=user)
         book.title = book.description = subject
         book.language = language
         book.keep_image = keepimage
@@ -83,14 +85,13 @@ class Url2Book(BaseHandler):
         opts = oeb = None
         
         # 创建 OEB
-        opts = getOpts(user.device)
         oeb = CreateOeb(main.log, None, opts)
         oeb.container = ServerContainer(main.log)
         
         if len(book.feeds) > 1:
             setMetaData(oeb, subject, language, local_time(tz=tz))
-            id, href = oeb.manifest.generate('masthead', DEFAULT_MASTHEAD)
-            oeb.manifest.add(id, href, MimeFromFilename(DEFAULT_MASTHEAD))
+            id_, href = oeb.manifest.generate('masthead', DEFAULT_MASTHEAD)
+            oeb.manifest.add(id_, href, MimeFromFilename(DEFAULT_MASTHEAD))
             oeb.guide.add('masthead', 'Masthead Image', href)
         else:
             setMetaData(oeb, subject, language, local_time(tz=tz), pubtype='book:book:KindleEar')
@@ -105,10 +106,10 @@ class Url2Book(BaseHandler):
         itemcnt,hasimage = 0,False
         sections = {subject:[]}
         toc_thumbnails = {} #map img-url -> manifest-href
-        for sec_or_media, url, title, content, brief, thumbnail in book.Items(opts,user):
+        for sec_or_media, url, title, content, brief, thumbnail in book.Items():
             if sec_or_media.startswith(r'image/'):
-                id, href = oeb.manifest.generate(id='img', href=title)
-                item = oeb.manifest.add(id, href, sec_or_media, data=content)
+                id_, href = oeb.manifest.generate(id='img', href=title)
+                item = oeb.manifest.add(id_, href, sec_or_media, data=content)
                 if thumbnail:
                     toc_thumbnails[url] = href
                 itemcnt += 1
@@ -117,8 +118,8 @@ class Url2Book(BaseHandler):
                 if len(book.feeds) > 1:
                     sections[subject].append((title, brief, thumbnail, content))
                 else:
-                    id, href = oeb.manifest.generate(id='page', href='page.html')
-                    item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=content)
+                    id_, href = oeb.manifest.generate(id='page', href='page.html')
+                    item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=content)
                     oeb.spine.add(item, False)
                     oeb.toc.add(title, href)
                     
@@ -126,7 +127,7 @@ class Url2Book(BaseHandler):
             
         if itemcnt > 0:
             if len(book.feeds) > 1:
-                InsertToc(oeb, sections, toc_thumbnails)
+                InsertToc(oeb, sections, toc_thumbnails, GENERATE_HTML_TOC, GENERATE_TOC_THUMBNAIL)
                 # elif not hasimage: #单文章没有图片则去掉封面
                 # href = oeb.guide['cover'].href
                 # oeb.guide.remove('cover')
@@ -142,7 +143,7 @@ class Url2Book(BaseHandler):
             main.log.info(rs)
             return rs
         else:
-            self.deliverlog(username, str(to), book.title, 0, status='fetch failed',tz=tz)
+            self.deliverlog(username, str(to), book.title, 0, status='fetch failed', tz=tz)
             rs = "[Url2Book]Fetch url failed."
             main.log.info(rs)
             return rs

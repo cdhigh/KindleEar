@@ -1,5 +1,9 @@
 # Changelog for KindleEar
 
+## 1.25
+  1. 添加漫画模式和多本漫画书。
+  2. 添加对Kindle Voyage和Kindle PaperWhite3的支持。
+
 ## 1.24
   1. 新特性：用户可以在GUI界面上直接上传修改封面图片，而且每个账号可单独设置不同的封面图片。
   2. bugfix：修正 反“反盗链”特性 无法下载包含unicode字符的URL的图片的一个bug。

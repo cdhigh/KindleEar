@@ -1,87 +1,187 @@
-"""
-Copyright (c) 2003-2005  Gustavo Niemeyer <gustavo@niemeyer.net>
-
-This module offers extensions to the standard python 2.3+
-datetime module.
-"""
-from dateutil.tz import tzfile
-from tarfile import TarFile
+# -*- coding: utf-8 -*-
+import logging
 import os
+import warnings
+import tempfile
+import shutil
+import json
 
-__author__ = "Gustavo Niemeyer <gustavo@niemeyer.net>"
-__license__ = "PSF License"
+from tarfile import TarFile
+from pkgutil import get_data
+from io import BytesIO
+from contextlib import closing
 
-__all__ = ["setcachesize", "gettz", "rebuild"]
+from dateutil.tz import tzfile
 
-CACHE = []
-CACHESIZE = 10
+__all__ = ["get_zonefile_instance", "gettz", "gettz_db_metadata", "rebuild"]
+
+ZONEFILENAME = "dateutil-zoneinfo.tar.gz"
+METADATA_FN = 'METADATA'
+
+# python2.6 compatability. Note that TarFile.__exit__ != TarFile.close, but
+# it's close enough for python2.6
+tar_open = TarFile.open
+if not hasattr(TarFile, '__exit__'):
+    def tar_open(*args, **kwargs):
+        return closing(TarFile.open(*args, **kwargs))
+
 
 class tzfile(tzfile):
     def __reduce__(self):
         return (gettz, (self._filename,))
 
-def getzoneinfofile():
-    filenames = os.listdir(os.path.join(os.path.dirname(__file__)))
-    filenames.sort()
-    filenames.reverse()
-    for entry in filenames:
-        if entry.startswith("zoneinfo") and ".tar." in entry:
-            return os.path.join(os.path.dirname(__file__), entry)
-    return None
 
-ZONEINFOFILE = getzoneinfofile()
+def getzoneinfofile_stream():
+    try:
+        return BytesIO(get_data(__name__, ZONEFILENAME))
+    except IOError as e:  # TODO  switch to FileNotFoundError?
+        warnings.warn("I/O error({0}): {1}".format(e.errno, e.strerror))
+        return None
 
-del getzoneinfofile
 
-def setcachesize(size):
-    global CACHESIZE, CACHE
-    CACHESIZE = size
-    del CACHE[size:]
+class ZoneInfoFile(object):
+    def __init__(self, zonefile_stream=None):
+        if zonefile_stream is not None:
+            with tar_open(fileobj=zonefile_stream, mode='r') as tf:
+                # dict comprehension does not work on python2.6
+                # TODO: get back to the nicer syntax when we ditch python2.6
+                # self.zones = {zf.name: tzfile(tf.extractfile(zf),
+                #               filename = zf.name)
+                #              for zf in tf.getmembers() if zf.isfile()}
+                self.zones = dict((zf.name, tzfile(tf.extractfile(zf),
+                                                   filename=zf.name))
+                                  for zf in tf.getmembers()
+                                  if zf.isfile() and zf.name != METADATA_FN)
+                # deal with links: They'll point to their parent object. Less
+                # waste of memory
+                # links = {zl.name: self.zones[zl.linkname]
+                #        for zl in tf.getmembers() if zl.islnk() or zl.issym()}
+                links = dict((zl.name, self.zones[zl.linkname])
+                             for zl in tf.getmembers() if
+                             zl.islnk() or zl.issym())
+                self.zones.update(links)
+                try:
+                    metadata_json = tf.extractfile(tf.getmember(METADATA_FN))
+                    metadata_str = metadata_json.read().decode('UTF-8')
+                    self.metadata = json.loads(metadata_str)
+                except KeyError:
+                    # no metadata in tar file
+                    self.metadata = None
+        else:
+            self.zones = dict()
+            self.metadata = None
+
+    def get(self, name, default=None):
+        """
+        Wrapper for :func:`ZoneInfoFile.zones.get`. This is a convenience method
+        for retrieving zones from the zone dictionary.
+        
+        :param name:
+            The name of the zone to retrieve. (Generally IANA zone names)
+
+        :param default:
+            The value to return in the event of a missing key.
+
+        .. versionadded:: 2.6.0
+
+        """
+        return self.zones.get(name, default)
+
+
+# The current API has gettz as a module function, although in fact it taps into
+# a stateful class. So as a workaround for now, without changing the API, we
+# will create a new "global" class instance the first time a user requests a
+# timezone. Ugly, but adheres to the api.
+#
+# TODO: Remove after deprecation period.
+_CLASS_ZONE_INSTANCE = list()
+
+def get_zonefile_instance(new_instance=False):
+    """
+    This is a convenience function which provides a :class:`ZoneInfoFile`
+    instance using the data provided by the ``dateutil`` package. By default, it
+    caches a single instance of the ZoneInfoFile object and returns that.
+
+    :param new_instance:
+        If ``True``, a new instance of :class:`ZoneInfoFile` is instantiated and
+        used as the cached instance for the next call. Otherwise, new instances
+        are created only as necessary.
+
+    :return:
+        Returns a :class:`ZoneInfoFile` object.
+
+    .. versionadded:: 2.6
+    """
+    if new_instance:
+        zif = None
+    else:
+        zif = getattr(get_zonefile_instance, '_cached_instance', None)
+
+    if zif is None:
+        zif = ZoneInfoFile(getzoneinfofile_stream())
+
+        get_zonefile_instance._cached_instance = zif
+
+    return zif
 
 def gettz(name):
-    tzinfo = None
-    if ZONEINFOFILE:
-        for cachedname, tzinfo in CACHE:
-            if cachedname == name:
-                break
-        else:
-            tf = TarFile.open(ZONEINFOFILE)
-            try:
-                zonefile = tf.extractfile(name)
-            except KeyError:
-                tzinfo = None
-            else:
-                tzinfo = tzfile(zonefile)
-            tf.close()
-            CACHE.insert(0, (name, tzinfo))
-            del CACHE[CACHESIZE:]
-    return tzinfo
+    """
+    This retrieves a time zone from the local zoneinfo tarball that is packaged
+    with dateutil.
 
-def rebuild(filename, tag=None, format="gz"):
-    import tempfile, shutil
-    tmpdir = tempfile.mkdtemp()
-    zonedir = os.path.join(tmpdir, "zoneinfo")
-    moduledir = os.path.dirname(__file__)
-    if tag: tag = "-"+tag
-    targetname = "zoneinfo%s.tar.%s" % (tag, format)
-    try:
-        tf = TarFile.open(filename)
-        for name in tf.getnames():
-            if not (name.endswith(".sh") or
-                    name.endswith(".tab") or
-                    name == "leapseconds"):
-                tf.extract(name, tmpdir)
-                filepath = os.path.join(tmpdir, name)
-                os.system("zic -d %s %s" % (zonedir, filepath))
-        tf.close()
-        target = os.path.join(moduledir, targetname)
-        for entry in os.listdir(moduledir):
-            if entry.startswith("zoneinfo") and ".tar." in entry:
-                os.unlink(os.path.join(moduledir, entry))
-        tf = TarFile.open(target, "w:%s" % format)
-        for entry in os.listdir(zonedir):
-            entrypath = os.path.join(zonedir, entry)
-            tf.add(entrypath, entry)
-        tf.close()
-    finally:
-        shutil.rmtree(tmpdir)
+    :param name:
+        An IANA-style time zone name, as found in the zoneinfo file.
+
+    :return:
+        Returns a :class:`dateutil.tz.tzfile` time zone object.
+
+    .. warning::
+        It is generally inadvisable to use this function, and it is only
+        provided for API compatibility with earlier versions. This is *not*
+        equivalent to ``dateutil.tz.gettz()``, which selects an appropriate
+        time zone based on the inputs, favoring system zoneinfo. This is ONLY
+        for accessing the dateutil-specific zoneinfo (which may be out of
+        date compared to the system zoneinfo).
+
+    .. deprecated:: 2.6
+        If you need to use a specific zoneinfofile over the system zoneinfo,
+        instantiate a :class:`dateutil.zoneinfo.ZoneInfoFile` object and call
+        :func:`dateutil.zoneinfo.ZoneInfoFile.get(name)` instead.
+
+        Use :func:`get_zonefile_instance` to retrieve an instance of the
+        dateutil-provided zoneinfo.
+    """
+    warnings.warn("zoneinfo.gettz() will be removed in future versions, "
+                  "to use the dateutil-provided zoneinfo files, instantiate a "
+                  "ZoneInfoFile object and use ZoneInfoFile.zones.get() "
+                  "instead. See the documentation for details.",
+                  DeprecationWarning)
+
+    if len(_CLASS_ZONE_INSTANCE) == 0:
+        _CLASS_ZONE_INSTANCE.append(ZoneInfoFile(getzoneinfofile_stream()))
+    return _CLASS_ZONE_INSTANCE[0].zones.get(name)
+
+
+def gettz_db_metadata():
+    """ Get the zonefile metadata
+
+    See `zonefile_metadata`_
+
+    :returns:
+        A dictionary with the database metadata
+
+    .. deprecated:: 2.6
+        See deprecation warning in :func:`zoneinfo.gettz`. To get metadata,
+        query the attribute ``zoneinfo.ZoneInfoFile.metadata``.
+    """
+    warnings.warn("zoneinfo.gettz_db_metadata() will be removed in future "
+                  "versions, to use the dateutil-provided zoneinfo files, "
+                  "ZoneInfoFile object and query the 'metadata' attribute "
+                  "instead. See the documentation for details.",
+                  DeprecationWarning)
+
+    if len(_CLASS_ZONE_INSTANCE) == 0:
+        _CLASS_ZONE_INSTANCE.append(ZoneInfoFile(getzoneinfofile_stream()))
+    return _CLASS_ZONE_INSTANCE[0].metadata
+
+

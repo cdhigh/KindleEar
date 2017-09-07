@@ -88,9 +88,6 @@ msgstr "设置"
 msgid "Logs"
 msgstr "投递日志"
 
-msgid "UpdateLogs"
-msgstr "漫画日志"
-
 msgid "Admin"
 msgstr "账户管理"
 
@@ -143,7 +140,7 @@ msgid "Operation"
 msgstr "命令"
 
 msgid "Change"
-msgstr "改密码"
+msgstr "修改"
 
 msgid "Delete"
 msgstr "删除"
@@ -618,3 +615,39 @@ msgstr "删除封面图片失败。错误信息："
 
 msgid "Error when try to delete the cover image. Status:"
 msgstr "在试图删除封面图片时出现异常。状态码："
+
+msgid "Book mode"
+msgstr "书籍模式"
+
+msgid "Periodical"
+msgstr "期刊"
+
+msgid "Comic"
+msgstr "漫画"
+
+msgid "Please input a new number"
+msgstr "请输入一个新的数值"
+
+msgid "The number is invalid"
+msgstr "数值非法"
+
+msgid "Unhappily : cannot change this record, Error:"
+msgstr "非常遗憾：无法修改此记录，错误码："
+
+msgid "Error when try to change this record. Status:"
+msgstr "在试图修改此记录时出错。错误码："
+
+msgid "Unhappily : cannot delete this record, Error:"
+msgstr "非常遗憾：无法删除此记录，错误码："
+
+msgid "Error when try to delete this record. Status:"
+msgstr "在试图删除此记录时出错。错误码："
+
+msgid "Last delivered"
+msgstr "已推送期号"
+
+msgid "Num"
+msgstr "期号"
+
+msgid "Record"
+msgstr "信息"

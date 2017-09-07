@@ -36,12 +36,18 @@ module-worker.yaml | application | 你的ApplicationId      |
 config.py          | SRC_EMAIL   | 创建GAE工程的GMAIL邮箱   |  
 config.py          | DOMAIN      | 你申请的应用的域名        |  
 
+> 如果使用gcloud部署，需要注释掉yaml文件中的application/version项。
+
 7. 转到GAE SDK安装目录(默认为：*C:\Program Files\Google\google_appengine*) 
 
-8. 执行两条Cmd命令：  
+8. 部署命令：
+8.1 使用appcfg.py：  
 	* `c:\python27\python.exe appcfg.py update kindleear目录\app.yaml kindleear目录\module-worker.yaml`  
 	* `c:\python27\python.exe appcfg.py update kindleear目录`
-
+8.2 使用gcloud：
+    * `"C:\Program Files\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" app deploy --version=1 KindleEar目录\app.yaml KindleEar目录\module-worker.yaml
+    * `"C:\Program Files\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" app deploy --version=1 KindleEar目录
+    
 9. 全部完成后就可以尝试打开域名：  
 *http://appid.appspot.com*  (appid是你申请的application名字)  
 比如作者的网站域名为：<http://kindleear.appspot.com/>  
@@ -65,3 +71,12 @@ KindleEar is licensed under the [AGPLv3](http://www.gnu.org/licenses/agpl-3.0.ht
 
 # 捐赠
 如果你希望支持一下KindleEar，可以戳 [Wiki捐赠页面](https://github.com/cdhigh/KindleEar/wiki/Donate)
+
+#主要贡献者
+@rexdf <https://github.com/rexdf>
+@insert0003 <https://github.com/insert0003>
+@zhu327 <https://github.com/zhu327>
+@lord63 <https://github.com/lord63>
+@th0mass <https://github.com/th0mass>
+@seff <https://github.com/seff>
+@miaowm5 <https://github.com/miaowm5>

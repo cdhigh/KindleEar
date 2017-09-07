@@ -214,8 +214,8 @@ class MobiWriter(object):
                 share_not_sync=self.opts.share_not_sync,
                 cover_offset=self.cover_offset,
                 thumbnail_offset=self.thumbnail_offset,
-                start_offset=self.serializer.start_offset, mobi_doctype=bt
-                )
+                start_offset=self.serializer.start_offset, mobi_doctype=bt,
+                opts=self.opts)
         first_image_record = None
         if self.resources:
             used_images = self.serializer.used_images
@@ -459,7 +459,7 @@ class MobiWriter(object):
                 kf8_unknown_count=kuc, be_kindlegen2=True,
                 kf8_header_index=kf8_header_index,
                 start_offset=self.serializer.start_offset,
-                mobi_doctype=2)
+                mobi_doctype=2, opts=opts)
         self.records[0] = MOBIHeader(file_version=6)(**header_fields)
 
     # }}}
@@ -487,5 +487,6 @@ class MobiWriter(object):
         for record in self.records:
             self.write(record)
 
- 
+
+ 
  

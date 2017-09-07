@@ -32,10 +32,15 @@ config.py          | SRC_EMAIL   | Your Gmail Address          |
 config.py          | DOMAIN      | appid@appspot.com        |  
 config.py          | TIMEZONE    | Your timezone         |
 
- 
-7. Execute two commands in directory GAE SDK (default is *C:\Program Files\Google\google_appengine*)  
+> the lines application and version in yaml have to be commented if you will deploy it by using gcloud.
+
+7. Choose 7.1 or 7.2 to deploy it.
+7.1 using appcfg.py
 	* `c:\python27\python.exe appcfg.py update KindleEarFolder\app.yaml KindleEarFolder\module-worker.yaml`  
 	* `c:\python27\python.exe appcfg.py update KindleEarFolder`  
+7.2 using gcloud
+    * `"C:\Program Files\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" app deploy --version=1 KindleEar\app.yaml KindleEar\module-worker.yaml
+    * `"C:\Program Files\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" app deploy --version=1 KindleEar
 
 8. After finished, you can open the website *'http://appid.appspot.com'* (appid is the name of your application),  
 For example the author's site: <http://kindleear.appspot.com>  
@@ -52,3 +57,12 @@ If you don't want to intall GAE SDK and python, you have another choice.
 
 # License
    KindleEar is Licensed under the [AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html) license.
+
+# Contributors
+@rexdf <https://github.com/rexdf>
+@insert0003 <https://github.com/insert0003>
+@zhu327 <https://github.com/zhu327>
+@lord63 <https://github.com/lord63>
+@th0mass <https://github.com/th0mass>
+@seff <https://github.com/seff>
+@miaowm5 <https://github.com/miaowm5>

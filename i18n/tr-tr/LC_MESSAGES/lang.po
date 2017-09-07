@@ -88,9 +88,6 @@ msgstr "Ayarlar"
 msgid "Logs"
 msgstr "Kayıtlar"
 
-msgid "UpdateLogs"
-msgstr "Kayıtlar"
-
 msgid "Admin"
 msgstr "Yönetim"
 
@@ -623,3 +620,39 @@ msgstr "Failed to delete the cover image. Error:"
 
 msgid "Error when try to delete the cover image. Status:"
 msgstr "Error when try to delete the cover image. Status:"
+
+msgid "Book mode"
+msgstr "Book mode"
+
+msgid "Periodical"
+msgstr "Periodical"
+
+msgid "Comic"
+msgstr "Comic"
+
+msgid "Please input a new number"
+msgstr "Please input a new number"
+
+msgid "The number is invalid"
+msgstr "The number is invalid"
+
+msgid "Unhappily : cannot change this record, Error:"
+msgstr "Unhappily : cannot change this record, Error:"
+
+msgid "Error when try to change this record. Status:"
+msgstr "Error when try to change this record. Status:"
+
+msgid "Unhappily : cannot delete this record, Error:"
+msgstr "Unhappily : cannot delete this record, Error:"
+
+msgid "Error when try to delete this record. Status:"
+msgstr "Error when try to delete this record. Status:"
+
+msgid "Last delivered"
+msgstr "Last delivered"
+
+msgid "Num"
+msgstr "Num"
+
+msgid "Record"
+msgstr "Record"

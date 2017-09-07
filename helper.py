@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-""" uploader helper for KindleEar
+""" uploader helper for KindleEar <https://github.com/cdhigh/KindleEar>
 It will modify AppId and some other items for you automatically.
 Configure file 'custom.txt' format (encoding of the file must be ascii):
 application: YourAppId
@@ -8,10 +8,10 @@ email: YourEmail
 timezone: 8
 If it not exist, this script will create it in same directory of __file__.
 """
-import os, re, codecs, locale
-__Author__ = 'cdhigh'
-__Version__ = '1.3'
-__Date__ = '2015-08-20'
+import os, sys, re, codecs, locale, shutil
+__Author__ = 'cdhigh <https://github.com/cdhigh>'
+__Version__ = '1.4'
+__Date__ = '2017-09-03'
 
 CUSTOM_FILE = 'custom.txt'
 KE_DIR = 'KindleEar'
@@ -21,11 +21,15 @@ PAT_EMAIL = r"^SRC_EMAIL\s*=\s*[\"\']([\w@\.-]+)[\"\'](.*)"
 PAT_DOMAIN = r"^DOMAIN\s*=\s*[\"\']([\w:/\.-]+)[\"\'](.*)"
 PAT_TZ = r"^TIMEZONE\s*=\s*?(-{0,1}\d+)(.*)"
 
+try:
+    input = raw_input
+except NameError:
+    pass
 
 #(re)move chinese books to a subdirectory (donot display in webpage) 
 def RemoveChineseBooks(ke_dir):
     lang = 'zh_CN'
-    cn_books = []
+    cn_books = [] #Relative path saved
     loc = locale.getdefaultlocale()
     if loc and len(loc) > 1:
         lang = loc[0]
@@ -36,53 +40,64 @@ def RemoveChineseBooks(ke_dir):
     books_dir = os.path.join(ke_dir, 'books')
     if not os.path.exists(books_dir):
         return
-    for bkfile in os.listdir(books_dir):
-        if bkfile.endswith('.py') and not bkfile.startswith('__') and not bkfile.endswith("base.py"):
-            slbk = []
+    list_book_dirs = os.walk(books_dir)
+    for root, dirs, files in list_book_dirs:
+        for f in files:
+            if not f.endswith('.py') or f.startswith('__') or f == 'base.py':
+                continue
+            
+            bkfile = os.path.join(root, f)
+            rel_path_bkfile = bkfile.replace(books_dir, '').lstrip('/').lstrip('\\') #Relative path
+            all_lines = []
             try:
-                with codecs.open(os.path.join(books_dir, bkfile), 'r', 'utf-8') as f:
-                    slbk = f.read().split('\n')
+                with codecs.open(bkfile, 'r', 'utf-8') as f:
+                    all_lines = f.read().split('\n')
             except:
                 continue
-
-            if not slbk:
+                
+            if not all_lines:
                 continue
-
+                
             iscnbook = False
-            for line in slbk:
+            for line in all_lines:
                 ln = line.replace(' ', '').replace('\t', '')
-                if ln.startswith('title='): #title line
+                if ln.startswith(('title=', 'description=')): #title line
                     for ch in ln:
                         if u'\u4e00' <= ch <= u'\u9fff': #Chinese Chars
                             iscnbook = True
                             break
-                    if not iscnbook:
-                        break #next book
-
-                if iscnbook: #Is Chinese Book
-                    cn_books.append(os.path.join(books_dir, bkfile))
-                    #*.pyc exists?
-                    bookname = os.path.splitext(bkfile)[0]
-                    pycfile = os.path.join(books_dir, bookname + '.pyc')
+                    #if not iscnbook:
+                    #    break #next book
+                        
+            if iscnbook: #Is Chinese Book
+                cn_books.append(rel_path_bkfile)
+                #*.pyc exists?
+                if rel_path_bkfile.endswith('.py'):
+                    pycfile = rel_path_bkfile + 'c'
                     if os.path.exists(pycfile):
                         cn_books.append(pycfile)
-                    break #next book
-
+            
     if not cn_books:
         return
 
     #if exist some Chinese books, then ask for move or not
-    ret = raw_input('Do you want to remove Chinese books? (y/n)')
+    ret = input('Do you want to remove Chinese books? (y/n)')
     if ret not in ('Y', 'YES', 'y', 'yes'):
         return
-
+        
     #check and create subdirectory
     bakdir = os.path.join(books_dir, 'ChineseBooksBak')
     if not os.path.exists(bakdir):
         os.makedirs(bakdir)
-
+        
     for book in cn_books:
-        dst = os.path.join(bakdir, os.path.basename(book))
+        dst = os.path.join(bakdir, book)
+        dst_dir = os.path.dirname(dst) #create dst directory
+        if not os.path.exists(dst_dir):
+            try:
+                os.makedirs(dst_dir)
+            except:
+                pass
         if os.path.exists(dst): #dst exist, try to remove it firstly.
             try:
                 os.remove(dst)
@@ -91,19 +106,30 @@ def RemoveChineseBooks(ke_dir):
         
         #remove book to bak directory
         try:
-            os.rename(book, dst)
+            shutil.move(os.path.join(books_dir, book), dst)
         except:
             try:
-                os.remove(book)
+                os.remove(os.path.join(books_dir, book))
             except:
                 pass
-
+    
+    #Delete __init__.py of directory backup
+    list_bak_dir = os.walk(bakdir)
+    for root, dirs, files in list_bak_dir:
+        for f in files:
+            if f == '__init__.py' or f == '__init__.pyc':
+                #try:
+                    os.remove(os.path.join(root, f))
+                #except:
+                #    pass
+    
 def Main():
     #Searching for KindleEar folder
     ke_dir = os.path.join(os.path.dirname(__file__), KE_DIR)
     kem_dir = os.path.join(os.path.dirname(__file__), KE_MASTER_DIR)
     kemm_dir = os.path.join(kem_dir, KE_MASTER_DIR)
-    dirs = filter(os.path.exists, (ke_dir, kemm_dir, kem_dir))
+    keup_dir = os.path.join(os.path.dirname(__file__), '..', KE_DIR)
+    dirs = list(filter(os.path.exists, (ke_dir, kemm_dir, kem_dir, keup_dir)))
     if not dirs:
         print("Cant found folder 'KindleEar'! Please download it from github firstly.")
         return 1
@@ -168,15 +194,15 @@ def Main():
             elif line.lower().startswith('timezone:'):
                 timezone = line[len('timezone:'):].strip()
     
-    ret = raw_input('Your custom info :\n\t  app id : %s\n\t   email : %s\n\ttimezone : %s\nCorrect? (y/n) : '%(app,email,timezone))
+    ret = input('Your custom info :\n\t  app id : %s\n\t   email : %s\n\ttimezone : %s\nCorrect? (y/n) : '%(app,email,timezone))
     if ret in ('y', 'yes', 'Y', 'YES'):
         needinput = False #configure items correct!
     
     while 1:
         if needinput or not all((app, email, timezone)):
-            new_app = raw_input('Input app id (%s): ' % app)
-            new_email = raw_input('Input your gmail (%s): ' % email)
-            new_timezone = raw_input('Input your timezone (%s): ' % timezone)
+            new_app = input('Input app id (%s): ' % app)
+            new_email = input('Input your gmail (%s): ' % email)
+            new_timezone = input('Input your timezone (%s): ' % timezone)
             app = new_app if new_app else app
             email = new_email if new_email else email
             timezone = new_timezone if new_timezone else timezone

@@ -20,7 +20,8 @@ def clean_attributes(html):
     return html
 
 def normalize_spaces(s):
-    if not s: return ''
+    if not s:
+        return ''
     """replace any sequence of whitespace
     characters with a single space"""
     return ' '.join(s.split())

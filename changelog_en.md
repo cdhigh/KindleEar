@@ -1,5 +1,9 @@
 # Changelog for KindleEar
 
+## 1.25
+  1. Added comic mode and several comic books.
+  2. Added supported to Kindle Voyage and Kindle PaperWhite3.
+  
 ## 1.24
   1. New feature: users can upload cover image via by web page directly.
   2. bugfix: fix a bug that anti 'anti-pirate-link' feature can't deal with urls which contain unicode characters.

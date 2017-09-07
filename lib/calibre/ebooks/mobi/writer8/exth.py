@@ -29,15 +29,23 @@ EXTH_CODES = {
     'versionnumber': 114,
     'startreading': 116,
     'kf8_header_index': 121,
+    'fixed-layout': 122,
+    'book-type': 123,
+    'orientation-lock': 124,
     'num_of_resources': 125,
+    'original-resolution': 126,
+    'zero-gutter': 127,
+    'zero-margin': 128,
     'kf8_thumbnail_uri': 129,
     'kf8_unknown_count': 131,
+    'RegionMagnification': 132,
     'coveroffset': 201,
     'thumboffset': 202,
     'hasfakecover': 203,
     'lastupdatetime': 502,
     'title': 503,
     'language': 524,
+    'primary-writing-mode': 525,
 }
 
 COLLAPSE_RE = re.compile(r'[ \t\r\n\v]+')
@@ -54,7 +62,8 @@ def usr_lang_as_iso639_1(raw):
 def build_exth(metadata, prefer_author_sort=False, is_periodical=False,
         share_not_sync=True, cover_offset=None, thumbnail_offset=None,
         start_offset=None, mobi_doctype=2, num_of_resources=None,
-        kf8_unknown_count=0, be_kindlegen2=False, kf8_header_index=None):
+        kf8_unknown_count=0, be_kindlegen2=False, kf8_header_index=None,
+        opts=None):
     exth = BytesIO()
     nrecs = 0
 
@@ -206,7 +215,28 @@ def build_exth(metadata, prefer_author_sort=False, is_periodical=False,
         exth.write(pack(b'>III', EXTH_CODES['kf8_unknown_count'], 12,
             kf8_unknown_count))
         nrecs += 1
-
+    
+    #Extra metadata for fullscrenn
+    if opts and opts.book_mode == 'comic': #added for kindleear [insert0003 2017-09-03]
+        exth.write(pack(b'>II', EXTH_CODES['RegionMagnification'], 13))
+        exth.write(b'false')
+        exth.write(pack(b'>II', EXTH_CODES['book-type'], 13))
+        exth.write(b'comic')
+        exth.write(pack(b'>II', EXTH_CODES['zero-gutter'], 12))
+        exth.write(b'true')
+        exth.write(pack(b'>II', EXTH_CODES['zero-margin'], 12))
+        exth.write(b'true')
+        exth.write(pack(b'>II', EXTH_CODES['primary-writing-mode'], 21))
+        exth.write(b'horizontal-lr')
+        exth.write(pack(b'>II', EXTH_CODES['fixed-layout'], 12))
+        exth.write(b'true')
+        exth.write(pack(b'>II', EXTH_CODES['orientation-lock'], 16))
+        exth.write(b'portrait')
+        original_resolution = b'%dx%d' % opts.dest.comic_screen_size #sth like comic_screen_size = (1072, 1430)
+        exth.write(pack(b'>II', EXTH_CODES['original-resolution'], len(original_resolution) + 8))
+        exth.write(original_resolution)
+        nrecs += 8
+        
     exth = exth.getvalue()
     trail = len(exth) % 4
     pad = b'\0' * (4 - trail) # Always pad w/ at least 1 byte

@@ -35,7 +35,6 @@ try:
 except ImportError, e:
     LXML_PRESENT = False
 
-PYTHON_2_PRE_2_7 = (sys.version_info < (2,7))
 PYTHON_3_PRE_3_2 = (sys.version_info[0] == 3 and sys.version_info < (3,2))
 
 class TestConstructor(SoupTest):
@@ -77,7 +76,7 @@ class TestWarnings(SoupTest):
     def test_no_warning_if_explicit_parser_specified(self):
         with warnings.catch_warnings(record=True) as w:
             soup = self.soup("<a><b></b></a>", "html.parser")
-        self.assertEquals([], w)
+        self.assertEqual([], w)
 
     def test_parseOnlyThese_renamed_to_parse_only(self):
         with warnings.catch_warnings(record=True) as w:
@@ -118,15 +117,34 @@ class TestWarnings(SoupTest):
             soup = self.soup(filename)
         self.assertEqual(0, len(w))
 
-    def test_url_warning(self):
-        with warnings.catch_warnings(record=True) as w:
-            soup = self.soup("http://www.crummy.com/")
-        msg = str(w[0].message)
-        self.assertTrue("looks like a URL" in msg)
+    def test_url_warning_with_bytes_url(self):
+        with warnings.catch_warnings(record=True) as warning_list:
+            soup = self.soup(b"http://www.crummybytes.com/")
+        # Be aware this isn't the only warning that can be raised during
+        # execution..
+        self.assertTrue(any("looks like a URL" in str(w.message) 
+            for w in warning_list))
 
-        with warnings.catch_warnings(record=True) as w:
-            soup = self.soup("http://www.crummy.com/ is great")
-        self.assertEqual(0, len(w))
+    def test_url_warning_with_unicode_url(self):
+        with warnings.catch_warnings(record=True) as warning_list:
+            # note - this url must differ from the bytes one otherwise
+            # python's warnings system swallows the second warning
+            soup = self.soup(u"http://www.crummyunicode.com/")
+        self.assertTrue(any("looks like a URL" in str(w.message) 
+            for w in warning_list))
+
+    def test_url_warning_with_bytes_and_space(self):
+        with warnings.catch_warnings(record=True) as warning_list:
+            soup = self.soup(b"http://www.crummybytes.com/ is great")
+        self.assertFalse(any("looks like a URL" in str(w.message) 
+            for w in warning_list))
+
+    def test_url_warning_with_unicode_and_space(self):
+        with warnings.catch_warnings(record=True) as warning_list:
+            soup = self.soup(u"http://www.crummyuncode.com/ is great")
+        self.assertFalse(any("looks like a URL" in str(w.message) 
+            for w in warning_list))
+
 
 class TestSelectiveParsing(SoupTest):
 
@@ -260,7 +278,7 @@ class TestEncodingConversion(SoupTest):
         self.assertEqual(soup_from_unicode.encode('utf-8'), self.utf8_data)
 
     @skipIf(
-        PYTHON_2_PRE_2_7 or PYTHON_3_PRE_3_2,
+        PYTHON_3_PRE_3_2,
         "Bad HTMLParser detected; skipping test of non-ASCII characters in attribute name.")
     def test_attribute_name_containing_unicode_characters(self):
         markup = u'<div><a \N{SNOWMAN}="snowman"></a></div>'

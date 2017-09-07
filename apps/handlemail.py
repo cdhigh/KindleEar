@@ -258,8 +258,8 @@ class HandleMail(InboundMailHandler):
                     user.ownfeeds.language, local_time(tz=user.timezone), 
                     pubtype='book:book:KindleEar')
                 oeb.container = ServerContainer(log)
-                id, href = oeb.manifest.generate(id='page', href='page.html')
-                item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=unicode(soup))
+                id_, href = oeb.manifest.generate(id='page', href='page.html')
+                item = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=unicode(soup))
                 oeb.spine.add(item, False)
                 oeb.toc.add(subject, href)
                 
@@ -272,8 +272,8 @@ class HandleMail(InboundMailHandler):
                             except:
                                 pass
                             else:
-                                id, href = oeb.manifest.generate(id='img', href=filename)
-                                item = oeb.manifest.add(id, href, mimetype, data=content)
+                                id_, href = oeb.manifest.generate(id='img', href=filename)
+                                item = oeb.manifest.add(id_, href, mimetype, data=content)
                 
                 oIO = byteStringIO()
                 o = EPUBOutput() if user.book_type == "epub" else MOBIOutput()
