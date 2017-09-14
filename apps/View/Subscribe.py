@@ -35,13 +35,14 @@ class MySubscription(BaseHandler):
         title = web.input().get('t')
         url = web.input().get('url')
         isfulltext = bool(web.input().get('fulltext'))
+        iscartoonmad = bool(web.input().get('cartoonmad'))
         if not title or not url:
             return self.GET(_("Title or url is empty!"))
         
         if not url.lower().startswith('http'): #http and https
             url = 'http://' + url
         assert user.ownfeeds
-        Feed(title=title,url=url,book=user.ownfeeds,isfulltext=isfulltext,
+        Feed(title=title,url=url,book=user.ownfeeds,isfulltext=isfulltext,iscartoonmad=iscartoonmad,
             time=datetime.datetime.utcnow()).put()
         memcache.delete('%d.feedscount'%user.ownfeeds.key().id())
         raise web.seeother('/my')
@@ -71,7 +72,8 @@ class FeedsAjax(BaseHandler):
             title = web.input().get('title')
             url = web.input().get('url')
             isfulltext = bool(web.input().get('fulltext','').lower() == 'true')
-            respDict = {'status':'ok', 'title':title, 'url':url, 'isfulltext':isfulltext}
+            iscartoonmad = bool(web.input().get('cartoonmad','').lower() == 'true')
+            respDict = {'status':'ok', 'title':title, 'url':url, 'isfulltext':isfulltext, 'iscartoonmad':iscartoonmad}
             
             if not title or not url:
                 respDict['status'] = _("Title or Url is empty!")
@@ -81,7 +83,7 @@ class FeedsAjax(BaseHandler):
                 url = 'http://' + url
                 respDict['url'] = url
             
-            fd = Feed(title=title, url=url, book=user.ownfeeds, isfulltext=isfulltext,
+            fd = Feed(title=title, url=url, book=user.ownfeeds, isfulltext=isfulltext, iscartoonmad=iscartoonmad,
                 time=datetime.datetime.utcnow())
             fd.put()
             respDict['feedid'] = fd.key().id()

@@ -23,6 +23,7 @@ from calibre.ebooks.conversion.epuboutput import EPUBOutput
 from calibre.utils.bytestringio import byteStringIO
 from books import BookClasses, BookClass
 from books.base import BaseFeedBook, BaseComicBook
+from books.comic.cartoonmadbase import CartoonMadBaseBook
     
 #实际下载文章和生成电子书并且发送邮件
 class Worker(BaseHandler):
@@ -165,7 +166,13 @@ class Worker(BaseHandler):
                 book.oldest_article = bk.oldest_article
                 book.fulltext_by_readability = True
                 feeds = bk.feeds
-                book.feeds = [(feed.title, feed.url, feed.isfulltext) for feed in feeds]
+                book.feeds = []
+                for feed in feeds:
+                    main.log.warn("cartoonmad: %s"%feed.title)
+                    if(feed.iscartoonmad):
+                        self.ProcessComicRSS(username, user, feed)
+                    else:
+                        book.feeds.append((feed.title, feed.url, feed.isfulltext))
                 book.url_filters = [flt.url for flt in user.urlfilter]
                 
             # 对于html文件，变量名字自文档,thumbnail为文章第一个img的url
@@ -334,4 +341,99 @@ class Worker(BaseHandler):
         data = StringIO.StringIO()
         imgnew.save(data, 'JPEG')
         return data.getvalue()
+
+    def ProcessComicRSS(self, username, user, feed):
+        opts = None
+        oeb = None
+
+        # 创建 OEB
+        #global log
+        opts = getOpts(user.device, 'comic')
+        oeb = CreateOeb(main.log, None, opts)
+        pubtype = 'book:book:KindleEar'
+        language = 'zh-cn'
+
+        setMetaData(oeb, feed.title, language, local_time("%Y-%m-%d", user.timezone), pubtype=pubtype)
+        oeb.container = ServerContainer(main.log)
+
+        #guide
+        id_, href = oeb.manifest.generate('masthead', DEFAULT_MASTHEAD) # size:600*60
+        oeb.manifest.add(id_, href, MimeFromFilename(DEFAULT_MASTHEAD))
+        oeb.guide.add('masthead', 'Masthead Image', href)
         
+        id_, href = oeb.manifest.generate('cover', DEFAULT_COVER)
+        item = oeb.manifest.add(id_, href, MimeFromFilename(DEFAULT_COVER))
+
+        oeb.guide.add('cover', 'Cover', href)
+        oeb.metadata.add('cover', id_)
+            
+        itemcnt, imgindex = 0, 0
+        sections = OrderedDict()
+        toc_thumbnails = {} #map img-url -> manifest-href
+
+        book = CartoonMadBaseBook(imgindex=imgindex, opts=opts, user=user)
+        book.title = feed.title
+        book.description = feed.title
+        book.language = language
+        book.keep_image = True
+        book.oldest_article = 7
+        book.fulltext_by_readability = True
+        book.feeds = [(feed.title, feed.url)]
+        book.url_filters = [flt.url for flt in user.urlfilter]
+
+        try: #书的质量可能不一，一本书的异常不能影响其他书籍的推送
+            for sec_or_media, url, title, content, brief, thumbnail in book.Items():
+                if not sec_or_media or not title or not content:
+                    continue
+                
+                if sec_or_media.startswith(r'image/'):
+                    id_, href = oeb.manifest.generate(id='img', href=title)
+                    item = oeb.manifest.add(id_, href, sec_or_media, data=content)
+                    if thumbnail:
+                        toc_thumbnails[url] = href
+                    imgindex += 1
+                else:
+                    #id, href = oeb.manifest.generate(id='feed', href='feed%d.html'%itemcnt)
+                    #item = oeb.manifest.add(id, href, 'application/xhtml+xml', data=content)
+                    #oeb.spine.add(item, True)
+                    sections.setdefault(sec_or_media, [])
+                    sections[sec_or_media].append((title, brief, thumbnail, content))
+                    itemcnt += 1
+        except Exception as e:
+            excFileName, excFuncName, excLineNo = get_exc_location()
+            main.log.warn("Failed to push <%s> : %s, in file '%s', %s (line %d)" % (
+                book.title, str(e), excFileName, excFuncName, excLineNo))
+            return "Failed to push book <%s>!"%title 
+        
+        volumeTitle = ''
+        if itemcnt > 0:
+            insertHtmlToc = False
+            insertThumbnail = False
+            volumeTitle = book.LastDeliveredVolume()
+            oeb.metadata.clear('title')
+            oeb.metadata.add('title', feed.title + volumeTitle)
+            
+            InsertToc(oeb, sections, toc_thumbnails, insertHtmlToc, insertThumbnail)
+            oIO = byteStringIO()
+            o = EPUBOutput() if user.book_type == "epub" else MOBIOutput()
+            o.convert(oeb, oIO, opts, main.log)
+            try:
+                ultima_log = DeliverLog.all().order('-time').get()
+            except:
+                ultima_log = sorted(DeliverLog.all(), key=attrgetter('time'), reverse=True)
+                ultima_log = ultima_log[0] if ultima_log else None
+
+            if ultima_log:
+                diff = datetime.datetime.utcnow() - ultima_log.datetime
+                if diff.days * 86400 + diff.seconds < 10:
+                    time.sleep(8)
+
+            self.SendToKindle(username, user.kindle_email, feed.title + volumeTitle, user.book_type, str(oIO.getvalue()), user.timezone)
+            rs = "%s(%s).%s Sent!"%(feed.title, local_time(tz=user.timezone), user.book_type)
+            main.log.info(rs)
+            return rs
+        else:
+            self.deliverlog(username, str(user.kindle_email), feed.title + volumeTitle, 0, status='nonews', tz=user.timezone)
+            rs = "No new feeds."
+            main.log.info(rs)
+            return rs

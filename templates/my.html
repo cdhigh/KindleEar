@@ -5,8 +5,10 @@
     <legend>{{_("Custom Rss")}}</legend>
     {% for feed in myfeeds -%}
     <div class="book">
-        <div class="titleRow">{{feed.title}} {% if feed.isfulltext %}
-            <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" />{% endif %}
+        <div class="titleRow">
+            {{feed.title}}
+            {% if feed.isfulltext %} <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" />{% endif %}
+            {% if feed.iscartoonmad %} <img alt="{{_("CartoonMad")}}" src="static/cartoonmad.gif" border="0" />{% endif %}
         </div>
         <div class="cornerControls">
             {#<a href="/delfeed/{{feed.key().id()}}" class="actionButton">{{_("Delete")}}</a>#}
@@ -22,8 +24,10 @@
     <div class="book" style="border-bottom:0;" id="divAddFeedCmdPanel">
         <div class="titleRow">
             <input type="text" name="t" id="title_to_add" placeholder={{_("Title")}} style="width:250px;" />
-            <input type="checkbox" name="fulltext" id="fulltext" />
-            <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" onclick="toggleFulltext();" />
+            <input type="checkbox" name="fulltext" id="fulltext" onclick="toggleFull(0);"/>
+            <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" onclick="toggleFull(1);" />
+            <input type="checkbox" name="cartoonmad" id="cartoonmad" onclick="toggleFull(2);"/>
+            <img alt="{{_("CartoonMad")}}" src="static/cartoonmad.gif" border="0" onclick="toggleFull(3);" />
         </div>
         <div class="summaryRow">
             <input type="text" name="url" id="url_to_add" style="width:600px;margin-top:8px;" placeholder="URL" />
@@ -82,9 +86,25 @@
 {% endblock -%}
 {% block js -%}
 <script type="text/javascript">
-function toggleFulltext() {
+function toggleFull(id) {
   var btnft = document.getElementById("fulltext");
-  btnft.checked = !btnft.checked;
+  var btnfp = document.getElementById("cartoonmad");
+  if (id == 1)
+  {
+      btnft.checked = !btnft.checked;
+  }
+  if (id == 3)
+  {
+      btnfp.checked = !btnfp.checked;
+  }
+  if ( (id < 2) && btnft.checked)
+  {
+      btnfp.checked = !btnft.checked;
+  }
+  if ( (id > 1) && btnfp.checked)
+  {
+      btnft.checked = !btnfp.checked;
+  }
 }
 function toggleSeparate(id) {
   id = "separate_" + id
@@ -155,12 +175,13 @@ function delFeed(obj, feedid) {
 function addFeed() {
     var title_to_add = document.getElementById('title_to_add');
     var isfulltext = document.getElementById('fulltext');
+    var iscartoonmad = document.getElementById('cartoonmad');
     var url_to_add = document.getElementById('url_to_add');
     ajax({url: "/feeds/add", type: "POST",
-        data: {title: title_to_add.value, fulltext: fulltext.checked, url: url_to_add.value},
+        data: {title: title_to_add.value, fulltext: fulltext.checked, cartoonmad: cartoonmad.checked, url: url_to_add.value},
         success: function (resp, xml) {
             if (resp.status == "ok") {
-                appendFeedDiv(resp.title, resp.isfulltext, resp.url, resp.feedid);
+                appendFeedDiv(resp.title, resp.isfulltext, resp.iscartoonmad, resp.url, resp.feedid);
                 title_to_add.value = "";
                 url_to_add.value = "";
             } else {
@@ -174,7 +195,7 @@ function addFeed() {
 }
 
 //新建一个自定义RSS书籍，添加到订阅列表
-function appendFeedDiv(title, isfulltext, url, feedid) {
+function appendFeedDiv(title, isfulltext, iscartoonmad, url, feedid) {
     var newFeedDiv = document.createElement("div");
     newFeedDiv.className = "book";
     
@@ -188,6 +209,14 @@ function appendFeedDiv(title, isfulltext, url, feedid) {
         var imgNode = document.createElement("img");
         imgNode.setAttribute("alt", {{'"' + _("Fulltext") + '"'}});
         imgNode.setAttribute("src", "static/fulltext.gif");
+        imgNode.setAttribute("border", "0");
+        newTitleDiv.appendChild(imgNode);
+    }
+    if (iscartoonmad) {
+        newTitleDiv.appendChild(document.createTextNode(' '));
+        var imgNode = document.createElement("img");
+        imgNode.setAttribute("alt", {{'"' + _("CartoonMad") + '"'}});
+        imgNode.setAttribute("src", "static/cartoonmad.gif");
         imgNode.setAttribute("border", "0");
         newTitleDiv.appendChild(imgNode);
     }

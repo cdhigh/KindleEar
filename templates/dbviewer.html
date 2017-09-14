@@ -81,6 +81,7 @@
         <th class="center">Title</th>
         <th class="center">URL</th>
         <th class="center">FullText</th>
+        <th class="center">CartoonMad</th>
     </tr>
     </thead>
     <tbody>
@@ -91,6 +92,8 @@
         <td class="center">{{item.title}}</td>
         <td class="center">{{item.url[:20]}}..</td>
         <td class="center">{%if item.isfulltext%}<span style="color:red;">1</span>
+            {%else%}0{%endif%}</td>
+        <td class="center">{%if item.iscartoonmad%}<span style="color:red;">1</span>
             {%else%}0{%endif%}</td>
     </tr>
     {% endfor -%}
