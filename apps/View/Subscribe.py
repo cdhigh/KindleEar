@@ -35,7 +35,7 @@ class MySubscription(BaseHandler):
         title = web.input().get('t')
         url = web.input().get('url')
         isfulltext = bool(web.input().get('fulltext'))
-        iscartoonmad = bool(web.input().get('cartoonmad'))
+        iscartoonmad = bool('cartoonmad' in url.lower())
         if not title or not url:
             return self.GET(_("Title or url is empty!"))
         
@@ -72,7 +72,7 @@ class FeedsAjax(BaseHandler):
             title = web.input().get('title')
             url = web.input().get('url')
             isfulltext = bool(web.input().get('fulltext','').lower() == 'true')
-            iscartoonmad = bool(web.input().get('cartoonmad','').lower() == 'true')
+            iscartoonmad = bool('cartoonmad' in url.lower())
             respDict = {'status':'ok', 'title':title, 'url':url, 'isfulltext':isfulltext, 'iscartoonmad':iscartoonmad}
             
             if not title or not url:
