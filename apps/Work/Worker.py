@@ -168,7 +168,6 @@ class Worker(BaseHandler):
                 feeds = bk.feeds
                 book.feeds = []
                 for feed in feeds:
-                    main.log.warn("cartoonmad: %s"%feed.title)
                     if(feed.iscartoonmad):
                         self.ProcessComicRSS(username, user, feed)
                     else:
