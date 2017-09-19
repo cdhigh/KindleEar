@@ -108,7 +108,6 @@ class Feed(db.Model):
     title = db.StringProperty()
     url = db.StringProperty()
     isfulltext = db.BooleanProperty()
-    iscartoonmad = db.BooleanProperty()
     time = db.DateTimeProperty() #源被加入的时间，用于排序
 
 #书籍的推送历史记录
@@ -150,3 +149,4 @@ class SubscriptionInfo(db.Model):
     @password.setter
     def password(self, pwd):
         self.encrypted_pwd = ke_encrypt(pwd, self.user.secret_key)
+        

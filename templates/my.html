@@ -8,7 +8,7 @@
         <div class="titleRow">
             {{feed.title}}
             {% if feed.isfulltext %} <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" />{% endif %}
-            {% if feed.iscartoonmad %} <img alt="{{_("CartoonMad")}}" src="static/cartoonmad.gif" border="0" />{% endif %}
+            {% if feed.url.startswith("http://www.cartoonmad.com") %} <img alt="{{_("CartoonMad")}}" src="static/comic.gif" border="0" />{% endif %}
         </div>
         <div class="cornerControls">
             {#<a href="/delfeed/{{feed.key().id()}}" class="actionButton">{{_("Delete")}}</a>#}
@@ -24,7 +24,7 @@
     <div class="book" style="border-bottom:0;" id="divAddFeedCmdPanel">
         <div class="titleRow">
             <input type="text" name="t" id="title_to_add" placeholder={{_("Title")}} style="width:250px;" />
-            <input type="checkbox" name="fulltext" id="fulltext"/>
+            <input type="checkbox" name="fulltext" id="fulltext" />
             <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" onclick="toggleFulltext();" />
         </div>
         <div class="summaryRow">
@@ -158,12 +158,11 @@ function addFeed() {
     var title_to_add = document.getElementById('title_to_add');
     var isfulltext = document.getElementById('fulltext');
     var url_to_add = document.getElementById('url_to_add');
-    var iscartoonmad = url_to_add.value.includes("cartoonmad");
     ajax({url: "/feeds/add", type: "POST",
-        data: {title: title_to_add.value, fulltext: fulltext.checked, cartoonmad: url_to_add.value.includes("cartoonmad"), url: url_to_add.value},
+        data: {title: title_to_add.value, fulltext: fulltext.checked, url: url_to_add.value},
         success: function (resp, xml) {
             if (resp.status == "ok") {
-                appendFeedDiv(resp.title, resp.isfulltext, resp.iscartoonmad, resp.url, resp.feedid);
+                appendFeedDiv(resp.title, resp.isfulltext, resp.url, resp.feedid);
                 title_to_add.value = "";
                 url_to_add.value = "";
             } else {
@@ -177,7 +176,7 @@ function addFeed() {
 }
 
 //新建一个自定义RSS书籍，添加到订阅列表
-function appendFeedDiv(title, isfulltext, iscartoonmad, url, feedid) {
+function appendFeedDiv(title, isfulltext, url, feedid) {
     var newFeedDiv = document.createElement("div");
     newFeedDiv.className = "book";
     
@@ -194,11 +193,11 @@ function appendFeedDiv(title, isfulltext, iscartoonmad, url, feedid) {
         imgNode.setAttribute("border", "0");
         newTitleDiv.appendChild(imgNode);
     }
-    if (iscartoonmad) {
+    if (url.startsWith("http://www.cartoonmad.com")) {
         newTitleDiv.appendChild(document.createTextNode(' '));
         var imgNode = document.createElement("img");
         imgNode.setAttribute("alt", {{'"' + _("CartoonMad") + '"'}});
-        imgNode.setAttribute("src", "static/cartoonmad.gif");
+        imgNode.setAttribute("src", "static/comic.gif");
         imgNode.setAttribute("border", "0");
         newTitleDiv.appendChild(imgNode);
     }
