@@ -71,7 +71,7 @@ class CartoonMadBaseBook(BaseComicBook):
     def UpdateLastDelivered(self, title, num):
         userName = self.UserName()
         dbItem = LastDelivered.all().filter('username = ', userName).filter('bookname = ', title).get()
-        self.last_delivered_volume = u' 第%d卷' % num
+        self.last_delivered_volume = u' 第%d话' % num
         if dbItem:
             dbItem.num = num
             dbItem.record = self.last_delivered_volume
@@ -130,4 +130,4 @@ class CartoonMadBaseBook(BaseComicBook):
                     break
                     
         return urls
-        
+
