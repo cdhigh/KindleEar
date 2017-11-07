@@ -1374,6 +1374,7 @@ class BaseComicBook(BaseFeedBook):
                 imgMime = r"image/" + imgType
                 fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType=='jpeg' else imgType)
                 imgFilenameList.append(fnImg)
+                content = self.process_image(content)
                 yield (imgMime, url, fnImg, content, None, None)
             else: #不是图片，有可能是包含图片的网页，抽取里面的图片
                 content = self.AutoDecodeContent(content, decoder, self.page_encoding, opener.realurl, result.headers)
@@ -1419,6 +1420,7 @@ class BaseComicBook(BaseFeedBook):
                         imgMime = r"image/" + imgType
                         fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType=='jpeg' else imgType)
                         imgFilenameList.append(fnImg)
+                        imgContent = self.process_image(imgContent)
                         yield (imgMime, imgUrl, fnImg, imgContent, None, None)
                 else: #多个图片，要分析哪些才是漫画
                     isComics = [True for n in range(len(imgContentList))]
@@ -1446,6 +1448,7 @@ class BaseComicBook(BaseFeedBook):
                             imgMime = r"image/" + imgType
                             fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType=='jpeg' else imgType)
                             imgFilenameList.append(fnImg)
+                            imgContent = self.process_image(imgContent)
                             yield (imgMime, imgUrl, fnImg, imgContent, None, None)
             
             #每个图片当做一篇文章，否则全屏模式下图片会挤到同一页
