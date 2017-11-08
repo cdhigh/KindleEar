@@ -21,6 +21,8 @@ CONNECTION_TIMEOUT = 60
 
 # True to translate filename in chinese to pinyin
 PINYIN_FILENAME = False
+#If True, use 'GBK' to encode the final filename of books (for Windows)
+GBK_FILENAME = True
 
 #If set to True, encoding detected by chardet module will be used for each article
 #otherwise encoding in http response header or meta of html is used in proprity.
