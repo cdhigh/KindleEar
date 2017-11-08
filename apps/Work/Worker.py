@@ -335,7 +335,7 @@ class Worker(BaseHandler):
         
         #新生成的图片再整体缩小到设定大小
         rw,rh = opts.reduce_image_to
-        ratio = min(float(rw)/float(new_size[0]), float(rh)/float(new_size[0]))
+        ratio = min(float(rw)/float(new_size[0]), float(rh)/float(new_size[1]))
         imgnew = imgnew.resize((int(new_size[0]*ratio), int(new_size[1]*ratio)))
         data = StringIO.StringIO()
         imgnew.save(data, 'JPEG')
