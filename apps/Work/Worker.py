@@ -179,7 +179,6 @@ class Worker(BaseHandler):
             #    img的thumbail仅当其为article的第一个img为True
             try: #书的质量可能不一，一本书的异常不能影响其他书籍的推送
                 lastSec = ''
-                seccnt = 0
                 for sec_or_media, url, title, content, brief, thumbnail in book.Items():
                     if not sec_or_media or not title or not content:
                         continue
@@ -197,12 +196,13 @@ class Worker(BaseHandler):
                         sections.setdefault(sec_or_media, [])
                         sections[sec_or_media].append((title, brief, thumbnail, content))
                         itemcnt += 1
-                        if (not bk.builtin) and sec_or_media != lastSec:#找到相应的Feed实体并更新lastArticle属性
-                            if feeds[seccnt].title ==  sec_or_media:
-                                feeds[seccnt].lastArticle = title
-                                feeds[seccnt].put()
+                        #找到相应的Feed实例并更新lastArticle属性
+                        if (not bk.builtin) and sec_or_media != lastSec:
+                            fd = feeds.filter('title = ',sec_or_media).get()
+                            if fd:
+                                fd.lastArticle = title#这里的title是文章标题，Feed里的title其实是这里的section name
+                                fd.put()
                                 lastSec = sec_or_media
-                            seccnt += 1
                         
             except Exception as e:
                 excFileName, excFuncName, excLineNo = get_exc_location()
