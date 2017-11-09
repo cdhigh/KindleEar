@@ -36,6 +36,9 @@ TRUST_ENCODING_IN_HEADER_OR_META = True
 GENERATE_TOC_DESC = True
 TOC_DESC_WORD_LIMIT = 500
 
+#Do not send articles that has been sent
+DONOTREPEAT = True
+
 #-------------------add by rexdf-----------
 #title for table of contents
 TABLE_OF_CONTENTS = u'Table Of Contents'
