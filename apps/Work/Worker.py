@@ -171,13 +171,15 @@ class Worker(BaseHandler):
                     if feed.url.startswith("http://www.cartoonmad.com"):
                         self.ProcessComicRSS(username, user, feed)
                     else:
-                        book.feeds.append((feed.title, feed.url, feed.isfulltext))
+                        book.feeds.append((feed.title, feed.url, feed.isfulltext, feed.lastArticle))
                 book.url_filters = [flt.url for flt in user.urlfilter]
                 
             # 对于html文件，变量名字自文档,thumbnail为文章第一个img的url
             # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容,
             #    img的thumbail仅当其为article的第一个img为True
             try: #书的质量可能不一，一本书的异常不能影响其他书籍的推送
+                lastSec = ''
+                seccnt = 0
                 for sec_or_media, url, title, content, brief, thumbnail in book.Items():
                     if not sec_or_media or not title or not content:
                         continue
@@ -195,6 +197,13 @@ class Worker(BaseHandler):
                         sections.setdefault(sec_or_media, [])
                         sections[sec_or_media].append((title, brief, thumbnail, content))
                         itemcnt += 1
+                        if (not bk.builtin) and sec_or_media != lastSec:#找到相应的Feed实体并更新lastArticle属性
+                            if feeds[seccnt].title ==  sec_or_media:
+                                feeds[seccnt].lastArticle = title
+                                feeds[seccnt].put()
+                                lastSec = sec_or_media
+                            seccnt += 1
+                        
             except Exception as e:
                 excFileName, excFuncName, excLineNo = get_exc_location()
                 main.log.warn("Failed to push <%s> : %s, in file '%s', %s (line %d)" % (
