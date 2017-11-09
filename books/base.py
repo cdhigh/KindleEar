@@ -259,6 +259,7 @@ class BaseFeedBook:
         for feed in self.feeds:
             section, url = feed[0], feed[1]
             isfulltext = feed[2] if len(feed) > 2 else False
+            lastarticle = feed[3] if len(feed) > 3 else ''
             timeout = self.timeout+10 if isfulltext else self.timeout
             opener = URLOpener(self.host, timeout=timeout, headers=self.extra_header)
             result = opener.open(url)
@@ -290,8 +291,10 @@ class BaseFeedBook:
                             self.log.info("Skip old article(%s): %s" % (updated.strftime('%Y-%m-%d %H:%M:%S'), e.link))
                             continue
                     
-                    title = e.title if hasattr(e, 'title') else 'Untitled'
-                    
+                    strUntitled = 'Untitled'
+                    title = e.title if hasattr(e, 'title') else strUntitled
+                    if title == lastarticle and title != strUntitled and DONOTREPEAT:#如果遇到已经推送过的文章，则跳出循环
+                        break
                     #支持HTTPS
                     if hasattr(e, 'link'):
                         if url.startswith('https://'):
