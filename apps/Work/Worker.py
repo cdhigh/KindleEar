@@ -198,11 +198,11 @@ class Worker(BaseHandler):
                         itemcnt += 1
                         #找到相应的Feed实例并更新lastArticle属性
                         if (not bk.builtin) and sec_or_media != lastSec:
-                            fd = feeds.filter('title = ',sec_or_media).get()
+                            fd = Feed.all().filter('title = ',sec_or_media).get()
                             if fd:
                                 fd.lastArticle = title#这里的title是文章标题，Feed里的title其实是这里的section name
                                 fd.put()
-                                lastSec = sec_or_media
+                            lastSec = sec_or_media
                         
             except Exception as e:
                 excFileName, excFuncName, excLineNo = get_exc_location()
