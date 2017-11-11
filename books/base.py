@@ -979,14 +979,16 @@ class BaseFeedBook:
         fmt = img.format
         #info = img.info
         
+        screen_width = self.opts.reduce_image_to[0]
+        ratio = width/screen_width if width > screen_width else 1.
+        
         #高比宽至少大一倍才认为是长图
-        if height < THRESHOLD_SPLIT_LONG_IMAGE or height < width * 3:
+        if height < THRESHOLD_SPLIT_LONG_IMAGE*ratio or height < width * 3:
             return None
-            
         imagesData = []
         top = 0
         while top < height:
-            bottom = top + THRESHOLD_SPLIT_LONG_IMAGE
+            bottom = top + THRESHOLD_SPLIT_LONG_IMAGE*ratio
             if bottom > height:
                 bottom = height
                     
@@ -997,7 +999,7 @@ class BaseFeedBook:
             imagesData.append(partData.getvalue())
             
             #分图和分图重叠20个像素，保证一行字符能显示在其中一个分图中
-            top = bottom - 20 if bottom < height else bottom
+            top = bottom - 20*ratio if bottom < height else bottom
             
         return imagesData
     
@@ -1341,6 +1343,7 @@ class BaseComicBook(BaseFeedBook):
     coverfile           = ''
     feeds               = [] #子类填充此列表[('name', mainurl),...]
     min_image_size      = (150, 150) #小于这个尺寸的图片会被删除，用于去除广告图片或按钮图片之类的
+    crop_img            = None #剪切距离左，上，右，下边界的比例（<1）
     
     #子类必须实现此函数，返回 [(section, title, url, desc),..]
     #每个URL直接为图片地址，或包含一个或几个漫画图片的网页地址
@@ -1354,7 +1357,7 @@ class BaseComicBook(BaseFeedBook):
         decoder = AutoDecoder(isfeed=False)
         prevSection = ''
         min_width, min_height = self.min_image_size if self.min_image_size else (0, 0)
-        htmlTemplate = '<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8"><title>%s</title></head><body><img src="%s"/></body></html>'
+        htmlTemplate = '<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8"><title>%s</title></head><body><div style="margin:auto;text-align:center;"><img src="%s"/></div></body></html>'
         
         for section, fTitle, url, desc in urls:
             if section != prevSection or prevSection == '':
@@ -1377,7 +1380,7 @@ class BaseComicBook(BaseFeedBook):
                 imgMime = r"image/" + imgType
                 fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType=='jpeg' else imgType)
                 imgFilenameList.append(fnImg)
-                content = self.process_image(content)
+                content = self.process_image_comic(content)
                 yield (imgMime, url, fnImg, content, None, None)
             else: #不是图片，有可能是包含图片的网页，抽取里面的图片
                 content = self.AutoDecodeContent(content, decoder, self.page_encoding, opener.realurl, result.headers)
@@ -1423,7 +1426,7 @@ class BaseComicBook(BaseFeedBook):
                         imgMime = r"image/" + imgType
                         fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType=='jpeg' else imgType)
                         imgFilenameList.append(fnImg)
-                        imgContent = self.process_image(imgContent)
+                        imgContent = self.process_image_comic(imgContent)
                         yield (imgMime, imgUrl, fnImg, imgContent, None, None)
                 else: #多个图片，要分析哪些才是漫画
                     isComics = [True for n in range(len(imgContentList))]
@@ -1451,14 +1454,32 @@ class BaseComicBook(BaseFeedBook):
                             imgMime = r"image/" + imgType
                             fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType=='jpeg' else imgType)
                             imgFilenameList.append(fnImg)
-                            imgContent = self.process_image(imgContent)
+                            imgContent = self.process_image_comic(imgContent)
                             yield (imgMime, imgUrl, fnImg, imgContent, None, None)
             
             #每个图片当做一篇文章，否则全屏模式下图片会挤到同一页
             for imgFilename in imgFilenameList:
                 tmpHtml = htmlTemplate % (fTitle, imgFilename)
                 yield (imgFilename.split('.')[0], url, fTitle, tmpHtml, '', None)
-            
+    def process_image_comic(self, data):
+        #先裁切图片
+        if self.crop_img:
+            if not isinstance(data, StringIO):
+                data = StringIO(data)
+            img = Image.open(data)
+            width, height = img.size
+            fmt = img.format
+            left, top, right, bottom = self.crop_img
+            left = int(left * width)
+            right = int((1.-right) * width)
+            top = int(top * height)
+            bottom = int((1.-bottom) *height)
+            part = img.crop((left, top, right, bottom))
+            part.load()
+            data = StringIO()
+            part.save(data, fmt)  
+            data = data.getvalue()
+        return self.process_image(data)          
 #几个小工具函数
 def remove_beyond(tag, next):
     while tag is not None and getattr(tag, 'name', None) != 'body':
