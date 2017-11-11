@@ -1344,6 +1344,7 @@ class BaseComicBook(BaseFeedBook):
     feeds               = [] #子类填充此列表[('name', mainurl),...]
     min_image_size      = (150, 150) #小于这个尺寸的图片会被删除，用于去除广告图片或按钮图片之类的
     crop_img            = None #剪切距离左，上，右，下边界的比例（<1）
+    extra_css           = '''div{text-align:center;}'''
     
     #子类必须实现此函数，返回 [(section, title, url, desc),..]
     #每个URL直接为图片地址，或包含一个或几个漫画图片的网页地址
@@ -1357,7 +1358,7 @@ class BaseComicBook(BaseFeedBook):
         decoder = AutoDecoder(isfeed=False)
         prevSection = ''
         min_width, min_height = self.min_image_size if self.min_image_size else (0, 0)
-        htmlTemplate = '<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8"><title>%s</title></head><body><div style="margin:auto;text-align:center;"><img src="%s"/></div></body></html>'
+        htmlTemplate = '<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8"><title>%s</title><style type="text/css">' + self.extra_css + '</style></head><body><img src="%s"/></body></html>'
         
         for section, fTitle, url, desc in urls:
             if section != prevSection or prevSection == '':
@@ -1468,16 +1469,24 @@ class BaseComicBook(BaseFeedBook):
                 data = StringIO(data)
             img = Image.open(data)
             width, height = img.size
+            screen_width, screen_height = self.opts.reduce_image_to
             fmt = img.format
             left, top, right, bottom = self.crop_img
-            left = int(left * width)
-            right = int((1.-right) * width)
-            top = int(top * height)
-            bottom = int((1.-bottom) *height)
-            part = img.crop((left, top, right, bottom))
-            part.load()
-            data = StringIO()
-            part.save(data, fmt)  
+            if width < screen_width:
+                left = 0
+                right = 0
+            if height < screen_height:
+                top = 0
+                bottom = 0
+            if any([x>0 for x in (left, top, right, bottom)]):
+                left = int(left * width)
+                right = int((1.-right) * width)
+                top = int(top * height)
+                bottom = int((1.-bottom) *height)
+                part = img.crop((left, top, right, bottom))
+                part.load()
+                data = StringIO()
+                part.save(data, fmt)  
             data = data.getvalue()
         return self.process_image(data)          
 #几个小工具函数
