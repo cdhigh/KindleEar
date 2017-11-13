@@ -945,6 +945,8 @@ class BaseFeedBook:
             return
         
         opts = self.opts
+        if self.user.book_mode == 'comic' and not REDUCE_IMAGE_TO:
+            opts.reduce_image_to = self.opts.dest.comic_screen_size
         try:
             if not opts or not opts.process_images or not opts.process_images_immediately:
                 return data
@@ -1344,7 +1346,7 @@ class BaseComicBook(BaseFeedBook):
     feeds               = [] #子类填充此列表[('name', mainurl),...]
     min_image_size      = (150, 150) #小于这个尺寸的图片会被删除，用于去除广告图片或按钮图片之类的
     crop_img            = None #剪切距离左，上，右，下边界的比例（<1）
-    extra_css           = '''div{text-align:center;}'''
+    extra_css           = ''
     
     #子类必须实现此函数，返回 [(section, title, url, desc),..]
     #每个URL直接为图片地址，或包含一个或几个漫画图片的网页地址
@@ -1353,12 +1355,13 @@ class BaseComicBook(BaseFeedBook):
     
     #生成器，返回一个图片元组，mime,url,filename,content,brief,thumbnail
     def Items(self):
+        self.user.book_mode = 'comic'
         urls = self.ParseFeedUrls()
         opener = URLOpener(self.host, timeout=self.timeout, headers=self.extra_header)
         decoder = AutoDecoder(isfeed=False)
         prevSection = ''
         min_width, min_height = self.min_image_size if self.min_image_size else (0, 0)
-        htmlTemplate = '<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8"><title>%s</title><style type="text/css">' + self.extra_css + '</style></head><body><img src="%s"/></body></html>'
+        htmlTemplate = '<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8"><title>%s</title><style type="text/css">%s</style></head><body><img src="%s"/></body></html>'
         
         for section, fTitle, url, desc in urls:
             if section != prevSection or prevSection == '':
@@ -1374,6 +1377,7 @@ class BaseComicBook(BaseFeedBook):
                 continue
             
             imgFilenameList = []
+            cssPlusList = []#css to be plused to extra_css
             
             #先判断是否是图片
             imgType = imghdr.what(None, content)
@@ -1381,7 +1385,8 @@ class BaseComicBook(BaseFeedBook):
                 imgMime = r"image/" + imgType
                 fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType=='jpeg' else imgType)
                 imgFilenameList.append(fnImg)
-                content = self.process_image_comic(content)
+                content, cssplus = self.process_image_comic(content)
+                cssPlusList.append(cssplus)
                 yield (imgMime, url, fnImg, content, None, None)
             else: #不是图片，有可能是包含图片的网页，抽取里面的图片
                 content = self.AutoDecodeContent(content, decoder, self.page_encoding, opener.realurl, result.headers)
@@ -1427,7 +1432,8 @@ class BaseComicBook(BaseFeedBook):
                         imgMime = r"image/" + imgType
                         fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType=='jpeg' else imgType)
                         imgFilenameList.append(fnImg)
-                        imgContent = self.process_image_comic(imgContent)
+                        imgContent, cssplus = self.process_image_comic(imgContent)
+                        cssPlusList.append(cssplus)
                         yield (imgMime, imgUrl, fnImg, imgContent, None, None)
                 else: #多个图片，要分析哪些才是漫画
                     isComics = [True for n in range(len(imgContentList))]
@@ -1455,29 +1461,29 @@ class BaseComicBook(BaseFeedBook):
                             imgMime = r"image/" + imgType
                             fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType=='jpeg' else imgType)
                             imgFilenameList.append(fnImg)
-                            imgContent = self.process_image_comic(imgContent)
+                            imgContent, cssplus = self.process_image_comic(imgContent)
+                            cssPlusList.append(cssplus)
                             yield (imgMime, imgUrl, fnImg, imgContent, None, None)
             
             #每个图片当做一篇文章，否则全屏模式下图片会挤到同一页
-            for imgFilename in imgFilenameList:
-                tmpHtml = htmlTemplate % (fTitle, imgFilename)
+            for imgFilename, cssplus in zip(imgFilenameList,cssPlusList):
+                tmpHtml = htmlTemplate % (fTitle, self.extra_css+cssplus, imgFilename)
                 yield (imgFilename.split('.')[0], url, fTitle, tmpHtml, '', None)
     def process_image_comic(self, data):
         #先裁切图片
+        if not isinstance(data, StringIO):
+            data = StringIO(data)
+        img = Image.open(data)
+        width, height = img.size
+        screen_width, screen_height = REDUCE_IMAGE_TO or self.opts.dest.comic_screen_size
+        cssplus = 'img{display:inline-block;vertical-align:middle;}'
         if self.crop_img:
-            if not isinstance(data, StringIO):
-                data = StringIO(data)
-            img = Image.open(data)
-            width, height = img.size
-            screen_width, screen_height = self.opts.reduce_image_to
             fmt = img.format
             left, top, right, bottom = self.crop_img
-            if width < screen_width:
-                left = 0
-                right = 0
-            if height < screen_height:
-                top = 0
-                bottom = 0
+            left    = 0 if left<0   else left#为了计算图片的长宽
+            right   = 0 if right<0  else right
+            top     = 0 if top<0    else top
+            bottom  = 0 if bottom<0 else bottom
             if any([x>0 for x in (left, top, right, bottom)]):
                 left = int(left * width)
                 right = int((1.-right) * width)
@@ -1486,9 +1492,18 @@ class BaseComicBook(BaseFeedBook):
                 part = img.crop((left, top, right, bottom))
                 part.load()
                 data = StringIO()
-                part.save(data, fmt)  
-            data = data.getvalue()
-        return self.process_image(data)          
+                part.save(data, fmt)
+            width = right - left
+            height = bottom - top
+        cssplus = 'div{text-align:center;}'#display:table-cell;vertical-align:middle;}
+        if width<screen_width and height<screen_height:
+            if width/float(screen_width) > height/float(screen_height):
+                mtop = (screen_height-height*screen_width/float(width))/2.
+                cssplus = cssplus.replace('div{','div{margin-top:%dpx;'%mtop)
+                cssplus += 'img{width:%dpx;}'%screen_width
+            else:
+                cssplus += 'img{height:%dpx;}'%screen_height
+        return self.process_image(data.getvalue()),cssplus      
 #几个小工具函数
 def remove_beyond(tag, next):
     while tag is not None and getattr(tag, 'name', None) != 'body':
