@@ -60,7 +60,7 @@ def rescale_image(data, maxsizeb=4000000, dimen=None,
         img.save(data, fmt)
     elif width > reducewidth or height > reduceheight:
         ratio = min(float(reducewidth)/float(width), float(reduceheight)/float(height))
-        img = img.resize((int(width*ratio), int(height*ratio)))
+        img = img.resize((int(width*ratio), int(height*ratio)),Image.ANTIALIAS)
         if png2jpg and fmt == 'PNG':
             fmt = 'JPEG'
         data = StringIO()

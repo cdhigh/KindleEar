@@ -171,13 +171,14 @@ class Worker(BaseHandler):
                     if feed.url.startswith("http://www.cartoonmad.com"):
                         self.ProcessComicRSS(username, user, feed)
                     else:
-                        book.feeds.append((feed.title, feed.url, feed.isfulltext))
+                        book.feeds.append((feed.title, feed.url, feed.isfulltext, feed.lastArticle))
                 book.url_filters = [flt.url for flt in user.urlfilter]
                 
             # 对于html文件，变量名字自文档,thumbnail为文章第一个img的url
             # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容,
             #    img的thumbail仅当其为article的第一个img为True
             try: #书的质量可能不一，一本书的异常不能影响其他书籍的推送
+                lastSec = ''
                 for sec_or_media, url, title, content, brief, thumbnail in book.Items():
                     if not sec_or_media or not title or not content:
                         continue
@@ -195,6 +196,14 @@ class Worker(BaseHandler):
                         sections.setdefault(sec_or_media, [])
                         sections[sec_or_media].append((title, brief, thumbnail, content))
                         itemcnt += 1
+                        #找到相应的Feed实例并更新lastArticle属性
+                        if (not bk.builtin) and sec_or_media != lastSec:
+                            fd = Feed.all().filter('title = ',sec_or_media).get()
+                            if fd:
+                                fd.lastArticle = title#这里的title是文章标题，Feed里的title其实是这里的section name
+                                fd.put()
+                            lastSec = sec_or_media
+                        
             except Exception as e:
                 excFileName, excFuncName, excLineNo = get_exc_location()
                 main.log.warn("Failed to push <%s> : %s, in file '%s', %s (line %d)" % (
@@ -335,7 +344,7 @@ class Worker(BaseHandler):
         
         #新生成的图片再整体缩小到设定大小
         rw,rh = opts.reduce_image_to
-        ratio = min(float(rw)/float(new_size[0]), float(rh)/float(new_size[0]))
+        ratio = min(float(rw)/float(new_size[0]), float(rh)/float(new_size[1]))
         imgnew = imgnew.resize((int(new_size[0]*ratio), int(new_size[1]*ratio)))
         data = StringIO.StringIO()
         imgnew.save(data, 'JPEG')

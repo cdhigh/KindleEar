@@ -109,6 +109,7 @@ class Feed(db.Model):
     url = db.StringProperty()
     isfulltext = db.BooleanProperty()
     time = db.DateTimeProperty() #源被加入的时间，用于排序
+    lastArticle = db.StringProperty() #最近一次抓取时的文章名，用于避免重复抓取
 
 #书籍的推送历史记录
 class DeliverLog(db.Model):
