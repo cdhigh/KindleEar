@@ -97,7 +97,7 @@ class BaseHandler:
         for i in range(SENDMAIL_RETRY_CNT+1):
             try:
                 mail.send_mail(SRC_EMAIL, to, "KindleEar %s" % lctime, "Deliver from KindleEar",
-                    attachments=[(filename.encode('gbk') if GBK_FILENAME else filename, attachment),])
+                    attachments=[(filename, attachment),])
             except OverQuotaError as e:
                 default_log.warn('overquota when sendmail to %s:%s' % (to, str(e)))
                 self.deliverlog(name, str(to), title, len(attachment), tz=tz, status='over quota')
