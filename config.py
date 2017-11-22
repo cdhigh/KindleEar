@@ -35,7 +35,7 @@ GENERATE_TOC_DESC = True
 TOC_DESC_WORD_LIMIT = 500
 
 #Do not send articles that has been sent
-DONOTREPEAT = True
+DONOTREPEAT = False
 
 #-------------------add by rexdf-----------
 #title for table of contents
