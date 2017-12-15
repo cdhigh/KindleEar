@@ -1,4 +1,4 @@
-application: kindleear
+application:  feedly4kindle
 version: 1
 runtime: python27
 api_version: 1
