@@ -3,6 +3,7 @@
 """
 KindleEar网页解码器，综合判断HTTP响应包头，HTML文件META信息，chardet检测编码来解码
 对于chardet检测的情况，则通过缓存解码结果到数据库，实现准确性和效率的平衡。
+Author: cdhigh <https://github.com/cdhigh>
 """
 import urlparse, re
 from google.appengine.ext import db
@@ -32,7 +33,7 @@ class AutoDecoder:
         self.encoding = None
         self.isfeed = isfeed #True:Feed,False:page
 
-    def decode(self, content, url, headers=None):
+    def decode(self, content, url=None, headers=None):
         if not content:
             return ''
             
@@ -70,7 +71,7 @@ class AutoDecoder:
         
         return self.decode_by_chardet(content, url)
         
-    def decode_by_chardet(self, content, url):
+    def decode_by_chardet(self, content, url=None):
         """有双级缓存的解码器
         第一级缓存是上一篇文章的编码，第二级缓存是数据库保存的此网站编码"""
         result = content    
@@ -90,23 +91,29 @@ class AutoDecoder:
                 else: # 保存下次使用，以节省时间
                     self.encoding = encoding
                     #同时保存到数据库
-                    netloc = urlparse.urlsplit(url)[1]
-                    urlenc = UrlEncoding.all().filter('netloc = ', netloc).get()
-                    if urlenc:
-                        enc = urlenc.feedenc if self.isfeed else urlenc.pageenc
-                        if enc != encoding:
-                            if self.isfeed:
-                                urlenc.feedenc = encoding
-                            else:
-                                urlenc.pageenc = encoding
-                            urlenc.put()
-                    elif self.isfeed:
-                        UrlEncoding(netloc=netloc,feedenc=encoding).put()
-                    else:
-                        UrlEncoding(netloc=netloc,pageenc=encoding).put()
+                    if url:
+                        netloc = urlparse.urlsplit(url)[1]
+                        urlenc = UrlEncoding.all().filter('netloc = ', netloc).get()
+                        if urlenc:
+                            enc = urlenc.feedenc if self.isfeed else urlenc.pageenc
+                            if enc != encoding:
+                                if self.isfeed:
+                                    urlenc.feedenc = encoding
+                                else:
+                                    urlenc.pageenc = encoding
+                                urlenc.put()
+                        elif self.isfeed:
+                            UrlEncoding(netloc=netloc,feedenc=encoding).put()
+                        else:
+                            UrlEncoding(netloc=netloc,pageenc=encoding).put()
         else:  # 暂时没有之前的编码信息
-            netloc = urlparse.urlsplit(url)[1]
-            urlenc = UrlEncoding.all().filter('netloc = ', netloc).get()
+            if url:
+                netloc = urlparse.urlsplit(url)[1]
+                urlenc = UrlEncoding.all().filter('netloc = ', netloc).get()
+            else:
+                netloc = None
+                urlenc = None
+                
             if urlenc: #先看数据库有没有
                 enc = urlenc.feedenc if self.isfeed else urlenc.pageenc
                 if enc:
@@ -133,12 +140,13 @@ class AutoDecoder:
                     result = content
             else:
                 #保存到数据库
-                newurlenc = urlenc if urlenc else UrlEncoding(netloc=netloc)
-                if self.isfeed:
-                    newurlenc.feedenc = self.encoding
-                else:
-                    newurlenc.pageenc = self.encoding
-                newurlenc.put()
+                if url:
+                    newurlenc = urlenc if urlenc else UrlEncoding(netloc=netloc)
+                    if self.isfeed:
+                        newurlenc.feedenc = self.encoding
+                    else:
+                        newurlenc.pageenc = self.encoding
+                    newurlenc.put()
         
         default_log.warn('Decoded (%s) by chardet: [%s]' % (self.encoding or 'Unknown Encoding', url))
         
@@ -172,9 +180,9 @@ def rectify_encoding(encoding):
         encoding = encoding.partition(' ')[0].strip()
     
     #常见的一些错误写法纠正
-    errata = {'8858':'8859','8559':'8859','5889':'8859','2313':'2312','2132':'2312',
-            '2321':'2312','gb-2312':'gb2312','gbk2312':'gbk','gbs2312':'gb2312',
-            '.gb2312':'gb2312','.gbk':'gbk','uft-8':'uft-8','x-euc':'euc'}
+    errata = {'8858':'8859', '8559':'8859', '5889':'8859', '2313':'2312', '2132':'2312',
+            '2321':'2312', 'gb-2312':'gb2312', 'gbk2312':'gbk', 'gbs2312':'gb2312',
+            '.gb2312':'gb2312', '.gbk':'gbk', 'uft-8':'utf-8', 'utf8':'utf-8', 'x-euc':'euc'}
     for e in errata:
         if e in encoding:
             encoding = encoding.replace(e, errata[e])
@@ -198,9 +206,9 @@ def rectify_encoding(encoding):
     
     #调整为python标准编码
     translate = { 'windows-874':'iso-8859-11', 'en_us':'utf8', 'macintosh':'iso-8859-1',
-        'euc_tw':'big5_tw', 'th':'tis-620','zh-cn':'gbk','gb_2312-80':'gb2312',
-        'iso-latin-1':'iso-8859-1','windows-31j':'shift_jis','x-sjis':'shift_jis',
-        'none': 'null','no':'null','0ff':'null'}
+        'euc_tw':'big5_tw', 'th':'tis-620', 'zh-cn':'gbk', 'gb_2312-80':'gb2312',
+        'iso-latin-1':'iso-8859-1', 'windows-31j':'shift_jis', 'x-sjis':'shift_jis',
+        'none':'null', 'no':'null', '0ff':'null'}
     for t in translate:
         if encoding == t:
             encoding = translate[t]

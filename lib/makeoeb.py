@@ -1,6 +1,7 @@
 #!usr/bin/Python
 # -*- coding:utf-8 -*-
 #将News feed生成的HTML文件转换成内存中的OEB格式
+#Author: cdhigh <https://github.com/cdhigh>
 import os, sys, uuid
 
 #这两个是必须先引入的，会有一些全局初始化
@@ -15,10 +16,12 @@ from config import *
 def MimeFromFilename(f):
     #从文件名生成MIME
     f = f.lower()
-    if f.endswith(('.gif','.png')):
-        return r"image/"+f[-3:]
-    elif f.endswith(('.jpg','.jpeg')):
-        return r"image/jpeg"
+    if f.endswith(('.gif', '.png', 'bmp')):
+        return r'image/' + f[-3:]
+    elif f.endswith(('.jpg', '.jpeg')):
+        return r'image/jpeg'
+    elif f.endswith('.tiff'):
+        return r'image/' + f[-4:]
     else:
         return ''
 
@@ -51,8 +54,8 @@ class ServerContainer(object):
     def namelist(self):
         return []
 
+#创建一个空的OEB书籍
 def CreateOeb(log, path_or_stream, opts, encoding='utf-8'):
-    """ 创建一个空的OEB书籍 """
     from calibre.ebooks.conversion.preprocess import HTMLPreProcessor
     from calibre.ebooks.oeb.base import OEBBook
     html_preprocessor = HTMLPreProcessor(log, opts)
@@ -60,28 +63,32 @@ def CreateOeb(log, path_or_stream, opts, encoding='utf-8'):
         encoding = None
     return OEBBook(log, html_preprocessor, pretty_print=opts.pretty_print, input_encoding=encoding)
 
-def getOpts(output_type='kindle'):
-    from calibre.customize.profiles import KindleOutput, KindlePaperWhiteOutput, KindleDXOutput, KindleFireOutput, OutputProfile
+#OEB的一些生成选项
+def getOpts(output_type='kindle', book_mode='periodical'):
+    from calibre.customize.profiles import (KindleOutput, KindlePaperWhiteOutput, KindleDXOutput, KindleFireOutput, 
+        KindleVoyageOutput, KindlePaperWhite3Output, OutputProfile)
     from config import REDUCE_IMAGE_TO
     opts = OptionValues()
     setattr(opts, "pretty_print", False)
     setattr(opts, "prefer_author_sort", True)
     setattr(opts, "share_not_sync", False)
-    setattr(opts, "mobi_file_type", 'old')
+    setattr(opts, "mobi_file_type", 'both' if book_mode == 'comic' else 'old') #mobi_file_type='old' | 'both'
     setattr(opts, "dont_compress", True)
     setattr(opts, "no_inline_toc", True)
     setattr(opts, "toc_title", "Table of Contents")
     setattr(opts, "mobi_toc_at_start", False)
     setattr(opts, "linearize_tables", True)
     setattr(opts, "source", None)
-    outputdic={
-        'kindle':KindleOutput,
-        'kindledx':KindleDXOutput,
-        'kindlepw':KindlePaperWhiteOutput,
-        'kindlefire':KindleFireOutput,
-        'others':OutputProfile,
+    outputdic = {
+        'kindle': KindleOutput,
+        'kindledx': KindleDXOutput,
+        'kindlepw': KindlePaperWhiteOutput,
+        'kindlefire': KindleFireOutput,
+        'kindlevoyage': KindleVoyageOutput,
+        'kindlepw3': KindlePaperWhite3Output,
+        'others': OutputProfile,
         }
-    OutputDevice = outputdic[output_type if output_type in outputdic.keys() else 'kindle']
+    OutputDevice = outputdic.get(output_type, KindleOutput)
     setattr(opts, "dest", OutputDevice(None))
     setattr(opts, "output_profile", OutputDevice(None))
     setattr(opts, "mobi_ignore_margins", True)
@@ -90,7 +97,7 @@ def getOpts(output_type='kindle'):
     setattr(opts, "process_images", True)
     setattr(opts, "mobi_keep_original_images", False)
     setattr(opts, "graying_image", COLOR_TO_GRAY) #changed
-    setattr(opts, "image_png_to_jpg", False) #changed
+    setattr(opts, "image_png_to_jpg", COLOR_TO_GRAY) #changed
     setattr(opts, "fix_indents", False)
     setattr(opts, "reduce_image_to", REDUCE_IMAGE_TO or OutputDevice.screen_size)
     
@@ -104,13 +111,13 @@ def getOpts(output_type='kindle'):
     setattr(opts, "epub_dont_compress", False)
     setattr(opts, "verbose", 0)
     
-    #extra
+    #extra customed by KindleEar
     setattr(opts, "process_images_immediately", True)
-    
+    setattr(opts, "book_mode", book_mode)
     return opts
     
 def setMetaData(oeb, title='Feeds', lang='zh-cn', date=None, creator='KindleEar',
-    pubtype='periodical:magazine:KindleEar'):
+    pubtype='periodical:magazine:KindleEar'): #pubtype='periodical:magazine:KindleEar' | 'book:book:KindleEar'
     oeb.metadata.add('language', lang if lang else 'zh-cn')
     oeb.metadata.add('creator', creator)
     oeb.metadata.add('title', title)

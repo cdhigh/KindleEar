@@ -88,12 +88,12 @@
     <p class="answer"><strong>以下是正规的搭建步骤：</strong>
         <ol>
         <li>在 <a href="http://www.github.com/cdhigh/kindleear">Github</a> 页面上下载KindleEar的最新版本，在页面的右下角有一个按钮"Download ZIP"，点击即可下载一个包含全部源码的ZIP文档，然后解压到你喜欢的目录，比如C:\KindleEar（下面以这个为例）。</li>
-        <li>首先你需要一个google账号，然后访问 <a href="https://console.developers.google.com/project">Google Developers Console</a>，新建一个Application。（用来上传KinldeEar用）。</li>
+        <li>首先你需要一个google账号，并暂时 <a href="https://www.google.com/settings/security/lesssecureapps">[启用不够安全的应用的访问权限]</a> 以便获得上传程序的权限。然后访问 <a href="https://console.developers.google.com/project">Google Developers Console</a>，新建一个Application。（用来上传KinldeEar用）。</li>
         <li>安装 <a href="http://www.python.org/getit/">Python 2.7.x</a>，在此页面中选择你的系统平台对应的2.7.x版本下载，然后直接双击安装。注意不要安装成Python 3.x版本，GAE和KindleEar都暂不支持。</li>
         <li>下载 <a href="https://cloud.google.com/appengine/downloads?hl=zh-CN">GAE SDK</a>，这是用来上传GAE程序用的。在此页面中的区段“Google App Engine SDK for Python”中选择你的系统平台对应的版本点击即可下载，然后安装，一路next无话。</li>
         <li>打开资源管理器，进入之前下载的KindleEar目录C:\KindleEar，使用任何文本编辑器打开app.yaml和module-worker.yaml文件，将第一行的kindleear字样修改为你之前申请的GAE程序名（比如kindleear123），保存退出。</li>
         <li>在app.yaml的同一个目录，打开config.py文件，修改SRC_EMAIL为你的gmail账号，DOMAIN为你的应用的域名。其他的选项也可以根据注释有选择性的修改，或者使用默认即可。</li>
-        <li>正式上传KindleEar。不能使用Google App Engine Launcher，因为Launcher默认不支持多module应用，这里介绍一下windows下使用命令行的方式。
+        <li>正式上传KindleEar。不能使用Google App Engine Launcher，因为Launcher默认不支持多module应用（修改配置后可以），这里介绍一下windows下使用命令行的方式。
             <li>依次点击：开始-运行-输入CMD，打开命令行窗口</li>
             <li>进入到App Engine SDK安装目录；例如：<br/><code>cd "C:\Program Files\Google\google_appengine"</code></li>
             <li>输入“上传”命令：<br/><code>c:\python27\python.exe appcfg.py update C:\kindleear\app.yaml c:\kindleear\module-worker.yaml</code></li>
@@ -124,7 +124,7 @@
         <ul><li>打开module-worker.yaml，将instance_class值修改为B4，然后重新上传。</li></ul>
     </li>
     <li>你输入的订阅地址不是合法的RSS/ATOM订阅（XML格式）。</li>
-    <li>如果RSS订阅源是Feedburner生成的，你可以在其链接之后添加一个查询字符串'?format=xml'，比如：http://xx.com/feed?format=xml.</li>
+    <li>如果RSS订阅源是Feedburner生成的，你可以在其链接之后添加一个查询字符串'?format=xml'或'?fmt=xml'，比如：http://xx.com/feed?format=xml.</li>
     </ol></p>
     
     <span id="whatisfulltext"></span>
@@ -139,8 +139,8 @@
     <h2>如何按周订阅？</h2>
     <p class="answer">有些RSS每周更新，这样每天推送同样的内容就蛋疼了点，碰到这种情况，有两种处理方法：
     <ol>
-    <li>在books目录下添加一个py文件，将参数deliver_days设置为你需要推送的星期（英文星期单词），注意deliver_days是一个列表，你也可以设置为几个单词，这样的话，其实也可以设置为哪天不推送。
-    <br />比如：<br/><code>deliver_days=['Friday']</code></li>
+    <li>在books目录下添加一个py文件，将参数deliver_days设置为你需要推送的星期（头字母大写的英文星期单词），注意deliver_days是一个列表，你也可以设置为几个单词，这样的话，其实也可以设置为哪天不推送。
+    <br />比如：<br/><code>deliver_days=['Friday']</code><br/><code>deliver_days=['Sunday', 'Friday']</code></li>
     <li>使用管理员登陆，新增一个账号，退出，使用新账号登陆，添加需要的RSS，然后在“设置”页面仅选择你需要的其中一个“投递日”，在页面下方的“最旧文章”中选择“一个星期”。</li></ol></p>
     
     <span id="moretimesperday"></span>
@@ -204,7 +204,7 @@
     <h2>xxx@appid.appspotmail.com邮件地址怎么用？</h2>
     <p class="answer">xxx@appid.appspotmail.com是KindleEar附送的邮件服务，在部署好KindleEar后，你自动拥有了无数个EMAIL邮箱地址，格式为：xxx@appid.appspotmail.com，xxx为任意合法字符串，appid为你的应用名。<br />
     <ul> 
-        <li>要使用此功能，先要添加白名单，如果为 '*' 则允许所有邮件，否则格式为 'xx@xx.xx' 或 '@xx.xx' 。</li>
+        <li>要使用此功能，先要添加白名单，如果为 '*' 则允许所有邮件，否则格式为 'xx@xx.xx' 或 '@xx.xx' （不包括单引号）。</li>
         <li>此邮箱将收到的邮件正文转换为邮件附件推送至你注册的Email邮箱，。如果邮件中只有链接（多个链接则每行一个），则抓取链接的网页内容制作成电子书然后再推送。</li>
         <li>如果在邮件主题最后添加了标识 !links，则不论邮件内容如何，KindleEar都只会提取邮件中的链接，然后抓取网页，制作成电子书发送至你的Kindle。这个功能最适合将网络连载直接发送至Kindle观看。</li>
         <li>如果在邮件主题后添加了标识 !article，则忽略所有链接，直接将内容转换为电子书发送。</li>
@@ -214,6 +214,7 @@
         （book/file/download邮件地址保留为下载电子书使用）
         </li>
         <li>发送至trigger@appid.appspotmail.com 或 username__trigger@appid.appspotmail.com，则触发一次手动投递。邮件标题为空或为all则完全等同于网页上的“现在投递”按钮。如果需要推送特定书籍，则在标题上写书籍名字，多个书籍名字使用逗号分隔。<br />注意：邮件标题上写多个书籍名字则自动合并推送为一本书。</li>
+        <li>发送至debug@appid.appspotmail.com的邮件则直接抓取邮件中的链接并直接发送HTML文件至管理员邮箱。</li>
     </ul>
     </p>
     
@@ -289,12 +290,7 @@
     
     <span id="aboutweixin"></span>
     <h2>如何订阅微信公众号？</h2>
-    <p class="answer">感谢网友 <a href="https://github.com/zhu327">zhu327</a> 的代码贡献，有几个方法可以订阅微信公众号：
-        <ol><li>可以在books目录下添加一个py文件，内容和格式可以仿照 Xiaodaonews.py， 里面写上你需要订阅的公众号信息，更多的说明可以打开weixinbase.py查看。</li>
-        <li>【推荐此方法】通过作者 <a href="https://github.com/zhu327/rss">zhu327</a> 搭建的 <a href="https://diy-devz.rhcloud.com/">https://diy-devz.rhcloud.com/</a> 网站爬取公众号文章并转换为RSS，然后在KindleEar中直接订阅此RSS。</li>
-        <li>还有另一个网站 <a href="http://weirss.me/">WeiRSS</a> 提供微信公众号转RSS服务，可以试用一下，其抓取原理和zhu327的方案基本一致，也是开源方案 <a href="https://github.com/iberryful/weixin_sogou">Weixin_sogou on github</a>，当前版本比较简单，估计不如zhu327的代码好用。</li>
-        </ol>
-    注意事项：因为微信是非常封闭的体系，腾讯和搜狗可能会时不时修改其接口或防爬取措施，不管哪个网站或解决方案，都无法保证永久有效，如果后续发现内容爬取失效，可能你需要升级了，或者你可以到 <a href="https://diy-devz.rhcloud.com/">https://diy-devz.rhcloud.com/</a> 确认 <a href="https://github.com/zhu327">zhu327</a> 有没有更新代码。
+    <p class="answer">网站 <a href="http://www.jintiankansha.me/">今天看啥</a> 提供微信公众号转RSS服务（注意在添加RSS时选择isfulltext选项）。
     </p>
     
     <span id="aboutgfw"></span>

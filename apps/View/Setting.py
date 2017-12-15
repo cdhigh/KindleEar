@@ -21,37 +21,39 @@ class Setting(BaseHandler):
     @etagged()
     def GET(self, tips=None):
         user = self.getcurrentuser()
-        return self.render('setting.html',"Setting",
-            current='setting',user=user,mail_sender=SRC_EMAIL,tips=tips)
+        return self.render('setting.html', "Setting",
+            current='setting', user=user, mail_sender=SRC_EMAIL, tips=tips)
         
     def POST(self):
         user = self.getcurrentuser()
-        kemail = web.input().get('kindleemail')
-        mytitle = web.input().get("rt")
+        webInput = web.input()
+        kemail = webInput.get('kindleemail')
+        mytitle = webInput.get("rt")
         if not kemail:
             tips = _("Kindle E-mail is requied!")
         elif not mytitle:
             tips = _("Title is requied!")
         else:
             user.kindle_email = kemail
-            user.timezone = int(web.input().get('timezone', TIMEZONE))
-            user.send_time = int(web.input().get('sendtime'))
-            user.enable_send = bool(web.input().get('enablesend'))
-            user.book_type = web.input().get('booktype')
-            user.device = web.input().get('devicetype') or 'kindle'
-            user.use_title_in_feed = bool(web.input().get('titlefrom') == 'feed')
-            user.titlefmt = web.input().get('titlefmt')
+            user.timezone = int(webInput.get('timezone', TIMEZONE))
+            user.send_time = int(webInput.get('sendtime'))
+            user.enable_send = bool(webInput.get('enablesend'))
+            user.book_type = webInput.get('booktype')
+            user.device = webInput.get('devicetype') or 'kindle'
+            user.use_title_in_feed = bool(webInput.get('titlefrom') == 'feed')
+            user.titlefmt = webInput.get('titlefmt')
             alldays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
-            user.send_days = [day for day in alldays if web.input().get(day)]
-            user.merge_books = bool(web.input().get('mergebooks'))
+            user.send_days = [day for day in alldays if webInput.get(day)]
+            user.merge_books = bool(webInput.get('mergebooks'))
+            user.book_mode = webInput.get('bookmode')
             user.put()
             
             myfeeds = user.ownfeeds
-            myfeeds.language = web.input().get("lng")
+            myfeeds.language = webInput.get("lng")
             myfeeds.title = mytitle
-            myfeeds.keep_image = bool(web.input().get("keepimage"))
-            myfeeds.oldest_article = int(web.input().get('oldest', 7))
-            myfeeds.users = [user.name] if web.input().get("enablerss") else []
+            myfeeds.keep_image = bool(webInput.get("keepimage"))
+            myfeeds.oldest_article = int(webInput.get('oldest', 7))
+            myfeeds.users = [user.name] if webInput.get("enablerss") else []
             myfeeds.put()
             tips = _("Settings Saved!")
         

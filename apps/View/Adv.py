@@ -4,14 +4,14 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #Contributors:
 # rexdf <https://github.com/rexdf>
-import datetime, urllib, urlparse, hashlib
+import datetime, urllib, urlparse, hashlib, StringIO
 try:
     import json
 except ImportError:
     import simplejson as json
     
 import web
-
+from PIL import Image
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
 from apps.utils import local_time, etagged, ke_encrypt, ke_decrypt
@@ -19,15 +19,15 @@ from lib.pocket import Pocket
 from lib.urlopener import URLOpener
 from config import *
 
+#高级设置的主入口
 class AdvSettings(BaseHandler):
-    """ 高级设置的主入口 """
     __url__ = "/adv"
     #@etagged()
     def GET(self):
         raise web.seeother(AdvWhiteList.__url__)
 
+#设置邮件白名单
 class AdvWhiteList(BaseHandler):
-    """ 设置邮件白名单 """
     __url__ = "/advwhitelist"
     @etagged()
     def GET(self):
@@ -40,11 +40,17 @@ class AdvWhiteList(BaseHandler):
         
         wlist = web.input().get('wlist')
         if wlist:
-            WhiteList(mail=wlist,user=user).put()
+            if len(wlist) > 2: #预防有的人输入的过滤器带有单引号或双引号
+                if wlist[0] in ('"', "'") and wlist[-1] in ('"', "'"):
+                    wlist = wlist[1:-1]
+            if wlist.startswith('*@'): #输入*@xx.xx则修改为@xx.xx
+                wlist = wlist[2:]
+            if wlist:
+                WhiteList(mail=wlist, user=user).put()
         raise web.seeother('')
 
+#设置归档和分享配置项
 class AdvArchive(BaseHandler):
-    """ 设置归档和分享配置项 """
     __url__ = "/advarchive"
     
     @etagged()
@@ -80,6 +86,7 @@ class AdvArchive(BaseHandler):
         twitter = bool(web.input().get('twitter'))
         tumblr = bool(web.input().get('tumblr'))
         browser = bool(web.input().get('browser'))
+        qrcode = bool(web.input().get('qrcode'))
         
         #将instapaper的密码加密
         if instapaper_username and instapaper_password:
@@ -103,11 +110,12 @@ class AdvArchive(BaseHandler):
         user.twitter = twitter
         user.tumblr = tumblr
         user.browser = browser
+        user.qrcode = qrcode
         user.put()
         raise web.seeother('')
 
+#设置URL过滤器
 class AdvUrlFilter(BaseHandler):
-    """ 设置URL过滤器 """
     __url__ = "/advurlfilter"
     @etagged()
     def GET(self):
@@ -122,10 +130,10 @@ class AdvUrlFilter(BaseHandler):
         if url:
             UrlFilter(url=url,user=user).put()
         raise web.seeother('')
-        
+
+#删除白名单或URL过滤器项目
 class AdvDel(BaseHandler):
     __url__ = "/advdel"
-    #删除白名单或URL过滤器项目
     @etagged()
     def GET(self):
         user = self.getcurrentuser()
@@ -142,8 +150,8 @@ class AdvDel(BaseHandler):
                 wlist.delete()
             raise web.seeother('/advwhitelist')
 
+#导入自定义rss订阅列表，当前支持Opml格式
 class AdvImport(BaseHandler):
-    """ 导入自定义rss订阅列表，当前支持Opml格式 """
     __url__ = "/advimport"
     @etagged()
     def GET(self, tips=None):
@@ -230,6 +238,59 @@ class AdvExport(BaseHandler):
         web.header("Content-Disposition","attachment;filename=KindleEar_subscription.xml")
         return opmlfile.encode('utf-8')
 
+#在本地选择一个图片上传做为自定义RSS书籍的封面
+class AdvUploadCoverImage(BaseHandler):
+    __url__ = "/advuploadcoverimage"
+    @etagged()
+    def GET(self, tips=None):
+        user = self.getcurrentuser()
+        return self.render('advcoverimage.html', "Cover Image", current='advsetting',
+            user=user, advcurr='uploadcoverimage', formaction=AdvUploadCoverImageAjax.__url__, 
+            deletecoverhref=AdvDeleteCoverImageAjax.__url__, tips=tips)
+
+#AJAX接口的上传封面图片处理函数
+class AdvUploadCoverImageAjax(BaseHandler):
+    __url__ = "/advuploadcoverimageajax"
+    MAX_IMAGE_PIXEL = 1024
+    def POST(self):
+        ret = 'ok'
+        try:
+            x = web.input(coverfile={})
+            user = self.getcurrentuser()
+            file_ = x['coverfile'].file
+            if user and file_:
+                #将图像转换为JPEG格式，同时限制分辨率不超过1024
+                img = Image.open(file_)
+                width, height = img.size
+                fmt = img.format
+                if (width > self.MAX_IMAGE_PIXEL) or (height > self.MAX_IMAGE_PIXEL):
+                    ratio = min(float(self.MAX_IMAGE_PIXEL)/float(width), float(self.MAX_IMAGE_PIXEL)/float(height))
+                    img = img.resize((int(width*ratio), int(height*ratio)))
+                data = StringIO.StringIO()
+                img.save(data, 'JPEG')
+                user.cover = db.Blob(data.getvalue())
+                user.put()
+        except Exception as e:
+            ret = str(e)
+            
+        return ret
+
+#删除上传的封面图片
+class AdvDeleteCoverImageAjax(BaseHandler):
+    __url__ = "/advdeletecoverimageajax"
+    def POST(self):
+        ret = {'status': 'ok'}
+        try:
+            confirmKey = web.input().get('action')
+            user = self.getcurrentuser()
+            if user and confirmKey == 'delete':
+                user.cover = None
+                user.put()
+        except Exception as e:
+            ret['status'] = str(e)
+            
+        return json.dumps(ret)
+        
 #集成各种网络服务OAuth2认证的相关处理
 class AdvOAuth2(BaseHandler):
     __url__ = "/oauth2/(.*)"

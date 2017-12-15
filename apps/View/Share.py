@@ -59,7 +59,7 @@ class Share(BaseHandler):
             main.log.warn('No have wiz mail yet.')
             return "No have wiz mail yet."
             
-        book = BaseUrlBook()
+        book = BaseUrlBook(user=user)
         book.title = book.description = action
         book.language = user.ownfeeds.language
         book.keep_image = user.ownfeeds.keep_image

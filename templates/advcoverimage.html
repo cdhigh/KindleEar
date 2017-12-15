@@ -1,0 +1,200 @@
+{% extends "advbase.html" %}
+{% block css -%}
+<style type="text/css">
+#preview{
+    position:relative;
+    width:90%;
+}
+#preview img{
+  width:90%;
+  max-width:500px;
+  height:auto;
+  vertical-align: bottom;
+}
+.out_shadow{
+  margin-right:10px;
+  padding:5px;
+  border:1px solid #ccc;
+  -moz-border-radius:5px;
+  -webkit-border-radius:5px;
+  border-radius:5px;
+  -webkit-box-shadow:0 0 5px rgba(0,0,0,0.2);
+  -moz-box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  -webkit-transition:all 0.3s ease;
+  -moz-transition:all 0.3s ease;
+  -ms-transition:all 0.3s ease;
+  -o-transition:all 0.3s ease;
+  transition:all 0.3s ease;
+}
+.out_shadow:hover{
+  border:1px solid rgba(82, 168, 236, 0.6);
+  -webkit-box-shadow:0 0 11px rgba(82, 168, 236, 0.6);
+  -moz-box-shadow: 0 0 11px rgba(82, 168, 236, 0.6);
+  box-shadow: 0 0 11px rgba(82, 168, 236, 0.6);
+}
+.upload_progress{
+    display:none;
+    padding:5px;
+    border-radius:10px;
+    color:#fff;
+    background-color:rgba(0,0,0,.6);
+    position:absolute;
+    left:15px;
+    top:15px;
+    z-index:18;
+}
+</style>
+{{super()}}
+{% endblock -%}
+{% block advcontent -%}
+<form class="pure-form" id="uploadForm" action="{{formaction}}" method="POST" enctype="multipart/form-data">
+  <fieldset>
+    <legend>{{_("Upload cover image")}}</legend>
+    <p style="font-size:0.8em;color:grey;">
+        {{_("Upload a cover image from local.")}}
+    </p>
+    <input type="file" name="coverfile" id="coverfile" />
+    <div id="preview" class="upload_preview">
+    {% if user and user.cover -%}
+        <img id="uploadImage" src="/dbimage/cover" class="out_shadow" />
+    {% else -%}
+        <img id="uploadImage" src="/images/cv_default.jpg" class="out_shadow" />
+    {% endif -%}
+        <span id="uploadProgress" class="upload_progress"></span>
+    </div>
+    <br />
+    <input type="button" value="{{_("Upload")}}" id="fileSubmit" class="pure-button pure-button-primary" style="margin-top:8px;" />
+    <span style="margin-left:1em;"><a href="#" datahref="{{deletecoverhref}}" class="actionButton" id="deletecover">{{_("Delete")}}</a></span>
+  </fieldset>
+</form>
+{% endblock -%}
+{% block js -%}
+<script type="text/javascript">
+var AJAXFILE = {
+    form: document.getElementById("uploadForm"),
+    fileInput: document.getElementById("coverfile"),
+    upButton: document.getElementById("fileSubmit"),
+    deleteButton: document.getElementById("deletecover"),
+    url: document.getElementById("uploadForm").action,
+    
+    filter: function(file) {
+        var ret = null;
+        if (file){
+            if (file.type.indexOf("image") == 0) {
+                if (file.size >= 512000) {
+                    alert('{{_("Size of image file must be smaller than 500KB.")}}');
+                } else {
+                    ret = file;
+                }
+            } else {
+                alert('{{_("The file you chosen is not an image.")}}');
+            }
+        }
+        return ret;
+    },
+    onSelect: function(file) {
+        var html = '';
+        if (file){
+            var reader = new FileReader();
+            reader.onloadend = function() {
+                document.getElementById("uploadImage").src = reader.result;
+            }
+            reader.readAsDataURL(file);
+        } else {
+            document.getElementById("uploadImage").src = '';
+        }
+    },
+    onProgress: function(loaded, total) {
+        var percent = (loaded / total * 100).toFixed(0) + '%';
+        var labelProgress = document.getElementById("uploadProgress");
+        labelProgress.innerHTML = percent;
+        labelProgress.style.display = "inline"; //display
+    },
+    onSuccess: function(response) {
+        var labelProgress = document.getElementById("uploadProgress");
+        labelProgress.innerHTML = "";
+        labelProgress.style.display = "none"; //hide
+        alert("{{_('The cover image have been uploaded successfully.')}}");
+    },
+    onFailure: function(status, response) {
+        alert("{{_('Failed to upload the cover image. Error:')}}" + response);
+    },
+    
+    //获取选择文件，file控件或拖放
+    funGetFiles: function(e) {
+        var files = e.target.files || e.dataTransfer.files;
+        var file = files[0]
+        this.file = this.filter(file);
+        this.onSelect(this.file);
+        return this;
+    },
+    
+    //文件上传
+    funUploadFile: function() {
+        var self = this;
+        var doUpload = function(file) {
+            if (file) {
+                var xhr = new XMLHttpRequest();
+                if (xhr.upload) {
+                    // 上传中
+                    xhr.upload.addEventListener("progress", function(e) {
+                        self.onProgress(e.loaded, e.total);
+                    }, false);
+                  
+                    // 文件上传成功或是失败
+                    xhr.onreadystatechange = function(e) {
+                        if (xhr.readyState == 4) {
+                            var status = xhr.status;
+                            if (status >= 200 && status < 300) {
+                                self.onSuccess(xhr.responseText);
+                            } else {
+                                self.onFailure(status, xhr.responseText);
+                            }
+                        }
+                    };
+        
+                    // 开始上传
+                    xhr.open("POST", self.url, true);
+                    var fd = new FormData(self.form);
+                    xhr.send(fd);
+                }
+            }
+        };
+        doUpload(self.file);
+        return false;
+    },
+    
+    //删除上传的图片，使用默认图片
+    funDeleteFile: function(){
+        ajax({url:this.deleteButton.getAttribute('datahref'), type: "POST", 
+            data: {'action': 'delete'},
+            success: function (resp, xml) {
+                if (resp.status == "ok") {
+                    document.getElementById("uploadImage").src = "/images/cv_default.jpg";
+                } else {
+                    alert("{{_('Failed to delete the cover image. Error:')}}" + resp.status);
+                }
+            },
+            fail: function (status) {
+                alert("{{_('Error when try to delete the cover image. Status:')}}" + status);
+            }
+        });
+    },
+    
+    init: function() {
+        var self = this;
+        if (this.fileInput) {
+            this.fileInput.addEventListener("change", function(e) { self.funGetFiles(e); }, false); 
+        }
+        if (this.upButton) {
+            this.upButton.addEventListener("click", function(e) { self.funUploadFile(e); }, false);
+        }
+        if (this.deleteButton) {
+            this.deleteButton.addEventListener("click", function(e) { self.funDeleteFile(e); }, false);
+        }
+    }
+};
+AJAXFILE.init();
+</script>
+{% endblock %}

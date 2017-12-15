@@ -55,6 +55,8 @@
                 <option value="kindledx" {% if user.device == 'kindledx' %}selected="selected"{% endif %}>Kindle DX</option>
                 <option value="kindlepw" {% if user.device == 'kindlepw' %}selected="selected"{% endif %}>Kindle PaperWhite</option>
                 <option value="kindlefire" {% if user.device == 'kindlefire' %}selected="selected"{% endif %}>Kindle Fire</option>
+                <option value="kindlevoyage" {% if user.device == 'kindlevoyage' %}selected="selected"{% endif %}>Kindle Voyage</option>
+                <option value="kindlepw3" {% if user.device == 'kindlepw3' %}selected="selected"{% endif %}>Kindle PaperWhite 3</option>
                 <option value="others" {% if user.device == 'others' %}selected="selected"{% endif %}>{{_("Others")}}</option>
             </select>
             </select></td></tr>
@@ -72,6 +74,11 @@
                 {#<option value="%d/%m" {% if user.titlefmt=='%d/%m' %}selected="selected"{% endif %}>{{_("Title DD/MM")}}</option>-#}
                 <option value="%b %d" {% if user.titlefmt=='%b %d' %}selected="selected"{% endif %}>{{_("Title MMM DD")}}</option>
                 <option value="%a, %b %d" {% if user.titlefmt=='%a, %b %d' %}selected="selected"{% endif %}>{{_("Title Day, MMM DD")}}</option>
+            </select></td></tr>
+            <tr><td style="text-align:right;"><label>{{_("Book mode")}}</label> : </td>
+            <td><select class="bool" name="bookmode">
+                <option value="periodical" {% if not user.book_mode or user.book_mode=='periodical' %}selected="selected"{% endif %}>{{_("Periodical")}}</option>
+                <option value="comic" {% if user.book_mode=='comic' %}selected="selected"{% endif %}>{{_("Comic")}}</option>
             </select></td></tr>
         </table>
         

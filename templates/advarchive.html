@@ -86,6 +86,11 @@
                 {% if user and user.browser %}checked="1"{% endif %} />
             {{_("Append hyperlink '%s' to article")|format(openinbrowser)}}
         </label>
+        <label for="enable_qrcode" class="pure-checkbox">
+            <input id="enable_qrcode" name="qrcode", type="checkbox" 
+                {% if user and user.qrcode %}checked="1"{% endif %} />
+            {{_("Append qrcode of url to article")}}
+        </label>
     </div>
     <hr style="width:90%;color:silver;margin:1em auto;" />
     <label for="fuck_gfw" class="pure-checkbox">

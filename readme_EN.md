@@ -1,4 +1,4 @@
-#Brief Introduction
+# Brief Introduction
 KindleEar is a web application to aggregate RSS for generating periodical mobi/epub file with images and send it to your kindle or your email automatically.
 
 ## The features included:
@@ -11,7 +11,7 @@ KindleEar is a web application to aggregate RSS for generating periodical mobi/e
 * Powerful and convenient mail-transfering service.
 * Integration with Evernote/Pocket/Instapaper.
 
-#Deployment
+# Deployment
 1. [Create a Google account](https://accounts.google.com/SignUp) and [Turn on Access for less secure apps](https://www.google.com/settings/security/lesssecureapps).  
 
 2. [Create an application](https://console.developers.google.com/project).  
@@ -32,10 +32,15 @@ config.py          | SRC_EMAIL   | Your Gmail Address          |
 config.py          | DOMAIN      | appid@appspot.com        |  
 config.py          | TIMEZONE    | Your timezone         |
 
- 
-7. Execute two commands in directory GAE SDK (default is *C:\Program Files\Google\google_appengine*)  
+> the lines application and version in yaml have to be commented if you will deploy it by using gcloud.
+
+7. Choose 7.1 or 7.2 to deploy it.
+7.1 using appcfg.py
 	* `c:\python27\python.exe appcfg.py update KindleEarFolder\app.yaml KindleEarFolder\module-worker.yaml`  
 	* `c:\python27\python.exe appcfg.py update KindleEarFolder`  
+7.2 using gcloud
+    * `"C:\Program Files\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" app deploy --version=1 KindleEar\app.yaml KindleEar\module-worker.yaml
+    * `"C:\Program Files\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" app deploy --version=1 KindleEar
 
 8. After finished, you can open the website *'http://appid.appspot.com'* (appid is the name of your application),  
 For example the author's site: <http://kindleear.appspot.com>  
@@ -43,12 +48,21 @@ For example the author's site: <http://kindleear.appspot.com>
 
 9. More details could be found in [FAQ](http://htmlpreview.github.io/?https://github.com/cdhigh/KindleEar/blob/master/static/faq.html).
 
-#Deployment simplified
+# Deployment simplified
 If you don't want to intall GAE SDK and python, you have another choice.  
 
 1. [Download KindleEar](https://github.com/cdhigh/KindleEar/archive/master.zip) and uncompress it (Change the name of folder to 'KindleEar').  
 2. [Download KindleEar-Uploader](https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing) and unzip it.  
 3. Put KindleEar folder into Uploader directory, double-click uploader.bat to start process of deployment.  
 
-#License
+# License
    KindleEar is Licensed under the [AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html) license.
+
+# Contributors
+@rexdf <https://github.com/rexdf>
+@insert0003 <https://github.com/insert0003>
+@zhu327 <https://github.com/zhu327>
+@lord63 <https://github.com/lord63>
+@th0mass <https://github.com/th0mass>
+@seff <https://github.com/seff>
+@miaowm5 <https://github.com/miaowm5>

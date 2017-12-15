@@ -13,7 +13,7 @@ from struct import pack
 from calibre.ebooks.mobi.utils import RECORD_SIZE, utf8_text
 from calibre.ebooks.mobi.writer8.header import Header
 from calibre.ebooks.mobi.writer2 import (PALMDOC, UNCOMPRESSED)
-from calibre.ebooks.mobi.langcodes import iana2mobi
+#from calibre.ebooks.mobi.langcodes import iana2mobi
 from calibre.ebooks.mobi.writer8.exth import build_exth
 from calibre.utils.filenames import ascii_filename
 
@@ -210,11 +210,12 @@ HEADER_FIELDS = {'compression', 'text_length', 'last_text_record', 'book_type',
 
 class KF8Book(object):
 
-    def __init__(self, writer, for_joint=False):
-        self.build_records(writer, for_joint)
+    def __init__(self, oeb, writer, for_joint=False):
+        self.oeb, self.for_joint, self.writer = oeb, for_joint, writer
+		self.build_records(oeb, writer, for_joint)
         self.used_images = writer.used_images
 
-    def build_records(self, writer, for_joint):
+    def build_records(self, oeb, writer, for_joint):
         metadata = writer.oeb.metadata
         # The text records
         for x in ('last_text_record_idx', 'first_non_text_record_idx'):
@@ -273,7 +274,7 @@ class KF8Book(object):
             self.extra_data_flags |= 0b10
         self.uid = random.randint(0, 0xffffffff)
 
-        self.language_code = iana2mobi(str(metadata.language[0]))
+        self.language_code = self.iana2mobi()
         self.exth_flags = 0b1010000
         if writer.opts.mobi_periodical:
             self.exth_flags |= 0b1000
@@ -299,20 +300,27 @@ class KF8Book(object):
                 thumbnail_offset=self.thumbnail_offset,
                 num_of_resources=self.num_of_resources,
                 kf8_unknown_count=self.kuc, be_kindlegen2=True,
-                start_offset=self.start_offset, mobi_doctype=self.book_type)
+                start_offset=self.start_offset, mobi_doctype=self.book_type,
+                opts=opts)
 
         kwargs = {field:getattr(self, field) for field in HEADER_FIELDS}
         return MOBIHeader()(**kwargs)
 
+    def iana2mobi(self):
+        return pack('>HBB', 0, 4, 8)
+
     def write(self, outpath):
         records = [self.record0] + self.records[1:]
 
-        with open(outpath, 'wb') as f:
+#        with open(outpath, 'wb') as f:
+        if outpath != None:
+            f = outpath
 
             # Write PalmDB Header
 
-            title = ascii_filename(self.full_title.decode('utf-8')).replace(
-                    ' ', '_')[:31]
+            title = ascii_filename(self.full_title.decode('utf-8'))
+#            title = ascii_filename(self.full_title.decode('utf-8')).replace(
+#                    ' ', '_')[:31]
             title += (b'\0' * (32 - len(title)))
             now = int(time.time())
             nrecords = len(records)

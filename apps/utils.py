@@ -6,7 +6,7 @@
 # cdhigh <https://github.com/cdhigh>
 #Contributors:
 # rexdf <https://github.com/rexdf>
-
+import os, sys
 from functools import wraps
 from hashlib import md5
 import web
@@ -15,6 +15,20 @@ import datetime
 import gettext
 import re
 
+#当异常出现时，使用此函数返回真实引发异常的文件名，函数名和行号
+def get_exc_location():
+    #追踪到最终的异常引发点
+    exc_info = sys.exc_info()[2]
+    last_exc = exc_info.tb_next
+    while (last_exc.tb_next):
+        last_exc = last_exc.tb_next
+    fileName = os.path.basename(last_exc.tb_frame.f_code.co_filename)
+    funcName = last_exc.tb_frame.f_code.co_name
+    lineNo = last_exc.tb_frame.f_lineno
+    last_exc = None
+    exc_info = None
+    return fileName, funcName, lineNo
+    
 def local_time(fmt="%Y-%m-%d %H:%M", tz=TIMEZONE):
     return (datetime.datetime.utcnow()+datetime.timedelta(hours=tz)).strftime(fmt)
 
@@ -75,11 +89,10 @@ def etagged():
         return wrapper
     return decorator
     
-def InsertToc(oeb, sections, toc_thumbnails):
-    """ 创建OEB的两级目录，主要代码由rexdf贡献
-    sections为有序字典，关键词为段名，元素为元组列表(title,brief,humbnail,content)
-    toc_thumbnails为字典，关键词为图片原始URL，元素为其在oeb内的href。
-    """
+#创建OEB的两级目录，主要代码由rexdf贡献
+#sections为有序字典，关键词为段名，元素为元组列表(title,brief,humbnail,content)
+#toc_thumbnails为字典，关键词为图片原始URL，元素为其在oeb内的href。
+def InsertToc(oeb, sections, toc_thumbnails, insertHtmlToc=True, insertThumbnail=True):
     css_pat = r'<style type="text/css">(.*?)</style>'
     css_ex = re.compile(css_pat, re.M | re.S)
     body_pat = r'(?<=<body>).*?(?=</body>)'
@@ -135,20 +148,20 @@ def InsertToc(oeb, sections, toc_thumbnails):
         ncx_toc.append(('section', sec_with_num, href, '', sec_toc_thumbnail)) #Sections name && href && no brief
         
         #generate the secondary toc
-        if GENERATE_HTML_TOC:
+        if insertHtmlToc:
             html_toc_ = ['<html><head><title>toc</title></head><body><h2>%s</h2><ol>' % (sec_with_num)]
         for title, anchor, brief, thumbnail in secondary_toc_list:
-            if GENERATE_HTML_TOC:
+            if insertHtmlToc:
                 html_toc_.append('&nbsp;&nbsp;&nbsp;&nbsp;<li><a href="%s#%d">%s</a></li><br />'%(href, anchor, title))
             ncx_toc.append(('article',title, '%s#%d'%(href,anchor), brief, thumbnail)) # article name & article href && article brief
-        if GENERATE_HTML_TOC:
+        if insertHtmlToc:
             html_toc_.append('</ol></body></html>')
             html_toc_2.append(html_toc_)
             name_section_list.append(sec_with_num)
 
         num_sections += 1
 
-    if GENERATE_HTML_TOC:
+    if insertHtmlToc:
         #Generate HTML TOC for Calibre mostly
         ##html_toc_1 top level toc
         html_toc_1 = [u'<html><head><title>Table Of Contents</title></head><body><h2>%s</h2><ul>'%(TABLE_OF_CONTENTS)]
@@ -176,10 +189,17 @@ def InsertToc(oeb, sections, toc_thumbnails):
     toc = oeb.toc.add(unicode(oeb.metadata.title[0]), oeb.spine[0].href, id='periodical', klass='periodical', play_order=po)
     po += 1
     for ncx in ncx_toc:
+        if insertThumbnail and ncx[4]:
+            toc_thumbnail = toc_thumbnails[ncx[4]]
+        else:
+            toc_thumbnail = None
+            
         if ncx[0] == 'section':
-            sectoc = toc.add(unicode(ncx[1]), ncx[2], klass='section', play_order=po, id='Main-section-%d'%po, toc_thumbnail=toc_thumbnails[ncx[4]] if GENERATE_TOC_THUMBNAIL and ncx[4] else None)
+            sectoc = toc.add(unicode(ncx[1]), ncx[2], klass='section', play_order=po, id='Main-section-%d'%po, 
+                toc_thumbnail=toc_thumbnail)
         elif sectoc:
-            sectoc.add(unicode(ncx[1]), ncx[2], description=ncx[3] if ncx[3] else None, klass='article', play_order=po, id='article-%d'%po, toc_thumbnail=toc_thumbnails[ncx[4]] if GENERATE_TOC_THUMBNAIL and ncx[4] else None)
+            sectoc.add(unicode(ncx[1]), ncx[2], description=ncx[3] if ncx[3] else None, klass='article', play_order=po, 
+                id='article-%d'%po, toc_thumbnail=toc_thumbnail)
         po += 1
                     
 #-----------以下几个函数为安全相关的

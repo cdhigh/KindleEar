@@ -14,14 +14,22 @@ _mt_inited = False
 def _init_mimetypes():
     global _mt_inited
     import mimetypes
-    mimetypes.init([P('mime.types')])
+    mimetypes.init()#[P('mime.types')])
     mimetypes.add_type("application/epub+zip", ".epub")
     mimetypes.add_type("application/xhtml+xml", ".xhtml")
+    mimetypes.add_type("text/html", ".html")
+    mimetypes.add_type("text/html", ".htm")
     mimetypes.add_type("text/css", ".css")
+    mimetypes.add_type("text/plain", ".txt")
     mimetypes.add_type("application/x-dtbncx+xml", ".ncx")
     mimetypes.add_type("application/oebps-package+xml", ".opf")
     mimetypes.add_type("application/vnd.ms-opentype", ".otf")
     mimetypes.add_type("image/svg+xml", ".svg")
+    mimetypes.add_type("image/jpeg", ".jpg")
+    mimetypes.add_type("image/jpeg", ".jpeg")
+    mimetypes.add_type("image/png", ".png")
+    mimetypes.add_type("image/gif", ".gif")
+    mimetypes.add_type("image/bmp", ".bmp")
     _mt_inited = True
 
 def guess_type(*args, **kwargs):

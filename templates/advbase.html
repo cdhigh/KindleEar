@@ -75,6 +75,12 @@ td:hover span{
     {% else -%}
       <li><a href="/advimport">{{_("Import Feeds")}}</a></li>
     {% endif -%}
+    {% if advcurr=='uploadcoverimage' -%}
+      <li class="pure-menu-selected"><a href="#">{{_("Cover Image")}}</a>
+      </li>
+    {% else -%}
+      <li><a href="/advuploadcoverimage">{{_("Cover Image")}}</a></li>
+    {% endif -%}
     </ul>
    </div>
   </div>

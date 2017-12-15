@@ -100,7 +100,7 @@ class URLOpener:
                 while cnt < self.maxFetchCount:
                     try:
                         if data and isinstance(data, dict):
-                            data = urllib.urlencode(data)
+                            data = urllib.urlencode(self.EncodedDict(data))
                         response = urlfetch.fetch(url=url, payload=data, method=method,
                             headers=self._getHeaders(url, headers),
                             allow_truncated=False, follow_redirects=False, 
@@ -163,17 +163,17 @@ class URLOpener:
                 maxRedirect -= 1
         
         if maxRedirect <= 0:
-            default_log.warn('Too many redirections:%s'%url)
+            default_log.warn('Too many redirections:%s' % url)
         
         self.realurl = url
         return response
         
     def _getHeaders(self, url=None, extheaders=None):
         headers = {
-             'User-Agent':"Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)",
-             'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+             'User-Agent': "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)",
+             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                   }
-        cookie = '; '.join(["%s=%s" % (v.key, v.value) for v in self.cookie.values()])
+        cookie = '; '.join(["%s=%s" % (v.key, v.value.encode('utf-8')) for v in self.cookie.values()])
         if cookie:
             headers['Cookie'] = cookie
         if self.addReferer and (self.host or url):
@@ -183,7 +183,7 @@ class URLOpener:
             headers.update(self.initHeaders)
         if extheaders:
             headers.update(extheaders)
-        return headers
+        return self.EncodedDict(headers)
         
     def SaveCookies(self, cookies):
         if not cookies:
@@ -194,4 +194,15 @@ class URLOpener:
             obj.load(cookie)
             for v in obj.values():
                 self.cookie[v.key] = v.value
+    
+    #UNICODE编码的URL会出错，所以需要编码转换
+    def EncodedDict(self, inDict):
+        outDict = {}
+        for k, v in inDict.iteritems():
+            if isinstance(v, unicode):
+                v = v.encode('utf-8')
             
+            outDict[k] = v
+        return outDict
+        
+        
