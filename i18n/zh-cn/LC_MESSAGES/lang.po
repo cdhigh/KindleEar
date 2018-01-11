@@ -651,3 +651,21 @@ msgstr "期号"
 
 msgid "Record"
 msgstr "信息"
+
+msgid "Expiration"
+msgstr "有效期"
+
+msgid "Never expire"
+msgstr "永久有效"
+
+msgid "1 Month"
+msgstr "1个月"
+
+msgid "3 Months"
+msgstr "3个月"
+
+msgid "6 Months"
+msgstr "6个月"
+
+msgid "1 Year"
+msgstr "1年"

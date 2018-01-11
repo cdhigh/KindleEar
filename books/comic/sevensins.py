@@ -7,7 +7,7 @@ def getBook():
     return SevenSins
 
 class SevenSins(CartoonMadBaseBook):
-    title               = u'七大罪'
+    title               = u'[漫画]七大罪'
     description         = u'日本漫画家铃木央创作的少年漫画'
     language            = 'zh-tw'
     feed_encoding       = 'big5'

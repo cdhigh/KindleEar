@@ -85,7 +85,7 @@ class Redirect(HTTPError):
 
         headers = {
             'Content-Type': 'text/html',
-            'Location': newloc
+            'Location': url #newloc -> url, changed by cdhigh 2017-10-28
         }
         HTTPError.__init__(self, status, headers, "")
 

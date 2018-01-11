@@ -7,7 +7,7 @@ def getBook():
     return Prison
 
 class Prison(CartoonMadBaseBook):
-    title               = u'监狱学园'
+    title               = u'[漫画]监狱学园'
     description         = u'日本漫画家Akira创作的少年漫画'
     language            = 'zh-tw'
     feed_encoding       = 'big5'

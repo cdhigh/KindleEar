@@ -5,10 +5,8 @@
     <legend>{{_("Custom Rss")}}</legend>
     {% for feed in myfeeds -%}
     <div class="book">
-        <div class="titleRow">
-            {{feed.title}}
-            {% if feed.isfulltext %} <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" />{% endif %}
-            {% if feed.url.startswith("http://www.cartoonmad.com") %} <img alt="{{_("CartoonMad")}}" src="static/comic.gif" border="0" />{% endif %}
+        <div class="titleRow">{{feed.title}} {% if feed.isfulltext %}
+            <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" />{% endif %}
         </div>
         <div class="cornerControls">
             {#<a href="/delfeed/{{feed.key().id()}}" class="actionButton">{{_("Delete")}}</a>#}
@@ -190,14 +188,6 @@ function appendFeedDiv(title, isfulltext, url, feedid) {
         var imgNode = document.createElement("img");
         imgNode.setAttribute("alt", {{'"' + _("Fulltext") + '"'}});
         imgNode.setAttribute("src", "static/fulltext.gif");
-        imgNode.setAttribute("border", "0");
-        newTitleDiv.appendChild(imgNode);
-    }
-    if (url.startsWith("http://www.cartoonmad.com")) {
-        newTitleDiv.appendChild(document.createTextNode(' '));
-        var imgNode = document.createElement("img");
-        imgNode.setAttribute("alt", {{'"' + _("CartoonMad") + '"'}});
-        imgNode.setAttribute("src", "static/comic.gif");
         imgNode.setAttribute("border", "0");
         newTitleDiv.appendChild(imgNode);
     }

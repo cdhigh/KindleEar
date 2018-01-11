@@ -176,6 +176,7 @@ class URLOpener:
         cookie = '; '.join(["%s=%s" % (v.key, v.value.encode('utf-8')) for v in self.cookie.values()])
         if cookie:
             headers['Cookie'] = cookie
+            #default_log.warn(repr(self.cookie)) #TODO
         if self.addReferer and (self.host or url):
             headers['Referer'] = self.host if self.host else url
         
@@ -194,6 +195,7 @@ class URLOpener:
             obj.load(cookie)
             for v in obj.values():
                 self.cookie[v.key] = v.value
+        #default_log.warn(repr(self.cookie)) #TODO
     
     #UNICODE编码的URL会出错，所以需要编码转换
     def EncodedDict(self, inDict):

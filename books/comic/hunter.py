@@ -7,7 +7,7 @@ def getBook():
     return Hunter
 
 class Hunter(CartoonMadBaseBook):
-    title               = u'全职猎人'
+    title               = u'[漫画]全职猎人'
     description         = u'日本漫画家富坚义博的一部漫画作品'
     language            = 'zh-tw'
     feed_encoding       = 'big5'
