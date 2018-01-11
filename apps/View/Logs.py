@@ -59,7 +59,7 @@ class Mylogs(BaseHandler):
 class RemoveLogs(BaseHandler):
     __url__ = "/removelogs"
     def GET(self):
-        # 停止过期用户的推送
+        #停止过期用户的推送
         for user in KeUser.all().filter('enable_send = ', True):
             if user.expires and (user.expires < datetime.datetime.utcnow()):
                 user.enable_send = False

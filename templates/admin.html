@@ -52,6 +52,16 @@ font-size:0.8em;
         <label for="password2">{{_("Confirm password")}}</label>
         <input type="text" name="up2" id="password2">
     </div>
+    <div class="pure-control-group">
+        <label for="expiration">{{_("Expiration")}}</label>
+        <select class="bool" name="expiration">
+            <option value="0" selected="selected">{{_("Never expire")}}</option>
+            <option value="30">{{_("1 Month")}}</option>
+            <option value="90">{{_("3 Months")}}</option>
+            <option value="180">{{_("6 Months")}}</option>
+            <option value="365">{{_("1 Year")}}</option>
+        </select>
+    </div>
     <div class="pure-controls">
         <button type="submit" class="pure-button">{{_("Add")}}</button>
     </div>

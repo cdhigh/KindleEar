@@ -15,7 +15,7 @@ from collections import defaultdict
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
 from apps.utils import local_time
-from books import BookClasses, BookClass
+from books import BookClass
 
 class Deliver(BaseHandler):
     """ 判断需要推送哪些书籍 """

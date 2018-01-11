@@ -172,6 +172,7 @@ class KindleInput(InputProfile):
     # Screen size is a best guess
     screen_size               = (525, 640)
     dpi                       = 168.451
+    comic_screen_size         = (600, 800)
     fbase                     = 16
     fsizes                    = [12, 12, 14, 16, 18, 20, 22, 24]
 
@@ -675,6 +676,7 @@ class KindleOutput(OutputProfile):
     # Screen size is a best guess
     screen_size               = (525, 640)
     dpi                       = 168.451
+    comic_screen_size         = (600, 800)
     fbase                     = 16
     fsizes                    = [12, 12, 14, 16, 18, 20, 22, 24]
     supports_mobi_indexing = True

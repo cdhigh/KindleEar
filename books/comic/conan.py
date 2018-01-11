@@ -7,7 +7,7 @@ def getBook():
     return Conan
 
 class Conan(CartoonMadBaseBook):
-    title               = u'名侦探柯南'
+    title               = u'[漫画]名侦探柯南'
     description         = u'日本漫画家青山刚昌创作的侦探漫画'
     language            = 'zh-tw'
     feed_encoding       = 'big5'
