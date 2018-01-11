@@ -7,7 +7,7 @@ def getBook():
     return Onepiece
 
 class Onepiece(CartoonMadBaseBook):
-    title               = u'[漫画]海贼王'
+    title               = u'海贼王'
     description         = u'日本漫画家尾田荣一郎创作的少年漫画'
     language            = 'zh-tw'
     feed_encoding       = 'big5'

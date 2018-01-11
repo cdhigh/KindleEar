@@ -6,7 +6,7 @@
 # rexdf <https://github.com/rexdf>
 
 import datetime
-from operator import attrgetter
+
 import web
 try:
     import json
@@ -27,12 +27,8 @@ class MySubscription(BaseHandler):
     def GET(self, tips=None):
         user = self.getcurrentuser()
         myfeeds = user.ownfeeds.feeds if user.ownfeeds else None
-        books = list(Book.all().filter("builtin = ", True))
-        #简单排个序，为什么不用数据库直接排序是因为Datastore数据库需要建立索引才能排序
-        books.sort(key=attrgetter('title'))
-        
-        return self.render('my.html', "My subscription", current='my', user=user,
-            books=books, myfeeds=myfeeds, tips=tips)
+        return self.render('my.html', "My subscription",current='my',user=user,
+            books=Book.all().filter("builtin = ",True),myfeeds=myfeeds,tips=tips)
     
     def POST(self): # 添加自定义RSS
         user = self.getcurrentuser()
@@ -45,9 +41,9 @@ class MySubscription(BaseHandler):
         if not url.lower().startswith('http'): #http and https
             url = 'http://' + url
         assert user.ownfeeds
-        Feed(title=title, url=url, book=user.ownfeeds, isfulltext=isfulltext,
+        Feed(title=title,url=url,book=user.ownfeeds,isfulltext=isfulltext,
             time=datetime.datetime.utcnow()).put()
-        memcache.delete('%d.feedscount' % user.ownfeeds.key().id())
+        memcache.delete('%d.feedscount'%user.ownfeeds.key().id())
         raise web.seeother('/my')
 
 #添加/删除自定义RSS订阅的AJAX处理函数
@@ -68,13 +64,13 @@ class FeedsAjax(BaseHandler):
             feed = Feed.get_by_id(feedid)
             if feed:
                 feed.delete()
-                return json.dumps({'status': 'ok'})
+                return json.dumps({'status':'ok'})
             else:
                 return json.dumps({'status': _('The feed(%d) not exist!') % feedid})
         elif mgrType.lower() == 'add':
             title = web.input().get('title')
             url = web.input().get('url')
-            isfulltext = bool(web.input().get('fulltext', '').lower() == 'true')
+            isfulltext = bool(web.input().get('fulltext','').lower() == 'true')
             respDict = {'status':'ok', 'title':title, 'url':url, 'isfulltext':isfulltext}
             
             if not title or not url:
@@ -233,7 +229,7 @@ class BookLoginInfo(BaseHandler):
             return "Not exist the book!<br />"
         
         subs_info = user.subscription_info(bk.title)
-        return self.render('booklogininfo.html', "Book Login Infomation", bk=bk, subs_info=subs_info, tips=tips)
+        return self.render('booklogininfo.html', "Book Login Infomation",bk=bk,subs_info=subs_info,tips=tips)
     
     def POST(self, id_):
         user = self.getcurrentuser()
@@ -257,7 +253,7 @@ class BookLoginInfo(BaseHandler):
                 subs_info.password = password
                 subs_info.put()
         elif account and password:
-            subs_info = SubscriptionInfo(account=account, user=user, title=bk.title)
+            subs_info = SubscriptionInfo(account=account,user=user,title=bk.title)
             subs_info.put() #先保存一次才有user信息，然后才能加密
             subs_info.password = password
             subs_info.put()

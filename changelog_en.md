@@ -1,9 +1,5 @@
 # Changelog for KindleEar
 
-##1.25.1
-  1. The expiration of account can be defined.
-  2. bugfix: pictures can't be resized in comic mode.
-
 ## 1.25
   1. Added comic mode and several comic books.
   2. Added supported to Kindle Voyage and Kindle PaperWhite3.

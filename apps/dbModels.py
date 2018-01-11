@@ -62,7 +62,7 @@ class KeUser(db.Model): # kindleEar User
     timezone = db.IntegerProperty()
     book_type = db.StringProperty() #mobi,epub
     device = db.StringProperty()
-    expires = db.DateTimeProperty() #超过了此日期后账号自动停止推送
+    expires = db.DateTimeProperty()
     ownfeeds = db.ReferenceProperty(Book) # 每个用户都有自己的自定义RSS
     use_title_in_feed = db.BooleanProperty() # 文章标题优先选择订阅源中的还是网页中的
     titlefmt = db.StringProperty() #在元数据标题中添加日期的格式
@@ -89,7 +89,6 @@ class KeUser(db.Model): # kindleEar User
     cover = db.BlobProperty() #保存各用户的自定义封面图片二进制内容
     
     book_mode = db.StringProperty() #added 2017-08-31 书籍模式，'periodical'|'comic'，漫画模式可以直接全屏
-    expiration_days = db.IntegerProperty() #added 2018-01-07 账号超期设置值，0为永久有效
     
     @property
     def whitelist(self):

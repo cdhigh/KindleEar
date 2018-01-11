@@ -28,14 +28,7 @@ def get_exc_location():
     last_exc = None
     exc_info = None
     return fileName, funcName, lineNo
-
-#字符串转整数，出错则返回0
-def str_to_int(txt):
-    try:
-        return int(txt.strip())
-    except:
-        return 0
-
+    
 def local_time(fmt="%Y-%m-%d %H:%M", tz=TIMEZONE):
     return (datetime.datetime.utcnow()+datetime.timedelta(hours=tz)).strftime(fmt)
 

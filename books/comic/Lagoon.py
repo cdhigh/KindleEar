@@ -7,7 +7,7 @@ def getBook():
     return Lagoon
 
 class Lagoon(CartoonMadBaseBook):
-    title               = u'[漫画]LetsLagoon'
+    title               = u'LetsLagoon'
     description         = u'日本漫画家创作的漫画'
     language            = 'zh-tw'
     feed_encoding       = 'big5'

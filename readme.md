@@ -73,10 +73,10 @@ KindleEar is licensed under the [AGPLv3](http://www.gnu.org/licenses/agpl-3.0.ht
 如果你希望支持一下KindleEar，可以戳 [Wiki捐赠页面](https://github.com/cdhigh/KindleEar/wiki/Donate)
 
 #主要贡献者
-@rexdf <https://github.com/rexdf> 
-@insert0003 <https://github.com/insert0003> 
-@zhu327 <https://github.com/zhu327> 
-@lord63 <https://github.com/lord63> 
-@th0mass <https://github.com/th0mass> 
-@seff <https://github.com/seff> 
-@miaowm5 <https://github.com/miaowm5> 
+@rexdf <https://github.com/rexdf>
+@insert0003 <https://github.com/insert0003>
+@zhu327 <https://github.com/zhu327>
+@lord63 <https://github.com/lord63>
+@th0mass <https://github.com/th0mass>
+@seff <https://github.com/seff>
+@miaowm5 <https://github.com/miaowm5>

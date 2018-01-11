@@ -7,7 +7,7 @@ def getBook():
     return GiantBefore
 
 class GiantBefore(CartoonMadBaseBook):
-    title               = u'[漫画]进击的巨人BeforeTheFall'
+    title               = u'进击的巨人BeforeTheFall'
     description         = u'諫山創'
     language            = 'zh-tw'
     feed_encoding       = 'big5'

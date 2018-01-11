@@ -99,10 +99,7 @@ def getOpts(output_type='kindle', book_mode='periodical'):
     setattr(opts, "graying_image", COLOR_TO_GRAY) #changed
     setattr(opts, "image_png_to_jpg", COLOR_TO_GRAY) #changed
     setattr(opts, "fix_indents", False)
-    if REDUCE_IMAGE_TO:
-        setattr(opts, "reduce_image_to", REDUCE_IMAGE_TO)
-    else:
-        setattr(opts, "reduce_image_to", OutputDevice.comic_screen_size if book_mode == 'comic' else OutputDevice.screen_size)
+    setattr(opts, "reduce_image_to", REDUCE_IMAGE_TO or OutputDevice.screen_size)
     
     #epub
     setattr(opts, "dont_split_on_page_breaks", False)

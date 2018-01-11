@@ -7,7 +7,7 @@ def getBook():
     return MyHero
 
 class MyHero(CartoonMadBaseBook):
-    title               = u'[漫画]我的英雄学院'
+    title               = u'我的英雄学院'
     description         = u'日本漫画家堀越耕平创作的少年漫画'
     language            = 'zh-tw'
     feed_encoding       = 'big5'

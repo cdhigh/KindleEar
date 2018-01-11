@@ -656,22 +656,3 @@ msgstr "Num"
 
 msgid "Record"
 msgstr "Record"
-
-msgid "Expiration"
-msgstr "Expiration"
-
-msgid "Never expire"
-msgstr "Never expire"
-
-msgid "1 Month"
-msgstr "1 Month"
-
-msgid "3 Months"
-msgstr "3 Months"
-
-msgid "6 Months"
-msgstr "6 Months"
-
-msgid "1 Year"
-msgstr "1 Year"
-
