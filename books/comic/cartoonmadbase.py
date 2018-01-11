@@ -130,4 +130,4 @@ class CartoonMadBaseBook(BaseComicBook):
                     break
                     
         return urls
-        
+
