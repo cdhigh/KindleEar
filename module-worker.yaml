@@ -1,6 +1,6 @@
 application: kindleear
-module: worker
 version: 1
+module: worker
 runtime: python27
 api_version: 1
 threadsafe: true

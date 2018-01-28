@@ -84,6 +84,12 @@ class URLOpener:
             content=''
             headers={}
         
+        #竟然实际中还碰到以//开头的URL，真是大千世界无奇不有
+        if url.startswith(r'//'):
+            url = 'http:' + url
+        elif url.startswith('www'):
+            url = 'http://' + url
+            
         response = resp()
         if url.startswith('data:'):
             import base64, re

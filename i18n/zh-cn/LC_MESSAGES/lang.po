@@ -82,7 +82,7 @@ msgstr "退出"
 msgid "Feeds"
 msgstr "我的订阅"
 
-msgid "Setting"
+msgid "Settings"
 msgstr "设置"
 
 msgid "Logs"
@@ -91,7 +91,7 @@ msgstr "投递日志"
 msgid "Admin"
 msgstr "账户管理"
 
-msgid "Advance"
+msgid "Advanced"
 msgstr "高级设置"
 
 msgid "Please Login"
@@ -181,7 +181,7 @@ msgstr "好消息时刻相随。"
 msgid "Inherited From Calibre"
 msgstr "源自Calibre"
 
-msgid "Share Your Idea"
+msgid "Share Your Ideas"
 msgstr "分享智慧"
 
 msgid ""

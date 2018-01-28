@@ -1,6 +1,11 @@
 # Changelog for KindleEar
 
-##1.25.1
+## 1.25.2
+  1. Update links of book "Economist".
+  2. bugfix: fix the crash problem of 'xxx@appid.appspotmail.com' feature.
+  3. bugfix: fix the crash problem of 'Save to Instapaper' feature.
+
+## 1.25.1
   1. The expiration of account can be defined.
   2. bugfix: pictures can't be resized in comic mode.
 

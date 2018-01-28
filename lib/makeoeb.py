@@ -61,7 +61,8 @@ def CreateOeb(log, path_or_stream, opts, encoding='utf-8'):
     html_preprocessor = HTMLPreProcessor(log, opts)
     if not encoding:
         encoding = None
-    return OEBBook(log, html_preprocessor, pretty_print=opts.pretty_print, input_encoding=encoding)
+    pretty_print = opts.pretty_print if opts else False
+    return OEBBook(log, html_preprocessor, pretty_print=pretty_print, input_encoding=encoding)
 
 #OEB的一些生成选项
 def getOpts(output_type='kindle', book_mode='periodical'):
@@ -129,6 +130,6 @@ def setMetaData(oeb, title='Feeds', lang='zh-cn', date=None, creator='KindleEar'
     oeb.metadata.add("publication_type", pubtype)
     if not date:
         import datetime
-        date = datetime.datetime.strftime(datetime.datetime.now(),"%Y-%m-%d")
+        date = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
     oeb.metadata.add("date", date)
 

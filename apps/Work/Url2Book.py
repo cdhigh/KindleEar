@@ -82,8 +82,6 @@ class Url2Book(BaseHandler):
         book.feeds = [(subject,url) for url in urls.split('|')]
         book.url_filters = [flt.url for flt in user.urlfilter]
         
-        opts = oeb = None
-        
         # 创建 OEB
         oeb = CreateOeb(main.log, None, opts)
         oeb.container = ServerContainer(main.log)

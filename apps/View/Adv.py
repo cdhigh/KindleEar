@@ -47,7 +47,7 @@ class AdvWhiteList(BaseHandler):
                 wlist = wlist[2:]
             if wlist:
                 WhiteList(mail=wlist, user=user).put()
-        raise web.seeother('')
+        raise web.seeother(self.__url__)
 
 #设置归档和分享配置项
 class AdvArchive(BaseHandler):
@@ -112,7 +112,7 @@ class AdvArchive(BaseHandler):
         user.browser = browser
         user.qrcode = qrcode
         user.put()
-        raise web.seeother('')
+        raise web.seeother(self.__url__)
 
 #设置URL过滤器
 class AdvUrlFilter(BaseHandler):
@@ -120,8 +120,8 @@ class AdvUrlFilter(BaseHandler):
     @etagged()
     def GET(self):
         user = self.getcurrentuser()
-        return self.render('advurlfilter.html',"Url Filter",current='advsetting',
-            user=user,advcurr='urlfilter')
+        return self.render('advurlfilter.html', "Url Filter", current='advsetting',
+            user=user, advcurr='urlfilter')
         
     def POST(self):
         user = self.getcurrentuser()
@@ -129,7 +129,7 @@ class AdvUrlFilter(BaseHandler):
         url = web.input().get('url')
         if url:
             UrlFilter(url=url,user=user).put()
-        raise web.seeother('')
+        raise web.seeother(self.__url__)
 
 #删除白名单或URL过滤器项目
 class AdvDel(BaseHandler):
@@ -156,8 +156,8 @@ class AdvImport(BaseHandler):
     @etagged()
     def GET(self, tips=None):
         user = self.getcurrentuser()
-        return self.render('advimport.html',"Import",current='advsetting',
-            user=user,advcurr='import',tips=tips)
+        return self.render('advimport.html', "Import", current='advsetting',
+            user=user, advcurr='import', tips=tips)
 
     def POST(self):
         import opml
@@ -183,12 +183,12 @@ class AdvImport(BaseHandler):
                         rss.isfulltext = isfulltext
                         rss.put()
                     else:
-                        Feed(title=title,url=url,book=user.ownfeeds,isfulltext=isfulltext,
+                        Feed(title=title, url=url, book=user.ownfeeds, isfulltext=isfulltext,
                             time=datetime.datetime.utcnow()).put()
                             
             raise web.seeother('/my')
         else:
-            raise web.seeother('')
+            raise web.seeother(self.__url__)
     
     def walkOutline(self, outline):
         #遍历opml的outline元素，支持不限层数的嵌套
@@ -234,8 +234,8 @@ class AdvExport(BaseHandler):
         outlines = '\n'.join(outlines)
         
         opmlfile = opmlTpl % (date, date, outlines)
-        web.header("Content-Type","text/xml;charset=utf-8")
-        web.header("Content-Disposition","attachment;filename=KindleEar_subscription.xml")
+        web.header("Content-Type", "text/xml;charset=utf-8")
+        web.header("Content-Disposition", "attachment;filename=KindleEar_subscription.xml")
         return opmlfile.encode('utf-8')
 
 #在本地选择一个图片上传做为自定义RSS书籍的封面

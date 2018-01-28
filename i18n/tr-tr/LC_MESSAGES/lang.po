@@ -82,7 +82,7 @@ msgstr "Çıkış"
 msgid "Feeds"
 msgstr "RSSler"
 
-msgid "Setting"
+msgid "Settings"
 msgstr "Ayarlar"
 
 msgid "Logs"
@@ -91,7 +91,7 @@ msgstr "Kayıtlar"
 msgid "Admin"
 msgstr "Yönetim"
 
-msgid "Advance"
+msgid "Advanced"
 msgstr "Gelişmiş"
 
 msgid "Please Login"
@@ -184,7 +184,7 @@ msgstr "İyi Haberler Daima Sizinle Olsun."
 msgid "Inherited From Calibre"
 msgstr "Calibre Kodları Kullanıldı."
 
-msgid "Share Your Idea"
+msgid "Share Your Ideas"
 msgstr "Fikrinizi Paylaşın"
 
 msgid ""

@@ -1,5 +1,10 @@
 # Changelog for KindleEar
 
+## 1.25.2
+  1. 更新内置书籍“Economist”的RSS订阅源链接。
+  2. bugfix: 修正邮件中转模块推送失败问题。
+  3. bugfix: 修正保存到Instapaper功能失效问题。
+  
 ## 1.25.1
   1. 新特性：创建其他账号时可选账号过期期限。
   2. bugfix: 修正漫画模式不压缩图片的问题。

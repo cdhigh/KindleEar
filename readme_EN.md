@@ -59,10 +59,10 @@ If you don't want to intall GAE SDK and python, you have another choice.
    KindleEar is Licensed under the [AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html) license.
 
 # Contributors
-@rexdf <https://github.com/rexdf> 
-@insert0003 <https://github.com/insert0003> 
-@zhu327 <https://github.com/zhu327> 
-@lord63 <https://github.com/lord63> 
-@th0mass <https://github.com/th0mass> 
-@seff <https://github.com/seff> 
-@miaowm5 <https://github.com/miaowm5> 
+* @rexdf <https://github.com/rexdf> 
+* @insert0003 <https://github.com/insert0003> 
+* @zhu327 <https://github.com/zhu327> 
+* @lord63 <https://github.com/lord63> 
+* @th0mass <https://github.com/th0mass> 
+* @seff <https://github.com/seff> 
+* @miaowm5 <https://github.com/miaowm5> 

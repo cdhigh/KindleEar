@@ -107,7 +107,8 @@ class AdminMgrPwd(BaseHandler):
                 else:
                     u.passwd = pwd
                     u.put()
-                    tips = _("Change password success!")
+                    strBackPage = '&nbsp;&nbsp;&nbsp;&nbsp;<a href="%s">Click here to go back</a>' % Admin.__url__
+                    tips = _("Change password success!") + strBackPage
         else:
             tips = _("Username is empty!")
         
