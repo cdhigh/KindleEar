@@ -1375,11 +1375,22 @@ class BaseComicBook(BaseFeedBook):
             imgType = imghdr.what(None, content)
             if imgType:
                 content = self.process_image_comic(content)
-                imgType = imghdr.what(None, content)
-                imgMime = r"image/" + imgType
-                fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType=='jpeg' else imgType)
-                imgFilenameList.append(fnImg)
-                yield (imgMime, url, fnImg, content, None, None)
+                if content:
+                    if isinstance(content, (list, tuple)): #一个图片分隔为多个图片
+                        imgIndex = self.imgindex
+                        for idx, imgPartContent in enumerate(content):
+                            imgType = imghdr.what(None, imgPartContent)
+                            imgMime = r"image/" + imgType
+                            fnImg = "img%d_%d.jpg" % (imgIndex, idx)
+                            imgPartUrl = url[:-4]+"_%d.jpg"%idx
+                            imgFilenameList.append(fnImg)
+                            yield (imgMime, imgPartUrl, fnImg, imgPartContent, None, True)
+                    else: #单个图片
+                        imgType = imghdr.what(None, content)
+                        imgMime = r"image/" + imgType
+                        fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType=='jpeg' else imgType)
+                        imgFilenameList.append(fnImg)
+                        yield (imgMime, url, fnImg, content, None, None)
             else: #不是图片，有可能是包含图片的网页，抽取里面的图片
                 content = self.AutoDecodeContent(content, decoder, self.page_encoding, opener.realurl, result.headers)
                 soup = BeautifulSoup(content, 'lxml')
@@ -1472,12 +1483,48 @@ class BaseComicBook(BaseFeedBook):
             if not opts or not opts.process_images or not opts.process_images_immediately:
                 return data
             else:
-                return rescale_image(data, png2jpg=opts.image_png_to_jpg,
+                #如果图被拆分，则返回一个图像列表，否则返回None
+                splitedImages = self.SplitWideImage(data)
+                if splitedImages:
+                    images = []
+                    for image in splitedImages:
+                        images.append(rescale_image(image, png2jpg=opts.image_png_to_jpg, graying=opts.graying_image,
+                            reduceto=opts.reduce_image_to))
+                    return images
+                else:
+                    return rescale_image(data, png2jpg=opts.image_png_to_jpg,
                                 graying=opts.graying_image,
                                 reduceto=opts.reduce_image_to)
         except Exception as e:
             self.log.warn('Process comic image failed (%s).' % str(e))
             return data
+
+        #如果一个图片为横屏，则将其分隔成2个图片
+    def SplitWideImage(self, data):
+        if not isinstance(data, StringIO):
+            data = StringIO(data)
+
+        img = Image.open(data)
+        width, height = img.size
+        fmt = img.format
+        #宽>高才认为是横屏
+        if height > width:
+            return None
+
+        imagesData = []
+        part2 = img.crop((width/2-10, 0, width, height))
+        part2.load()
+        part2Data = StringIO()
+        part2.save(part2Data, fmt)
+        imagesData.append(part2Data.getvalue())
+
+        part1 = img.crop((0, 0, width/2+10, height))
+        part1.load()
+        part1Data = StringIO()
+        part1.save(part1Data, fmt)
+        imagesData.append(part1Data.getvalue())
+
+        return imagesData
 
 #几个小工具函数
 def remove_beyond(tag, next):
