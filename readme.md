@@ -37,8 +37,8 @@ Readme of english version refers to [Readme_EN.md](https://github.com/cdhigh/Kin
 --------
 
 
-# 标准部署步骤
-1. [申请google账号](https://accounts.google.com/SignUp) 并暂时 [启用不够安全的应用的访问权限](https://www.google.com/settings/security/lesssecureapps) 以便上传程序。  
+# 标准部署步骤（已失效）
+1. [申请google账号](https://accounts.google.com/SignUp) 并暂时 [启用不够安全的应用的访问权限](https://www.google.com/settings/security/lesssecureapps) 以便上传程序。  
 
 2. [创建一个Application](https://console.developers.google.com/project)，注意不用申请GCE，那个是60天试用的，而GAE是限额范围内永久免费的。  
 
@@ -78,7 +78,7 @@ config.py          | DOMAIN      | 你申请的应用的域名        |
 **不建议使用GAE Launcher部署KindleEar，除非你知道怎么设置Extra Flags等参数。**
 11. 步骤已经说的很详细了，如果自己还是部署不成功，也可以选择直接捐赠给作者50块钱 ([Wiki捐赠页面](https://github.com/cdhigh/KindleEar/wiki/Donate))，然后将gmail地址和密码发给作者（先要提前关闭密码二步验证），作者负责帮你部署成功。有需要自定义抓取和分析其他网站的需求，也可以联系作者有偿实现。
 
-# 简化的部署步骤（推荐）
+# 简化的部署步骤（已失效）
   假如你不想安装python和GAE SDK，则可以：  
 
 1. [下载KindleEar](https://github.com/cdhigh/KindleEar/archive/master.zip) 并解压（改目录名为KindleEar）。  
