@@ -16,7 +16,7 @@ Readme of english version refers to [Readme_EN.md](https://github.com/cdhigh/Kin
 > 注：如果您要求不高，自定义RSS推送功能足以应付一般应用，如果要求排版和完美，可以参照books目录下的文件范本自己添加一个文件再重新上传即可，books目录下的书籍文件都不是随意预置的，每个文件都至少演示一个适用的books编写技巧。
 在您懂python的前提下，您可以完全的操控网页，可以生成您需要的最完美的MOBI/EPUB文件。
 
-# 部署步骤（使用gcloud）
+# 部署步骤（使用gcloud在线部署，推荐）
 
 因Google转为使用oauth认证，原来的步骤均已失效，现提供新的部署方式。
 
@@ -26,7 +26,7 @@ Readme of english version refers to [Readme_EN.md](https://github.com/cdhigh/Kin
 
 2. 下载这个repo  [KindleEar](https://github.com/cdhigh/KindleEar/archive/master.zip) 
 
-3. 在网页上打开终端，点三个点的图标，上传文件，把上一步中下载的压缩文件上传上去。
+3. 在网页上打开终端，点最右边三个点的图标，上传文件，把上一步中下载的压缩文件上传上去。
 
 4. 上传完毕后，在终端里用ls查看，应该可以看到上传的文件，假设文件名为 kindleear-master.zip ，使用 `unzip kindleear-master.zip` 来解压
 
@@ -37,7 +37,7 @@ Readme of english version refers to [Readme_EN.md](https://github.com/cdhigh/Kin
 --------
 
 
-# 标准部署步骤（已失效）
+# 标准部署步骤
 1. [申请google账号](https://accounts.google.com/SignUp) 并暂时 [启用不够安全的应用的访问权限](https://www.google.com/settings/security/lesssecureapps) 以便上传程序。  
 
 2. [创建一个Application](https://console.developers.google.com/project)，注意不用申请GCE，那个是60天试用的，而GAE是限额范围内永久免费的。  
