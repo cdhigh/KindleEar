@@ -73,11 +73,11 @@ class CartoonMadBaseBook(BaseComicBook):
         dbItem = LastDelivered.all().filter('username = ', userName).filter('bookname = ', title).get()
         self.last_delivered_volume = u' 第%d话' % num
         if dbItem:
-            dbItem.num = num
+            dbItem.trynum = num
             dbItem.record = self.last_delivered_volume
             dbItem.datetime = datetime.datetime.utcnow() + datetime.timedelta(hours=TIMEZONE)
         else:
-            dbItem = LastDelivered(username=userName, bookname=title, num=num, record=self.last_delivered_volume,
+            dbItem = LastDelivered(username=userName, bookname=title, num=0, trynum=num, record=self.last_delivered_volume,
                 datetime=datetime.datetime.utcnow() + datetime.timedelta(hours=TIMEZONE))
         dbItem.put()
 
