@@ -44,7 +44,7 @@ class CartoonMadBaseBook(BaseComicBook):
             ul = sel.find_all('option') if sel else None
             if not ul:
                 continue
-                
+
             for comicPage in ul:
                 href = comicPage.get('value')
                 if href:
@@ -62,25 +62,25 @@ class CartoonMadBaseBook(BaseComicBook):
                     comicSrc = comicImgTag.get('src') if comicImgTag else None
                     if comicSrc:
                         urls.append((title, comicPage.text, comicSrc, None))
-            
+
             self.UpdateLastDelivered(title, num)
             
         return urls
-    
+
     #更新已经推送的卷序号到数据库
     def UpdateLastDelivered(self, title, num):
         userName = self.UserName()
         dbItem = LastDelivered.all().filter('username = ', userName).filter('bookname = ', title).get()
         self.last_delivered_volume = u' 第%d话' % num
         if dbItem:
-            dbItem.num = num
+            dbItem.trynum = num
             dbItem.record = self.last_delivered_volume
             dbItem.datetime = datetime.datetime.utcnow() + datetime.timedelta(hours=TIMEZONE)
         else:
-            dbItem = LastDelivered(username=userName, bookname=title, num=num, record=self.last_delivered_volume,
+            dbItem = LastDelivered(username=userName, bookname=title, num=0, trynum=num, record=self.last_delivered_volume,
                 datetime=datetime.datetime.utcnow() + datetime.timedelta(hours=TIMEZONE))
         dbItem.put()
-        
+
     #根据已经保存的记录查看连载是否有新的章节，返回章节URL列表
     #返回：[(title, num, url),...]
     def GetNewComic(self):
@@ -130,4 +130,4 @@ class CartoonMadBaseBook(BaseComicBook):
                     break
                     
         return urls
-        
+

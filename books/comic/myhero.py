@@ -12,6 +12,6 @@ class MyHero(CartoonMadBaseBook):
     language            = 'zh-tw'
     feed_encoding       = 'big5'
     page_encoding       = 'big5'
-    mastheadfile        = 'mh_comic.gif'
-    coverfile           = 'cv_myhero.jpg'
-    feeds               = [(u'我的英雄学院', 'http://www.cartoonmad.com/comic/4085.html')]
+    mastheadfile        = 'mh_default.gif'
+    coverfile           = 'cv_bound.jpg'
+    feeds               = [(u'[漫画]我的英雄学院', 'http://www.cartoonmad.com/comic/4085.html')]

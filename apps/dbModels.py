@@ -126,6 +126,7 @@ class LastDelivered(db.Model):
     username = db.StringProperty()
     bookname = db.StringProperty()
     num = db.IntegerProperty(default=0) #num和record可以任选其一用来记录，或使用两个配合都可以
+    trynum = db.IntegerProperty(default=0) #保存预订发送的期数，发送成功后保存到num和record中
     record = db.StringProperty(default='') #record同时也用做在web上显示
     datetime = db.DateTimeProperty()
     

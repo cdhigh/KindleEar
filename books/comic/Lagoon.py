@@ -12,6 +12,6 @@ class Lagoon(CartoonMadBaseBook):
     language            = 'zh-tw'
     feed_encoding       = 'big5'
     page_encoding       = 'big5'
-    mastheadfile        = 'mh_comic.gif'
-    coverfile           = 'cv_lagoon.jpg'
-    feeds               = [(u'LetsLagoon', 'http://www.cartoonmad.com/comic/1473.html')]
+    mastheadfile        = 'mh_default.gif'
+    coverfile           = 'cv_bound.jpg'
+    feeds               = [(u'[漫画]LetsLagoon', 'http://www.cartoonmad.com/comic/1473.html')]

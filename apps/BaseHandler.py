@@ -72,9 +72,21 @@ class BaseHandler:
                time=local_time(tz=tz), datetime=datetime.datetime.utcnow(),
                book=book, status=status)
             dl.put()
+
+            #漫画书籍的book格式为【漫画名 期数】
+            #通过titles的长度判断是否为漫画，更新记录。
+            titles = book.split(" ")
+            if len(titles) != 1:
+                dbItem = LastDelivered.all().filter('username = ', name).filter('bookname = ', titles[0]).get()
+                if status == 'ok':
+                    dbItem.num = dbItem.trynum
+                else:
+                    dbItem.record = u' 第%d话' % dbItem.num
+                dbItem.put()
+
         except Exception as e:
             default_log.warn('DeliverLog failed to save:%s',str(e))
-    
+
     #TO可以是一个单独的字符串，或一个字符串列表，对应发送到多个地址
     @classmethod
     def SendToKindle(self, name, to, title, booktype, attachment, tz=TIMEZONE, filewithtime=True):

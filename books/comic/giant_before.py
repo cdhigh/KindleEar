@@ -12,6 +12,6 @@ class GiantBefore(CartoonMadBaseBook):
     language            = 'zh-tw'
     feed_encoding       = 'big5'
     page_encoding       = 'big5'
-    mastheadfile        = 'mh_comic.gif'
-    coverfile           = 'cv_giant.jpg'
-    feeds               = [(u'进击的巨人BeforeTheFall', 'http://www.cartoonmad.com/comic/3413.html')]
+    mastheadfile        = 'mh_default.gif'
+    coverfile           = 'cv_bound.jpg'
+    feeds               = [(u'[漫画]进击的巨人BeforeTheFall', 'http://www.cartoonmad.com/comic/3413.html')]
