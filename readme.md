@@ -65,6 +65,29 @@ config.py          | DOMAIN      | 你申请的应用的域名        |
 3. 将KindleEar目录放到Uploader目录下，双击uploader.bat即开始上传，根据提示输入你的相关信息即可，在第一次成功部署之后，适用uploader再次升级KindleEar则不需要再次输入。  
 **此uploader仅适用于Windows系统。**
 
+# 漫画使用说明
+  目前支持以下网站的漫画
+  http://www.cartoonmad.com
+
+  漫画的订阅方法有两种
+
+  1. 新增书籍并上传订阅
+
+  进入books/comic/下，在该目录拷贝conan.py并任意命名，修改其中的下列位置。这里使用【食戟之灵】举例，考虑conan.py到soma.py。
+
+位置|修改前|修改后|说明|
+------|--------------|--------------|-----------------------|
+第7行|return Conan  | return Soma | 使用Soma作为类名      |
+第9行|class Conan(CartoonMadBaseBook): | class Soma(CartoonMadBaseBook): | 使用Soma作为类名      |
+第10行|title = u'[漫画]名侦探柯南'|title = u'[漫画]食戟之灵'|漫画名为【食戟之灵】|
+第11行|description = u'日本漫画家青山刚昌创作的侦探漫画'|description = u'由附田祐斗原作，佐伯俊作画，料理研究家森崎友纪协力于集英社旗下的漫画杂志《周刊少年JUMP》上的连载作品。'|漫画的简单说明|
+第17行|feeds = [(u'[漫画]名侦探柯南', 'http://www.cartoonmad.com/comic/1066.html')]|feeds               = [(u'[漫画]食戟之灵', 'http://www.cartoonmad.com/comic/1698.html')]|在网站上搜索到该漫画的网址|
+  修改完以后，重新上传到GAE，点击新的书籍【[漫画]食戟之灵】进行订阅。
+
+  2. 通过Feeds订阅
+
+  相比较方法1,方法2比较简单，在【我的订阅】页面的【自定义RSS】框中，添加书籍标题和URL。内容同方法1的第17行一致。投递时需要打开【自动定时投递自定义RSS】选项。
+
 # 许可协议
 KindleEar is licensed under the [AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html) license.  
 大体的许可框架是此应用代码你可以任意使用，任意修改，可以商用，但是必须将你修改后的代码开源并保留原始版权声明。
