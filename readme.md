@@ -68,6 +68,8 @@ config.py          | DOMAIN      | 你申请的应用的域名        |
 # 漫画使用说明
   目前支持以下网站的漫画
   http://www.cartoonmad.com
+  http://ac.qq.com
+  http://m.ac.qq.com
 
   漫画的订阅方法有两种
 

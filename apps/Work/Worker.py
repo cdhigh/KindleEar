@@ -24,6 +24,7 @@ from calibre.utils.bytestringio import byteStringIO
 from books import BookClasses, BookClass
 from books.base import BaseFeedBook, BaseComicBook
 from books.comic.cartoonmadbase import CartoonMadBaseBook
+from books.comic.tencentbase import TencentBaseBook
     
 #实际下载文章和生成电子书并且发送邮件
 class Worker(BaseHandler):
@@ -168,7 +169,9 @@ class Worker(BaseHandler):
                 feeds = bk.feeds
                 book.feeds = []
                 for feed in feeds:
-                    if feed.url.startswith("http://www.cartoonmad.com"):
+                    if feed.url.startswith("http://www.cartoonmad.com") \
+                        or feed.url.startswith("http://ac.qq.com") \
+                        or feed.url.startswith("http://m.ac.qq.com"):
                         self.ProcessComicRSS(username, user, feed)
                     else:
                         book.feeds.append((feed.title, feed.url, feed.isfulltext))
@@ -370,7 +373,12 @@ class Worker(BaseHandler):
         sections = OrderedDict()
         toc_thumbnails = {} #map img-url -> manifest-href
 
-        book = CartoonMadBaseBook(imgindex=imgindex, opts=opts, user=user)
+        if feed.url.startswith("http://ac.qq.com") \
+            or feed.url.startswith("http://m.ac.qq.com"):
+            book = TencentBaseBook(imgindex=imgindex, opts=opts, user=user)
+        else:
+            book = CartoonMadBaseBook(imgindex=imgindex, opts=opts, user=user)
+
         book.title = feed.title
         book.description = feed.title
         book.language = language
