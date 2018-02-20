@@ -12,6 +12,6 @@ class OnePunch(CartoonMadBaseBook):
     language            = 'zh-tw'
     feed_encoding       = 'big5'
     page_encoding       = 'big5'
-    mastheadfile        = 'mh_comic.gif'
-    coverfile           = 'cv_onepunch.jpg'
-    feeds               = [(u'一拳超人', 'http://www.cartoonmad.com/comic/3583.html')]
+    mastheadfile        = 'mh_default.gif'
+    coverfile           = 'cv_bound.jpg'
+    feeds               = [(u'[漫画]一拳超人', 'http://www.cartoonmad.com/comic/3583.html')]

@@ -52,6 +52,7 @@
         <li><a href="#savetopocket">保存到Pocket功能如何使用？</a></li>
         <li><a href="#wrongemail">投递日志状态wrong SRC_EMAIL的解决方案。</a></li>
         <li><a href="#tips">其他的一些小Tips。</a></li>
+        <li><a href="#comic">漫画订阅说明</a></li>
         <li><a href="#issues">我还有更多问题，到哪里去问？</a></li>
       </ul>
     </div>
@@ -336,6 +337,63 @@
             <li>自定义书籍中的属性 extra_css 可以自定义投递文章的样式。</li>
             <li>在高级设置中可以批量导入和导出OPML格式的订阅列表，这功能比较适合从其他RSS软件中转移数据。</li>
             <li>因Evernote的免费政策，通过邮件保存到Evernote仅支持5个邮件，需要更多则需要升级Evernote账户。</li>
+        </ul>
+    </p>
+
+    <span id="comic"></span>
+    <h2>漫画订阅说明</h2>
+    <p class="answer">
+        目前支持以下网站的漫画<br/>
+        <ul>
+            <a href="http://www.cartoonmad.com">动漫狂</a><br/>
+            <a href="http://ac.qq.com">腾讯动漫</a><br/>
+            <a href="http://m.ac.qq.com">腾讯动漫移动版</a><br/>
+        </ul>
+        漫画的订阅方法有两种，可以选择其中任意一种。<br/>
+        这里使用【食戟之灵】举例，先从动漫狂中搜索得到该漫画的URL。<br/>
+        <ul>
+            <li>1. 通过Feeds订阅</li>
+            这种方法比较简单，在【我的订阅】页面的【自定义RSS】框中，添加书籍标题和URL进行订阅。<br/>
+            注意：投递时需要打开【自动定时投递自定义RSS】选项。<br/>
+
+            <li>2. 新建书籍并上传订阅</li>
+            进入books/comic/下，在该目录拷贝conan.py并任意命名，修改其中的下列位置以后，重新上传到GAE，点击新的书籍【[漫画]食戟之灵】进行订阅。<br/>
+            拷贝conan.py到soma.py。<br/>
+            <table border="1">
+                    <tr>
+                    <td>位置</td>
+                    <td>修改前</td>
+                    <td>修改后</td>
+                    <td>说明</td>
+                    </tr>
+                    <tr>
+                    <td>7行</td>
+                    <td>return Conan</td>
+                    <td>return Soma</td>
+                    <td>使用"Soma"作为类名</td>
+                    </tr>
+                    <tr>
+                    <td>9行</td>
+                    <td>class Conan(CartoonMadBaseBook):</td>
+                    <td>class Soma(CartoonMadBaseBook):</td>
+                    <td>使用"Soma"作为类名</td>
+                    </tr>
+                    <td>10行</td>
+                    <td>title = u'[漫画]名侦探柯南'</td>
+                    <td>title = u'[漫画]食戟之灵'</td>
+                    <td>漫画名为【食戟之灵】</td>
+                    </tr>
+                    <td>11行</td>
+                    <td>description = u'日本漫画家青山刚昌创作的侦探漫画'</td>
+                    <td>description = u'由附田祐斗原作，佐伯俊作画的连载作品。'</td>
+                    <td>漫画的简单说明</td>
+                    </tr>
+                    <td>17行</td>
+                    <td>feeds = [(u'[漫画]名侦探柯南', 'http://www.cartoonmad.com/comic/1066.html')]</td>
+                    <td>feeds = [(u'[漫画]食戟之灵', 'http://www.cartoonmad.com/comic/1698.html')]</td>
+                    <td>在网站上搜索到该漫画的网址</td>
+                    </tr>
+            </table>
         </ul>
     </p>
     
