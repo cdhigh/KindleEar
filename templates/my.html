@@ -9,7 +9,7 @@
             {{feed.title}}
             {% if feed.isfulltext %} <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" />{% endif %}
             {% if feed.url.startswith("http://www.cartoonmad.com") %} <img alt="{{_("CartoonMad")}}" src="static/comic.gif" border="0" />{% endif %}
-            {% if feed.url.startswith("http://ac.qq.com") or feed.url.startswith("http://m.ac.qq.com") %} <img alt="{{_("Tencent")}}" src="static/comic.gif" border="0" />{% endif %}
+            {% if feed.url.startswith(("http://ac.qq.com", "http://m.ac.qq.com")) %} <img alt="{{_("Tencent")}}" src="static/comic.gif" border="0" />{% endif %}
         </div>
         <div class="cornerControls">
             {#<a href="/delfeed/{{feed.key().id()}}" class="actionButton">{{_("Delete")}}</a>#}
