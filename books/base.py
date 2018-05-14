@@ -680,10 +680,10 @@ class BaseFeedBook:
                     img.decompose()
 
             #去掉图像上面的链接，以免误触后打开浏览器
-            for img in soup.find_all('img'):
-                if img.parent and img.parent.parent and \
-                    img.parent.name == 'a':
-                    img.parent.replace_with(img)
+            if user and user.remove_hyperlinks in (u'image', u'all', 'image', 'all'):
+                for img in soup.find_all('img'):
+                    if img.parent and img.parent.parent and img.parent.name == 'a':
+                        img.parent.replace_with(img)
         else:
             for img in soup.find_all('img'):
                 img.decompose()
@@ -694,6 +694,14 @@ class BaseFeedBook:
             x.name = 'div'
         
         self.soupprocessex(soup)
+
+        #如果需要，去掉正文中的超链接(使用斜体下划线标识)，以避免误触
+        if user and user.remove_hyperlinks in (u'text', u'all', 'text', 'all'):
+            for a_ in soup.find_all('a'):
+                #a_.unwrap()
+                a_.name = 'i'
+                a_.attrs.clear()
+                a_.attrs['style'] = 'text-decoration:underline;'
 
         #插入分享链接，如果有插入qrcode，则返回(imgName, imgContent)
         qrimg = self.AppendShareLinksToArticle(soup, url)
@@ -844,10 +852,10 @@ class BaseFeedBook:
                     img.decompose()
 
             #去掉图像上面的链接，以免误触后打开浏览器
-            for img in soup.find_all('img'):
-                if img.parent and img.parent.parent and \
-                    img.parent.name == 'a':
-                    img.parent.replace_with(img)
+            if user and user.remove_hyperlinks in (u'image', u'all', 'image', 'all'):
+                for img in soup.find_all('img'):
+                    if img.parent and img.parent.parent and img.parent.name == 'a':
+                        img.parent.replace_with(img)
         else:
             for img in soup.find_all('img'):
                 img.decompose()
@@ -881,11 +889,19 @@ class BaseFeedBook:
         
         self.soupprocessex(soup)
 
+        #如果需要，去掉正文中的超链接(使用斜体下划线标识)，以避免误触
+        if user and user.remove_hyperlinks in (u'text', u'all', 'text', 'all'):
+            for a_ in soup.find_all('a'):
+                #a_.unwrap()
+                a_.name = 'i'
+                a_.attrs.clear()
+                a_.attrs['style'] = 'text-decoration:underline;'
+
         #插入分享链接，如果插入了qrcode，则返回(imgName, imgContent)
         qrimg = self.AppendShareLinksToArticle(soup, url)
         if qrimg:
             yield ('image/jpeg', url, qrimg[0], qrimg[1], None, None)
-                
+        
         content = unicode(soup)
 
         #提取文章内容的前面一部分做为摘要，[漫画模式不需要摘要]
@@ -1289,16 +1305,24 @@ class WebpageBook(BaseFeedBook):
                         img.decompose()
 
                 #去掉图像上面的链接
-                for img in soup.find_all('img'):
-                    if img.parent and img.parent.parent and \
-                        img.parent.name == 'a':
-                        img.parent.replace_with(img)
-
+                if self.user and self.user.remove_hyperlinks in (u'image', u'all', 'image', 'all'):
+                    for img in soup.find_all('img'):
+                        if img.parent and img.parent.parent and img.parent.name == 'a':
+                            img.parent.replace_with(img)
             else:
                 for img in soup.find_all('img'):
                     img.decompose()
 
             self.soupprocessex(soup)
+
+            #如果需要，去掉正文中的超链接(使用斜体下划线标识)，以避免误触
+            if self.user and self.user.remove_hyperlinks in (u'text', u'all', 'text', 'all'):
+                for a_ in soup.find_all('a'):
+                    #a_.unwrap()
+                    a_.name = 'i'
+                    a_.attrs.clear()
+                    a_.attrs['style'] = 'text-decoration:underline;'
+            
             content = unicode(soup)
             
             #提取文章内容的前面一部分做为摘要，[漫画模式不需要摘要]
@@ -1312,7 +1336,7 @@ class WebpageBook(BaseFeedBook):
                         brief = brief[:TOC_DESC_WORD_LIMIT]
                         break
             soup = None
-
+            
             content =  self.postprocess(content)
             yield (section, url, title, content, brief, thumbnail)
 

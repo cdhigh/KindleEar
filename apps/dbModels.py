@@ -90,6 +90,7 @@ class KeUser(db.Model): # kindleEar User
     
     book_mode = db.StringProperty() #added 2017-08-31 书籍模式，'periodical'|'comic'，漫画模式可以直接全屏
     expiration_days = db.IntegerProperty() #added 2018-01-07 账号超期设置值，0为永久有效
+    remove_hyperlinks = db.StringProperty() #added 2018-05-02 去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
     
     @property
     def whitelist(self):

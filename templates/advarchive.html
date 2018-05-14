@@ -8,7 +8,7 @@
     </p>
     <div class="pure-control-group">
         <label for="enable_evernote" class="pure-checkbox">
-            <input id="enable_evernote" name="evernote", type="checkbox" 
+            <input id="enable_evernote" name="evernote" type="checkbox" 
                 {% if user and user.evernote %}checked="1"{% endif %} />
             {{_("Append hyperlink '%s' to article")|format(savetoevernote)}}
         </label>
@@ -18,7 +18,7 @@
     
     <div class="pure-control-group">
         <label for="enable_wiz" class="pure-checkbox">
-            <input id="enable_wiz" name="wiz", type="checkbox" 
+            <input id="enable_wiz" name="wiz" type="checkbox" 
                 {% if user and user.wiz %}checked="1"{% endif %} />
             {{_("Append hyperlink '%s' to article")|format(savetowiz)}}
         </label>
@@ -28,7 +28,7 @@
     <hr style="width:90%;color:silver;margin:1em auto;" />
     <div class="pure-control-group">
         <label for="enable_pocket" class="pure-checkbox">
-            <input id="enable_pocket" name="pocket", type="checkbox" 
+            <input id="enable_pocket" name="pocket" type="checkbox" 
                 {% if user and user.pocket and user.pocket_access_token %} checked="1" {% endif %}
                 {% if user and not user.pocket_access_token %} disabled="1" {% endif %}
             />
@@ -42,7 +42,7 @@
     </div>
     <div class="pure-control-group">
         <label for="enable_instapaper" class="pure-checkbox">
-            <input id="enable_instapaper" name="instapaper", type="checkbox" 
+            <input id="enable_instapaper" name="instapaper" type="checkbox" 
                 {% if user and user.instapaper %}checked="1"{% endif %} />
             {{_("Append hyperlink '%s' to article")|format(savetoinstapaper)}}
         </label>
@@ -57,37 +57,37 @@
     <hr style="width:90%;color:silver;margin:1em auto;" />
     <div class="pure-control-group">
         <label for="enable_xweibo" class="pure-checkbox">
-            <input id="enable_xweibo" name="xweibo", type="checkbox" 
+            <input id="enable_xweibo" name="xweibo" type="checkbox" 
                 {% if user and user.xweibo %}checked="1"{% endif %} />
             {{_("Append hyperlink '%s' to article")|format(shareonxweibo)}}
         </label>
         <label for="enable_tweibo" class="pure-checkbox">
-            <input id="enable_tweibo" name="tweibo", type="checkbox" 
+            <input id="enable_tweibo" name="tweibo" type="checkbox" 
                 {% if user and user.tweibo %}checked="1"{% endif %} />
             {{_("Append hyperlink '%s' to article")|format(shareontweibo)}}
         </label>
         <label for="enable_facebook" class="pure-checkbox">
-            <input id="enable_facebook" name="facebook", type="checkbox" 
+            <input id="enable_facebook" name="facebook" type="checkbox" 
                 {% if user and user.facebook %}checked="1"{% endif %} />
             {{_("Append hyperlink '%s' to article")|format(shareonfacebook)}}
         </label>
         <label for="enable_twitter" class="pure-checkbox">
-            <input id="enable_twitter" name="twitter", type="checkbox" 
+            <input id="enable_twitter" name="twitter" type="checkbox" 
                 {% if user and user.twitter %}checked="1"{% endif %} />
             {{_("Append hyperlink '%s' to article")|format(shareontwitter)}}
         </label>
         <label for="enable_tumblr" class="pure-checkbox">
-            <input id="enable_tumblr" name="tumblr", type="checkbox" 
+            <input id="enable_tumblr" name="tumblr" type="checkbox" 
                 {% if user and user.tumblr %}checked="1"{% endif %} />
             {{_("Append hyperlink '%s' to article")|format(shareontumblr)}}
         </label>
         <label for="enable_browser" class="pure-checkbox">
-            <input id="enable_browser" name="browser", type="checkbox" 
+            <input id="enable_browser" name="browser" type="checkbox" 
                 {% if user and user.browser %}checked="1"{% endif %} />
             {{_("Append hyperlink '%s' to article")|format(openinbrowser)}}
         </label>
         <label for="enable_qrcode" class="pure-checkbox">
-            <input id="enable_qrcode" name="qrcode", type="checkbox" 
+            <input id="enable_qrcode" name="qrcode" type="checkbox" 
                 {% if user and user.qrcode %}checked="1"{% endif %} />
             {{_("Append qrcode of url to article")}}
         </label>

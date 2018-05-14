@@ -24,7 +24,17 @@ class AdvSettings(BaseHandler):
     __url__ = "/adv"
     #@etagged()
     def GET(self):
-        raise web.seeother(AdvWhiteList.__url__)
+        raise web.seeother(AdvDeliverNow.__url__)
+
+#现在推送
+class AdvDeliverNow(BaseHandler):
+    __url__ = "/advdelivernow"
+    @etagged()
+    def GET(self):
+        user = self.getcurrentuser()
+        books = [item for item in Book.all() if user.name in item.users]
+        return self.render('advdelivernow.html', "Deliver now", current='advsetting',
+            user=user, advcurr='delivernow', books=books, booksnum=len(books))
 
 #设置邮件白名单
 class AdvWhiteList(BaseHandler):
@@ -32,8 +42,8 @@ class AdvWhiteList(BaseHandler):
     @etagged()
     def GET(self):
         user = self.getcurrentuser()
-        return self.render('advwhitelist.html',"White List",current='advsetting',
-            user=user,advcurr='whitelist')
+        return self.render('advwhitelist.html', "White List", current='advsetting',
+            user=user, advcurr='whitelist')
         
     def POST(self):
         user = self.getcurrentuser()

@@ -1,0 +1,68 @@
+{% extends "advbase.html" %}
+{% block advcontent -%}
+<fieldset>
+    <legend>{{_("Deliver now")}}</legend>
+    <p style="font-size:0.8em;color:grey;">
+        {{_("Deliver selected books now.")}}
+    </p>
+  {% if booksnum > 0 %}
+    <a href="/deliver?u={{nickname}}" value="{{_("Deliver")}}" id="deliverButton" 
+        class="pure-button pure-button-primary" style="margin-right:4em;" >{{_("Deliver")}}</a>
+    <a href="#" class="actionButton" onclick="SelectAll();return false;">{{_("Select all")}}</a>
+    <a href="#" class="actionButton" onclick="SelectNone();return false;">{{_("Select none")}}</a>
+    <hr style="width:90%;color:silver;margin:1em auto;" />
+    <div class="pure-control-group">
+        {% for item in books %}
+        <label for="{{item.key().id()}}" class="pure-checkbox">
+            <input id="{{item.key().id()}}" type="checkbox" checked="1" onclick="UpdateDeliverLink();" />{{item.title}}
+        </label><br />
+        {% endfor %}
+    </div>
+  {% else %}
+    <hr style="width:90%;color:silver;margin:1em auto;" />
+    {{_("Do not have any subscribed book.")}}
+  {% endif %}
+</fieldset>
+{% endblock -%}
+{% block javascriptinhead %}
+<script type="text/javascript">
+    function UpdateDeliverLink() {
+        var booksId = [];
+        var inputs = document.getElementsByTagName("input");
+        var deliverButton = document.getElementById("deliverButton");
+        var inputsNum = inputs.length;
+        for (var i = 0; i < inputsNum; i++) {
+            if ((inputs[i].type == "checkbox") && inputs[i].checked) {
+                booksId.push(inputs[i].id);
+            }
+        }
+        var booksNum = booksId.length;
+        if ((booksNum > 0) && (booksNum != inputsNum)) {
+            deliverButton.href = "/deliver?u={{nickname}}&id=" + booksId.join("|");
+        } else {
+            deliverButton.href = "/deliver?u={{nickname}}";
+        }
+    };
+
+    function SelectAll() {
+        var inputs = document.getElementsByTagName("input");
+        for (var i = 0; i < inputs.length; i++) {
+            if (inputs[i].type == "checkbox") {
+                inputs[i].checked = true;
+            }
+        }
+        UpdateDeliverLink();
+    };
+
+    function SelectNone() {
+        var inputs = document.getElementsByTagName("input");
+        var deliverButton = document.getElementById("deliverButton");
+        for (var i = 0; i < inputs.length; i++) {
+            if (inputs[i].type == "checkbox") {
+                inputs[i].checked = false;
+            }
+        }
+        UpdateDeliverLink();
+    };
+</script>
+{% endblock %}

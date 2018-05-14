@@ -669,3 +669,36 @@ msgstr "6个月"
 
 msgid "1 Year"
 msgstr "1年"
+
+msgid "Remove hyperlinks"
+msgstr "移除链接"
+
+msgid "Not remove"
+msgstr "不移除"
+
+msgid "Image"
+msgstr "图片"
+
+msgid "Text"
+msgstr "正文"
+
+msgid "All"
+msgstr "全部"
+
+msgid "The username not exist or the email of kindle is empty."
+msgstr "对应用户名不存在或kindle email未设置。"
+
+msgid "Seperated by semicolon"
+msgstr "分号隔开多个地址"
+
+msgid "Deliver selected books now."
+msgstr "手动推送已选择的书籍。"
+
+msgid "Deliver"
+msgstr "推送"
+
+msgid "Select all"
+msgstr "选择全部"
+
+msgid "Select none"
+msgstr "取消全部"

@@ -108,6 +108,11 @@ class Login(BaseHandler):
                     except:
                         pass
             
+            #1.25.3新增user.remove_hyperlinks
+            if u.remove_hyperlinks is None:
+                u.remove_hyperlinks = 'image'
+                u.put()
+                
             #同步书籍数据库
             bksToDelete = []
             for bk in Book.all().filter('builtin = ', True):

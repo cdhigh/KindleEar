@@ -38,28 +38,35 @@ class Deliver(BaseHandler):
         
     def GET(self):
         username = web.input().get('u')
-        id_ = web.input().get('id') #for debug
+        id_ = web.input().get('id')
+        if id_:
+            id_ = [int(item) for item in id_.split('|') if item.isdigit()]
         
         self.queue2push = defaultdict(list)
         
         books = Book.all()
         if username: #现在投递【测试使用】，不需要判断时间和星期
+            user = KeUser.all().filter("name = ", username).get()
+            if not user or not user.kindle_email:
+                return self.render('autoback.html', "Delivering", tips=_('The username not exist or the email of kindle is empty.'))
+
             sent = []
-            books2push = Book.get_by_id(int(id_)) if id_ and id_.isdigit() else None
-            books2push = [books2push] if books2push else books
+            if id_: #推送特定账号指定的书籍，这里不判断特定账号是否已经订阅了指定的书籍，只要提供就推送
+                books2push = [Book.get_by_id(item) for item in id_ if Book.get_by_id(item)]
+            else: #推送特定账号所有的书籍
+                books2push = [item for item in books if username in item.users]
+            
             for book in books2push:
-                if not id_ and username not in book.users:
-                    continue
-                user = KeUser.all().filter("name = ", username).get()
-                if user and user.kindle_email:
-                    self.queueit(user, book.key().id(), book.separate)
-                    sent.append(book.title)
+                self.queueit(user, book.key().id(), book.separate)
+                sent.append(book.title)
             self.flushqueue()
+
             if len(sent):
                 tips = _("Book(s) (%s) put to queue!") % u', '.join(sent)
             else:
                 tips = _("No book to deliver!")
-            return self.render('autoback.html', "Delivering",tips=tips)
+
+            return self.render('autoback.html', "Delivering", tips=tips)
         
         #定时cron调用
         sentcnt = 0
@@ -109,3 +116,4 @@ class Deliver(BaseHandler):
                 sentcnt += 1
         self.flushqueue()
         return "Put <strong>%d</strong> books to queue!" % sentcnt
+        

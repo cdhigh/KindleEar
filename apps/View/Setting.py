@@ -46,6 +46,7 @@ class Setting(BaseHandler):
             user.send_days = [day for day in alldays if webInput.get(day)]
             user.merge_books = bool(webInput.get('mergebooks'))
             user.book_mode = webInput.get('bookmode')
+            user.remove_hyperlinks = webInput.get('removehyperlinks')
             user.put()
             
             myfeeds = user.ownfeeds

@@ -1,5 +1,9 @@
 # Changelog for KindleEar
 
+## 1.25.3
+  1. 'Deliver now' can select which books to been push (moved to 'Advanced|Deliver now').
+  2. New option allows remove hyperlinks of text.
+  
 ## 1.25.2
   1. Update links of book "Economist".
   2. bugfix: fix the crash problem of 'xxx@appid.appspotmail.com' feature.

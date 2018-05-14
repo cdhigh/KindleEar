@@ -51,6 +51,12 @@ td:hover span{
   <div class="m-box-r">
    <div class="pure-menu pure-menu-open">
     <ul>
+    {% if advcurr=='delivernow' -%}
+      <li class="pure-menu-selected"><a href="#">{{_("Deliver now")}}</a>
+      </li>
+    {% else -%}
+      <li><a href="/advdelivernow">{{_("Deliver now")}}</a></li>
+    {% endif -%}
     {% if advcurr=='whitelist' -%}
       <li class="pure-menu-selected"><a href="#">{{_("White List")}}</a>
       </li>

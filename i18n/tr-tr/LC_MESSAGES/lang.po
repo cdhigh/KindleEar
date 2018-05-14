@@ -502,176 +502,196 @@ msgid "Feed"
 msgstr "Feed"
 
 msgid "Authorize"
-msgstr "Authorize"
+msgstr "Yetki vermek"
 
 msgid "Authorized"
-msgstr "Authorized"
+msgstr "Yetkili"
 
 msgid "Authorization Error!<br/>%s"
-msgstr "Authorization Error!<br/>%s"
+msgstr "Yetkilendirme Hatası!<br/>%s"
 
 msgid "Success authorized by Pocket!"
-msgstr "Success authorized by Pocket!"
+msgstr "Pocket tarafından yetkilendirilen başarı!"
 
 msgid "Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>%s"
-msgstr "Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>%s"
+msgstr "Cep yetkilendirme isteğinde bulunamadı! <hr/> Aşağıdaki ayrıntılara bakın:<br/><br/>%s"
 
 msgid "'%(title)s'<br/><br/>Saved to %(act)s [%(email)s] success."
-msgstr "'%(title)s'<br/><br/>Saved to %(act)s [%(email)s] success."
+msgstr "'%(title)s'<br/><br/>%(act)s [%(email)s] başarısına kaydedildi."
 
 msgid "Failed save to Pocket.<br/>"
-msgstr "Failed save to Pocket.<br/>"
+msgstr "Pocket'e kaydetme işlemi başarısız oldu.<br/>"
 
 msgid "'%s'<br/><br/>Saved to your Pocket account."
-msgstr "'%s'<br/><br/>Saved to your Pocket account."
+msgstr "'%s'<br/><br/>Pocket hesabınıza kaydedildi."
 
 msgid "See details below:<br/><br/>%s"
-msgstr "See details below:<br/><br/>%s"
+msgstr "Aşağıdaki ayrıntılara bakın:<br/><br/>%s"
 
 msgid "Request type[%s] unsupported"
-msgstr "Request type[%s] unsupported"
+msgstr "İstek türü [%s] desteklenmiyor"
 
 msgid "The Instapaper service encountered an error. Please try again later."
-msgstr "The Instapaper service encountered an error. Please try again later."
+msgstr "Instapaper hizmeti bir hatayla karşılaştı. Lütfen daha sonra tekrar deneyiniz."
 
 msgid "Verify"
-msgstr "Verify"
+msgstr "Doğrulamak"
 
 msgid "Verifying"
-msgstr "Verifying"
+msgstr "Doğrulama"
 
 msgid "Verified"
-msgstr "Verified"
+msgstr "Doğrulanmış"
 
 msgid "Congratulation : the username and password are correct."
-msgstr "Congratulation : the username and password are correct."
+msgstr "Tebrik: kullanıcı adı ve şifre doğru."
 
 msgid "Unhappily : the username or password is incorrect!"
-msgstr "Unhappily : the username or password is incorrect!"
+msgstr "Mutsuz: kullanıcı adı veya şifre yanlış!"
 
 msgid "Error when verify the username and password for Instapaper. Status:"
-msgstr "Error when verify the username and password for Instapaper. Status:"
+msgstr "Instapaper için kullanıcı adı ve şifre doğrulanırken hata oluştu. Durum:"
 
 msgid "'%s'<br/><br/>Saved to your Instapaper account."
-msgstr "'%s'<br/><br/>Saved to your Instapaper account."
+msgstr "'%s'<br/><br/>Instapaper hesabınıza kaydedildi."
 
 msgid "The id is invalid!"
-msgstr "The id is invalid!"
+msgstr "Kimlik geçersiz!"
 
 msgid "The feed(%d) not exist!"
-msgstr "The feed(%d) not exist!"
+msgstr "Besleme(%d) mevcut değil!"
 
 msgid "The book(%d) not exist!"
-msgstr "The book(%d) not exist!"
+msgstr "Kitap(%d) mevcut değil!"
 
 msgid "Unhappily : cannot subscribe this book, Error:"
-msgstr "Unhappily : cannot subscribe this book, Error:"
+msgstr "Ne yazık ki: Bu kitaba abone olamaz, Hata:"
 
 msgid "Error when try to subscribe this book. Status:"
-msgstr "Error when try to subscribe this book. Status:"
+msgstr "Bu kitaba abone olmaya çalışırken hata oluştu. Durum:"
 
 msgid "Unhappily : cannot unsubscribe this book, Error:"
-msgstr "Unhappily : cannot unsubscribe this book, Error:"
+msgstr "Ne yazık ki: Bu kitabı iptal edemem, Hata:"
 
 msgid "Error when try to unsubscribe this book. Status:"
-msgstr "Error when try to unsubscribe this book. Status:"
+msgstr "Bu kitabı iptal etmeyi denediğinizde hata oluştu. Durum:"
 
 msgid "Unhappily : cannot delete this feed, Error:"
-msgstr "Unhappily : cannot delete this feed, Error:"
+msgstr "Ne yazık ki: Bu yayını silemiyorum, Hata:"
 
 msgid "Error when try to delete this feed. Status:"
-msgstr "Error when try to delete this feed. Status:"
+msgstr "Bu yayını silmeye çalışırken hata oluştu. Durum:"
 
 msgid "Unhappily : cannot add this feed, Error:"
-msgstr "Unhappily : cannot add this feed, Error:"
+msgstr "Mutsuz: Bu yayını ekleyemiyorum, Hata:"
 
 msgid "Error when try to add this feed. Status:"
-msgstr "Error when try to add this feed. Status:"
+msgstr "Bu yayını eklemeye çalışırken hata oluştu. Durum:"
 
 msgid "Append qrcode of url to article"
-msgstr "Append qrcode of url to article"
+msgstr "Url’in qrcode’unu makaleye ekle"
 
 msgid "Cover Image"
-msgstr "Cover Image"
+msgstr "Kapak resmi"
 
 msgid "Upload cover image"
-msgstr "Upload cover image"
+msgstr "Kapak resmi yükle"
 
 msgid "Upload a cover image from local."
-msgstr "Upload a cover image from local."
+msgstr "Yerelden bir kapak resmi yükleyin."
 
 msgid "Upload"
-msgstr "Upload"
+msgstr "Yükleme"
 
 msgid "Size of image file must be smaller than 500KB."
-msgstr "Size of image file must be smaller than 500KB."
+msgstr "Resim dosyasının boyutu 500 KB'den küçük olmalıdır."
 
 msgid "The file you chosen is not an image."
-msgstr "The file you chosen is not an image."
+msgstr "Seçtiğiniz dosya bir görüntü değil."
 
 msgid "The cover image have been uploaded successfully."
-msgstr "The cover image have been uploaded successfully."
+msgstr "Kapak resmi başarıyla yüklendi."
 
 msgid "Failed to upload the cover image. Error:"
-msgstr "Failed to upload the cover image. Error:"
+msgstr "Kapak resmi yüklenemedi. Hata:"
 
 msgid "Failed to delete the cover image. Error:"
-msgstr "Failed to delete the cover image. Error:"
+msgstr "Kapak resmi silinemedi. Hata:"
 
 msgid "Error when try to delete the cover image. Status:"
-msgstr "Error when try to delete the cover image. Status:"
+msgstr "Kapak resmini silmeye çalışırken hata oluştu. Durum:"
 
 msgid "Book mode"
-msgstr "Book mode"
+msgstr "Kitap modu"
 
 msgid "Periodical"
-msgstr "Periodical"
+msgstr "Periyodik"
 
 msgid "Comic"
-msgstr "Comic"
+msgstr "Komik"
 
 msgid "Please input a new number"
-msgstr "Please input a new number"
+msgstr "Lütfen yeni bir sayı giriniz"
 
 msgid "The number is invalid"
-msgstr "The number is invalid"
+msgstr "Numara geçersiz"
 
 msgid "Unhappily : cannot change this record, Error:"
-msgstr "Unhappily : cannot change this record, Error:"
+msgstr "Ne yazık ki: Bu kaydı değiştiremiyorum, Hata:"
 
 msgid "Error when try to change this record. Status:"
-msgstr "Error when try to change this record. Status:"
+msgstr "Bu kaydı değiştirmeye çalışırken hata oluştu. Durum:"
 
 msgid "Unhappily : cannot delete this record, Error:"
-msgstr "Unhappily : cannot delete this record, Error:"
+msgstr "Ne yazık ki: Bu kaydı silemiyorum, Hata:"
 
 msgid "Error when try to delete this record. Status:"
-msgstr "Error when try to delete this record. Status:"
+msgstr "Bu kaydı silmeye çalışırken hata oluştu. Durum:"
 
 msgid "Last delivered"
-msgstr "Last delivered"
+msgstr "Son teslim"
 
 msgid "Num"
 msgstr "Num"
 
 msgid "Record"
-msgstr "Record"
+msgstr "Kayıt"
 
 msgid "Expiration"
-msgstr "Expiration"
+msgstr "Son"
 
 msgid "Never expire"
-msgstr "Never expire"
+msgstr "hiç sona ermeyen"
 
 msgid "1 Month"
-msgstr "1 Month"
+msgstr "1 ay"
 
 msgid "3 Months"
-msgstr "3 Months"
+msgstr "3 ay"
 
 msgid "6 Months"
-msgstr "6 Months"
+msgstr "6 ay"
 
 msgid "1 Year"
-msgstr "1 Year"
+msgstr "1 yıl"
 
+msgid "Remove hyperlinks"
+msgstr "Köprüler kaldır"
+
+msgid "Not remove"
+msgstr "Kaldırmak yok"
+
+msgid "Image"
+msgstr "Görüntü"
+
+msgid "Text"
+msgstr "Metin"
+
+msgid "All"
+msgstr "Herşey"
+
+msgid "The username not exist or the email of kindle is empty."
+msgstr "The username not exist or the email of kindle is empty."
+
+msgid "Seperated by semicolon"
+msgstr "Seperated by semicolon"

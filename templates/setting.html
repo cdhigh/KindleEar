@@ -15,7 +15,7 @@
         <legend>{{_("Base Setting")}}</legend>
         <table border="0">
             <tr><td style="text-align:right;"><label><em class="required">*</em>{{_("Kindle E-mail")}}</label> : </td>
-            <td><input type="text" name="kindleemail" style="width:280px" value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" required />
+            <td><input type="text" name="kindleemail" style="width:280px" value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" placeholder="{{_("Seperated by semicolon")}}" required />
             </td></tr>
             <tr><td style="text-align:right;"><label>{{_("Time zone")}} : </label></td>
             <td><select class="bool" name="timezone">
@@ -80,16 +80,23 @@
                 <option value="periodical" {% if not user.book_mode or user.book_mode=='periodical' %}selected="selected"{% endif %}>{{_("Periodical")}}</option>
                 <option value="comic" {% if user.book_mode=='comic' %}selected="selected"{% endif %}>{{_("Comic")}}</option>
             </select></td></tr>
+            <tr><td style="text-align:right;"><label>{{_("Remove hyperlinks")}}</label> : </td>
+            <td><select class="bool" name="removehyperlinks">
+                <option value="" {% if not user.remove_hyperlinks %}selected="selected"{% endif %}>{{_("Not remove")}}</option>
+                <option value="image" {% if user.remove_hyperlinks=='image' %}selected="selected"{% endif %}>{{_("Image")}}</option>
+                <option value="text" {% if user.remove_hyperlinks=='text' %}selected="selected"{% endif %}>{{_("Text")}}</option>
+                <option value="all" {% if user.remove_hyperlinks=='all' %}selected="selected"{% endif %}>{{_("All")}}</option>
+            </select></td></tr>
         </table>
         
         <p><label><input type="checkbox" name="mergebooks" {% if user and user.merge_books %}checked="1"{% endif %} />
         {{_("Merge books into one")}}</label></p>
         <p><label><input type="checkbox" name="enablesend" {% if user and user.enable_send %}checked="1"{% endif %} />
         {{_("Enable deliver")}}</label></p>
-        <p>
+        {#<p>
             <a id="testlink" href="/deliver?u={{nickname}}">{{_("Deliver now")}}</a>
             <strong id="testmsg" class="error"></strong> {{_("Note: task deliver will be executed after some minutes.")}}
-        </p>
+        </p>#}
     </fieldset>
     <p></p>
     <fieldset id="adv_fieldset">
