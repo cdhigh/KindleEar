@@ -1,5 +1,8 @@
 # Changelog for KindleEar
 
+## 1.25.4
+  1. Improved 'Deliver now' feature, can select which feeds (in custom RSS) to been push. The feature is actived when have only custom RSS subscripted.
+
 ## 1.25.3
   1. 'Deliver now' can select which books to been push (moved to 'Advanced|Deliver now').
   2. New option allows remove hyperlinks of text.

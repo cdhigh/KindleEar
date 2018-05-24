@@ -32,6 +32,7 @@ class Worker(BaseHandler):
     def GET(self):
         username = web.input().get("u")
         bookid = web.input().get("id")
+        feedsId = web.input().get("feedsId")
         
         user = KeUser.all().filter("name = ", username).get()
         if not user:
@@ -55,6 +56,11 @@ class Worker(BaseHandler):
                 continue
                 #return "id of book is invalid or book not exist!<br />"
         
+        #Deliver only some feeds in custom rss
+        if feedsId:
+            feedsId = [int(item) for item in feedsId.split('|') if item.isdigit()]
+            feedsId = [Feed.get_by_id(item) for item in feedsId if Feed.get_by_id(item)]
+
         book4meta = None
         if len(bks) == 0:
             return "No have book to push!"
@@ -166,7 +172,7 @@ class Worker(BaseHandler):
                 book.keep_image = bk.keep_image
                 book.oldest_article = bk.oldest_article
                 book.fulltext_by_readability = True
-                feeds = bk.feeds
+                feeds = feedsId if feedsId else bk.feeds
                 book.feeds = []
                 for feed in feeds:
                     if feed.url.startswith( ("http://www.cartoonmad.com", "http://ac.qq.com", "http://m.ac.qq.com") ) :

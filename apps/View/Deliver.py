@@ -20,10 +20,12 @@ from books import BookClass
 class Deliver(BaseHandler):
     """ 判断需要推送哪些书籍 """
     __url__ = "/deliver"
-    def queueit(self, usr, bookid, separate):
+    def queueit(self, usr, bookid, separate, feedsId=None):
         param = {"u":usr.name, "id":bookid}
+        if feedsId:
+            param['feedsId'] = feedsId
         
-        if usr.merge_books and not separate:
+        if usr.merge_books and not separate and not feedsId:
             self.queue2push[usr.name].append(str(bookid)) #合并推送
         else:
             taskqueue.add(url='/worker', queue_name="deliverqueue1", method='GET',
@@ -32,13 +34,14 @@ class Deliver(BaseHandler):
     def flushqueue(self):
         for name in self.queue2push:
             param = {'u':name, 'id':','.join(self.queue2push[name])}
-            taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
-                params=param,target="worker")
+            taskqueue.add(url='/worker', queue_name="deliverqueue1", method='GET',
+                params=param, target="worker")
         self.queue2push = defaultdict(list)
         
     def GET(self):
         username = web.input().get('u')
         id_ = web.input().get('id')
+        feedsId = web.input().get('feedsId')
         if id_:
             id_ = [int(item) for item in id_.split('|') if item.isdigit()]
         
@@ -57,7 +60,7 @@ class Deliver(BaseHandler):
                 books2push = [item for item in books if username in item.users]
             
             for book in books2push:
-                self.queueit(user, book.key().id(), book.separate)
+                self.queueit(user, book.key().id(), book.separate, feedsId)
                 sent.append(book.title)
             self.flushqueue()
 
