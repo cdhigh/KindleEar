@@ -51,7 +51,7 @@ class TencentBaseBook(BaseComicBook):
                 newNum = oldNum + deliverCount
                 if newNum < len(chapterList):
                     if chapterList[newNum]['vip'] == 'lock':
-                        print("Chapter {} is Vip, waiting for free.".format(newNum))
+                        self.log.info("Chapter {} is Vip, waiting for free.".format(newNum))
                         break
                     imgList = self.getImgList(chapterList[newNum])
                     for img in imgList:
