@@ -16,7 +16,7 @@ class xxbiqugebase(BaseUrlBook):
     """
     title = u''
     description = u''
-    url = ''
+    feeds = []
     language = 'zh-cn'
     feed_encoding = 'utf-8'
     page_encoding = 'utf-8'
@@ -28,13 +28,9 @@ class xxbiqugebase(BaseUrlBook):
         newNovelUrls = self.GetNewNovel()
         if not newNovelUrls:
             return []
-        lastNum = 0
-        lastTitle = ''
-        for chapterTitle, num, url in newNovelUrls:
-            urls.append(('', chapterTitle, url, ''))
-            lastNum = num
-            lastTitle = chapterTitle
-        self.UpdateLastDelivered(self.title, lastNum, lastTitle)
+        for title, chapterTitle, num, url in newNovelUrls:
+            urls.append((title, chapterTitle, url, ''))
+            self.UpdateLastDelivered(title, num, chapterTitle)
         return urls
 
     def UpdateLastDelivered(self, title, num, chapter):
@@ -55,30 +51,35 @@ class xxbiqugebase(BaseUrlBook):
         userName = self.UserName()
         decoder = AutoDecoder(isfeed=False)
 
-        lastCount = LastDelivered.all().filter('username = ', userName).filter("bookname = ", self.title).get()
-        if not lastCount:
-            oldNum = 0
-        else:
-            oldNum = lastCount.num
+        for title, url in self.feeds:
+            lastCount = LastDelivered.all().filter('username = ', userName).filter("bookname = ", title).get()
+            if not lastCount:
+                oldNum = 0
+            else:
+                oldNum = lastCount.num
 
-        opener = URLOpener(self.host, timeout=60)
-        result = opener.open(self.url)
-        if result.status_code != 200:
-            self.log.warn('fetch index page for %s failed[%s] : %s' % (
-                self.title, URLOpener.CodeMap(result.status_code), self.url))
-            return []
-        content = result.content
-        content = self.AutoDecodeContent(content, decoder, self.feed_encoding, opener.realurl, result.headers)
+            opener = URLOpener(self.host, timeout=60)
+            result = opener.open(url)
+            if result.status_code != 200:
+                self.log.warn('fetch index page for %s failed[%s] : %s' % (
+                    title, URLOpener.CodeMap(result.status_code), url))
+                continue
+            content = result.content
+            content = self.AutoDecodeContent(content, decoder, self.feed_encoding, opener.realurl, result.headers)
 
-        soup = BeautifulSoup(content, 'lxml')
+            soup = BeautifulSoup(content, 'lxml')
 
-        table = soup.find('div', {'id': 'list'}).find_all('a')
-        for chapter in table:
-            url = chapter.get('href')
-            chapterTitle = chapter.text
-            num = int(url.split('/')[2].split('.')[0])
-            if num > oldNum:
-                oldNum = num
-                urls.append((chapterTitle, num, self.urljoin(self.host, url)))
+            table = soup.find('div', {'id': 'list'}).find_all('a')
+            chapterNum = 0
+            for chapter in table:
+                chapterNum += 1
+                if chapterNum > 100:
+                    break
+                url = chapter.get('href')
+                chapterTitle = chapter.text
+                num = int(url.split('/')[2].split('.')[0])
+                if num > oldNum:
+                    oldNum = num
+                    urls.append((title, chapterTitle, num, self.urljoin(self.host, url)))
 
         return urls
