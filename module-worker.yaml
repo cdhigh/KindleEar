@@ -1,4 +1,4 @@
-application: skiinder-kindleear
+application: kindleearte
 version: 1
 module: worker
 runtime: python27
