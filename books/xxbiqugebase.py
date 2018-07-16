@@ -72,7 +72,6 @@ class xxbiqugebase(BaseUrlBook):
             table = soup.find('div', {'id': 'list'}).find_all('a')
             chapterNum = 0
             for chapter in table:
-                chapterNum += 1
                 if chapterNum > 100:
                     break
                 url = chapter.get('href')
@@ -80,6 +79,7 @@ class xxbiqugebase(BaseUrlBook):
                 num = int(url.split('/')[2].split('.')[0])
                 if num > oldNum:
                     oldNum = num
+                    chapterNum += 1
                     urls.append((title, chapterTitle, num, self.urljoin(self.host, url)))
 
         return urls
