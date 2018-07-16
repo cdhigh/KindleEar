@@ -22,6 +22,8 @@ class xxbiqugebase(BaseUrlBook):
     page_encoding = 'utf-8'
     host = 'https://www.xxbiquge.com/'
 
+    limit = 100000
+
     def ParseFeedUrls(self):
         urls = []
 
@@ -72,7 +74,7 @@ class xxbiqugebase(BaseUrlBook):
             table = soup.find('div', {'id': 'list'}).find_all('a')
             chapterNum = 0
             for chapter in table:
-                if chapterNum > 100:
+                if chapterNum >= self.limit:
                     break
                 url = chapter.get('href')
                 chapterTitle = chapter.text

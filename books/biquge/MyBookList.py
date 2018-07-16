@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from .xxbiqugebase import xxbiqugebase
+from books.xxbiqugebase import xxbiqugebase
 
 
 def getBook():
@@ -16,3 +16,4 @@ class MyBookList(xxbiqugebase):
              (u'大王饶命', 'https://www.xxbiquge.com/78_78201/'),
              (u'逆流纯真年代', 'https://www.xxbiquge.com/77_77294/'),
              (u'剑灵同居日记', 'http://www.xxbiquge.com/76_76570/')]
+    limit = 100
