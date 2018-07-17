@@ -11,4 +11,4 @@ def getBook():
 class WenDing(cn3k5):
     title = u'问鼎森罗'
     description = u'神巫六六'
-    feeds = 'http://www.cn3k5.com/book/7342.html'
+    feeds = 'http://www.cn3k5.com/7/7342/'
