@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from books.xxbiqugebase import xxbiqugebase
+from books.Novelbase import xxbiqugebase
 
 
 def getBook():
@@ -10,5 +10,5 @@ def getBook():
 
 class DaWang(xxbiqugebase):
     title = u'大王饶命'
-    description = u'肘子'
-    feeds = [(u'大王饶命', 'https://www.xxbiquge.com/78_78201/')]
+    description = u'会说话的肘子'
+    feeds = 'https://www.xxbiquge.com/78_78201/'

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from books.xxbiqugebase import xxbiqugebase
+from books.Novelbase import xxbiqugebase
 
 
 def getBook():
@@ -10,5 +10,5 @@ def getBook():
 
 class XiuZhen(xxbiqugebase):
     title = u'修真聊天群'
-    description = u'NULL'
-    feeds = [(u'修真聊天群', 'https://www.xxbiquge.com/65_65306/')]
+    description = u'圣骑士的传说'
+    feeds = 'https://www.xxbiquge.com/65_65306/'

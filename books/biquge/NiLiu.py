@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from books.xxbiqugebase import xxbiqugebase
+from books.Novelbase import xxbiqugebase
 
 
 def getBook():
@@ -11,4 +11,4 @@ def getBook():
 class NiLiu(xxbiqugebase):
     title = u'逆流纯真年代'
     description = u'人间武库'
-    feeds = [(u'逆流纯真年代', 'https://www.xxbiquge.com/77_77294/')]
+    feeds = 'https://www.xxbiquge.com/77_77294/'
