@@ -8,6 +8,7 @@ from lib.urlopener import URLOpener
 from lib.autodecoder import AutoDecoder
 from books.base import BaseComicBook
 from apps.dbModels import LastDelivered
+from bs4 import BeautifulSoup
 
 
 class TencentBaseBook(BaseComicBook):
@@ -32,7 +33,7 @@ class TencentBaseBook(BaseComicBook):
             
             lastCount = LastDelivered.all().filter('username = ', userName).filter("bookname = ", title).get()
             if not lastCount:
-                default_log.info('These is no log in db LastDelivered for name: %s, set to 0' % title)
+                self.log.info('These is no log in db LastDelivered for name: %s, set to 0' % title)
                 oldNum = 0
             else:
                 oldNum = lastCount.num
@@ -49,7 +50,10 @@ class TencentBaseBook(BaseComicBook):
             for deliverCount in range(5):
                 newNum = oldNum + deliverCount
                 if newNum < len(chapterList):
-                    imgList = self.getImgList(chapterList[newNum], comic_id)
+                    if chapterList[newNum]['vip'] == True:
+                        self.log.info("Chapter {} is Vip, waiting for free.".format(newNum))
+                        break
+                    imgList = self.getImgList(chapterList[newNum])
                     for img in imgList:
                         urls.append((title, img, img, None))
                     self.UpdateLastDelivered(title, newNum+1)
@@ -78,37 +82,44 @@ class TencentBaseBook(BaseComicBook):
         opener = URLOpener(self.host, timeout=60)
         chapterList = []
 
-        getChapterListUrl = 'http://m.ac.qq.com/GetData/getChapterList?id={}'.format(comic_id)
-        result = opener.open(getChapterListUrl)
+        url = 'http://m.ac.qq.com/comic/chapterList/id/{}'.format(comic_id)
+        result = opener.open(url)
         if result.status_code != 200 or not result.content:
             self.log.warn('fetch comic page failed: %s' % url)
             return chapterList
 
-        content = result.content
-        content = self.AutoDecodeContent(content, decoder, self.page_encoding, opener.realurl, result.headers)
+        content = self.AutoDecodeContent(result.content, decoder, self.feed_encoding, opener.realurl, result.headers)
 
-        contentJson = json.loads(content)
-        count = contentJson.get('length', 0)
-        if (count != 0):
-            for i in range(count + 1):
-                for item in contentJson:
-                    if isinstance(contentJson[item], dict) and contentJson[item].get('seq') == i:
-                        chapterList.append({item: contentJson[item]})
-                        break
-        else:
-            self.log.warn('comic count is zero.')
+        soup = BeautifulSoup(content, 'lxml')
+        # <section class="chapter-list-box list-expanded" data-vip-free="1">
+        section = soup.find('section', {'class': 'chapter-list-box list-expanded'})
+        if (section is None):
+            self.log.warn('chapter-list-box is not exist.')
+            return chapterList
+
+        # <ul class="chapter-list normal">
+        # <ul class="chapter-list reverse">
+        reverse_list = section.find('ul', {'class': 'chapter-list reverse'})
+        if (reverse_list is None):
+            self.log.warn('chapter-list is not exist.')
+            return chapterList
+
+        for item in reverse_list.find_all('a'):
+            # <a class="chapter-link lock" data-cid="447" data-seq="360" href="/chapter/index/id/531490/cid/447">360</a>
+            href = 'http://m.ac.qq.com' + item.get('href')
+            isVip = "lock" in item.get('class')
+
+            chapterList.append({'url':href, 'vip':isVip})
 
         return chapterList
 
     #获取漫画图片列表
-    def getImgList(self, chapterJson, comic_id):
+    def getImgList(self, url):
         decoder = AutoDecoder(isfeed=False)
         opener = URLOpener(self.host, timeout=60)
         imgList = []
 
-        cid = list(chapterJson.keys())[0]
-        getImgListUrl = 'http://ac.qq.com/ComicView/index/id/{0}/cid/{1}'.format(comic_id, cid)
-        result = opener.open(getImgListUrl)
+        result = opener.open(url['url'])
         if result.status_code != 200 or not result.content:
             self.log.warn('fetch comic page failed: %s' % url)
             return imgList
