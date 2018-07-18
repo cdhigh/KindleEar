@@ -1,0 +1,52 @@
+<component name="libraryTable">
+  <library name="Google App Engine SDK" type="python">
+    <CLASSES>
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/antlr3" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/apiclient" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/argparse" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/cacerts" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/cherrypy" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/concurrent" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/deprecated_enum" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/distutils" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/docker" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/endpoints-1.0" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/fancy_urllib" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/google-api-python-client" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/grizzled" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/grpcio-1.9.1" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/httplib2" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/ipaddr" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/jinja2-2.6" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/markupsafe-0.15" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/markupsafe-0.23" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/mox" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/oauth2" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/oauth2client" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/oauth2client_devserver" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/portpicker" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/prettytable" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/protorpc-1.0" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/PyAMF-0.6.1" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/PyAMF-0.7.2" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/pyasn1" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/pyasn1_modules" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/python-gflags" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/requests" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/rsa" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/setuptools-0.6c11" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/simplejson" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/six-1.9.0" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/six_subset" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/sqlcmd" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/uritemplate" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/websocket" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/werkzeug-0.11.10" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/webapp2-2.5.2" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/webob-1.2.3" />
+      <root url="file://$USER_HOME$/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/google_appengine/lib/yaml-3.10" />
+    </CLASSES>
+    <SOURCES />
+  </library>
+</component>
