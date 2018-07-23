@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 #http://ac.qq.com或者http://m.ac.qq.com网站的免费漫画的基类，简单提供几个信息实现一个子类即可推送特定的漫画
+#Author: insert0003 <https://github.com/insert0003>
 import re, urlparse, json, datetime, base64
 from time import sleep
 from config import TIMEZONE

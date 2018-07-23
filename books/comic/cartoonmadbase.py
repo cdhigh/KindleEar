@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 #http://www.cartoonmad.com网站的漫画的基类，简单提供几个信息实现一个子类即可推送特定的漫画
+#Author: insert0003 <https://github.com/insert0003>
 import datetime
 from bs4 import BeautifulSoup
 from config import TIMEZONE

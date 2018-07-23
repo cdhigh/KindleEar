@@ -695,3 +695,9 @@ msgstr "The username not exist or the email of kindle is empty."
 
 msgid "Seperated by semicolon"
 msgstr "Seperated by semicolon"
+
+msgid "Import as fulltext RSS by default"
+msgstr "Import as fulltext RSS by default"
+
+msgid "Do not have any subscribed book."
+msgstr "Do not have any subscribed book."

@@ -702,3 +702,9 @@ msgstr "选择全部"
 
 msgid "Select none"
 msgstr "取消全部"
+
+msgid "Import as fulltext RSS by default"
+msgstr "默认导入为全文订阅源"
+
+msgid "Do not have any subscribed book."
+msgstr "暂时没有已订阅的书籍。"

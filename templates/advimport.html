@@ -8,6 +8,11 @@
     </p>
     <br />
     <input type="file" name="importfile" />
+    <hr />
+    <label for="defaultIsfulltext" class="pure-checkbox">
+        <input type="checkbox" name="defaultIsfulltext" id="defaultIsfulltext" />
+        {{_("Import as fulltext RSS by default")}}
+    </label>
     <br />
     <input type="submit" value="{{_("Import")}}" class="pure-button pure-button-primary" style="margin-top:8px;" />
     <span style="margin-left:1em;"><a href="/advexport" class="actionButton">{{_("Download")}}</a></span>

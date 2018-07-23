@@ -43,7 +43,7 @@ def RemoveChineseBooks(ke_dir):
     list_book_dirs = os.walk(books_dir)
     for root, dirs, files in list_book_dirs:
         for f in files:
-            if not f.endswith('.py') or f.startswith('__') or f == 'base.py':
+            if not f.endswith('.py') or f.startswith('__') or f.endswith('base.py'):
                 continue
             
             bkfile = os.path.join(root, f)

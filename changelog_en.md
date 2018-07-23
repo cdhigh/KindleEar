@@ -1,5 +1,9 @@
 # Changelog for KindleEar
 
+## 1.25.5
+  1. Added some online novel books. (implemented by skiinder<https://github.com/skiinder>.)
+  2. OPML can be imported as fulltext or summary.
+
 ## 1.25.4
   1. Improved 'Deliver now' feature, can select which feeds (in custom RSS) to been push. The feature is actived when have only custom RSS subscripted.
 

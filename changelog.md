@@ -1,5 +1,9 @@
 # Changelog for KindleEar
 
+## 1.25.5
+  1. skiinder<https://github.com/skiinder>实现在线连载小说的推送。
+  2. 导入OPML订阅列表时可选默认按全文还是摘要订阅源导入。
+
 ## 1.25.4
   1. 改进手动推送功能，如果仅订阅了自定义RSS，则可以选择推送哪些订阅源。
 

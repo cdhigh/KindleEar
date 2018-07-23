@@ -172,6 +172,7 @@ class AdvImport(BaseHandler):
     def POST(self):
         import opml
         x = web.input(importfile={})
+        defaultIsfulltext = bool(x.get('defaultIsfulltext')) #默认是否按全文RSS导入
         if 'importfile' in x:
             user = self.getcurrentuser()
             try:
@@ -181,7 +182,13 @@ class AdvImport(BaseHandler):
             
             for o in self.walkOutline(rsslist):
                 title, url, isfulltext = o.text, urllib.unquote_plus(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
-                isfulltext = bool(isfulltext.lower() in ('true', '1'))
+                if isfulltext.lower() in ('true', '1'):
+                    isfulltext = True
+                elif isfulltext.lower() in ('false', '0'):
+                    isfulltext = False
+                else:
+                    isfulltext = defaultIsfulltext
+                    
                 if title and url:
                     try:
                         url = url.decode('utf-8')

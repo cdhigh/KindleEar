@@ -701,7 +701,7 @@ class BaseFeedBook:
                 #a_.unwrap()
                 a_.name = 'i'
                 a_.attrs.clear()
-                a_.attrs['style'] = 'text-decoration:underline;'
+                #a_.attrs['style'] = 'text-decoration:underline;'
 
         #插入分享链接，如果有插入qrcode，则返回(imgName, imgContent)
         qrimg = self.AppendShareLinksToArticle(soup, url)
@@ -895,7 +895,7 @@ class BaseFeedBook:
                 #a_.unwrap()
                 a_.name = 'i'
                 a_.attrs.clear()
-                a_.attrs['style'] = 'text-decoration:underline;'
+                #a_.attrs['style'] = 'text-decoration:underline;'
 
         #插入分享链接，如果插入了qrcode，则返回(imgName, imgContent)
         qrimg = self.AppendShareLinksToArticle(soup, url)
@@ -1321,7 +1321,7 @@ class WebpageBook(BaseFeedBook):
                     #a_.unwrap()
                     a_.name = 'i'
                     a_.attrs.clear()
-                    a_.attrs['style'] = 'text-decoration:underline;'
+                    #a_.attrs['style'] = 'text-decoration:underline;'
             
             content = unicode(soup)
             
