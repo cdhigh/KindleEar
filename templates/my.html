@@ -8,7 +8,7 @@
         <div class="titleRow">
             {{feed.title}}
             {% if feed.isfulltext %} <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" />{% endif %}
-            {% if feed.url.startswith("http://www.cartoonmad.com") %} <img alt="{{_("CartoonMad")}}" src="static/comic.gif" border="0" />{% endif %}
+            {% if feed.url.startswith(("http://www.cartoonmad.com", "https://www.cartoonmad.com")) %} <img alt="{{_("CartoonMad")}}" src="static/comic.gif" border="0" />{% endif %}
             {% if feed.url.startswith(("http://ac.qq.com", "http://m.ac.qq.com")) %} <img alt="{{_("Tencent")}}" src="static/comic.gif" border="0" />{% endif %}
         </div>
         <div class="cornerControls">
@@ -194,7 +194,7 @@ function appendFeedDiv(title, isfulltext, url, feedid) {
         imgNode.setAttribute("border", "0");
         newTitleDiv.appendChild(imgNode);
     }
-    if (url.startsWith("http://www.cartoonmad.com")) {
+    if (url.startsWith("http://www.cartoonmad.com") || url.startsWith("https://www.cartoonmad.com")) {
         newTitleDiv.appendChild(document.createTextNode(' '));
         var imgNode = document.createElement("img");
         imgNode.setAttribute("alt", {{'"' + _("CartoonMad") + '"'}});

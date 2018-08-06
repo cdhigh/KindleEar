@@ -24,13 +24,15 @@ class CartoonMadBaseBook(BaseComicBook):
     #使用此函数返回漫画图片列表[(section, title, url, desc),...]
     def ParseFeedUrls(self):
         urls = [] #用于返回
-        
         newComicUrls = self.GetNewComic() #返回[(title, num, url),...]
         if not newComicUrls:
             return []
         
         decoder = AutoDecoder(isfeed=False)
         for title, num, url in newComicUrls:
+            if url.startswith( "http://" ):
+                url = url.replace('http://', 'https://')
+
             opener = URLOpener(self.host, timeout=60)
             result = opener.open(url)
             if result.status_code != 200 or not result.content:
@@ -86,7 +88,7 @@ class CartoonMadBaseBook(BaseComicBook):
     #返回：[(title, num, url),...]
     def GetNewComic(self):
         urls = []
-        
+
         if not self.feeds:
             return []
         
@@ -94,6 +96,8 @@ class CartoonMadBaseBook(BaseComicBook):
         decoder = AutoDecoder(isfeed=False)
         for item in self.feeds:
             title, url = item[0], item[1]
+            if url.startswith( "http://" ):
+                url = url.replace('http://', 'https://')
             
             lastCount = LastDelivered.all().filter('username = ', userName).filter("bookname = ", title).get()
             if not lastCount:
@@ -112,7 +116,7 @@ class CartoonMadBaseBook(BaseComicBook):
             
             soup = BeautifulSoup(content, 'lxml')
             
-            allComicTable = soup.find_all('table', {'width': '688'})
+            allComicTable = soup.find_all('table', {'width': '800', 'align': 'center'})
             addedForThisComic = False
             for comicTable in allComicTable:
                 comicVolumes = comicTable.find_all('a', {'target': '_blank'})
