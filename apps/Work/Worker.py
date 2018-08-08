@@ -175,7 +175,7 @@ class Worker(BaseHandler):
                 feeds = feedsId if feedsId else bk.feeds
                 book.feeds = []
                 for feed in feeds:
-                    if feed.url.startswith( ("http://www.cartoonmad.com", "http://ac.qq.com", "http://m.ac.qq.com") ) :
+                    if feed.url.startswith( ("http://www.cartoonmad.com", "https://www.cartoonmad.com", "http://ac.qq.com", "http://m.ac.qq.com") ) :
                         self.ProcessComicRSS(username, user, feed)
                     else:
                         book.feeds.append((feed.title, feed.url, feed.isfulltext))
@@ -379,7 +379,7 @@ class Worker(BaseHandler):
 
         if feed.url.startswith( ("http://ac.qq.com", "http://m.ac.qq.com") ):
             book = TencentBaseBook(imgindex=imgindex, opts=opts, user=user)
-        elif feed.url.startswith( "http://www.cartoonmad.com" ):
+        elif feed.url.startswith( ("http://www.cartoonmad.com", "https://www.cartoonmad.com") ):
             book = CartoonMadBaseBook(imgindex=imgindex, opts=opts, user=user)
         else:
             return "Failed to push book <%s>!"%title
