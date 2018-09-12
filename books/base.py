@@ -1386,7 +1386,7 @@ class BaseComicBook(BaseFeedBook):
             chapterList = self.getChapterList(url)
 
             pageCount=0
-            for deliverCount in range(1):
+            for deliverCount in range(10):
                 newNum = oldNum + deliverCount
                 if newNum < len(chapterList):
                     imgList = self.getImgList(chapterList[newNum])
@@ -1397,8 +1397,6 @@ class BaseComicBook(BaseFeedBook):
                         pageCount=pageCount+1
                         urls.append((title, '{}'.format(pageCount), img, None))
                         self.log.info('comicSrc: %s' % img)
-                        print img
-                        break
 
                     self.UpdateLastDelivered(title, newNum+1)
                     if pageCount > 80:
