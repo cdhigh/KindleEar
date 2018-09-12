@@ -18,7 +18,7 @@ class CartoonMadBaseBook(BaseComicBook):
     page_encoding       = ''
     mastheadfile        = ''
     coverfile           = ''
-    host                = 'http://www.cartoonmad.com'
+    host                = 'https://www.cartoonmad.com'
     feeds               = [] #子类填充此列表[('name', mainurl),...]
     
     #使用此函数返回漫画图片列表[(section, title, url, desc),...]
