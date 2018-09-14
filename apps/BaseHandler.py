@@ -74,7 +74,7 @@ class BaseHandler:
             dl.put()
         except Exception as e:
             default_log.warn('DeliverLog failed to save:%s',str(e))
-    
+
     #TO可以是一个单独的字符串，或一个字符串列表，对应发送到多个地址
     @classmethod
     def SendToKindle(self, name, to, title, booktype, attachment, tz=TIMEZONE, filewithtime=True):

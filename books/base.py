@@ -1412,6 +1412,10 @@ class BaseComicBook(BaseFeedBook):
     def getImgList(self, url):
         return []
     
+    #获取漫画图片内容
+    def adjustImgContent(self, content):
+        return content 
+    
     #生成器，返回一个图片元组，mime,url,filename,content,brief,thumbnail
     def Items(self):
         urls = self.ParseFeedUrls()
@@ -1433,7 +1437,8 @@ class BaseComicBook(BaseFeedBook):
             content = result.content
             if not content:
                 continue
-            
+
+            content = self.adjustImgContent(content);
             imgFilenameList = []
             
             #先判断是否是图片
@@ -1668,4 +1673,3 @@ def debug_save_ftp(content, name='page.html', root='', server='127.0.0.1', port=
     ftp.storbinary('STOR %s' % name, StringIO(content))
     ftp.set_debuglevel(0)
     ftp.quit()
-
