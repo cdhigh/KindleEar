@@ -10,6 +10,7 @@
             {% if feed.isfulltext %} <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" />{% endif %}
             {% if feed.url.startswith(("http://www.cartoonmad.com", "https://www.cartoonmad.com")) %} <img alt="{{_("CartoonMad")}}" src="static/comic.gif" border="0" />{% endif %}
             {% if feed.url.startswith(("http://ac.qq.com", "http://m.ac.qq.com")) %} <img alt="{{_("Tencent")}}" src="static/comic.gif" border="0" />{% endif %}
+            {% if feed.url.startswith(("https://www.manhuagui.com", "https://m.manhuagui.com")) %} <img alt="{{_("ManHuaGui")}}" src="static/comic.gif" border="0" />{% endif %}
         </div>
         <div class="cornerControls">
             {#<a href="/delfeed/{{feed.key().id()}}" class="actionButton">{{_("Delete")}}</a>#}
@@ -206,6 +207,14 @@ function appendFeedDiv(title, isfulltext, url, feedid) {
         newTitleDiv.appendChild(document.createTextNode(' '));
         var imgNode = document.createElement("img");
         imgNode.setAttribute("alt", {{'"' + _("Tencent") + '"'}});
+        imgNode.setAttribute("src", "static/comic.gif");
+        imgNode.setAttribute("border", "0");
+        newTitleDiv.appendChild(imgNode);
+    }
+    if (url.startsWith("https://www.manhuagui.com") || url.startsWith("https://m.manhuagui.com")) {
+        newTitleDiv.appendChild(document.createTextNode(' '));
+        var imgNode = document.createElement("img");
+        imgNode.setAttribute("alt", {{'"' + _("ManHuaGui") + '"'}});
         imgNode.setAttribute("src", "static/comic.gif");
         imgNode.setAttribute("border", "0");
         newTitleDiv.appendChild(imgNode);
