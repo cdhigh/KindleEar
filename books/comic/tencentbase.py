@@ -42,7 +42,7 @@ class TencentBaseBook(BaseComicBook):
 
         content = self.AutoDecodeContent(result.content, decoder, self.feed_encoding, opener.realurl, result.headers)
 
-        soup = BeautifulSoup(content, 'lxml')
+        soup = BeautifulSoup(content, 'html.parser')
         # <section class="chapter-list-box list-expanded" data-vip-free="1">
         section = soup.find('section', {'class': 'chapter-list-box list-expanded'})
         if (section is None):

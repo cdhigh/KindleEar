@@ -62,12 +62,12 @@ class ManHuaGuiBaseBook(BaseComicBook):
 
         content = self.AutoDecodeContent(result.content, decoder, self.feed_encoding, opener.realurl, result.headers)
 
-        soup = BeautifulSoup(content, 'lxml')
+        soup = BeautifulSoup(content, 'html.parser')
         invisible_input = soup.find("input", {"id":'__VIEWSTATE'})
         if invisible_input:
             lz_encoded=invisible_input.get("value")
             lz_decoded = decompressFromBase64(lz_encoded)
-            soup = BeautifulSoup(lz_decoded, 'lxml')
+            soup = BeautifulSoup(lz_decoded, 'html.parser')
         else:
             soup = soup.find("div", {"class": 'chapter-list', "id":'chapterList'})
 
@@ -91,7 +91,7 @@ class ManHuaGuiBaseBook(BaseComicBook):
             return imgList
 
         content = self.AutoDecodeContent(result.content, decoder, self.feed_encoding, opener.realurl, result.headers)
-        soup = BeautifulSoup(content, 'lxml')
+        soup = BeautifulSoup(content, 'html.parser')
         scripts = soup.findAll("script", {"type": "text/javascript"})
         for script in scripts:
             if script.text != "":
