@@ -2,13 +2,10 @@
 # -*- coding:utf-8 -*-
 #http://www.cartoonmad.com网站的漫画的基类，简单提供几个信息实现一个子类即可推送特定的漫画
 #Author: insert0003 <https://github.com/insert0003>
-import datetime
 from bs4 import BeautifulSoup
-from config import TIMEZONE
 from lib.urlopener import URLOpener
 from lib.autodecoder import AutoDecoder
 from books.base import BaseComicBook
-from apps.dbModels import LastDelivered
 
 class CartoonMadBaseBook(BaseComicBook):
     title               = u''
@@ -18,121 +15,98 @@ class CartoonMadBaseBook(BaseComicBook):
     page_encoding       = ''
     mastheadfile        = ''
     coverfile           = ''
-    host                = 'http://www.cartoonmad.com'
+    host                = 'https://www.cartoonmad.com'
     feeds               = [] #子类填充此列表[('name', mainurl),...]
     
-    #使用此函数返回漫画图片列表[(section, title, url, desc),...]
-    def ParseFeedUrls(self):
-        urls = [] #用于返回
-        newComicUrls = self.GetNewComic() #返回[(title, num, url),...]
-        if not newComicUrls:
-            return []
-        
+    #获取漫画章节列表
+    def getChapterList(self, url):
         decoder = AutoDecoder(isfeed=False)
-        for title, num, url in newComicUrls:
-            if url.startswith( "http://" ):
-                url = url.replace('http://', 'https://')
+        opener = URLOpener(self.host, timeout=60)
+        chapterList = []
 
-            opener = URLOpener(self.host, timeout=60)
-            result = opener.open(url)
-            if result.status_code != 200 or not result.content:
-                self.log.warn('fetch comic page failed: %s' % url)
-                continue
-                
-            content = result.content
-            content = self.AutoDecodeContent(content, decoder, self.page_encoding, opener.realurl, result.headers)
+        if url.startswith( "http://" ):
+            url = url.replace('http://', 'https://')
             
-            bodySoup = BeautifulSoup(content, 'lxml')
-            sel = bodySoup.find('select') #页码行，要提取所有的页面
-            ul = sel.find_all('option') if sel else None
-            if not ul:
-                continue
+        result = opener.open(url)
+        if result.status_code != 200 or not result.content:
+            self.log.warn('fetch comic page failed: %s' % url)
+            return chapterList
 
-            for comicPage in ul:
-                href = comicPage.get('value')
-                if href:
-                    pageHref = self.urljoin(url, href)
-                    result = opener.open(pageHref)
-                    if result.status_code != 200:
-                        self.log.warn('fetch comic page failed: %s' % pageHref)
-                        continue
-                        
-                    content = result.content
-                    content = self.AutoDecodeContent(content, decoder, self.page_encoding, opener.realurl, result.headers)
-                    soup = BeautifulSoup(content, 'lxml')
-                    
-                    comicImgTag = soup.find('img', {'oncontextmenu': 'return false'})
-                    comicSrc = comicImgTag.get('src') if comicImgTag else None
-                    if comicSrc:
-                        urls.append((title, comicPage.text, comicSrc, None))
+        content = self.AutoDecodeContent(result.content, decoder, self.feed_encoding, opener.realurl, result.headers)
 
-            self.UpdateLastDelivered(title, num)
-            
-        return urls
+        soup = BeautifulSoup(content, 'html.parser')
+        allComicTable = soup.find_all('table', {'width': '800', 'align': 'center'})
+        for comicTable in allComicTable:
+            comicVolumes = comicTable.find_all('a', {'target': '_blank'})
+            for volume in comicVolumes:
+                href = self.urljoin(self.host, volume.get('href'))
+                chapterList.append(href)
 
-    #更新已经推送的卷序号到数据库
-    def UpdateLastDelivered(self, title, num):
-        userName = self.UserName()
-        dbItem = LastDelivered.all().filter('username = ', userName).filter('bookname = ', title).get()
-        self.last_delivered_volume = u' 第%d话' % num
-        if dbItem:
-            dbItem.num = num
-            dbItem.record = self.last_delivered_volume
-            dbItem.datetime = datetime.datetime.utcnow() + datetime.timedelta(hours=TIMEZONE)
+        return chapterList
+
+    #获取漫画图片列表
+    def getImgList(self, url):
+        decoder = AutoDecoder(isfeed=False)
+        opener = URLOpener(self.host, timeout=60)
+        imgList = []
+
+        result = opener.open(url)
+        if result.status_code != 200 or not result.content:
+            self.log.warn('fetch comic page failed: %s' % url)
+            return imgList
+
+        content = self.AutoDecodeContent(result.content, decoder, self.page_encoding, opener.realurl, result.headers)
+        soup = BeautifulSoup(content, 'html.parser')
+        sel = soup.find('select') #页码行，要提取所有的页面
+        ulist = sel.find_all('option') if sel else None
+        if not ulist:
+            return imgList
+
+        for ul in ulist:
+            if ul.get('value') == None:
+                ulist.remove(ul)
+
+        listLen = len(ulist)
+        firstPageTag = soup.find('img', {'oncontextmenu': 'return false'})
+        firstPage = firstPageTag.get('src') if firstPageTag else None
+
+        if firstPage != None:
+            base, length, type = self.getImgStr(firstPage)
+            for index in range(len(ulist)):
+                imgUrl = "{}{}.{}".format(base, str(index+1).zfill(length), type)
+                imgList.append(imgUrl)
+        
+        if imgList[0] == firstPage and imgList[listLen-1] == self.getImgUrl(ulist[listLen-1].get('value')):
+            return imgList
         else:
-            dbItem = LastDelivered(username=userName, bookname=title, num=num, record=self.last_delivered_volume,
-                datetime=datetime.datetime.utcnow() + datetime.timedelta(hours=TIMEZONE))
-        dbItem.put()
+            imgList = []
+            for ul in ulist:
+                imgList.append(self.getImgUrl(ul.get('value')))
+            return imgList
 
-    #根据已经保存的记录查看连载是否有新的章节，返回章节URL列表
-    #返回：[(title, num, url),...]
-    def GetNewComic(self):
-        urls = []
+        return imgList
 
-        if not self.feeds:
-            return []
-        
-        userName = self.UserName()
+    #获取漫画图片网址
+    def getImgUrl(self, url):
         decoder = AutoDecoder(isfeed=False)
-        for item in self.feeds:
-            title, url = item[0], item[1]
-            if url.startswith( "http://" ):
-                url = url.replace('http://', 'https://')
-            
-            lastCount = LastDelivered.all().filter('username = ', userName).filter("bookname = ", title).get()
-            if not lastCount:
-                default_log.info('These is no log in db LastDelivered for name: %s, set to 0' % title)
-                oldNum = 0
-            else:
-                oldNum = lastCount.num
-                
-            opener = URLOpener(self.host, timeout=60)
-            result = opener.open(url)
-            if result.status_code != 200:
-                self.log.warn('fetch index page for %s failed[%s] : %s' % (title, URLOpener.CodeMap(result.status_code), url))
-                continue
-            content = result.content
-            content = self.AutoDecodeContent(content, decoder, self.feed_encoding, opener.realurl, result.headers)
-            
-            soup = BeautifulSoup(content, 'lxml')
-            
-            allComicTable = soup.find_all('table', {'width': '800', 'align': 'center'})
-            addedForThisComic = False
-            for comicTable in allComicTable:
-                comicVolumes = comicTable.find_all('a', {'target': '_blank'})
-                for volume in comicVolumes:
-                    texts = volume.text.split(' ')
-                    if len(texts) > 2 and texts[1].isdigit() and volume.get('href'):
-                        num = int(texts[1])
-                        if num > oldNum:
-                            oldNum = num
-                            href = self.urljoin(self.host, volume.get('href'))
-                            urls.append((title, num, href))
-                            addedForThisComic = True
-                            break #一次只推送一卷（有时候一卷已经很多图片了）
-                            
-                if addedForThisComic:
-                    break
-                    
-        return urls
+        opener = URLOpener(self.host, timeout=60)
 
+        url = self.host + "/comic/" + url
+        result = opener.open(url)
+        if result.status_code != 200 or not result.content:
+            self.log.warn('fetch comic page failed: %s' % url)
+            return None
+
+        content = self.AutoDecodeContent(result.content, decoder, self.page_encoding, opener.realurl, result.headers)
+        soup = BeautifulSoup(content, 'html.parser')
+        comicImgTag = soup.find('img', {'oncontextmenu': 'return false'})
+        return comicImgTag.get('src') if comicImgTag else None
+
+    #获取漫画图片格式
+    def getImgStr(self, url):
+        urls = url.split("/")
+        tail = urls[len(urls)-1]
+        imgIndex = tail.split(".")[0]
+        imgType = tail.split(".")[1]
+        base = url.replace(tail, "")
+        return base, len(imgIndex), imgType
