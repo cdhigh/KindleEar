@@ -1133,7 +1133,7 @@ class BaseFeedBook:
         elif sharetype == 'tweibo':
             href = 'http://v.t.qq.com/share/share.php?url='
         elif sharetype == 'facebook':
-            href = 'http://www.facebook.com/share.php?u='
+            href = 'http://note.wiz.cn/url2wiz?folder=/My Notes/&user=maliyikousu&content-only=true&url='
         elif sharetype == 'twitter':
             href = 'http://twitter.com/home?status='
         elif sharetype == 'tumblr':

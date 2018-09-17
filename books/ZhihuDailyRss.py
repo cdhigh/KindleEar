@@ -3,10 +3,10 @@
 from base import BaseFeedBook
 
 def getBook():
-    return ZhihuDaily
+    return ZhihuDailyRss
 
-class ZhihuDaily(BaseFeedBook):
-    title                 = u'知乎日報'
+class ZhihuDailyRss(BaseFeedBook):
+    title                 = u'知乎日报'
     description           = u'知乎日报全文RSS，不需要转发，排版图片正常。'
     language              = 'zh-cn'
     feed_encoding         = "utf-8"
@@ -15,5 +15,6 @@ class ZhihuDaily(BaseFeedBook):
     coverfile = "cv_zhihudaily.jpg"
     oldest_article        = 1
     feeds = [
-            (u'知乎日报', 'http://zhihudaily.dev.malash.net/', True)
+            (u'知乎日报', 'http://rss-suu.avosapps.us/rss/zhihurb', False)
            ]
+# 天国的http://zhihudaily.dev.malash.net/ http://feeds.feedburner.com/zhihu-daily http://feed43.com/feed.html?name=zhihurb
