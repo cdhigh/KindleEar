@@ -15,6 +15,6 @@ class ZhihuDailyRss(BaseFeedBook):
     coverfile = "cv_zhihudaily.jpg"
     oldest_article        = 1
     feeds = [
-            (u'知乎日报', 'http://rss-suu.avosapps.us/rss/zhihurb', False)
+            (u'知乎日报', 'https://feedx.net/rss/zhihudaily.xml', True)
            ]
 # 天国的http://zhihudaily.dev.malash.net/ http://feeds.feedburner.com/zhihu-daily http://feed43.com/feed.html?name=zhihurb
