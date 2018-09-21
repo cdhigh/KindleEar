@@ -53,6 +53,7 @@
         <li><a href="#wrongemail">投递日志状态wrong SRC_EMAIL的解决方案。</a></li>
         <li><a href="#tips">其他的一些小Tips。</a></li>
         <li><a href="#comic">漫画订阅说明</a></li>
+        <li><a href="#sendgrid">使用sendgrid发送邮件</a></li>
         <li><a href="#issues">我还有更多问题，到哪里去问？</a></li>
       </ul>
     </div>
@@ -398,7 +399,15 @@
             </table>
         </ul>
     </p>
-    
+    <span id="sendgrid"></span>
+    <h2>使用sendgrid发送邮件</h2>
+    <p class="answer">
+        在设置界面，可以设置sendgrid发送邮件，需要在下面网站申请帐号并创建自己的apikey。<br/>
+        <a href="https://app.sendgrid.com/settings/api_keys">sendgrid</a><br/>
+        推荐按照Google的官方说明进行操作。
+        <a href="https://cloud.google.com/compute/docs/tutorials/sending-mail/using-sendgrid">google</a><br/>
+        需要说明的是sendgrid支持的邮件大小是30M，但是由于gcloud的urlfetch的限制变成了10M。
+    </p>
     <span id="issues"></span>
     <h2>我还有更多问题，到哪里去问？</h2>
     <p class="answer">如果你碰到更多问题，可以到 <a href="https://github.com/cdhigh/KindleEar/issues">https://github.com/cdhigh/KindleEar/issues</a> 去提交一个issue，然后等待答复，不过在提交问题之前，还是建议先搜索一下别人先前提交的issues，说不定已经有人重复提过了相关问题呢？<br/>
