@@ -1386,7 +1386,7 @@ class BaseComicBook(BaseFeedBook):
             chapterList = self.getChapterList(url)
 
             pageCount=0
-            for deliverCount in range(10):
+            for deliverCount in range(5):
                 newNum = oldNum + deliverCount
                 if newNum < len(chapterList):
                     imgList = self.getImgList(chapterList[newNum])
@@ -1399,7 +1399,7 @@ class BaseComicBook(BaseFeedBook):
                         self.log.info('comicSrc: %s' % img)
 
                     self.UpdateLastDelivered(title, newNum+1)
-                    if pageCount > 80:
+                    if pageCount > 30:
                         break
 
         return urls
@@ -1432,7 +1432,7 @@ class BaseComicBook(BaseFeedBook):
                 opener = URLOpener(self.host, timeout=self.timeout, headers=self.extra_header)
                 if self.needs_subscription:
                     result = self.login(opener, decoder)
-                        
+
             result = opener.open(url)
             content = result.content
             if not content:
