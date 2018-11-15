@@ -233,7 +233,6 @@ class HandleMail(InboundMailHandler):
             #有图片的话，要生成MOBI或EPUB才行
             #而且多看邮箱不支持html推送，也先转换epub再推送
             if hasimage or (user.book_type == "epub"):
-                from main import local_time
                 from lib.makeoeb import (getOpts, CreateOeb, setMetaData,
                                     ServerContainer, byteStringIO, 
                                     EPUBOutput, MOBIOutput)

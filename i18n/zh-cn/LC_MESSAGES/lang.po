@@ -708,3 +708,15 @@ msgstr "默认导入为全文订阅源"
 
 msgid "Do not have any subscribed book."
 msgstr "暂时没有已订阅的书籍。"
+
+msgid "Sendgrid Mail Setting"
+msgstr "Sendgrid邮件设置"
+
+msgid "Use Sendgrid"
+msgstr "使用Sendgrid"
+
+msgid "ApiKey"
+msgstr "密钥"
+
+msgid "Need sendgrid ApiKey!"
+msgstr "请输入Sendgrid的ApiKey！"

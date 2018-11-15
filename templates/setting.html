@@ -139,6 +139,25 @@
             <p style="color:grey;font-size:0.7em;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{_("This switch only effective when 'Enable deliver' is enabled.")}}</P>
         </p>
     </fieldset>
+    <p></p>
+    <fieldset id="sg_fieldset">
+        <legend>{{_("Sendgrid Mail Setting")}}</legend>
+        <p>
+            <label><input type="checkbox" name="sgenable"  {% if user and user.sgenable %}checked="1"{% endif %}
+            onclick="setEditEnable(this.name, 'sgapikey')" /><span onclick="setEditEnable('sgenable', 'sgapikey');">{{_("Use Sendgrid")}}</span></label>
+        </p>
+        <table border="0">
+            <tr>
+                <td style="text-align:right;">
+                    <label><em class="required">*</em>{{_("ApiKey")}} : </label>
+                </td>
+                <td>
+                    <input type="text" name="sgapikey" style="width:680px" {% if not user.sgenable %}disabled{% endif %}
+                    value="{% if user and user.sgenable %}{{ user.sgapikey }}{% endif %}" required />
+                </td>
+            </tr>
+        </table>
+    </fieldset>
     <p>
     {{_("Important: Please activate your kindle firstly, and goto")}} <a href="https://www.amazon.com/gp/digital/fiona/manage#pdocSettings" rel="external" target="_blank">Personal Document Settings</a> {{_("Page and add")}} <strong>{{ mail_sender }}</strong> {{_("to 'Approved Personal Document E-mail List'.")}}
     </p>
@@ -153,6 +172,11 @@ function toggleweekbtn(btn_name) {
   if (!btn_name) return
   var btn = document.getElementById(btn_name);
   btn.checked = !btn.checked;
+}
+function setEditEnable(chkName, strName){
+  var elm = document.getElementsByName(strName).item(0);
+  var chk = document.getElementsByName(chkName).item(0);
+  elm.disabled = !chk.checked;
 }
 </script>
 {% endblock -%}
