@@ -95,7 +95,7 @@ class TencentBaseBook(BaseComicBook):
                 base64data = filter_result[0].split("cGljdHVyZSI6")[1]
                 self.log.warn('found flag string: %s'%"cGljdHVyZSI6")
             elif "aWN0dXJlIjpb" in filter_result[0]:
-                base64data = filter_result[0].split("aWN0dXJlIjpb")[1]
+                base64data = filter_result[0].split("aWN0dXJl")[1]
                 self.log.warn('found flag string: %s'%"aWN0dXJlIjpb")
             else:
                 self.log.warn('can not found flag string in data: %s'%filter_result[0])
