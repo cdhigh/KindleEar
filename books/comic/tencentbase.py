@@ -34,7 +34,7 @@ class TencentBaseBook(BaseComicBook):
             self.log.warn('can not get comic id: %s' % url)
             return chapterList
 
-        url = 'http://m.ac.qq.com/comic/chapterList/id/{}'.format(comic_id)
+        url = 'https://m.ac.qq.com/comic/chapterList/id/{}'.format(comic_id)
         result = opener.open(url)
         if result.status_code != 200 or not result.content:
             self.log.warn('fetch comic page failed: %s' % url)
@@ -58,7 +58,8 @@ class TencentBaseBook(BaseComicBook):
 
         for item in reverse_list.find_all('a'):
             # <a class="chapter-link lock" data-cid="447" data-seq="360" href="/chapter/index/id/531490/cid/447">360</a>
-            href = 'http://m.ac.qq.com' + item.get('href')
+            # https://m.ac.qq.com/chapter/index/id/511915/cid/1
+            href = 'https://m.ac.qq.com' + item.get('href')
             isVip = "lock" in item.get('class')
             if isVip == True:
                 self.log.info("Chapter {} is Vip, waiting for free.".format(href))
@@ -82,13 +83,37 @@ class TencentBaseBook(BaseComicBook):
         content = result.content
         cid_page = self.AutoDecodeContent(content, decoder, self.page_encoding, opener.realurl, result.headers)
         filter_result = re.findall(r"data\s*:\s*'(.+?)'", cid_page)
+        # "picture": [{},...{}]}
         if len(filter_result) != 0:
-            base64data = filter_result[0][1:]
-            img_detail_json = json.loads(base64.decodestring(base64data))
-            for img_url in img_detail_json.get('picture', []):
-                if ( 'url' in img_url ):
-                    imgList.append(img_url['url'])
-                else:
-                    self.log.warn('no url in img_url:%s' % img_url)
+            # "picture" > InBpY3R1cmUi
+            # picture": > cGljdHVyZSI6
+            # icture":[ > aWN0dXJlIjpb
+            if "InBpY3R1cmUi" in filter_result[0]:
+                base64data = filter_result[0].split("InBpY3R1cmUi")[1]
+                self.log.warn('found flag string: %s'%"InBpY3R1cmUi")
+            elif "cGljdHVyZSI6" in filter_result[0]:
+                base64data = filter_result[0].split("cGljdHVyZSI6")[1]
+                self.log.warn('found flag string: %s'%"cGljdHVyZSI6")
+            elif "aWN0dXJlIjpb" in filter_result[0]:
+                base64data = filter_result[0].split("aWN0dXJl")[1]
+                self.log.warn('found flag string: %s'%"aWN0dXJlIjpb")
+            else:
+                self.log.warn('can not found flag string in data: %s'%filter_result[0])
+                return imgList
+            decodeData = base64.decodestring(base64data)
+            startIndex = decodeData.find('[')
+            endIndex = decodeData.find(']')
+
+            if startIndex > -1 and endIndex > -1:
+                img_detail_json = json.loads(decodeData[startIndex:endIndex+1])
+                for img_url in img_detail_json:
+                    if ( 'url' in img_url ):
+                        imgList.append(img_url['url'])
+                    else:
+                        self.log.warn('no url in img_url:%s' % img_url)
+            else:
+                self.log.warn('can not found [] in decodeData:%s' % decodeData)
+        else:
+            self.log.warn('can not fount filter_result with data: .')
 
         return imgList

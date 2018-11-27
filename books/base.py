@@ -1439,8 +1439,15 @@ class BaseComicBook(BaseFeedBook):
                 continue
 
             content = self.adjustImgContent(content);
+            if content == None:
+                self.log.warn("Image adjust error, try again: {}".format(url.encode('utf-8')))
+                content = self.adjustImgContent(content);
+                if content == None:
+                    self.log.warn("Image adjust error: {}".format(url.encode('utf-8')))
+                    continue
+
             imgFilenameList = []
-            
+
             #先判断是否是图片
             imgType = imghdr.what(None, content)
             if imgType:
