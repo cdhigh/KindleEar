@@ -86,7 +86,15 @@ class ManHuaGuiBaseBook(BaseComicBook):
         else:
             soup = soup.find("div", {"class": 'chapter-list', "id":'chapterList'})
 
+        if (soup is None):
+            self.log.warn('chapterList is not exist.')
+            return chapterList
+
         lias = soup.findAll('a')
+        if (lias is None):
+            self.log.warn('chapterList href is not exist.')
+            return chapterList
+
         for aindex in range(len(lias)):
             rindex = len(lias)-1-aindex
             href = "https://m.manhuagui.com" + lias[rindex].get("href")
@@ -113,6 +121,10 @@ class ManHuaGuiBaseBook(BaseComicBook):
                 raw_content = script.text
                 break
 
+        if (raw_content is None):
+            self.log.warn('raw_content href is not exist.')
+            return imgList
+
         res = re.search(r'window\["\\x65\\x76\\x61\\x6c"\](.*\))', raw_content).group(1)
         lz_encoded = re.search(r"'([A-Za-z0-9+/=]+)'\['\\x73\\x70\\x6c\\x69\\x63'\]\('\\x7c'\)", res).group(1)
         lz_decoded = decompressFromBase64(lz_encoded)
@@ -123,6 +135,11 @@ class ManHuaGuiBaseBook(BaseComicBook):
         cid = self.getChapterId(url)
         md5 = pages_opts["sl"]["md5"]
         images = pages_opts["images"]
+
+        if (images is None):
+            self.log.warn('image list is not exist.')
+            return imgList
+
         for img in images:
             img_url = u'https://i.hamreus.com{}?cid={}&md5={}'.format(img, cid, md5)
             imgList.append(img_url)
