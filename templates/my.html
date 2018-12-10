@@ -11,6 +11,7 @@
             {% if feed.url.startswith(("http://www.cartoonmad.com", "https://www.cartoonmad.com")) %} <img alt="{{_("CartoonMad")}}" src="static/comic.gif" border="0" />{% endif %}
             {% if feed.url.startswith(("http://ac.qq.com", "http://m.ac.qq.com")) %} <img alt="{{_("Tencent")}}" src="static/comic.gif" border="0" />{% endif %}
             {% if feed.url.startswith(("https://www.manhuagui.com", "https://m.manhuagui.com")) %} <img alt="{{_("ManHuaGui")}}" src="static/comic.gif" border="0" />{% endif %}
+            {% if feed.url.startswith(("https://www.733.so", "https://m.733.so")) %} <img alt="{{_("Seven33So")}}" src="static/comic.gif" border="0" />{% endif %}
         </div>
         <div class="cornerControls">
             {#<a href="/delfeed/{{feed.key().id()}}" class="actionButton">{{_("Delete")}}</a>#}
@@ -99,8 +100,8 @@ function toggleSeparate(id) {
 //点击了订阅内置书籍
 function doSubscribe(obj, id_) {
     var separate = document.getElementById("separate_" + id_).checked;
-    
-    ajax({url:"/books/subscribe", type: "POST", 
+
+    ajax({url:"/books/subscribe", type: "POST",
         data: {id_: id_, separate: separate},
         success: function (resp, xml) {
             if (resp.status == "ok") {
@@ -119,7 +120,7 @@ function doSubscribe(obj, id_) {
 
 //点击了退订内置书籍
 function doUnsubscribe(obj, id_) {
-    ajax({url:"/books/unsubscribe", type: "POST", 
+    ajax({url:"/books/unsubscribe", type: "POST",
         data: {id_: id_},
         success: function (resp, xml) {
             if (resp.status == "ok") {
@@ -138,7 +139,7 @@ function doUnsubscribe(obj, id_) {
 
 //用户点击了删除自定义RSS按钮
 function delFeed(obj, feedid) {
-    ajax({url:"/feeds/delete", type: "POST", 
+    ajax({url:"/feeds/delete", type: "POST",
         data: {feedid: feedid},
         success: function (resp, xml) {
             if (resp.status == "ok") {
@@ -181,10 +182,10 @@ function addFeed() {
 function appendFeedDiv(title, isfulltext, url, feedid) {
     var newFeedDiv = document.createElement("div");
     newFeedDiv.className = "book";
-    
+
     var newTitleDiv = document.createElement("div");
     newTitleDiv.className = "titleRow";
-    
+
     var titleNode = document.createTextNode(title);
     newTitleDiv.appendChild(titleNode);
     if (isfulltext) {
@@ -219,8 +220,16 @@ function appendFeedDiv(title, isfulltext, url, feedid) {
         imgNode.setAttribute("border", "0");
         newTitleDiv.appendChild(imgNode);
     }
+    if (url.startsWith("https://www.733.so") || url.startsWith("https://m.733.so")) {
+        newTitleDiv.appendChild(document.createTextNode(' '));
+        var imgNode = document.createElement("img");
+        imgNode.setAttribute("alt", {{'"' + _("Seven33So") + '"'}});
+        imgNode.setAttribute("src", "static/comic.gif");
+        imgNode.setAttribute("border", "0");
+        newTitleDiv.appendChild(imgNode);
+    }
     newFeedDiv.appendChild(newTitleDiv);
-    
+
     var newCornerDiv = document.createElement("div");
     newCornerDiv.className = "cornerControls";
     var atoDel = document.createElement("a");
@@ -230,7 +239,7 @@ function appendFeedDiv(title, isfulltext, url, feedid) {
     atoDel.appendChild(document.createTextNode({{'"' + _("Delete") + '"'}}));
     newCornerDiv.appendChild(atoDel);
     newFeedDiv.appendChild(newCornerDiv);
-    
+
     var sumRowDiv = document.createElement("div");
     sumRowDiv.className = "summaryRow";
     var aa =   document.createElement("a");
@@ -245,7 +254,7 @@ function appendFeedDiv(title, isfulltext, url, feedid) {
     }
     sumRowDiv.appendChild(aa);
     newFeedDiv.appendChild(sumRowDiv);
-    
+
     var cmdPanel = document.getElementById("divAddFeedCmdPanel");
     cmdPanel.parentNode.insertBefore(newFeedDiv, cmdPanel);
 }
@@ -255,7 +264,7 @@ function appendFeedDiv(title, isfulltext, url, feedid) {
 function appendSubscribedBook(id_, title, desc, separate, needs_subscription, subscription_info) {
     var sBookDiv = document.createElement("div");
     sBookDiv.className = "book";
-    
+
     var titleDiv = document.createElement("div");
     titleDiv.className = "titleRow";
     titleDiv.appendChild(document.createTextNode(title));
@@ -268,7 +277,7 @@ function appendSubscribedBook(id_, title, desc, separate, needs_subscription, su
         titleDiv.appendChild(img);
     }
     sBookDiv.appendChild(titleDiv);
-    
+
     var cornDiv = document.createElement("div");
     cornDiv.className = "cornerControls";
     if (needs_subscription) {
@@ -288,7 +297,7 @@ function appendSubscribedBook(id_, title, desc, separate, needs_subscription, su
     aa.appendChild(document.createTextNode({{'"' + _("Unsubscribe") + '"'}}));
     cornDiv.appendChild(aa);
     sBookDiv.appendChild(cornDiv);
-    
+
     var sumDiv = document.createElement("div");
     sumDiv.className = "summaryRow";
     if (desc.length > 80) {
@@ -300,14 +309,14 @@ function appendSubscribedBook(id_, title, desc, separate, needs_subscription, su
         sumDiv.appendChild(document.createTextNode(desc));
     }
     sBookDiv.appendChild(sumDiv);
-    
+
     document.getElementById("mybooks").appendChild(sBookDiv);
 }
 
 function appendBookToBooks(id_, title, desc) {
     var bookDiv = document.createElement("div");
     bookDiv.className = "book";
-    
+
     var titleDiv = document.createElement("div");
     titleDiv.appendChild(document.createTextNode(title));
     var objIn = document.createElement("input");
@@ -322,7 +331,7 @@ function appendBookToBooks(id_, title, desc) {
     img.setAttribute("onclick", "toggleSeparate(" + id_ + ");");
     titleDiv.appendChild(img);
     bookDiv.appendChild(titleDiv);
-    
+
     var cornDiv = document.createElement("div");
     cornDiv.className = "cornerControls";
     var a = document.createElement("a");
@@ -332,7 +341,7 @@ function appendBookToBooks(id_, title, desc) {
     a.appendChild(document.createTextNode({{'"' + _("Subscribe") + '"'}}));
     cornDiv.appendChild(a);
     bookDiv.appendChild(cornDiv);
-    
+
     var sumDiv =  document.createElement("div");
     sumDiv.className = "summaryRow";
     if (desc.length > 80) {
@@ -343,9 +352,9 @@ function appendBookToBooks(id_, title, desc) {
     } else {
         sumDiv.appendChild(document.createTextNode(desc));
     }
-    
+
     bookDiv.appendChild(sumDiv);
-    
+
     document.getElementById("books").appendChild(bookDiv);
 }
 
