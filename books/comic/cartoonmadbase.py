@@ -87,7 +87,7 @@ class CartoonMadBaseBook(BaseComicBook):
         if firstPage != None:
             base, length, type = self.getImgStr(firstPage)
             for index in range(len(ulist)):
-                imgUrl = "{}{}.{}".format(base, str(index+1).zfill(length), type)
+                imgUrl = "https://www.cartoonmad.com/{}{}.{}".format(base, str(index+1).zfill(length), type)
                 imgList.append(imgUrl)
 
         if imgList[0] == firstPage and imgList[listLen-1] == self.getImgUrl(ulist[listLen-1].get('value')):
