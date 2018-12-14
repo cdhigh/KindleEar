@@ -85,6 +85,7 @@ class CartoonMadBaseBook(BaseComicBook):
         firstPage = firstPageTag.get('src') if firstPageTag else None
 
         if firstPage != None:
+            firstPage = "https://www.cartoonmad.com/{}".format(firstPage)
             base, length, type = self.getImgStr(firstPage)
             for index in range(len(ulist)):
                 imgUrl = "{}{}.{}".format(base, str(index+1).zfill(length), type)
@@ -95,7 +96,7 @@ class CartoonMadBaseBook(BaseComicBook):
         else:
             imgList = []
             for ul in ulist:
-                imgList.append(self.getImgUrl(ul.get('value')))
+                imgList.append("https://www.cartoonmad.com/{}".format(self.getImgUrl(ul.get('value'))))
             return imgList
 
         return imgList
