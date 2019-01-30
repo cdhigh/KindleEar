@@ -2,7 +2,7 @@
 # encoding: utf-8
 #https://www.733.so或者https://m.733.so网站的免费漫画的基类，简单提供几个信息实现一个子类即可推送特定的漫画
 #Author: insert0003 <https://github.com/insert0003>
-import re, json
+import re, json, urlparse, time
 from lib.urlopener import URLOpener
 from lib.autodecoder import AutoDecoder
 from books.base import BaseComicBook
@@ -18,7 +18,7 @@ class Seven33SoBaseBook(BaseComicBook):
     page_encoding       = ''
     mastheadfile        = ''
     coverfile           = ''
-    host                = 'https://m.733.so'
+    host                = 'https://www.733.so'
     feeds               = [] #子类填充此列表[('name', mainurl),...]
 
     #获取漫画章节列表
@@ -50,7 +50,7 @@ class Seven33SoBaseBook(BaseComicBook):
 
         for aindex in range(len(lias)):
             rindex = len(lias)-1-aindex
-            href = "https://m.733.so/" + lias[rindex].get("href")
+            href = "https://www.733.so" + lias[rindex].get("href")
             chapterList.append(href)
 
         return chapterList
@@ -64,6 +64,17 @@ class Seven33SoBaseBook(BaseComicBook):
         result = opener.open(url)
         if result.status_code != 200 or not result.content:
             self.log.warn('fetch comic page failed: %s' % url)
+            return imgList
+
+        urlpaths = urlparse.urlsplit(url.lower()).path.split("/")
+        if ( (u"mh" in urlpaths) and (urlpaths.index(u"mh")+2 < len(urlpaths)) ):
+            tid = str(time.time()).replace(".", "1")
+            if len(tid) == 12:
+                tid = tid + "1"
+            cid = urlpaths[urlpaths.index(u"mh")+1]
+            pid = urlpaths[urlpaths.index(u"mh")+2].replace(".html", "")
+        else:
+            self.log.warn('Can not get cid and pid from URL: {}.'.format(url))
             return imgList
 
         content = self.AutoDecodeContent(result.content, decoder, self.feed_encoding, opener.realurl, result.headers)
@@ -82,8 +93,18 @@ class Seven33SoBaseBook(BaseComicBook):
             return imgList
 
         for img in images:
-            imgb64 = b64encode(img.replace("http://www.baidu1.com/", ""))
-            img_url = u'http://new.234us.com:8989/img_new.php?data={}'.format(imgb64)
+            if "http://www.baidu1.com/" in img:
+                b64str = img.replace("http://www.baidu1.com/", "") + '|{}|{}|{}|pc'.format(tid, cid, pid)
+                imgb64 = b64encode(b64str)
+                img_url = u'http://img_733.234us.com/newfile.php?data={}'.format(imgb64)
+            elif "http://ac.tc.qq.com/" in img:
+                b64str = img + '|{}|{}|{}|pc'.format(tid, cid, pid)
+                imgb64 = b64encode(b64str)
+                img_url = u'http://img_733.234us.com/newfile.php?data={}'.format(imgb64)
+            else:
+                img_url = img
+
+            self.log.info('Ths image herf is: %s' % img_url)
             imgList.append(img_url)
 
         return imgList

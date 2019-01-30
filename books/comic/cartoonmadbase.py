@@ -80,24 +80,19 @@ class CartoonMadBaseBook(BaseComicBook):
             if ul.get('value') == None:
                 ulist.remove(ul)
 
-        listLen = len(ulist)
         firstPageTag = soup.find('img', {'oncontextmenu': 'return false'})
         firstPage = firstPageTag.get('src') if firstPageTag else None
 
         if firstPage != None:
-            firstPage = "https://www.cartoonmad.com/{}".format(firstPage)
-            base, length, type = self.getImgStr(firstPage)
+            comicId, chapterId, length, imgType = self.getImgStr(firstPage)
             for index in range(len(ulist)):
-                imgUrl = "{}{}.{}".format(base, str(index+1).zfill(length), type)
+                if imgType == "&":
+                    # http://web3.cartoonmad.com/c529e4khw31/1733/049/001.jpg
+                    imgUrl = "http://web3.cartoonmad.com/c529e4khw31/{}/{}/{}.jpg".format(comicId, chapterId, str(index+1).zfill(length))
+                else:
+                    # https://www.cartoonmad.com/home1/z2r17v3tr15/4295/186/001.jpg
+                    imgUrl = "https://www.cartoonmad.com/home1/z2r17v3tr15/{}/{}/{}.jpg".format(comicId, chapterId, str(index+1).zfill(length))
                 imgList.append(imgUrl)
-
-        if imgList[0] == firstPage and imgList[listLen-1] == self.getImgUrl(ulist[listLen-1].get('value')):
-            return imgList
-        else:
-            imgList = []
-            for ul in ulist:
-                imgList.append("https://www.cartoonmad.com/{}".format(self.getImgUrl(ul.get('value'))))
-            return imgList
 
         return imgList
 
@@ -120,8 +115,15 @@ class CartoonMadBaseBook(BaseComicBook):
     #获取漫画图片格式
     def getImgStr(self, url):
         urls = url.split("/")
+        comicId = urls[len(urls)-3]
+        chapterId = urls[len(urls)-2]
         tail = urls[len(urls)-1]
-        imgIndex = tail.split(".")[0]
-        imgType = tail.split(".")[1]
-        base = url.replace(tail, "")
-        return base, len(imgIndex), imgType
+        if "&" in tail:
+            # comicpic.asp?file=/3583/001/001&rimg=1
+            imgIndex = tail.split("&")[0]
+            imgType = "&"
+        else:
+            # comicpic.asp?file=/3583/001/001
+            imgIndex = tail
+            imgType = ""
+        return comicId, chapterId, len(imgIndex), imgType
