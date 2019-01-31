@@ -55,58 +55,42 @@ class CartoonMadBaseBook(BaseComicBook):
 
     #获取漫画图片列表
     def getImgList(self, url):
-        decoder = AutoDecoder(isfeed=False)
-        opener = URLOpener(self.host, timeout=60)
         imgList = []
 
-        result = opener.open(url)
-        if result.status_code != 200 or not result.content:
-            self.log.warn('fetch comic page failed: %s' % url)
-            return imgList
-
-        content = self.AutoDecodeContent(result.content, decoder, self.page_encoding, opener.realurl, result.headers)
-        soup = BeautifulSoup(content, 'html.parser')
-        sel = soup.find('select') #页码行，要提取所有的页面
-        if (sel is None):
-            self.log.warn('soup select is not exist.')
-            return imgList
-
-        ulist = sel.find_all('option') if sel else None
+        ulist = self.getImgUrlList(url)
         if not ulist:
-            self.log.warn('select option is not exist.')
+            self.log.warn('can not find img list for : %s' % url)
             return imgList
 
-        for ul in ulist:
-            if ul.get('value') == None:
-                ulist.remove(ul)
-
-        listLen = len(ulist)
-        firstPageTag = soup.find('img', {'oncontextmenu': 'return false'})
-        firstPage = firstPageTag.get('src') if firstPageTag else None
-
-        if firstPage != None:
-            firstPage = "https://www.cartoonmad.com/{}".format(firstPage)
-            base, length, type = self.getImgStr(firstPage)
-            for index in range(len(ulist)):
-                imgUrl = "{}{}.{}".format(base, str(index+1).zfill(length), type)
-                imgList.append(imgUrl)
-
-        if imgList[0] == firstPage and imgList[listLen-1] == self.getImgUrl(ulist[listLen-1].get('value')):
+        firstPage = self.getImgUrl(url)
+        if not firstPage:
+            self.log.warn('can not get first image real url : %s' % url)
             return imgList
-        else:
+
+        # https://www.cartoonmad.com/home1/z2r26v3tr17/5582/001/001.jpg
+        imgTail = firstPage.split("/")[-1]
+        imgLeng = len(imgTail.split(".")[0])
+        imgType = "."+imgTail.split(".")[1]
+        imgBase = firstPage.replace(imgTail, "")
+
+        imgList.append(firstPage)
+        for index in range(len(ulist)):
+            imgUrl = "{}{}{}".format(imgBase, str(index+2).zfill(imgLeng), imgType)
+            imgList.append(imgUrl)
+
+        if imgList[0] != firstPage or imgList[-1] != self.getImgUrl(ulist[-1]):
             imgList = []
             for ul in ulist:
-                imgList.append("https://www.cartoonmad.com/{}".format(self.getImgUrl(ul.get('value'))))
-            return imgList
+                imgList.append(self.getImgUrl(ul))
 
         return imgList
 
     #获取漫画图片网址
-    def getImgUrl(self, url):
+    def getImgUrlList(self, url):
+        imgUrlList = []
         decoder = AutoDecoder(isfeed=False)
         opener = URLOpener(self.host, timeout=60)
 
-        url = self.host + "/comic/" + url
         result = opener.open(url)
         if result.status_code != 200 or not result.content:
             self.log.warn('fetch comic page failed: %s' % url)
@@ -114,14 +98,48 @@ class CartoonMadBaseBook(BaseComicBook):
 
         content = self.AutoDecodeContent(result.content, decoder, self.page_encoding, opener.realurl, result.headers)
         soup = BeautifulSoup(content, 'html.parser')
-        comicImgTag = soup.find('img', {'oncontextmenu': 'return false'})
-        return comicImgTag.get('src') if comicImgTag else None
+
+        sel = soup.find('select') #页码行，要提取所有的页面
+        if (sel is None):
+            self.log.warn('soup select is not exist.')
+            return None
+
+        ulist = sel.find_all('option') if sel else None
+        if not ulist:
+            self.log.warn('select option is not exist.')
+            return None
+
+        for ul in ulist:
+            if ul.get('value') == None:
+                ulist.remove(ul)
+            else:
+                href = self.host + '/comic/' + ul.get('value')
+                imgUrlList.append(href)
+
+        return imgUrlList
 
     #获取漫画图片格式
-    def getImgStr(self, url):
-        urls = url.split("/")
-        tail = urls[len(urls)-1]
-        imgIndex = tail.split(".")[0]
-        imgType = tail.split(".")[1]
-        base = url.replace(tail, "")
-        return base, len(imgIndex), imgType
+    def getImgUrl(self, url):
+        decoder = AutoDecoder(isfeed=False)
+        opener = URLOpener(self.host, timeout=60)
+        result = opener.open(url)
+        if result.status_code != 200 or not result.content:
+            self.log.warn('fetch comic page failed: %s' % url)
+            return None
+
+        content = self.AutoDecodeContent(result.content, decoder, self.page_encoding, opener.realurl, result.headers)
+        soup = BeautifulSoup(content, 'html.parser')
+
+        comicImgTag = soup.find('img', {'oncontextmenu': 'return false'})
+        if (comicImgTag is None):
+            self.log.warn('can not find image href.')
+            return None
+        imgUrl = self.host + "/comic/" + comicImgTag.get('src')
+
+        headers = {'Referer': url}
+        result = opener.open(imgUrl, headers=headers)
+        if result.status_code != 200 or opener.realurl == url:
+            self.log.warn('can not get real comic url for : %s' % url)
+            return None
+
+        return opener.realurl
