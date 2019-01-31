@@ -117,7 +117,7 @@ class ManHuaGuiBaseBook(BaseComicBook):
         soup = BeautifulSoup(content, 'html.parser')
         scripts = soup.findAll("script", {"type": "text/javascript"})
         for script in scripts:
-            if script.text != "":
+            if "window[\"\\x65\\x76\\x61\\x6c\"]" in script.text != "":
                 raw_content = script.text
                 break
 
