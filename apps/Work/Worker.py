@@ -27,6 +27,7 @@ from books.comic.cartoonmadbase import CartoonMadBaseBook
 from books.comic.tencentbase import TencentBaseBook
 from books.comic.manhuaguibase import ManHuaGuiBaseBook
 from books.comic.seven33sobase import Seven33SoBaseBook
+from books.comic.tohomhbase import ToHoMHBaseBook
     
 #实际下载文章和生成电子书并且发送邮件
 class Worker(BaseHandler):
@@ -177,7 +178,13 @@ class Worker(BaseHandler):
                 feeds = feedsId if feedsId else bk.feeds
                 book.feeds = []
                 for feed in feeds:
-                    if feed.url.startswith( ("http://www.cartoonmad.com", "https://www.cartoonmad.com", "http://ac.qq.com", "http://m.ac.qq.com", "https://www.manhuagui.com", "https://m.manhuagui.com", "https://www.733.so", "https://m.733.so") ) :
+                    if feed.url.startswith((
+                        "http://www.cartoonmad.com", "https://www.cartoonmad.com",
+                        "http://ac.qq.com", "http://m.ac.qq.com",
+                        "https://www.manhuagui.com", "https://m.manhuagui.com",
+                        "https://www.733.so", "https://m.733.so",
+                        "https://www.tohomh123.com", "https://m.tohomh123.com"
+                    )) :
                         self.ProcessComicRSS(username, user, feed)
                     else:
                         book.feeds.append((feed.title, feed.url, feed.isfulltext))
@@ -387,6 +394,8 @@ class Worker(BaseHandler):
             book = ManHuaGuiBaseBook(imgindex=imgindex, opts=opts, user=user)
         elif feed.url.startswith( ("https://www.733.so", "https://m.733.so") ):
             book = Seven33SoBaseBook(imgindex=imgindex, opts=opts, user=user)
+        elif feed.url.startswith( ("https://www.tohomh123.com", "https://m.tohomh123.com") ):
+            book = ToHoMHBaseBook(imgindex=imgindex, opts=opts, user=user)
         else:
             return "Failed to push book <%s>!"%feed.title
 
