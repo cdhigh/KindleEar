@@ -12,17 +12,14 @@ from google.appengine.api import images
 from lib.userdecompress import decompressFromBase64
 
 class ManHuaGuiBaseBook(BaseComicBook):
-    title               = u''
-    description         = u''
-    language            = ''
-    feed_encoding       = ''
-    page_encoding       = ''
-    mastheadfile        = ''
-    coverfile           = ''
-    host                = 'https://m.manhuagui.com'
-    feeds               = [] #子类填充此列表[('name', mainurl),...]
+    accept_domains = (
+        "https://www.manhuagui.com",
+        "https://m.manhuagui.com",
+        "https://tw.manhuagui.com",
+    )
+    host = "https://m.manhuagui.com"
 
-    #获取漫画图片内容
+    # 获取漫画图片内容
     def adjustImgContent(self, content):
         #强制转换成JPEG
         try:
@@ -67,8 +64,8 @@ class ManHuaGuiBaseBook(BaseComicBook):
         opener = URLOpener(self.host, timeout=60)
         chapterList = []
 
-        if url.startswith( "https://www.manhuagui.com" ):
-            url = url.replace('https://www.manhuagui.com', 'https://m.manhuagui.com')
+        url = url.replace("https://www.manhuagui.com", "https://m.manhuagui.com")
+        url = url.replace("https://tw.manhuagui.com", "https://m.manhuagui.com")
 
         result = opener.open(url)
         if result.status_code != 200 or not result.content:

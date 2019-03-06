@@ -8,11 +8,15 @@
         <div class="titleRow">
             {{feed.title}}
             {% if feed.isfulltext %} <img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" />{% endif %}
-            {% if feed.url.startswith(("http://www.cartoonmad.com", "https://www.cartoonmad.com")) %} <img alt="{{_("CartoonMad")}}" src="static/comic.gif" border="0" />{% endif %}
-            {% if feed.url.startswith(("http://ac.qq.com", "http://m.ac.qq.com")) %} <img alt="{{_("Tencent")}}" src="static/comic.gif" border="0" />{% endif %}
-            {% if feed.url.startswith(("https://www.manhuagui.com", "https://m.manhuagui.com")) %} <img alt="{{_("ManHuaGui")}}" src="static/comic.gif" border="0" />{% endif %}
-            {% if feed.url.startswith(("https://www.733.so", "https://m.733.so")) %} <img alt="{{_("Seven33So")}}" src="static/comic.gif" border="0" />{% endif %}
-            {% if feed.url.startswith(("https://www.tohomh123.com/", "https://m.tohomh123.com/")) %} <img alt="{{_("ToHoMH")}}" src="static/comic.gif" border="0" />{% endif %}
+            {% for ComicBaseClass in comic_base_classes -%}
+                {% if feed.url.startswith(ComicBaseClass.accept_domains) %}
+                <img
+                  alt="{{ _(ComicBaseClass.__name__.rstrip('BaseBook')) }}"
+                  src="static/comic.gif"
+                  border="0"
+                />
+                {% endif %}
+            {% endfor -%}
         </div>
         <div class="cornerControls">
             {#<a href="/delfeed/{{feed.key().id()}}" class="actionButton">{{_("Delete")}}</a>#}
@@ -197,38 +201,31 @@ function appendFeedDiv(title, isfulltext, url, feedid) {
         imgNode.setAttribute("border", "0");
         newTitleDiv.appendChild(imgNode);
     }
-    if (url.startsWith("http://www.cartoonmad.com") || url.startsWith("https://www.cartoonmad.com")) {
-        newTitleDiv.appendChild(document.createTextNode(' '));
-        var imgNode = document.createElement("img");
-        imgNode.setAttribute("alt", {{'"' + _("CartoonMad") + '"'}});
-        imgNode.setAttribute("src", "static/comic.gif");
-        imgNode.setAttribute("border", "0");
-        newTitleDiv.appendChild(imgNode);
-    }
-    if (url.startsWith("http://ac.qq.com") || url.startsWith("http://m.ac.qq.com")) {
-        newTitleDiv.appendChild(document.createTextNode(' '));
-        var imgNode = document.createElement("img");
-        imgNode.setAttribute("alt", {{'"' + _("Tencent") + '"'}});
-        imgNode.setAttribute("src", "static/comic.gif");
-        imgNode.setAttribute("border", "0");
-        newTitleDiv.appendChild(imgNode);
-    }
-    if (url.startsWith("https://www.manhuagui.com") || url.startsWith("https://m.manhuagui.com")) {
-        newTitleDiv.appendChild(document.createTextNode(' '));
-        var imgNode = document.createElement("img");
-        imgNode.setAttribute("alt", {{'"' + _("ManHuaGui") + '"'}});
-        imgNode.setAttribute("src", "static/comic.gif");
-        imgNode.setAttribute("border", "0");
-        newTitleDiv.appendChild(imgNode);
-    }
-    if (url.startsWith("https://www.733.so") || url.startsWith("https://m.733.so")) {
-        newTitleDiv.appendChild(document.createTextNode(' '));
-        var imgNode = document.createElement("img");
-        imgNode.setAttribute("alt", {{'"' + _("Seven33So") + '"'}});
-        imgNode.setAttribute("src", "static/comic.gif");
-        imgNode.setAttribute("border", "0");
-        newTitleDiv.appendChild(imgNode);
-    }
+    var comicSites = [
+        {% for ComicBaseClass in comic_base_classes -%}
+        [
+            "{{_(ComicBaseClass.__name__.rstrip('BaseBook'))}}",
+            [
+                {% for domain in ComicBaseClass.accept_domains -%}
+                    "{{domain}}",
+                {%- endfor %}
+            ],
+        ],
+        {%- endfor %}
+    ];
+    comicSites.forEach(function (comicSite) {
+        var comicSiteDomains = comicSite[1];
+        if (comicSiteDomains.some(function(domain) {
+            return url.startsWith(domain)
+        })) {
+            newTitleDiv.appendChild(document.createTextNode(' '));
+            var imgNode = document.createElement("img");
+            imgNode.setAttribute("alt", comicSite[0]);
+            imgNode.setAttribute("src", "static/comic.gif");
+            imgNode.setAttribute("border", "0");
+            newTitleDiv.appendChild(imgNode);
+        }
+    })
     newFeedDiv.appendChild(newTitleDiv);
 
     var newCornerDiv = document.createElement("div");

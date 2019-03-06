@@ -11,17 +11,10 @@ import urllib, urllib2, imghdr
 from base64 import b64decode, b64encode
 
 class Seven33SoBaseBook(BaseComicBook):
-    title               = u''
-    description         = u''
-    language            = ''
-    feed_encoding       = ''
-    page_encoding       = ''
-    mastheadfile        = ''
-    coverfile           = ''
-    host                = 'https://www.733.so'
-    feeds               = [] #子类填充此列表[('name', mainurl),...]
+    accept_domains = ("https://www.733.so", "https://m.733.so")
+    host = "https://www.733.so"
 
-    #获取漫画章节列表
+    # 获取漫画章节列表
     def getChapterList(self, url):
         decoder = AutoDecoder(isfeed=False)
         opener = URLOpener(self.host, timeout=60)

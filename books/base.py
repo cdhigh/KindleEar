@@ -1357,51 +1357,65 @@ class BaseComicBook(BaseFeedBook):
     由 insert0003 <https://github.com/insert0003> 贡献代码
     如果要处理连载的话，可以使用 ComicUpdateLog 数据库表来记录和更新
     """
-    title               = u''
-    description         = u''
-    language            = ''
-    feed_encoding       = ''
-    page_encoding       = ''
-    mastheadfile        = ''
-    coverfile           = ''
-    feeds               = [] #子类填充此列表[('name', mainurl),...]
-    min_image_size      = (150, 150) #小于这个尺寸的图片会被删除，用于去除广告图片或按钮图片之类的
-    
-    #子类必须实现此函数，返回 [(section, title, url, desc),..]
-    #每个URL直接为图片地址，或包含一个或几个漫画图片的网页地址
+
+    # 子类填充： (https://www.manhuagui.com", "https://m.manhuagui.com")
+    accept_domains = tuple()
+
+    title = u""
+    description = u""
+    language = ""
+    feed_encoding = ""
+    page_encoding = ""
+    mastheadfile = "mh_default.gif"
+    coverfile = "cv_bound.jpg"
+    feeds = []  # 子类填充此列表[('name', mainurl),...]
+    min_image_size = (150, 150)  # 小于这个尺寸的图片会被删除，用于去除广告图片或按钮图片之类的
+
+    # 子类必须实现此函数，返回 [(section, title, url, desc),..]
+    # 每个URL直接为图片地址，或包含一个或几个漫画图片的网页地址
     def ParseFeedUrls(self):
-        urls = [] #用于返回
+        urls = []  # 用于返回
 
         userName = self.UserName()
         for item in self.feeds:
             title, url = item[0], item[1]
+            self.log.debug(u"Parsing Feed {} for {}".format(url, title))
 
-            lastCount = LastDelivered.all().filter('username = ', userName).filter("bookname = ", title).get()
+            lastCount = (
+                LastDelivered.all()
+                .filter("username = ", userName)
+                .filter("bookname = ", title)
+                .get()
+            )
             if not lastCount:
-                self.log.info('These is no log in db LastDelivered for name: %s, set to 0' % title)
+                self.log.info(
+                    "These is no log in db LastDelivered for name: %s, set to 0" % title
+                )
                 oldNum = 0
             else:
                 oldNum = lastCount.num
 
             chapterList = self.getChapterList(url)
 
-            pageCount=0
-            for deliverCount in range(5):
-                newNum = oldNum + deliverCount
-                if newNum < len(chapterList):
-                    imgList = self.getImgList(chapterList[newNum])
-                    if len(imgList) == 0:
-                        self.log.warn('can not found image list: %s' % chapterList[newNum])
-                        break
-                    for img in imgList:
-                        pageCount=pageCount+1
-                        urls.append((title, '{}'.format(pageCount), img, None))
-                        self.log.info('comicSrc: %s' % img)
+            pageCount = 0
+            newChapterIndex = oldNum
+            if newChapterIndex < len(chapterList):
+                imgList = self.getImgList(chapterList[newChapterIndex])
+                if not imgList:
+                    self.log.warn(
+                        "can not found image list: %s" % chapterList[newChapterIndex]
+                    )
+                    break
+                for img in imgList:
+                    pageCount = pageCount + 1
+                    urls.append((title, "{}".format(pageCount), img, None))
+                    self.log.info("comicSrc: %s" % img)
 
-                    self.UpdateLastDelivered(title, newNum+1)
-                    if pageCount > 30:
-                        break
-
+                self.UpdateLastDelivered(title, newChapterIndex + 1)
+            else:
+                self.log.info(u"No new chapter for {} ( total {}, pushed {} )".format(
+                    title, len(chapterList), newChapterIndex
+                ))
         return urls
 
     #获取漫画章节列表
@@ -1583,11 +1597,14 @@ class BaseComicBook(BaseFeedBook):
                             reduceto=opts.reduce_image_to))
                     return images
                 else:
-                    return rescale_image(data, png2jpg=opts.image_png_to_jpg,
-                                graying=opts.graying_image,
-                                reduceto=opts.reduce_image_to)
-        except Exception as e:
-            self.log.warn('Process comic image failed (%s).' % str(e))
+                    return rescale_image(
+                        data,
+                        png2jpg=opts.image_png_to_jpg,
+                        graying=opts.graying_image,
+                        reduceto=opts.reduce_image_to,
+                    )
+        except:
+            self.log.exception("Process comic image failed.")
             return data
 
         #如果一个图片为横屏，则将其分隔成2个图片

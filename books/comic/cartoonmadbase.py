@@ -8,17 +8,10 @@ from lib.autodecoder import AutoDecoder
 from books.base import BaseComicBook
 
 class CartoonMadBaseBook(BaseComicBook):
-    title               = u''
-    description         = u''
-    language            = ''
-    feed_encoding       = ''
-    page_encoding       = ''
-    mastheadfile        = ''
-    coverfile           = ''
-    host                = 'https://www.cartoonmad.com'
-    feeds               = [] #子类填充此列表[('name', mainurl),...]
+    accept_domains = ("http://www.cartoonmad.com", "https://www.cartoonmad.com")
+    host = "https://www.cartoonmad.com"
 
-    #获取漫画章节列表
+    # 获取漫画章节列表
     def getChapterList(self, url):
         decoder = AutoDecoder(isfeed=False)
         opener = URLOpener(self.host, timeout=60)
