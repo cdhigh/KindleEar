@@ -44,7 +44,7 @@ class Seven33SoBaseBook(BaseComicBook):
         for aindex in range(len(lias)):
             rindex = len(lias)-1-aindex
             href = "https://www.733.so" + lias[rindex].get("href")
-            chapterList.append(href)
+            chapterList.append((lias[rindex].get_text(), href))
 
         return chapterList
 

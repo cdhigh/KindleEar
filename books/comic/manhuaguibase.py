@@ -95,7 +95,7 @@ class ManHuaGuiBaseBook(BaseComicBook):
         for aindex in range(len(lias)):
             rindex = len(lias)-1-aindex
             href = "https://m.manhuagui.com" + lias[rindex].get("href")
-            chapterList.append(href)
+            chapterList.append((unicode(lias[rindex].string), href))
 
         return chapterList
 

@@ -45,7 +45,7 @@ class ToHoMHBaseBook(BaseComicBook):
 
         for a in lias:
             href = "https://www.tohomh123.com" + a.get("href")
-            chapterList.append(href)
+            chapterList.append((unicode(a.contents[0]), href))
 
         return chapterList
 

@@ -205,7 +205,7 @@ class Worker(BaseHandler):
                         sections[sec_or_media].append((title, brief, thumbnail, content))
                         itemcnt += 1
             except:
-                main.log.exception("Failed to push <%s>" % book.title)
+                main.log.exception(u"Failed to push <%s>" % book.title)
                 continue
         
         volumeTitle = ''
@@ -216,8 +216,8 @@ class Worker(BaseHandler):
                 insertThumbnail = False
                 if len(bks) == 1 and book: #因为漫画模式没有目录，所以在标题中添加卷号
                     volumeTitle = book.LastDeliveredVolume()
-                    oeb.metadata.clear('title')
-                    oeb.metadata.add('title', bookTitle + volumeTitle)
+                    oeb.metadata.clear("title")
+                    oeb.metadata.add("title", bookTitle + " " + volumeTitle)
             else:
                 insertHtmlToc = GENERATE_HTML_TOC
                 insertThumbnail = GENERATE_TOC_THUMBNAIL
@@ -412,16 +412,16 @@ class Worker(BaseHandler):
                     sections[sec_or_media].append((title, brief, thumbnail, content))
                     itemcnt += 1
         except:
-            main.log.exception("Failed to push <%s>" % book.title)
-            return "Failed to push book <%s>!" % title
+            main.log.exception(u"Failed to push <%s>" % book.title)
+            return u"Failed to push book <%s>!" % book.title
 
         volumeTitle = ''
         if itemcnt > 0:
             insertHtmlToc = False
             insertThumbnail = False
             volumeTitle = book.LastDeliveredVolume()
-            oeb.metadata.clear('title')
-            oeb.metadata.add('title', feed.title + volumeTitle)
+            oeb.metadata.clear("title")
+            oeb.metadata.add("title", feed.title + " " + volumeTitle)
 
             InsertToc(oeb, sections, toc_thumbnails, insertHtmlToc, insertThumbnail)
             oIO = byteStringIO()
