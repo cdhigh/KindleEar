@@ -382,7 +382,9 @@ class Worker(BaseHandler):
                 book = ComicBaseClass(imgindex=imgindex, opts=opts, user=user)
                 break
         else:
-            raise Exception("No base class for {}".format(feed.title))
+            msg = u"No base class for {}".format(feed.title)
+            main.log.error(msg)
+            return msg
 
         book.title = feed.title
         book.description = feed.title
