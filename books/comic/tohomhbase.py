@@ -12,25 +12,16 @@ from lib.userdecompress import decompressFromBase64
 
 
 class ToHoMHBaseBook(BaseComicBook):
-    title = u''
-    description = u''
-    language = ''
-    feed_encoding = ''
-    page_encoding = ''
-    mastheadfile = ''
-    coverfile = ''
-    host = 'https://www.tohomh123.com'
-    feeds = []  #子类填充此列表[('name', mainurl),...]
+    accept_domains = ("https://www.tohomh123.com", "https://m.tohomh123.com")
+    host = "https://www.tohomh123.com"
 
-    #获取漫画章节列表
+    # 获取漫画章节列表
     def getChapterList(self, url):
         decoder = AutoDecoder(isfeed=False)
         opener = URLOpener(self.host, timeout=60)
         chapterList = []
 
-        if url.startswith( "https://www.tohomh123.com" ):
-            url = url.replace('https://m.tohomh123.com', 'https://www.tohomh123.com')
-
+        url = url.replace("https://m.tohomh123.com", "https://www.tohomh123.com")
 
         result = opener.open(url)
         if result.status_code != 200 or not result.content:
@@ -54,7 +45,7 @@ class ToHoMHBaseBook(BaseComicBook):
 
         for a in lias:
             href = "https://www.tohomh123.com" + a.get("href")
-            chapterList.append(href)
+            chapterList.append((unicode(a.contents[0]), href))
 
         return chapterList
 
@@ -85,7 +76,6 @@ class ToHoMHBaseBook(BaseComicBook):
 
         did = re.search("did=(\d+)", raw_content).group(1)
         sid = re.search("sid=(\d+)", raw_content).group(1)
-        endpoint = "https://www.tohomh123.com/action/play/read"
         pcount = int(re.search("pcount = (\d+)", raw_content).group(1))
 
         for i in range(pcount):

@@ -19,6 +19,7 @@ from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
 from books import BookClasses, BookClass
 from books.base import BaseComicBook
+from books.comic import ComicBaseClasses
 
 class MySubscription(BaseHandler):
     __url__ = "/my"
@@ -28,13 +29,21 @@ class MySubscription(BaseHandler):
         user = self.getcurrentuser()
         myfeeds = user.ownfeeds.feeds if user.ownfeeds else None
         books = list(Book.all().filter("builtin = ", True))
-        #简单排个序，为什么不用数据库直接排序是因为Datastore数据库需要建立索引才能排序
-        books.sort(key=attrgetter('title'))
-        
-        return self.render('my.html', "My subscription", current='my', user=user,
-            books=books, myfeeds=myfeeds, tips=tips)
-    
-    def POST(self): # 添加自定义RSS
+        # 简单排个序，为什么不用数据库直接排序是因为Datastore数据库需要建立索引才能排序
+        books.sort(key=attrgetter("title"))
+
+        return self.render(
+            "my.html",
+            "My subscription",
+            current="my",
+            user=user,
+            books=books,
+            myfeeds=myfeeds,
+            comic_base_classes=ComicBaseClasses,
+            tips=tips,
+        )
+
+    def POST(self):  # 添加自定义RSS
         user = self.getcurrentuser()
         title = web.input().get('t')
         url = web.input().get('url')

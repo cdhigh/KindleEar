@@ -10,17 +10,11 @@ from bs4 import BeautifulSoup
 
 
 class TencentBaseBook(BaseComicBook):
-    title               = u''
-    description         = u''
-    language            = ''
-    feed_encoding       = ''
-    page_encoding       = ''
-    mastheadfile        = ''
-    coverfile           = ''
-    host                = 'http://m.ac.qq.com'
-    feeds               = [] #子类填充此列表[('name', mainurl),...]
+    accept_domains = ("http://ac.qq.com", "http://m.ac.qq.com")
+    host = "http://m.ac.qq.com"
+    feeds = []  # 子类填充此列表[('name', mainurl),...]
 
-    #获取漫画章节列表
+    # 获取漫画章节列表
     def getChapterList(self, url):
         decoder = AutoDecoder(isfeed=False)
         opener = URLOpener(self.host, timeout=60)
@@ -65,7 +59,7 @@ class TencentBaseBook(BaseComicBook):
                 self.log.info("Chapter {} is Vip, waiting for free.".format(href))
                 continue
 
-            chapterList.append(href)
+            chapterList.append((item.get_text(), href))
 
         return chapterList
 
