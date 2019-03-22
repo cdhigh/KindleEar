@@ -21,14 +21,11 @@ class ManHuaGuiBaseBook(BaseComicBook):
 
     # 获取漫画图片内容
     def adjustImgContent(self, content):
-        #强制转换成JPEG
-        try:
-            img = images.Image(content)
-            img.resize(width=(img.width-1), height=(img.height-1))
-            content = img.execute_transforms(output_encoding=images.JPEG)
-            return content
-        except:
-            return None
+        # 强制转换成JPEG
+        img = images.Image(content)
+        img.resize(width=(img.width - 1), height=(img.height - 1))
+        content = img.execute_transforms(output_encoding=images.JPEG)
+        return content
 
     #获取图片信息
     def get_node_online(self, input_str):
