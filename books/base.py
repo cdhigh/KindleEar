@@ -1418,11 +1418,13 @@ class BaseComicBook(BaseFeedBook):
                     )
                     break
                 next_chapter_index += 1
-                chapters.append((bookname, chapter_title, imgList, next_chapter_index))
+                chapters.append(
+                    (bookname, chapter_title, imgList, chapter_url, next_chapter_index)
+                )
             else:
                 self.log.info(
                     u"No new chapter for {} ( total {}, pushed {} )".format(
-                        bookname, len(chapterList), next_chapter_index
+                        bookname, len(chapter_list), next_chapter_index
                     )
                 )
         return chapters
@@ -1440,8 +1442,8 @@ class BaseComicBook(BaseFeedBook):
         return content
 
     # 生成器，返回一个图片元组，mime,url,filename,content,brief,thumbnail
-    def gen_image_items(self, img_list):
-        opener = URLOpener(self.host, timeout=self.timeout, headers=self.extra_header)
+    def gen_image_items(self, img_list, referer):
+        opener = URLOpener(referer, timeout=self.timeout, headers=self.extra_header)
         decoder = AutoDecoder(isfeed=False)
         min_width, min_height = self.min_image_size
         if self.needs_subscription:
@@ -1566,9 +1568,10 @@ class BaseComicBook(BaseFeedBook):
             bookname,
             chapter_title,
             img_list,
+            chapter_url,
             next_chapter_index,
         ) in self.ParseFeedUrls():
-            for item in self.gen_image_items(img_list):
+            for item in self.gen_image_items(img_list, chapter_url):
                 yield item
             self.UpdateLastDelivered(bookname, chapter_title, next_chapter_index)
 

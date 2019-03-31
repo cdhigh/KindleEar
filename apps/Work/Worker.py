@@ -380,7 +380,13 @@ class Worker(BaseHandler):
                 tz=user.timezone,
             )
             return
-        for (bookname, chapter_title, img_list, next_chapter_index) in chapters:
+        for (
+            bookname,
+            chapter_title,
+            img_list,
+            chapter_url,
+            next_chapter_index,
+        ) in chapters:
             try:
                 image_count = 0
                 for (
@@ -390,7 +396,7 @@ class Worker(BaseHandler):
                     content,
                     brief,
                     thumbnail,
-                ) in book.gen_image_items(img_list):
+                ) in book.gen_image_items(img_list, chapter_url):
                     if not mime_or_section or not filename or not content:
                         continue
 
