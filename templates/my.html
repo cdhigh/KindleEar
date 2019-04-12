@@ -102,6 +102,18 @@ function toggleSeparate(id) {
   btnft.checked = !btnft.checked;
 }
 
+function fillAddForm() {
+    var urlParams = new URLSearchParams(window.location.search);
+    var title = urlParams.get('title_to_add');
+    var url = urlParams.get('url_to_add');
+    if (title || url) {
+        document.getElementById("title_to_add").value = title || "";
+        document.getElementById("url_to_add").value = url || "";
+        document.getElementById("title_to_add").scrollIntoView();
+    }
+}
+fillAddForm();
+
 //点击了订阅内置书籍
 function doSubscribe(obj, id_) {
     var separate = document.getElementById("separate_" + id_).checked;
