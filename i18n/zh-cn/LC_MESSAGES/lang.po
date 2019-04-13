@@ -256,6 +256,15 @@ msgstr "未订阅"
 msgid "Subscribe"
 msgstr "订阅"
 
+msgid "Bookmarklet"
+msgstr "书签小应用"
+
+msgid "Drag and drop this link to your bookmarks."
+msgstr "将链接拖动到书签栏"
+
+msgid "Add to KindleEar"
+msgstr "在 KindleEar 中订阅"
+
 msgid "No have book unsubscrebed"
 msgstr "暂时没有未订阅的书籍"
 

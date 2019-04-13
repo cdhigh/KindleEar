@@ -89,6 +89,14 @@
     {% endif -%}
     {% endfor -%}
 </fieldset>
+<fieldset id="bookmarklet" style="margin-top:10px;">
+    <legend>{{_("Bookmarklet")}}</legend>
+    <p>{{_("Drag and drop this link to your bookmarks.")}}</p>
+    <a class="actionButton"
+        href="javascript:location.href='{{subscribe_url}}?title_to_add='+encodeURIComponent(document.title)+'&url_to_add='+encodeURIComponent(window.location.href)">
+        {{_("Add to KindleEar")}}
+    </a>
+</fieldset>
 {% endblock -%}
 {% block js -%}
 <script type="text/javascript">
@@ -101,6 +109,18 @@ function toggleSeparate(id) {
   var btnft = document.getElementById(id);
   btnft.checked = !btnft.checked;
 }
+
+function fillAddForm() {
+    var urlParams = new URLSearchParams(window.location.search);
+    var title = urlParams.get('title_to_add');
+    var url = urlParams.get('url_to_add');
+    if (title || url) {
+        document.getElementById("title_to_add").value = title || "";
+        document.getElementById("url_to_add").value = url || "";
+        document.getElementById("title_to_add").scrollIntoView();
+    }
+}
+fillAddForm();
 
 //点击了订阅内置书籍
 function doSubscribe(obj, id_) {
