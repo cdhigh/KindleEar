@@ -1,25 +1,24 @@
 {% extends "advbase.html" %}
 {% block advcontent -%}
 <form class="pure-form" action="" method="POST" enctype="multipart/form-data">
-  <fieldset>
-    <legend>{{_("Import Feeds")}}</legend>
-    <p style="font-size:0.8em;color:grey;">
-        {{_("Import custom rss from a OPML file.")}}
-    </p>
-    <br />
-    <input type="file" name="importfile" />
-    <hr />
-    <label for="defaultIsfulltext" class="pure-checkbox">
-        <input type="checkbox" name="defaultIsfulltext" id="defaultIsfulltext" />
-        {{_("Import as fulltext RSS by default")}}
-    </label>
-    <br />
-    <input type="submit" value="{{_("Import")}}" class="pure-button pure-button-primary" style="margin-top:8px;" />
-    <span style="margin-left:1em;"><a href="/advexport" class="actionButton">{{_("Download")}}</a></span>
-    {% if tips -%}
-    <br />
-    <p style="font-size:0.9em;color:red;font-weight:bold;">{{tips}}</p>
-    {% endif -%}
-  </fieldset>
+    <fieldset>
+        <legend><h3>{{_("Import Feeds")}}</h3></legend>
+        <p><small>{{ _("Import custom rss from a OPML file.") }}</small></p>
+        <div class="box-list">
+            <input type="file" name="importfile" class="pure-input-1 box" />
+        </div>
+        <label for="defaultIsfulltext" class="pure-checkbox">
+            <input type="checkbox" name="defaultIsfulltext" id="defaultIsfulltext" />
+            <span>{{_("Import as fulltext RSS by default")}}</span>
+        </label>
+        <div style="text-align:center;">
+            <input type="submit" value="{{_("Import")}}" class="pure-button pure-button-primary pure-input-rounded" />
+            <a href="/advexport" class="pure-button pure-input-rounded">{{_("Download")}}</a>
+        </div>
+        {% if tips -%}
+        <br />
+        <p style="font-size:0.9em;color:red;font-weight:bold;">{{tips}}</p>
+        {% endif -%}
+    </fieldset>
 </form>
 {% endblock -%}

@@ -1,7 +1,10 @@
 {% extends "base.html" %}
+
 {% block menubar -%}
 {% endblock -%}
+
 {% block content -%}
+<div class="main">
     <form class="pure-form pure-form-aligned" action="" method="POST">
       <fieldset>
         <legend>{{_("Input website login info for book '%s'")|format('<strong>' + bk.title + '</strong>')|safe}}</legend>
@@ -26,4 +29,5 @@
         </div>
       </fieldset>
     </form>
+</div>
 {% endblock -%}

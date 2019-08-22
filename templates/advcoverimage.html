@@ -1,72 +1,49 @@
 {% extends "advbase.html" %}
+
 {% block css -%}
 <style type="text/css">
-#preview{
-    position:relative;
-    width:90%;
+#preview {
+    text-align: center;
+    background-color: #eee;
 }
+
+#preview:hover {
+    background-color: #ddd;
+}
+
 #preview img{
   width:90%;
   max-width:500px;
   height:auto;
+  margin: 1.5em auto;
   vertical-align: bottom;
-}
-.out_shadow{
-  margin-right:10px;
-  padding:5px;
-  border:1px solid #ccc;
-  -moz-border-radius:5px;
-  -webkit-border-radius:5px;
-  border-radius:5px;
-  -webkit-box-shadow:0 0 5px rgba(0,0,0,0.2);
-  -moz-box-shadow: 0 0 5px rgba(0,0,0,0.2);
-  box-shadow: 0 0 5px rgba(0,0,0,0.2);
-  -webkit-transition:all 0.3s ease;
-  -moz-transition:all 0.3s ease;
-  -ms-transition:all 0.3s ease;
-  -o-transition:all 0.3s ease;
-  transition:all 0.3s ease;
-}
-.out_shadow:hover{
-  border:1px solid rgba(82, 168, 236, 0.6);
-  -webkit-box-shadow:0 0 11px rgba(82, 168, 236, 0.6);
-  -moz-box-shadow: 0 0 11px rgba(82, 168, 236, 0.6);
-  box-shadow: 0 0 11px rgba(82, 168, 236, 0.6);
-}
-.upload_progress{
-    display:none;
-    padding:5px;
-    border-radius:10px;
-    color:#fff;
-    background-color:rgba(0,0,0,.6);
-    position:absolute;
-    left:15px;
-    top:15px;
-    z-index:18;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 </style>
 {{super()}}
 {% endblock -%}
+
 {% block advcontent -%}
 <form class="pure-form" id="uploadForm" action="{{formaction}}" method="POST" enctype="multipart/form-data">
-  <fieldset>
-    <legend>{{_("Upload cover image")}}</legend>
-    <p style="font-size:0.8em;color:grey;">
-        {{_("Upload a cover image from local.")}}
-    </p>
-    <input type="file" name="coverfile" id="coverfile" />
-    <div id="preview" class="upload_preview">
-    {% if user and user.cover -%}
-        <img id="uploadImage" src="/dbimage/cover" class="out_shadow" />
-    {% else -%}
-        <img id="uploadImage" src="/images/cv_default.jpg" class="out_shadow" />
-    {% endif -%}
-        <span id="uploadProgress" class="upload_progress"></span>
-    </div>
-    <br />
-    <input type="button" value="{{_("Upload")}}" id="fileSubmit" class="pure-button pure-button-primary" style="margin-top:8px;" />
-    <span style="margin-left:1em;"><a href="#" datahref="{{deletecoverhref}}" class="actionButton" id="deletecover">{{_("Delete")}}</a></span>
-  </fieldset>
+    <fieldset>
+        <legend><h3>{{_("Upload cover image")}}</h3></legend>
+        <p><small>{{_("Upload a cover image from local.")}}</small></p>
+        <div class="box-list">
+            <input type="file" name="coverfile" id="coverfile" class="pure-input-1 box" />
+            <div id="preview" class="box upload_preview">
+                {% if user and user.cover -%}
+                    <img id="uploadImage" src="/dbimage/cover" class="out_shadow" />
+                {% else -%}
+                    <img id="uploadImage" src="/images/cv_default.jpg" class="out_shadow" />
+                {% endif -%}
+                    <span id="uploadProgress" class="upload_progress"></span>
+            </div>
+        </div>
+        <div style="text-align:center;">
+            <input type="button" value="{{ _('Upload') }}" id="fileSubmit" class="pure-button pure-button-primary pure-input-rounded" />
+            <a href="javascript:;" datahref="{{ deletecoverhref }}" id="deletecover" class="pure-button pure-input-rounded">{{_("Delete")}}</a>
+        </div>
+    </fieldset>
 </form>
 {% endblock -%}
 {% block js -%}
