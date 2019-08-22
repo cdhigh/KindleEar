@@ -1,25 +1,34 @@
 {% extends "advbase.html" %}
+
+{% block bodytag -%}
+<body class="advwhitelist">
+{% endblock -%}
+
 {% block advcontent -%}
-<form class="pure-form" action="" method="POST">
-  <fieldset>
-    <legend>{{_("White List")}}</legend>
-    <p style="font-size:0.8em;color:grey;">
-        {{_("mail sent to %sxxx@<em>appid</em>.appspotmail.com will be transfered to your email.")|format('' if user.name=="admin" else user.name+"__")}}
-    </p>
-    {% if user.whitelist.count() -%}
-    <table class="pure-table pure-table-striped pure-table-horizontal tburl">
-    {% for lst in user.whitelist -%}
-    <tr>
-        <td style="width:80%;font-size:0.9em;">{{lst.mail}}</td>
-        <td style="text-align:right;"><a href="/advdel?delwlist={{lst.key().id()}}" class="actionButton">{{_("Delete")}}</a></td>
-    </tr>
-    {% endfor -%}
-    </table>
-    {% endif -%}
-        <div class="newitem">
-            <input type="text" name="wlist" style="width:100%" placeholder="{{_("Please input mail address")}}" />
+<form class="pure-form pure-form-aligned" action="" method="POST">
+    <fieldset>
+        <legend><h3>{{_("White List")}}</h3></legend>
+        <p>
+            <small>{{_("mail sent to %sxxx@<em>appid</em>.appspotmail.com will be transfered to your email.")|format('' if user.name=="admin" else user.name+"__")}}</small>
+        </p>
+        <div class="box-list">
+            {% if user.whitelist.count() -%}
+                {%- for lst in user.whitelist -%}
+                    <div class="box">
+                        {{ lst.mail }}
+                        <div class="cornerControls">
+                            <a href="/advdel?delwlist={{ lst.key().id() }}" class="actionButton">{{ _("Delete") }}</a>
+                        </div>
+                    </div>
+                {%- endfor -%}
+            {%- endif %}
+            <div class="box">
+                <input type="text" name="wlist" placeholder="{{ _('Please input mail address') }}" class="pure-input-1" />
+                <div class="cornerControls">
+                    <input type="submit" value="{{ _('Add') }}" class="actionButton add" />
+                </div>
+            </div>
         </div>
-        <input type="submit" value="{{_("Add")}}" class="pure-button pure-button-primary" style="margin-top:8px;" />
-  </fieldset>    
+    </fieldset>    
 </form>
 {% endblock -%}

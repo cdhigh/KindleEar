@@ -1,43 +1,48 @@
 {% extends "advbase.html" %}
 {% block advcontent -%}
-<fieldset>
-    <legend>{{_("Deliver now")}}</legend>
-    <p style="font-size:0.8em;color:grey;">
-        {{_("Deliver selected books now.")}}
-    </p>
-  {% if booksnum > 0 %}
-    <a href="/deliver?u={{nickname}}" value="{{_("Deliver")}}" id="deliverButton" 
-        class="pure-button pure-button-primary" style="margin-right:4em;" >{{_("Deliver")}}</a>
-  {% if booksnum == 1 and books[0].builtin == False -%}
-    <a href="#" class="actionButton" onclick="SelectAll();UpdateDeliverFeedLink();return false;">{{_("Select all")}}</a>
-    <a href="#" class="actionButton" onclick="SelectNone();UpdateDeliverFeedLink();return false;">{{_("Select none")}}</a>
-    <hr style="width:90%;color:silver;margin:1em auto;" />
-    <div class="pure-control-group">
-        {% for item in books[0].feeds %}
-        <label for="{{item.key().id()}}" class="pure-checkbox">
-            <input id="{{item.key().id()}}" bookid="{{books[0].key().id()}}" type="checkbox" checked="1" onclick="UpdateDeliverFeedLink();" />{{item.title}}
-        </label><br />
-        {% endfor %}
-    </div>
-  {% else -%}
-    <a href="#" class="actionButton" onclick="SelectAll();UpdateDeliverLink();return false;">{{_("Select all")}}</a>
-    <a href="#" class="actionButton" onclick="SelectNone();UpdateDeliverLink();return false;">{{_("Select none")}}</a>
-    <hr style="width:90%;color:silver;margin:1em auto;" />
-    <div class="pure-control-group">
-        {% for item in books %}
-        <label for="{{item.key().id()}}" class="pure-checkbox">
-            <input id="{{item.key().id()}}" type="checkbox" checked="1" onclick="UpdateDeliverLink();" />{{item.title}}
-        </label><br />
-        {% endfor %}
-    </div>
-  {% endif %}
-    
-  {% else %}
-    <hr style="width:90%;color:silver;margin:1em auto;" />
-    {{_("Do not have any subscribed book.")}}
-  {% endif %}
-</fieldset>
+<div class="pure-form pure-form-aligned">
+    <fieldset>
+        <legend><h3>{{ _("Deliver now") }}</h3></legend>
+        <p><small>{{ _("Deliver selected books now.") }}</small></p>
+        <div class="box-list">
+            {% if (booksnum == 0 and not books) or (booksnum == 1 and books[0].builtin == False and books[0].feeds.count() == 0) %}
+                <div class="box">{{ _("Do not have any subscribed book.") }}</div>
+            {% endif %}
+            {% if booksnum == 1 and books[0].builtin == False -%}
+                {% for item in books[0].feeds %}
+                <label for="{{ item.key().id() }}" class="pure-checkbox box">
+                    <input id="{{ item.key().id() }}" bookid="{{ books[0].key().id() }}" type="checkbox" checked="1" onclick="UpdateDeliverFeedLink();" />
+                    <span>{{item.title}}</span>
+                </label>
+                {% endfor %}
+                {% if books[0].feeds.count() > 0 %}
+                <div class="cornerControls" style="padding:.5em 0;text-align:center;">
+                    <a href="#" class="actionButton act" onclick="SelectAll();UpdateDeliverFeedLink();return false;">{{ _("Select all") }}</a>
+                    <a href="#" class="actionButton act" onclick="SelectNone();UpdateDeliverFeedLink();return false;">{{ _("Select none") }}</a>
+                </div>
+                {% endif %}
+            {%- elif booksnum > 0 -%}
+                {% for item in books %}
+                <label for="{{ item.key().id() }}" class="pure-checkbox box">
+                    <input id="{{ item.key().id() }}" type="checkbox" checked="1" onclick="UpdateDeliverLink();" />
+                    <span>{{ item.title }}</span>
+                </label>
+                {% endfor %}
+                <div class="cornerControls" style="padding:.5em 0;text-align:center;">
+                    <a href="#" class="actionButton act" onclick="SelectAll();UpdateDeliverLink();return false;">{{ _("Select all") }}</a>
+                    <a href="#" class="actionButton act" onclick="SelectNone();UpdateDeliverLink();return false;">{{ _("Select none") }}</a>
+                </div>
+            {%- endif %}
+        </div>
+        {% if booksnum > 0 and ((books[0].builtin == True and books) or ((books[0].builtin == False and books[0].feeds.count() >= 1) or booksnum >= 2)) %}
+        <div style="text-align:center;">
+            <a href="/deliver?u={{nickname}}" value="{{ _('Deliver') }}" id="deliverButton" class="pure-button pure-button-primary pure-input-rounded">{{ _('Deliver') }}</a>
+        </div>
+        {% endif %}
+    </fieldset>
+</div>
 {% endblock -%}
+
 {% block javascriptinhead %}
 <script type="text/javascript">
     //Update link of deliver button for feeds (custom rss)

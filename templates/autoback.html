@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% block js -%}
 <script type="text/javascript">
 function gobackafter(secs){
@@ -12,12 +13,18 @@ function gobackafter(secs){
 gobackafter(5);
 </script>
 {% endblock -%}
+
 {% block menubar -%}
 {% endblock -%}
+
 {% block content -%}
+<div class="main">
     {% if tips -%}
-    <p style="font-size:0.9em;">{{tips}}</p>
+        <div class="notice-box">
+            {{tips}}
+            {{_("Auto back to previous page after 5 seconds")}}...
+            <a href="javascript:history.go(-1);">{{_("Click to back")}}</a>
+        </div>
     {% endif -%}
-    <p>{{_("Auto back to previous page after 5 seconds")}}...</p>
-    <p><a href="javascript:history.go(-1);">{{_("Click to back")}}</a></p><br />
+</div>
 {% endblock -%}

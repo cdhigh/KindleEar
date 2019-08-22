@@ -1,18 +1,21 @@
 {% extends "base.html" %}
+
 {% block menubar -%}
 {% endblock -%}
+
 {% block content -%}
+<div class="main">
     {% if tips -%}
-    <p style="color:red;font-weight:bold;">{{tips}}</p>
+    <div class="notice-box">{{tips}}</div>
     {% endif -%}
     <form class="pure-form pure-form-aligned" action="" method="POST">
         <div class="pure-control-group">
             <label for="u">{{_("Username")}}</label>
-            <input id="u" name="u" type="text" placeholder="Username" 
-            {% if username %}value="{{username}}"{% endif %} readonly="true" />
+            <input id="u" name="u" type="text" placeholder="Username" {% if username %}value="{{username}}"{% endif %} readonly="true" class="pure-u-1 pure-u-sm-1-2" />
         </div>
-        <div class="pure-controls">
+        <div class="pure-control-group" style="text-align:center;">
             <button type="submit" class="pure-button pure-button-primary">{{_("Delete")}}</button>
         </div>        
     </form>
+</div>
 {% endblock -%}

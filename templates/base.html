@@ -2,11 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="KindleEar is a service for Amazon Kindle owners that aggregates feeds and deliver them to your Kindle." />    
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no" />
+    <meta name="description" content="KindleEar is a service for Amazon Kindle owners that aggregates feeds and deliver them to your Kindle." />
     <title>{{title}} - Kindle's Ear</title>
     <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
     <link rel="stylesheet" href="/static/pure-min.css" type="text/css" charset="utf-8"/>
+    <link rel="stylesheet" href="/static/grids-responsive-min.css" type="text/css" charset="utf-8"/>
     <link rel="stylesheet" href="/static/base.css" type="text/css" charset="utf-8"/>
     <script type="text/javascript">
         function $(id_){return document.getElementById(id_);}
@@ -42,13 +43,13 @@
             options.type = (options.type || "GET").toUpperCase();
             options.dataType = options.dataType || "json";
             var params = formatParams(options.data);
-            
+
             if (window.XMLHttpRequest) {
                 var xhr = new XMLHttpRequest();
             } else {
                 var xhr = new ActiveXObject('Microsoft.XMLHTTP');
             }
-            
+
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4) {
                     var status = xhr.status;
@@ -63,7 +64,7 @@
                     }
                 }
             }
-            
+
             if (options.type == "GET") {
                 xhr.open("GET", options.url + "?" + params, true);
                 xhr.send(null);
@@ -78,85 +79,85 @@
     {% block cssfiles %}{% endblock -%}
     {% block css %}{% endblock -%}
 </head>
+
 {% block bodytag -%}
 <body>
 {% endblock -%}
-    <div id="header">
-        {% block header -%}
-        <h1><a href="/">KindleEar</a></h1>
-        {% block header_loginfo -%}
-        {% if nickname -%}
-          <a class="nav" href="/logout">{{_("Logout")}}</a>
-          <span style="color: #ccc;">&bull;</span>
-        <span><a href="/admin"><strong>{{nickname}}</strong></a></span>
-        {% else -%}
-        <form class="pure-form headerloginform" action="/login" method="POST">
-            <input type="text" class="pure-u-1-6" style="min-width:100px;" placeholder={{_("Name")}} name="u" id="u" />
-            <input type="password" class="pure-u-1-6" style="min-width:100px;" placeholder={{_("Password")}} name="p" />
-            <input type="submit" class="pure-button pure-button-small" value={{_("Login")}} />
-        </form>
-        {% endif -%}
-        {% endblock -%}
-        <div class="clear"></div>
-        {% endblock -%}
-    </div>
-    {% block menubar -%}
-    {% if nickname -%}
-    <div class="pure-skin-mine">
-    <div class="pure-menu pure-menu-open pure-menu-horizontal">
-        <ul>
-        {% if current == "my" -%}
-        <li class="pure-menu-selected"><a href="#">{{_("Feeds")}}</a></li>
-        {% else -%}
-        <li><a href="/my">{{_("Feeds")}}</a></li>
-        {% endif -%}
-        {% if current == "setting" -%}
-        <li class="pure-menu-selected"><a href="#">{{_("Settings")}}</a></li>
-        {% else -%}
-        <li><a href="/setting">{{_("Settings")}}</a></li>
-        {% endif -%}
-        {% if current == "logs" -%}
-        <li class="pure-menu-selected"><a href="#">{{_("Logs")}}</a></li>
-        {% else -%}
-        <li><a href="/logs">{{_("Logs")}}</a></li>
-        {% endif -%}
-        {% if current == "admin" -%}
-        <li class="pure-menu-selected"><a href="#">{{_("Admin")}}</a></li>
-        {% else -%}
-        <li><a href="/admin">{{_("Admin")}}</a></li>
-        {% endif -%}
-        {% if current == "advsetting" -%}
-        <li class="pure-menu-selected"><a href="#">{{_("Advanced")}}</a></li>
-        {% else -%}
-        <li><a href="/adv">{{_("Advanced")}}</a></li>
-        {% endif -%}
-        </ul>
-    </div>
-    </div>
-    {% else -%}
-        {#<h2 style="text-align:center;padding:10px 0;"><a href="/login">{{_("Please Login")}}</a></h2>#}
-    </div>
-    </div>
-    {% endif -%}
-    {% endblock -%}
     <div id="content">
-    {% block content -%}
-    {% endblock -%}
+        <!-- Header Navigation -->
+        <div class="header pure-menu pure-menu-horizontal">
+        {% block header -%}
+            <a href="/" class="pure-menu-heading pure-menu-link logo">KindleEar</a>
+            {% block header_loginfo -%}
+            <ul class="pure-menu-list home-menu">
+                {% if nickname -%}
+                    <li class="pure-menu-item"><a href="/admin" class="pure-menu-link">{{nickname}}</a></li>
+                    <li class="pure-menu-item"><a href="/logout" class="pure-menu-link">{{_("Logout")}}</a></li>
+                {% else -%}
+                    <li class="pure-menu-item"><a href="/login" class="pure-menu-link">{{_("Login")}}</a></li>
+                {% endif -%}
+                <li class="pure-menu-item">
+                    <a href="/lang/en"><img src="/static/us.gif" alt="EN" /></a>
+                    <a href="/lang/zh-cn"><img src="/static/cn.gif" alt="CN" /></a>
+                    <a href="/lang/tr-tr"><img src="/static/tr.gif" alt="TR" /></a>
+                </li>
+            </ul>
+            {% endblock -%}
+        {% endblock -%}
+        </div>
+
+        {% block menubar -%}
+            {% if nickname -%}
+            <div class="pure-menu pure-menu-horizontal pure-menu-scrollable app-menu">
+                <ul class="pure-menu-list">
+                    {% if current == "my" -%}
+                    <li class="pure-menu-item pure-menu-selected"><span>{{_("Feeds")}}</span></li>
+                    {% else -%}
+                    <li class="pure-menu-item"><a href="/my" class="pure-menu-link">{{_("Feeds")}}</a></li>
+                    {% endif -%}
+                    {% if current == "setting" -%}
+                    <li class="pure-menu-item pure-menu-selected"><span>{{_("Settings")}}</span></li>
+                    {% else -%}
+                    <li class="pure-menu-item"><a href="/setting" class="pure-menu-link">{{_("Settings")}}</a></li>
+                    {% endif -%}
+                    {% if current == "logs" -%}
+                    <li class="pure-menu-item pure-menu-selected"><span>{{_("Logs")}}</span></li>
+                    {% else -%}
+                    <li class="pure-menu-item"><a href="/logs" class="pure-menu-link">{{_("Logs")}}</a></li>
+                    {% endif -%}
+                    {% if current == "admin" -%}
+                    <li class="pure-menu-item pure-menu-selected"><span>{{_("Admin")}}</span></li>
+                    {% else -%}
+                    <li class="pure-menu-item"><a href="/admin" class="pure-menu-link">{{_("Admin")}}</a></li>
+                    {% endif -%}
+                    {% if current == "advsetting" -%}
+                    <li class="pure-menu-item pure-menu-selected"><span>{{_("Advanced")}}</span></li>
+                    {% else -%}
+                    <li class="pure-menu-item"><a href="/adv" class="pure-menu-link">{{_("Advanced")}}</a></li>
+                    {% endif -%}
+                </ul>
+            </div>
+            {% endif -%}
+        {% endblock -%}
+
+        {% block content -%}
+        {% endblock -%}
+        <div class="footer-sticker"></div>
     </div>
-    <div id="footer">
+
+    <div class="footer l-box">
         {% block footer -%}
-        <div class="clear"></div>
-        2013 - 2018 &copy; KindleEar&nbsp;@{{version}}&nbsp;&nbsp;|&nbsp;&nbsp;
-        <a href="/static/faq{%if lang and not lang.startswith('zh')%}_en{%endif%}.html" target="_blank" style="text-decoration:none;">FAQ</a>
-        &nbsp;&nbsp;|&nbsp;&nbsp;
-        <a href="https://github.com/cdhigh/kindleear" target="_blank" style="text-decoration:none;">Github page</a>
-        &nbsp;&nbsp;|&nbsp;&nbsp;
-        <a href="http://appengine.google.com" target="_blank" style="text-decoration:none;">App Engine</a>
-        <div style="float:right;"><a href="/lang/en"><img src="/static/us.gif" alt="EN" /></a>
-        <a href="/lang/zh-cn"><img src="/static/cn.gif" alt="CN" /></a>
-        <a href="/lang/tr-tr"><img src="/static/tr.gif" alt="TR" /></a></div>
+        <p>
+            <small>
+            2013-2019 &copy; KindleEar&nbsp;@{{version}} ｜
+            <a href="/static/faq{%if lang and not lang.startswith('zh')%}_en{%endif%}.html" target="_blank">FAQ</a> ｜
+            <a href="https://github.com/cdhigh/kindleear"  target="_blank">Github page</a> ｜
+            <a href="https://console.cloud.google.com/appengine" target="_blank">App Engine</a>
+            </small>
+        </p>
         {% endblock -%}
     </div>
+
 {% block jsfiles %}{% endblock -%}
 {% block js %}{% endblock -%}
 </body>

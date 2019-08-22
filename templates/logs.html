@@ -1,168 +1,169 @@
 {% extends "base.html" %}
+
+{% block bodytag -%}
+<body class="logs">
+{% endblock -%}
+
 {% block css -%}
 <style type="text/css">
-.logs_list{
-    border-spacing: 0;
-    border-collapse: collapse;
-    background:#F8F8F8;
-    width:100%;
-    -moz-border-radius: 8px;
-    -webkit-border-radius: 8px;
-    border-radius: 8px;
-}
-.logs_list td,.logs_list th{
-    font-size: 13px;
-    padding:3px 10px;
-    border: 1px solid #e6e6e6;
+.logs .status {
+    display: inline-block;
+    border-radius: 20px;
+    background-color: grey;
+    color: #fff;
+    text-align: center;
+    padding: 3px 15px;
+    white-space: nowrap;
 }
 
-.logs_list td{
-    line-height: 25px;
-    text-align: left;
-    padding-left: 10px;
-}
-.logs_list th{
-    font-weight: bold;
-    color: #333;
-    line-height: 25px;
-    text-align: left;
-    padding-left: 10px;
+.logs .status.success {
+    background-color: green;
 }
 
-.logs_list .center{
-    text-align:center;
-}
-.logs_list strong{font-weight: bold;color:#005DA7;}
-.logs_list caption{
-    font-size: 16px;
-    text-align: left;
-    padding: 5px 10px;
-    border: 1px solid #e6e6e6;
-}
-.logs_list .logbook {
-    text-align:center;
-}
-
-.logs_list .logbook span{
-    display:none;
-}
-.logs_list .logbook:hover{
-    position:relative;
-    z-index:1;
-}
-.logs_list .logbook:hover span{
-    display:block;
-    padding:2px;
-    background:#ffffe1;
-    border:1px solid #000000;
-    color:#333;
-    z-index:10;
-    position:absolute;
-    top:1.2em;
-    left:5px;
-    width:400px;
+.logs .status.error {
+    background-color: darkorange;
 }
 </style>
 {% endblock -%}
+
 {% block content -%}
-{% if mylogs -%}
-<p><em class="required">*</em> {{_("Only display last 10 logs")}}</p>
-<table class="pure-table pure-table-striped logs_list">
-    <thead><tr>
-        <th class="center">{{_("Time")}}</th>
-        <th class="center">{{_("Title")}}</th>
-        <th class="center">{{_("Size")}}</th>
-        <th class="center">{{_("To")}}</th>
-        <th class="center">{{_("Status")}}</th>
-    </tr></thead>
-    <tbody>
-    {% for log in mylogs -%}
-    <tr>
-        <td class="center">{{ log.time }}</td>
-        <td class="logbook">
-        {% if log.book|length>20 -%}
-        {{log.book[:20]}}...<span>{{log.book}}</span>
-        {% else %}{{log.book}}{% endif %}</td>
-        <td class="center">{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>
-        <td class="center">{{ log.to }}</td>
-        <td class="center">{% if log.status %}{{ log.status }}{% else %}ok{% endif %}</td>
-    </tr>
-    {% endfor -%}
-    </tbody>
-</table>
-{% else -%}
-<p>{{_("Has no log")}}</p>
-{% endif -%}
+<div class="main">
+    {% if mylogs -%}
+    <legend><h3>{{ _("Only display last 10 logs") }}</h3></legend>
+    <table class="pure-table pure-table-horizontal logs_list" width="100%">
+        <colgroup>
+            <col width="30%">
+            <col width="40%">
+            <col width="15%">
+            <col width="10%">
+            <col width="5%">
+        </colgroup>
+        <thead>
+            <tr>
+                <th>{{ _("Time") }}</th>
+                <th>{{ _("Title") }}</th>
+                <th>{{ _("Size") }}</th>
+                <th>{{ _("To") }}</th>
+                <th>{{ _("Status") }}</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for log in mylogs -%}
+        <tr>
+            <td>{{ log.time }}</td>
+            <td class="logbook">
+                {% if log.book|length>20 -%}
+                    {{log.book[:20]}}...<span>{{log.book}}</span>
+                {% else %}
+                    {{log.book}}
+                {% endif %}
+            </td>
+            <td>{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>
+            <td>{{ log.to }}</td>
+            <td>
+                <span class="status {% if 'ok' in log.status -%} success {%- else -%} error {%- endif %}">
+                    {{ log.status }}
+                </span>
+            </td>
+        </tr>
+        {% endfor -%}
+        </tbody>
+    </table>
+    {% else -%}
+    <div class="notice-box">{{_('Has no log')}}</div>
+    {% endif -%}
 
-{% if logs -%}
-<br />
-<em class="required">*</em> {{_("Logs of other users")}}<br />
-<table class="pure-table pure-table-striped logs_list">
-    <thead><tr>
-        <th class="center">{{_("Username")}}</th>
-        <th class="center">{{_("Time")}}</th>
-        <th class="center">{{_("Title")}}</th>
-        <th class="center">{{_("Size")}}</th>
-        <th class="center">{{_("To")}}</th>
-        <th class="center">{{_("Status")}}</th>
-    </tr></thead>
-    <tbody>
-    {% for u in logs -%}
-    {% for log in logs[u] -%}
-    <tr>
-        <td class="center">{{ u }}</td>
-        <td class="center">{{ log.time }}</td>
-        <td class="logbook">
-        {% if log.book|length>20 -%}
-        {{log.book[:20]}}...<span>{{log.book}}</span>
-        {% else %}{{log.book}}{% endif %}</td>
-        <td class="center">{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>
-        <td class="center">{{ log.to }}</td>
-        <td class="center">{% if log.status %}{{ log.status }}{% else %}ok{% endif %}</td>
-    </tr>
-    {% endfor -%}
-    {% endfor -%}
-    </tbody>
-</table>
-{% endif -%} {# endif of if logs -#}
+    {% if logs -%}
+    <legend><h3>{{ _("Logs of other users") }}</h3></legend>
+    <table class="pure-table pure-table-horizontal logs_list" width="100%">
+        <colgroup>
+            <col width="10%" />
+            <col width="25%" />
+            <col width="25%" />
+            <col width="15%" />
+            <col width="20%" />
+            <col width="5%" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th>{{ _("Username") }}</th>
+                <th>{{ _("Time") }}</th>
+                <th>{{ _("Title") }}</th>
+                <th>{{ _("Size") }}</th>
+                <th>{{ _("To") }}</th>
+                <th>{{ _("Status") }}</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for u in logs -%}
+        {% for log in logs[u] -%}
+        <tr>
+            <td>{{ u }}</td>
+            <td>{{ log.time }}</td>
+            <td class="logbook">
+            {% if log.book|length>20 -%}
+            {{log.book[:20]}}...<span>{{log.book}}</span>
+            {% else %}{{log.book}}{% endif %}</td>
+            <td>{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>
+            <td>{{ log.to }}</td>
+            <td>
+                <span class="status {% if 'ok' in log.status -%} success {%- else -%} error {%- endif %}">
+                    {{ log.status }}
+                </span>
+            </td>
+        </tr>
+        {% endfor -%}
+        {% endfor -%}
+        </tbody>
+    </table>
+    {% endif -%} {# endif of if logs -#}
 
-{% if lastDelivered -%}
-<br />
-<em class="required">*</em> {{_("Last delivered")}}<br />
-<table class="pure-table pure-table-striped logs_list">
-    <thead><tr>
-        <th class="center">{{_("Username")}}</th>
-        <th class="center">{{_("Time")}}</th>
-        <th class="center">{{_("Title")}}</th>
-        <th class="center">{{_("Num")}}</th>
-        <th class="center">{{_("Record")}}</th>
-        <th class="center" colspan="2">{{_("Operation")}}</th>
-    </tr></thead>
-    <tbody>
-    {% for log in lastDelivered -%}
-    <tr id="lastDelivered_{{log.key().id()}}">
-        <td class="center">{{ log.username }}</td>
-        <td class="center">{{ log.datetime.strftime('%Y-%m-%d %H:%M') }}</td>
-        <td class="center">{{ log.bookname }}</td>
-        <td class="center" id="lastDelivered_num_{{log.key().id()}}">{%if log.num %} {{ log.num }} {% else %} - {% endif %}</td>
-        <td class="center" id="lastDelivered_rec_{{log.key().id()}}">{%if log.record %} {{ log.record }} {% else %} - {% endif %}</td>
-        {% if log.num -%}
-        <th><a href="#" onclick="ChangeLastDelivered({{log.key().id()}});return false;" class="actionButton">{{_("Change")}}</a></th>
-        {% else -%}
-        <th>-</th>
-        {% endif -%}
-        <th><a href="#" onclick="DeleteLastDelivered({{log.key().id()}});return false;" class="actionButton">{{_("Delete")}}</a></th>
-    </tr>
-    {% endfor -%}
-    </tbody>
-</table>
-{% endif -%} {# endif of if lastDelivered -#}
-
+    {% if lastDelivered -%}
+    <legend><h3>{{ _("Last delivered") }}</h3></legend>
+    <table class="pure-table pure-table-horizontal logs_list" width="100%">
+        <colgroup>
+            <col width="10%">
+            <col width="23%">
+            <col width="20%">
+            <col width="5%">
+            <col width="20%">
+            <col width="22%">
+        </colgroup>
+        <thead>
+            <tr>
+                <th>{{ _("Username") }}</th>
+                <th>{{ _("Time") }}</th>
+                <th>{{ _("Title") }}</th>
+                <th>{{ _("Num") }}</th>
+                <th>{{ _("Record") }}</th>
+                <th>{{ _("Operation") }}</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for log in lastDelivered -%}
+        <tr id="lastDelivered_{{ log.key().id() }}">
+            <td>{{ log.username }}</td>
+            <td>{{ log.datetime.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ log.bookname }}</td>
+            <td id="lastDelivered_num_{{ log.key().id() }}">{%if log.num %} {{ log.num }} {% else %} - {% endif %}</td>
+            <td id="lastDelivered_rec_{{ log.key().id() }}">{%if log.record %} {{ log.record }} {% else %} - {% endif %}</td>
+            {% if log.num -%}
+            <td>
+                <a href="#" onclick="ChangeLastDelivered({{ log.key().id() }});return false;" class="actionButton">{{_("Change")}}</a>
+            {% else -%}
+            {% endif -%}
+                <a href="#" onclick="DeleteLastDelivered({{ log.key().id() }});return false;" class="actionButton">{{_("Delete")}}</a>
+            </td>
+        </tr>
+        {% endfor -%}
+        </tbody>
+    </table>
+    {% endif -%} {# endif of if lastDelivered -#}
+</div>
 {% endblock -%}
 
 {% block js -%}
 <script type="text/javascript">
-
 //用户点击了修改已推送期号按钮
 function ChangeLastDelivered(id_) {
     var numObj = $('lastDelivered_num_' + id_);
@@ -207,6 +208,5 @@ function DeleteLastDelivered(id_) {
         }
     });
 }
-
 </script>
 {% endblock -%}

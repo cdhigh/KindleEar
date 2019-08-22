@@ -1,1114 +1,427 @@
+/*
+ * -- BASE STYLES --
+ */
+
+html,
 body {
-    font-family: '微软雅黑',YaHeiConsolas,'Microsoft YaHei', 'Helvetica', 'Arial', sans-serif;
-    font-size: 100%;
-    max-width: 800px;
-    min-width: 300px;
-    margin: 5px auto 0;
-    padding: 0 5px;
-    background-color: white;
-    position: relative;
+    height: 100%;
 }
-
-a{ color: #0078e7;text-decoration: none; }
-a:hover{ color:#0060b8;text-decoration: underline; }
-a:active{ color:#00498d; }
-
-.error{
-    text-align:center;
-    font-weight:bold;
-    color:red;
-}
-
-.clear{
-    clear:both;
-}
-
-.required{
-    color:red;
-}
-
-#header{
-    position: relative;;
-    padding-bottom: 10px;
-}
-
-#header h1{
-    float:left;
-    width:45%;
-    margin:0;
-    font-size:160%;
-}
-
-#header h1 sup, sup.beta{
-    font-size:50%;
-    color:red;
-}
-
-#header h1 a{
-    color:#333333;
-    text-decoration:none;
-    text-shadow: rgb(200, 200, 200) 2px 3px 1px;
-}
-
-#header span,#header a.nav{
-    float:right;
-    font-size:90%;
-    text-align:right;
-    margin-left:4px;
-}
-.grey{
-    font-size: 13px; 
-    padding: 5px 0 10px 0;
-    text-align: center;
-    color:#f60;
-}
-
-#content{
-    margin:0 0 10px 0;
-}
-#footer{
-    margin-top: 20px;
-    padding: 20px 0;
-    text-align: center;
-    border-top: 1px solid #d8d8d8;
-    font-size:70%;
-    color:#888;
-}
-
-#footer a{
-    color:#888;
-}
-
-#footer a:hover{
-    text-decoration: underline;
-}
-
-.actionButton,
-.actionButton:visited,
-.actionButton:active {
-    /*font-family: 'Lucida Grande', Verdana, Helvetica, Arial, sans-serif;*/
-    display: inline-block;
-    padding: 5px 5px;
-    margin: 2px;
-    font-size: 0.8em;
-    text-align: center;
-    text-decoration: none;
-    color: #555;
-    background-color: #f8f8f8;
-    border: 1px solid #ccc;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    border-radius: 5px;
-}
-
-.actionButton:hover {
-    text-decoration: none;
-    /*border-color: #448;*/
-    outline:0;
-    outline:thin dotted \9;
-    border-color:#129FEA;
-}
-
-.book {
-    position: relative;;
-    border-bottom: 1px dotted #d8d8d8;
-    padding: 10px 0;
-}
-
-#ownfeeds .book:last-child,#ownfeeds .book:last-child:hover{
-    border-bottom: 0;
-    background: white;
-    padding: 10px 0;
-}
-#ownfeeds .book:hover{
-    border-bottom: 1px dotted #d8d8d8;
-    background: #F4F9FD;
-    padding: 10px 0;
-}
-#mybooks .book:hover, #books .book:hover{
-    border-bottom: 1px dotted #d8d8d8;
-    background: #F4F9FD;
-}
-.titleRow {
-    font-size:0.9em;
-    font-weight:bold;
-    float: left;
-    width:90%;
-    clear:both;
-}
-.summaryRow {
-    font-size: 0.8em;
-    color: #555;
-    clear:both;
-}
-.summaryRow span{
-    display:none;
-}
-.summaryRow:hover{
-    position:relative;
-    z-index:1;
-}
-.summaryRow:hover span{
-    display:block;
-    padding:2px;
-    background:#ffffe1;
-    border:1px solid #000000;
-    color:#333;
-    z-index:10;
-    position:absolute;
-    top:1.2em;
-    left:5px;
-    width:600px;
-}
-.summaryRow a{color:#aaa;text-decoration: none;}
-.summaryRow a:hover{color: #0078e7;text-decoration: underline;}
-.summaryRow a:active{color: #00498d;}
-.cornerControls {
-    position: absolute;
-    top: 8px;
-    right: 0;
-    text-align: right;
-    padding-top: 3px;
-    font-size: 0.8em;
-}
-
-.headerloginform {
-    position: absolute;
-    top: 3px;
-    right: 0;
-    font-size:90%;
-    vertical-align:middle;
-    text-align:right;
-}
-.pure-button-small {padding: .6em 2em;font-size: 85%;}
-.font90{font-size:90%;}
-.width100{width:100%;}
 
 body {
-    background-color: #ffffff;
+    color: #526066;
 }
 
-/* from PURE buttons-core.css */
-.pure-skin-mine{margin-bottom: 10px;}
+h2,
+h3 {
+    text-transform: uppercase;
+    font-weight: 600;
+}
 
-.pure-skin-mine .pure-button {
-    /* Structure */
-    display: inline-block;
-    *display: inline; /*IE 6/7*/
-    zoom: 1;
-    line-height: normal;
-    white-space: nowrap;
-    vertical-align: baseline;
+p {
+    line-height: 1.6em;
+}
+
+a {
+    color: #0078e7;
+}
+
+/*
+ * -- LAYOUT STYLES --
+ */
+
+#content {
+    min-height: 100%;
+    margin-bottom: -73px;
+}
+
+.l-content {
+    padding: 3em 0;
+    padding-bottom: 73px;
+}
+
+.footer-sticker {
+    height: 73px;
+}
+
+.l-box {
+    padding: 0.5em 2em;
+}
+
+.footer {
+    background: #111;
+    color: #888;
     text-align: center;
-    cursor: pointer;
-    -webkit-user-drag: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
 }
 
-/* Firefox: Get rid of the inner focus border */
-.pure-skin-mine .pure-button::-moz-focus-inner{
-    padding: 0;
-    border: 0;
-}
-/* end from PURE buttons-core.css */
-/* from PURE buttons.css */
-/*csslint unqualified-attributes:false*/
+    .footer a {
+        color: #ddd;
+        text-decoration: none;
+    }
 
-.pure-skin-mine .pure-button {
-    font-size: 100%;
-    *font-size: 90%; /*IE 6/7 - To reduce IE's oversized button text*/
-    *overflow: visible; /*IE 6/7 - Because of IE's overly large left/right padding on buttons */
-    padding: .7em 1.5em;
-    color: #0e1320; /* rgba not supported (IE 8) */
-    /* color: rgba(0, 0, 0, 0.80); rgba supported */
-    /* *color: #444; IE 6 & 7 */
-    border: none rgba(0, 0, 0, 0); /*IE9 + everything else*/
-    background-color: #b0bcdd;
-    text-decoration: none;
+/*
+ * -- MENU STYLES --
+ */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    box-shadow: 0 2px 5px rgba(0,0,0,.15)
 }
 
-.pure-skin-mine .pure-button-hover,
-.pure-skin-mine .pure-button:hover {
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00000000', endColorstr='#00000000', GradientType=0);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(transparent), color-stop(40%, rgba(0,0,0, 0.05)), to(rgba(0,0,0, 0.05)));
-    background-image: -webkit-linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.15));
-    background-image: -moz-linear-gradient(top, rgba(0,0,0, 0.05) 0%, rgba(0,0,0, 0.05));
-    background-image: -ms-linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.15));
-    background-image: -o-linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.05));
-    background-image: linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.05));
-}
+    .logo {
+        padding: .5em;
+        font-family: Palatino, STSong, SimSun, serif;
+        font-size: 1.5em;
+        text-transform: none;
+        font-weight: 200;
+        color: #222;
+    }
 
-.pure-skin-mine .pure-button:focus {
-    outline: 0;
-}
-.pure-skin-mine .pure-button-active,
-.pure-skin-mine .pure-button:active {
-    box-shadow: 0 0 0 1px rgba(0,0,0, 0.15) inset, 0 0 6px rgba(0,0,0, 0.20) inset;
-}
+    .home-menu {
+        padding: 0 .5em;
+    }
 
-.pure-skin-mine .pure-button[disabled],
-.pure-skin-mine .pure-button-disabled,
-.pure-skin-mine .pure-button-disabled:hover,
-.pure-skin-mine .pure-button-disabled:active {
-    border: none;
-    background-image: none;
-    filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
-    filter: alpha(opacity=40);
-    -khtml-opacity: 0.40;
-    -moz-opacity: 0.40;
-    opacity: 0.40;
-    cursor: not-allowed;
-    box-shadow: none;
-}
+        .home-menu .pure-menu-item {
+            height: auto;
+        }
 
-.pure-skin-mine .pure-button-hidden {
-    display: none;
-}
+        .home-menu .pure-menu-link {
+            padding: 1em .5em;
+        }
 
-/* Firefox: Get rid of the inner focus border */
-.pure-skin-mine .pure-button::-moz-focus-inner{
-    padding: 0;
-    border: 0;
-}
-
-.pure-skin-mine .pure-button-primary,
-.pure-skin-mine .pure-button-selected,
-.pure-skin-mine a.pure-button-primary,
-.pure-skin-mine a.pure-button-selected {
+.app-menu {
     background-color: #0078e7;
-    color: #fbfcfe;
 }
 
-/*! Copyright 2013 Yahoo! Inc. http://yuilibrary.com/license/ */
-/* This page lists core form styles adopted from Normalize.css. */
-/*! Copyright (c) Nicolas Gallagher and Jonathan Neal */
-
-/*! normalize.css v1.1.0 | MIT License | git.io/normalize */
-
-/* This page has Normalize.css form-specific style rules applied to a .yui3-form context */
-
-/* ==========
-Forms Core
-=========*/
-
-
-/*
- * Corrects margin displayed oddly in IE 6/7.
- */
-
-.pure-skin-mine .pure-form {
-    margin: 0;
-}
-
-/* Define consistent border, margin, and padding.*/
- 
-
-.pure-skin-mine .pure-form fieldset {
-    border: 1px solid #d8d8d8;
-    padding: 15px;
-}
-
-/*
- * 1. Corrects color not being inherited in IE 6/7/8/9.
- * 2. Corrects text not wrapping in Firefox 3.
- * 3. Corrects alignment displayed oddly in IE 6/7.
- */
-
-.pure-skin-mine .pure-form legend {
-    border: 0; /* 1 */
-    padding: 0;
-    white-space: normal; /* 2 */
-    *margin-left: -7px; /* 3 */
-}
-
-/*
- * 1. Corrects font size not being inherited in all browsers.
- * 2. Addresses margins set differently in IE 6/7, Firefox 3+, Safari 5,
- *    and Chrome.
- * 3. Improves appearance and consistency in all browsers.
- */
-
-.pure-skin-mine .pure-form button,
-.pure-skin-mine .pure-form input,
-.pure-skin-mine .pure-form select,
-.pure-skin-mine .pure-form textarea {
-    font-size: 90%; /* 1 */
-    margin: 0; /* 2 */
-    vertical-align: baseline; /* 3 */
-    *vertical-align: middle; /* 3 */
-}
-
-/*
- * Addresses Firefox 3+ setting `line-height` on `input` using `!important` in
- * the UA stylesheet.
- */
-
-.pure-skin-mine .pure-form button,
-.pure-skin-mine .pure-form input {
-    line-height: normal;
-}
-
-/*
- * 1. Avoid the WebKit bug in Android 4.0.* where (2) destroys native `audio`
- *    and `video` controls.
- * 2. Corrects inability to style clickable `input` types in iOS.
- * 3. Improves usability and consistency of cursor style between image-type
- *    `input` and others.
- * 4. Removes inner spacing in IE 7 without affecting normal text inputs.
- *    Known issue: inner spacing remains in IE 6.
- */
-
-.pure-skin-mine .pure-form button,
-.pure-skin-mine .pure-form input[type="button"], /* 1 */
-.pure-skin-mine .pure-form input[type="reset"],
-.pure-skin-mine .pure-form input[type="submit"] {
-    -webkit-appearance: button; /* 2 */
-    cursor: pointer; /* 3 */
-    *overflow: visible;  /* 4 */
-}
-
-/*
- * Re-set default cursor for disabled elements.
- */
-
-.pure-skin-mine .pure-form button[disabled],
-.pure-skin-mine .pure-form input[disabled] {
-    cursor: default;
-}
-
-/*
- * 1. Addresses box sizing set to content-box in IE 8/9.
- * 2. Removes excess padding in IE 8/9.
- * 3. Removes excess padding in IE 7.
- *    Known issue: excess padding remains in IE 6.
- */
-
-.pure-skin-mine .pure-form input[type="checkbox"],
-.pure-skin-mine .pure-form input[type="radio"] {
-    box-sizing: border-box; /* 1 */
-    padding: 0; /* 2 */
-    *height: 13px; /* 3 */
-    *width: 13px; /* 3 */
-}
-
-/*
- * 1. Addresses `appearance` set to `searchfield` in Safari 5 and Chrome.
- * 2. Addresses `box-sizing` set to `border-box` in Safari 5 and Chrome
- *    (include `-moz` to future-proof).
- */
-
-.pure-skin-mine .pure-form input[type="search"] {
-    -webkit-appearance: textfield; /* 1 */
-    -moz-box-sizing: content-box;
-    -webkit-box-sizing: content-box; /* 2 */
-    box-sizing: content-box;
-}
-
-/*
- * Removes inner padding and search cancel button in Safari 5 and Chrome
- * on OS X.
- */
-
-.pure-skin-mine .pure-form input[type="search"]::-webkit-search-cancel-button,
-.pure-skin-mine .pure-form input[type="search"]::-webkit-search-decoration {
-    -webkit-appearance: none;
-}
-
-/*
- * Removes inner padding and border in Firefox 3+.
- */
-
-.pure-skin-mine .pure-form button::-moz-focus-inner,
-.pure-skin-mine .pure-form input::-moz-focus-inner {
-    border: 0;
-    padding: 0;
-}
-
-/*
- * 1. Removes default vertical scrollbar in IE 6/7/8/9.
- * 2. Improves readability and alignment in all browsers.
- */
-
-.pure-skin-mine .pure-form textarea {
-    overflow: auto; /* 1 */
-    vertical-align: top; /* 2 */
-}
-/* ===============  forms-responsive.css =================*/
-@media only screen and (max-width : 480px) {
-    .pure-skin-mine .pure-form button[type="submit"] {
-    margin: 0.7em 0 0;
+    .app-menu .pure-menu-list {
+        margin: 0 auto;
+        max-width: 800px;
     }
 
-    .pure-skin-mine .pure-form input[type="text"],
-    .pure-skin-mine .pure-form input[type="password"],
-    .pure-skin-mine .pure-form input[type="email"],
-    .pure-skin-mine .pure-form input[type="url"],
-    .pure-skin-mine .pure-form input[type="date"],
-    .pure-skin-mine .pure-form input[type="month"],
-    .pure-skin-mine .pure-form input[type="time"],
-    .pure-skin-mine .pure-form input[type="datetime"],
-    .pure-skin-mine .pure-form input[type="datetime-local"],
-    .pure-skin-mine .pure-form input[type="week"],
-    .pure-skin-mine .pure-form input[type="number"],
-    .pure-skin-mine .pure-form input[type="search"],
-    .pure-skin-mine .pure-form input[type="tel"],
-    .pure-skin-mine .pure-form input[type="color"],
-    .pure-skin-mine .pure-form label {
-        margin-bottom: 0.3em;
-        display: block;
-    }
-    
-    .pure-skin-mine .pure-group input[type="text"],
-    .pure-skin-mine .pure-group input[type="password"],
-    .pure-skin-mine .pure-group input[type="email"],
-    .pure-skin-mine .pure-group input[type="url"],
-    .pure-skin-mine .pure-group input[type="date"],
-    .pure-skin-mine .pure-group input[type="month"],
-    .pure-skin-mine .pure-group input[type="time"],
-    .pure-skin-mine .pure-group input[type="datetime"],
-    .pure-skin-mine .pure-group input[type="datetime-local"],
-    .pure-skin-mine .pure-group input[type="week"],
-    .pure-skin-mine .pure-group input[type="number"],
-    .pure-skin-mine .pure-group input[type="search"],
-    .pure-skin-mine .pure-group input[type="tel"],
-    .pure-skin-mine .pure-group input[type="color"] {
-        margin-bottom: 0;
+    @media only screen and (min-width: 480px) {
+        .app-menu .pure-menu-list {
+            display: block!important;
+        }
     }
 
-    .pure-skin-mine .pure-form-aligned .pure-control-group label {
-        margin-bottom: 0.3em;
-        text-align: left;
-        display: block;
-        width: 100%;
-        font-size: 90%;
+    .app-menu .pure-menu-link {
+        color: #6fbef3;
     }
 
-    .pure-skin-mine .pure-form-aligned .pure-controls {
-        margin: 1.5em 0 0 0;
+    .app-menu a,
+    .app-menu span {
+        padding: .8em 1em;
     }
 
-    /* NOTE: pure-help-inline is deprecated. Use .pure-form-message-inline instead. */
-    .pure-skin-mine .pure-form .pure-help-inline,
-    .pure-skin-mine .pure-form-message-inline,
-    .pure-skin-mine .pure-form-message {
-        display: block;
-        font-size: 80%;
-        /* increased bottom padding to make it group with its related input element */
-        padding: 0.2em 0 0.8em;
+    .app-menu .pure-menu-selected a,
+    .app-menu .pure-menu-selected span {
+        color: white;
     }
+
+        .app-menu .pure-menu-item a:hover,
+        .app-menu .pure-menu-item a:focus {
+            background: none;
+            border: none;
+            color: #aecfe5;
+        }
+
+    .app-menu.pure-menu-horizontal.pure-menu-scrollable {
+        padding: 0;
+    }
+
+.main {
+    margin: 0 auto;
+    padding: 20px;
+    max-width: 800px;
 }
 
-/* ===============  forms.css =================================*/
-.pure-skin-mine .pure-form input[type="text"],
-.pure-skin-mine .pure-form input[type="password"],
-.pure-skin-mine .pure-form input[type="email"],
-.pure-skin-mine .pure-form input[type="url"],
-.pure-skin-mine .pure-form input[type="date"],
-.pure-skin-mine .pure-form input[type="month"],
-.pure-skin-mine .pure-form input[type="time"],
-.pure-skin-mine .pure-form input[type="datetime"],
-.pure-skin-mine .pure-form input[type="datetime-local"],
-.pure-skin-mine .pure-form input[type="week"],
-.pure-skin-mine .pure-form input[type="number"],
-.pure-skin-mine .pure-form input[type="search"],
-.pure-skin-mine .pure-form input[type="tel"],
-.pure-skin-mine .pure-form input[type="color"],
-.pure-skin-mine .pure-form select,
-.pure-skin-mine .pure-form textarea {
-    padding: 0.6em;
-    display: inline-block;
-    border: 1px solid #ccc;
-}
+/*
+ * -- BANNER --
+ */
 
-.pure-skin-mine .pure-form input[type="text"]:focus,
-.pure-skin-mine .pure-form input[type="password"]:focus,
-.pure-skin-mine .pure-form input[type="email"]:focus,
-.pure-skin-mine .pure-form input[type="url"]:focus,
-.pure-skin-mine .pure-form input[type="date"]:focus,
-.pure-skin-mine .pure-form input[type="month"]:focus,
-.pure-skin-mine .pure-form input[type="time"]:focus,
-.pure-skin-mine .pure-form input[type="datetime"]:focus,
-.pure-skin-mine .pure-form input[type="datetime-local"]:focus,
-.pure-skin-mine .pure-form input[type="week"]:focus,
-.pure-skin-mine .pure-form input[type="number"]:focus,
-.pure-skin-mine .pure-form input[type="search"]:focus,
-.pure-skin-mine .pure-form input[type="tel"]:focus,
-.pure-skin-mine .pure-form input[type="color"]:focus,
-.pure-skin-mine .pure-form select:focus,
-.pure-skin-mine .pure-form textarea:focus {
-    outline: 0;
-    outline: thin dotted \9; /* IE6-9 */
-    border-color: #129FEA;
-}
-
-.pure-skin-mine .pure-form input[type="file"]:focus,
-.pure-skin-mine .pure-form input[type="radio"]:focus,
-.pure-skin-mine .pure-form input[type="checkbox"]:focus {
-    outline: thin dotted #333;
-    outline: 1px auto #129FEA;
-}
-.pure-skin-mine .pure-form .pure-checkbox,
-.pure-skin-mine .pure-form .pure-radio {
-    margin: 0.5em 0;
-    display: block;
-}
-.pure-skin-mine .pure-form input[type="text"][disabled],
-.pure-skin-mine .pure-form input[type="password"][disabled],
-.pure-skin-mine .pure-form input[type="email"][disabled],
-.pure-skin-mine .pure-form input[type="url"][disabled],
-.pure-skin-mine .pure-form input[type="date"][disabled],
-.pure-skin-mine .pure-form input[type="month"][disabled],
-.pure-skin-mine .pure-form input[type="time"][disabled],
-.pure-skin-mine .pure-form input[type="datetime"][disabled],
-.pure-skin-mine .pure-form input[type="datetime-local"][disabled],
-.pure-skin-mine .pure-form input[type="week"][disabled],
-.pure-skin-mine .pure-form input[type="number"][disabled],
-.pure-skin-mine .pure-form input[type="search"][disabled],
-.pure-skin-mine .pure-form input[type="tel"][disabled],
-.pure-skin-mine .pure-form input[type="color"][disabled],
-.pure-skin-mine .pure-form select[disabled],
-.pure-skin-mine .pure-form textarea[disabled] {
-    cursor: not-allowed;
-    box-shadow: inset 0 1px 10px #ededed;
-    background-color: #ededed;
-    color: #adadad;
-    border-color: #e6e6e6;
-}
-.pure-skin-mine .pure-form input[readonly],
-.pure-skin-mine .pure-form select[readonly],
-.pure-skin-mine .pure-form textarea[readonly],
-.pure-skin-mine .pure-form input[readonly]:focus,
-.pure-skin-mine .pure-form select[readonly]:focus,
-.pure-skin-mine .pure-form textarea[readonly]:focus {
-    background: #eee; /* menu hover bg color */
-    color: #777; /* menu text color */
-    border-color: #ccc;
-}
-.pure-skin-mine .pure-form input:focus:invalid,
-.pure-skin-mine .pure-form textarea:focus:invalid,
-.pure-skin-mine .pure-form select:focus:invalid {
-    color: #b94a48;
-    border: 1px solid #ee5f5b;
-}
-.pure-skin-mine .pure-form input:focus:invalid:focus,
-.pure-skin-mine .pure-form textarea:focus:invalid:focus,
-.pure-skin-mine .pure-form select:focus:invalid:focus {
-    border-color: #e9322d;
-}
-.pure-skin-mine .pure-form input[type="file"]:focus:invalid:focus,
-.pure-skin-mine .pure-form input[type="radio"]:focus:invalid:focus,
-.pure-skin-mine .pure-form input[type="checkbox"]:focus:invalid:focus {
-    outline-color: #e9322d;
-}
-.pure-skin-mine .pure-form select {
-    border: 1px solid #e6e6e6;
-    background-color: white;
-}
-.pure-skin-mine .pure-form select[multiple] {
-    height: auto;
-}
-.pure-skin-mine .pure-form label {
-    margin: 0.5em 0 0.2em;
-    color: #4f4f4f;
-    font-size:90%;
-}
-.pure-skin-mine .pure-form legend {
-    display: block;
-    margin: 0;
-    padding: 0 5px;
-    color: #262626;
-}
-
-.pure-skin-mine .pure-form-stacked input[type="text"],
-.pure-skin-mine .pure-form-stacked input[type="password"],
-.pure-skin-mine .pure-form-stacked input[type="email"],
-.pure-skin-mine .pure-form-stacked input[type="url"],
-.pure-skin-mine .pure-form-stacked input[type="date"],
-.pure-skin-mine .pure-form-stacked input[type="month"],
-.pure-skin-mine .pure-form-stacked input[type="time"],
-.pure-skin-mine .pure-form-stacked input[type="datetime"],
-.pure-skin-mine .pure-form-stacked input[type="datetime-local"],
-.pure-skin-mine .pure-form-stacked input[type="week"],
-.pure-skin-mine .pure-form-stacked input[type="number"],
-.pure-skin-mine .pure-form-stacked input[type="search"],
-.pure-skin-mine .pure-form-stacked input[type="tel"],
-.pure-skin-mine .pure-form-stacked input[type="color"],
-.pure-skin-mine .pure-form-stacked select,
-.pure-skin-mine .pure-form-stacked label,
-.pure-skin-mine .pure-form-stacked textarea {
-    display: block;
-    margin: 0.25em 0;
-}
-
-.pure-skin-mine .pure-form-aligned input,
-.pure-skin-mine .pure-form-aligned textarea,
-.pure-skin-mine .pure-form-aligned select,
-/* note: pure-help-inline is deprecated. Use .pure-form-message-inline instead */
-.pure-skin-mine .pure-form-aligned .pure-help-inline, 
-.pure-skin-mine .pure-form-message-inline {
-    display: inline-block;
-    *display: inline; /* IE7 inline-block hack */
-    *zoom: 1;
-    vertical-align: middle;
-}
-
-/* aligned Forms */
-.pure-skin-mine .pure-form-aligned .pure-control-group {
-    margin-bottom: 0.5em;
-}
-.pure-skin-mine .pure-form-aligned .pure-control-group label {
-    text-align: right;
-    display: inline-block;
-    vertical-align: middle;
-    width: 10em;
-    margin: 0 1em 0 0;
-}
-.pure-skin-mine .pure-form-aligned .pure-controls {
-    margin: 1.5em 0 0 10em;
-}
-
-/* Rounded Inputs */
-.pure-skin-mine .pure-form input.pure-input-rounded,
-.pure-skin-mine .pure-form .pure-input-rounded {
-    border-radius: 30px;
-    padding: 0.5em 1em;
-}
-
-/* Grouped Inputs */
-.pure-skin-mine .pure-form .pure-group fieldset {
-    margin-bottom: 10px;
-}
-.pure-skin-mine .pure-form .pure-group input {
-    display: block;
-    padding: 0.5em 0.6em;
-    margin: 0;
-    border-radius: 0;
-    position: relative;
-    top: -1px;
-}
-.pure-skin-mine .pure-form .pure-group input:focus {
-    z-index: 2;
-}
-.pure-skin-mine .pure-form .pure-group input:first-child {
-    top: 1px;
-    border-radius: 4px 4px 0px 0px;
-}
-.pure-skin-mine .pure-form .pure-group input:last-child {
-    top: -2px;
-    border-radius: 0px 0px 4px 4px;
-}
-.pure-skin-mine .pure-form .pure-group button {
-    margin: 0.35em 0;
-}
-
-.pure-skin-mine .pure-form .pure-input-1 {
-    width: 100%;
-}
-.pure-skin-mine .pure-form .pure-input-2-3 {
-    width: 66%;
-}
-.pure-skin-mine .pure-form .pure-input-1-2 {
-    width: 50%;
-}
-.pure-skin-mine .pure-form .pure-input-1-3 {
-    width: 33%;
-}
-.pure-skin-mine .pure-form .pure-input-1-4 {
-    width: 25%;
-}
-
-/* Inline help for forms */
-/* Note: pure-help-inline is deprecated. Use .pure-form-message-inline instead */ 
-.pure-skin-mine .pure-form .pure-help-inline,
-.pure-skin-mine .pure-form-message-inline {
-    display: inline-block;
-    padding-left: 0.3em;
-    color: #adadad;
-    vertical-align: middle;
-    font-size: 90%;
-}
-
-/* Block help for forms */
-.pure-skin-mine .pure-form-message {
-    display: block;
-    color: #adadad;
-    font-size: 90%;
-}
-/* note no template for forms-r.css. no skinnable properties */
-
-/* foundational CSS */
-.pure-skin-mine .pure-table {
-    /* Remove spacing between table cells (from Normalize.css) */
-    border-collapse: collapse;
-    border-spacing: 0;
-    empty-cells: show;
-    border: 1px solid #e6eaf4;
-}
-
-.pure-skin-mine .pure-table caption {
-    color: #adadad;
-    font: italic 85%/1 arial, sans-serif;
-    padding: 1em 0;
+.banner {
+    padding: 6em 0;
+    background: #262626 url('banner-bg.png') center center no-repeat fixed;
     text-align: center;
+    background-size: cover;
+    filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='banner-bg.png', sizingMethod='scale');
+    width: 100%;
+    display: table;
 }
 
-.pure-skin-mine .pure-table td,
-.pure-skin-mine .pure-table th {
-    border-left: 1px solid #e6eaf4;/* inner column border */
-    border-width: 0 0 0 1px;
-    font-size: inherit;
-    margin: 0;
-    overflow: visible; /*to make ths where the title is really long work*/
-    padding: 0.3em 0.6em; /* cell padding */
+@media (min-width: 480px) {
+    .banner {
+        padding: 10em 0;
+    }
 }
 
-.pure-skin-mine .pure-table td:first-child,
-.pure-skin-mine .pure-table th:first-child {
-    border-left-width: 0;
+    .banner-head {
+        display: table-cell;
+        vertical-align: middle;
+        margin-bottom: 0;
+        padding: 0 2em;
+    }
+
+        .banner-head h1 {
+            margin: 0 0 .67em;
+            font-size: 3.8em;
+            color: white;
+            font-weight: 200;
+            text-shadow: 0 1px 1px black;
+        }
+
+        .banner a.pure-button {
+            border-radius: 2em;
+            padding: .8em 2em;
+        }
+
+@media only screen and (max-width: 768px) {
+    .banner-head h1 {
+        font-size: 2.8em;
+    }
 }
 
-.pure-skin-mine .pure-table thead {
-    background-color: #fff;
-    color: #1c2440;
-    text-align: left;
-    vertical-align: bottom;
+@media only screen and (max-width: 568px) {
+    .banner-head h1 {
+        font-size: 1.6em;
+    }
+
+    .banner-head form input {
+        margin-bottom: .3em;
+    }
+
+    .banner-head form button {
+        margin-top: .7em;
+    }
+}
+
+@media only screen and (max-width: 375px) {
+    .banner-head h1 {
+        font-size: 1.49em;
+    }
+}
+
+@media only screen and (max-width: 320px) {
+    .banner-head h1 {
+        font-size: 1.23em;
+    }
 }
 
 /*
-striping:
-   even - #fff (white)
-   odd  - #f2f2f2 (light gray)
-*/
-.pure-skin-mine .pure-table td {
-    background-color: #f1f3f9;
-    color: #344579;
-}
-.pure-skin-mine .pure-table-odd td {
-    background-color: #e6eaf4;
-    color: #273259;
-}
+ * -- BOX LIST STYLE --
+ */
 
-/* nth-child selector for modern browsers */
-.pure-skin-mine .pure-table-striped tr:nth-child(2n-1) td {
-    background-color: #e6eaf4;
-    color: #273259;
-}
-
-
-/* BORDERED TABLES */
-.pure-skin-mine .pure-table-bordered td {
-    border-bottom: 1px solid #e6eaf4;
-}
-.pure-skin-mine .pure-table-bordered tbody > tr:last-child td,
-.pure-skin-mine .pure-table-horizontal tbody > tr:last-child td {
-    border-bottom-width: 0;
-}
-
-/* HORIZONTAL BORDERED TABLES */
-.pure-skin-mine .pure-table-horizontal td,
-.pure-skin-mine .pure-table-horizontal th {
-    border-width: 0 0 1px 0;
-    border-bottom:1px solid #e6eaf4;
-}
-.pure-skin-mine .pure-table-horizontal tbody > tr:last-child td {
-    border-bottom-width: 0;
-}
-
-/* from PURE menu-core.css */
-/*csslint adjoining-classes:false, outline-none:false*/
-/*TODO: Remove this lint rule override after a refactor of this code.*/ 
-
-.pure-skin-mine .pure-menu ul {
-    position: absolute;
-    visibility: hidden;
-}
-
-.pure-skin-mine .pure-menu.pure-menu-open {
-    visibility: visible;
-    z-index: 2;
-    width: 100%;
-}
-
-.pure-skin-mine .pure-menu ul {
-    left: -10000px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    top: -10000px;
-    z-index: 1;
-    font-size: 90%;
-}
-
-.pure-skin-mine .pure-menu > ul { position: relative; }
-
-.pure-skin-mine .pure-menu-open > ul {
-    left: 0;
-    top: 0;
-    visibility: visible;
-}
-
-.pure-skin-mine .pure-menu-open > ul:focus {
-    outline: 0;
-}
-
-.pure-skin-mine .pure-menu li {
-    position: relative;
-}
-
-.pure-skin-mine .pure-menu a, .pure-skin-mine .pure-menu .pure-menu-heading {
-    display: block;
-    color: inherit;
-    line-height: 1.5em;
-    padding: 0.35em 1.4em;
-    text-decoration: none;
-    white-space: nowrap;
-}
-
-.pure-skin-mine .pure-menu.pure-menu-horizontal > .pure-menu-heading {
-    display: inline-block;
-    *display: inline;
-    zoom: 1;
-    margin: 0;
-    vertical-align: middle;
-}
-.pure-skin-mine .pure-menu.pure-menu-horizontal > ul {
-    display: inline-block;
-    *display: inline;
-    zoom: 1;
-    vertical-align: middle;
-    /* height: 2.4em; removed for Skin Builder */
-}
-
-.pure-skin-mine .pure-menu li a { padding: 0.35em 1.4em; }
-
-.pure-skin-mine .pure-menu-can-have-children > .pure-menu-label:after {
-    content: '\25B8';
-    float: right;
-    font-family: 'Lucida Grande', 'Lucida Sans Unicode', 'DejaVu Sans', sans-serif; /* These specific fonts have the Unicode char we need. */
-    margin-right: -20px;
-    margin-top: -1px;
-}
-
-.pure-skin-mine .pure-menu-can-have-children > .pure-menu-label {
-    padding-right: 30px;
-}
-
-.pure-skin-mine .pure-menu-separator {
-    background-color: #e6eaf4;
-    display: block;
-    height: 1px;
-    font-size: 0;
-    margin: 7px 2px;
+.box-list {
+    margin-bottom: 1em;
+    border: 1px solid #ddd;
+    border-top-width: 2px;
+    border-top-color: #ccc;
+    border-radius: .5em;
+    background: #f9f9f9;
     overflow: hidden;
 }
 
-.pure-skin-mine .pure-menu-hidden {
-    display: none;
+    .box-list .box {
+        position: relative;
+        margin: 0;
+        padding: .7em 1em;
+        border-bottom: 1px solid #ddd;
+        background-color: #fff;
+    }
+
+    .box-list .box:hover {
+        background-color: #f9f9f9;
+    }
+
+    .box-list .box:last-child {
+        border-bottom: 0;
+    }
+
+    .box-list#bookmarklet .box {
+        padding-right: 1em;
+    }
+
+        .box-list .book .titleRow {
+            padding-bottom: .2em;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .box-list .book.pure-form .titleRow {
+            font:unset;
+        }
+
+            .box-list#bookmarklet .book .titleRow small {
+                font-weight: normal;
+                padding-left: .5em;
+            }
+
+            .box-list .book .titleRow img {
+                vertical-align: -3px;
+            }
+
+            .box-list .book .summaryRow {
+                word-wrap: break-word;
+            }
+
+            .box-list .book .summaryRow a {
+                text-decoration: none;
+                color: grey;
+            }
+
+            .box-list .book .summaryRow a:hover {
+                color: #0078e7;
+                text-decoration: underline;
+            }
+
+            .actionButton {
+                display: inline-block;
+                padding: 0 1em;
+                line-height: 30px;
+                text-align: center;
+                background-color: #999;
+                text-decoration: none;
+                color: #fff;
+                border: 2px solid #fff;
+                border-radius: 2em;
+            }
+
+            #bookmarklet .box .actionButton {
+                display: block;
+                padding: 10px 20px;
+                width: 100%;
+                text-align: center;
+                text-decoration: none;
+                color: #111;
+                font-weight: bold;
+                border: 3px dotted grey;
+                background-color: #efefef;
+                border-radius: .5em;
+                box-sizing: border-box;
+            }
+
+        .box-list .box .cornerControls {
+            margin-top: .5em;
+            text-align: center;
+        }
+
+            .actionButton.add {
+                background-color: #0078e7;
+            }
+
+            .actionButton:hover {
+                background-color: rgb(202, 60, 60);
+            }
+
+            .actionButton.add:hover {
+                background-color: #0765bb;
+            }
+
+            .actionButton.act:hover {
+                background-color: #0078e7;
+            }
+
+@media only screen and (min-width: 768px) {
+    .my-rss .box-list .box,
+    .advwhitelist .box-list .box,
+    .advurlfilter .box-list .box {
+        padding-right: 6.3em;
+    }
+
+    .box-list .box .cornerControls {
+        position: absolute;
+        top: 50%;
+        right: 1em;
+        margin-top: -17px;
+    }
 }
 
-/* FIXED MENU */
-.pure-skin-mine .pure-menu-fixed {
-    position: fixed;
-    top:0;
-    left:0;
-    width: 100%;
+/*
+ * -- FORM ELEMENT STYLE --
+ */
+
+.my-rss h2 {
+    margin: .5em auto;
+    text-align: center;
 }
 
-
-/* HORIZONTAL MENU CODE */
-
-/* Initial menus should be inline-block so that they are horizontal */
-.pure-skin-mine .pure-menu-horizontal li {
-    float:left;
-    zoom: 1;
-    vertical-align: middle;
+.settings .pure-form-aligned .pure-control-group label,
+.admin .pure-form-aligned .pure-control-group label {
+    width: auto;
+    font-weight: bold;
 }
 
-/* Submenus should still be display:block; */
-.pure-skin-mine .pure-menu-horizontal li li {
-    display: block;
-}
-
-/* Content after should be down arrow */
-.pure-skin-mine .pure-menu-horizontal > .pure-menu-children > .pure-menu-can-have-children > .pure-menu-label:after {
-    content: "\25BE";
-}
-/*Add extra padding to elements that have the arrow so that the hover looks nice */
-.pure-skin-mine .pure-menu-horizontal > .pure-menu-children > .pure-menu-can-have-children > .pure-menu-label {
-    padding-right: 30px;
-}
-
-/* Adjusting separator for vertical menus */
-.pure-skin-mine .pure-menu-horizontal li.pure-menu-separator {
-    height: 50%;
-    width: 1px;
-    margin: 0 7px;
-}
-
-/* Submenus should be horizontal separator again */
-.pure-skin-mine .pure-menu-horizontal li li.pure-menu-separator {
-height: 1px;
-width: auto;
-margin: 7px 2px;
-}
-
-
-/* end from yuicss/menu-core.css *******************************************/
-/* from yuicss menu-paginator.css */
-/*csslint box-model:false*/
-/*TODO: Remove this lint rule override after a refactor of this code.*/ 
-
-.pure-skin-mine .pure-paginator {
-
-    /* `pure-g` Grid styles */
-    letter-spacing: -0.31em; /* Webkit: collapse white-space between units */
-    *letter-spacing: normal; /* reset IE < 8 */
-    *word-spacing: -0.43em; /* IE < 8: collapse white-space between units */
-    text-rendering: optimizespeed; /* Webkit: fixes text-rendering: optimizeLegibility */
-
-    /* `pure-paginator` Specific styles */
-    list-style: none;
+.advdelivernow .pure-form .pure-radio,
+.advdelivernow .pure-form label {
     margin: 0;
-    padding: 0;
-}
-.opera-only :-o-prefocus,
-.pure-skin-mine .pure-paginator {
-    word-spacing: -0.43em;
 }
 
-/* `pure-u` Grid styles */
-.pure-skin-mine .pure-paginator li {
-    display: inline-block;
-    *display: inline; /* IE < 8: fake inline-block */
-    zoom: 1;
-    letter-spacing: normal;
-    word-spacing: normal;
-    vertical-align: top;
-    text-rendering: auto;
-}
-.pure-skin-mine .pure-paginator .pure-button {
-    border-radius: 0;
-    padding: 0.8em 1.4em;
-    vertical-align: top;
-    height: 1.1em;
-}
-.pure-skin-mine .pure-paginator .pure-button:focus,
-.pure-skin-mine .pure-paginator .pure-button:active {
-    outline-style: none;
-}
-.pure-skin-mine .pure-paginator .prev,
-.pure-skin-mine .pure-paginator .next {
-    /*color: #C0C1C3; allow .pure-button to color text*/
-}
-.pure-skin-mine .pure-paginator .prev {
-    border-radius: 4px 0px 0px 4px;
-}
-.pure-skin-mine .pure-paginator .next {
-    border-radius: 0px 4px 4px 0px;
-}
-/* end from PURE menu-paginator.css ******************************/
-/* from PURE menu.css *******************************************/
-/* MAIN MENU STYLING */
-/*csslint adjoining-classes:false*/
-/*TODO: Remove this lint rule override after a refactor of this code.*/ 
-
-.pure-skin-mine .pure-menu.pure-menu-open,
-.pure-skin-mine .pure-menu.pure-menu-horizontal li .pure-menu-children {
-    background: #f1f3f9; /* Old browsers */
-    border: 1px solid #e6eaf4;
-}
-
-/* remove borders for horizontal menus */
-.pure-skin-mine .pure-menu.pure-menu-horizontal,
-.pure-skin-mine .pure-menu.pure-menu-horizontal .pure-menu-heading {
-    border: none;
-}
-
-
-/* LINK STYLES */
-
-.pure-skin-mine .pure-menu a {
-    border: 1px solid transparent;
-    border-left: none;
-    border-right: none;
-
-}
-
-.pure-skin-mine .pure-menu a,
-.pure-skin-mine .pure-menu .pure-menu-can-have-children > li:after {
-    color: #333;
-}
-
-.pure-skin-mine .pure-menu .pure-menu-can-have-children > li:hover:after {
-    color: #273259;
-}
-
-/* Focus style for a dropdown menu-item when the parent has been opened */
-.pure-skin-mine .pure-menu .pure-menu-open {
-    background: #d8ddee;
-}
-
-.pure-skin-mine .pure-menu li a:hover,
-.pure-skin-mine .pure-menu li a:focus {
-    background: #d8ddee;
-}
-
-/* DISABLED STATES */
-.pure-skin-mine .pure-menu li.pure-menu-disabled a:hover,
-.pure-skin-mine .pure-menu li.pure-menu-disabled a:focus {
-    background: #f1f3f9;
-    color: #97a6d3;
-}
-
-.pure-skin-mine .pure-menu .pure-menu-disabled > a {
-    background-image: none;
-    border-color: transparent;
-    cursor: default;
-}
-
-.pure-skin-mine .pure-menu .pure-menu-disabled > a,
-.pure-skin-mine .pure-menu .pure-menu-can-have-children.pure-menu-disabled > a:after {
-    color: #97a6d3;
-}
-
-/* HEADINGS */
-.pure-skin-mine .pure-menu .pure-menu-heading {
-    color: #171f36;
-    text-transform: uppercase;
-    font-size: 90%;
-    margin-top: 0.5em;
-    border-bottom: solid 1px #e6eaf4;
-}
-
-
-/* SELECTED MENU ITEM */
-.pure-skin-mine .pure-menu li.pure-menu-selected a {
-    background-color: #0078e7;
-    color: #fbfcfe;
-}
-
-/* FIXED MENU */
-.pure-skin-mine .pure-menu.pure-menu-open.pure-menu-fixed {
-    border: none;
-    border-bottom: 1px solid #e6eaf4;
-}
-/* end from PURE menu.css ***********************************/
-/* from PURE menu-responsive.css ****************************/
-/* RESPONSIVE */
-
-@media (max-width: 480px) {
-
-    .pure-skin-mine .pure-menu-horizontal {
-        width:100%;
+@media only screen and (min-width: 568px) {
+    .settings .pure-form-aligned .pure-control-group label,
+    .admin .pure-form-aligned .pure-control-group label {
+        width: 7.5em;
+        padding: .45em;
+        border-bottom: 2px solid #eee;
+        border-radius: 4px;
+        background-color: #f9f9f9;
     }
+}
 
-    .pure-skin-mine .pure-menu-children li {
+.settings .pure-form-aligned .pure-control-group span {
+    vertical-align: -2px;
+}
+
+.pure-form legend {
+    color: #526066;
+}
+
+/*
+ * -- NOTICE STYLE --
+ */
+
+.notice-box {
+    padding: 12px 20px;
+    margin-bottom: .6em;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    background-color: #fff3cd;
+    border-radius: 5px;
+}
+
+/*
+ * -- TABLE STYLE --
+ */
+
+table.pure-table {
+    font-size: .9em;
+    border-collapse: separate;
+    border-top-width: 2px;
+    border-radius: .5em;
+    overflow: hidden;
+}
+
+table.pure-table thead {
+    background-color: #eee;
+}
+
+@media only screen and (max-width: 568px) {
+    .pure-table-horizontal tr,
+    .pure-table-horizontal th,
+    .pure-table-horizontal td {
         display: block;
-        border-bottom:1px solid #e6eaf4;
+        padding: .3em 0;
     }
 
+    .pure-table-horizontal tr {
+        padding: 1em;
+    }
+
+    .pure-table-horizontal th,
+    .pure-table-horizontal tbody td {
+        border-bottom: 0;
+    }
+
+    .pure-table-horizontal tbody tr {
+        border-top: 1px solid #cbcbcb;
+    }
 }
-/* end from menu-responsive.css ******************/
