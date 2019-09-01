@@ -10,6 +10,7 @@ Readme of english version refers to [Readme_EN.md](https://github.com/cdhigh/Kin
 * 多账号管理，支持多用户和多Kindle
 * 生成带图的杂志格式mobi或带图的有目录epub
 * 自动每天定时推送
+* 内置共享库，可以直接订阅其他网友分享的订阅源，也可以分享自己的订阅源给其他网友
 * 强大而且方便的邮件中转服务
 * 和Evernote/Pocket/Instapaper等系统的集成
 
@@ -43,19 +44,23 @@ config.py          | DOMAIN      | 你申请的应用的域名        |
 8. 部署命令：
 8.1 使用appcfg.py：  
 	* `c:\python27\python.exe appcfg.py update kindleear目录\app.yaml kindleear目录\module-worker.yaml`  
-	* `c:\python27\python.exe appcfg.py update kindleear目录`
+	* `c:\python27\python.exe appcfg.py update kindleear目录`  
 8.2 使用gcloud：
-    * `"C:\Program Files\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" app deploy --version=1 KindleEar目录\app.yaml KindleEar目录\module-worker.yaml
-    * `"C:\Program Files\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" app deploy --version=1 KindleEar目录
-    
+    * 删除app.yaml和module-worker.yaml开头的两行：application /  version  
+    * `gcloud auth login`  
+    * `gcloud config set project 你的ApplicationId`  
+    * `gcloud app deploy --version=1 KindleEar目录\app.yaml KindleEar目录\module-worker.yaml`  
+    * `gcloud app deploy --version=1 KindleEar目录`  
+    * [如果服务器没有正常创建数据库索引，可能需要手动执行如下语句]  
+      `gcloud datastore indexes create KindleEar目录\index.yaml`  
+
 9. 全部完成后就可以尝试打开域名：  
 *http://appid.appspot.com*  (appid是你申请的application名字)  
 比如作者的网站域名为：<http://kindleear.appspot.com/>  
-**注：初始用户名为 admin，密码为 admin，建议登录后及时修改密码。**
+**注：初始用户名为 admin，密码为 admin，建议登录后及时修改密码。** 
 
 10. 更详细一点的说明请参照Github上的 [FAQ](http://htmlpreview.github.io/?https://github.com/cdhigh/KindleEar/blob/master/static/faq.html) 或作者网站的 [FAQ](http://kindleear.appspot.com/static/faq.html) 链接。有关部署失败，部署后"internal server error"等问题都有解释。  
 **不建议使用GAE Launcher部署KindleEar，除非你知道怎么设置Extra Flags等参数。**
-11. 步骤已经说的很详细了，如果自己还是部署不成功，也可以选择直接捐赠给作者50块钱 ([Wiki捐赠页面](https://github.com/cdhigh/KindleEar/wiki/Donate))，然后将gmail地址和密码发给作者（先要提前关闭密码二步验证），作者负责帮你部署成功。有需要自定义抓取和分析其他网站的需求，也可以联系作者有偿实现。
 
 # 简化的部署步骤（推荐）
   假如你不想安装python和GAE SDK，则可以：  
@@ -69,9 +74,6 @@ config.py          | DOMAIN      | 你申请的应用的域名        |
 KindleEar is licensed under the [AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html) license.  
 大体的许可框架是此应用代码你可以任意使用，任意修改，可以商用，但是必须将你修改后的代码开源并保留原始版权声明。
 
-# 捐赠
-如果你希望支持一下KindleEar，可以戳 [Wiki捐赠页面](https://github.com/cdhigh/KindleEar/wiki/Donate)
-
 # 主要贡献者
 * @rexdf <https://github.com/rexdf> 
 * @insert0003 <https://github.com/insert0003> 
@@ -80,3 +82,4 @@ KindleEar is licensed under the [AGPLv3](http://www.gnu.org/licenses/agpl-3.0.ht
 * @th0mass <https://github.com/th0mass> 
 * @seff <https://github.com/seff> 
 * @miaowm5 <https://github.com/miaowm5> 
+* @bookfere <https://github.com/bookfere> 

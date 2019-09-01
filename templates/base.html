@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="/static/pure-min.css" type="text/css" charset="utf-8"/>
     <link rel="stylesheet" href="/static/grids-responsive-min.css" type="text/css" charset="utf-8"/>
     <link rel="stylesheet" href="/static/base.css" type="text/css" charset="utf-8"/>
+    <link rel="stylesheet" href="/static/tingle.min.css" type="text/css" charset="utf-8"/>
+    <script type="text/javascript" src="/static/tingle.min.js"></script>
     <script type="text/javascript">
         function $(id_){return document.getElementById(id_);}
         function displayElement(id_) {
@@ -22,27 +24,27 @@
             for (var name in data) {
                 arr.push(encodeURIComponent(name) + "=" + encodeURIComponent(data[name]));
             }
-            arr.push(("v=" + Math.random()).replace(".", ""));
+            arr.push(("v_=" + Math.random()).replace(".", ""));
             return arr.join("&");
         }
         //Usage:
         //ajax({
-        //    url: "./TestXHR.aspx",              //请求地址
-        //    type: "POST",                       //请求方式
-        //    data: { name: "super", age: 20 },   //请求参数
-        //    dataType: "json",                   //可选,'json'/'text'/'xml'
+        //    url: "./TestXHR.aspx",
+        //    type: "POST",
+        //    data: { name: "super", age: 20 },
+        //    dataType: "json",          //optional,'json'/'text'/'xml'
         //    success: function (response, xml) {
         //        // obj.innerHTML = response or response.name
         //    },
-        //    fail: function (status) {           //可选
-        //        // 此处放失败后执行的代码
+        //    fail: function (status) {       //optional
+        //        // some codes
         //    }
         //});
         function ajax(options) {
             options = options || {};
             options.type = (options.type || "GET").toUpperCase();
             options.dataType = options.dataType || "json";
-            var params = formatParams(options.data);
+            var params = formatParams(options.data || []);
 
             if (window.XMLHttpRequest) {
                 var xhr = new XMLHttpRequest();
@@ -54,8 +56,10 @@
                 if (xhr.readyState == 4) {
                     var status = xhr.status;
                     if (status >= 200 && status < 300) {
-                        if (options.dataType == "json" || options.dataType=="JSON") {
-                            options.success && options.success(eval("(" + xhr.responseText + ")"), xhr.responseXML);
+                        if (options.dataType == "json" || options.dataType == "JSON") {
+                            var respData = JSON.parse(xhr.responseText);
+                            //options.success && options.success(eval("(" + xhr.responseText + ")"), xhr.responseXML);
+                            options.success && options.success(respData, xhr.responseXML);
                         } else {
                             options.success && options.success(xhr.responseText, xhr.responseXML);
                         }
@@ -73,6 +77,14 @@
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 xhr.send(params);
             }
+        }
+        //Add a method 'format' to string
+        String.prototype.format = function(){
+            var args = Array.prototype.slice.call(arguments);
+            var count = 0;
+            return this.replace(/%s/g, function(s,i){
+                return args[count++];
+            });
         }
     </script>
     {% block javascriptinhead %}{% endblock -%}
@@ -135,6 +147,11 @@
                     {% else -%}
                     <li class="pure-menu-item"><a href="/adv" class="pure-menu-link">{{_("Advanced")}}</a></li>
                     {% endif -%}
+                    {% if current == "shared" -%}
+                    <li class="pure-menu-item pure-menu-selected"><span>{{_("Shared")}}</span></li>
+                    {% else -%}
+                    <li class="pure-menu-item"><a href="/library" class="pure-menu-link">{{_("Shared")}}</a></li>
+                    {% endif -%}
                 </ul>
             </div>
             {% endif -%}
@@ -151,7 +168,7 @@
             <small>
             2013-2019 &copy; KindleEar&nbsp;@{{version}} ｜
             <a href="/static/faq{%if lang and not lang.startswith('zh')%}_en{%endif%}.html" target="_blank">FAQ</a> ｜
-            <a href="https://github.com/cdhigh/kindleear"  target="_blank">Github page</a> ｜
+            <a href="https://github.com/cdhigh/kindleear" target="_blank">Github page</a> ｜
             <a href="https://console.cloud.google.com/appengine" target="_blank">App Engine</a>
             </small>
         </p>

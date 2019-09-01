@@ -40,6 +40,7 @@ class Worker(BaseHandler):
         to = user.kindle_email
         if (';' in to) or (',' in to):
             to = to.replace(',', ';').replace(' ', '').split(';')
+            to = list(filter(lambda x: x.find('@', 1, len(x) - 1) > 0, to)) #最简单的判断是否是EMAIL
         
         booktype = user.book_type #mobi,epub
         bookmode = user.book_mode or 'periodical' #periodical,comic

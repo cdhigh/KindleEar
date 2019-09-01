@@ -6,6 +6,10 @@
 # rexdf <https://github.com/rexdf>
 
 import hashlib, gettext, datetime
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 import web
 from apps.BaseHandler import BaseHandler
@@ -162,4 +166,10 @@ class Logout(BaseHandler):
         main.session.lang = ''
         main.session.kill()
         raise web.seeother(r'/')
-        
+
+#for ajax parser, if login required, retuan a dict 
+class NeedLoginAjax(BaseHandler):
+    __url__ = "/needloginforajax"
+    def GET(self):
+        web.header('Content-Type', 'application/json')
+        return json.dumps({'status': _('login required')})

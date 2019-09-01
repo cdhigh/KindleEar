@@ -38,7 +38,7 @@ class Setting(BaseHandler):
         elif sgenable and (not sgapikey):
             tips = _("Need sendgrid ApiKey!")
         else:
-            user.kindle_email = kemail
+            user.kindle_email = kemail.strip(';, ')
             user.timezone = int(webInput.get('timezone', TIMEZONE))
             user.send_time = int(webInput.get('sendtime'))
             user.enable_send = bool(webInput.get('enablesend'))

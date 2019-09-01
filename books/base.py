@@ -305,10 +305,10 @@ class BaseFeedBook:
                     
                     #支持HTTPS
                     if hasattr(e, 'link'):
-                        if url.startswith('https://'):
-                            urlfeed = e.link.replace('http://','https://')
-                        else:
-                            urlfeed = e.link
+                        #if url.startswith('https://'): #有的RSS为HTTPS，但是文章为HTTP，所以不能直接替换HTTPS 
+                        #    urlfeed = e.link.replace('http://','https://')
+                        #else:
+                        urlfeed = e.link
                             
                         if urlfeed in urladded:
                             continue

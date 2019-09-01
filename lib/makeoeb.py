@@ -67,7 +67,7 @@ def CreateOeb(log, path_or_stream, opts, encoding='utf-8'):
 #OEB的一些生成选项
 def getOpts(output_type='kindle', book_mode='periodical'):
     from calibre.customize.profiles import (KindleOutput, KindlePaperWhiteOutput, KindleDXOutput, KindleFireOutput, 
-        KindleVoyageOutput, KindlePaperWhite3Output, OutputProfile)
+        KindleVoyageOutput, KindlePaperWhite3Output, KindleOasisOutput, OutputProfile)
     from config import REDUCE_IMAGE_TO
     opts = OptionValues()
     setattr(opts, "pretty_print", False)
@@ -87,6 +87,8 @@ def getOpts(output_type='kindle', book_mode='periodical'):
         'kindlefire': KindleFireOutput,
         'kindlevoyage': KindleVoyageOutput,
         'kindlepw3': KindlePaperWhite3Output,
+        'kindlepw4': KindlePaperWhite3Output,
+        'kindleoasis': KindleOasisOutput,
         'others': OutputProfile,
         }
     OutputDevice = outputdic.get(output_type, KindleOutput)

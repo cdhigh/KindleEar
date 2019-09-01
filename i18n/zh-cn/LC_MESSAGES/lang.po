@@ -184,10 +184,10 @@ msgid "Share Your Ideas"
 msgstr "分享智慧"
 
 msgid ""
-"Author modified and ported Calibre to generate mobi file in GAE without kindlegen "
+"Author modified and ported %s to generate mobi file in GAE without kindlegen "
 "tool of Amazon,"
 msgstr ""
-"作者提取了Calibre的mobi模块用于通过Python在线生成mobi格式文件，不依赖Amazon的"
+"作者提取了%s的mobi模块用于通过Python在线生成mobi格式文件，不依赖Amazon的"
 "kindlegen工具，"
 
 msgid "for periodical mobi file is a better format to represent news feeds."
@@ -261,7 +261,7 @@ msgid "Drag and drop this link to your bookmarks"
 msgstr "将链接拖动到书签栏"
 
 msgid "Add to KindleEar"
-msgstr "在 KindleEar 中订阅"
+msgstr "在KindleEar中订阅"
 
 msgid "No have book unsubscrebed"
 msgstr "暂时没有未订阅的书籍"
@@ -455,10 +455,13 @@ msgstr "多本书籍合并投递为一本"
 msgid "Append hyperlink '%s' to article"
 msgstr "在每篇文章后附加 '%s' 超链接"
 
-msgid "Share"
-msgstr "归档和分享"
+msgid "Archive"
+msgstr "归档"
 
-msgid "Append hyperlinks for share to article."
+msgid "Share"
+msgstr "分享"
+
+msgid "Append hyperlinks for archiving or sharing."
 msgstr "在文章最后附加归档或分享链接。"
 
 msgid "Fuck Gfw (For users in China)"
@@ -551,8 +554,8 @@ msgstr "已校验"
 msgid "Congratulation : the username and password are correct."
 msgstr "恭喜：你提供的账号和密码都正确。"
 
-msgid "Unhappily : the username or password is incorrect!"
-msgstr "非常遗憾：你提供的账号或密码有误！"
+msgid "The username or password is incorrect!"
+msgstr "你提供的账号或密码有误！"
 
 msgid "Error when verify the username and password for Instapaper. Status:"
 msgstr "在校验Instapaper的账号和密码时发生错误。错误码："
@@ -569,26 +572,26 @@ msgstr "订阅源(数据库ID: %d)不存在!"
 msgid "The book(%d) not exist!"
 msgstr "内置书籍(数据库ID: %d)不存在!"
 
-msgid "Unhappily : cannot subscribe this book, Error:"
-msgstr "非常遗憾：无法订阅此书籍，错误描述："
+msgid "Cannot subscribe this book, Error:"
+msgstr "无法订阅此书籍，错误描述："
 
 msgid "Error when try to subscribe this book. Status:"
 msgstr "试图订阅此书籍时出错。错误码："
 
-msgid "Unhappily : cannot unsubscribe this book, Error:"
-msgstr "非常遗憾：无法退订此书籍，错误描述："
+msgid "Cannot unsubscribe this book, Error:"
+msgstr "无法退订此书籍，错误描述："
 
 msgid "Error when try to unsubscribe this book. Status:"
 msgstr "试图退订此书籍时出错。错误码："
 
-msgid "Unhappily : cannot delete this feed, Error:"
-msgstr "非常遗憾：无法删除此订阅源，错误描述："
+msgid "Cannot delete this feed, Error:"
+msgstr "无法删除此订阅源，错误描述："
 
 msgid "Error when try to delete this feed. Status:"
 msgstr "试图删除此订阅源时出错，错误码："
 
-msgid "Unhappily : cannot add this feed, Error:"
-msgstr "非常遗憾：无法添加此订阅源，错误描述："
+msgid "Cannot add this feed, Error:"
+msgstr "无法添加此订阅源，错误描述："
 
 msgid "Error when try to add this feed. Status:"
 msgstr "试图添加此订阅源时出错，错误码："
@@ -641,14 +644,14 @@ msgstr "请输入一个新的数值"
 msgid "The number is invalid"
 msgstr "数值非法"
 
-msgid "Unhappily : cannot change this record, Error:"
-msgstr "非常遗憾：无法修改此记录，错误码："
+msgid "Cannot change this record, Error:"
+msgstr "无法修改此记录，错误码："
 
 msgid "Error when try to change this record. Status:"
 msgstr "在试图修改此记录时出错。错误码："
 
-msgid "Unhappily : cannot delete this record, Error:"
-msgstr "非常遗憾：无法删除此记录，错误码："
+msgid "Cannot delete this record, Error:"
+msgstr "无法删除此记录，错误码："
 
 msgid "Error when try to delete this record. Status:"
 msgstr "在试图删除此记录时出错。错误码："
@@ -733,3 +736,60 @@ msgstr "请输入Sendgrid的ApiKey！"
 
 msgid "Email or Username"
 msgstr "邮箱或用户名"
+
+msgid "Shared"
+msgstr "网友分享"
+
+msgid "This feed has been successfully subscribed."
+msgstr "已经成功订阅了此订阅源。"
+
+msgid "[All]"
+msgstr "[所有分类]"
+
+msgid "[Uncategoried]"
+msgstr "[未分类]"
+
+msgid "<h1>Successfully</h1><p>This feed has been successfully subscribed.</p>"
+msgstr "<h1>成功</h1><p>已经成功订阅了此订阅源。</p>"
+
+msgid "Close"
+msgstr "关闭"
+
+msgid "Url is empty!"
+msgstr "URL为空！"
+
+msgid "<h1>Thanks</h1><p>Thank you for your feedback, this feed will be reviewed soon.</p>"
+msgstr "<h1>非常感谢</h1><p>非常感谢您的反馈，此订阅源将很快被检视。</p>"
+
+msgid "Duplicated subscription!"
+msgstr "重复的订阅!"
+
+msgid "Invalid"
+msgstr "报失效"
+
+msgid "<p>Please write a category in text field if the one you wish is not in the list.</p>"
+msgstr "<p>如果列表中没有合适的分类，请直接在文本框中填写。</p>"
+
+msgid "<h1>Share links, share happiness</h1>"
+msgstr "<h1>分享链接，分享快乐</h1>"
+
+msgid "Cannot fetch data from kindleear.appspot.com, status: "
+msgstr "无法从kindleear.appspot.com获取数据，状态： "
+
+msgid "Database has no data yet, you can share your subscription now."
+msgstr "数据库还没有数据，您可以分享现在的订阅源。"
+
+msgid "<h1>Thanks</h1><p>Thank you for sharing, good luck will always with you."
+msgstr "<h1>非常感谢</h1><p>谢谢您的分享，愿好运永远伴随您。"
+
+msgid "<h1>Share links, share happiness</h1>"
+msgstr "<h1>分享链接，分享快乐</h1>"
+
+msgid "<p>Category for [%s]:</p>"
+msgstr "<p>[%s] 的类别:</p>"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Read with Kindle"
+msgstr "在Kindle阅读"

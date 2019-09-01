@@ -86,7 +86,7 @@ class LastDeliveredAjax(BaseHandler):
     
     def POST(self, mgrType):
         web.header('Content-Type', 'application/json')
-        user = self.getcurrentuser()
+        user = self.getcurrentuser(forAjax=True)
         
         if mgrType.lower() == 'delete':
             id_ = web.input().get('id_')

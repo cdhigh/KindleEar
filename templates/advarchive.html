@@ -3,13 +3,13 @@
 {% block advcontent -%}
 <form class="pure-form" action="" method="POST">
   <fieldset>
-    <legend><h3>{{ _("Share") }}</h3></legend>
-    <p><small>{{ _("Append hyperlinks for share to article.") }}</small></p>
+    <legend><h3>{{_("Archive")}}</h3></legend>
+    <p><small>{{ _("Append hyperlinks for archiving or sharing.") }}</small></p>
     <div class="pure-control-group">
         <label for="enable_evernote" class="pure-checkbox">
             <input id="enable_evernote" name="evernote" type="checkbox" 
                 {% if user and user.evernote %}checked="1"{% endif %} />
-            {{ _("Append hyperlink '%s' to article")|format(savetoevernote) }}
+            {{_("Append hyperlink '%s' to article")|format(savetoevernote)}}
         </label>
         <input type="text" name="evernote_mail" placeholder="Evernote Email" value="{% if user and user.evernote_mail %}{{ user.evernote_mail }}{% endif %}" class="pure-u-1" />
     </div>
@@ -17,7 +17,7 @@
     <div class="pure-control-group">
         <label for="enable_wiz" class="pure-checkbox">
             <input id="enable_wiz" name="wiz" type="checkbox" {% if user and user.wiz %}checked="1"{% endif %} />
-            {{ _("Append hyperlink '%s' to article")|format(savetowiz) }}
+            {{_("Append hyperlink '%s' to article")|format(savetowiz)}}
         </label>
         <input type="text" name="wiz_mail" placeholder="Wiz Email" value="{% if user and user.wiz_mail %}{{ user.wiz_mail }}{% endif %}" class="pure-u-1" />
     </div>
@@ -27,7 +27,7 @@
     <div class="pure-control-group">
         <label for="enable_pocket" class="pure-checkbox">
             <input id="enable_pocket" name="pocket" type="checkbox" {% if user and user.pocket and user.pocket_access_token %} checked="1" {% endif %} {% if user and not user.pocket_access_token %} disabled="1" {% endif %} />
-            {{ _("Append hyperlink '%s' to article")|format(savetopocket) }}&nbsp;&nbsp;&nbsp;&nbsp;
+            {{_("Append hyperlink '%s' to article")|format(savetopocket)}}&nbsp;&nbsp;&nbsp;&nbsp;
             {%if user and user.pocket_access_token -%}
             [<a href="/oauth2/pocket" style="text-decoration:none;color:silver;">{{ _("Authorized") }}</a>]
             {%else -%}
@@ -39,7 +39,7 @@
         <label for="enable_instapaper" class="pure-u-1 pure-checkbox">
             <input id="enable_instapaper" name="instapaper" type="checkbox" 
                 {% if user and user.instapaper %}checked="1"{% endif %} />
-            {{ _("Append hyperlink '%s' to article")|format(savetoinstapaper) }}
+            {{_("Append hyperlink '%s' to article")|format(savetoinstapaper)}}
         </label>
         <div class="pure-u-1 pure-u-sm-2-5">
             <input type="text" name="instapaper_username" id="instapaper_username" placeholder="{{ _('Email or Username') }}" value="{% if user and user.instapaper_username %}{{ user.instapaper_username }}{% endif %}" onchange="notifyInstapaperVerify();" class="pure-u-1 pure-u-sm-23-24" />
@@ -48,7 +48,7 @@
             <input type="password" name="instapaper_password" id="instapaper_password" placeholder="{{ _('Password') }}" value="{% if user and user.instapaper_password %}{{ ke_decrypt(user.instapaper_password, user.secret_key or '') }}{% endif %}" onchange="notifyInstapaperVerify();" class="pure-u-1 pure-u-sm-23-24" />
         </div>
         <div class="pure-u-1 pure-u-sm-1-5" style="text-align:center;">
-            <a href="javascript:;" id="averInstapaper" onclick="verifyInstapaper();return false;" class="pure-u-1 pure-button">{{ _("Verify") }}</a>
+            <a href="javascript:;" id="averInstapaper" onclick="verifyInstapaper();return false;" class="pure-u-1 pure-button">{{_("Verify")}}</a>
         </div>
     </div>
 
@@ -57,31 +57,31 @@
     <div class="pure-control-group">
         <label for="enable_xweibo" class="pure-checkbox">
             <input id="enable_xweibo" name="xweibo" type="checkbox" {% if user and user.xweibo %}checked="1"{% endif %} />
-            {{ _("Append hyperlink '%s' to article")|format(shareonxweibo) }}
+            {{_("Append hyperlink '%s' to article")|format(shareonxweibo)}}
         </label>
         <label for="enable_tweibo" class="pure-checkbox">
             <input id="enable_tweibo" name="tweibo" type="checkbox" {% if user and user.tweibo %}checked="1"{% endif %} />
-            {{ _("Append hyperlink '%s' to article")|format(shareontweibo) }}
+            {{_("Append hyperlink '%s' to article")|format(shareontweibo)}}
         </label>
         <label for="enable_facebook" class="pure-checkbox">
             <input id="enable_facebook" name="facebook" type="checkbox" {% if user and user.facebook %}checked="1"{% endif %} />
-            {{ _("Append hyperlink '%s' to article")|format(shareonfacebook) }}
+            {{_("Append hyperlink '%s' to article")|format(shareonfacebook)}}
         </label>
         <label for="enable_twitter" class="pure-checkbox">
             <input id="enable_twitter" name="twitter" type="checkbox" {% if user and user.twitter %}checked="1"{% endif %} />
-            {{ _("Append hyperlink '%s' to article")|format(shareontwitter) }}
+            {{_("Append hyperlink '%s' to article")|format(shareontwitter)}}
         </label>
         <label for="enable_tumblr" class="pure-checkbox">
             <input id="enable_tumblr" name="tumblr" type="checkbox" {% if user and user.tumblr %}checked="1"{% endif %} />
-            {{ _("Append hyperlink '%s' to article")|format(shareontumblr) }}
+            {{_("Append hyperlink '%s' to article")|format(shareontumblr)}}
         </label>
         <label for="enable_browser" class="pure-checkbox">
             <input id="enable_browser" name="browser" type="checkbox" {% if user and user.browser %}checked="1"{% endif %} />
-            {{ _("Append hyperlink '%s' to article")|format(openinbrowser) }}
+            {{_("Append hyperlink '%s' to article")|format(openinbrowser)}}
         </label>
         <label for="enable_qrcode" class="pure-checkbox">
             <input id="enable_qrcode" name="qrcode" type="checkbox" {% if user and user.qrcode %}checked="1"{% endif %} />
-            {{ _("Append qrcode of url to article") }}
+            {{_("Append qrcode of url to article")}}
         </label>
     </div>
 
@@ -89,10 +89,10 @@
 
     <label for="fuck_gfw" class="pure-checkbox">
         <input id="fuck_gfw" type="checkbox" name="fuckgfw" {% if user and user.share_fuckgfw %}checked="1"{% endif %} >
-        {{ _("Fuck Gfw (For users in China)") }}
+        {{_("Fuck Gfw (For users in China)")}}
     </label>
     <div style="text-align:center;">
-        <button type="submit" class="pure-button pure-button-primary pure-input-rounded" style="margin-top:8px;">{{ _("Save settings") }}</button>
+        <button type="submit" class="actionButton act" style="margin-top:8px;">{{_("Save settings")}}</button>
     </div>
   </fieldset>    
 </form>
@@ -101,10 +101,10 @@
 {% block js %}
 <script type="text/javascript">
     function notifyInstapaperVerify() {
-        document.getElementById("averInstapaper").innerHTML = "{{ _('Verify') }}";
+        document.getElementById("averInstapaper").innerHTML = "{{_('Verify')}}";
     };
     function verifyInstapaper() {
-        document.getElementById("averInstapaper").innerHTML = "{{ _('Verifying') }}";
+        document.getElementById("averInstapaper").innerHTML = "{{_('Verifying')}}";
         var instauser = document.getElementById("instapaper_username").value;
         var instapass = document.getElementById("instapaper_password").value;
         ajax({url:"/verifyajax/instapaper", type: "POST", 
@@ -112,20 +112,20 @@
             success: function (resp, xml) {
                 if (resp.status != "ok") {
                     alert("Error:" + resp.status);
-                    document.getElementById("averInstapaper").innerHTML = "{{ _('Verify') }}";
+                    document.getElementById("averInstapaper").innerHTML = "{{_('Verify')}}";
                 }
                 else if (resp.correct == 1) {
-                    alert("{{ _('Congratulation : the username and password are correct.') }}");
-                    document.getElementById("averInstapaper").innerHTML = "{{ _('Verified') }}";
+                    alert("{{_('Congratulation : the username and password are correct.')}}");
+                    document.getElementById("averInstapaper").innerHTML = "{{_('Verified')}}";
                 } else {
-                    alert("{{ _('Unhappily : the username or password is incorrect!') }}");
-                    document.getElementById("averInstapaper").innerHTML = "{{ _('Verify') }}";
+                    alert("{{_('The username or password is incorrect!') }}");
+                    document.getElementById("averInstapaper").innerHTML = "{{_('Verify')}}";
                 }
                 
             },
             fail: function (status) {
-                alert("{{ _('Error when verify the username and password for Instapaper. Status:') }}" + status);
-                document.getElementById("averInstapaper").innerHTML = "{{ _('Verify') }}";
+                alert("{{_('Error when verify the username and password for Instapaper. Status:')}}" + status);
+                document.getElementById("averInstapaper").innerHTML = "{{_('Verify')}}";
             }
         });
     };

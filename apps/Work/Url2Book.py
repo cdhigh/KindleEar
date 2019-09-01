@@ -34,6 +34,7 @@ class Url2Book(BaseHandler):
         
         if (';' in to) or (',' in to):
             to = to.replace(',', ';').replace(' ', '').split(';')
+            to = list(filter(lambda x: x.find('@', 1, len(x) - 1) > 0, to)) #最简单的判断是否是EMAIL
         
         if type(urls) is unicode:
             urls = urls.encode('utf-8')

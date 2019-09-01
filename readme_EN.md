@@ -7,6 +7,7 @@ KindleEar is a web application to aggregate RSS for generating periodical mobi/e
 * With account management, support several kindles.
 * Generate periodical mobi/epub file with images.
 * Deliver news feeds to your kindle dialy automatically.
+* Built-in shared library, can share links with others and subscribe links from others.
 * Website support multi-languages.
 * Powerful and convenient mail-transfering service.
 * Integration with Evernote/Pocket/Instapaper.
@@ -39,14 +40,18 @@ config.py          | TIMEZONE    | Your timezone         |
 	* `c:\python27\python.exe appcfg.py update KindleEarFolder\app.yaml KindleEarFolder\module-worker.yaml`  
 	* `c:\python27\python.exe appcfg.py update KindleEarFolder`  
 7.2 using gcloud
-    * `"C:\Program Files\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" app deploy --version=1 KindleEar\app.yaml KindleEar\module-worker.yaml
-    * `"C:\Program Files\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" app deploy --version=1 KindleEar
+    * Delete the first two lines of app.yaml and module-worker.yaml [application and version]  
+    * `gcloud auth login`  
+    * `gcloud config set project YourApplicationId`  
+    * `gcloud app deploy --version=1 KindleEarFolder\app.yaml KindleEarFolder\module-worker.yaml`    
+    * `gcloud app deploy --version=1 KindleEarFolder`  
+    * [If needed] `gcloud datastore indexes create KindleEarFolder\index.yaml`  
 
 8. After finished, you can open the website *'http://appid.appspot.com'* (appid is the name of your application),  
 For example the author's site: <http://kindleear.appspot.com>  
 **The initial username is 'admin', password is 'admin', please change the password immediately after first login.**  
 
-9. More details could be found in [FAQ](http://htmlpreview.github.io/?https://github.com/cdhigh/KindleEar/blob/master/static/faq.html).
+9. More details could be found in [FAQ](http://htmlpreview.github.io/?https://github.com/cdhigh/KindleEar/blob/master/static/faq_en.html).
 
 # Deployment simplified
 If you don't want to intall GAE SDK and python, you have another choice.  
@@ -66,3 +71,4 @@ If you don't want to intall GAE SDK and python, you have another choice.
 * @th0mass <https://github.com/th0mass> 
 * @seff <https://github.com/seff> 
 * @miaowm5 <https://github.com/miaowm5> 
+* @bookfere <https://github.com/bookfere> 

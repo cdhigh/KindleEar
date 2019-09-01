@@ -180,7 +180,7 @@ function ChangeLastDelivered(id_) {
                     numObj.innerHTML = resp.num;
                     recObj.innerHTML = '-';
                 } else {
-                    alert("{{_('Unhappily : cannot change this record, Error:')}}" + resp.status);
+                    alert("{{_('Cannot change this record, Error:')}}" + resp.status);
                 }
             },
             fail: function (status) {
@@ -200,7 +200,7 @@ function DeleteLastDelivered(id_) {
                 var thisRow = $('lastDelivered_' + id_);
                 thisRow.parentNode.removeChild(thisRow);
             } else {
-                alert("{{_('Unhappily : cannot delete this record, Error:')}}" + resp.status);
+                alert("{{_('Cannot delete this record, Error:')}}" + resp.status);
             }
         },
         fail: function (status) {

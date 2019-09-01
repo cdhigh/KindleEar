@@ -53,10 +53,10 @@ a {
     text-align: center;
 }
 
-    .footer a {
-        color: #ddd;
-        text-decoration: none;
-    }
+.footer a {
+    color: #ddd;
+    text-decoration: none;
+}
 
 /*
  * -- MENU STYLES --
@@ -68,66 +68,66 @@ a {
     box-shadow: 0 2px 5px rgba(0,0,0,.15)
 }
 
-    .logo {
-        padding: .5em;
-        font-family: Palatino, STSong, SimSun, serif;
-        font-size: 1.5em;
-        text-transform: none;
-        font-weight: 200;
-        color: #222;
-    }
+.logo {
+    padding: .5em;
+    font-family: Palatino, STSong, SimSun, serif;
+    font-size: 1.5em;
+    text-transform: none;
+    font-weight: 200;
+    color: #222;
+}
 
-    .home-menu {
-        padding: 0 .5em;
-    }
+.home-menu {
+    padding: 0 .5em;
+}
 
-        .home-menu .pure-menu-item {
-            height: auto;
-        }
+.home-menu .pure-menu-item {
+    height: auto;
+}
 
-        .home-menu .pure-menu-link {
-            padding: 1em .5em;
-        }
+.home-menu .pure-menu-link {
+    padding: 1em .5em;
+}
 
 .app-menu {
     background-color: #0078e7;
 }
 
+.app-menu .pure-menu-list {
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+@media only screen and (min-width: 480px) {
     .app-menu .pure-menu-list {
-        margin: 0 auto;
-        max-width: 800px;
+        display: block!important;
     }
+}
 
-    @media only screen and (min-width: 480px) {
-        .app-menu .pure-menu-list {
-            display: block!important;
-        }
-    }
+.app-menu .pure-menu-link {
+    color: #6fbef3;
+}
 
-    .app-menu .pure-menu-link {
-        color: #6fbef3;
-    }
+.app-menu a,
+.app-menu span {
+    padding: .8em 1em;
+}
 
-    .app-menu a,
-    .app-menu span {
-        padding: .8em 1em;
-    }
+.app-menu .pure-menu-selected a,
+.app-menu .pure-menu-selected span {
+    color: white;
+}
 
-    .app-menu .pure-menu-selected a,
-    .app-menu .pure-menu-selected span {
-        color: white;
-    }
+.app-menu .pure-menu-item a:hover,
+.app-menu .pure-menu-item a:focus {
+    background: none;
+    border: none;
+    color: #aecfe5;
+}
 
-        .app-menu .pure-menu-item a:hover,
-        .app-menu .pure-menu-item a:focus {
-            background: none;
-            border: none;
-            color: #aecfe5;
-        }
-
-    .app-menu.pure-menu-horizontal.pure-menu-scrollable {
-        padding: 0;
-    }
+.app-menu.pure-menu-horizontal.pure-menu-scrollable {
+    padding: 0;
+}
 
 .main {
     margin: 0 auto;
@@ -155,25 +155,25 @@ a {
     }
 }
 
-    .banner-head {
-        display: table-cell;
-        vertical-align: middle;
-        margin-bottom: 0;
-        padding: 0 2em;
-    }
+.banner-head {
+    display: table-cell;
+    vertical-align: middle;
+    margin-bottom: 0;
+    padding: 0 2em;
+}
 
-        .banner-head h1 {
-            margin: 0 0 .67em;
-            font-size: 3.8em;
-            color: white;
-            font-weight: 200;
-            text-shadow: 0 1px 1px black;
-        }
+.banner-head h1 {
+    margin: 0 0 .67em;
+    font-size: 3.8em;
+    color: white;
+    font-weight: 200;
+    text-shadow: 0 1px 1px black;
+}
 
-        .banner a.pure-button {
-            border-radius: 2em;
-            padding: .8em 2em;
-        }
+.banner a.pure-button {
+    border-radius: 2em;
+    padding: .8em 2em;
+}
 
 @media only screen and (max-width: 768px) {
     .banner-head h1 {
@@ -221,105 +221,116 @@ a {
     overflow: hidden;
 }
 
-    .box-list .box {
-        position: relative;
-        margin: 0;
-        padding: .7em 1em;
-        border-bottom: 1px solid #ddd;
-        background-color: #fff;
-    }
+.box-list .box {
+    position: relative;
+    margin: 0;
+    padding: .7em 1em;
+    border-bottom: 1px solid #ddd;
+    background-color: #fff;
+}
 
-    .box-list .box:hover {
-        background-color: #f9f9f9;
-    }
+.box-list .box:hover {
+    background-color: #f9f9f9;
+}
 
-    .box-list .box:last-child {
-        border-bottom: 0;
-    }
+.box-list .box:last-child {
+    border-bottom: 0;
+}
 
-    .box-list#bookmarklet .box {
-        padding-right: 1em;
-    }
+.box-list#bookmarklet .box {
+    padding-right: 1em;
+}
 
-        .box-list .book .titleRow {
-            padding-bottom: .2em;
-            font-size: 1.1em;
-            font-weight: bold;
-        }
+.box-list#bookmarklet .box a {
+    margin-top: 8px;
+}
 
-        .box-list .book.pure-form .titleRow {
-            font:unset;
-        }
+.box-list .book .titleRow {
+    padding-bottom: .2em;
+    font-size: 1.1em;
+    font-weight: bold;
+}
 
-            .box-list#bookmarklet .book .titleRow small {
-                font-weight: normal;
-                padding-left: .5em;
-            }
+.box-list .book.pure-form .titleRow {
+    font:unset;
+}
 
-            .box-list .book .titleRow img {
-                vertical-align: -3px;
-            }
+.box-list#bookmarklet .book .titleRow small {
+    font-weight: normal;
+    padding-left: .5em;
+}
 
-            .box-list .book .summaryRow {
-                word-wrap: break-word;
-            }
+.box-list .book .titleRow img {
+    vertical-align: -3px;
+}
 
-            .box-list .book .summaryRow a {
-                text-decoration: none;
-                color: grey;
-            }
+.box-list .book .titleRow span {
+    font-size: 0.6em;
+    color: grey;
+    font-weight: normal;
+    font-style: italic;
+}
 
-            .box-list .book .summaryRow a:hover {
-                color: #0078e7;
-                text-decoration: underline;
-            }
+.box-list .book .summaryRow {
+    word-wrap: break-word;
+}
 
-            .actionButton {
-                display: inline-block;
-                padding: 0 1em;
-                line-height: 30px;
-                text-align: center;
-                background-color: #999;
-                text-decoration: none;
-                color: #fff;
-                border: 2px solid #fff;
-                border-radius: 2em;
-            }
+.box-list .book .summaryRow a {
+    text-decoration: none;
+    color: grey;
+}
 
-            #bookmarklet .box .actionButton {
-                display: block;
-                padding: 10px 20px;
-                width: 100%;
-                text-align: center;
-                text-decoration: none;
-                color: #111;
-                font-weight: bold;
-                border: 3px dotted grey;
-                background-color: #efefef;
-                border-radius: .5em;
-                box-sizing: border-box;
-            }
+.box-list .book .summaryRow a:hover {
+    color: #0078e7;
+    text-decoration: underline;
+}
 
-        .box-list .box .cornerControls {
-            margin-top: .5em;
-            text-align: center;
-        }
+.actionButton {
+    display: inline-block;
+    padding: 0 1em;
+    line-height: 30px;
+    text-align: center;
+    background-color: #999;
+    text-decoration: none;
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 0.5em;
+}
 
-            .actionButton.add {
-                background-color: #0078e7;
-            }
+#bookmarklet .box .actionButton {
+    display: block;
+    padding: 10px 20px;
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+    color: #111;
+    font-weight: bold;
+    border: 3px dotted grey;
+    background-color: #efefef;
+    border-radius: .5em;
+    box-sizing: border-box;
+}
 
-            .actionButton:hover {
-                background-color: rgb(202, 60, 60);
-            }
+.box-list .box .cornerControls {
+    margin-top: .5em;
+    text-align: center;
+}
 
-            .actionButton.add:hover {
-                background-color: #0765bb;
-            }
+.actionButton.add {
+    background-color: #0078e7;
+}
 
-            .actionButton.act:hover {
-                background-color: #0078e7;
-            }
+.actionButton:hover {
+    background-color: rgb(202, 60, 60);
+}
+
+.actionButton.add:hover {
+    background-color: #0765bb;
+}
+
+.actionButton.act:hover {
+    background-color: #0078e7;
+}
 
 @media only screen and (min-width: 768px) {
     .my-rss .box-list .box,
@@ -425,3 +436,80 @@ table.pure-table thead {
         border-top: 1px solid #cbcbcb;
     }
 }
+
+/*
+* FOR COMBOBOX widget
+*/
+.select-editable {
+     position:relative;
+     background-color:white;
+     border:solid grey 1px;
+     width:200px;
+     height:20px;
+ }
+ .select-editable select {
+     position:absolute;
+     top:0px;
+     left:0px;
+     font-size:14px;
+     border:none;
+     width:200px;
+     margin:0;
+ }
+ .select-editable input {
+     position:absolute;
+     top:0px;
+     left:0px;
+     width:180px;
+     height:19px;
+     padding:1px;
+     font-size:12px;
+     border:solid grey 1px;
+ }
+ .select-editable select:focus, .select-editable input:focus {
+     outline:none;
+ }
+
+/*
+ * -- PAGINATION BUTTONS STYLE --
+ */
+.paging {
+  overflow: hidden;
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  font-size: 14px;
+  color: #666666;
+  background-color: #FFFFFF;
+}
+.paging li {
+  display: inline-block;
+  height: 32px;
+  width: 32px;
+  line-height: 32px;
+  margin: 0px 5px;
+  padding: 0px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  cursor: pointer;
+  vertical-align: top;
+  text-align: center;
+}
+.paging li:hover {
+  border-color:#31C27C;
+  color:#31C27C;
+}
+.paging li.pgdisabled {
+  border: 1px solid #ddd;
+  color: #ddd;
+}
+.paging .pageinfo {
+  width: 60px;
+  border: none;
+}
+

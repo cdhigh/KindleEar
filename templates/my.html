@@ -7,13 +7,13 @@
 {% block content -%}
 <div class="main">
     {% if myfeeds -%}
-    <legend><h3>{{ _("Custom Rss") }}</legend>
+    <legend><h3>{{_("Custom Rss")}}</legend>
     <div id="ownfeeds" class="box-list">
-        {#<form class="pure-form" action="" method="POST">#}
         <div class="book box pure-form pure-form-aligned" id="divAddFeedCmdPanel">
             <div class="pure-control-group titleRow pure-g">
                 <div class="pure-u-3-5 pure-u-sm-3-4 pure-u-md-5-6">
-                    <input type="text" name="t" id="title_to_add" class="pure-u-23-24 pure-input-rounded" placeholder="{{ _('Title') }}"/>
+                    <input type="text" name="t" id="title_to_add" class="pure-u-23-24" placeholder="{{ _('Title')}}"
+                    {% if title_to_add %}value="{{title_to_add}}"{% endif %}/>
                 </div>
                 <div class="pure-u-2-5 pure-u-sm-1-4 pure-u-md-1-6">
                     <div style="padding:.5em;">
@@ -23,39 +23,40 @@
                 </div>
             </div>
             <div class="summaryRow">
-                <input type="text" name="url" id="url_to_add" class="pure-input-1 pure-input-rounded" placeholder="URL" />
+                <input type="text" name="url" id="url_to_add" class="pure-input-1" placeholder="URL" 
+                {% if url_to_add %}value="{{url_to_add}}"{% endif %}/>
             </div>
             <div class="cornerControls">
-                <a href="javascript:;" onclick="addFeed();return false;" class="actionButton add">{{ _("Add") }}</a>
+                <a href="javascript:;" onclick="addFeed();return false;" class="actionButton add">{{_("Add")}}</a>
             </div>
             {% if tips %}
                 <div class="notice-box">{{tips}}</div>
             {% endif %}
         </div>
-        {#</form>#}
+        
         {% for feed in myfeeds -%}
         <div class="book box">
             <div class="titleRow">
                 {{ feed.title }}
-                {% if feed.isfulltext %} <img alt="{{ _('Fulltext') }}" src="static/fulltext.gif" border="0" />{% endif %}
+                {% if feed.isfulltext %} <img alt="{{_('Fulltext')}}" src="static/fulltext.gif" border="0" />{% endif %}
                 {% for ComicBaseClass in comic_base_classes -%}
                     {% if feed.url.startswith(ComicBaseClass.accept_domains) %}
-                    <img alt="{{ _(ComicBaseClass.__name__.rstrip('BaseBook')) }}" src="static/comic.gif" border="0" />
+                    <img alt="{{_(ComicBaseClass.__name__.rstrip('BaseBook'))}}" src="static/comic.gif" border="0" />
                     {% endif %}
                 {% endfor -%}
             </div>
             <div class="summaryRow">
                 <a href="{{feed.url}}" target="_blank">
                     {% if feed.url|length>80 %}
-                        {{ feed.url[:80] }}...
+                        {{feed.url[:80]}}...
                     {% else %}
-                        {{ feed.url }}
+                        {{feed.url}}
                     {% endif %}
                 </a>
             </div>
             <div class="cornerControls">
-                {#<a href="/delfeed/{{feed.key().id() }}" class="actionButton">{{ _("Delete") }}</a>#}
-                <a href="javascript:;" onclick="delFeed(this, {{ feed.key().id() }});return false;" class="actionButton">{{ _("Delete") }}</a>
+                <a href="javascript:;" onclick="startShareRss('{{feed.title}}', '{{feed.url}}', {% if feed.isfulltext %}'true'{% else %}'false'{% endif %});return false;" class="actionButton act">{{_("Share")}}</a>
+                <a href="javascript:;" onclick="delFeed(this, {{feed.key().id()}});return false;" class="actionButton">{{ _("Delete") }}</a>
             </div>
         </div>
         {% endfor -%}
@@ -64,8 +65,8 @@
 
     <legend><h3>{{ _("Subscribed") }}</h3></legend>
     <div id="mybooks" class="box-list">
-        <div id="nosub" class="book box">{{ _("No have book subscribed") }}</div>
-        <script>
+        <div id="nosub" class="book box">{{_("No have book subscribed")}}</div>
+        <script type="text/javascript">
         var show = 'block';
         {% for book in books -%}
             {% if nickname in book.users -%}
@@ -80,22 +81,22 @@
                 <div class="titleRow">
                     {{ book.title }}
                     {% if book.separate -%}
-                      <img alt="{{ _('Separate') }}" src="static/separate.gif" border="0" />
+                      <img alt="{{_('Separate')}}" src="static/separate.gif" border="0" />
                     {% endif -%}
                 </div>
                 <div class="summaryRow">
                     {% if book.description|length>80 %}
-                        {{ book.description[:80] }}...
+                        {{book.description[:80]}}...
                     {% else %}
-                        {{ book.description }}
+                        {{book.description}}
                     {% endif %}
                 </div>
                 <div class="cornerControls">
                     {% if book.needs_subscription -%}
-                        <a href="/booklogininfo/{{book.key().id() }}" class="actionButton" {% if not user.subscription_info(book.title) -%} style="color:red;" {%- endif %}
-                    >{{ _("Login Info") }}</a>
+                        <a href="/booklogininfo/{{book.key().id()}}" class="actionButton" {% if not user.subscription_info(book.title) -%} style="color:red;" {%- endif %}
+                    >{{_("Login Info")}}</a>
                     {% endif -%}
-                    <a href="javascript:;" onclick="doUnsubscribe(this,{{ book.key().id() }});return false;" class="actionButton">{{ _("Unsubscribe") }}</a>
+                    <a href="javascript:;" onclick="doUnsubscribe(this,{{book.key().id()}});return false;" class="actionButton">{{ _("Unsubscribe") }}</a>
                 </div>
             </div>
             {% endif -%}
@@ -118,8 +119,8 @@
         {% if nickname not in book.users -%}
         <div class="book box">
             <div class="titleRow">{{book.title}}
-                <input type="checkbox" id="separate_{{book.key().id() }}" />
-                <img alt="{{ _('Separate') }}" src="static/separate.gif" border="0" onclick="toggleSeparate('{{book.key().id() }}');" />
+                <input type="checkbox" id="separate_{{book.key().id()}}" />
+                <img alt="{{ _('Separate') }}" src="static/separate.gif" border="0" onclick="toggleSeparate('{{book.key().id()}}');" />
             </div>
             <div class="summaryRow">
                 {% if book.description|length>80 %}
@@ -129,7 +130,7 @@
                 {% endif %}
             </div>
             <div class="cornerControls">
-                <a href="javascript:;" onclick="doSubscribe(this,{{book.key().id() }});return false;" class="actionButton act">{{ _("Subscribe") }}</a>
+                <a href="javascript:;" onclick="doSubscribe(this,{{book.key().id()}});return false;" class="actionButton act">{{ _("Subscribe") }}</a>
             </div>
         </div>
         {% endif -%}
@@ -138,14 +139,15 @@
 
     <legend><h3>{{ _("Bookmarklet") }}</h3></legend>
     <div id="bookmarklet" class="box-list">
-        <div class="book box">
-            <a class="actionButton" href="javascript:location.href='{{subscribe_url}}?title_to_add='+encodeURIComponent(document.title)+'&url_to_add='+encodeURIComponent(window.location.href);" onclick="return false;">
-                {{ _("Add to KindleEar") }}
+        <div class="book box" id="bookmarklet_content">
+            <a class="actionButton" target="_blank" href="javascript:location.href='{{subscribe_url}}?title_to_add='+encodeURIComponent(document.title)+'&url_to_add='+encodeURIComponent(window.location.href);" onclick="return false;">
+                {{_("Add to KindleEar")}}
             </a>
             <div style="text-align:center;">
-                <small>- {{ _("Drag and drop this link to your bookmarks") }} -</small>
+                <small>- {{_("Drag and drop this link to your bookmarks")}} -</small>
             </div>
         </div>
+
     </div>
 </div>
 {% endblock -%}
@@ -161,18 +163,6 @@ function toggleSeparate(id) {
   var btnft = document.getElementById(id);
   btnft.checked = !btnft.checked;
 }
-
-function fillAddForm() {
-    var urlParams = new URLSearchParams(window.location.search);
-    var title = urlParams.get('title_to_add');
-    var url = urlParams.get('url_to_add');
-    if (title || url) {
-        document.getElementById("title_to_add").value = title || "";
-        document.getElementById("url_to_add").value = url || "";
-        document.getElementById("title_to_add").scrollIntoView();
-    }
-}
-fillAddForm();
 
 //点击了订阅内置书籍
 function doSubscribe(obj, id_) {
@@ -194,11 +184,11 @@ function doSubscribe(obj, id_) {
                     document.getElementById("nounsub").style.display = 'block';
                 }
             } else {
-                alert("{{ _('Unhappily : cannot subscribe this book, Error:') }}" + resp.status);
+                alert("{{_('Cannot subscribe this book, Error:')}}" + resp.status);
             }
         },
         fail: function (status) {
-            alert("{{ _('Error when try to subscribe this book. Status:') }}" + status);
+            alert("{{_('Error when try to subscribe this book. Status:')}}" + status);
         }
     });
 }
@@ -223,11 +213,11 @@ function doUnsubscribe(obj, id_) {
                     document.getElementById("nounsub").style.display = 'none';
                 }
             } else {
-                alert("{{ _('Unhappily : cannot unsubscribe this book, Error:') }}" + resp.status);
+                alert("{{_('Cannot unsubscribe this book, Error:')}}" + resp.status);
             }
         },
         fail: function (status) {
-            alert("{{ _('Error when try to unsubscribe this book. Status:') }}" + status);
+            alert("{{_('Error when try to unsubscribe this book. Status:')}}" + status);
         }
     });
 }
@@ -242,11 +232,11 @@ function delFeed(obj, feedid) {
                 thisDiv.parentNode.removeChild(thisDiv);
             }
             else {
-                alert("{{ _('Unhappily : cannot delete this feed, Error:') }}" + resp.status);
+                alert("{{_('Cannot delete this feed, Error:')}}" + resp.status);
             }
         },
         fail: function (status) {
-            alert("{{ _('Error when try to delete this feed. Status:') }}" + status);
+            alert("{{_('Error when try to delete this feed. Status:')}}" + status);
         }
     });
 }
@@ -264,11 +254,11 @@ function addFeed() {
                 title_to_add.value = "";
                 url_to_add.value = "";
             } else {
-                alert("{{ _('Unhappily : cannot add this feed, Error:') }}" + resp.status);
+                alert("{{_('Cannot add this feed, Error:')}}" + resp.status);
             }
         },
         fail: function (status) {
-            alert("{{ _('Error when try to add this feed. Status:') }}" + status);
+            alert("{{_('Error when try to add this feed. Status:')}}" + status);
         }
     });
 }
@@ -294,7 +284,7 @@ function appendFeedDiv(title, isfulltext, url, feedid) {
     var comicSites = [
         {% for ComicBaseClass in comic_base_classes -%}
         [
-            "{{ _(ComicBaseClass.__name__.rstrip('BaseBook')) }}",
+            "{{_(ComicBaseClass.__name__.rstrip('BaseBook'))}}",
             [
                 {% for domain in ComicBaseClass.accept_domains -%}
                     "{{domain}}",
@@ -335,11 +325,26 @@ function appendFeedDiv(title, isfulltext, url, feedid) {
 
     var newCornerDiv = document.createElement("div");
     newCornerDiv.className = "cornerControls";
+
+    var atoShare = document.createElement("a");
+    atoShare.className = "actionButton act";
+    atoShare.setAttribute("href", "#");
+    var sShare = "startShareRss('" + title + "', '" + url + "', ";
+    if (isfulltext){
+        sShare += "'true');return false;";
+    }else{
+        sShare += "'false');return false;";
+    }
+
+    atoShare.setAttribute("onclick", sShare);
+    atoShare.appendChild(document.createTextNode("{{_('Share')}}"));
+    newCornerDiv.appendChild(atoShare);
+
     var atoDel = document.createElement("a");
     atoDel.className = "actionButton";
     atoDel.setAttribute("href", "#");
     atoDel.setAttribute("onclick", "delFeed(this, " + feedid + ");return false;");
-    atoDel.appendChild(document.createTextNode({{'"' + _("Delete") + '"'}}));
+    atoDel.appendChild(document.createTextNode("{{_('Delete')}}"));
     newCornerDiv.appendChild(atoDel);
     newFeedDiv.appendChild(newCornerDiv);
 
@@ -358,7 +363,7 @@ function appendSubscribedBook(id_, title, desc, separate, needs_subscription, su
     if (separate) {
         titleDiv.appendChild(document.createTextNode(' '));
         var img = document.createElement("img");
-        img.setAttribute("alt", {{'"' + _("Separate") + '"'}});
+        img.setAttribute("alt", "{{_('Separate')}}");
         img.setAttribute("src", "static/separate.gif");
         img.setAttribute("border", "0");
         titleDiv.appendChild(img);
@@ -380,7 +385,7 @@ function appendSubscribedBook(id_, title, desc, separate, needs_subscription, su
         var a = document.createElement("a");
         a.setAttribute("href", "/booklogininfo/" + id_);
         a.className = "actionButton";
-        a.appendChild(document.createTextNode({{'"' + _("Login Info") + '"'}}));
+        a.appendChild(document.createTextNode("{{_('Login Info')}}"));
         if (!subscription_info) {
             a.style.color = "red";
         }
@@ -390,7 +395,7 @@ function appendSubscribedBook(id_, title, desc, separate, needs_subscription, su
     aa.className = "actionButton";
     aa.setAttribute("href", "#");
     aa.setAttribute("onclick", "doUnsubscribe(this," + id_ + ");return false;");
-    aa.appendChild(document.createTextNode({{'"' + _("Unsubscribe") + '"'}}));
+    aa.appendChild(document.createTextNode("{{_('Unsubscribe')}}"));
     cornDiv.appendChild(aa);
     sBookDiv.appendChild(cornDiv);
 
@@ -411,7 +416,7 @@ function appendBookToBooks(id_, title, desc) {
     titleDiv.appendChild(objIn);
     titleDiv.appendChild(document.createTextNode(' '));
     var img = document.createElement("img");
-    img.setAttribute("alt", {{'"' + _("Separate") + '"'}});
+    img.setAttribute("alt", "{{_('Separate')}}");
     img.setAttribute("src", "static/separate.gif");
     img.setAttribute("border", "0");
     img.setAttribute("onclick", "toggleSeparate(" + id_ + ");");
@@ -433,11 +438,125 @@ function appendBookToBooks(id_, title, desc) {
     a.className = "actionButton act";
     a.setAttribute("href", "#");
     a.setAttribute("onclick", "doSubscribe(this," + id_ + ");return false;");
-    a.appendChild(document.createTextNode({{'"' + _("Subscribe") + '"'}}));
+    a.appendChild(document.createTextNode("{{_('Subscribe')}}"));
     cornDiv.appendChild(a);
     bookDiv.appendChild(cornDiv);
 
     document.getElementById("books").appendChild(bookDiv);
+};
+
+//Global variable
+var g_rss_categories = false;
+
+// user submit a rss to shared database
+function shareRssToServer(category, title, feedUrl, isfulltext) {
+    ajax({url:"/library", type: "POST",
+        data: {category: category, title: title, url: feedUrl, isfulltext: isfulltext, creator: window.location.hostname},
+        success: function (resp, xml) {
+            if (resp.status == "ok") {
+                var idx = g_rss_categories.indexOf(category);
+                if (g_rss_categories && (category != "")){
+                    if (idx > 0){
+                        g_rss_categories.splice(idx, 1);
+                    }
+                    if (idx != 0) {
+                        g_rss_categories.unshift(category);
+                    }
+                }
+                var modal = new tingle.modal({footer: true});
+                modal.setContent("{{_('<h1>Thanks</h1><p>Thank you for sharing, good luck will always with you.</p>')}}");
+                modal.addFooterBtn("{{_('Close')}}", 'actionButton', function() {
+                    modal.close();
+                });
+                modal.open();
+            } else {
+                alert("{{ _('Error:') }}" + resp.status);
+            }
+        },
+        fail: function (status) {
+            alert("{{ _('Error when try to fetch content of the category. Status:') }}" + status);
+        }
+    });
 }
+
+// show modal dialog
+function showShareDialog(title, feedUrl, isfulltext){
+    console.log(title);
+    var modal = new tingle.modal({footer:true});
+    var strContent = "{{_('<h1>Share links, share happiness</h1>')}}";
+    strContent += "{{_('<p>Category for [%s]:</p>')}}".format(title);
+    strContent += '<div class="select-editable"><select onchange="this.nextElementSibling.value=this.value"><option value=""></option>';
+    for (var idx in g_rss_categories){
+        strContent += '<option value="' + g_rss_categories[idx] + '">' + g_rss_categories[idx] + '</option>';
+    }
+    strContent += '</select><input type="text" name="category" value="" id="txt_share_rss_category" /></div>';
+    strContent += "{{_('<p>Please write a category in text field if the one you wish is not in the list.</p>')}}";
+
+    modal.setContent(strContent);
+    modal.addFooterBtn("{{_('Cancel')}}", 'actionButton', function() {
+        modal.close();
+    });
+    modal.addFooterBtn("{{_('Share')}}", 'actionButton act', function() {
+        var category = document.getElementById("txt_share_rss_category").value;
+        shareRssToServer(category, title, feedUrl, isfulltext);
+        modal.close();
+    });
+    modal.open();
+}
+
+// start display a dialog to share a link
+function startShareRss(title, feedUrl, isfulltext) {
+    // fetch categories from server
+    if (!g_rss_categories){
+        ajax({url: "/library/category", type: "GET",
+            success: function (resp, xml) {
+                if (resp.status == "ok") {
+                    g_rss_categories = resp.categories;
+                    showShareDialog(title, feedUrl, isfulltext);
+                } else {
+                    alert("{{_('Cannot add this feed, Error:')}}" + resp.status);
+                }
+            },
+            fail: function (status) {
+                alert("{{_('Error when try to add this feed. Status:')}}" + status);
+            }
+        });
+    }else{
+        showShareDialog(title, feedUrl, isfulltext);
+    }
+}
+
+// return a appspotmail url for bookmarklet
+function appspotmailUrl(){
+    var parser = document.createElement('a');
+    parser.href = "{{subscribe_url}}";
+
+    var host = parser.hostname;
+    var length = host.length;
+    if ((length > 12) && host.substr(length - 12, 12) == '.appspot.com'){
+        return 'read@' + host.substr(0, length - 12) + '.appspotmail.com';
+    }else{
+        return '';
+    }
+}
+
+function insertBookmarkletGmailThis(){
+    var mailUrl = appspotmailUrl();
+    if (mailUrl == ''){
+        return;
+    }
+
+    var parent = document.getElementById('bookmarklet_content');
+    var theFirstChild = parent.firstChild;
+    var newElement = document.createElement("a");
+    newElement.className = "actionButton";
+    var href = "javascript:(function(){popw='';Q='';d=document;w=window;if(d.selection){Q=d.selection.createRange().text;}else if(w.getSelection){Q=w.getSelection();}else if(d.getSelection){Q=d.getSelection();}popw=w.open('http://mail.google.com/mail/s?view=cm&fs=1&tf=1&to=" + mailUrl +
+        "&su='+encodeURIComponent(d.title)+'&body='+encodeURIComponent(Q)+escape('%5Cn%5Cn')+encodeURIComponent(d.location)+'&zx=RANDOMCRAP&shva=1&disablechatbrowsercheck=1&ui=1','gmailForm','scrollbars=yes,width=550,height=400,top=100,left=75,status=no,resizable=yes');if(!d.all)setTimeout(function(){popw.focus();},50);})();";
+    newElement.setAttribute("href", href);
+    newElement.setAttribute("onclick", "return false;");
+    newElement.textContent = "{{_('Read with Kindle')}}";
+    parent.insertBefore(newElement, theFirstChild);
+}
+insertBookmarkletGmailThis();
 </script>
 {% endblock -%}

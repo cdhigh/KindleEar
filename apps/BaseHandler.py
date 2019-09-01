@@ -26,27 +26,30 @@ from google.appengine.runtime.apiproxy_errors import (OverQuotaError,
 #import main
 
 #URL请求处理类的基类，实现一些共同的工具函数
-class BaseHandler:
-    def __init__(self):
-        if not main.session.get('lang'):
-            main.session.lang = self.browerlang()
-        set_lang(main.session.lang)
+class BaseHandler(object):
+    def __init__(self, setLang=True):
+        if setLang:
+            if not main.session.get('lang'):
+                main.session.lang = self.browerlang()
+            set_lang(main.session.lang)
         
     @classmethod
     def logined(self):
         return True if main.session.get('login') == 1 else False
     
     @classmethod
-    def login_required(self, username=None):
+    def login_required(self, username=None, forAjax=False):
         if (main.session.get('login') != 1) or (username and username != main.session.get('username')):
-            raise web.seeother(r'/login')
+            raise web.seeother(r'/needloginforajax' if forAjax else r'/login')
     
     @classmethod
-    def getcurrentuser(self):
-        self.login_required()
-        u = KeUser.all().filter("name = ", main.session.username).get()
+    def getcurrentuser(self, forAjax=False):
+        if main.session.get('login') != 1 or not main.session.get('username'):
+            raise web.seeother(r'/needloginforajax' if forAjax else r'/login')
+
+        u = KeUser.all().filter("name = ", main.session.get('username', '')).get()
         if not u:
-            raise web.seeother(r'/login')
+            raise web.seeother(r'/needloginforajax' if forAjax else r'/login')
         return u
 
     @classmethod

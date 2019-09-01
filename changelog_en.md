@@ -1,5 +1,12 @@
 # Changelog for KindleEar
 
+## 1.26
+  1. Add shared library, all user of KindleEar can share links for others.
+  2. [by contributor] Create responsive layouts for mobiles.
+  3. [by contributor] Add Bookmarklets.
+  4. [by contributor] Add more comic books.
+  5. [by contributor] Add support of Sendgrid.
+
 ## 1.25.5
   1. Added some online novel books. (implemented by skiinder<https://github.com/skiinder>.)
   2. OPML can be imported as fulltext or summary.

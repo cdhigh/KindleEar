@@ -154,4 +154,25 @@ class SubscriptionInfo(db.Model):
     @password.setter
     def password(self, pwd):
         self.encrypted_pwd = ke_encrypt(pwd, self.user.secret_key)
-        
+
+#Shared RSS links from other users [for kindleear.appspot.com only]
+class SharedRss(db.Model):
+    title = db.StringProperty()
+    url = db.StringProperty()
+    isfulltext = db.BooleanProperty()
+    category = db.StringProperty()
+    creator = db.StringProperty()
+    created_time = db.DateTimeProperty()
+    subscribed = db.IntegerProperty(default=0) #for sort
+    invalid_report_days = db.IntegerProperty(default=0) #some one reported it is a invalid link
+    last_invalid_report_time = db.DateTimeProperty() #a rss will be deleted after some days of reported_invalid
+    
+    #return all categories in database
+    @classmethod
+    def categories(self):
+        return [item.category for item in db.GqlQuery('SELECT DISTINCT category FROM SharedRss')]
+    
+#Buffer for category of shared rss [for kindleear.appspot.com only]
+class SharedRssCategory(db.Model):
+    name = db.StringProperty()
+    last_updated = db.DateTimeProperty() #for sort

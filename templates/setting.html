@@ -76,6 +76,8 @@
                     <option value="kindlefire" {% if user.device == 'kindlefire' %}selected="selected"{% endif %}>Kindle Fire</option>
                     <option value="kindlevoyage" {% if user.device == 'kindlevoyage' %}selected="selected"{% endif %}>Kindle Voyage</option>
                     <option value="kindlepw3" {% if user.device == 'kindlepw3' %}selected="selected"{% endif %}>Kindle PaperWhite 3</option>
+                    <option value="kindlepw4" {% if user.device == 'kindlepw4' %}selected="selected"{% endif %}>Kindle PaperWhite 4</option>
+                    <option value="kindleoasis" {% if user.device == 'kindleoasis' %}selected="selected"{% endif %}>Kindle Oasis</option>
                     <option value="others" {% if user.device == 'others' %}selected="selected"{% endif %}>{{_("Others")}}</option>
                 </select>
             </div>
@@ -188,7 +190,7 @@
         {{_("Important: Please activate your kindle firstly, and goto")}}“<a href="https://www.amazon.{%if lang and not lang.startswith('zh')%}com{%else%}cn{%endif%}/hz/mycd/myx#/home/settings/payment" rel="external" target="_blank">{{_("Personal Document Settings")}}</a>”{{_("Page and add")}} <strong>{{ mail_sender }}</strong> {{_("to 'Approved Personal Document E-mail List'.")}}
         </p>
         <p style="text-align:center;">
-            <input type="submit" class="pure-button pure-button-primary pure-input-rounded" value="{{_("Save settings")}}" />
+            <input type="submit" class="actionButton" value="{{_("Save settings")}}" />
         </p>
     </form>
 </div>

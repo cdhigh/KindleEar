@@ -1,10 +1,4 @@
 *.pyc
 .DS_Store
-Correio.py
-oGlobo.py
-mh_correio.gif
-mh_globo.gif
-cv_correio.jpg
-cv_globo.jpg
 
 .idea/

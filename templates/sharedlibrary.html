@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block css -%}
+<style type="text/css">
+.submenu-box {
+    padding: .5em 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.submenu-box .pure-menu-selected {
+    font-weight: bold;
+    color: #0078e7;
+}
+
+.submenu-box span {
+    display: block;
+    padding: .5em 1em;
+    cursor: default;
+}
+
+@media (min-width: 768px) {
+    .submenu-box {
+        margin-right: 20px;
+    }
+}
+</style>
+{% endblock -%}
+
+{% block content -%}
+<div class="main">
+    <div class="pure-g">
+        <div class="pure-u-1 pure-u-md-7-24">
+            <div class="pure-menu">
+                <ul class="pure-menu-list submenu-box" id="ul-category-menu">
+                </ul>
+            </div>
+        </div>
+        <div class="pure-u-1 pure-u-md-17-24" id="librarycontent">
+            {% if tips -%}
+            <p>{{tips}}</p>
+            {% elif not shared_data -%}
+            <p>{{_('Database has no data yet, you can share your subscription now.')}}</p>
+            {% endif -%}
+        </div>
+    </div>
+</div>
+{% endblock -%}
+
+{% block js %}
+<script type="text/javascript">
+    // all data stored in database
+    var all_rss_data = [{% for item in shared_data %}{t:"{{item['title']}}",u:"{{item['url']}}",c:"{{item['category']}}",f:{% if item['isfulltext'] %}"true"{% else %}"false"{% endif %}},{% endfor %}];
+    // build another Array using category
+    function buildRssByCategory() {
+        var by_category = new Array();
+        by_category["{{_('[All]')}}"] = all_rss_data;
+        by_category["{{_('[Uncategoried]')}}"] = new Array();
+        for (var idx in all_rss_data) {
+            var item = all_rss_data[idx];
+            var category = item.c;
+            if (category == ""){
+                category = "{{_('[Uncategoried]')}}";
+            }
+            if (!by_category.hasOwnProperty(category)){
+                by_category[category] = new Array();
+            }
+            by_category[category].push(item);
+        }
+        if (by_category["{{_('[Uncategoried]')}}"].length == 0){
+            delete by_category["{{_('[Uncategoried]')}}"];
+        }
+        return by_category;
+    };
+    var all_rss_data_by_category = buildRssByCategory();
+
+    //fill category menu on left side
+    function createCategoryMenu() {
+        var ulNode = document.getElementById("ul-category-menu");
+        var menuStr = "";
+        for (var cat in all_rss_data_by_category) {
+            var itemStr = '<li class="pure-menu-item"><a href="javascript:;" onclick="selectCategory(this,\'' +
+                    cat +'\');return false;" class="pure-menu-link category-menu">' + cat + ' ('+ all_rss_data_by_category[cat].length + ')</a></li>';
+            menuStr += itemStr;
+        }
+        ulNode.innerHTML = menuStr;
+    };
+    createCategoryMenu();
+
+    function hightlightCategory(nodeLi) {
+        var parentNode = nodeLi.parentNode;
+        var childrenNodes = parentNode.children;
+        for (var i = 0; i < childrenNodes.length; i++) {
+            childrenNodes[i].classList.remove('pure-menu-selected');
+        }
+        nodeLi.classList.add('pure-menu-selected');
+    };
+
+    // paginated data by category, return {data:[xx,...], currentPage:1, maxPage:5}
+    function paginated(category, currentPage, pageSize){
+        var pageSize = pageSize || 30; // for best compatibility
+        var ret = {data: [], currentPage:1, maxPage:1};
+        if (!all_rss_data_by_category.hasOwnProperty(category)){
+            return ret;
+        }
+
+        var rssInThisCat = all_rss_data_by_category[category];
+        var maxPage = Math.ceil(rssInThisCat.length / pageSize);
+        if (currentPage <= 0){
+            currentPage = 1;
+        } else if (currentPage > maxPage){
+            currentPage = maxPage;
+        }
+
+        if (maxPage <= 1){
+            ret.data = rssInThisCat;
+        }else{
+            var begin = ((currentPage - 1) * pageSize);
+            var end = begin + pageSize;
+            ret.data = rssInThisCat.slice(begin, end);
+            ret.currentPage = currentPage;
+            ret.maxPage = maxPage;
+        }
+        return ret;
+    };
+
+    //Create page html content of category
+    function createPageContent(category, page){
+        pageData = paginated(category, page);
+        if (page <= 0){
+            page = 1;
+        } else if (page > pageData.maxPage){
+            page = pageData.maxPage;
+        }
+
+        if (pageData.data.length == 0){
+            return "Do not has any link";
+        }
+
+        var rssStr = '<div class="box-list">';
+        var data = pageData.data;
+        var aStr = "";
+        for (idx in data){
+            var item = data[idx];
+            aStr = '<div class="book box">' +
+                '<div class="titleRow">' + item.t + '</div>' +
+                '<div class="summaryRow"><a target="_blank" href="' + item.u + '">' + item.u + '</div>' +
+                '<div class="cornerControls">' +
+                '<a href="javascript:;" onclick="reportInvalid(\'' + item.t + '\', \'' + item.u + '\');return false;" class="actionButton">{{_("Invalid")}}</a>' +
+                '<a href="javascript:;" onclick="addFeed(\'' + item.t + '\', \'' + item.u + '\',' + item.f + ');return false;" class="actionButton act">{{_("Subscribe")}}</a>' +
+                '</div></div>';
+            rssStr += aStr;
+        }
+        rssStr += '</div>';
+
+        // need pagination?
+        if (pageData.maxPage > 1){
+            rssStr += generatePaginationButtons(category, page, pageData.maxPage);
+        }
+        return rssStr;
+    };
+
+    //Click to a page
+    function toPage(category, page){
+        var contentDiv = document.getElementById("librarycontent");
+        contentDiv.innerHTML = createPageContent(category, page);
+    };
+
+    //Generated html snippet for pagination buttons
+    function generatePaginationButtons(category, currentPage, maxPage){
+        var previousPage = currentPage - 1;
+        var nextPage = currentPage + 1;
+        var strFirst = "";
+        var strPrev = "";
+        var strNext = "";
+        var strLast = "";
+        if (previousPage <= 0){
+            previousPage = 1;
+        }
+        if (nextPage > maxPage){
+            nextPage = maxPage;
+        }
+        if (currentPage <= 1){
+            clsFirst = 'class="pgdisabled"';
+            clsPrev = 'class="pgdisabled"';
+            strNext = 'onclick="toPage(\'' + category + '\',' + nextPage + ')"';
+            strLast = 'onclick="toPage(\'' + category + '\',' + maxPage + ')"';
+        }else if (currentPage >= maxPage){
+            clsFirst = 'onclick="toPage(\'' + category + '\',1)"';
+            clsPrev = 'onclick="toPage(\'' + category + '\',' + previousPage + ')"';
+            strNext = 'class="pgdisabled"';
+            strLast = 'class="pgdisabled"';
+        }else{
+            clsFirst = 'onclick="toPage(\'' + category + '\',1)"';
+            clsPrev = 'onclick="toPage(\'' + category + '\',' + previousPage + ')"';
+            strNext = 'onclick="toPage(\'' + category + '\',' + nextPage + ')"';
+            strLast = 'onclick="toPage(\'' + category + '\',' + maxPage + ')"';
+        }
+        return '<ul class="paging">' +
+            '<li ' + clsFirst + '><<</li>' +
+            '<li ' + clsPrev + '>＜</li>' +
+            '<li ' + strNext + '>＞</li>' +
+            '<li ' + strLast + '>>></li>' +
+            '<li class="pageinfo">' + currentPage + '/' + maxPage + '</li></ul>';
+    };
+
+    //Click a category and then populate the content of links on right side
+    function selectCategory(obj, category) {
+        var thisLi = obj.parentNode;
+        hightlightCategory(thisLi);
+        toPage(category, 1);
+    };
+
+    // select first category by default
+    selectCategory(document.querySelector(".category-menu"), "{{_('[All]')}}");
+    
+    function addFeed(title, feedurl, isfulltext) {
+        ajax({url: "/feeds/add", type: "POST",
+            data: {title: title, fulltext: isfulltext, url: feedurl, fromsharedlibrary: 'true'},
+            success: function (resp, xml) {
+                if (resp.status == "ok") {
+                    var modal = new tingle.modal({footer: true});
+                    modal.setContent("{{_('<h1>Successfully</h1><p>This feed has been successfully subscribed.</p>')}}");
+                    modal.addFooterBtn("{{_('Close')}}", 'actionButton', function() {
+                        modal.close();
+                    });
+                    modal.open();
+                } else {
+                    alert("{{ _('Cannot add this feed, Error:') }}" + resp.status);
+                }
+            },
+            fail: function (status) {
+                alert("{{ _('Error when try to add this feed. Status:') }}" + status);
+            }
+        });
+    };
+
+    // report some link is invalid
+    function reportInvalid(title, feedurl){
+        ajax({url: "/library/mgr/reportinvalid", type: "POST",
+            data: {title: title, url: feedurl},
+            success: function (resp, xml) {
+                if (resp.status == "ok") {
+                    var modal = new tingle.modal({footer: true});
+                    modal.setContent("{{_('<h1>Thanks</h1><p>Thank you for your feedback, this feed will be reviewed soon.</p>')}}");
+                    modal.addFooterBtn("{{_('Close')}}", 'actionButton', function() {
+                        modal.close();
+                    });
+                    modal.open();
+                } else {
+                    alert(resp.status);
+                }
+            },
+            fail: function (status) {
+                alert(status);
+            }
+        });
+    }
+</script>
+{% endblock %}
