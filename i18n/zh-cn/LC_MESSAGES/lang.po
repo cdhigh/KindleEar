@@ -782,11 +782,8 @@ msgstr "无法从kindleear.appspot.com获取数据，状态： "
 msgid "Database has no data yet, you can share your subscription now."
 msgstr "数据库还没有数据，您可以分享现在的订阅源。"
 
-msgid "<h1>Thanks</h1><p>Thank you for sharing, good luck will always with you."
-msgstr "<h1>非常感谢</h1><p>谢谢您的分享，愿好运永远伴随您。"
-
-msgid "<h1>Share links, share happiness</h1>"
-msgstr "<h1>分享链接，分享快乐</h1>"
+msgid "<h1>Thanks</h1><p>Thank you for sharing, good luck will always with you.</p>"
+msgstr "<h1>非常感谢</h1><p>谢谢您的分享，愿好运永远伴随您。</p>"
 
 msgid "<p>Category for [%s]:</p>"
 msgstr "<p>[%s] 的类别:</p>"

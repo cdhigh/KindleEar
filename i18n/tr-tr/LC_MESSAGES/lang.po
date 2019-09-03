@@ -750,8 +750,8 @@ msgstr "Cannot fetch data from kindleear.appspot.com, status: "
 msgid "Database has no data yet, you can share your subscription now."
 msgstr "Database has no data yet, you can share your subscription now."
 
-msgid "<h1>Thanks</h1><p>Thank you for sharing, good luck will always with you."
-msgstr "<h1>Thanks</h1><p>Thank you for sharing, good luck will always with you."
+msgid "<h1>Thanks</h1><p>Thank you for sharing, good luck will always with you.</p>"
+msgstr "<h1>Thanks</h1><p>Thank you for sharing, good luck will always with you.</p>"
 
 msgid "<h1>Share links, share happiness</h1>"
 msgstr "<h1>Share links, share happiness</h1>"
