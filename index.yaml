@@ -31,10 +31,3 @@ indexes:
   - name: username
   - name: datetime
     direction: desc
-
-- kind: SharedRss
-  properties:
-  - name: subscribed
-    direction: desc
-  - name: created_time
-    direction: desc

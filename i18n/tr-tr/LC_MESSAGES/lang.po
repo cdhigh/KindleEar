@@ -714,6 +714,9 @@ msgstr "This feed has been successfully subscribed."
 msgid "[All]"
 msgstr "[All]"
 
+msgid "[by Time]"
+msgstr "[by Time]"
+
 msgid "[Uncategoried]"
 msgstr "[Uncategoried]"
 

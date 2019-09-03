@@ -1,5 +1,9 @@
 # Changelog for KindleEar
 
+## 1.26.1
+  1. sticky recent links in shared library.
+  2. bugfix: two or more accounts cannot subscribe same link.
+
 ## 1.26
   1. Add shared library, all user of KindleEar can share links for others.
   2. [by contributor] Create responsive layouts for mobiles.

@@ -266,7 +266,14 @@ a {
 
 .box-list .book .titleRow span {
     font-size: 0.6em;
-    color: grey;
+    color: gray;
+    font-weight: normal;
+    font-style: italic;
+}
+
+.box-list .book .titleRow sup {
+    font-size: 0.6em;
+    color: red;
     font-weight: normal;
     font-style: italic;
 }
@@ -277,7 +284,7 @@ a {
 
 .box-list .book .summaryRow a {
     text-decoration: none;
-    color: grey;
+    color: gray;
 }
 
 .box-list .book .summaryRow a:hover {
@@ -305,7 +312,7 @@ a {
     text-decoration: none;
     color: #111;
     font-weight: bold;
-    border: 3px dotted grey;
+    border: 3px dotted gray;
     background-color: #efefef;
     border-radius: .5em;
     box-sizing: border-box;
@@ -443,7 +450,7 @@ table.pure-table thead {
 .select-editable {
      position:relative;
      background-color:white;
-     border:solid grey 1px;
+     border:solid gray 1px;
      width:200px;
      height:20px;
  }
@@ -464,7 +471,7 @@ table.pure-table thead {
      height:19px;
      padding:1px;
      font-size:12px;
-     border:solid grey 1px;
+     border:solid gray 1px;
  }
  .select-editable select:focus, .select-editable input:focus {
      outline:none;

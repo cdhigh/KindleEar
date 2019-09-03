@@ -51,11 +51,42 @@
 {% block js %}
 <script type="text/javascript">
     // all data stored in database
-    var all_rss_data = [{% for item in shared_data %}{t:"{{item['title']}}",u:"{{item['url']}}",c:"{{item['category']}}",f:{% if item['isfulltext'] %}"true"{% else %}"false"{% endif %}},{% endfor %}];
+    var all_rss_data = [{% for item in shared_data %}{t:"{{item['t']}}",u:"{{item['u']}}",c:"{{item['c']}}",s:{{item['s']}},d:{{item['d']}},f:{% if item['f'] %}"true"{% else %}"false"{% endif %}},{% endfor %}];
+    
+    // sort rss data
+    function sortRssDataArray(){
+        all_rss_data.sort(function(a, b){
+            var ret = b.s - a.s;
+            if (ret == 0){
+                ret = b.d - a.d;
+            }
+            return ret;
+        });
+        
+        //sticky recent items
+        var now_total_seconds = Math.floor(new Date().getTime() / 1000);
+        var recent = new Array();
+        for (var i = all_rss_data.length - 1; i >= 0; i--){
+            if (Math.abs(now_total_seconds - all_rss_data[i].d) < 60 * 60 * 24){
+                recent.unshift(all_rss_data.splice(i, 1)[0]);
+            }
+        }
+        for (var i = recent.length - 1; i >= 0; i--){
+            all_rss_data.unshift(recent[i]);
+        }
+    }
+    sortRssDataArray();
+    
+    // build Array sorted by time
+    var all_rss_data_by_time = all_rss_data.slice().sort(function(a, b){
+        return b.d - a.d;
+        });
+    
     // build another Array using category
     function buildRssByCategory() {
         var by_category = new Array();
         by_category["{{_('[All]')}}"] = all_rss_data;
+        by_category["{{_('[by Time]')}}"] = all_rss_data_by_time;
         by_category["{{_('[Uncategoried]')}}"] = new Array();
         for (var idx in all_rss_data) {
             var item = all_rss_data[idx];
@@ -141,10 +172,16 @@
         var rssStr = '<div class="box-list">';
         var data = pageData.data;
         var aStr = "";
+        var now_total_seconds = Math.floor(new Date().getTime() / 1000);
+        
         for (idx in data){
             var item = data[idx];
+            supText = "";
+            if (Math.abs(now_total_seconds - item.d) < 60 * 60 * 24){
+                supText = "<sup> New</sup>";
+            }
             aStr = '<div class="book box">' +
-                '<div class="titleRow">' + item.t + '</div>' +
+                '<div class="titleRow">' + item.t + supText + '</div>' +
                 '<div class="summaryRow"><a target="_blank" href="' + item.u + '">' + item.u + '</div>' +
                 '<div class="cornerControls">' +
                 '<a href="javascript:;" onclick="reportInvalid(\'' + item.t + '\', \'' + item.u + '\');return false;" class="actionButton">{{_("Invalid")}}</a>' +

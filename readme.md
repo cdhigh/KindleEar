@@ -41,11 +41,11 @@ config.py          | DOMAIN      | 你申请的应用的域名        |
 
 7. 转到GAE SDK安装目录(默认为：*C:\Program Files\Google\google_appengine*) 
 
-8. 部署命令：
+8. 部署命令：  
 8.1 使用appcfg.py：  
 	* `c:\python27\python.exe appcfg.py update kindleear目录\app.yaml kindleear目录\module-worker.yaml`  
 	* `c:\python27\python.exe appcfg.py update kindleear目录`  
-8.2 使用gcloud：
+8.2 使用gcloud：  
     * 删除app.yaml和module-worker.yaml开头的两行：application /  version  
     * `gcloud auth login`  
     * `gcloud config set project 你的ApplicationId`  

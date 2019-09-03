@@ -746,6 +746,9 @@ msgstr "已经成功订阅了此订阅源。"
 msgid "[All]"
 msgstr "[所有分类]"
 
+msgid "[by Time]"
+msgstr "[按时间]"
+
 msgid "[Uncategoried]"
 msgstr "[未分类]"
 
