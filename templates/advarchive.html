@@ -7,13 +7,13 @@
     <p><small>{{ _("Append hyperlinks for archiving or sharing.") }}</small></p>
     <div class="pure-control-group">
         <label for="enable_evernote" class="pure-checkbox">
-            <input id="enable_evernote" name="evernote" type="checkbox" 
+            <input id="enable_evernote" name="evernote" type="checkbox"
                 {% if user and user.evernote %}checked="1"{% endif %} />
             {{_("Append hyperlink '%s' to article")|format(savetoevernote)}}
         </label>
         <input type="text" name="evernote_mail" placeholder="Evernote Email" value="{% if user and user.evernote_mail %}{{ user.evernote_mail }}{% endif %}" class="pure-u-1" />
     </div>
-    
+
     <div class="pure-control-group">
         <label for="enable_wiz" class="pure-checkbox">
             <input id="enable_wiz" name="wiz" type="checkbox" {% if user and user.wiz %}checked="1"{% endif %} />
@@ -37,7 +37,7 @@
     </div>
     <div class="pure-control-group pure-g">
         <label for="enable_instapaper" class="pure-u-1 pure-checkbox">
-            <input id="enable_instapaper" name="instapaper" type="checkbox" 
+            <input id="enable_instapaper" name="instapaper" type="checkbox"
                 {% if user and user.instapaper %}checked="1"{% endif %} />
             {{_("Append hyperlink '%s' to article")|format(savetoinstapaper)}}
         </label>
@@ -92,9 +92,9 @@
         {{_("Fuck Gfw (For users in China)")}}
     </label>
     <div style="text-align:center;">
-        <button type="submit" class="actionButton act" style="margin-top:8px;">{{_("Save settings")}}</button>
+        <button type="submit" class="pure-button pure-button-primary pure-input-rounded" style="margin-top:8px;">{{_("Save settings")}}</button>
     </div>
-  </fieldset>    
+  </fieldset>
 </form>
 {% endblock -%}
 
@@ -107,7 +107,7 @@
         document.getElementById("averInstapaper").innerHTML = "{{_('Verifying')}}";
         var instauser = document.getElementById("instapaper_username").value;
         var instapass = document.getElementById("instapaper_password").value;
-        ajax({url:"/verifyajax/instapaper", type: "POST", 
+        ajax({url:"/verifyajax/instapaper", type: "POST",
             data: {username: instauser, password: instapass},
             success: function (resp, xml) {
                 if (resp.status != "ok") {
@@ -121,7 +121,7 @@
                     alert("{{_('The username or password is incorrect!') }}");
                     document.getElementById("averInstapaper").innerHTML = "{{_('Verify')}}";
                 }
-                
+
             },
             fail: function (status) {
                 alert("{{_('Error when verify the username and password for Instapaper. Status:')}}" + status);

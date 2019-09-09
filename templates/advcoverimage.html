@@ -40,8 +40,8 @@
             </div>
         </div>
         <div style="text-align:center;">
-            <input type="button" value="{{ _('Upload') }}" id="fileSubmit" class="actionButton act" />
-            <a href="javascript:;" datahref="{{ deletecoverhref }}" id="deletecover" class="actionButton">{{_("Delete")}}</a>
+            <input type="button" value="{{ _('Upload') }}" id="fileSubmit" class="pure-button pure-button-primary pure-input-rounded" />
+            <a href="javascript:;" datahref="{{ deletecoverhref }}" id="deletecover" class="pure-button pure-input-rounded">{{_("Delete")}}</a>
         </div>
     </fieldset>
 </form>
@@ -54,7 +54,7 @@ var AJAXFILE = {
     upButton: document.getElementById("fileSubmit"),
     deleteButton: document.getElementById("deletecover"),
     url: document.getElementById("uploadForm").action,
-    
+
     filter: function(file) {
         var ret = null;
         if (file){
@@ -97,7 +97,7 @@ var AJAXFILE = {
     onFailure: function(status, response) {
         alert("{{_('Failed to upload the cover image. Error:')}}" + response);
     },
-    
+
     //获取选择文件，file控件或拖放
     funGetFiles: function(e) {
         var files = e.target.files || e.dataTransfer.files;
@@ -106,7 +106,7 @@ var AJAXFILE = {
         this.onSelect(this.file);
         return this;
     },
-    
+
     //文件上传
     funUploadFile: function() {
         var self = this;
@@ -118,7 +118,7 @@ var AJAXFILE = {
                     xhr.upload.addEventListener("progress", function(e) {
                         self.onProgress(e.loaded, e.total);
                     }, false);
-                  
+
                     // 文件上传成功或是失败
                     xhr.onreadystatechange = function(e) {
                         if (xhr.readyState == 4) {
@@ -130,7 +130,7 @@ var AJAXFILE = {
                             }
                         }
                     };
-        
+
                     // 开始上传
                     xhr.open("POST", self.url, true);
                     var fd = new FormData(self.form);
@@ -141,10 +141,10 @@ var AJAXFILE = {
         doUpload(self.file);
         return false;
     },
-    
+
     //删除上传的图片，使用默认图片
     funDeleteFile: function(){
-        ajax({url:this.deleteButton.getAttribute('datahref'), type: "POST", 
+        ajax({url:this.deleteButton.getAttribute('datahref'), type: "POST",
             data: {'action': 'delete'},
             success: function (resp, xml) {
                 if (resp.status == "ok") {
@@ -158,11 +158,11 @@ var AJAXFILE = {
             }
         });
     },
-    
+
     init: function() {
         var self = this;
         if (this.fileInput) {
-            this.fileInput.addEventListener("change", function(e) { self.funGetFiles(e); }, false); 
+            this.fileInput.addEventListener("change", function(e) { self.funGetFiles(e); }, false);
         }
         if (this.upButton) {
             this.upButton.addEventListener("click", function(e) { self.funUploadFile(e); }, false);
