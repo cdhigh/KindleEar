@@ -245,6 +245,10 @@ a {
     margin-top: 8px;
 }
 
+.box-list .book h2, h3 {
+    text-transform: unset;
+}
+
 .box-list .book .titleRow {
     padding-bottom: .2em;
     font-size: 1.1em;
