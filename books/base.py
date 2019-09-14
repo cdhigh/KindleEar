@@ -261,8 +261,8 @@ class BaseFeedBook:
             s = s.decode("utf-8")
         return s
 
+    #return list like [(section,title,url,desc),..]
     def ParseFeedUrls(self):
-        """ return list like [(section,title,url,desc),..] """
         urls = []
         tnow = datetime.datetime.utcnow()
         urladded = set()
@@ -344,12 +344,10 @@ class BaseFeedBook:
                 
         return urls
 
+    #生成器，返回一个元组
+    #对于HTML：section,url,title,content,brief,thumbnail
+    #对于图片/CSS，mime,url,filename,content,brief,thumbnail
     def Items(self):
-        """
-        生成器，返回一个元组
-        对于HTML：section,url,title,content,brief,thumbnail
-        对于图片，mime,url,filename,content,brief,thumbnail
-        """
         urls = self.ParseFeedUrls()
         readability = self.readability if self.fulltext_by_readability else self.readability_by_soup
         prevsection = ''
@@ -375,9 +373,9 @@ class BaseFeedBook:
             else:
                 article = self.FragToXhtml(desc, fTitle)
             
-            #如果是图片，title则是mime
+            #如果是图片或CSS，title则是mime
             for title, imgurl, imgfn, content, brief, thumbnail in readability(article, url):
-                if title.startswith(r'image/'): #图片
+                if title.startswith(r'image/') or title == 'text/css': #图片/CSS
                     yield (title, imgurl, imgfn, content, brief, thumbnail)
                 else:
                     if self.user and self.user.use_title_in_feed:
@@ -387,18 +385,17 @@ class BaseFeedBook:
                     content = self.postprocess(content)
                     yield (section, url, title, content, brief, thumbnail)
 
+    #链接网页获取一篇文章
     def fetcharticle(self, url, opener, decoder):
-        """链接网页获取一篇文章"""
         if self.fulltext_by_instapaper and not self.fulltext_by_readability:
             url = "http://www.instapaper.com/m?u=%s" % self.url_unescape(url)
         
         return self.fetch(url, opener, decoder)
-        
+    
+    #登陆网站然后将cookie自动保存在opener内，以便应付一些必须登陆才能下载网页的网站。
+    #因为GAE环境的限制，所以如果需要javascript才能登陆的网站就不支持了，
+    #需要验证码的网站也无法支持。
     def login(self, opener, decoder):
-        """登陆网站然后将cookie自动保存在opener内，以便应付一些必须登陆才能下载网页的网站。
-        因为GAE环境的限制，所以如果需要javascript才能登陆的网站就不支持了，
-        需要验证码的网站也无法支持。
-        """
         if not all((self.login_url, self.account, self.password)):
             return
         
@@ -453,9 +450,9 @@ class BaseFeedBook:
             #self.log.info('field_dic:%s' % repr(fields_dic))
             target_url = action
             return opener.open(target_url, data=fields_dic)
-            
+    
+    #根据用户提供的信息提取登陆表单或猜测哪个Form才是登陆表单
     def SelectLoginForm(self, soup):
-        "根据用户提供的信息提取登陆表单或猜测哪个Form才是登陆表单"
         form = None
         if isinstance(self.form_4_login, (int,long)): #通过序号选择表单
             forms = soup.select('form:nth-of-type(%d)' % (self.form_4_login+1))
@@ -497,9 +494,9 @@ class BaseFeedBook:
                 if not form: #如果无法判断，则假定第二个为登陆表单
                     form = forms[1]
         return form
-        
+    
+    #链接网络，下载网页并解码
     def fetch(self, url, opener, decoder):
-        """链接网络，下载网页并解码"""
         result = opener.open(url)
         status_code, content = result.status_code, result.content
         if status_code not in (200, 206) or not content:
@@ -523,11 +520,10 @@ class BaseFeedBook:
                 return decoder.decode(content, url, headers)
         else:
             return decoder.decode(content, url, headers)
-        
+    
+    #使用readability-lxml处理全文信息
+    #因为图片文件占内存，为了节省内存，这个函数也做为生成器
     def readability(self, article, url):
-        """ 使用readability-lxml处理全文信息
-        因为图片文件占内存，为了节省内存，这个函数也做为生成器
-        """
         user = self.user
         content = self.preprocess(article)
         if not content:
@@ -628,7 +624,13 @@ class BaseFeedBook:
             sty = soup.new_tag('style', type="text/css")
             sty.string = self.extra_css
             soup.html.head.append(sty)
-
+        
+        #如果用户需要自定义CSS
+        if user and user.css_content:
+            sty = soup.new_tag('link', type='text/css', rel='stylesheet', href='custom.css')
+            soup.html.head.append(sty)
+            yield ('text/css', 'custom.css', 'custom.css', user.css_content, None, None)
+        
         self.soupbeforeimage(soup)
 
         has_imgs = False
@@ -735,10 +737,9 @@ class BaseFeedBook:
 
         yield (title, None, None, content, brief, thumbnail)
 
+    #使用BeautifulSoup手动解析网页，提取正文内容
+    #因为图片文件占内存，为了节省内存，这个函数也做为生成器
     def readability_by_soup(self, article, url):
-        """ 使用BeautifulSoup手动解析网页，提取正文内容
-        因为图片文件占内存，为了节省内存，这个函数也做为生成器
-        """
         user = self.user
         content = self.preprocess(article)
         soup = BeautifulSoup(content, "lxml")
@@ -800,7 +801,13 @@ class BaseFeedBook:
             sty = soup.new_tag('style', type="text/css")
             sty.string = self.extra_css
             soup.html.head.append(sty)
-
+        
+        #如果用户需要自定义CSS
+        if user and user.css_content:
+            sty = soup.new_tag('link', type='text/css', rel='stylesheet', href='custom.css')
+            soup.html.head.append(sty)
+            yield ('text/css', 'custom.css', 'custom.css', user.css_content, None, None)
+        
         self.soupbeforeimage(soup)
 
         has_imgs = False
@@ -1156,8 +1163,8 @@ class BaseFeedBook:
             href += urllib.quote(url.encode('utf-8'))
         return href
 
+    #在文章末尾添加'|'分隔符
     def AppendSeperator(self, soup):
-        " 在文章末尾添加'|'分隔符 "
         span = soup.new_tag('span')
         span.string = ' | '
         soup.html.body.append(span)
@@ -1166,13 +1173,11 @@ class WebpageBook(BaseFeedBook):
     fulltext_by_readability = False
 
     # 直接在网页中获取信息
+    #生成器，返回一个元组
+    #对于HTML：section,url,title,content,brief,thumbnail
+    #对于图片，mime,url,filename,content,brief,thumbnail
+    #如果是图片，仅第一个图片的thumbnail返回True，其余为None
     def Items(self):
-        """
-        生成器，返回一个元组
-        对于HTML：section,url,title,content,brief,thumbnail
-        对于图片，mime,url,filename,content,brief,thumbnail
-        如果是图片，仅第一个图片的thumbnail返回True，其余为None
-        """
         decoder = AutoDecoder(isfeed=False)
         timeout = self.timeout
         for section, url in self.feeds:
@@ -1256,7 +1261,13 @@ class WebpageBook(BaseFeedBook):
                 sty = soup.new_tag('style', type="text/css")
                 sty.string = self.extra_css
                 soup.html.head.append(sty)
-
+            
+            #如果用户需要自定义CSS
+            if user and user.css_content:
+                sty = soup.new_tag('link', type='text/css', rel='stylesheet', href='custom.css')
+                soup.html.head.append(sty)
+                yield ('text/css', 'custom.css', 'custom.css', user.css_content, None, None)
+                
             has_imgs = False
             thumbnail = None
             if self.keep_image:
@@ -1351,23 +1362,20 @@ class WebpageBook(BaseFeedBook):
             content =  self.postprocess(content)
             yield (section, url, title, content, brief, thumbnail)
 
+#提供网页URL，而不是RSS订阅地址，
+#此类生成的MOBI使用普通书籍格式，而不是期刊杂志格式
+#feeds中的地址为网页的URL，section可以为空。
 class BaseUrlBook(BaseFeedBook):
-    """ 提供网页URL，而不是RSS订阅地址，
-    此类生成的MOBI使用普通书籍格式，而不是期刊杂志格式
-    feeds中的地址为网页的URL，section可以为空。
-    """
     fulltext_by_readability = True
 
     def ParseFeedUrls(self):
-        """ return list like [(section,title,url,desc),..] """
+        #return list like [(section,title,url,desc),..]
         return [(sec,sec,url,'') for sec, url in self.feeds]
 
+#漫画专用，漫画的主要特征是全部为图片，而且图片默认全屏呈现
+#由 insert0003 <https://github.com/insert0003> 贡献代码
+#如果要处理连载的话，可以使用 ComicUpdateLog 数据库表来记录和更新
 class BaseComicBook(BaseFeedBook):
-    """ 漫画专用，漫画的主要特征是全部为图片，而且图片默认全屏呈现
-    由 insert0003 <https://github.com/insert0003> 贡献代码
-    如果要处理连载的话，可以使用 ComicUpdateLog 数据库表来记录和更新
-    """
-
     # 子类填充： (https://www.manhuagui.com", "https://m.manhuagui.com")
     accept_domains = tuple()
 

@@ -29,9 +29,9 @@
             <div class="cornerControls">
                 <a href="javascript:;" onclick="addFeed();return false;" class="actionButton add">{{_("Add")}}</a>
             </div>
-            {% if tips %}
+            {% if tips -%}
                 <div class="notice-box">{{tips}}</div>
-            {% endif %}
+            {% endif -%}
         </div>
         
         {% for feed in myfeeds -%}
@@ -47,11 +47,11 @@
             </div>
             <div class="summaryRow">
                 <a href="{{feed.url}}" target="_blank">
-                    {% if feed.url|length>80 %}
+                    {% if feed.url|length>80 -%}
                         {{feed.url[:80]}}...
-                    {% else %}
+                    {% else -%}
                         {{feed.url}}
-                    {% endif %}
+                    {% endif -%}
                 </a>
             </div>
             <div class="cornerControls">
@@ -65,75 +65,61 @@
 
     <legend><h3>{{ _("Subscribed") }}</h3></legend>
     <div id="mybooks" class="box-list">
-        <div id="nosub" class="book box">{{_("No have book subscribed")}}</div>
-        <script type="text/javascript">
-        var show = 'block';
-        {% for book in books -%}
-            {% if nickname in book.users -%}
-                show = 'none';
-            {% endif -%}
-        {% endfor -%}
-        document.getElementById('nosub').style.display = show;
-        </script>
-        {% for book in books -%}
-            {% if nickname in book.users -%}
-            <div class="book box">
-                <div class="titleRow">
-                    {{ book.title }}
-                    {% if book.separate -%}
-                      <img alt="{{_('Separate')}}" src="static/separate.gif" border="0" />
-                    {% endif -%}
-                </div>
-                <div class="summaryRow">
-                    {% if book.description|length>80 %}
-                        {{book.description[:80]}}...
-                    {% else %}
-                        {{book.description}}
-                    {% endif %}
-                </div>
-                <div class="cornerControls">
-                    {% if book.needs_subscription -%}
-                        <a href="/booklogininfo/{{book.key().id()}}" class="actionButton" {% if not user.subscription_info(book.title) -%} style="color:red;" {%- endif %}
-                    >{{_("Login Info")}}</a>
-                    {% endif -%}
-                    <a href="javascript:;" onclick="doUnsubscribe(this,{{book.key().id()}});return false;" class="actionButton">{{ _("Unsubscribe") }}</a>
-                </div>
+        <div id="nosub" class="book box" style="display:none">{{_("No have book subscribed")}}</div>
+        {% for book in books if nickname in book.users -%}
+        <div class="book box">
+            <div class="titleRow">
+                {{ book.title }}
+                {% if book.separate -%}
+                  <img alt="{{_('Separate')}}" src="static/separate.gif" border="0" />
+                {% endif -%}
             </div>
-            {% endif -%}
+            <div class="summaryRow">
+                {% if book.description|length>80 -%}
+                    {{book.description[:80]}}...
+                {% else -%}
+                    {{book.description}}
+                {% endif -%}
+            </div>
+            <div class="cornerControls">
+                {% if book.needs_subscription -%}
+                    <a href="/booklogininfo/{{book.key().id()}}" class="actionButton" {% if not user.subscription_info(book.title) -%} style="color:red;" {%- endif %}
+                >{{_("Login Info")}}</a>
+                {% endif -%}
+                <a href="javascript:;" onclick="doUnsubscribe(this,{{book.key().id()}});return false;" class="actionButton">{{ _("Unsubscribe") }}</a>
+            </div>
+        </div>
+        {% else -%}
+        <script type="text/javascript">
+        document.getElementById('nosub').style.display = "block";
+        </script>
         {% endfor -%}
     </div>
 
     <legend><h3>{{ _("Unsubscribed") }}</h3></legend>
     <div id="books" class="box-list">
-        <div id="nounsub" class="book box">{{ _("No have book subscribed") }}</div>
-        <script>
-        var show = 'block';
-        {% for book in books -%}
-            {% if nickname not in book.users -%}
-                show = 'none';
-            {% endif -%}
-        {% endfor -%}
-        document.getElementById('nounsub').style.display = show;
-        </script>
-        {% for book in books -%}
-        {% if nickname not in book.users -%}
+        <div id="nounsub" class="book box" style="display:none">{{ _("No have book unsubscribed") }}</div>
+        {% for book in books if nickname not in book.users -%}
         <div class="book box">
             <div class="titleRow">{{book.title}}
                 <input type="checkbox" id="separate_{{book.key().id()}}" />
                 <img alt="{{ _('Separate') }}" src="static/separate.gif" border="0" onclick="toggleSeparate('{{book.key().id()}}');" />
             </div>
             <div class="summaryRow">
-                {% if book.description|length>80 %}
+                {% if book.description|length>80 -%}
                     {{book.description[:80]}}...
-                {% else %}
+                {% else -%}
                     {{ book.description }}
-                {% endif %}
+                {% endif -%}
             </div>
             <div class="cornerControls">
                 <a href="javascript:;" onclick="doSubscribe(this,{{book.key().id()}});return false;" class="actionButton act">{{ _("Subscribe") }}</a>
             </div>
         </div>
-        {% endif -%}
+        {% else -%}
+        <script type="text/javascript">
+        document.getElementById('nounsub').style.display = "block";
+        </script>
         {% endfor -%}
     </div>
 
@@ -534,15 +520,20 @@ function appspotmailUrl(){
     var host = parser.hostname;
     var length = host.length;
     if ((length > 12) && host.substr(length - 12, 12) == '.appspot.com'){
-        return 'read@' + host.substr(0, length - 12) + '.appspotmail.com';
+        {% if user.name == "admin" -%}
+        var addr = "read@";
+        {% else -%}
+        var addr = "{{user.name}}__read@";
+        {% endif -%}
+        return addr + host.substr(0, length - 12) + '.appspotmail.com';
     }else{
-        return '';
+        return "";
     }
 }
 
 function insertBookmarkletGmailThis(){
     var mailUrl = appspotmailUrl();
-    if (mailUrl == ''){
+    if (mailUrl == ""){
         return;
     }
 

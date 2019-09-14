@@ -1,21 +1,25 @@
-import itertools
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+"""
+自动导入KindleEar漫画书基类
+可以继承BaseComicBook类而实现自己的定制漫画书籍。
+cdhigh <https://github.com/cdhigh>
+"""
+import itertools, os
+from books.base import BaseComicBook
 
-from .cartoonmadbase import CartoonMadBaseBook
-from .tencentbase import TencentBaseBook
-from .manhuaguibase import ManHuaGuiBaseBook
-from .manhuarenbase import ManHuaRenBaseBook
-from .seven33sobase import Seven33SoBaseBook
-from .tohomhbase import ToHoMHBaseBook
-from .dmzjbase import DMZJBaseBook
-
-ComicBaseClasses = [
-    CartoonMadBaseBook,
-    TencentBaseBook,
-    ManHuaGuiBaseBook,
-    ManHuaRenBaseBook,
-    Seven33SoBaseBook,
-    ToHoMHBaseBook,
-    DMZJBaseBook,
-]
+ComicBaseClasses = []
+for comicFile in os.listdir(os.path.dirname(__file__)):
+    if comicFile.endswith('base.py') and not comicFile.startswith('__'):
+        comicName = os.path.splitext(comicFile)[0]
+        try:
+            moduleComic = __import__('books.comic.' + comicName, fromlist='*')
+            memberList = [getattr(moduleComic, member) for member in dir(moduleComic) if not member.startswith('_')]
+            for member in memberList:
+                if issubclass(member, BaseComicBook) and (member is not BaseComicBook):
+                    ComicBaseClasses.append(member)
+        except Exception as e:
+            default_log.warn("Comic base book '%s' import failed : %s" % (comicName, e))
 
 comic_domains = tuple(itertools.chain(*[x.accept_domains for x in ComicBaseClasses]))
+

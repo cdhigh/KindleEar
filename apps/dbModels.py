@@ -87,6 +87,7 @@ class KeUser(db.Model): # kindleEar User
     browser = db.BooleanProperty()
     qrcode = db.BooleanProperty() #是否在文章末尾添加文章网址的QRCODE
     cover = db.BlobProperty() #保存各用户的自定义封面图片二进制内容
+    css_content = db.TextProperty() #added 2019-09-12 保存用户上传的css样式表
     
     book_mode = db.StringProperty() #added 2017-08-31 书籍模式，'periodical'|'comic'，漫画模式可以直接全屏
     expiration_days = db.IntegerProperty() #added 2018-01-07 账号超期设置值，0为永久有效

@@ -248,6 +248,9 @@ msgstr "İptal"
 msgid "No have book subscribed"
 msgstr "Abone olduğunuz kitap yok."
 
+msgid "No have book unsubscribed"
+msgstr "No have book unsubscribed"
+
 msgid "Custom Rss"
 msgstr "Özel RSS"
 
@@ -612,17 +615,14 @@ msgstr "Resim dosyasının boyutu 500 KB'den küçük olmalıdır."
 msgid "The file you chosen is not an image."
 msgstr "Seçtiğiniz dosya bir görüntü değil."
 
-msgid "The cover image have been uploaded successfully."
-msgstr "Kapak resmi başarıyla yüklendi."
+msgid "<h1>Successfully</h1><p>The cover image have been uploaded successfully.</p>"
+msgstr "<h1>Successfully</h1><p>Kapak resmi başarıyla yüklendi.</p>"
 
 msgid "Failed to upload the cover image. Error:"
 msgstr "Kapak resmi yüklenemedi. Hata:"
 
 msgid "Failed to delete the cover image. Error:"
 msgstr "Kapak resmi silinemedi. Hata:"
-
-msgid "Error when try to delete the cover image. Status:"
-msgstr "Kapak resmini silmeye çalışırken hata oluştu. Durum:"
 
 msgid "Book mode"
 msgstr "Kitap modu"
@@ -764,3 +764,24 @@ msgstr "Cancel"
 
 msgid "Read with Kindle"
 msgstr "Read with Kindle"
+
+msgid "Stylesheet"
+msgstr "Stylesheet"
+
+msgid "Upload style sheet"
+msgstr "Upload style sheet"
+
+msgid "Upload a style sheet from local (accept utf-8 only)."
+msgstr "Upload a style sheet from local (accept utf-8 only)."
+
+msgid "The file you chosen is not a stylesheet file."
+msgstr "The file you chosen is not a stylesheet file."
+
+msgid "<h1>Successfully</h1><p>The stylesheet file have been uploaded successfully.</p>"
+msgstr "<h1>Successfully</h1><p>The stylesheet file have been uploaded successfully.</p>"
+
+msgid "Failed to upload the stylesheet file. Error:"
+msgstr "Failed to upload the stylesheet file. Error:"
+
+msgid "Failed to delete the stylesheet. Error:"
+msgstr "Failed to delete the stylesheet. Error:"

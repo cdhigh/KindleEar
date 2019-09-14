@@ -88,6 +88,15 @@
                         <a href="/advuploadcoverimage" class="pure-menu-link">{{_("Cover Image")}}</a>
                     </li>
                     {% endif -%}
+                    {% if advcurr=='uploadcss' -%}
+                    <li class="pure-menu-item pure-menu-selected">
+                        <span>{{_("Stylesheet")}}</span>
+                    </li>
+                    {% else -%}
+                    <li class="pure-menu-item">
+                        <a href="/advuploadcss" class="pure-menu-link">{{_("Stylesheet")}}</a>
+                    </li>
+                    {% endif -%}
                 </ul>
             </div>
         </div>
