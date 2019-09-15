@@ -1460,10 +1460,8 @@ class BaseComicBook(BaseFeedBook):
             result = opener.open(url)
             content = result.content
             if not content:
-                raise Exception(
-                    "Failed to download %s: code %s" % url, result.status_code
-                )
-
+                raise Exception("Failed to download %s: code %s" % (url, result.status_code))
+                
             content = self.adjustImgContent(content)
 
             imgFilenameList = []

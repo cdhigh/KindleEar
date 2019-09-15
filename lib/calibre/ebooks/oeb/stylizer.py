@@ -37,7 +37,7 @@ def html_css_stylesheet():
     if _html_css_stylesheet is None:
         html_css = open(os.path.join(os.path.dirname(__file__), 'html.css'), 'rb').read()
         _html_css_stylesheet = parseString(html_css, validate=False)
-        _html_css_stylesheet.namespaces['h'] = XHTML_NS
+        #_html_css_stylesheet.namespaces['h'] = XHTML_NS
     return _html_css_stylesheet
 
 XHTML_CSS_NAMESPACE = '@namespace "%s";\n' % XHTML_NS
@@ -232,13 +232,13 @@ class Stylizer(object):
                     if t:
                         text += u'\n\n' + force_unicode(t, u'utf-8')
                 if text:
-                    text = oeb.css_preprocessor(text, add_namespace=True)
+                    text = oeb.css_preprocessor(text, add_namespace=False)
                     # We handle @import rules separately
                     parser.setFetcher(lambda x: ('utf-8', b''))
                     stylesheet = parser.parseString(text, href=cssname,
                             validate=False)
                     parser.setFetcher(self._fetch_css_file)
-                    stylesheet.namespaces['h'] = XHTML_NS
+                    #stylesheet.namespaces['h'] = XHTML_NS
                     for rule in stylesheet.cssRules:
                         if rule.type == rule.IMPORT_RULE:
                             ihref = item.abshref(rule.href)
@@ -282,7 +282,7 @@ class Stylizer(object):
                     text = XHTML_CSS_NAMESPACE + x
                     stylesheet = parser.parseString(text, href=cssname,
                             validate=False)
-                    stylesheet.namespaces['h'] = XHTML_NS
+                    #stylesheet.namespaces['h'] = XHTML_NS
                     stylesheets.append(stylesheet)
                 except:
                     self.logger.exception('Failed to parse %s, ignoring.'%w)
