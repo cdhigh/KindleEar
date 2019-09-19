@@ -405,7 +405,7 @@ class MobiMLizer(object):
             if valign in ('top', 'bottom', 'middle'):
                 istate.attrib['align'] = valign
             for prop in ('width', 'height'):
-                if cssdict[prop] != 'auto':
+                if cssdict.get(prop, None) != 'auto':
                     value = style[prop]
                     if value == getattr(self.profile, prop):
                         result = '100%'

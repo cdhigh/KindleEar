@@ -814,3 +814,6 @@ msgstr "上传样式表文件失败，错误信息："
 
 msgid "Failed to delete the stylesheet. Error:"
 msgstr "删除样式表文件失败，错误信息："
+
+msgid "Forgot password?"
+msgstr "忘记密码？"

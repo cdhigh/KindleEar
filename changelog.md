@@ -1,5 +1,8 @@
 # Changelog for KindleEar
 
+## 1.26.4
+  1. bugfix: 漫画书籍推送失败，1.26.2引入的bug。
+
 ## 1.26.3
   1. 不在用户上传的CSS样式表里面添加命名空间。
 

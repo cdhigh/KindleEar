@@ -23,7 +23,13 @@ from calibre.ebooks.conversion.epuboutput import EPUBOutput
 from calibre.utils.bytestringio import byteStringIO
 from books import BookClasses, BookClass
 from books.base import BaseFeedBook, BaseComicBook
-from books.comic import ComicBaseClasses, comic_domains
+
+try:
+    from books.comic import ComicBaseClasses, comic_domains
+except ImportError:
+    default_log.warn('Failed to import comic base classes.')
+    ComicBaseClasses = []
+    comic_domains = tuple()
 
 # 实际下载文章和生成电子书并且发送邮件
 class Worker(BaseHandler):
@@ -477,11 +483,11 @@ class Worker(BaseHandler):
     def ProcessComicRSS(self, username, user, feed):
         opts = getOpts(user.device, "comic")
         for comicClass in ComicBaseClasses:
-            if feed.url.startswith(ComicBaseClass.accept_domains):
+            if feed.url.startswith(comicClass.accept_domains):
                 book = comicClass(opts=opts, user=user)
                 break
         else:
-            msg = u"No base class for {}".format(feed.title)
+            msg = u"No base class for %s" % feed.title
             main.log.error(msg)
             return
 
