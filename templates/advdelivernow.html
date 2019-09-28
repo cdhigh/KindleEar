@@ -36,7 +36,7 @@
         </div>
         {% if booksnum > 0 and ((books[0].builtin == True and books) or ((books[0].builtin == False and books[0].feeds.count() >= 1) or booksnum >= 2)) %}
         <div style="text-align:center;">
-            <a href="/deliver?u={{nickname}}" value="{{ _('Deliver') }}" id="deliverButton" class="actionButton">{{ _('Deliver') }}</a>
+            <a href="/deliver?u={{nickname}}" value="{{ _('Deliver') }}" id="deliverButton" class="pure-button pure-button-primary pure-input-rounded">{{ _('Deliver') }}</a>
         </div>
         {% endif %}
     </fieldset>

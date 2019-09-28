@@ -9,13 +9,13 @@
     <div class="banner-head">
         <h1>{{_("Free Forever.")}}{{_("Good News Always Come With You.")}}</h1>
         {% if nickname -%}
-            <a class="actionButton act" href="/my">{{_("Feeds")}}</a> 
-            <a class="actionButton" href="/logout" style="margin-left:.6em;">{{_('Logout')}}</a>
+            <a class="pure-button pure-button-primary" href="/my">{{_("Feeds")}}</a>
+            <a class="pure-button pure-button-primary" href="/logout" style="margin-left:.6em;">{{_('Logout')}}</a>
         {% else -%}
         <form class="pure-form" action="/login" method="POST">
-            <input type="text" name="u" id="u" placeholder="{{_('Username')}}" class="pure-u-1 pure-u-sm-1-4 pure-u-lg-1-6"/>
-            <input type="password" name="p" placeholder="{{_('Password')}}" class="pure-u-1 pure-u-sm-1-4 pure-u-lg-1-6"/>
-            <button type="submit" class="actionButton pure-u-1 pure-u-sm-1-6 pure-u-lg-1-12">{{_('Login')}}</button>
+            <input type="text" name="u" id="u" placeholder="{{_('Username')}}" class="pure-input-rounded pure-u-1 pure-u-sm-1-4 pure-u-lg-1-6"/>
+            <input type="password" name="p" placeholder="{{_('Password')}}" class="pure-input-rounded pure-u-1 pure-u-sm-1-4 pure-u-lg-1-6"/>
+            <button type="submit" class="pure-button pure-button-primary pure-input-rounded pure-u-1 pure-u-sm-1-6 pure-u-lg-1-12">{{_('Login')}}</button>
         </form>
         {% endif -%}
     </div>
@@ -36,7 +36,7 @@
             <div class="l-box">
                 <h3 class="information-head">{{_("Share Your Ideas")}}</h3>
                 <p>
-                    {{_("With my")}} <a href="https://github.com/cdhigh/kindleear" target="_blank" style="text-decoration:none;">{{_("open source KindleEar application")}}</a>{{_(", You can deploy your own server to push news feeds to your kindle dialy or share the service with your friends.")}}
+                    {{_("With my")}} <a href="https://github.com/cdhigh/kindleear" target="_blank">{{_("open source KindleEar application")}}</a>{{_(", You can deploy your own server to push news feeds to your kindle dialy or share the service with your friends.")}}
                 </p>
             </div>
         </div>

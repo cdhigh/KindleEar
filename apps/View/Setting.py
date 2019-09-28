@@ -21,9 +21,9 @@ class Setting(BaseHandler):
     @etagged()
     def GET(self, tips=None):
         user = self.getcurrentuser()
-        return self.render('setting.html', "Setting",
+        return self.render('setting.html', "Settings",
             current='setting', user=user, mail_sender=SRC_EMAIL, tips=tips)
-        
+
     def POST(self):
         user = self.getcurrentuser()
         webInput = web.input()
@@ -54,7 +54,7 @@ class Setting(BaseHandler):
             user.sgenable = sgenable
             user.sgapikey = sgapikey
             user.put()
-            
+
             myfeeds = user.ownfeeds
             myfeeds.language = webInput.get("lng")
             myfeeds.title = mytitle
@@ -63,7 +63,7 @@ class Setting(BaseHandler):
             myfeeds.users = [user.name] if webInput.get("enablerss") else []
             myfeeds.put()
             tips = _("Settings Saved!")
-        
+
         return self.GET(tips)
 
 class SetLang(BaseHandler):

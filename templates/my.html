@@ -12,7 +12,7 @@
         <div class="book box pure-form pure-form-aligned" id="divAddFeedCmdPanel">
             <div class="pure-control-group titleRow pure-g">
                 <div class="pure-u-3-5 pure-u-sm-3-4 pure-u-md-5-6">
-                    <input type="text" name="t" id="title_to_add" class="pure-u-23-24" placeholder="{{ _('Title')}}"
+                    <input type="text" name="t" id="title_to_add" class="pure-u-23-24 pure-input-rounded" placeholder="{{ _('Title')}}"
                     {% if title_to_add %}value="{{title_to_add}}"{% endif %}/>
                 </div>
                 <div class="pure-u-2-5 pure-u-sm-1-4 pure-u-md-1-6">
@@ -23,7 +23,7 @@
                 </div>
             </div>
             <div class="summaryRow">
-                <input type="text" name="url" id="url_to_add" class="pure-input-1" placeholder="URL" 
+                <input type="text" name="url" id="url_to_add" class="pure-input-1 pure-input-rounded" placeholder="URL"
                 {% if url_to_add %}value="{{url_to_add}}"{% endif %}/>
             </div>
             <div class="cornerControls">
@@ -33,7 +33,7 @@
                 <div class="notice-box">{{tips}}</div>
             {% endif -%}
         </div>
-        
+
         {% for feed in myfeeds -%}
         <div class="book box">
             <div class="titleRow">
@@ -129,7 +129,7 @@
             <a class="actionButton" target="_blank" href="javascript:location.href='{{subscribe_url}}?title_to_add='+encodeURIComponent(document.title)+'&url_to_add='+encodeURIComponent(window.location.href);" onclick="return false;">
                 {{_("Add to KindleEar")}}
             </a>
-            <div style="text-align:center;">
+            <div style="padding-top:10px;text-align:center;">
                 <small>- {{_("Drag and drop this link to your bookmarks")}} -</small>
             </div>
         </div>
