@@ -79,6 +79,9 @@ msgstr "没有需要推送的书籍！"
 msgid "Logout"
 msgstr "退出"
 
+msgid "Home"
+msgstr "首页"
+
 msgid "Feeds"
 msgstr "我的订阅"
 

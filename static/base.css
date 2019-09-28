@@ -24,6 +24,20 @@ a {
     color: #0078e7;
 }
 
+input[type=submit],
+button {
+  outline: none;
+}
+
+/*
+ * -- Override PureCSS --
+ */
+
+.pure-form .pure-input-rounded,
+.pure-form input.pure-input-rounded {
+  padding: .5em 1.5em;
+}
+
 /*
  * -- LAYOUT STYLES --
  */
@@ -444,8 +458,9 @@ table.pure-table thead {
 }
 
 /*
-* FOR COMBOBOX widget
+* -- FOR COMBOBOX widget --
 */
+
 .select-editable {
      position:relative;
      background-color:white;
@@ -453,6 +468,7 @@ table.pure-table thead {
      width:200px;
      height:20px;
  }
+
  .select-editable select {
      position:absolute;
      top:0px;
@@ -462,6 +478,7 @@ table.pure-table thead {
      width:200px;
      margin:0;
  }
+
  .select-editable input {
      position:absolute;
      top:0px;
@@ -472,6 +489,7 @@ table.pure-table thead {
      font-size:12px;
      border:solid gray 1px;
  }
+
  .select-editable select:focus, .select-editable input:focus {
      outline:none;
  }
@@ -479,6 +497,7 @@ table.pure-table thead {
 /*
  * -- PAGINATION BUTTONS STYLE --
  */
+
 .paging {
   overflow: hidden;
   display: block;
@@ -493,6 +512,7 @@ table.pure-table thead {
   color: #666666;
   background-color: #FFFFFF;
 }
+
 .paging li {
   display: inline-block;
   height: 32px;
@@ -506,16 +526,18 @@ table.pure-table thead {
   vertical-align: top;
   text-align: center;
 }
+
 .paging li:hover {
   border-color:#31C27C;
   color:#31C27C;
 }
+
 .paging li.pgdisabled {
   border: 1px solid #ddd;
   color: #ddd;
 }
+
 .paging .pageinfo {
   width: 60px;
   border: none;
 }
-

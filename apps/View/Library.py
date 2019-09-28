@@ -7,7 +7,7 @@ try:
     import json
 except ImportError:
     import simplejson as json
-    
+
 import web
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
@@ -19,7 +19,7 @@ class SharedLibrary(BaseHandler):
 
     def GET(self):
         user = self.getcurrentuser()
-        
+
         #连接分享服务器获取数据
         shared_data = []
         tips = ''
@@ -33,7 +33,7 @@ class SharedLibrary(BaseHandler):
 
         return self.render('sharedlibrary.html', "Shared",
             current='shared', user=user, shared_data=shared_data, tips=tips)
-    
+
     #分享了一个订阅源
     def POST(self):
         user = self.getcurrentuser(forAjax=True)
@@ -50,7 +50,7 @@ class SharedLibrary(BaseHandler):
 
         opener = URLOpener()
         srvUrl = urlparse.urljoin('http://kindleear.appspot.com/', SharedLibrarykindleearAppspotCom.__url__)
-        data = {'category': category, 'title': title, 'url': feedUrl, 'creator': creator, 
+        data = {'category': category, 'title': title, 'url': feedUrl, 'creator': creator,
             'isfulltext': 'true' if isfulltext else 'false', 'key': 'kindleear.lucky!'}
         result = opener.open(srvUrl, data)
         if result.status_code == 200 and result.content:
@@ -60,7 +60,7 @@ class SharedLibrary(BaseHandler):
 
 class SharedLibraryMgr(BaseHandler):
     __url__ = "/library/mgr/(.*)"
-    
+
     def POST(self, mgrType):
         user = self.getcurrentuser(forAjax=True)
         if mgrType == 'reportinvalid': #报告一个源失效了
@@ -84,14 +84,14 @@ class SharedLibraryMgr(BaseHandler):
 #共享的订阅源的分类信息
 class SharedLibraryCategory(BaseHandler):
     __url__ = "/library/category"
-    
+
     def GET(self):
         user = self.getcurrentuser(forAjax=True)
         web.header('Content-Type', 'application/json')
 
         #连接分享服务器获取数据
         respDict = {'status':'ok', 'categories':[]}
-        
+
         opener = URLOpener()
         url = urlparse.urljoin('http://kindleear.appspot.com/', SharedLibraryCategorykindleearAppspotCom.__url__)
         result = opener.open(url + '?key=kindleear.lucky!')
@@ -100,7 +100,7 @@ class SharedLibraryCategory(BaseHandler):
             respDict['categories'] = json.loads(result.content)
         else:
             respDict['status'] = _('Cannot fetch data from kindleear.appspot.com, status: ') + URLOpener.CodeMap(result.status_code)
-            
+
         return json.dumps(respDict)
 
 #===========================================================================================================
@@ -126,10 +126,10 @@ class SharedLibrarykindleearAppspotCom(BaseHandler):
         #qry = SharedRss.all().order('-subscribed').order('-created_time').fetch(limit=10000)
         shared_data = []
         for d in SharedRss.all().fetch(limit=10000):
-            shared_data.append({'t':d.title, 'u':d.url, 'f':d.isfulltext, 'c':d.category, 's':d.subscribed, 
+            shared_data.append({'t':d.title, 'u':d.url, 'f':d.isfulltext, 'c':d.category, 's':d.subscribed,
                 'd':int((d.created_time - datetime.datetime(1970, 1, 1)).total_seconds())})
         return json.dumps(shared_data)
-        
+
     #网友分享了一个订阅链接
     def POST(self):
         web.header('Content-Type', 'application/json')
@@ -182,7 +182,7 @@ class SharedLibrarykindleearAppspotCom(BaseHandler):
         else:
             SharedRss(title=title, url=url, category=category, isfulltext=isfulltext, creator=creator,
                 subscribed=1, created_time=now, invalid_report_days=0, last_invalid_report_time=now).put()
-        
+
         #更新分类信息，用于缓存
         if category:
             cItem = SharedRssCategory.all().filter('name = ', category).get()
@@ -204,7 +204,7 @@ class SharedLibrarykindleearAppspotCom(BaseHandler):
 #共享库的订阅源信息管理
 class SharedLibraryMgrkindleearAppspotCom(BaseHandler):
     __url__ = "/kindleearappspotlibrary/mgr/(.*)"
-    
+
     def __init__(self):
         super(SharedLibraryMgrkindleearAppspotCom, self).__init__(setLang=False)
 
@@ -213,15 +213,15 @@ class SharedLibraryMgrkindleearAppspotCom(BaseHandler):
             title = web.input().get('title')
             url = web.input().get('url')
             respDict = {'status':'ok', 'title':title, 'url':url}
-            
+
             if not url:
                 respDict['status'] = _("Url is empty!")
                 return json.dumps(respDict)
-            
+
             if not url.lower().startswith('http'):
                 url = 'http://' + url
                 respDict['url'] = url
-            
+
             #判断是否存在
             dbItem = SharedRss.all().filter('url = ', url).get()
             if not dbItem:
@@ -251,21 +251,21 @@ class SharedLibraryMgrkindleearAppspotCom(BaseHandler):
             else:
                 dbItem.last_invalid_report_time = now
                 dbItem.put()
-            
+
             return json.dumps(respDict)
         elif mgrType == 'subscribedfromshared': #有用户订阅了一个共享库里面的链接
             title = web.input().get('title')
             url = web.input().get('url')
             respDict = {'status':'ok', 'title':title, 'url':url}
-            
+
             if not url:
                 respDict['status'] = _("Url is empty!")
                 return json.dumps(respDict)
-            
+
             if not url.lower().startswith('http'):
                 url = 'http://' + url
                 respDict['url'] = url
-            
+
             #判断是否存在
             dbItem = SharedRss.all().filter('url = ', url).get()
             if dbItem:
@@ -282,10 +282,10 @@ class SharedLibraryMgrkindleearAppspotCom(BaseHandler):
 #共享库的订阅源数据分类信息(仅用于kindleear.appspot.com"官方"共享服务器)
 class SharedLibraryCategorykindleearAppspotCom(BaseHandler):
     __url__ = "/kindleearappspotlibrarycategory"
-    
+
     def __init__(self):
         super(SharedLibraryCategorykindleearAppspotCom, self).__init__(setLang=False)
-        
+
     def GET(self):
         key = web.input().get('key', '') #避免爬虫消耗IO资源
         if key != 'kindleear.lucky!':
@@ -293,4 +293,3 @@ class SharedLibraryCategorykindleearAppspotCom(BaseHandler):
 
         web.header('Content-Type', 'application/json')
         return json.dumps([item.name for item in SharedRssCategory.all().order('-last_updated')])
-        
