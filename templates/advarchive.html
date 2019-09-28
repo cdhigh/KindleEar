@@ -38,7 +38,7 @@
     <div class="pure-control-group pure-g">
         <label for="enable_instapaper" class="pure-u-1 pure-checkbox">
             <input id="enable_instapaper" name="instapaper" type="checkbox"
-                {% if user and user.instapaper %}checked="1"{% endif %} />
+                {% if user and user.instapaper %} checked="1"{% endif %} />
             {{_("Append hyperlink '%s' to article")|format(savetoinstapaper)}}
         </label>
         <div class="pure-u-1 pure-u-sm-2-5">
