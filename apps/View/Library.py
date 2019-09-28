@@ -172,6 +172,7 @@ class SharedLibrarykindleearAppspotCom(BaseHandler):
         dbItem = SharedRss.all().filter('url = ', url).get()
         prevCategory = ''
         if dbItem:
+            dbItem.title = title
             dbItem.isfulltext = isfulltext
             dbItem.invalid_report_days = 0
             if category:

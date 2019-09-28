@@ -50,16 +50,10 @@
         <tbody>
         {% for log in mylogs -%}
         <tr>
-            <td>{{ log.time }}</td>
-            <td class="logbook">
-                {% if log.book|length>20 -%}
-                    {{log.book[:20]}}...<span>{{log.book}}</span>
-                {% else %}
-                    {{log.book}}
-                {% endif %}
-            </td>
+            <td>{{log.time}}</td>
+            <td>{{log.book}}</td>
             <td>{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>
-            <td>{{ log.to }}</td>
+            <td>{{log.to}}</td>
             <td>
                 <span class="status {% if 'ok' in log.status -%} success {%- else -%} error {%- endif %}">
                     {{ log.status }}
@@ -98,14 +92,11 @@
         {% for u in logs -%}
         {% for log in logs[u] -%}
         <tr>
-            <td>{{ u }}</td>
-            <td>{{ log.time }}</td>
-            <td class="logbook">
-            {% if log.book|length>20 -%}
-            {{log.book[:20]}}...<span>{{log.book}}</span>
-            {% else %}{{log.book}}{% endif %}</td>
+            <td>{{u}}</td>
+            <td>{{log.time}}</td>
+            <td>{{log.book}}</td>
             <td>{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>
-            <td>{{ log.to }}</td>
+            <td>{{log.to}}</td>
             <td>
                 <span class="status {% if 'ok' in log.status -%} success {%- else -%} error {%- endif %}">
                     {{ log.status }}

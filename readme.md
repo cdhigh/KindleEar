@@ -45,6 +45,7 @@ config.py          | DOMAIN      | 你申请的应用的域名        |
 8.1 使用appcfg.py：  
 	* `c:\python27\python.exe appcfg.py update kindleear目录\app.yaml kindleear目录\module-worker.yaml`  
 	* `c:\python27\python.exe appcfg.py update kindleear目录`  
+
 8.2 使用gcloud：  
     * 删除app.yaml和module-worker.yaml开头的两行：application /  version  
     * `gcloud auth login`  
@@ -63,11 +64,14 @@ config.py          | DOMAIN      | 你申请的应用的域名        |
 **不建议使用GAE Launcher部署KindleEar，除非你知道怎么设置Extra Flags等参数。**
 
 # 简化的部署步骤（推荐）
-  假如你不想安装python和GAE SDK，则可以：  
+  假如你不想安装python和GAE SDK，则可以选择如下两种方法之一：  
 
-1. [下载KindleEar](https://github.com/cdhigh/KindleEar/archive/master.zip) 并解压（改目录名为KindleEar）。  
-2. [下载KindleEar-Uploader](https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing) 并解压。  
-3. 将KindleEar目录放到Uploader目录下，双击uploader.bat即开始上传，根据提示输入你的相关信息即可，在第一次成功部署之后，适用uploader再次升级KindleEar则不需要再次输入。  
+1. 参考代码库 <https://github.com/bookfere/KindleEar-Uploader> ，里面有详细的教程和服务器脚本，也很简单。  
+
+2. 使用本机脚本：  
+2.1 [下载KindleEar](https://github.com/cdhigh/KindleEar/archive/master.zip) 并解压（改目录名为KindleEar）。  
+2.2 [下载KindleEar-Uploader](https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing) 并解压。  
+3.3 将KindleEar目录放到Uploader目录下，双击uploader.bat即开始上传，根据提示输入你的相关信息即可，在第一次成功部署之后，适用uploader再次升级KindleEar则不需要再次输入。  
 **此uploader仅适用于Windows系统。**
 
 # 许可协议

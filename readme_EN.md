@@ -36,9 +36,11 @@ config.py          | TIMEZONE    | Your timezone         |
 > the lines application and version in yaml have to be commented if you will deploy it by using gcloud.
 
 7. Choose 7.1 or 7.2 to deploy it.  
+
 7.1 using appcfg.py  
 	* `c:\python27\python.exe appcfg.py update KindleEarFolder\app.yaml KindleEarFolder\module-worker.yaml`  
 	* `c:\python27\python.exe appcfg.py update KindleEarFolder`  
+  
 7.2 using gcloud  
     * Delete the first two lines of app.yaml and module-worker.yaml [application and version]  
     * `gcloud auth login`  

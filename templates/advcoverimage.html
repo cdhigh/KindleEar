@@ -29,7 +29,7 @@
         <legend><h3>{{_("Upload cover image")}}</h3></legend>
         <p><small>{{_("Upload a cover image from local.")}}</small></p>
         <div class="box-list">
-            <input type="file" name="coverfile" id="coverfile" class="pure-input-1 box" />
+            <input type="file" name="coverfile" id="coverfile" class="pure-input-1 box" accept=".jpg, .png, .jpeg, .gif, .bmp" />
             <div id="preview" class="box upload_preview">
                 {% if user and user.cover -%}
                     <img id="uploadImage" src="/dbimage/cover" class="out_shadow" />
@@ -65,6 +65,7 @@ var AJAXFILE = {
                     ret = file;
                 }
             } else {
+                document.getElementById("coverfile").value = null;
                 alert('{{_("The file you chosen is not an image.")}}');
             }
         }
@@ -92,7 +93,12 @@ var AJAXFILE = {
         var labelProgress = document.getElementById("uploadProgress");
         labelProgress.innerHTML = "";
         labelProgress.style.display = "none"; //hide
-        alert("{{_('The cover image have been uploaded successfully.')}}");
+        var modal = new tingle.modal({footer: true});
+        modal.setContent("{{_('<h1>Successfully</h1><p>The cover image have been uploaded successfully.</p>')}}");
+        modal.addFooterBtn("{{_('Close')}}", 'actionButton', function() {
+            modal.close();
+        });
+        modal.open();
     },
     onFailure: function(status, response) {
         alert("{{_('Failed to upload the cover image. Error:')}}" + response);
@@ -148,13 +154,14 @@ var AJAXFILE = {
             data: {'action': 'delete'},
             success: function (resp, xml) {
                 if (resp.status == "ok") {
+                    document.getElementById("coverfile").value = null;
                     document.getElementById("uploadImage").src = "/images/cv_default.jpg";
                 } else {
                     alert("{{_('Failed to delete the cover image. Error:')}}" + resp.status);
                 }
             },
             fail: function (status) {
-                alert("{{_('Error when try to delete the cover image. Status:')}}" + status);
+                alert("{{_('Failed to delete the cover image. Status:')}}" + status);
             }
         });
     },

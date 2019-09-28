@@ -242,6 +242,9 @@ msgstr "退订"
 msgid "No have book subscribed"
 msgstr "暂时没有已订阅的书籍"
 
+msgid "No have book unsubscribed"
+msgstr "暂时没有未订阅的书籍"
+
 msgid "Custom Rss"
 msgstr "自定义RSS"
 
@@ -617,17 +620,14 @@ msgstr "封面图片大小必须要小于500KB。"
 msgid "The file you chosen is not an image."
 msgstr "你选择的文件不是一个图像文件。"
 
-msgid "The cover image have been uploaded successfully."
-msgstr "封面图片已经成功上传。"
+msgid "<h1>Successfully</h1><p>The cover image have been uploaded successfully.</p>"
+msgstr "<h1>成功</h1><p>封面图片已经成功上传。</p>"
 
 msgid "Failed to upload the cover image. Error:"
 msgstr "上传封面图片失败。错误信息："
 
 msgid "Failed to delete the cover image. Error:"
 msgstr "删除封面图片失败。错误信息："
-
-msgid "Error when try to delete the cover image. Status:"
-msgstr "在试图删除封面图片时出现异常。状态码："
 
 msgid "Book mode"
 msgstr "书籍模式"
@@ -793,3 +793,27 @@ msgstr "取消"
 
 msgid "Read with Kindle"
 msgstr "在Kindle阅读"
+
+msgid "Stylesheet"
+msgstr "样式表"
+
+msgid "Upload style sheet"
+msgstr "上传样式表"
+
+msgid "Upload a style sheet from local (accept utf-8 only)."
+msgstr "从本机上传一个样式表（仅接受utf-8格式）。"
+
+msgid "The file you chosen is not a stylesheet file."
+msgstr "您选择的文件不是样式表。"
+
+msgid "<h1>Successfully</h1><p>The stylesheet file have been uploaded successfully.</p>"
+msgstr "<h1>成功</h1><p>样式表文件已经上传成功。</p>"
+
+msgid "Failed to upload the stylesheet file. Error:"
+msgstr "上传样式表文件失败，错误信息："
+
+msgid "Failed to delete the stylesheet. Error:"
+msgstr "删除样式表文件失败，错误信息："
+
+msgid "Forgot password?"
+msgstr "忘记密码？"

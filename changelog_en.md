@@ -1,5 +1,16 @@
 # Changelog for KindleEar
 
+
+## 1.26.4
+  1. bugfix: failed to push comic book, bug from 1.26.2.
+
+## 1.26.3
+  1. Do not add namespace in custom stylesheet.
+
+## 1.26.2
+  1. new feature: user can upload a custom stylesheet for all books.
+  2. remove some invalid books.
+
 ## 1.26.1
   1. sticky recent links in shared library.
   2. bugfix: two or more accounts cannot subscribe same link.

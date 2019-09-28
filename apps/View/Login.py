@@ -62,7 +62,7 @@ class Login(BaseHandler):
         elif len(name) > 25:
             tips = _("The len of username reached the limit of 25 chars!")
             return self.render('login.html', "Login", nickname='', tips=tips, username=name)
-        elif '<' in name or '>' in name or '&' in name:
+        elif '<' in name or '>' in name or '&' in name or '\\' in name or '/' in name:
             tips = _("The username includes unsafe chars!")
             return self.render('login.html', "Login", nickname='', tips=tips)
         
@@ -153,6 +153,11 @@ class Login(BaseHandler):
             import time
             time.sleep(5)
             tips = _("The username not exist or password is wrong!")
+            lang = main.session.get('lang')
+            if lang and lang.startswith('zh'):
+                tips += '&nbsp;&nbsp;&nbsp;&nbsp;<a href="/static/faq.html#forgotpwd" target="_blank">' + _('Forgot password?') + '</a>'
+            else:
+                tips += '&nbsp;&nbsp;&nbsp;&nbsp;<a href="/static/faq_en.html#forgotpwd" target="_blank">' + _('Forgot password?') + '</a>'
             main.session.login = 0
             main.session.username = ''
             main.session.kill()

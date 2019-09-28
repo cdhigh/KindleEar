@@ -37,7 +37,7 @@
         <li><a href="#imagesfolder">How to put the cover or the masthead images in the same directory when I add a customize book?</a></li>
         <li><a href="#sslerror">How to deal with the SSL error problem when I upload KindleEar?</a></li>
         <li><a href="#garbled">Why some articles have garbled characters?</a></li>
-        <li><a href="#forgotpwd">What can I do if I forget the password?</a></li>
+        <li><a href="#forgotpwd">What can I do if I forgot the password?</a></li>
         <li><a href="#mailservice">How to use mail service xxx@appid.appspotmail.com?</a></li>
         <li><a href="#mergebooks">Why I can't lookup words in the delivery books after I chosen 'Merge books into one'?</a></li>
         <li><a href="#needlogin">How to deal with those websites that need login before I can view the articles?</a></li>
@@ -185,10 +185,9 @@
     </p>
 
     <span id="forgotpwd"></span>
-    <h2>What can I do if I forget the password?</h2>
-    <p class="answer">If you are a non-administrator user, and you forget the password, you can ask the administrator to change your password. If the administrator password was forgot, you can login appengine.google.com, select "Datastore Admin" on the left, delete all KeUser data, all the account information will be deleted. And then re-use admin/admin to login in  your application . Did not find "Datastore Admin"? You can activate it in the "Application Settings".
-    <br />If you know python, I'm sure that you can find other solutions.</p>
-
+    <h2>What can I do if I forgot the password?</h2>
+    <p class="answer">If you are an non-administrator user, you can ask the administrator to change your password. <br />If forgot the administrator's password, you can login <a href="https://console.cloud.google.com/appengine" target="_blank">App Engine</a>, select "Datastore | Entries" on the left menu, select "KeUser" in the "Kind" Combobox, write down the value of field "secret_key" of database line "admin", let's assume that is "abcdefgh", add some characters at the beginning, become "123abcdefgh", find a website to calculate the MD5 hash of string "123abcdefgh", will be "8b920d97ca5fceff6c5835223c541bf4", fill it in field "passwd" of database line "admin". and then use admin/123 to login.
+    
     <span id="mailservice"></span>
     <h2>How to use mail service xxx@appid.appspotmail.com?</h2>
     <p class="answer">

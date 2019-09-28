@@ -199,8 +199,7 @@
     
     <span id="forgotpwd"></span>
     <h2>忘记密码了怎么办？</h2>
-    <p class="answer">如果是忘记非管理员账号的密码，则可以通知管理员改密码。如果是管理员密码，则可以登陆appengine.google.com，在左边选择"Datastore Admin"，删除KeUser的所有数据，则所有账号的信息都会被删除，或者建议将所有数据库都删除，然后重新使用admin/admin登陆你的应用即可。没有找到"Datastore Admin"？则可以先在"Application Settings"里面打开。
-    <br />如果你会编程，则你会有其他方法，不用我说。</p>
+    <p class="answer">如果是忘记非管理员账号的密码，则可以通知管理员改密码。<br />如果是管理员密码，则可以登陆 <a href="https://console.cloud.google.com/appengine" target="_blank">App Engine</a>，在左边选择 "Datastore | 实体"，在种类里面选择 "KeUser"，选中 name 为 admin 的行，记下 "secret_key" 的值，比如为 "abcdefgh"，在前面加随便几个字符，比如 "123abcdefgh"，然后随便搜索一个在线的MD5计算网站，将其转换为MD5摘要字符串，比如 "8b920d97ca5fceff6c5835223c541bf4"，再点击修改上面选择的数据行，将最后的MD5字符串填写到passwd域，然后点击页面下方的保存，重新使用密码 "123" 登录。
     
     <span id="mailservice"></span>
     <h2>xxx@appid.appspotmail.com邮件地址怎么用？</h2>

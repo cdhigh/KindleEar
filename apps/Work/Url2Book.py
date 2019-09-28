@@ -11,7 +11,7 @@ import web, zlib, base64
 import jinja2
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
-from apps.utils import InsertToc, local_time
+from apps.utils import local_time
 from lib.makeoeb import *
 
 from books.base import BaseUrlBook
