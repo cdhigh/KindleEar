@@ -538,7 +538,7 @@ class BaseFeedBook:
             imgtype = imghdr.what(None, content)
             if imgtype: #如果是图片，则使用一个简单的html做为容器
                 imgmime = r"image/" + imgtype
-                fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
+                fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype == 'jpeg' else imgtype)
                 yield (imgmime, url, fnimg, content, None, None)
                 tmpHtml = '<html><head><title>Picture</title></head><body><img src="%s" /></body></html>' % fnimg
                 yield ('Picture', None, None, tmpHtml, '', None)
@@ -631,12 +631,11 @@ class BaseFeedBook:
             soup.html.head.append(sty)
             yield ('text/css', 'custom.css', 'custom.css', user.css_content, None, None)
         
-        self.soupbeforeimage(soup)
-
         has_imgs = False
         thumbnail = None
 
         if self.keep_image:
+            self.soupbeforeimage(soup)
             self.RectifyImageSrcInSoup(soup, url)
             opener = URLOpener(self.host, timeout=self.timeout, headers=self.extra_header)
             for img in soup.find_all('img'):
@@ -676,7 +675,7 @@ class BaseFeedBook:
                         imgtype = imghdr.what(None, imgcontent)
                         if imgtype:
                             imgmime = r"image/" + imgtype
-                            fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
+                            fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype == 'jpeg' else imgtype)
                             img['src'] = fnimg
 
                             #使用第一个图片做为目录缩略图
@@ -853,7 +852,7 @@ class BaseFeedBook:
                         imgtype = imghdr.what(None, imgcontent)
                         if imgtype:
                             imgmime = r"image/" + imgtype
-                            fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
+                            fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype == 'jpeg' else imgtype)
                             img['src'] = fnimg
 
                             #使用第一个图片做为目录缩略图
@@ -1279,9 +1278,9 @@ class WebpageBook(BaseFeedBook):
                         continue
                         
                     imgresult = opener.open(imgurl)
-                    imgcontent = self.process_image(imgresult.content) if imgresult.status_code==200 else None
+                    imgcontent = self.process_image(imgresult.content) if imgresult.status_code == 200 else None
                     if imgcontent:
-                        if isinstance(imgcontent, list): #一个图片分隔为多个图片
+                        if isinstance(imgcontent, (list, tuple)): #一个图片分隔为多个图片
                             imgIndex = self.imgindex
                             lastImg = img
                             imgPartUrl = imgurl
@@ -1310,7 +1309,7 @@ class WebpageBook(BaseFeedBook):
                             imgtype = imghdr.what(None, imgcontent)
                             if imgtype:
                                 imgmime = r"image/" + imgtype
-                                fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype=='jpeg' else imgtype)
+                                fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype == 'jpeg' else imgtype)
                                 img['src'] = fnimg
 
                                 #使用第一个图片做为目录摘要图
@@ -1370,7 +1369,7 @@ class BaseUrlBook(BaseFeedBook):
 
     def ParseFeedUrls(self):
         #return list like [(section,title,url,desc),..]
-        return [(sec,sec,url,'') for sec, url in self.feeds]
+        return [(sec, sec, url, '') for sec, url in self.feeds]
 
 #漫画专用，漫画的主要特征是全部为图片，而且图片默认全屏呈现
 #由 insert0003 <https://github.com/insert0003> 贡献代码
@@ -1483,7 +1482,7 @@ class BaseComicBook(BaseFeedBook):
                     else: #单个图片
                         imgType = imghdr.what(None, content)
                         imgMime = r"image/" + imgType
-                        fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType=='jpeg' else imgType)
+                        fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType == 'jpeg' else imgType)
                         imgFilenameList.append(fnImg)
                         yield (imgMime, url, fnImg, content, None, None)
             else: #不是图片，有可能是包含图片的网页，抽取里面的图片
@@ -1530,7 +1529,7 @@ class BaseComicBook(BaseFeedBook):
                         imgContent = self.process_image_comic(imgContent)
                         imgType = imghdr.what(None, imgContent)
                         imgMime = r"image/" + imgType
-                        fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType=='jpeg' else imgType)
+                        fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType == 'jpeg' else imgType)
                         imgFilenameList.append(fnImg)
                         yield (imgMime, imgUrl, fnImg, imgContent, None, None)
                 else: #多个图片，要分析哪些才是漫画
@@ -1559,7 +1558,7 @@ class BaseComicBook(BaseFeedBook):
                             imgContent = self.process_image_comic(imgContent)
                             imgType = imghdr.what(None, imgContent)
                             imgMime = r"image/" + imgType
-                            fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType=='jpeg' else imgType)
+                            fnImg = "img%d.%s" % (self.imgindex, 'jpg' if imgType == 'jpeg' else imgType)
                             imgFilenameList.append(fnImg)
                             yield (imgMime, imgUrl, fnImg, imgContent, None, None)
             

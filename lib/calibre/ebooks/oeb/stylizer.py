@@ -37,7 +37,7 @@ def html_css_stylesheet():
     if _html_css_stylesheet is None:
         html_css = open(os.path.join(os.path.dirname(__file__), 'html.css'), 'rb').read()
         _html_css_stylesheet = parseString(html_css, validate=False)
-        #_html_css_stylesheet.namespaces['h'] = XHTML_NS
+        _html_css_stylesheet.namespaces['h'] = XHTML_NS
     return _html_css_stylesheet
 
 XHTML_CSS_NAMESPACE = '@namespace "%s";\n' % XHTML_NS

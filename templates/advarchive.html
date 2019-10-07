@@ -8,7 +8,7 @@
     <div class="pure-control-group">
         <label for="enable_evernote" class="pure-checkbox">
             <input id="enable_evernote" name="evernote" type="checkbox"
-                {% if user and user.evernote %}checked="1"{% endif %} />
+                {% if user and user.evernote %} checked="1"{% endif %} />
             {{_("Append hyperlink '%s' to article")|format(savetoevernote)}}
         </label>
         <input type="text" name="evernote_mail" placeholder="Evernote Email" value="{% if user and user.evernote_mail %}{{ user.evernote_mail }}{% endif %}" class="pure-u-1" />

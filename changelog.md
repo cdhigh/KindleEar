@@ -1,5 +1,8 @@
 # Changelog for KindleEar
 
+## 1.26.5
+  1. bugfix: 修正1.26.3引入的BUG，此BUG导致排版异常和在电脑上目录跳转到不正确的位置。
+
 ## 1.26.4
   1. bugfix: 漫画书籍推送失败，1.26.2引入的bug。
 
