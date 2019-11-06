@@ -86,12 +86,8 @@ class GuFengBaseBook(BaseComicBook):
         else:
             images = images.group(2).split(',')
 
-        count = 0
         for img in images:
             img_url = imgPrefix + chapterPath + img.replace("\"","")
             imgList.append(img_url)
-            count = count + 1
-            if count == 3:
-                break
 
         return imgList

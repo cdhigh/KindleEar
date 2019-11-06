@@ -20,10 +20,8 @@ class PuFeiBaseBook(BaseComicBook):
         opener = URLOpener(self.host, timeout=60)
         chapterList = []
 
-        print url
         if url.startswith( "http://m.pufei.net" ):
             url = url.replace('http://m.pufei.net', 'http://www.pufei.net')
-        print url
 
         result = opener.open(url)
         if result.status_code != 200 or not result.content:
@@ -77,7 +75,6 @@ class PuFeiBaseBook(BaseComicBook):
 
             res = urllib2.urlopen(req)
             result = BeautifulSoup(res.read(), 'html.parser')
-            print result
             return result.find("br").text
 
     #获取漫画图片列表
