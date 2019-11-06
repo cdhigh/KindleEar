@@ -20,6 +20,9 @@ class CartoonMadBaseBook(BaseComicBook):
         if url.startswith( "http://" ):
             url = url.replace('http://', 'https://')
 
+        if "/m/" in url:
+            url = url.replace('/m/', '/')
+
         result = opener.open(url)
         if result.status_code != 200 or not result.content:
             self.log.warn('fetch comic page failed: %s' % url)
