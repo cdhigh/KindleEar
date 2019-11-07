@@ -44,7 +44,7 @@ class PuFeiBaseBook(BaseComicBook):
 
         for aindex in range(len(lias)):
             rindex = len(lias)-1-aindex
-            href = "http://www.pufei.net" + lias[rindex].get("href")
+            href = "http://www.pufei.net" + lias[rindex].get("href", '')
             chapterList.append((unicode(lias[rindex].string), href))
 
         return chapterList
@@ -53,7 +53,7 @@ class PuFeiBaseBook(BaseComicBook):
     def get_node_online(self, input_str):
         opts_str = 'console.log(%s)' % input_str.encode("utf-8")
         try:
-            self.log.warn("Try use runoob execution nodejs.")
+            self.log.info("Try use runoob execution nodejs.")
             url = "https://m.runoob.com/api/compile.php"
             params = {"code":opts_str, "stdin":"", "language":"4", "fileext":"node.js"}
             params = urllib.urlencode(params)
@@ -65,7 +65,7 @@ class PuFeiBaseBook(BaseComicBook):
             result = json.loads(res.read())
             return result["output"]
         except:
-            self.log.warn("Try use tutorialspoint execution nodejs.")
+            self.log.info("Try use tutorialspoint execution nodejs.")
             url = "https://tpcg.tutorialspoint.com/tpcg.php"
             params = {"lang":"node", "device":"", "code":opts_str, "stdin":"", "ext":"js", "compile":0, "execute": "node main.js", "mainfile": "main.js", "uid": 4203253 }
             params = urllib.urlencode(params)
@@ -90,8 +90,11 @@ class PuFeiBaseBook(BaseComicBook):
 
         content = self.AutoDecodeContent(result.content, decoder, self.feed_encoding, opener.realurl, result.headers)
 
-        res = re.search(r'packed=".*";', content).group()
-        if (res is None):
+        try:
+            res = re.search(r'packed=".*";', content).group()
+            if (res is None):
+                raise Exception("var photosr is not exist.")
+        except:
             self.log.warn('var photosr is not exist.')
             return imgList
 

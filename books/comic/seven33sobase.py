@@ -31,15 +31,20 @@ class Seven33SoBaseBook(BaseComicBook):
         content = self.AutoDecodeContent(result.content, decoder, self.feed_encoding, opener.realurl, result.headers)
 
         soup = BeautifulSoup(content, 'html.parser')
-        lias = soup.select("html > body > div.Introduct > div#list > ul#mh-chapter-list-ol-0 > li > a")
+        # <ul class="Drama autoHeight" id="mh-chapter-list-ol-0">
+        soup = soup.find('ul', {"class":"Drama autoHeight", "id":"mh-chapter-list-ol-0"})
+        if (soup is None):
+            self.log.warn('chapter-list is not exist.')
+            return chapterList
 
+        lias = soup.findAll('a')
         if (lias is None):
             self.log.warn('chapter-list is not exist.')
             return chapterList
 
         for aindex in range(len(lias)):
             rindex = len(lias)-1-aindex
-            href = "https://m.733.so" + lias[rindex].get("href")
+            href = "https://m.733.so" + lias[rindex].get('href', '')
             chapterList.append((lias[rindex].get_text(), href))
 
         return chapterList
