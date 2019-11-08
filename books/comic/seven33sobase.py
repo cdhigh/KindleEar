@@ -20,8 +20,8 @@ class Seven33SoBaseBook(BaseComicBook):
         opener = URLOpener(self.host, timeout=60)
         chapterList = []
 
-        if url.startswith( "https://m.733.so" ):
-            url = url.replace('https://m.733.so', 'https://www.733.so')
+        if url.startswith( "https://www.733.so" ):
+            url = url.replace('https://www.733.so', 'https://m.733.so')
 
         result = opener.open(url)
         if result.status_code != 200 or not result.content:
@@ -31,19 +31,20 @@ class Seven33SoBaseBook(BaseComicBook):
         content = self.AutoDecodeContent(result.content, decoder, self.feed_encoding, opener.realurl, result.headers)
 
         soup = BeautifulSoup(content, 'html.parser')
-        soup = soup.find('div', {"class": "cy_plist"})
+        # <ul class="Drama autoHeight" id="mh-chapter-list-ol-0">
+        soup = soup.find('ul', {"class":"Drama autoHeight", "id":"mh-chapter-list-ol-0"})
         if (soup is None):
-            self.log.warn('cy_plist is not exist.')
+            self.log.warn('chapter-list is not exist.')
             return chapterList
 
         lias = soup.findAll('a')
         if (lias is None):
-            self.log.warn('chapterList href is not exist.')
+            self.log.warn('chapter-list is not exist.')
             return chapterList
 
         for aindex in range(len(lias)):
             rindex = len(lias)-1-aindex
-            href = "https://www.733.so" + lias[rindex].get("href")
+            href = "https://m.733.so" + lias[rindex].get('href', '')
             chapterList.append((lias[rindex].get_text(), href))
 
         return chapterList
@@ -87,17 +88,37 @@ class Seven33SoBaseBook(BaseComicBook):
 
         for img in images:
             if "http://www.baidu1.com/" in img:
-                b64str = img.replace("http://www.baidu1.com/", "") + '|{}|{}|{}|pc'.format(tid, cid, pid)
-                imgb64 = b64encode(b64str)
-                img_url = u'http://img_733.234us.com/newfile.php?data={}'.format(imgb64)
-            elif "http://ac.tc.qq.com/" in img:
-                b64str = img + '|{}|{}|{}|pc'.format(tid, cid, pid)
-                imgb64 = b64encode(b64str)
-                img_url = u'http://img_733.234us.com/newfile.php?data={}'.format(imgb64)
+                # http://www.baidu1.com/2016/06/28/21/042f051bea.jpg
+                # http://img_733.234us.com/newfile.php?data=MjAxNi8wNi8yOC8yMS8wNDJmMDUxYmVhLmpwZ3wxNTQ4OTgzNDA0ODkwfDI2Nzk4fDMwOTYzNnxt
+                b64str = img.replace("http://www.baidu1.com/", "") + '|{}|{}|{}|m'.format(tid, cid, pid)
+            elif ("http://ac.tc.qq.com/" in img) or ("http://res.gufengmh.com/" in img):
+                b64str = img + '|{}|{}|{}|m'.format(tid, cid, pid)
             else:
-                img_url = img
+                # https://res.gufengmh8.com/
+                # http://res.img.pufei.net
+                # https://images.dmzj.com/
+                self.log.warn('Ths image herf is: %s' % img)
+                b64str = img
 
-            self.log.info('Ths image herf is: %s' % img_url)
+            if b64str == img:
+                img_url = b64str
+            else:
+                imgb64 = b64encode(b64str)
+                requestImg = 'http://img_733.234us.com/newfile.php?data={}'.format(imgb64)
+                img_url = self.getImgUrl(requestImg)
             imgList.append(img_url)
 
         return imgList
+
+    #获取漫画图片格式
+    def getImgUrl(self, url):
+        opener = URLOpener(self.host, timeout=60)
+        headers = {
+            'Host': "img_733.234us.com",
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25'}
+        result = opener.open(url, headers=headers)
+        if result.status_code != 200 or opener.realurl == url:
+            self.log.warn('can not get real comic url for : %s' % url)
+            return None
+
+        return opener.realurl
