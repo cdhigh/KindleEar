@@ -42,10 +42,10 @@ class PuFeiBaseBook(BaseComicBook):
             self.log.warn('chapterList href is not exist.')
             return chapterList
 
-        for aindex in range(len(lias)):
-            rindex = len(lias)-1-aindex
-            href = "http://www.pufei.net" + lias[rindex].get("href", '')
-            chapterList.append((unicode(lias[rindex].string), href))
+        for index, a in enumerate(lias):
+            href = self.urljoin("http://www.pufei.net", a.get('href', ''))
+            span = a.find("span")
+            chapterList.append((unicode(lias[len(lias)-1-index].string), href))
 
         return chapterList
 
@@ -53,18 +53,6 @@ class PuFeiBaseBook(BaseComicBook):
     def get_node_online(self, input_str):
         opts_str = 'console.log(%s)' % input_str.encode("utf-8")
         try:
-            self.log.info("Try use runoob execution nodejs.")
-            url = "https://m.runoob.com/api/compile.php"
-            params = {"code":opts_str, "stdin":"", "language":"4", "fileext":"node.js"}
-            params = urllib.urlencode(params)
-            req = urllib2.Request(url)
-            req.add_header('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
-            req.add_data(params)
-
-            res = urllib2.urlopen(req)
-            result = json.loads(res.read())
-            return result["output"]
-        except:
             self.log.info("Try use tutorialspoint execution nodejs.")
             url = "https://tpcg.tutorialspoint.com/tpcg.php"
             params = {"lang":"node", "device":"", "code":opts_str, "stdin":"", "ext":"js", "compile":0, "execute": "node main.js", "mainfile": "main.js", "uid": 4203253 }
@@ -76,6 +64,18 @@ class PuFeiBaseBook(BaseComicBook):
             res = urllib2.urlopen(req)
             result = BeautifulSoup(res.read(), 'html.parser')
             return result.find("br").text
+        except:
+            self.log.info("Try use runoob execution nodejs.")
+            url = "https://m.runoob.com/api/compile.php"
+            params = {"code":opts_str, "stdin":"", "language":"4", "fileext":"node.js"}
+            params = urllib.urlencode(params)
+            req = urllib2.Request(url)
+            req.add_header('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
+            req.add_data(params)
+
+            res = urllib2.urlopen(req)
+            result = json.loads(res.read())
+            return result["output"]
 
     #获取漫画图片列表
     def getImgList(self, url):
@@ -90,28 +90,33 @@ class PuFeiBaseBook(BaseComicBook):
 
         content = self.AutoDecodeContent(result.content, decoder, self.feed_encoding, opener.realurl, result.headers)
 
+
         try:
-            res = re.search(r'packed=".*";', content).group()
-            if (res is None):
-                raise Exception("var photosr is not exist.")
+            # function base64decode(str){*};
+            func = re.search(r'function\ base64decode\(str\){.*};', content).group()
+            func = func.split('base64decode')[1].replace('};', '}')
+
+            # packed="*";
+            packed = re.search(r'packed=".*";', content).group()
+            packed = packed.split('\"')[1]
         except:
             self.log.warn('var photosr is not exist.')
             return imgList
 
-        list_encoded = res.split('\"')[1]
-        lz_decoded = b64decode(list_encoded)
-        lz_nodejs = self.get_node_online(lz_decoded)
+        # eval(function(str){*}("*").slice(4))
+        lz_input = "eval(function{}(\"{}\").slice(4))".format(func, packed)
+        lz_nodejs = self.get_node_online(lz_input)
 
         if (lz_nodejs is None):
             self.log.warn('image list is not exist.')
             return imgList
 
-        # images01 = re.sub("\[|\]| |'|\n", "", lz_nodejs)
+        # photosr[1]="images/2019/11/08/09/19904f5d64.jpg/0";...photosr[98]="images/2019/11/08/09/22abc96bd2.jpg/0";
         images = lz_nodejs.split("\"")
 		# http://res.img.220012.net/2017/08/22/13/343135d67f.jpg
         for img in images:
             if ".jpg" in img:
-                img_url = "http://res.img.220012.net/" + img
+                img_url = self.urljoin("http://res.img.220012.net", img)
                 imgList.append(img_url)
 
         return imgList

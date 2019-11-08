@@ -42,9 +42,9 @@ class GuFengBaseBook(BaseComicBook):
             self.log.warn('chapterList href is not exist.')
             return chapterList
 
-        for index in range(len(lias)):
-            href = "https://m.gufengmh.com" + lias[index].get("href")
-            span = lias[index].find('span')
+        for index, a in enumerate(lias):
+            href = self.urljoin("https://m.gufengmh.com", a.get('href', ''))
+            span = a.find("span")
             if span is None:
                 chapterList.append((u'第%d话'%(index+1), href))
             else:
