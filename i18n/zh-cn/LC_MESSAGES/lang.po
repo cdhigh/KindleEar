@@ -353,6 +353,54 @@ msgstr "俄语"
 msgid "Turkish"
 msgstr "土耳其语"
 
+msgid "Korean"
+msgstr "韩语"
+
+msgid "Arabic"
+msgstr "阿拉伯语"
+
+msgid "Czech"
+msgstr "捷克语"
+
+msgid "Dutch"
+msgstr "荷兰语"
+
+msgid "Greek"
+msgstr "希腊语"
+
+msgid "Hindi"
+msgstr "印地语"
+
+msgid "Malaysian"
+msgstr "马来西亚语"
+
+msgid "Bengali"
+msgstr "孟加拉语"
+
+msgid "Persian"
+msgstr "波斯语"
+
+msgid "Urdu"
+msgstr "乌尔都语"
+
+msgid "Swahili"
+msgstr "斯瓦希里语"
+
+msgid "Vietnamese"
+msgstr "越南语"
+
+msgid "Punjabi"
+msgstr "旁遮普语"
+
+msgid "Javanese"
+msgstr "爪哇语"
+
+msgid "Tagalog"
+msgstr "他加禄语"
+
+msgid "Hausa"
+msgstr "豪萨语"
+
 msgid "Keep images"
 msgstr "保留文章图片"
 
@@ -820,3 +868,4 @@ msgstr "删除样式表文件失败，错误信息："
 
 msgid "Forgot password?"
 msgstr "忘记密码？"
+

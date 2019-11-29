@@ -1705,6 +1705,8 @@ def debug_fetch(url, name='page.html'):
     result = opener.open(url)
     if result.status_code == 200 and result.content:
         debug_mail(result.content, name)
+    else:
+        default_log.warn('debug_fetch failed: code:%d, url:%s' % (result.status_code, url))
 
 #本地调试使用，在本地创建一个FTP服务器后，将调试文件通过FTP保存到本地
 #因为只是调试使用，所以就没有那么复杂的处理了，要提前保证目标目录存在

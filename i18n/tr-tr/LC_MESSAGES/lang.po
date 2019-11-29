@@ -347,6 +347,54 @@ msgstr "Rusça"
 msgid "Turkish"
 msgstr "Türkçe"
 
+msgid "Korean"
+msgstr "Koreli"
+
+msgid "Arabic"
+msgstr "Arapça"
+
+msgid "Czech"
+msgstr "Çek"
+
+msgid "Dutch"
+msgstr "Flemenkçe"
+
+msgid "Greek"
+msgstr "Yunan"
+
+msgid "Hindi"
+msgstr "Hintçe"
+
+msgid "Malaysian"
+msgstr "Malezyalı"
+
+msgid "Bengali"
+msgstr "Bengal"
+
+msgid "Persian"
+msgstr "Farsça"
+
+msgid "Urdu"
+msgstr "Urduca"
+
+msgid "Swahili"
+msgstr "Svahili"
+
+msgid "Vietnamese"
+msgstr "Vietnam"
+
+msgid "Punjabi"
+msgstr "Pencap"
+
+msgid "Javanese"
+msgstr "Cava"
+
+msgid "Tagalog"
+msgstr "Tagalog"
+
+msgid "Hausa"
+msgstr "Hausa"
+
 msgid "Keep images"
 msgstr "Resimler gözüksün."
 

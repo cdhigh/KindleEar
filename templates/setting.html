@@ -139,16 +139,13 @@
             <div class="pure-control-group">
                 <label>{{_("Language")}}</label>
                 <select class="pure-u-1 pure-u-sm-1-2" name="lng">
-                    <option value="zh-cn" {% if not user.ownfeeds.language or user.ownfeeds.language=="zh-cn" %}selected="selected"{% endif %}>{{_("Chinese")}}</option>
-                    <option value="en-us" {% if user.ownfeeds.language=="en-us" %}selected="selected"{% endif %}>{{_("English")}}</option>
-                    <option value="fr-fr" {% if user.ownfeeds.language=="fr-fr" %}selected="selected"{% endif %}>{{_("French")}}</option>
-                    <option value="es-es" {% if user.ownfeeds.language=="es-es" %}selected="selected"{% endif %}>{{_("Spanish")}}</option>
-                    <option value="pt-br" {% if user.ownfeeds.language=="pt-br" %}selected="selected"{% endif %}>{{_("Portuguese")}}</option>
-                    <option value="de-de" {% if user.ownfeeds.language=="de-de" %}selected="selected"{% endif %}>{{_("German")}}</option>
-                    <option value="it-it" {% if user.ownfeeds.language=="it-it" %}selected="selected"{% endif %}>{{_("Italian")}}</option>
-                    <option value="ja-jp" {% if user.ownfeeds.language=="ja-jp" %}selected="selected"{% endif %}>{{_("Japanese")}}</option>
-                    <option value="ru-ru" {% if user.ownfeeds.language=="ru-ru" %}selected="selected"{% endif %}>{{_("Russian")}}</option>
-                    <option value="tr-tr" {% if user.ownfeeds.language=="tr-tr" %}selected="selected"{% endif %}>{{_("Turkish")}}</option>
+                {% for lang_code in lang_map -%}
+                    {% if user.ownfeeds.language == lang_code -%}
+                    <option value="{{lang_code}}" selected="selected">{{lang_map[lang_code]}}</option>
+                    {% else -%}
+                    <option value="{{lang_code}}">{{lang_map[lang_code]}}</option>
+                    {% endif -%}
+                {% endfor -%}
                 </select>
             </div>
             <div class="pure-control-group">
