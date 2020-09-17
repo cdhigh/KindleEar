@@ -52,6 +52,7 @@ class Worker(BaseHandler):
         bookmode = user.book_mode or 'periodical' #periodical,comic
         titlefmt = user.titlefmt
         tz = user.timezone
+        authorfmt = user.author_format
         
         bookid = bookid.split(',') if ',' in bookid else [bookid]
         bks = []
@@ -99,8 +100,11 @@ class Worker(BaseHandler):
             pubtype = 'book:book:KindleEar'
         else:
             pubtype = 'periodical:magazine:KindleEar'
-            
-        setMetaData(oeb, bookTitle, book4meta.language, local_time("%Y-%m-%d",tz), pubtype=pubtype)
+        
+        #修正Kindle固件5.9.x将作者显示为日期的BUG
+        author = local_time(authorfmt, tz) if authorfmt else 'KindleEar'
+        
+        setMetaData(oeb, bookTitle, book4meta.language, local_time("%Y-%m-%d",tz), pubtype=pubtype, creator=author)
         oeb.container = ServerContainer(main.log)
         
         #guide

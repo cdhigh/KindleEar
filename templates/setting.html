@@ -117,6 +117,18 @@
                 </select>
             </div>
             <div class="pure-control-group">
+                <label>{{_("Author format")}}</label>
+                <select class="pure-u-1 pure-u-sm-1-2" name="authorformat">
+                    <option value="" {% if not user.author_format %}selected="selected"{% endif %}>KindleEar</option>
+                    <option value="%Y-%m-%d" {% if user.author_format=='%Y-%m-%d' %}selected="selected"{% endif %}>{{_("YYYY-MM-DD")}}</option>
+                    <option value="%m-%d" {% if user.author_format=='%m-%d' %}selected="selected"{% endif %}>{{_("MM-DD")}}</option>
+                    <option value="%m/%d" {% if user.author_format=='%m/%d' %}selected="selected"{% endif %}>{{_("MM/DD")}}</option>
+                    <option value="%d/%m" {% if user.author_format=='%d/%m' %}selected="selected"{% endif %}>{{_("DD/MM")}}</option>
+                    <option value="%b %d" {% if user.author_format=='%b %d' %}selected="selected"{% endif %}>{{_("MMM DD")}}</option>
+                    <option value="%a, %b %d" {% if user.author_format=='%a, %b %d' %}selected="selected"{% endif %}>{{_("Day, MMM DD")}}</option>
+                </select>
+            </div>
+            <div class="pure-control-group">
                 <input type="checkbox" id="mb" name="mergebooks" {% if user and user.merge_books %}checked="1"{% endif %} />
                 <span style="cursor:default;" onclick="toggleweekbtn('mb');">{{_("Merge books into one")}}</span>
             </div>

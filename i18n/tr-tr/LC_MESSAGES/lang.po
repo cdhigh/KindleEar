@@ -836,3 +836,24 @@ msgstr "Failed to delete the stylesheet. Error:"
 
 msgid "Forgot password?"
 msgstr "Forgot password?"
+
+msgid "Author format"
+msgstr "Author format"
+
+msgid "YYYY-MM-DD"
+msgstr "YYYY-AA-GG"
+
+msgid "MM-DD"
+msgstr "AA-GG"
+
+msgid "MM/DD"
+msgstr "AA/GG"
+
+msgid "DD/MM"
+msgstr "GG/AA"
+
+msgid "MMM DD"
+msgstr "AAA GG"
+
+msgid "Day, MMM DD"
+msgstr "Gün, AAA GG"

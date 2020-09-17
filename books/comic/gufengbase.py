@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # encoding: utf-8
-#https://www.gufengmh.com或者https://m.gufengmh.com网站的免费漫画的基类，简单提供几个信息实现一个子类即可推送特定的漫画
+#https://www.gufengmh8.com或者https://m.gufengmh8.com网站的免费漫画的基类，简单提供几个信息实现一个子类即可推送特定的漫画
 #Author: insert0003 <https://github.com/insert0003>
 import re, json
 from lib.urlopener import URLOpener
@@ -11,8 +11,8 @@ import urllib, urllib2, imghdr
 from base64 import b64decode, b64encode
 
 class GuFengBaseBook(BaseComicBook):
-    accept_domains = ("https://www.gufengmh.com", "https://m.gufengmh.com")
-    host = "https://m.gufengmh.com"
+    accept_domains = ("https://www.gufengmh8.com", "https://m.gufengmh8.com")
+    host = "https://m.gufengmh8.com"
 
     #获取漫画章节列表
     def getChapterList(self, url):
@@ -20,8 +20,8 @@ class GuFengBaseBook(BaseComicBook):
         opener = URLOpener(self.host, timeout=60)
         chapterList = []
 
-        if url.startswith( "https://www.gufengmh.com" ):
-            url = url.replace('https://www.gufengmh.com', 'https://m.gufengmh.com')
+        if url.startswith("https://www.gufengmh8.com"):
+            url = url.replace('https://www.gufengmh8.com', 'https://m.gufengmh8.com')
 
         result = opener.open(url)
         if result.status_code != 200 or not result.content:
@@ -43,7 +43,7 @@ class GuFengBaseBook(BaseComicBook):
             return chapterList
 
         for index, a in enumerate(lias):
-            href = self.urljoin("https://m.gufengmh.com", a.get('href', ''))
+            href = self.urljoin("https://m.gufengmh8.com", a.get('href', ''))
             span = a.find("span")
             if span is None:
                 chapterList.append((u'第%d话'%(index+1), href))
@@ -73,10 +73,10 @@ class GuFengBaseBook(BaseComicBook):
         else:
             chapterPath = chapterPath.group(2)
 
-        #var pageImage = "https://res.gufengmh.com/gufeng/images/";
+        #var pageImage = "https://res.gufengmh8.com/gufeng/images/";
         imgPrefix = re.search(r'(var pageImage = ")(.*)(gufeng/images/)', content)
         if (imgPrefix is None):
-            self.log.warn('"https://res.gufengmh.com/gufeng/images/ is not exist.')
+            self.log.warn('"https://res.gufengmh8.com/gufeng/images/ is not exist.')
             return imgList
         else:
             imgPrefix = imgPrefix.group(2)+"/"

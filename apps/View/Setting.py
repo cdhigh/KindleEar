@@ -79,6 +79,7 @@ class Setting(BaseHandler):
             user.merge_books = bool(webInput.get('mergebooks'))
             user.book_mode = webInput.get('bookmode')
             user.remove_hyperlinks = webInput.get('removehyperlinks')
+            user.author_format = webInput.get('authorformat')
             user.sgenable = sgenable
             user.sgapikey = sgapikey
             user.put()

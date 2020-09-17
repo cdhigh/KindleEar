@@ -535,7 +535,10 @@ class BaseFeedBook:
             summary = doc.summary(html_partial=False)
         except:
             # 如果提取正文出错，可能是图片（一个图片做为一篇文章，没有使用html包装）
-            imgtype = imghdr.what(None, content)
+            try:
+                imgtype = imghdr.what(None, content)
+            except:
+                imgtype = ''
             if imgtype: #如果是图片，则使用一个简单的html做为容器
                 imgmime = r"image/" + imgtype
                 fnimg = "img%d.%s" % (self.imgindex, 'jpg' if imgtype == 'jpeg' else imgtype)

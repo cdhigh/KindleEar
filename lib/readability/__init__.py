@@ -1,5 +1,5 @@
-# version : 0.3.0.5
-# https://pypi.python.org/pypi/readability-lxml
+__version__ = "0.8.1"
+
 from .readability import Document
 
 #Usage:

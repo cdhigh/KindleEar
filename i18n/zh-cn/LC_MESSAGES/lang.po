@@ -869,3 +869,23 @@ msgstr "删除样式表文件失败，错误信息："
 msgid "Forgot password?"
 msgstr "忘记密码？"
 
+msgid "Author format"
+msgstr "作者格式"
+
+msgid "YYYY-MM-DD"
+msgstr "年-月-日"
+
+msgid "MM-DD"
+msgstr "月-日"
+
+msgid "MM/DD"
+msgstr "月/日"
+
+msgid "DD/MM"
+msgstr "日/月"
+
+msgid "MMM DD"
+msgstr "英文月 日"
+
+msgid "Day, MMM DD"
+msgstr "星期, 英文月 日"
