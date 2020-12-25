@@ -6,7 +6,7 @@ KindleEar is a web application to aggregate RSS for generating periodical mobi/e
 * Support custom RSS, only title/url are needed, don't need to program.
 * With account management, support several kindles.
 * Generate periodical mobi/epub file with images.
-* Deliver news feeds to your kindle dialy automatically.
+* Deliver news feeds to your kindle daily automatically.
 * Built-in shared library, can share links with others and subscribe links from others.
 * Website support multi-languages.
 * Powerful and convenient mail-transfering service.
