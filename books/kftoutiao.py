@@ -5,6 +5,9 @@ from base import BaseFeedBook # 继承基类BaseFeedBook
 from lib.urlopener import URLOpener # 导入请求URL获取页面内容的模块
 from bs4 import BeautifulSoup # 导入BeautifulSoup处理模块
 from bs4 import element
+from config import SHARE_FUCK_GFW_SRV
+import urllib
+import string
 
 # 返回此脚本定义的类名
 def getBook():
@@ -31,11 +34,24 @@ class KFTouTiao(BaseFeedBook):
 
     coverfile = 'cv_kftoutiao.jpg' # 设定封面图片
 
-    # 设定内容页需要保留的标签
-    # keep_only_tags = [
-    #     dict(name='rich_media_title', class_='js_content'),
-    #     dict(name='rich_media_conetent', id='js_content'),
-    # ]
+    http_headers = { 'Accept': '*/*','Connection': 'keep-alive', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36'}
+
+    def url4forwarder(self, url):
+        ' 生成经过转发器的URL '
+        return SHARE_FUCK_GFW_SRV % urllib.quote(url)
+
+    def getRealUrl (self, url, try_count = 1):
+        if try_count > 3:
+            return url
+        try:
+            opener = URLOpener(self.host, timeout=self.timeout)
+            result = opener.open(url, None, self.http_headers)
+            if result.status_code > 400:
+                return self.getRealUrl(url, try_count + 1)
+            else:
+                return opener.realurl
+        except:
+            return self.getRealUrl(url, try_count + 1)
 
     # 提取每个主题页面下所有文章URL
     def ParseFeedUrls(self):
@@ -61,7 +77,11 @@ class KFTouTiao(BaseFeedBook):
                     title = item.a.string # 获取文章标题
                     link = item.a.get('href') # 获取文章链接
                     link = BaseFeedBook.urljoin("https://toutiao.io", link) # 合成文章链接
-                    # self.log.warn('Fetch article : %s' % link)
+                    link = self.getRealUrl (link)
+                    self.log.warn('Fetch article : %s' % link)
+                    if string.find (link, 'zhihu.com') != -1:
+                        link = self.url4forwarder(url)
+                        self.log.warn('transport : %s' % link)                        
                     urls.append((topic, title, link, None)) # 把文章元组加入列表
                     count = count + 1
                     if count >= 30 :
@@ -78,57 +98,60 @@ class KFTouTiao(BaseFeedBook):
         # 将页面内容转换成BeatifulSoup对象
         soup = BeautifulSoup(content, 'html.parser')
 
-        siteNameTag = soup.find (attrs={"property":"og:site_name"})
-        if siteNameTag :
-            siteName = siteNameTag['content']
+        self.keep_only_tags = []
+        tag = soup.find (attrs={"property":"og:site_name"})
+        if tag :
+            siteName = tag['content']
             # 对微信公众号文章做清洗
-            if siteName and siteName == u'微信公众平台' :
-                #self.log.warn("it's WeChat article.")
-                # 需要填充title字段，否则微信公众号文章会没有标题
-                soup.title.string = soup.find (attrs={"property":"og:title"})['content']
-                # 清除后面的“喜欢此内容的人还喜欢”
-                tag = soup.find (name="div", class_="rich_media_area_extra")
-                if tag :
-                    tag.decompose ()
+            if siteName:
+                if siteName == u'微信公众平台' :
+                    #self.log.warn("it's WeChat article.")
+                    # 需要填充title字段，否则微信公众号文章会没有标题
+                    soup.title.string = soup.find (attrs={"property":"og:title"})['content']
 
-                # 清除微信扫码
-                tag = soup.find (name="div", class_="qr_code_pc_outer")
-                if tag :
-                    tag.decompose ()
+                    self.keep_only_tags = [
+                        dict(name='div', id="img-content", class_='rich_media_wrp'),
+                        dict(name='div', id="js_content", class_='rich_media_content'),
+                    ]
 
-                # 清除文章标签
-                tag = soup.find (name="div", class_="article-tag_list")
-                if tag :
-                    tag.decompose ()
-               
+                    # 清除隐藏信息
+                    tags = soup.find_all (name="div", style="display:none;")
+                    for tag in tags:
+                        tag.decompose () 
 
-                # 清除文章的元数据信息
-                tag = soup.find (name="div", class_="rich_media_meta_list")
-                if tag :
-                    tag.decompose ()
-                    
-                # 清除打赏信息
-                tag = soup.find (name="div", id="js_reward_area")
-                if tag :
-                    tag.decompose ()
+                    tags = soup.find_all (name="div", style="display: none;")
+                    for tag in tags:
+                        tag.decompose ()  
 
-                # 清除工具条信息
-                tag = soup.find (name="div", class_="rich_media_tool")
-                if tag :
-                    tag.decompose ()
+                    return unicode(soup)
 
-                # 清除隐藏信息
-                tags = soup.find_all (name="div", style="display:none;")
-                for tag in tags:
-                    tag.decompose () 
+                # 处理ThoughtWorks洞见文章
+                elif siteName == u'ThoughtWorks洞见':
+                    self.keep_only_tags = [
+                        dict(name='div', class_='entry-wrap'),
+                    ]
+                    return content
+        
+        # 处理codingstyle文章
+        tag = soup.find (name='link', rel='alternate')
+        if tag :
+            herfLink = tag['href']
+            if herfLink and string.find (herfLink, 'codingstyle') != -1:
+                self.keep_only_tags = [
+                    dict(name='div', class_='topic-detail'),
+                ]
+                return content
 
-                tags = soup.find_all (name="div", style="display: none;")
-                for tag in tags:
-                    tag.decompose ()                           
+        # 处理开发者头条文章
+        title = soup.title.string
+        if title and string.find (title, u'开发者头条') != -1 :
+            self.keep_only_tags = [
+                dict(name='div', class_='content'),
+                dict(name='div', class_='preview'),
+            ]
+            return content
 
-        # 返回预处理完成的内容
-        return unicode(soup)
-
+        return content
 
 
         
