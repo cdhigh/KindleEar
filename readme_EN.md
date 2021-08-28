@@ -19,7 +19,15 @@ KindleEar is a web application to aggregate RSS for generating periodical mobi/e
 
 3. Install [Python 2.7.x](https://www.python.org/downloads/).  
 
-4. Install [GAE SDK](https://cloud.google.com/appengine/downloads).  
+4. Install [GAE SDK](https://storage.cloud.google.com/cloud-sdk-release).  note: choose some version before 273.0.  
+   [google-cloud-sdk-273.0.0-windows-x86_64-bundled-python.zip](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86_64-bundled-python.zip)
+    [google-cloud-sdk-273.0.0-darwin-x86.tar.gz](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-darwin-x86.tar.gz)
+    [google-cloud-sdk-273.0.0-darwin-x86_64.tar.gz](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-darwin-x86_64.tar.gz)
+    [google-cloud-sdk-273.0.0-linux-x86.tar.gz](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-linux-x86.tar.gz)
+    [google-cloud-sdk-273.0.0-linux-x86_64.tar.gz](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-linux-x86_64.tar.gz)
+    [google-cloud-sdk-273.0.0-windows-x86-bundled-python.zip](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86-bundled-python.zip)
+    [google-cloud-sdk-273.0.0-windows-x86.zip](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86.zip)
+    [google-cloud-sdk-273.0.0-windows-x86_64.zip](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86_64.zip)
 
 5. [Download KindleEar](https://github.com/cdhigh/KindleEar/archive/master.zip) and uncompress it into a directory for example: *c:\kindleear*.  
 
@@ -33,21 +41,19 @@ config.py          | SRC_EMAIL   | Your Gmail Address          |
 config.py          | DOMAIN      | appid@appspot.com        |  
 config.py          | TIMEZONE    | Your timezone         |
 
-> the lines application and version in yaml have to be commented if you will deploy it by using gcloud.
+> the lines 'application' and 'version' in yaml have to be commented if you will deploy it by using gcloud.
 
-7. Choose 7.1 or 7.2 to deploy it.  
-
-7.1 using appcfg.py  
-	* `c:\python27\python.exe appcfg.py update KindleEarFolder\app.yaml KindleEarFolder\module-worker.yaml`  
-	* `c:\python27\python.exe appcfg.py update KindleEarFolder`  
-  
-7.2 using gcloud  
+7. Deployment
     * Delete the first two lines of app.yaml and module-worker.yaml [application and version]  
     * `gcloud auth login`  
     * `gcloud config set project YourApplicationId`  
     * `gcloud app deploy --version=1 KindleEarFolder\app.yaml KindleEarFolder\module-worker.yaml`    
     * `gcloud app deploy --version=1 KindleEarFolder`  
-    * [If needed] `gcloud datastore indexes create KindleEarFolder\index.yaml`  
+    * [If some error after deployment.] 
+      `gcloud datastore indexes create index.yaml`
+      `gcloud app deploy --version=1 app.yaml queue.yaml`
+      `gcloud app deploy --version=1 app.yaml cron.yaml`
+      `gcloud app deploy --version=1 app.yaml dispatch.yaml`  
 
 8. After finished, you can open the website *'http://appid.appspot.com'* (appid is the name of your application),  
 For example the author's site: <http://kindleear.appspot.com>  

@@ -1,5 +1,5 @@
-application: kindleear
-version: 1
+#application: kindleear
+#version: 1
 module: worker
 runtime: python27
 api_version: 1

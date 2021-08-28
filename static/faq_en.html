@@ -79,21 +79,40 @@
     
     <span id="ownserver"></span>
     <h2>How to deploy my own delivery server?</h2>
-    <p class="answer"><strong>The formal way:</strong>
+    <p class="answer">
         <ol>
         <li><a href="https://github.com/cdhigh/KindleEar/archive/master.zip">Download</a> the latest version of KindleEar on github and then extract it to somewhere, for example C:\KindleEar (we'll use it in the following steps).</li>
         <li>You need a google account, please visit the <a href="https://console.developers.google.com">Google Developers Console</a> page. Use your gmail account to login, click on "Create an empty Project", follow steps to create a GAE application.</li>
-        <li>Install Python 2.7.x. <a href="https://www.python.org/downloads/">Download</a> the latest 2.7.x source release and then install it.  Do not install a Python 3.x version, because GAE does not support it now.</li>
-        <li>Install GAE SDK, which will be used to upload a GAE program. In section on <a href="https://developers.google.com/appengine/downloads">this page</a>, click "Google App Engine SDK for Python", choose your platform, click to download the corresponding version, then install, all the way "next" without words.</li>
-        <li>Go to the previously downloaded KindleEar directory (e.g. C:\KindleEar), use a text editor to open app.yaml and module-worker.yaml file, modify the word 'kindleear' in the first line to your GAE application name (e.g. kindleear123), then save and exit.</li>
+        <li>Install Python 2.7.x. <a href="https://www.python.org/downloads/">Download</a> the latest 2.7.x source release and then install it.  Do not install a Python 3.x version, because KindleEar does not support it now.</li>
+        <li>Install <a href="https://storage.cloud.google.com/cloud-sdk-release">GAE SDK</a>, choose some version before 273. for example:
+            <ol>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86_64-bundled-python.zip">google-cloud-sdk-273.0.0-windows-x86_64-bundled-python.zip</a></li>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-darwin-x86.tar.gz">google-cloud-sdk-273.0.0-darwin-x86.tar.gz</a></li>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-darwin-x86_64.tar.gz">google-cloud-sdk-273.0.0-darwin-x86_64.tar.gz</a></li>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-linux-x86.tar.gz">google-cloud-sdk-273.0.0-linux-x86.tar.gz</a></li>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-linux-x86_64.tar.gz">google-cloud-sdk-273.0.0-linux-x86_64.tar.gz</a></li>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86-bundled-python.zip">google-cloud-sdk-273.0.0-windows-x86-bundled-python.zip</a></li>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86.zip">google-cloud-sdk-273.0.0-windows-x86.zip</a></li>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86_64.zip">google-cloud-sdk-273.0.0-windows-x86_64.zip</a></li>
+            </ol>
+        </li>
         <li>Modify variables 'SRC_EMAIL' and 'DOMAIN' and 'TIMEZONE' in config.py in same directory of app.yaml. You can modify other variables if you want and understand what it means.Using the default values are recommended.</li>
-        <li>Start upload KindleEar now. You can use Google App Engine Launcher GUI or command line. Because Launcher is not stable, we'll use the command line in Windows.
+        <li>Start upload KindleEar now.
           <ul>
             <li>Followed by clicking: Start - Run - type cmd, it will open a command line window</li>
-            <li>Change current directory to App Engine SDK installation directory, example: <br/><code>cd C:\Program Files\Google\google_appengine</code></li>
-            <li>Enter 'upload' command: <br/><code>C:\python27\python.exe appcfg.py update C:\KindleEar\app.yaml C:\KindleEar\module-worker.yaml</code></li>
-            <li>Enter the gmail account and password (password does not display in screen).</li>
-            <li>Enter command: <br/><code>C:\python27\python.exe appcfg.py update C:\KindleEar</code></li>
+            <li>Change current directory to App Engine SDK installation directory, example: <code>cd C:\Program Files\Google\google_appengine</code></li>
+            <li>gcloud auth login</li>
+            <li>gcloud config set project YourAppId</li>
+            <li>gcloud app deploy --version=1 app.yaml module-worker.yaml</li>
+            <li>gcloud app deploy --version=1 KindleEarDirectory</li>
+            <li>If something goes wrong, execute following command lines.
+                <ol>
+                    <li>gcloud datastore indexes create index.yaml</li>
+                    <li>gcloud app deploy --version=1 app.yaml queue.yaml</li>
+                    <li>gcloud app deploy --version=1 app.yaml cron.yaml</li>
+                    <li>gcloud app deploy --version=1 app.yaml dispatch.yaml</li>  
+                </ol>
+            </li>
           </ul>
         </li>
         <li>After successfully uploading KindleEar, use your browser to open the site: http://kindleear123.appspot.com (example only, kindleear123 should be changed to the name of your GAE application). If everything goes fine, then go to the last step.</li>

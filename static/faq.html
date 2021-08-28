@@ -88,31 +88,45 @@
     
     <span id="ownserver"></span>
     <h2>如何搭建自己的推送服务器？</h2>
-    <p class="answer"><strong>以下是正规的搭建步骤：</strong>
+    <p class="answer">
         <ol>
         <li>在 <a href="http://www.github.com/cdhigh/kindleear">Github</a> 页面上下载KindleEar的最新版本，在页面的右下角有一个按钮"Download ZIP"，点击即可下载一个包含全部源码的ZIP文档，然后解压到你喜欢的目录，比如C:\KindleEar（下面以这个为例）。</li>
         <li>首先你需要一个google账号，并暂时 <a href="https://www.google.com/settings/security/lesssecureapps">[启用不够安全的应用的访问权限]</a> 以便获得上传程序的权限。然后访问 <a href="https://console.developers.google.com/project">Google Developers Console</a>，新建一个Application。（用来上传KinldeEar用）。</li>
-        <li>安装 <a href="http://www.python.org/getit/">Python 2.7.x</a>，在此页面中选择你的系统平台对应的2.7.x版本下载，然后直接双击安装。注意不要安装成Python 3.x版本，GAE和KindleEar都暂不支持。</li>
-        <li>下载 <a href="https://cloud.google.com/appengine/downloads?hl=zh-CN">GAE SDK</a>，这是用来上传GAE程序用的。在此页面中的区段“Google App Engine SDK for Python”中选择你的系统平台对应的版本点击即可下载，然后安装，一路next无话。</li>
-        <li>打开资源管理器，进入之前下载的KindleEar目录C:\KindleEar，使用任何文本编辑器打开app.yaml和module-worker.yaml文件，将第一行的kindleear字样修改为你之前申请的GAE程序名（比如kindleear123），保存退出。</li>
+        <li>安装 <a href="https://www.python.org/downloads/">Python 2.7.x</a>，在此页面中选择你的系统平台对应的2.7.x版本下载，然后直接双击安装。注意不要安装成Python 3.x版本，KindleEar都暂不支持。</li>
+        <li>下载 <a href="https://storage.cloud.google.com/cloud-sdk-release">GAE SDK</a>，选择273之前的版本，比如下面几个链接。 
+            <ol>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86_64-bundled-python.zip">google-cloud-sdk-273.0.0-windows-x86_64-bundled-python.zip</a></li>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-darwin-x86.tar.gz">google-cloud-sdk-273.0.0-darwin-x86.tar.gz</a></li>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-darwin-x86_64.tar.gz">google-cloud-sdk-273.0.0-darwin-x86_64.tar.gz</a></li>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-linux-x86.tar.gz">google-cloud-sdk-273.0.0-linux-x86.tar.gz</a></li>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-linux-x86_64.tar.gz">google-cloud-sdk-273.0.0-linux-x86_64.tar.gz</a></li>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86-bundled-python.zip">google-cloud-sdk-273.0.0-windows-x86-bundled-python.zip</a></li>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86.zip">google-cloud-sdk-273.0.0-windows-x86.zip</a></li>
+                <li><a href="https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86_64.zip">google-cloud-sdk-273.0.0-windows-x86_64.zip</a></li>
+            </ol>
+        </li>
         <li>在app.yaml的同一个目录，打开config.py文件，修改SRC_EMAIL为你的gmail账号，DOMAIN为你的应用的域名。其他的选项也可以根据注释有选择性的修改，或者使用默认即可。</li>
-        <li>正式上传KindleEar。不能使用Google App Engine Launcher，因为Launcher默认不支持多module应用（修改配置后可以），这里介绍一下windows下使用命令行的方式。
-            <li>依次点击：开始-运行-输入CMD，打开命令行窗口</li>
-            <li>进入到App Engine SDK安装目录；例如：<br/><code>cd "C:\Program Files\Google\google_appengine"</code></li>
-            <li>输入“上传”命令：<br/><code>c:\python27\python.exe appcfg.py update C:\kindleear\app.yaml c:\kindleear\module-worker.yaml</code></li>
-            <li>依次输入gmail账号及密码（密码输入时屏幕不显示）。</li>
-            <li>再输入“上传”命令：<br/><code>c:\python27\python.exe appcfg.py update C:\kindleear\</code></li>
+        <li>正式上传KindleEar。
+            <ol>
+            <li>依次点击：开始-运行-输入CMD，打开命令行窗口，进入KindleEar目录</li>
+            <li>gcloud auth login</li>
+            <li>gcloud config set project 你的ApplicationId</li>
+            <li>gcloud app deploy --version=1 app.yaml module-worker.yaml</li>
+            <li>gcloud app deploy --version=1 KindleEar目录</li>
+            <li>如果出现错误，可能需要下面几条命令。
+                <ol>
+                    <li>gcloud datastore indexes create index.yaml</li>
+                    <li>gcloud app deploy --version=1 app.yaml queue.yaml</li>
+                    <li>gcloud app deploy --version=1 app.yaml cron.yaml</li>
+                    <li>gcloud app deploy --version=1 app.yaml dispatch.yaml</li>  
+                </ol>
             </li>
+            </ol>
+        </li>
         <li>显示上传成功后使用你的浏览器打开域名：kindleear123.appspot.com （举例而已，kindleear123要改为你申请的GAE程序名称），如果能正常打开，则还有最后一步。</li>
         <li>将你的gmail账号加入kindle推送邮箱的白名单。这一步你应该早就会了吧。</li>
         <li>然后呢？享受你自己的推送服务吧！</li>
         </ol>
-    <p><strong>以下是推荐的简化搭建步骤（使用uploader）：</strong>
-        <ol>
-        <li>下载<a href="http://www.github.com/cdhigh/kindleear">KindleEar</a>和申请GAE账号，并创建一个application。</li>
-        <li>下载<a href="https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing">uploader</a>。</li>
-        <li>解压uploader到特定目录，将之前下载并解压的KindleEar目录拷贝到此目录下，改名为kindleear，然后双击执行uploader.bat后根据提示输入appid/email/timezone后会正式启动上传程序，输入email和密码即可上传代码。</li>
-        </ol></p>
     </p>
     
     <span id="notreceived"></span>

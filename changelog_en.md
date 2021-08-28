@@ -1,5 +1,14 @@
 # Changelog for KindleEar
 
+## 1.26.8
+  1. Add a search bar in shared library (trick: you can download all rss by input a keyword "#download" in search bar).
+  2. Update the description of the deployment process in readme and FAQ.
+
+## 1.26.7
+  1. fix bug of kindle firmware 5.9.x (use author as date)
+  2. fix name of site gufengmh.
+  3. update module readability to 0.8.1
+
 ## 1.26.6
   1. Add comic pufei, gufeng.
   2. Add more languages for books.

@@ -32,6 +32,10 @@
 <div class="main">
     <div class="pure-g">
         <div class="pure-u-1 pure-u-md-7-24">
+            <div class="pure-form">
+                <input type="text" id="search_text" onkeyup="doSearch()" class="pure-input-rounded" style="width:90%" placeholder="Search" />
+                <p></p>
+            </div>
             <div class="pure-menu">
                 <ul class="pure-menu-list submenu-box" id="ul-category-menu">
                 </ul>
@@ -82,29 +86,56 @@
         return b.d - a.d;
         });
     
+    //generated in function buildRssByCategory
+    var all_rss_data_by_category;
+
     // build another Array using category
-    function buildRssByCategory() {
-        var by_category = new Array();
-        by_category["{{_('[All]')}}"] = all_rss_data;
-        by_category["{{_('[by Time]')}}"] = all_rss_data_by_time;
-        by_category["{{_('[Uncategoried]')}}"] = new Array();
-        for (var idx in all_rss_data) {
-            var item = all_rss_data[idx];
+    function buildRssByCategory(sch_txt) {
+        var title, url;
+        var all_rss_data_by_text;
+        var all_rss_data_by_text_by_time;
+        all_rss_data_by_category = new Array();
+        if (sch_txt) {
+            all_rss_data_by_text = new Array();
+            all_rss_data_by_text_by_time = new Array();
+            sch_txt = sch_txt.toUpperCase();
+            for (var i = 0; i < all_rss_data.length; i++) {
+                title = all_rss_data[i].t.toUpperCase();
+                url = all_rss_data[i].u.toUpperCase();
+                if ((title.indexOf(sch_txt) > -1) || (url.indexOf(sch_txt) > -1)) {
+                    all_rss_data_by_text.push(all_rss_data[i])
+                }
+            }
+            for (var i = 0; i < all_rss_data_by_time.length; i++) {
+                title = all_rss_data_by_time[i].t.toUpperCase();
+                url = all_rss_data_by_time[i].u.toUpperCase();
+                if ((title.indexOf(sch_txt) > -1) || (url.indexOf(sch_txt) > -1)) {
+                    all_rss_data_by_text_by_time.push(all_rss_data_by_time[i])
+                }
+            }
+        } else {
+            all_rss_data_by_text = all_rss_data;
+            all_rss_data_by_text_by_time = all_rss_data_by_time;
+        }
+
+        all_rss_data_by_category["{{_('[All]')}}"] = all_rss_data_by_text;
+        all_rss_data_by_category["{{_('[by Time]')}}"] = all_rss_data_by_text_by_time;
+        all_rss_data_by_category["{{_('[Uncategoried]')}}"] = new Array();
+        for (var idx in all_rss_data_by_text) {
+            var item = all_rss_data_by_text[idx];
             var category = item.c;
             if (category == ""){
                 category = "{{_('[Uncategoried]')}}";
             }
-            if (!by_category.hasOwnProperty(category)){
-                by_category[category] = new Array();
+            if (!all_rss_data_by_category.hasOwnProperty(category)){
+                all_rss_data_by_category[category] = new Array();
             }
-            by_category[category].push(item);
+            all_rss_data_by_category[category].push(item);
         }
-        if (by_category["{{_('[Uncategoried]')}}"].length == 0){
-            delete by_category["{{_('[Uncategoried]')}}"];
+        if (all_rss_data_by_category["{{_('[Uncategoried]')}}"].length == 0){
+            delete all_rss_data_by_category["{{_('[Uncategoried]')}}"];
         }
-        return by_category;
     };
-    var all_rss_data_by_category = buildRssByCategory();
 
     //fill category menu on left side
     function createCategoryMenu() {
@@ -117,8 +148,7 @@
         }
         ulNode.innerHTML = menuStr;
     };
-    createCategoryMenu();
-
+    
     function hightlightCategory(nodeLi) {
         var parentNode = nodeLi.parentNode;
         var childrenNodes = parentNode.children;
@@ -249,9 +279,24 @@
         toPage(category, 1);
     };
 
-    // select first category by default
-    selectCategory(document.querySelector(".category-menu"), "{{_('[All]')}}");
-    
+    function doSearch() {
+        var input, sch_txt;
+        input = document.getElementById('search_text');
+        sch_txt = input.value;
+        if (sch_txt == "#download") {
+            downAllRssToFile();
+            input.value = "";
+            sch_txt = "";
+        }
+
+        all_rss_data_by_category = buildRssByCategory(sch_txt);
+        createCategoryMenu();
+        // select first category by default
+        selectCategory(document.querySelector(".category-menu"), "{{_('[All]')}}");
+    }
+
+    doSearch();
+
     function addFeed(title, feedurl, isfulltext) {
         ajax({url: "/feeds/add", type: "POST",
             data: {title: title, fulltext: isfulltext, url: feedurl, fromsharedlibrary: 'true'},
@@ -293,6 +338,45 @@
                 alert(status);
             }
         });
+    }
+
+    function downAllRssToFile() {
+        var title, url, ftext, cat, rssd, fmtdate, nowdate;
+        var elementA = document.createElement('a');
+        var aTxt = new Array();
+        aTxt.push("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
+        aTxt.push("<opml version=\"2.0\">");
+        aTxt.push("<head>");
+        aTxt.push("    <title>KindleEar.opml</title>");
+        aTxt.push("    <dateCreated>" + new Date() + "</dateCreated>");
+        aTxt.push("    <dateModified>" + new Date() + "</dateModified>");
+        aTxt.push("    <ownerName>KindleEar</ownerName>");
+        aTxt.push("</head>");
+        aTxt.push("<body>");
+        for (var i = 0; i < all_rss_data.length; i++) {
+            title = all_rss_data[i].t;
+            url = all_rss_data[i].u;
+            title = title.replace(/<[^<>]+?>/g,'');
+            cat = all_rss_data[i].c;
+            if (all_rss_data[i].f == "false") {
+                ftext = "0";
+            } else {
+                ftext = "1";
+            }
+            aTxt.push("    <outline type=\"rss\" text=\"" + title + "\" xmlUrl=\"" + url + "\" isFulltext=\"" + ftext + "\" category=\"" + cat + "\" />");
+        }
+        aTxt.push("</body>");
+        aTxt.push("</opml>");
+
+        nowdate = new Date();
+        fmtdate = "KindleEar_library_" + nowdate.getFullYear() + "_" + ((nowdate.getMonth() + 1)) + "_" + nowdate.getDate() + ".xml";
+
+        elementA.setAttribute("href", "data:text/plain;charset=utf-8," + aTxt.join("\n"));
+        elementA.setAttribute("download", fmtdate);
+        elementA.style.display = 'none';
+        document.body.appendChild(elementA);
+        elementA.click();
+        document.body.removeChild(elementA);
     }
 </script>
 {% endblock %}
