@@ -274,9 +274,11 @@
 
     //Click a category and then populate the content of links on right side
     function selectCategory(obj, category) {
-        var thisLi = obj.parentNode;
-        hightlightCategory(thisLi);
-        toPage(category, 1);
+        if (obj) {
+            var thisLi = obj.parentNode;
+            hightlightCategory(thisLi);
+            toPage(category, 1);
+        }
     };
 
     function doSearch() {
@@ -289,7 +291,7 @@
             sch_txt = "";
         }
 
-        all_rss_data_by_category = buildRssByCategory(sch_txt);
+        buildRssByCategory(sch_txt);
         createCategoryMenu();
         // select first category by default
         selectCategory(document.querySelector(".category-menu"), "{{_('[All]')}}");
