@@ -63,10 +63,8 @@ For example the author's site: <http://kindleear.appspot.com>
 
 # Deployment simplified
 If you don't want to intall GAE SDK and python, you have another choice.  
-
-1. [Download KindleEar](https://github.com/cdhigh/KindleEar/archive/master.zip) and uncompress it (Change the name of folder to 'KindleEar').  
-2. [Download KindleEar-Uploader](https://drive.google.com/folderview?id=0ByRickMo9V_XNlJITzhYM3JOYW8&usp=sharing) and unzip it.  
-3. Put KindleEar folder into Uploader directory, double-click uploader.bat to start process of deployment.  
+Reference code repository <https://github.com/bookfere/KindleEar-Uploader> and tutorial <https://bookfere.com/post/19.html#ke_2_1> (in Chinese, but you can translate it by Google).  
+This method can be deployed directly in the console window of the GAE background.  
 
 # License
    KindleEar is Licensed under the [AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html) license.

@@ -19,6 +19,16 @@
             <label for="p2">{{ _("Confirm password") }}</label>
             <input id="p2" name="p2" type="password" placeholder="{{ _('Confirm password') }}" class="pure-u-1 pure-u-sm-1-2" />
         </div>
+        <div class="pure-control-group">
+            <label for="ep">{{_("Expiration")}}</label>
+            <select class="pure-u-1 pure-u-sm-1-2 bool" name="ep">
+                <option value="0" {% if expiration == 0 %}selected="selected"{% endif %}>{{_("Never expire")}}</option>
+                <option value="30" {% if expiration == 30 %}selected="selected"{% endif %}>{{_("1 Month")}}</option>
+                <option value="90" {% if expiration == 90 %}selected="selected"{% endif %}>{{_("3 Months")}}</option>
+                <option value="180" {% if expiration == 180 %}selected="selected"{% endif %}>{{_("6 Months")}}</option>
+                <option value="365" {% if expiration == 365 %}selected="selected"{% endif %}>{{_("1 Year")}}</option>
+            </select>
+        </div>
         <div class="pure-control-group" style="text-align:center;">
             <button type="submit" class="pure-button pure-button-primary pure-input-rounded">{{ _("Confirm Change") }}</button>
         </div>

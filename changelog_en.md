@@ -1,5 +1,8 @@
 # Changelog for KindleEar
 
+## 1.26.9
+  1. Add a field "Expiration" in page Edit account.
+
 ## 1.26.8
   1. Add a search bar in shared library (trick: you can download all rss by input a keyword "#download" in search bar).
   2. Update the description of the deployment process in readme and FAQ.

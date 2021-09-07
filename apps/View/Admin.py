@@ -86,12 +86,21 @@ class AdminMgrPwd(BaseHandler):
     # 管理员修改其他账户的密码
     def GET(self, name):
         self.login_required('admin')
-        tips = _("Please input new password to confirm!")
-        return self.render('adminmgrpwd.html', "Change password", tips=tips, username=name)
+        u = KeUser.all().filter("name = ", name).get()
+        expiration = 0
+        if not u:
+            tips = _("The username '%s' not exist!") % name
+        else:
+            tips = _("Please input new password to confirm!")
+            expiration = u.expiration_days
+
+        return self.render('adminmgrpwd.html', "Change password", tips=tips, username=name, expiration=expiration)
         
     def POST(self, _n=None):
         self.login_required('admin')
         name, p1, p2 = web.input().get('u'), web.input().get('p1'), web.input().get('p2')
+        expiration = str_to_int(web.input().get('ep', '0'))
+
         if name:
             u = KeUser.all().filter("name = ", name).get()
             if not u:
@@ -106,6 +115,11 @@ class AdminMgrPwd(BaseHandler):
                     tips = _("The password includes non-ascii chars!")
                 else:
                     u.passwd = pwd
+                    u.expiration_days = expiration
+                    if expiration:
+                        u.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
+                    else:
+                        u.expires = None
                     u.put()
                     strBackPage = '&nbsp;&nbsp;&nbsp;&nbsp;<a href="%s">Click here to go back</a>' % Admin.__url__
                     tips = _("Change password success!") + strBackPage
