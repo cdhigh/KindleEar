@@ -47,7 +47,7 @@ try:
 except ImportError:
     import simplejson as json
 
-from lib.urlopener import URLOpener
+from lib.urlopener import UrlOpener
 
 class APIError(StandardError):
     def __init__(self, status_code, x_error_code, x_error, request):
@@ -76,7 +76,7 @@ class Pocket(object):
         self.consumer_key = str(consumer_key)
         self.redirect_uri = redirect_uri
         self.access_token = None
-        self.opener = URLOpener(headers=POCKET_HEADERS)
+        self.opener = UrlOpener(headers=POCKET_HEADERS)
         
     def _post(self, method_url, **kw):
         ret = self.opener.open(method_url, data=json.dumps(kw))

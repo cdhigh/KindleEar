@@ -4,7 +4,7 @@
 import urllib, urllib2, Cookie, urlparse, time, re
 from google.appengine.api import urlfetch
 from google.appengine.runtime.apiproxy_errors import OverQuotaError
-from lib.urlopener import URLOpener
+from lib.urlopener import UrlOpener
 
 URLFETCH_MAX = 2
 URLFETCH_MAXSIZE = 1*1024*1024 #最大4M，但是为了稳定性，每次下载1M
@@ -53,11 +53,11 @@ def Download(url):
     
 class FileDownload:
     def __init__(self, host=None, maxfetchcount=URLFETCH_MAX,
-                timeout=URLFETCH_TIMEOUT, addreferer=False):
+                timeout=URLFETCH_TIMEOUT, addReferer=False):
         self.cookie = Cookie.SimpleCookie()
         self.maxFetchCount = maxfetchcount
         self.host = host
-        self.addReferer = addreferer
+        self.addReferer = addReferer
         self.timeout = timeout
         self.realurl = ''
         self.filelen = 0
@@ -253,7 +253,7 @@ def BaiduPanHandler(url):
     #和 https://github.com/xuanqinanhai/bleed-baidu-white
     #将代码集成过来
     url = 'http://daimajia.duapp.com/baidu/?url=%s' % url
-    opener = URLOpener()
+    opener = UrlOpener()
     result = opener.open(url)
     if result.status_code != 200 or not result.content:
         return None

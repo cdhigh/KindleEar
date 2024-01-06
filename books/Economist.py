@@ -1,7 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-from bs4 import BeautifulSoup
-from base import BaseFeedBook, URLOpener, string_of_tag
+from books.base_book import BaseFeedBook
 
 def getBook():
     return Economist
@@ -12,8 +11,8 @@ class Economist(BaseFeedBook):
     language              = 'en'
     feed_encoding         = "utf-8"
     page_encoding         = "utf-8"
-    mastheadfile          = "mh_economist.gif"
-    coverfile             = "cv_economist.jpg"
+    masthead_file         = "mh_economist.gif"
+    cover_file            = "cv_economist.jpg"
     deliver_days          = ['Friday']
     
     remove_classes = ['ec-messages',]

@@ -1,3 +1,7 @@
+# Announcement
+Starting from 2024-01-06, the author has begun the migration of KindleEar to Python 3. The final completion time of the migration cannot be assessed temporarily. Before the announcement is complete, the code in this repository cannot be deployed. If you need to deploy, please download the [v1.26.9 code archive](https://github.com/cdhigh/KindleEar/releases/tag/1.26.9).
+
+
 # Brief Introduction
 KindleEar is a web application to aggregate RSS for generating periodical mobi/epub file with images and send it to your kindle or your email automatically.
 

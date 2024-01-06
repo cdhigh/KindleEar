@@ -1,5 +1,12 @@
 Readme of english version refers to [Readme_EN.md](https://github.com/cdhigh/KindleEar/blob/master/readme_EN.md)
 
+
+# 公告
+从 2024-01-06 起作者开始将KindleEar迁移至Python3，暂时无法评估迁移完成的最终时间，在公告完成前本仓库的代码将无法部署，如果要部署，请下载
+[v1.26.9代码存档](https://github.com/cdhigh/KindleEar/releases/tag/1.26.9)
+
+
+
 # 简介
 这是一个运行在Google App Engine(GAE)上的Kindle个人推送服务应用，生成排版精美的杂志模式mobi/epub格式自动每天推送至您的Kindle或其他邮箱。
 

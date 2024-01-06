@@ -1,0 +1,16 @@
+# Dependencias basicas
+requests
+chardet
+pillow
+lxml
+jinja2
+sendgrid
+qrcode
+python-dateutil
+css_parser
+beautifulsoup4
+web.py
+six
+feedparser
+google-cloud-tasks
+appengine-python-standard>=1.0.0

@@ -1,13 +1,13 @@
 dispatch:
   # Default module serves the typical web resources and all static resources.
   - url: "*/favicon.ico"
-    module: default
+    service: default
 
   - url: "*/worker*"
-    module: worker
+    service: worker
 
   - url: "*/url2book*"
-    module: worker
+    service: worker
 
 #  - url: "*/_ah/mail/*"
-#    module: worker
+#    service: worker

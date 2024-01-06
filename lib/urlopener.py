@@ -1,13 +1,13 @@
 #!usr/bin/Python
 # -*- coding:utf-8 -*-
 """为了应付时不时出现的Too many redirects异常，使用此类打开链接。
-此类会自动处理redirect和cookie，同时增加了失败自动重试功能"""
-import urllib, urllib2, Cookie, urlparse, time
-from google.appengine.api import urlfetch
-from google.appengine.runtime.apiproxy_errors import OverQuotaError
-from config import CONNECTION_TIMEOUT
+此类会自动处理redirect和cookie，同时增加了失败自动重试功能
+2024: 移植到Python3后改用requests，其实已经很好了，但是requests默认没有超时时间，
+所以还是继续使用此模块封装超时时间吧，并且去掉自动重试功能"""
+import requests
+from config import CONNECT_TIMEOUT
 
-class URLOpener:
+class UrlOpener:
     _codeMapDict = {
         200 : 'Ok',
         201 : 'Created',
@@ -63,154 +63,57 @@ class URLOpener:
         des = cls._codeMapDict.get(errCode, None)
         return '%d %s' % (errCode, des) if des else str(errCode)
     
-    def __init__(self, host=None, maxfetchcount=2, maxredirect=5, 
-              timeout=CONNECTION_TIMEOUT, addreferer=True, headers=None):
-        self.cookie = Cookie.SimpleCookie()
-        self.maxFetchCount = maxfetchcount
-        self.maxRedirect = maxredirect
+    def __init__(self, host=None, timeout=CONNECT_TIMEOUT, headers=None):
         self.host = host
-        self.addReferer = addreferer
         self.timeout = timeout
-        self.realurl = ''
         self.initHeaders = headers
-    
-    def open(self, url, data=None, headers=None):
-        method = urlfetch.GET if data is None else urlfetch.POST
-        self.realurl = url
-        maxRedirect = self.maxRedirect
+        self.session = requests.session()
         
-        class resp: #出现异常时response不是合法的对象，使用一个模拟的
-            status_code=555
-            content=''
-            headers={}
+    def open(self, url, data=None, headers=None):
+        #出现异常时response不是合法的对象，使用一个模拟的
+        r = requests.models.Response()
+        r.status_code = 555
         
         #竟然实际中还碰到以//开头的URL，真是大千世界无奇不有
-        if url.startswith(r'//'):
-            url = 'http:' + url
+        if url.startswith(r"//"):
+            url = "https:" + url
         elif url.startswith('www'):
-            url = 'http://' + url
+            url = "https://" + url
             
-        response = resp()
-        if url.startswith('data:'):
+        if url.startswith("data:"): #网页内嵌内容data url
             import base64, re
+            #data:image/png;base64,iVBORw...
             rxDataUri = re.compile("^data:(?P<mime>[a-z]+/[a-z]+);base64,(?P<data>.*)$", re.I | re.M | re.DOTALL)
             m = rxDataUri.match(url)
             try:
-                response.content = base64.decodestring(m.group("data"))
-                response.status_code = 200
+                r._content = base64.b64decode(m.group("data").encode("ascii")) #return bytes
+                r.status_code = 200
             except Exception as e:
-                response.status_code = 404
+                r.status_code = 404
         else:
-            while url and (maxRedirect > 0):
-                cnt = 0
-                while cnt < self.maxFetchCount:
-                    try:
-                        if data and isinstance(data, dict):
-                            data = urllib.urlencode(self.EncodedDict(data))
-                        response = urlfetch.fetch(url=url, payload=data, method=method,
-                            headers=self._getHeaders(url, headers),
-                            allow_truncated=False, follow_redirects=False, 
-                            deadline=self.timeout, validate_certificate=False)
-                    except urlfetch.DeadlineExceededError:
-                        if response.status_code == 555:
-                            response.status_code = 530
-                        cnt += 1
-                        time.sleep(1)
-                    except urlfetch.ResponseTooLargeError:
-                        if response.status_code == 555:
-                            response.status_code = 531
-                        break
-                    except OverQuotaError:
-                        if response.status_code == 555:
-                            response.status_code = 529
-                        cnt += 1
-                        if cnt < self.maxFetchCount:
-                            default_log.warn('OverQuotaError in url [%s], retry after 1 minute.' % url)
-                            time.sleep(60)
-                    except urlfetch.SSLCertificateError:
-                        #有部分网站不支持HTTPS访问，对于这些网站，尝试切换http
-                        if url.startswith(r'https://'):
-                            url = url.replace(r'https://', r'http://')
-                            if response.status_code == 555:
-                                response.status_code = 532
-                            continue #这里不用自增变量
-                        else:
-                            if response.status_code == 555:
-                                response.status_code = 533
-                            break
-                    except urlfetch.DownloadError:
-                        if response.status_code == 555:
-                            response.status_code = 534
-                        cnt += 1
-                        #break
-                    except Exception as e:
-                        if response.status_code == 555:
-                            response.status_code = 535
-                            default_log.warn('url [%s] failed [%s].' % (url, str(e)))
-                        break
-                    else:
-                        break
-                
-                data = None
-                method = urlfetch.GET
-                try:
-                    self.SaveCookies(response.header_msg.getheaders('Set-Cookie'))
-                except:
-                    pass
-                
-                if response.status_code not in [300,301,302,303,307]: #只处理重定向信息
-                    break
-                
-                urlnew = response.headers.get('Location')
-                if urlnew and not urlnew.startswith("http"):
-                    url = urlparse.urljoin(url, urlnew)
+            try:
+                if data:
+                    r = self.session.post(url, data=data, headers=self.GetHeaders(url, headers), timeout=self.timeout)
                 else:
-                    url = urlnew
-                maxRedirect -= 1
+                    r = self.session.get(url, headers=self.GetHeaders(url, headers), timeout=self.timeout)
+            except Exception as e:
+                default_log.warn("url {} failed {}.".format(url, str(e)))
         
-        if maxRedirect <= 0:
-            default_log.warn('Too many redirections:%s' % url)
+        #有些网页头部没有编码信息，则使用chardet检测编码，否则requests会认为text类型的编码为"ISO-8859-1"
+        if "charset" not in r.headers.get("Content-Type", "").lower():
+            r.encoding = None #r.apparent_encoding
+        return r
         
-        self.realurl = url
-        return response
-        
-    def _getHeaders(self, url=None, extheaders=None):
+    def GetHeaders(self, url=None, extHeaders=None):
         headers = {
-             'User-Agent': "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)",
-             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                  }
-        cookie = '; '.join(["%s=%s" % (v.key, v.value.encode('utf-8')) for v in self.cookie.values()])
-        if cookie:
-            headers['Cookie'] = cookie
-            #default_log.warn(repr(self.cookie)) #TODO
+            "User-Agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        }
         if self.addReferer and (self.host or url):
-            headers['Referer'] = self.host if self.host else url
+            headers["Referer"] = self.host if self.host else url
         
         if self.initHeaders:
             headers.update(self.initHeaders)
-        if extheaders:
-            headers.update(extheaders)
-        return self.EncodedDict(headers)
-        
-    def SaveCookies(self, cookies):
-        if not cookies:
-            return
-        self.cookie.load(cookies[0])
-        for cookie in cookies[1:]:
-            obj = Cookie.SimpleCookie()
-            obj.load(cookie)
-            for v in obj.values():
-                self.cookie[v.key] = v.value
-        #default_log.warn(repr(self.cookie)) #TODO
-    
-    #UNICODE编码的URL会出错，所以需要编码转换
-    def EncodedDict(self, inDict):
-        outDict = {}
-        for k, v in inDict.iteritems():
-            if isinstance(v, unicode):
-                v = v.encode('utf-8')
-            
-            outDict[k] = v
-        return outDict
-        
-        
+        if extHeaders:
+            headers.update(extHeaders)
+        return headers

@@ -1,12 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 # https://www.xxbiquge.com 的基类
 # Author: skiinder <https://github.com/skiinder>
 import datetime
 from bs4 import BeautifulSoup
 from config import TIMEZONE
-from lib.urlopener import URLOpener
-from lib.autodecoder import AutoDecoder
+from lib.urlopener import UrlOpener
 from books.base import BaseUrlBook
 from apps.dbModels import LastDelivered
 from apps.utils import str_to_int
@@ -37,9 +36,8 @@ class Novelbase(BaseUrlBook):
 
     def ParseFeedUrls(self):
         urls = []
-        userName = self.UserName()
-        decoder = AutoDecoder(isfeed=False)
-
+        userName = self.UserName
+        
         lastCount = LastDelivered.all().filter('username = ', userName).filter("bookname = ", self.title).get()
         if not lastCount:
             oldNum = 0
@@ -48,11 +46,11 @@ class Novelbase(BaseUrlBook):
             oldNum = lastCount.num
             oldChapterTitle = lastCount.record
 
-        opener = URLOpener(self.host, timeout=60)
+        opener = UrlOpener(self.host, timeout=60)
         result = opener.open(self.feeds)
         if result.status_code != 200:
             self.log.warn('fetch index page for %s failed[%s] : %s' % (
-                self.title, URLOpener.CodeMap(result.status_code), self.feeds))
+                self.title, UrlOpener.CodeMap(result.status_code), self.feeds))
             return []
 
         # 从页面获取章节列表
@@ -86,7 +84,7 @@ class Novelbase(BaseUrlBook):
         return str_to_int(url.split('/')[self.indexChapterInUrl].split('.')[0])
 
     def UpdateLastDelivered(self, title, num, chapter):
-        userName = self.UserName()
+        userName = self.UserName
         dbItem = LastDelivered.all().filter('username = ', userName).filter('bookname = ', title).get()
         if dbItem:
             dbItem.num = num
