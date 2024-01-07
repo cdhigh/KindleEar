@@ -9,7 +9,8 @@ qrcode
 python-dateutil
 css_parser
 beautifulsoup4
-web.py
+bottle
+bottle-beaker
 six
 feedparser
 google-cloud-tasks

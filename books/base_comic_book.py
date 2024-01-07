@@ -67,15 +67,15 @@ class BaseComicBook(BaseFeedBook):
             yield from self.GenImageItems(comicItem.imgList, comicItem.url)
             self.UpdateLastDelivered(comicItem.name, comicItem.title, comicItem.nextChapterIndex)
 
-    #获取漫画章节列表
+    #获取漫画章节列表，返回[(title, url),...]
     def GetChapterList(self, url):
         return []
 
-    #获取漫画图片列表
+    #获取漫画图片列表，返回[url,...]
     def GetImgList(self, url):
         return []
     
-    #获取漫画图片内容
+    #获取漫画图片内容，返回二进制图像数据
     def AdjustImgContent(self, content):
         return content
 

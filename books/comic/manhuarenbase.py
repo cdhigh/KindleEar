@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 import re, json
-from lib.urlopener import URLOpener
-from lib.autodecoder import AutoDecoder
-from books.base import BaseComicBook
+from lib.urlopener import UrlOpener
+from books.base_comic_book import BaseComicBook
 from bs4 import BeautifulSoup
 from packer import decode_packed_codes
 

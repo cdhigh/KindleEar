@@ -3,12 +3,9 @@
 #http://www.pufei.net或者http://m.pufei.net网站的免费漫画的基类，简单提供几个信息实现一个子类即可推送特定的漫画
 #Author: insert0003 <https://github.com/insert0003>
 import re, json
-from lib.urlopener import URLOpener
-from lib.autodecoder import AutoDecoder
-from books.base import BaseComicBook
+from lib.urlopener import UrlOpener
+from books.base_comic_book import BaseComicBook
 from bs4 import BeautifulSoup
-import urllib, urllib2, imghdr
-from base64 import b64decode, b64encode
 
 class PuFeiBaseBook(BaseComicBook):
     accept_domains = ("http://www.pufei.net", "http://m.pufei.net")

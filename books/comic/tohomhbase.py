@@ -2,11 +2,9 @@
 # encoding: utf-8
 # https://www.tohomh123.com/ 网站的免费漫画的基类，简单提供几个信息实现一个子类即可推送特定的漫画
 import re, json
-from lib.urlopener import URLOpener
-from lib.autodecoder import AutoDecoder
-from books.base import BaseComicBook
+from lib.urlopener import UrlOpener
+from books.base_comic_book import BaseComicBook
 from bs4 import BeautifulSoup
-import urllib, urllib2, imghdr
 from google.appengine.api import images
 from lib.userdecompress import decompressFromBase64
 

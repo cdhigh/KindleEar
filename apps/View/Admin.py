@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
@@ -7,7 +7,7 @@
 
 import hashlib, gettext, datetime
 
-import web
+from bottle import route, post
 
 from apps.BaseHandler import BaseHandler
 from apps.dbModels import *
@@ -15,71 +15,72 @@ from apps.utils import new_secret_key, etagged, str_to_int
 
 from config import *
 
-class Admin(BaseHandler):
-    __url__ = "/admin"
-    # 账户管理页面
-    @etagged()
-    def GET(self):
-        user = self.getcurrentuser()
-        users = KeUser.all() if user.name == 'admin' else None
-        return self.render('admin.html', "Admin", current='admin', user=user, users=users)
-        
-    def POST(self):
-        u, up1, up2 = web.input().get('u'), web.input().get('up1'), web.input().get('up2')
-        expiration = str_to_int(web.input().get('expiration', '0'))
-        op, p1, p2 = web.input().get('op'), web.input().get('p1'), web.input().get('p2')
-        user = self.getcurrentuser()
-        users = KeUser.all() if user.name == 'admin' else None
-        
-        if all((op, p1, p2)): #修改当前登陆账号的密码
-            secret_key = user.secret_key or ''
+# 账户管理页面
+@etagged()
+@route("/admin")
+def Admin():
+    user = self.getcurrentuser()
+    users = KeUser.all() if user.name == 'admin' else None
+    return self.render('admin.html', "Admin", current='admin', user=user, users=users)
+
+@post("/admin")
+def POST(self):
+    forms = request.forms
+    u, up1, up2 = forms.u, forms.up1, forms.up2
+    expiration = str_to_int(forms.get('expiration', '0'))
+    op, p1, p2 = forms.op, forms.p1, forms.p2
+    user = get_current_user()
+    users = KeUser.all() if user.name == 'admin' else None
+    
+    if all((op, p1, p2)): #修改当前登陆账号的密码
+        secret_key = user.secret_key or ''
+        try:
+            pwd = hashlib.md5(op+secret_key).hexdigest()
+            newpwd = hashlib.md5(p1+secret_key).hexdigest()
+        except:
+            tips = _("The password includes non-ascii chars!")
+        else:
+            if user.passwd != pwd:
+                tips = _("Old password is wrong!")
+            elif p1 != p2:
+                tips = _("The two new passwords are dismatch!")
+            else:
+                tips = _("Change password success!")
+                user.passwd = newpwd
+                user.put()
+        return self.render('admin.html', "Admin", current='admin', user=user, users=users, chpwdtips=tips)
+    elif all((u, up1, up2)): #添加账户
+        if user.name != 'admin':
+            raise web.seeother(r'/')
+        elif not u:
+            tips = _("Username is empty!")
+        elif up1 != up2:
+            tips = _("The two new passwords are dismatch!")
+        elif KeUser.all().filter("name = ", u).get():
+            tips = _("Already exist the username!")
+        else:
+            secret_key = new_secret_key()
             try:
-                pwd = hashlib.md5(op+secret_key).hexdigest()
-                newpwd = hashlib.md5(p1+secret_key).hexdigest()
+                pwd = hashlib.md5(up1 + secret_key).hexdigest()
             except:
                 tips = _("The password includes non-ascii chars!")
             else:
-                if user.passwd != pwd:
-                    tips = _("Old password is wrong!")
-                elif p1 != p2:
-                    tips = _("The two new passwords are dismatch!")
-                else:
-                    tips = _("Change password success!")
-                    user.passwd = newpwd
-                    user.put()
-            return self.render('admin.html', "Admin", current='admin', user=user, users=users, chpwdtips=tips)
-        elif all((u, up1, up2)): #添加账户
-            if user.name != 'admin':
-                raise web.seeother(r'/')
-            elif not u:
-                tips = _("Username is empty!")
-            elif up1 != up2:
-                tips = _("The two new passwords are dismatch!")
-            elif KeUser.all().filter("name = ", u).get():
-                tips = _("Already exist the username!")
-            else:
-                secret_key = new_secret_key()
-                try:
-                    pwd = hashlib.md5(up1 + secret_key).hexdigest()
-                except:
-                    tips = _("The password includes non-ascii chars!")
-                else:
-                    myfeeds = Book(title=MY_FEEDS_TITLE, description=MY_FEEDS_DESC,
-                        builtin=False, keep_image=True, oldest_article=7, 
-                        needs_subscription=False, separate=False)
-                    myfeeds.put()
-                    au = KeUser(name=u, passwd=pwd, kindle_email='', enable_send=False,
-                        send_time=7, timezone=TIMEZONE, book_type="mobi",
-                        ownfeeds=myfeeds, merge_books=False, secret_key=secret_key, expiration_days=expiration)
-                    if expiration:
-                        au.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
+                myfeeds = Book(title=MY_FEEDS_TITLE, description=MY_FEEDS_DESC,
+                    builtin=False, keep_image=True, oldest_article=7, 
+                    needs_subscription=False, separate=False)
+                myfeeds.put()
+                au = KeUser(name=u, passwd=pwd, kindle_email='', enable_send=False,
+                    send_time=7, timezone=TIMEZONE, book_type="mobi",
+                    ownfeeds=myfeeds, merge_books=False, secret_key=secret_key, expiration_days=expiration)
+                if expiration:
+                    au.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
 
-                    au.put()
-                    users = KeUser.all() if user.name == 'admin' else None
-                    tips = _("Add a account success!")
-            return self.render('admin.html', "Admin", current='admin', user=user, users=users, actips=tips)
-        else:
-            return self.GET()
+                au.put()
+                users = KeUser.all() if user.name == 'admin' else None
+                tips = _("Add a account success!")
+        return self.render('admin.html', "Admin", current='admin', user=user, users=users, actips=tips)
+    else:
+        return self.GET()
 
 class AdminMgrPwd(BaseHandler):
     __url__ = "/mgrpwd/(.*)"

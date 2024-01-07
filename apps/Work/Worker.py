@@ -240,7 +240,7 @@ class Worker(BaseHandler):
                 diff = datetime.datetime.utcnow() - ultima_log.datetime
                 if diff.days * 86400 + diff.seconds < 10:
                     time.sleep(8)
-            self.SendToKindle(username, to, book4meta.title + volumeTitle, booktype, str(oIO.getvalue()), tz)
+            self.SendToKindle(username, to, book4meta.title + volumeTitle, booktype, oIO.getvalue(), tz)
             rs = "%s(%s).%s Sent!"%(book4meta.title, local_time(tz=tz), booktype)
             main.log.info(rs)
             return rs

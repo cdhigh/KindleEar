@@ -57,13 +57,13 @@ class Setting(BaseHandler):
         webInput = web.input()
         kemail = webInput.get('kindleemail')
         mytitle = webInput.get("rt")
-        sgenable = bool(webInput.get('sgenable'))
-        sgapikey = webInput.get('sgapikey')
+        sg_enable = bool(webInput.get('sgenable'))
+        sg_apikey = webInput.get('sgapikey')
         if not kemail:
             tips = _("Kindle E-mail is requied!")
         elif not mytitle:
             tips = _("Title is requied!")
-        elif sgenable and (not sgapikey):
+        elif sg_enable and (not sg_apikey):
             tips = _("Need sendgrid ApiKey!")
         else:
             user.kindle_email = kemail.strip(';, ')
@@ -80,8 +80,8 @@ class Setting(BaseHandler):
             user.book_mode = webInput.get('bookmode')
             user.remove_hyperlinks = webInput.get('removehyperlinks')
             user.author_format = webInput.get('authorformat')
-            user.sgenable = sgenable
-            user.sgapikey = sgapikey
+            user.sg_enable = sg_enable
+            user.sg_apikey = sg_apikey
             user.put()
 
             myfeeds = user.ownfeeds

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #A GAE web application to aggregate rss and send it to your kindle.
 #Visit https://github.com/cdhigh/KindleEar for the latest version
@@ -37,10 +37,11 @@ def str_to_int(txt):
         return 0
 
 def local_time(fmt="%Y-%m-%d %H:%M", tz=TIMEZONE):
-    return (datetime.datetime.utcnow()+datetime.timedelta(hours=tz)).strftime(fmt)
+    return (datetime.datetime.utcnow() + datetime.timedelta(hours=tz)).strftime(fmt)
 
+#隐藏真实email地址，使用星号代替部分字符
+#输入email字符串，返回部分隐藏的字符串
 def hide_email(email):
-    """ 隐藏真实email地址，使用星号代替部分字符 """
     if not email or '@' not in email:
         return email
     email = email.split('@')
@@ -48,53 +49,6 @@ def hide_email(email):
         return email[0][0] + '**@' + email[-1]
     to = email[0][0:2] + ''.join(['*' for s in email[0][2:-1]]) + email[0][-1]
     return to + '@' + email[-1]
-    
-def set_lang(lang):
-    """ 设置网页显示语言 """
-    tr = gettext.translation('lang', 'i18n', languages=[lang])
-    tr.install(True)
-    main.jjenv.install_gettext_translations(tr)
-
-def fix_filesizeformat(value, binary=False):
-    " bugfix for do_filesizeformat of jinja2 "
-    bytes = float(value)
-    base = binary and 1024 or 1000
-    prefixes = [
-        (binary and 'KiB' or 'kB'),(binary and 'MiB' or 'MB'),
-        (binary and 'GiB' or 'GB'),(binary and 'TiB' or 'TB'),
-        (binary and 'PiB' or 'PB'),(binary and 'EiB' or 'EB'),
-        (binary and 'ZiB' or 'ZB'),(binary and 'YiB' or 'YB'),]
-    if bytes < base:
-        return '1 Byte' if bytes == 1 else '%d Bytes' % bytes
-    else:
-        for i, prefix in enumerate(prefixes):
-            unit = base ** (i + 2)
-            if bytes < unit:
-                return '%.1f %s' % ((base * bytes / unit), prefix)
-        return '%.1f %s' % ((base * bytes / unit), prefix)
-
-        
-#将etag应用于具体页面的装饰器
-#此装饰器不能减轻服务器压力，但是可以减小客户端的再次加载页面时间
-def etagged():
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwds):
-            rsp_data = func(*args, **kwds)
-            if type(rsp_data) is unicode:
-                etag = '"%s"' % md5(rsp_data.encode('utf-8', 'ignore')).hexdigest()
-            else:
-                etag = '"%s"' % md5(rsp_data).hexdigest()
-            #格式参见：<http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.26>
-            n = set([x.strip().lstrip('W/') for x in web.ctx.env.get('HTTP_IF_NONE_MATCH', '').split(',')])
-            if etag in n:
-                raise web.notmodified()
-            else:
-                web.header('ETag', etag)
-                web.header('Cache-Control', 'no-cache')
-                return rsp_data
-        return wrapper
-    return decorator
     
 #-----------以下几个函数为安全相关的
 def new_secret_key(length=8):

@@ -19,9 +19,6 @@ MY_FEEDS_DESC = u'RSS from KindleEar'
 #default timeout for network connection
 CONNECTION_TIMEOUT = 60
 
-# True to translate filename in chinese to pinyin
-PINYIN_FILENAME = False
-
 #If set to True, encoding detected by chardet module will be used for each article
 #otherwise encoding in http response header or meta of html is used in proprity.
 ALWAYS_CHAR_DETECT = False
@@ -67,8 +64,8 @@ WORDCNT_THRESHOLD_FOR_APMAIL = 100
 #subject of email will be truncated based limit of word count
 SUBJECT_WORDCNT_FOR_APMAIL = 16
 
-#retry count when failed in sendmail to kindle
-SENDMAIL_RETRY_CNT = 1
+#retry count when failed in sendmail to kindle, 0-dont retry
+SENDMAIL_RETRY_CNT = 0
 
 #GAE restrict postfix of attachment in email to send
 #True indicates KindleEar will replace the dot to underline to send mail if it failed.

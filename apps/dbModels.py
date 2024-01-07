@@ -94,7 +94,7 @@ class KeUser(db.Model): # kindleEar User
     remove_hyperlinks = db.StringProperty() #added 2018-05-02 去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
     author_format = db.StringProperty() #added 2020-09-17 修正Kindle 5.9.x固件的bug【将作者显示为日期】
 
-    sgenable = db.BooleanProperty() #是否使用SendGrid
+    sg_enable = db.BooleanProperty() #是否使用SendGrid
     sgapikey = db.StringProperty() #SendGrid API Key
     
     @property

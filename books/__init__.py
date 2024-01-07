@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #KindleEar <https://github.com/cdhigh/KindleEar>
 #Author: cdhigh <https://github.com/cdhigh>
@@ -27,7 +27,7 @@ for root, dirs, files in listBkDirs:
         bkFile = os.path.join(root, f)
         baseName = os.path.basename(bkFile)
         initFileName = os.path.join(os.path.dirname(bkFile), '__init__.py') #保证对应子目录下有__init__.py
-        if bkFile.endswith('.py') and not baseName.startswith('__') and not bkFile.endswith("base.py") and os.path.isfile(initFileName):
+        if bkFile.endswith('.py') and not baseName.startswith(('__', 'base_')) and os.path.isfile(initFileName):
             fullName = bkFile.replace(bookRootDir, '')
             fullName = fullName.lstrip('/').lstrip('\\').replace('\\', '/')
             bookModuleName = os.path.splitext(fullName)[0].replace('/', '.')
@@ -37,4 +37,4 @@ for root, dirs, files in listBkDirs:
                     bk = mBook.getBook()
                     RegisterBook(bk)
             except Exception as e:
-                default_log.warn("Book '%s' import failed : %s" % (bookModuleName, e))
+                default_log.warn("Book '{}' import failed : {}".format(bookModuleName, e))

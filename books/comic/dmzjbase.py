@@ -1,54 +1,40 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # encoding: utf-8
 
 import re
 import json
 
 from bs4 import BeautifulSoup
-from lib.urlopener import URLOpener
-from lib.autodecoder import AutoDecoder
-from books.base import BaseComicBook
-
+from lib.urlopener import UrlOpener
+from books.base_comic_book import BaseComicBook
 
 class DMZJBaseBook(BaseComicBook):
     accept_domains = ("https://manhua.dmzj.com", "https://m.dmzj.com")
     host = "http://images.dmzj.com/"
 
-    def get_chapter_list_from_api(self, comic_id):
-        opener = URLOpener(addreferer=False, timeout=60)
-        json_result = opener.open(
-            "http://v3api.dmzj.com/comic/{comic_id}.json".format(comic_id=comic_id)
-        )
+    def GetChapterListFromApi(self, comicId):
+        opener = UrlOpener(addreferer=False, timeout=self.timeout)
+        result = opener.open("http://v3api.dmzj.com/comic/{}.json".format(comicId))
 
-        if json_result.status_code != 200 or not json_result.content:
-            self.log.info(
-                "fetch v3 chapter list failed: %s, try v2" % json_result.status_code
-            )
-            json_result = opener.open(
-                "http://v2.api.dmzj.com/comic/{comic_id}.json?channel=Android&version=2.6.004".format(
-                    comic_id=comic_id
-                )
-            )
-            if json_result.status_code != 200 or not json_result.content:
-                self.log.warn(
-                    "fetch v2 chapter list failed: %s" % json_result.status_code
-                )
+        if result.status_code != 200:
+            self.log.info("fetch v3 chapter list failed: {}, try v2".format(result.status_code))
+            result = opener.open("http://v2.api.dmzj.com/comic/{}.json?channel=Android&version=2.6.004".format(comicId))
+            if result.status_code != 200:
+                self.log.warn("Fetch v2 chapter list failed: {}".format(result.status_code))
                 return []
 
-        data = json.loads(json_result.content)
-        chapter_datas = []
-        for chapters_data in data["chapters"]:
-            chapter_datas += chapters_data["data"]
-        chapter_datas.sort(key=lambda d: d["chapter_id"])
+        data = result.json
+        chapterDatas = []
+        for chapterData in data["chapters"]:
+            chapterDatas += chapterData["data"]
+        chapterDatas.sort(key=lambda d: d["chapter_id"])
         chapters = []
-        for chapter in chapter_datas:
-            chapter_url = "https://m.dmzj.com/view/{comic_id}/{chapter_id}.html".format(
-                chapter_id=chapter["chapter_id"], comic_id=comic_id
-            )
+        for chapter in chapterDatas:
+            chapter_url = "https://m.dmzj.com/view/{}/{}.html".format(comicId, chapter["chapter_id"])
             chapters.append((chapter["chapter_title"], chapter_url))
         return chapters
 
-    def get_chapter_list_from_mobile_url(self, url):
+    def GetChapterListFromMobileUrl(self, url):
         decoder = AutoDecoder(isfeed=False)
         opener = URLOpener(addreferer=False, timeout=60)
 
@@ -85,93 +71,70 @@ class DMZJBaseBook(BaseComicBook):
         return chapters
 
     # 获取漫画章节列表
-    def getChapterList(self, url):
+    def GetChapterList(self, url):
         if url.startswith("https://m.dmzj.com"):
-            return self.get_chapter_list_from_mobile_url(url)
-        decoder = AutoDecoder(isfeed=False)
-        opener = URLOpener(addreferer=False, timeout=60)
+            return self.GetChapterListFromMobileUrl(url)
+        opener = URLOpener(addreferer=False, timeout=self.timeout)
         chapterList = []
 
         result = opener.open(url)
-        if result.status_code != 200 or not result.content:
-            self.log.warn("fetch comic page failed: %s" % result.status_code)
+        if result.status_code != 200:
+            self.log.warn("Fetch comic page failed: {}".format(result.status_code))
             return chapterList
 
-        content = self.AutoDecodeContent(
-            result.content, decoder, self.feed_encoding, opener.realurl, result.headers
-        )
-
-        comic_id = re.search('g_comic_id = "([^"]+)', content).group(1)
+        content = result.text
+        comicId = re.search('g_comic_id = "([^"]+)', content)
+        if comicId:
+            comicId = comicId.group(1)
+        else:
+            return chapterList
 
         # try get chapters from html
-        soup = BeautifulSoup(content, "html.parser")
-        chapter_datas = []
-        for comic_classname in ["cartoon_online_border", "cartoon_online_border_other"]:
-            divs = soup.find_all("div", attrs={"class": comic_classname})
-            if not divs:
-                continue
-            for div in divs:
+        soup = BeautifulSoup(content, "lxml")
+        chapterDatas = []
+        for comicClassName in ["cartoon_online_border", "cartoon_online_border_other"]:
+            for div in soup.find_all("div", attrs={"class": comicClassName}):
                 for link in div.find_all("a"):
-                    chapter_datas.append(
-                        {
-                            "chapter_id": int(
-                                re.search("\/(\d+)\.shtml", link.get("href")).group(1)
-                            ),
-                            "chapter_title": unicode(link.string),
-                        }
-                    )
-        if chapter_datas:
-            chapter_datas.sort(key=lambda d: d["chapter_id"])
-            for chapter in chapter_datas:
-                chapter_url = "https://m.dmzj.com/view/{comic_id}/{chapter_id}.html".format(
-                    chapter_id=chapter["chapter_id"], comic_id=comic_id
-                )
-                chapterList.append((chapter["chapter_title"], chapter_url))
+                    #[(chapterId, chapterTitle)]
+                    chapterDatas.append((int(re.search("\/(\d+)\.shtml", link.get("href")).group(1)), link.string))
+
+        if chapterDatas:
+            chapterDatas.sort(key=lambda d: d["chapter_id"])
+            for chapter in chapterDatas:
+                chapterUrl = "https://m.dmzj.com/view/{}/{}.html".format(comicId, chapter[0])
+                chapterList.append((chapter[1], chapterUrl))
             return chapterList
         else:
-            return self.get_chapter_list_from_api(comic_id)
+            return self.GetChapterListFromApi(comicId)
 
-    def get_image_list_from_api(self, url):
-        comic_id, chapter_id = re.search(r"(\d+)/(\d+)\.html", url).groups()
-        opener = URLOpener(addreferer=False, timeout=60)
+    def GetImageListFromApi(self, url):
+        comicId, chapterId = re.search(r"(\d+)/(\d+)\.html", url).groups()
+        opener = UrlOpener(addreferer=False, timeout=self.timeout)
 
-        result = opener.open(
-            "http://v3api.dmzj.com/chapter/{comic_id}/{chapter_id}.json".format(
-                comic_id=comic_id, chapter_id=chapter_id
-            )
-        )
+        result = opener.open("http://v3api.dmzj.com/chapter/{}/{}.json".format(comicId, chapterId))
         if result.status_code != 200:
-            self.log.info("fetch v3 api json failed: %s, try v2" % result.status_code)
-            result = opener.open(
-                "http://v2.api.dmzj.com/chapter/{comic_id}/{chapter_id}.json?channel=Android&version=2.6.004".format(
-                    comic_id=comic_id, chapter_id=chapter_id
-                )
-            )
+            self.log.info("Fetch v3 api json failed: {}, try v2".format(result.status_code))
+            result = opener.open("http://v2.api.dmzj.com/chapter/{}/{}.json?channel=Android&version=2.6.004".format(comicId, chapterId))
             if result.status_code != 200:
-                self.log.warn("fetch v2 api json failed: %s" % result.status_code)
+                self.log.warn("Fetch v2 api json failed: {}".format(result.status_code))
                 return []
 
-        data = json.loads(result.content)
+        data = result.json
         return data["page_url"]
 
     # 获取漫画图片列表
-    def getImgList(self, url):
-        decoder = AutoDecoder(isfeed=False)
-        opener = URLOpener(addreferer=False, timeout=60)
+    def GetImgList(self, url):
+        opener = UrlOpener(addreferer=False, timeout=self.timeout)
 
         result = opener.open(url)
         if result.status_code != 200:
-            self.log.warn("fetch comic page failed: %s" % result.status_code)
+            self.log.warn("fetch comic page failed: {}".format(result.status_code))
             return []
 
-        content = self.AutoDecodeContent(
-            result.content, decoder, self.feed_encoding, opener.realurl, result.headers
-        )
-
-        reader_data_match = re.search("mReader\.initData\(({.+})", content)
-        if reader_data_match:
-            reader_data = reader_data_match.group(1)
-            return json.loads(reader_data)["page_url"]
-        self.log.info("Failed to get images from content, try api")
-
-        return self.get_image_list_from_api(url)
+        readerDataMatch = re.search("mReader\.initData\(({.+})", result.text)
+        if readerDataMatch:
+            readerData = readerDataMatch.group(1)
+            return json.loads(readerData)["page_url"]
+        else:
+            self.log.info("Failed to get images from content, try api")
+            return self.GetImageListFromApi(url)

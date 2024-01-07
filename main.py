@@ -21,39 +21,23 @@ builtins.__dict__['__Version__'] = __Version__
 builtins.__dict__['default_log'] = log
 builtins.__dict__['IsRunInLocal'] = IsRunInLocal
 
-supported_languages = ['en','zh-cn','tr-tr'] #不支持的语种则使用第一个语言
+supported_languages = ('en', 'zh-cn', 'tr-tr') #不支持的语种则使用第一个语言
+builtins.__dict__['supported_languages'] = supported_languages
 #gettext.install('lang', 'i18n', unicode=True) #for calibre startup
 
-class Main_Var:
-    urls = []
-    session = None
-    jjenv = None
-    supported_languages = None
-    log = None
-    __Version__ = None
-
-builtins.__dict__['main'] = Main_Var
-main.supported_languages = supported_languages
-main.log = log
-main.__Version__ = __Version__
 log.setLevel(logging.INFO if IsRunInLocal else logging.WARN)
 
-import web
+from bottle import default_app, route, run, hook
 import jinja2
-from google.appengine.api import memcache
+from bottle.ext import beaker
 
-from lib.memcachestore import MemcacheStore
 from books import BookClasses
 
+from apps.base_handler import set_session_lang
 from apps.view import *
 
 from apps.dbModels import Book
 from apps.BaseHandler import BaseHandler
-from apps.utils import fix_filesizeformat
-
-#print(str(os.environ))
-#reload(sys)
-#sys.setdefaultencoding('utf-8')
 
 for book in BookClasses():  #添加内置书籍
     if memcache.get(book.title): #使用memcache加速
@@ -65,25 +49,31 @@ for book in BookClasses():  #添加内置书籍
         b.put()
         memcache.add(book.title, book.description, 86400)
 
-class Test(BaseHandler):
-    def GET(self):
-        s = ''
-        for d in os.environ:
-            s += "<pre><p>" + str(d).rjust(28) + " | " + str(os.environ[d]) + "</p></pre>"
-        return s
+#让jinja2到工程根目录下的templates子目录加载模板
+jinja2Env = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'),
+                            extensions=["jinja2.ext.do", "jinja2.ext.i18n"])
+builtins.__dict__['jinja2Env'] = jinja2Env
 
-main.urls += ["/test", "Test",]
+#Bottle session configuration
+sessionOpts = {
+    'session.type': 'file',
+    'session.cookie_expires': 300,
+    'session.data_dir': '/tmp',  #Cloud 平台只有这个目录是可写的
+    'session.auto': True
+}
 
-application = web.application(main.urls, globals())
-store = MemcacheStore(memcache)
-session = web.session.Session(application, store, initializer={'username':'', 'login':0, 'lang':'', 'pocket_request_token':''})
-jjenv = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'),
-                            extensions=["jinja2.ext.do",'jinja2.ext.i18n'])
-jjenv.filters['filesizeformat'] = fix_filesizeformat
+hook.add_hook('before_request', set_session_lang)
+app = beaker.middleware.SessionMiddleware(default_app(), sessionOpts) #app为Cloud需要的接口名字
 
-app = application.wsgifunc()
+#print(str(os.environ))
+#reload(sys)
+#sys.setdefaultencoding('utf-8')
 
-web.config.debug = IsRunInLocal
+@route('/test')
+def Test():
+    s = ''
+    for d in os.environ:
+        s += "<pre><p>" + str(d).rjust(28) + " | " + str(os.environ[d]) + "</p></pre>"
+    return s
 
-main.session = session
-main.jjenv = jjenv
+#run(host='localhost', port=8080, debug=True)

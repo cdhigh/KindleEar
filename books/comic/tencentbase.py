@@ -4,10 +4,8 @@
 #Author: insert0003 <https://github.com/insert0003>
 import re, urlparse, json, base64
 from lib.urlopener import URLOpener
-from lib.autodecoder import AutoDecoder
-from books.base import BaseComicBook
+from books.base_comic_book import BaseComicBook
 from bs4 import BeautifulSoup
-
 
 class TencentBaseBook(BaseComicBook):
     accept_domains = ("http://ac.qq.com", "http://m.ac.qq.com")
