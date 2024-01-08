@@ -84,7 +84,7 @@ class Worker(BaseHandler):
                 mhfile = DEFAULT_MASTHEAD
                 coverfile = DEFAULT_COVER
         else: #多本书合并推送时使用“自定义RSS”的元属性
-            book4meta = user.ownfeeds
+            book4meta = user.own_feeds
             mhfile = DEFAULT_MASTHEAD
             coverfile = DEFAULT_COVER_BV if user.merge_books else DEFAULT_COVER
         

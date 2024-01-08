@@ -84,7 +84,7 @@ def shorten_title(doc):
     if title is None or title.text is None or len(title.text) == 0:
         return ""
     
-    zhPattern = re.compile(u'[\u4e00-\u9fa5]+') # added by cdhigh, exp for chinese
+    zhPattern = re.compile(u'[\u4e00-\u9fff]+') # added by cdhigh, exp for CJK
     
     title = orig = norm_title(title.text)
 

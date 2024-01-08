@@ -37,8 +37,8 @@ msgstr "用户名已经存在！"
 msgid "Add a account success!"
 msgstr "添加用户账号成功！"
 
-msgid "Please use admin/admin to login at first time."
-msgstr "初次登录请使用用户名'admin'/密码'admin'。"
+msgid "Please use {}/{} to login at first time."
+msgstr "初次登录请使用用户名'{}'/密码'{}'。"
 
 msgid "Please input username and password."
 msgstr "请输入正确的用户名和密码。"
@@ -58,8 +58,8 @@ msgstr "用户名不存在或密码错误！"
 msgid "Please input new password to confirm!"
 msgstr "请输入新的密码并确认！"
 
-msgid "The username '%s' not exist!"
-msgstr "用户名'%s'不存在！"
+msgid "The username '{}' not exist!"
+msgstr "用户名'{}'不存在！"
 
 msgid "Please confirm to delete the account!"
 msgstr "请确认是否要删除此账号！"
@@ -575,23 +575,23 @@ msgstr "申请授权过程失败！<br/>%s"
 msgid "Success authorized by Pocket!"
 msgstr "已经成功获得Pocket的授权！"
 
-msgid "Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>%s"
-msgstr "申请Pocket授权失败!<hr/>错误信息参考如下：<br/><br/>%s"
+msgid "Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>{}"
+msgstr "申请Pocket授权失败!<hr/>错误信息参考如下：<br/><br/>{}"
 
-msgid "'%(title)s'<br/><br/>Saved to %(act)s [%(email)s] success."
-msgstr "《%(title)s》<br/><br/>成功被保存至 %(act)s [%(email)s]。"
+msgid "'{title}'<br/><br/>Saved to {act} [{email}] success."
+msgstr "《{title}》<br/><br/>成功被保存至 {act} [{email}]。"
 
 msgid "Failed save to Pocket.<br/>"
 msgstr "保存到 Pocket 失败。<br/>"
 
-msgid "'%s'<br/><br/>Saved to your Pocket account."
-msgstr "《%s》<br/><br/>已经成功被保存到你的Pocket账户。"
+msgid "'{}'<br/><br/>Saved to your Pocket account."
+msgstr "《{}》<br/><br/>已经成功被保存到你的Pocket账户。"
 
-msgid "See details below:<br/><br/>%s"
-msgstr "下面是一些技术细节：<br/><br/>%s"
+msgid "See details below:<br/><br/>{}"
+msgstr "下面是一些技术细节：<br/><br/>{}"
 
-msgid "Request type[%s] unsupported"
-msgstr "不支持你请求的命令类型[%s]"
+msgid "Request type [{}] unsupported"
+msgstr "不支持你请求的命令类型 [{}]"
 
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr "Instapaper服务器异常，请稍候再试。"
@@ -614,17 +614,17 @@ msgstr "你提供的账号或密码有误！"
 msgid "Error when verify the username and password for Instapaper. Status:"
 msgstr "在校验Instapaper的账号和密码时发生错误。错误码："
 
-msgid "'%s'<br/><br/>Saved to your Instapaper account."
-msgstr "《%s》<br/><br/>已经成功被保存到你的Instapaper账户。"
+msgid "'{}'<br/><br/>Saved to your Instapaper account."
+msgstr "《{}》<br/><br/>已经成功被保存到你的Instapaper账户。"
 
 msgid "The id is invalid!"
 msgstr "ID不是合法的数值!"
 
-msgid "The feed(%d) not exist!"
-msgstr "订阅源(数据库ID: %d)不存在!"
+msgid "The feed ({}) not exist!"
+msgstr "订阅源(数据库ID: {})不存在!"
 
-msgid "The book(%d) not exist!"
-msgstr "内置书籍(数据库ID: %d)不存在!"
+msgid "The book ({}) not exist!"
+msgstr "内置书籍(数据库ID: {})不存在!"
 
 msgid "Cannot subscribe this book, Error:"
 msgstr "无法订阅此书籍，错误描述："
@@ -827,8 +827,8 @@ msgstr "<p>如果列表中没有合适的分类，请直接在文本框中填写
 msgid "<h1>Share links, share happiness</h1>"
 msgstr "<h1>分享链接，分享快乐</h1>"
 
-msgid "Cannot fetch data from kindleear.appspot.com, status: "
-msgstr "无法从kindleear.appspot.com获取数据，状态： "
+msgid "Cannot fetch data from {}, status: {}"
+msgstr "无法从 {} 获取数据，状态： {}"
 
 msgid "Database has no data yet, you can share your subscription now."
 msgstr "数据库还没有数据，您可以分享现在的订阅源。"
@@ -869,23 +869,3 @@ msgstr "删除样式表文件失败，错误信息："
 msgid "Forgot password?"
 msgstr "忘记密码？"
 
-msgid "Author format"
-msgstr "作者格式"
-
-msgid "YYYY-MM-DD"
-msgstr "年-月-日"
-
-msgid "MM-DD"
-msgstr "月-日"
-
-msgid "MM/DD"
-msgstr "月/日"
-
-msgid "DD/MM"
-msgstr "日/月"
-
-msgid "MMM DD"
-msgstr "英文月 日"
-
-msgid "Day, MMM DD"
-msgstr "星期, 英文月 日"

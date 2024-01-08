@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-#A GAE web application to aggregate rss and send it to your kindle.
+#数据库行结构定义
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #Author:
 # cdhigh <https://github.com/cdhigh>
@@ -10,7 +10,7 @@ from operator import attrgetter
 from google.appengine.ext import db
 from google.appengine.api import memcache
 from google.appengine.api.datastore_errors import NeedIndexError
-from apps.utils import ke_encrypt,ke_decrypt
+from apps.utils import ke_encrypt, ke_decrypt
 
 #--------------db models----------------
 #对应到每一个”书“，注意，同一个用户的”自定义RSS“会归到同一本书内
@@ -49,7 +49,7 @@ class Book(db.Model):
             return fc
     @property
     def owner(self):
-        return KeUser.all().filter('ownfeeds = ', self.key())
+        return KeUser.all().filter('own_feeds = ', self.key())
     
 class KeUser(db.Model): # kindleEar User
     name = db.StringProperty(required=True)
@@ -63,7 +63,7 @@ class KeUser(db.Model): # kindleEar User
     book_type = db.StringProperty() #mobi,epub
     device = db.StringProperty()
     expires = db.DateTimeProperty() #超过了此日期后账号自动停止推送
-    ownfeeds = db.ReferenceProperty(Book) # 每个用户都有自己的自定义RSS
+    own_feeds = db.ReferenceProperty(Book) # 每个用户都有自己的自定义RSS
     use_title_in_feed = db.BooleanProperty() # 文章标题优先选择订阅源中的还是网页中的
     titlefmt = db.StringProperty() #在元数据标题中添加日期的格式
     merge_books = db.BooleanProperty() #是否合并书籍成一本
@@ -95,7 +95,7 @@ class KeUser(db.Model): # kindleEar User
     author_format = db.StringProperty() #added 2020-09-17 修正Kindle 5.9.x固件的bug【将作者显示为日期】
 
     sg_enable = db.BooleanProperty() #是否使用SendGrid
-    sgapikey = db.StringProperty() #SendGrid API Key
+    sg_apikey = db.StringProperty() #SendGrid API Key
     
     @property
     def whitelist(self):

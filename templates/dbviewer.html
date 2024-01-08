@@ -101,29 +101,5 @@
         </tbody>
     </table>
     {% endif -%}
-    {% if urlencs and urlencs.count()>0 -%}
-    <hr />
-    <p style="text-align:center;color:red;font-weight:bold;">UrlEncoding</p>
-    <table border="1" cellspacing="0" cellpadding="0" align="center" width="100%">
-        <thead>
-        <tr>
-            <th class="center">ID</th>
-            <th class="center">Host</th>
-            <th class="center">FeedEncoding</th>
-            <th class="center">PageEncoding</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for item in urlencs -%}
-        <tr class={{loop.cycle("odd","even")}}>
-            <td class="center">{{item.key().id()}}</td>
-            <td class="center">{{item.netloc}}</td>
-            <td class="center">{% if item.feedenc %}{{item.feedenc}}{% else %}-{% endif %}</td>
-            <td class="center">{% if item.pageenc %}{{item.pageenc}}{% else %}-{% endif %}</td>
-        </tr>
-        {% endfor -%}
-        </tbody>
-    </table>
-    {% endif -%}
 </div>
 {% endblock -%}

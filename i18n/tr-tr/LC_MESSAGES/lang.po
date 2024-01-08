@@ -37,8 +37,8 @@ msgstr "Bu isimde bir kullanıcı kaydı zaten mevcut!"
 msgid "Add a account success!"
 msgstr "Yeni hesap başarıyla eklendi!"
 
-msgid "Please use admin/admin to login at first time."
-msgstr "İlk giriş için kullanıcı adı:'admin' ve şifre: 'admin'"
+msgid "Please use {}/{} to login at first time."
+msgstr "İlk giriş için kullanıcı adı:'{}' ve şifre: '{}'"
 
 msgid "Please input username and password."
 msgstr "Lütfen kullanıcı adı ve şifresini giriniz"
@@ -58,8 +58,8 @@ msgstr "Kullanıcı mevcut değil veya şifre hatalı!"
 msgid "Please input new password to confirm!"
 msgstr "Lütfen onaylamak için yeni şifreyi giriniz! "
 
-msgid "The username '%s' not exist!"
-msgstr "'%s' isminde bir kullanıcı bulunmuyor!"
+msgid "The username '{}' not exist!"
+msgstr "'{}' isminde bir kullanıcı bulunmuyor!"
 
 msgid "Please confirm to delete the account!"
 msgstr "Lütfen hesap silme işlemini onaylayınız!"
@@ -567,23 +567,23 @@ msgstr "Yetkilendirme Hatası!<br/>%s"
 msgid "Success authorized by Pocket!"
 msgstr "Pocket tarafından yetkilendirilen başarı!"
 
-msgid "Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>%s"
-msgstr "Cep yetkilendirme isteğinde bulunamadı! <hr/> Aşağıdaki ayrıntılara bakın:<br/><br/>%s"
+msgid "Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>{}"
+msgstr "Cep yetkilendirme isteğinde bulunamadı! <hr/> Aşağıdaki ayrıntılara bakın:<br/><br/>{}"
 
-msgid "'%(title)s'<br/><br/>Saved to %(act)s [%(email)s] success."
-msgstr "'%(title)s'<br/><br/>%(act)s [%(email)s] başarısına kaydedildi."
+msgid "'{title}'<br/><br/>Saved to {act} [{email}] success."
+msgstr "'{title}'<br/><br/>{act} [{email}] başarısına kaydedildi."
 
 msgid "Failed save to Pocket.<br/>"
 msgstr "Pocket'e kaydetme işlemi başarısız oldu.<br/>"
 
-msgid "'%s'<br/><br/>Saved to your Pocket account."
-msgstr "'%s'<br/><br/>Pocket hesabınıza kaydedildi."
+msgid "'{}'<br/><br/>Saved to your Pocket account."
+msgstr "'{}'<br/><br/>Pocket hesabınıza kaydedildi."
 
-msgid "See details below:<br/><br/>%s"
-msgstr "Aşağıdaki ayrıntılara bakın:<br/><br/>%s"
+msgid "See details below:<br/><br/>{}"
+msgstr "Aşağıdaki ayrıntılara bakın:<br/><br/>{}"
 
-msgid "Request type[%s] unsupported"
-msgstr "İstek türü [%s] desteklenmiyor"
+msgid "Request type [{}] unsupported"
+msgstr "İstek türü [{}] desteklenmiyor"
 
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr "Instapaper hizmeti bir hatayla karşılaştı. Lütfen daha sonra tekrar deneyiniz."
@@ -606,17 +606,17 @@ msgstr "kullanıcı adı veya şifre yanlış!"
 msgid "Error when verify the username and password for Instapaper. Status:"
 msgstr "Instapaper için kullanıcı adı ve şifre doğrulanırken hata oluştu. Durum:"
 
-msgid "'%s'<br/><br/>Saved to your Instapaper account."
-msgstr "'%s'<br/><br/>Instapaper hesabınıza kaydedildi."
+msgid "'{}'<br/><br/>Saved to your Instapaper account."
+msgstr "'{}'<br/><br/>Instapaper hesabınıza kaydedildi."
 
 msgid "The id is invalid!"
 msgstr "Kimlik geçersiz!"
 
-msgid "The feed(%d) not exist!"
-msgstr "Besleme(%d) mevcut değil!"
+msgid "The feed ({}) not exist!"
+msgstr "Besleme ({}) mevcut değil!"
 
-msgid "The book(%d) not exist!"
-msgstr "Kitap(%d) mevcut değil!"
+msgid "The book ({}) not exist!"
+msgstr "Kitap ({}) mevcut değil!"
 
 msgid "Cannot subscribe this book, Error:"
 msgstr "Bu kitaba abone olamaz, Hata:"
@@ -792,8 +792,8 @@ msgstr "<p>Please write a category in text field if the one you wish is not in t
 msgid "<h1>Share links, share happiness</h1>"
 msgstr "<h1>Share links, share happiness</h1>"
 
-msgid "Cannot fetch data from kindleear.appspot.com, status: "
-msgstr "Cannot fetch data from kindleear.appspot.com, status: "
+msgid "Cannot fetch data from {}, status: {}"
+msgstr "Cannot fetch data from {}, status: {}"
 
 msgid "Database has no data yet, you can share your subscription now."
 msgstr "Database has no data yet, you can share your subscription now."
@@ -836,24 +836,3 @@ msgstr "Failed to delete the stylesheet. Error:"
 
 msgid "Forgot password?"
 msgstr "Forgot password?"
-
-msgid "Author format"
-msgstr "Author format"
-
-msgid "YYYY-MM-DD"
-msgstr "YYYY-AA-GG"
-
-msgid "MM-DD"
-msgstr "AA-GG"
-
-msgid "MM/DD"
-msgstr "AA/GG"
-
-msgid "DD/MM"
-msgstr "GG/AA"
-
-msgid "MMM DD"
-msgstr "AAA GG"
-
-msgid "Day, MMM DD"
-msgstr "Gün, AAA GG"

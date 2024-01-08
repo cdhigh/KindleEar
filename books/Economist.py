@@ -9,8 +9,6 @@ class Economist(BaseFeedBook):
     title                 = 'The Economist'
     description           = 'Global news and current affairs from a European perspective. deliver on Friday.'
     language              = 'en'
-    feed_encoding         = "utf-8"
-    page_encoding         = "utf-8"
     masthead_file         = "mh_economist.gif"
     cover_file            = "cv_economist.jpg"
     deliver_days          = ['Friday']

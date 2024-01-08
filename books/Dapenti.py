@@ -9,8 +9,6 @@ class Dapenti(BaseFeedBook):
     title                 = '喷嚏图卦'
     description           = '每天一图卦，让我们更清楚地了解这个世界'
     language              = 'zh-cn'
-    feed_encoding         = "utf-8"
-    page_encoding         = "utf-8"
     max_articles_per_feed = 1
     oldest_article        = 2
     masthead_file         = "mh_dapenti.gif"

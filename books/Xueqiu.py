@@ -18,8 +18,6 @@ class Xueqiu(BaseFeedBook):
     title                 = '雪球今日话题'
     description           = '雪球是一个社交投资网络，「今日话题」是雪球用户每日发布的投资交流精选。'
     language              = 'zh-cn'
-    feed_encoding         = "utf-8"
-    page_encoding         = "utf-8"
     masthead_file         = "mh_xueqiu.gif"
     cover_file            = "cv_xueqiu.jpg"
     oldest_article        = 1

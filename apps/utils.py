@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-#A GAE web application to aggregate rss and send it to your kindle.
-#Visit https://github.com/cdhigh/KindleEar for the latest version
-#Author:
-# cdhigh <https://github.com/cdhigh>
-#Contributors:
-# rexdf <https://github.com/rexdf>
+#一些常用工具函数
+
 import os, sys
 from functools import wraps
 from hashlib import md5
@@ -40,15 +36,26 @@ def local_time(fmt="%Y-%m-%d %H:%M", tz=TIMEZONE):
     return (datetime.datetime.utcnow() + datetime.timedelta(hours=tz)).strftime(fmt)
 
 #隐藏真实email地址，使用星号代替部分字符
-#输入email字符串，返回部分隐藏的字符串
+#输入单个email字符串或列表，返回部分隐藏的字符串
 def hide_email(email):
-    if not email or '@' not in email:
+    emailList = [email] if isinstance(email, str) else email
+    newEmails = []
+    for item in emailList:
+        if '@' not in item:
+            newEmails.append(item)
+            continue
+
+        item = item.split('@')
+        if len(item[0]) < 4:
+            return item[0][0] + '**@' + item[-1]
+        to = item[0][0:2] + ''.join(['*' for s in item[0][2:-1]]) + item[0][-1]
+        newEmails.append(to + '@' + item[-1])
+    if not newEmails:
         return email
-    email = email.split('@')
-    if len(email[0]) < 4:
-        return email[0][0] + '**@' + email[-1]
-    to = email[0][0:2] + ''.join(['*' for s in email[0][2:-1]]) + email[0][-1]
-    return to + '@' + email[-1]
+    elif len(newEmails) == 1:
+        return newEmails[0]
+    else:
+        return newEmails
     
 #-----------以下几个函数为安全相关的
 def new_secret_key(length=8):
@@ -105,4 +112,79 @@ def auth_code(string, key, operation='DECODE'):
             return ''
     else:
         return base64.urlsafe_b64encode(result)
-        
+
+
+#基于readability-lxml修改的提取网页标题的函数，增加CJK语种支持
+def shorten_webpage_title(title):
+    if not title:
+        return ""
+    
+    zhPattern = re.compile('[\u4e00-\u9fff]+') # CJK unicode range
+    
+    #去除多余空格和转换一些HTML转义字符
+    title = " ".join(title.split())
+    entities = {"\u2014": "-", "\u2013": "-", "&mdash;": "-", "&ndash;": "-",
+        "\u00A0": " ", "\u00AB": '"', "\u00BB": '"', "&quot;": '"'}
+    for c, r in entities.items():
+        if c in title:
+            title = title.replace(c, r)
+    
+    orig = title
+
+    candidates = set()
+
+    for item in [".//h1", ".//h2", ".//h3"]:
+        for e in list(doc.iterfind(item)):
+            if e.text:
+                add_match(candidates, e.text, orig)
+            if e.text_content():
+                add_match(candidates, e.text_content(), orig)
+
+    for item in TITLE_CSS_HEURISTICS:
+        for e in doc.cssselect(item):
+            if e.text:
+                add_match(candidates, e.text, orig)
+            if e.text_content():
+                add_match(candidates, e.text_content(), orig)
+
+    if candidates:
+        title = sorted(candidates, key=len)[-1]
+    else:
+        for delimiter in [" | ", " - ", " :: ", " / "]:
+            if delimiter in title:
+                parts = orig.split(delimiter)
+                lp0 = parts[0].split() #split by space
+                lpl = parts[-1].split()
+                if len(lp0) >= 4:
+                    title = parts[0]
+                    break
+                # added by cdhigh, CJK? no use space to split words
+                elif zhPattern.search(parts[0]) and len(parts[0]) > 4:
+                    title = parts[0]
+                    break
+                elif len(lpl) >= 4:
+                    title = parts[-1]
+                    break
+                # added by cdhigh, CJK? no use space to split words
+                elif zhPattern.search(parts[-1]) and len(parts[-1]) > 4:
+                    title = parts[-1]
+                    break
+        else:
+            if ": " in title:
+                parts = orig.split(": ")
+                if len(parts[-1].split()) >= 4:
+                    title = parts[-1]
+                # added by cdhigh
+                elif zhPattern.search(parts[-1]) and len(parts[-1]) > 4:
+                    title = parts[-1]
+                else:
+                    title = orig.split(": ", 1)[1]
+    
+    # added by cdhigh
+    if zhPattern.search(title):
+        if not 4 < len(title) < 100:
+            return orig
+    elif not 15 < len(title) < 150:
+        return orig
+    
+    return title

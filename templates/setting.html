@@ -63,8 +63,8 @@
             <div class="pure-control-group">
                 <label>{{_("Book type")}}</label>
                 <select class="pure-u-1 pure-u-sm-1-2" name="booktype">
-                    <option value="mobi" {% if user.book_type != 'epub' %}selected="selected"{% endif %}>mobi</option>
                     <option value="epub" {% if user.book_type == 'epub' %}selected="selected"{% endif %}>epub</option>
+                    <option value="mobi" {% if user.book_type != 'epub' %}selected="selected"{% endif %}>mobi</option>
                 </select>
             </div>
             <div class="pure-control-group">

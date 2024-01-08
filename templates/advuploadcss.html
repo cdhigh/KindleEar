@@ -19,7 +19,7 @@
         <legend><h3>{{_("Upload style sheet")}}</h3></legend>
         <p><small>{{_("Upload a style sheet from local (accept utf-8 only).")}}</small></p>
         <div class="box-list">
-            <input type="file" name="cssfile" id="cssfile" class="pure-input-1 box" accept="text/css" />
+            <input type="file" name="css_file" id="cssfile" class="pure-input-1 box" accept="text/css" />
             <textarea id="csspreview" rows="10" cols="50" readonly="true">{% if user and user.css_content -%}{{user.css_content}}{% endif -%}
             </textarea>
         </div>

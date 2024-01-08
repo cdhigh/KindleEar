@@ -26,8 +26,6 @@ class WenXue72(BaseFeedBook):
         (u'穿越八年才出道', 'https://www.72wx.com/wenxue/89019/'),
     ]
 
-    feed_encoding = "utf-8"
-    page_encoding = 'utf-8'  # 设定待抓取页面的页面编码
     fulltext_by_readability = False  # 设定手动解析网页
 
     coverfile = 'cv_WenXue72.jpg'  # 设定封面图片

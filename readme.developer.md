@@ -8,3 +8,6 @@
      * 删除__init__()
      * is_file_accessible() 无条件返回 FakeFile.Visibility.OK
      * stubs.py默认位置：C:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\platform\google_appengine\google\appengine\tools\devappserver2\python\runtime\stubs.py
+
+# Python库
+* readability-lxml: 修改了其htmls.py|shorten_title()

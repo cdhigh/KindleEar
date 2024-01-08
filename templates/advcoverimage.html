@@ -29,7 +29,7 @@
         <legend><h3>{{_("Upload cover image")}}</h3></legend>
         <p><small>{{_("Upload a cover image from local.")}}</small></p>
         <div class="box-list">
-            <input type="file" name="coverfile" id="coverfile" class="pure-input-1 box" accept=".jpg, .png, .jpeg, .gif, .bmp" />
+            <input type="file" name="cover_file" id="coverfile" class="pure-input-1 box" accept=".jpg, .png, .jpeg, .gif, .bmp" />
             <div id="preview" class="box upload_preview">
                 {% if user and user.cover -%}
                     <img id="uploadImage" src="/dbimage/cover" class="out_shadow" />

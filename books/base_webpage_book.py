@@ -20,7 +20,7 @@ class BaseWebpageBook(BaseFeedBook):
             result = opener.open(url)
             status_code = result.status_code
             if status_code != 200:
-                self.log.warn('fetch article failed({}):{}'.format(UrlOpener.CodeMap(status_code), url))
+                self.log.warn('Fetch article failed({}):{}'.format(UrlOpener.CodeMap(status_code), url))
                 continue
             
             content =  self.PreProcess(result.text)
@@ -50,7 +50,7 @@ class BaseWebpageBook(BaseFeedBook):
 
             #添加额外的CSS
             if self.AddCustomCss(soup):
-                yield ItemImageCssTuple("text/css", "custom.css", "custom.css", user.css_content, False)
+                yield ItemCssTuple("custom.css", "custom.css", user.css_content)
 
             #逐个处理文章内的图像链接，生成对应的图像文件
             thumbnailUrl = None

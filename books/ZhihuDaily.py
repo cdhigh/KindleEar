@@ -24,8 +24,6 @@ class ZhihuDaily(BaseFeedBook):
     title                 = '知乎日报'
     description           = '知乎日报的内容是动态更新的，建议在晚 8 点或 23 点进行投递。此外，知乎日报 API 需要转发服务器，参见 https://github.com/ohdarling/ZhihuDailyForwarder'
     language      = 'zh-cn'
-    feed_encoding = "utf-8"
-    page_encoding = "utf-8"
     masthead_file = "mh_zhihudaily.gif"
     cover_file    = "cv_zhihudaily.jpg"
     fulltext_by_readability = False

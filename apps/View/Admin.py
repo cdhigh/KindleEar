@@ -1,42 +1,40 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-#A GAE web application to aggregate rss and send it to your kindle.
-#Visit https://github.com/cdhigh/KindleEar for the latest version
-#Contributors:
-# rexdf <https://github.com/rexdf>
+#账号管理页面
 
-import hashlib, gettext, datetime
+import hashlib, datetime
 
-from bottle import route, post
+from bottle import route, post, redirect
 
-from apps.BaseHandler import BaseHandler
-from apps.dbModels import *
-from apps.utils import new_secret_key, etagged, str_to_int
+from apps.base_handler import *
+from apps.db_models import *
+from apps.utils import new_secret_key, str_to_int
 
 from config import *
 
 # 账户管理页面
-@etagged()
 @route("/admin")
 def Admin():
-    user = self.getcurrentuser()
-    users = KeUser.all() if user.name == 'admin' else None
-    return self.render('admin.html', "Admin", current='admin', user=user, users=users)
+    user = get_current_user()
+
+    #只有管理员才能管理其他用户
+    users = KeUser.all() if user.name == ADMIN_NAME else None
+    return render_page('admin.html', 'Admin', current=ADMIN_NAME, user=user, users=users)
 
 @post("/admin")
-def POST(self):
+def AdminPost(self):
     forms = request.forms
     u, up1, up2 = forms.u, forms.up1, forms.up2
     expiration = str_to_int(forms.get('expiration', '0'))
     op, p1, p2 = forms.op, forms.p1, forms.p2
     user = get_current_user()
-    users = KeUser.all() if user.name == 'admin' else None
+    users = KeUser.all() if user.name == ADMIN_NAME else None
     
     if all((op, p1, p2)): #修改当前登陆账号的密码
         secret_key = user.secret_key or ''
         try:
-            pwd = hashlib.md5(op+secret_key).hexdigest()
-            newpwd = hashlib.md5(p1+secret_key).hexdigest()
+            pwd = hashlib.md5((op + secret_key).encode()).hexdigest()
+            newpwd = hashlib.md5((p1 + secret_key).encode()).hexdigest()
         except:
             tips = _("The password includes non-ascii chars!")
         else:
@@ -48,10 +46,10 @@ def POST(self):
                 tips = _("Change password success!")
                 user.passwd = newpwd
                 user.put()
-        return self.render('admin.html', "Admin", current='admin', user=user, users=users, chpwdtips=tips)
+        return render_page('admin.html', "Admin", current=ADMIN_NAME, user=user, users=users, chpwdtips=tips)
     elif all((u, up1, up2)): #添加账户
-        if user.name != 'admin':
-            raise web.seeother(r'/')
+        if user.name != ADMIN_NAME:
+            redirect('/')
         elif not u:
             tips = _("Username is empty!")
         elif up1 != up2:
@@ -61,7 +59,7 @@ def POST(self):
         else:
             secret_key = new_secret_key()
             try:
-                pwd = hashlib.md5(up1 + secret_key).hexdigest()
+                pwd = hashlib.md5((up1 + secret_key).encode()).hexdigest()
             except:
                 tips = _("The password includes non-ascii chars!")
             else:
@@ -70,115 +68,117 @@ def POST(self):
                     needs_subscription=False, separate=False)
                 myfeeds.put()
                 au = KeUser(name=u, passwd=pwd, kindle_email='', enable_send=False,
-                    send_time=7, timezone=TIMEZONE, book_type="mobi",
-                    ownfeeds=myfeeds, merge_books=False, secret_key=secret_key, expiration_days=expiration)
+                    send_time=7, timezone=TIMEZONE, book_type="epub",
+                    own_feeds=myfeeds, merge_books=False, secret_key=secret_key, expiration_days=expiration)
                 if expiration:
                     au.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
 
                 au.put()
-                users = KeUser.all() if user.name == 'admin' else None
+                users = KeUser.all() if user.name == ADMIN_NAME else None
                 tips = _("Add a account success!")
-        return self.render('admin.html', "Admin", current='admin', user=user, users=users, actips=tips)
+        return render_page('admin.html', "Admin", current=ADMIN_NAME, user=user, users=users, actips=tips)
     else:
-        return self.GET()
+        return Admin()
 
-class AdminMgrPwd(BaseHandler):
-    __url__ = "/mgrpwd/(.*)"
-    # 管理员修改其他账户的密码
-    def GET(self, name):
-        self.login_required('admin')
+#管理员修改其他账户的密码
+@route("/mgrpwd/<name>")
+def AdminManagePassword(name):
+    login_required(ADMIN_NAME)
+    u = KeUser.all().filter("name = ", name).get()
+    expiration = 0
+    if not u:
+        tips = _("The username '{}' not exist!").format(name)
+    else:
+        tips = _("Please input new password to confirm!")
+        expiration = u.expiration_days
+
+    return render_page('adminmgrpwd.html', "Change password", tips=tips, username=name, expiration=expiration)
+
+@post("/mgrpwd/<name>")
+def AdminManagePasswordPost(name=None):
+    login_required(ADMIN_NAME)
+    forms = request.forms
+    name, p1, p2 = forms.u, forms.p1, forms.p2
+    expiration = str_to_int(forms.get('ep', '0'))
+
+    if name:
         u = KeUser.all().filter("name = ", name).get()
-        expiration = 0
         if not u:
-            tips = _("The username '%s' not exist!") % name
+            tips = _("The username '{}' not exist!").format(name)
+        elif p1 != p2:
+            tips = _("The two new passwords are dismatch!")
         else:
-            tips = _("Please input new password to confirm!")
-            expiration = u.expiration_days
-
-        return self.render('adminmgrpwd.html', "Change password", tips=tips, username=name, expiration=expiration)
-        
-    def POST(self, _n=None):
-        self.login_required('admin')
-        name, p1, p2 = web.input().get('u'), web.input().get('p1'), web.input().get('p2')
-        expiration = str_to_int(web.input().get('ep', '0'))
-
-        if name:
-            u = KeUser.all().filter("name = ", name).get()
-            if not u:
-                tips = _("The username '%s' not exist!") % name
-            elif p1 != p2:
-                tips = _("The two new passwords are dismatch!")
+            secret_key = u.secret_key or ''
+            try:
+                pwd = hashlib.md5((p1 + secret_key).encode()).hexdigest()
+            except:
+                tips = _("The password includes non-ascii chars!")
             else:
-                secret_key = u.secret_key or ''
-                try:
-                    pwd = hashlib.md5(p1 + secret_key).hexdigest()
-                except:
-                    tips = _("The password includes non-ascii chars!")
+                u.passwd = pwd
+                u.expiration_days = expiration
+                if expiration:
+                    u.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
                 else:
-                    u.passwd = pwd
-                    u.expiration_days = expiration
-                    if expiration:
-                        u.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
-                    else:
-                        u.expires = None
-                    u.put()
-                    strBackPage = '&nbsp;&nbsp;&nbsp;&nbsp;<a href="%s">Click here to go back</a>' % Admin.__url__
-                    tips = _("Change password success!") + strBackPage
-        else:
-            tips = _("Username is empty!")
-        
-        return self.render('adminmgrpwd.html', "Change password", tips=tips, username=name)
-        
-class DelAccount(BaseHandler):
-    __url__ = "/delaccount/(.*)"
-    def GET(self, name):
-        self.login_required()
-        if main.session.username == 'admin' or (name and name == main.session.username):
-            tips = _("Please confirm to delete the account!")
-            return self.render('delaccount.html', "Delete account", tips=tips,username=name)
-        else:
-            raise web.seeother(r'/')
+                    u.expires = None
+                u.put()
+                strBackPage = '&nbsp;&nbsp;&nbsp;&nbsp;<a href="/admin">Click here to go back</a>'
+                tips = _("Change password success!") + strBackPage
+    else:
+        tips = _("Username is empty!")
     
-    def POST(self, _n=None):
-        self.login_required()
-        name = web.input().get('u')
-        if name and (main.session.username == 'admin' or main.session.username == name):
-            u = KeUser.all().filter("name = ", name).get()
-            if not u:
-                tips = _("The username '%s' not exist!") % name
-            else:
-                if u.ownfeeds:
-                    for feed in list(u.ownfeeds.feeds):
-                        feed.delete()
-                    u.ownfeeds.delete()
-                    
-                #删掉白名单和过滤器
-                whitelists = list(u.whitelist)
-                urlfilters = list(u.urlfilter)
-                for d in whitelists:
-                    d.delete()
-                for d in urlfilters:
-                    d.delete()
-                
-                # 删掉订阅记录
-                for book in Book.all():
-                    if book.users and name in book.users:
-                        book.users.remove(name)
-                        book.put()
-                
-                #删掉推送记录
-                db.delete(DeliverLog.all().filter('username = ', name))
-                
-                #删掉书籍登陆信息
-                for subs_info in SubscriptionInfo.all().filter('user = ', u.key()):
-                    subs_info.delete()
-                
-                u.delete()
-                
-                if main.session.username == name:
-                    raise web.seeother('/logout')
-                else:
-                    raise web.seeother('/admin')
+    return render_page('adminmgrpwd.html', "Change password", tips=tips, username=name)
+        
+#删除一个账号
+@route("/delaccount/<name>")
+def DelAccount(name):
+    session = login_required()
+    if (session.userName == ADMIN_NAME) or (name and name == session.userName):
+        tips = _("Please confirm to delete the account!")
+        return render_page('delaccount.html', "Delete account", tips=tips, username=name)
+    else:
+        redirect('/')
+
+@post("/delaccount/<name>")
+def DelAccountPost(name=None):
+    session = login_required()
+    name = request.forms.u
+    if name and (name == ADMIN_NAME) and (session.userName in (ADMIN_NAME, name)):
+        u = KeUser.all().filter("name = ", name).get()
+        if not u:
+            tips = _("The username '{}' not exist!").format(name)
         else:
-            tips = _("The username is empty or you dont have right to delete it!")
-        return self.render('delaccount.html', "Delete account", tips=tips, username=name)
+            if u.own_feeds:
+                for feed in list(u.own_feeds.feeds):
+                    feed.delete()
+                u.own_feeds.delete()
+                
+            #删掉白名单和过滤器
+            whitelists = list(u.whitelist)
+            urlfilters = list(u.urlfilter)
+            for d in whitelists:
+                d.delete()
+            for d in urlfilters:
+                d.delete()
+            
+            # 删掉订阅记录
+            for book in Book.all():
+                if book.users and name in book.users:
+                    book.users.remove(name)
+                    book.put()
+            
+            #删掉推送记录
+            db.delete(DeliverLog.all().filter('username = ', name))
+            
+            #删掉书籍登陆信息
+            for subs_info in SubscriptionInfo.all().filter('user = ', u.key()):
+                subs_info.delete()
+            
+            u.delete()
+            
+            if session.username == name:
+                redirect('/logout')
+            else:
+                redirect('/admin')
+    else:
+        tips = _("The username is empty or you dont have right to delete it!")
+    return render_page('delaccount.html', "Delete account", tips=tips, username=name)

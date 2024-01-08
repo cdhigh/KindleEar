@@ -11,7 +11,7 @@ from urllib.parse import urljoin, urlparse, urlunparse, urlencode, parse_qs, unq
 
 from bs4 import BeautifulSoup, Comment, NavigableString, CData, Tag
 import feedparser
-import readability
+from lib import readability #修改了其htmls.py|shorten_title()
 from lib.urlopener import UrlOpener
 from apps.dbModels import LastDelivered
 
@@ -38,9 +38,12 @@ RssItemTuple = namedtuple("RssItemTuple", "section title url desc")
 #每个HTML，thumbnailUrl为文章第一个图片文件的url
 ItemHtmlTuple = namedtuple("ItemHtmlTuple", "section url title content brief thumbnailUrl")
 
-#每个图片/CSS
+#每个图片
 #图片的isThumbnail仅当其为article的第一个img为True
-ItemImageCssTuple = namedtuple("ItemImageCssTuple", "mime url fileName content isThumbnail")
+ItemImageTuple = namedtuple("ItemImageTuple", "mime url fileName content isThumbnail")
+
+#每个CSS，其mime固定为 "text/css"
+ItemCssTuple = namedtuple("ItemCssTuple", "url fileName content")
 
 # base class of Book
 class BaseFeedBook:
@@ -56,10 +59,6 @@ class BaseFeedBook:
 
     extra_header = {}# 设置请求头包含的额外数据
     # 例如设置 Accept-Language：extra_header['Accept-Language'] = 'zh-CN,zh;q=0.8,en;q=0.6,ja;q=0.4'
-
-    #下面这两个编码建议设置，如果留空，则使用自动探测解码，稍耗费CPU
-    feed_encoding = '' # RSS编码，一般为XML格式，直接打开源码看头部就有编码了
-    page_encoding = '' # 页面编码，获取全文信息时的网页编码
 
     # 题图文件名，格式：gif(600*60)，所有图片文件存放在images/下面，文件名不需要images/前缀
     # 如果不提供此图片，软件使用PIL生成一个，但是因为GAE不能使用ImageFont组件
@@ -215,7 +214,7 @@ class BaseFeedBook:
     #返回当前任务的用户名
     @property
     def UserName(self):
-        return self.user.name if self.user else "admin"
+        return self.user.name if self.user else ADMIN_NAME
 
     # 返回最近推送的章节标题
     @property
@@ -307,7 +306,7 @@ class BaseFeedBook:
         return urls
 
     #生成器，返回电子书中的每一项内容，包括HTML或图像文件，
-    #每次返回一个命名元组，可能为 ItemHtmlTuple 或 ItemImageTuple
+    #每次返回一个命名元组，可能为 ItemHtmlTuple, ItemImageTuple, ItemCssTuple
     def Items(self):
         useTitleInFeed = self.user.use_title_in_feed if self.user else False
         urls = self.ParseFeedUrls() #返回 [RssItemTuple,...]
@@ -339,7 +338,7 @@ class BaseFeedBook:
     #因为图片文件占内存，为了节省内存，这个函数也做为生成器
     #resp: 可能为字符串(描述片段生成的HTML)，也可能为 requests.Response 实例
     #rssItem: RssItemTuple 实例
-    #返回可能为：ItemHtmlTuple, ItemImageCssTuple
+    #返回可能为：ItemHtmlTuple, ItemImageTuple, ItemCssTuple
     def Readability(self, resp, rssItem):
         url = rssItem.url
         title = ""
@@ -363,7 +362,7 @@ class BaseFeedBook:
                 if imgType: #如果是图片，则使用一个简单的html做为容器
                     imgMime = "image/{}".format(imgType)
                     imgFn = "img{}.{}".format(self.ImgIndex, imgType.replace("jpeg", "jpg"))
-                    yield ItemImageCssTuple(imgMime, url, imgFn, resp.content, False)
+                    yield ItemImageTuple(imgMime, url, imgFn, resp.content, False)
                     tmpHtml = imageHtmlTemplate.format(title="Picture", imgFilename=imgFn) #HTML容器
                     yield ItemHtmlTuple("", url, "Picture", tmpHtml, "", "")
                 else:
@@ -414,7 +413,7 @@ class BaseFeedBook:
 
         #添加额外的CSS
         if self.AddCustomCss(soup):
-            yield ItemImageCssTuple("text/css", "custom.css", "custom.css", self.user.css_content, False)
+            yield ItemCssTuple("custom.css", "custom.css", self.user.css_content)
 
         #逐个处理文章内的图像链接，生成对应的图像文件
         thumbnailUrl = None
@@ -431,7 +430,7 @@ class BaseFeedBook:
         #插入分享链接，如果有插入qrcode，则返回(imgName, imgContent)
         qrImg = self.AppendShareLinksToArticle(soup, url)
         if qrImg:
-            yield ItemImageCssTuple("image/jpeg", url, qrImg[0], qrImg[1], False)
+            yield ItemImageTuple("image/jpeg", url, qrImg[0], qrImg[1], False)
 
         #提取文章内容的前面一部分做为摘要
         brief = self.ExtractBrief(soup)
@@ -449,7 +448,7 @@ class BaseFeedBook:
     #因为图片文件占内存，为了节省内存，这个函数也做为生成器
     #resp: 可能为字符串(描述片段生成的HTML)，也可能为 requests.Response 实例
     #rssItem: RssItemTuple 实例
-    #返回可能为：ItemHtmlTuple, ItemImageCssTuple
+    #返回可能为：ItemHtmlTuple, ItemImageTuple, ItemCssTuple
     def ReadabilityBySoup(self, resp, rssItem):
         article = resp if isinstance(resp, str) else resp.text
         content = self.PreProcess(article)
@@ -483,7 +482,7 @@ class BaseFeedBook:
 
         #添加额外的CSS
         if self.AddCustomCss(soup):
-            yield ItemImageCssTuple("text/css", "custom.css", "custom.css", self.user.css_content, False)
+            yield ItemCssTuple("custom.css", "custom.css", self.user.css_content)
 
         self.ProcessBeforeImage(soup)
 
@@ -502,7 +501,7 @@ class BaseFeedBook:
         #插入分享链接，如果插入了qrcode，则返回(imgName, imgContent)
         qrImg = self.AppendShareLinksToArticle(soup, url)
         if qrImg:
-            yield ItemImageCssTuple("image/jpeg", url, qrImg[0], qrImg[1], False)
+            yield ItemImageTuple("image/jpeg", url, qrImg[0], qrImg[1], False)
         
         #提取文章内容的前面一部分做为摘要
         brief = self.ExtractBrief(soup)
@@ -557,7 +556,7 @@ class BaseFeedBook:
         for attr in [attr for attr in bodyTag.attrs]:
             del bodyTag[attr]
 
-    #逐个处理文章内的图像链接，生成对应的图像文件，然后使用生成器模式逐个返回 ItemImageCssTuple 实例
+    #逐个处理文章内的图像链接，生成对应的图像文件，然后使用生成器模式逐个返回 ItemImageTuple 实例
     #soup: BeautifulSoup 实例
     #url: 文章的URL
     def PrepareImageManifest(self, soup, url):
@@ -606,7 +605,7 @@ class BaseFeedBook:
             #第一个图片
             imgName = "img{}.{}".format(imgIndex, imgType)
             imgTag['src'] = imgName
-            yield ItemImageCssTuple(imgMime, imgUrl, imgName, imgPartContent, True) #True-做为文章缩略图
+            yield ItemImageTuple(imgMime, imgUrl, imgName, imgPartContent, True) #True-做为文章缩略图
 
             for idx, imgPartContent in enumerate(imgContent[1:]):
                 imgName = "img{}_{}.{}".format(imgIndex, idx, imgType)
@@ -614,7 +613,7 @@ class BaseFeedBook:
                 imgNew =  soup.new_tag('img', src=imgName)
                 lastImgTag.insert_after(imgNew)
                 lastImgTag = imgNew
-                yield ItemImageCssTuple(imgMime, imgPartUrl, imgName, imgPartContent, False)
+                yield ItemImageTuple(imgMime, imgPartUrl, imgName, imgPartContent, False)
 
         #去掉图像上面的链接，以免误触后打开浏览器
         if self.user and self.user.remove_hyperlinks in ('image', 'all'):

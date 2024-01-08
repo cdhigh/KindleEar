@@ -23,8 +23,6 @@ class BaseComicBook(BaseFeedBook):
     title         = ""
     description   = ""
     language      = ""
-    feed_encoding = ""
-    page_encoding = ""
     masthead_file = "mh_default.gif"
     cover_file    = "cv_bound.jpg"
     feeds = []  # 子类填充此列表[('name', mainurl),...]
@@ -61,11 +59,11 @@ class BaseComicBook(BaseFeedBook):
         return chapters
 
     #生成器，返回电子书中的每一项内容，包括HTML或图像文件，
-    #每次返回一个命名元组，可能为 ItemHtmlTuple 或 ItemImageTuple
+    #每次返回一个命名元组，可能为 ItemHtmlTuple, ItemImageTuple, ItemCssTuple
     def Items(self):
         for comicItem in self.ParseFeedUrls():
-            yield from self.GenImageItems(comicItem.imgList, comicItem.url)
             self.UpdateLastDelivered(comicItem.name, comicItem.title, comicItem.nextChapterIndex)
+            yield from self.GenImageItems(comicItem.imgList, comicItem.url)
 
     #获取漫画章节列表，返回[(title, url),...]
     def GetChapterList(self, url):
@@ -157,7 +155,7 @@ class BaseComicBook(BaseFeedBook):
                     if imgType:
                         yield from self.PrepareComicImageManifest(imgContent, url)
 
-    #处理单个图像，然后使用生成器模式返回一个或多个 ItemImageCssTuple/ItemHtmlTuple 实例
+    #处理单个图像，然后使用生成器模式返回一个或多个 ItemImageTuple/ItemHtmlTuple 实例
     #data: 图像二进制内容
     #url: 文章的URL
     def PrepareComicImageManifest(self, data, url):
@@ -178,7 +176,7 @@ class BaseComicBook(BaseFeedBook):
             else:
                 imgPartUrl += '_'
 
-            yield ItemImageCssTuple(imgMime, imgPartUrl, imgName, imgPartContent, False)
+            yield ItemImageTuple(imgMime, imgPartUrl, imgName, imgPartContent, False)
             #每个图片当做一篇文章，否则全屏模式下图片会挤到同一页
             tmpHtml = imageHtmlTemplate.format(title=imgName, imgFilename=imgName)
             yield ItemHtmlTuple(imgName, url, imgName, tmpHtml, "", "")

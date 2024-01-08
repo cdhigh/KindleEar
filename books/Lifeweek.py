@@ -10,8 +10,6 @@ class Lifeweek(BaseFeedBook):
     title                 = '三联生活周刊'
     description           = '秉承"倡导品质生活"的理念，提供优质新媒体内容与服务。每周六推送'
     language              = 'zh-cn'
-    feed_encoding         = "utf-8"
-    page_encoding         = "utf-8"
     masthead_file         = "mh_lifeweek.gif"
     cover_file            = "cv_lifeweek.jpg"
     oldest_article        = 0

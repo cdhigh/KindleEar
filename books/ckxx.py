@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
 from base import BaseFeedBook  # 继承基类BaseFeedBook
@@ -24,11 +24,9 @@ class CKXX(BaseFeedBook):
         (u'参考消息要闻', 'http://www.cankaoxiaoxi.com/'),
     ]
 
-    feed_encoding = "utf-8"
-    page_encoding = 'utf-8'  # 设定待抓取页面的页面编码
     fulltext_by_readability = False  # 设定手动解析网页
 
-    coverfile = 'cv_ckxx.jpg'  # 设定封面图片
+    cover_file = 'cv_ckxx.jpg'  # 设定封面图片
 
     # 设定内容页需要保留的标签
     keep_only_tags = [

@@ -9,8 +9,6 @@ class FTChinese(BaseFeedBook):
     title                 = 'FT中文网'
     description           = '英国《金融时报》集团旗下唯一的中文商业财经网站。'
     language              = 'zh-cn'
-    feed_encoding         = "utf-8"
-    page_encoding         = "utf-8"
     masthead_file         = "mh_ftchinese.gif"
     cover_file            = "cv_ftchinese.jpg"
     oldest_article        = 1

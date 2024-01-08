@@ -69,6 +69,10 @@ app = beaker.middleware.SessionMiddleware(default_app(), sessionOpts) #app为Clo
 #reload(sys)
 #sys.setdefaultencoding('utf-8')
 
+@route('/')
+def Home():
+    return render_page('home.html', "Home")
+
 @route('/test')
 def Test():
     s = ''

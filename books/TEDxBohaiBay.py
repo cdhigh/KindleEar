@@ -16,8 +16,6 @@ class TEDxBohaiBay(BaseFeedBook):
     title                 = 'TED渤海湾'
     description           = '推送最新的TED内容，来自传送门抓取的TEDxBohaiBay微信公众账号文章'
     language              = 'en' #TED中英文双语，为en则能英文查词
-    feed_encoding         = "utf-8"
-    page_encoding         = "utf-8"
     masthead_file         = "mh_chuansongme.gif"
     cover_file            = "cv_chuansongme.jpg"
     oldest_article        = 1

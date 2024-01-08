@@ -43,14 +43,14 @@ class HandleMail(InboundMailHandler):
         to = to.split('@')[0] if to and '@' in to else 'xxx'
         if '__' in to:
             listto = to.split('__')
-            username = listto[0] if listto[0] else 'admin'
+            username = listto[0] if listto[0] else ADMIN_NAME
             to = listto[1]
         else:
-            username = 'admin'
+            username = ADMIN_NAME
             
         user = KeUser.all().filter('name = ', username).get()
         if not user:
-            username = 'admin'
+            username = ADMIN_NAME
             user = KeUser.all().filter('name = ', username).get()
         
         if not user or not user.kindle_email:
@@ -204,8 +204,8 @@ class HandleMail(InboundMailHandler):
                      'to': user.kindle_email,
                      'tz': user.timezone,
                      'subject': subject[:SUBJECT_WORDCNT_FOR_APMAIL],
-                     'lng': user.ownfeeds.language,
-                     'keepimage': '1' if user.ownfeeds.keep_image else '0'
+                     'lng': user.own_feeds.language,
+                     'keepimage': '1' if user.own_feeds.keep_image else '0'
                     }
             taskqueue.add(url='/url2book', queue_name="deliverqueue1", method='GET',
                 params=param, target='worker')
@@ -254,7 +254,7 @@ class HandleMail(InboundMailHandler):
                 oeb = CreateOeb(log, None, opts)
                 
                 setMetaData(oeb, subject[:SUBJECT_WORDCNT_FOR_APMAIL], 
-                    user.ownfeeds.language, local_time(tz=user.timezone), 
+                    user.own_feeds.language, local_time(tz=user.timezone), 
                     pubtype='book:book:KindleEar')
                 oeb.container = ServerContainer(log)
                 id_, href = oeb.manifest.generate(id='page', href='page.html')

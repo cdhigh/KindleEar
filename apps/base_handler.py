@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #主要针对网页显示之类的一些公共支持工具函数
-#Visit https://github.com/cdhigh/KindleEar for the latest version
-#Author:
-# cdhigh <https://github.com/cdhigh>
-#Contributors:
-# rexdf <https://github.com/rexdf>
 
 import os, datetime, hashlib, time, base64
 from urllib.parse import urlparse
 from bottle import request, redirect
 from bs4 import BeautifulSoup
-from apps.dbModels import *
+from apps.db_models import *
 from google.appengine.api import mail
 import sendgrid
 from sendgrid.helpers.mail import Email, Content, Mail, Attachment
@@ -46,15 +41,18 @@ def current_session():
 def logined():
     return True if request.environ.get('beaker.session', {}).login == 1 else False
 
-#如果对应的用户没有登录，则跳转到登录界面，此函数不会再返回，如果已经登录，无作用
+#如果对应的用户没有登录，则跳转到登录界面，此函数不会再返回，如果已经登录，返回当前session实例
 #userName: 为空对应任意用户，否则仅判断特定用户
-#forAjax: 网页Javascript脚本和服务器通讯，会返回json数据包
+#forAjax: 网页Javascript脚本和服务器通讯使用
 def login_required(userName=None, forAjax=False):
     session = current_session()
     if (session.login != 1) or (username and userName != session.userName):
         redirect('/needloginforajax' if forAjax else '/login')
+    else:
+        return session
 
 #查询当前登录用户名，如果没有登录，则跳转到登录界面
+#返回一个数据库行实例，而不是一个字符串
 def get_current_user(forAjax=False):
     session = current_session()
     userName = session.userName
@@ -206,6 +204,9 @@ def send_html_mail(userName, to, title, html, attachments, tz=TIMEZONE, textCont
     global default_log
     if not textContent or not isinstance(textContent, str):
         textContent = "Deliver from KindlerEar, refers to html part."
+    
+    if isinstance(html, str):
+        html = html.encode("utf-8")
         
     for i in range(SENDMAIL_RETRY_CNT + 1):
         try:
@@ -251,7 +252,7 @@ def send_html_mail(userName, to, title, html, attachments, tz=TIMEZONE, textCont
             deliver_log(userName, str(to), title, size, tz=tz)
             break
 
-def render(templateFile, title='KindleEar', **kwargs):
+def render_page(templateFile, title='KindleEar', **kwargs):
     global jinja2Env
     session = current_session()
     kwargs.setdefault('nickname', session.get('username', ''))

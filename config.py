@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 """Configures for KindleEar, the First two variable is must to modify.
 KindleEar配置文件，请务必修改开始两个配置（如果使用uploader，则uploader自动帮你修改）
@@ -13,27 +13,21 @@ DEFAULT_MASTHEAD = "mh_default.gif" #default masthead
 DEFAULT_COVER = "cv_default.jpg" #default cover, leave it empty will not add cover to book
 DEFAULT_COVER_BV = DEFAULT_COVER #default cover for merged-book, None indicates paste all covers into one, =DEFAULT_COVER enable the using of uploaded image.
 
-MY_FEEDS_TITLE = u'KindleEar'
-MY_FEEDS_DESC = u'RSS from KindleEar'
+MY_FEEDS_TITLE = 'KindleEar'
+MY_FEEDS_DESC = 'RSS from KindleEar'
 
 #default timeout for network connection
-CONNECTION_TIMEOUT = 60
+CONNECTION_TIMEOUT = 30
 
-#If set to True, encoding detected by chardet module will be used for each article
-#otherwise encoding in http response header or meta of html is used in proprity.
-ALWAYS_CHAR_DETECT = False
-
-#True indicates that any encoding in http header or in html header will be used.
-#False indicates that encoding will be used if the encoding in http header and the one in html header are the same.
-TRUST_ENCODING_IN_HEADER_OR_META = True
+#The administrator's login name
+ADMIN_NAME = "admin"
 
 #generate brief description for toc item or not.
 GENERATE_TOC_DESC = True
 TOC_DESC_WORD_LIMIT = 500
 
-#-------------------add by rexdf-----------
 #title for table of contents
-TABLE_OF_CONTENTS = u'Table Of Contents'
+TABLE_OF_CONTENTS = 'Table Of Contents'
 
 #description of toc contains image or not
 GENERATE_TOC_THUMBNAIL = True
@@ -47,8 +41,6 @@ COLOR_TO_GRAY = True
 #Split long image(height of image is bigger than some value) to multiple images or not?
 #This feature is disabled if it be set to None or 0.
 THRESHOLD_SPLIT_LONG_IMAGE = 750
-
-#----------------end of add by rexdf-------
 
 #reduce dimension of image to (Width,Height)
 #or you can set it to None, and choose device type in webpage 'setting'
@@ -74,18 +66,18 @@ SENDMAIL_ALL_POSTFIX = False
 #text for link to share or archive
 #SHARE_FUCK_GFW_SRV: (For users in China)如果你要翻墙的话，请设置为其中一个转发服务器
 #翻墙转发服务器源码：http://github.com/cdhigh/forwarder
-#SHARE_FUCK_GFW_SRV = "http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u=%s"
-SHARE_FUCK_GFW_SRV = "http://kforwarder.herokuapp.com/?k=xzSlE&t=60&u=%s"
-SAVE_TO_EVERNOTE = u"Save to Evernote"
-SAVE_TO_WIZ = u"Save to Wiz"
-SAVE_TO_POCKET = u"Save to Pocket"
-SAVE_TO_INSTAPAPER = u"Save to Instapaper"
-SHARE_ON_XWEIBO = u"Share on Sina Weibo"
-SHARE_ON_TWEIBO = u"Share on Tencent Weibo"
-SHARE_ON_FACEBOOK = u"Share on Facebook"
-SHARE_ON_TWITTER = u"Tweet it"
-SHARE_ON_TUMBLR = u"Share on Tumblr"
-OPEN_IN_BROWSER = u"Open in Browser"
+#SHARE_FUCK_GFW_SRV = "http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u={}"
+SHARE_FUCK_GFW_SRV = "http://kforwarder.herokuapp.com/?k=xzSlE&t=60&u={}"
+SAVE_TO_EVERNOTE = "Save to Evernote"
+SAVE_TO_WIZ = "Save to Wiz"
+SAVE_TO_POCKET = "Save to Pocket"
+SAVE_TO_INSTAPAPER = "Save to Instapaper"
+SHARE_ON_XWEIBO = "Share on Sina Weibo"
+SHARE_ON_TWEIBO = "Share on Tencent Weibo"
+SHARE_ON_FACEBOOK = "Share on Facebook"
+SHARE_ON_TWITTER = "Tweet it"
+SHARE_ON_TUMBLR = "Share on Tumblr"
+OPEN_IN_BROWSER = "Open in Browser"
 
 POCKET_CONSUMER_KEY = '50188-e221424f1c9ed0c010058aef'
 

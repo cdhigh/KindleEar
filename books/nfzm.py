@@ -11,8 +11,6 @@ class NFZM(BaseFeedBook):
     description         = '在这里读懂中国 | 每周五更新 | 需要登录'
     __author__          = 'mcfloundinho'
     language            = 'zh-cn'
-    feed_encoding       = "utf-8"
-    page_encoding       = "utf-8"
     masthead_file       = "mh_nfzm.gif"
     cover_file          = "cv_nfzm.jpg"
     deliver_days        = ['Friday']
