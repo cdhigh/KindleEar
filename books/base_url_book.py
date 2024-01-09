@@ -14,4 +14,4 @@ class BaseUrlBook(BaseFeedBook):
     fulltext_by_readability = True
 
     def ParseFeedUrls(self):
-        return [RssItemTuple(sec, sec, url, '') for sec, url in self.feeds]
+        return [ItemRssTuple(sec, sec, url, '') for sec, url in self.feeds]

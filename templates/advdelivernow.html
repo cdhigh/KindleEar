@@ -62,9 +62,9 @@
         }
         var feedsNum = feedsId.length;
         if ((feedsNum > 0) && (feedsNum != inputsNum)) {
-            deliverButton.href = "/deliver?u={{nickname}}&id=" + bookId + "&feedsId=" + feedsId.join("|");
+            deliverButton.href = "/deliver?u={{nickname}}&id_=" + bookId + "&feedsId=" + feedsId.join(",");
         } else {
-            deliverButton.href = "/deliver?u={{nickname}}&id=" + bookId;
+            deliverButton.href = "/deliver?u={{nickname}}&id_=" + bookId;
         }
     }
 
@@ -81,7 +81,7 @@
         }
         var booksNum = booksId.length;
         if ((booksNum > 0) && (booksNum != inputsNum)) {
-            deliverButton.href = "/deliver?u={{nickname}}&id=" + booksId.join("|");
+            deliverButton.href = "/deliver?u={{nickname}}&id_=" + booksId.join(",");
         } else {
             deliverButton.href = "/deliver?u={{nickname}}";
         }

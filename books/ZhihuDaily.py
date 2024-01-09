@@ -6,7 +6,7 @@ __version__     = "0.1.2"
 
 import json
 from urllib.parse import quote_plus
-from books.base_book import BaseFeedBook, UrlOpener, RssItemTuple
+from books.base_book import BaseFeedBook, UrlOpener, ItemRssTuple
 from config import SHARE_FUCK_GFW_SRV
 
 # 知乎屏蔽了 GAE 访问 API，所以需要一个中转服务器来获取知乎日报的 Feed 内容
@@ -49,7 +49,7 @@ class ZhihuDaily(BaseFeedBook):
     def url4forwarder(self, url):
         return SHARE_FUCK_GFW_SRV.format(quote_plus(url))
     
-    #返回一个 RssItemTuple 列表，里面包含了接下来需要抓取的链接或描述
+    #返回一个 ItemRssTuple 列表，里面包含了接下来需要抓取的链接或描述
     def ParseFeedUrls(self):
         urls = []
         urlAdded = set()
@@ -66,7 +66,7 @@ class ZhihuDaily(BaseFeedBook):
                         self.log.info('duplicated zhihudiaily, skipped {}'.format(urlFeed))
                         continue
                     
-                    urls.append(RssItemTuple(section, item['title'], self.url4forwarder(urlFeed), ""))
+                    urls.append(ItemRssTuple(section, item['title'], self.url4forwarder(urlFeed), ""))
                     urlAdded.add(urlFeed)
         else:
             self.log.warn('fetch rss failed({}):{}'.format(UrlOpener.CodeMap(result.status_code), url))

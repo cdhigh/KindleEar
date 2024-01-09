@@ -6,6 +6,10 @@ KindleEar配置文件，请务必修改开始两个配置（如果使用uploader
 
 SRC_EMAIL = "akindleear@gmail.com"  #Your gmail account for sending mail to Kindle
 DOMAIN = "http://kindleear.appspot.com/" #Your domain of app
+#Need for taskqueue, Refers to <https://cloud.google.com/appengine/docs/locations>
+#Upper right corner at <https://console.cloud.google.com/appengine?project=your_app_id>
+APP_ID = "kindleear"
+SERVER_LOCATION = "us-central1"
 
 TIMEZONE = 8  #Default timezone, you can modify it in webpage after deployed
 

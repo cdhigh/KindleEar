@@ -300,8 +300,8 @@ class HandleMail(InboundMailHandler):
             如果是书籍名，则单独投递，多个书籍名使用逗号分隔
         """
         if subject.lower() in (u'nosubject', u'all'):
-            taskqueue.add(url='/deliver',queue_name="deliverqueue1",method='GET',
-                params={'u':username},target='default')
+            taskqueue.add(url='/deliver', queue_name="deliverqueue1", method='GET',
+                params={'u':username}, target='default')
         else:
             bkids = []
             booklist = subject.split(',')
@@ -312,8 +312,8 @@ class HandleMail(InboundMailHandler):
                 else:
                     log.warn('book not found : %s' % b.strip())
             if bkids:
-                taskqueue.add(url='/worker',queue_name="deliverqueue1",method='GET',
-                    params={'u':username,'id':','.join(bkids)},target='worker')
+                taskqueue.add(url='/worker', queue_name="deliverqueue1", method='GET',
+                    params={'u':username, 'id_': ','.join(bkids)}, target='worker')
                     
         
 appmail = webapp2.WSGIApplication([HandleMail.mapping()], debug=False)

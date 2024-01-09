@@ -78,7 +78,7 @@ def SaveToEvernoteWiz(user, action, orgUrl):
             else:
                 attachments.append((item.fileName, item.content))
         elif isinstance(item, ItemHtmlTuple):
-            soup = BeautifulSoup(item.content, 'lxml')
+            soup = item.soup
             
             #插入源链接
             p = soup.new_tag('p', style='font-size:80%;color:grey;')

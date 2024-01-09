@@ -63,10 +63,5 @@ class BaseWebpageBook(BaseFeedBook):
 
             #提取文章内容的前面一部分做为摘要，[漫画模式不需要摘要]
             brief = self.ExtractBrief(soup)
-
-            content = str(soup)
-            soup = None
-            
-            content =  self.ProcessBeforeYield(content)
-            yield ItemHtmlTuple(section, url, title, content, brief, thumbnailUrl)
+            yield ItemHtmlTuple(section, url, title, soup, brief, thumbnailUrl)
             

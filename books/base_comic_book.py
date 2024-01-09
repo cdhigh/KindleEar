@@ -179,7 +179,7 @@ class BaseComicBook(BaseFeedBook):
             yield ItemImageTuple(imgMime, imgPartUrl, imgName, imgPartContent, False)
             #每个图片当做一篇文章，否则全屏模式下图片会挤到同一页
             tmpHtml = imageHtmlTemplate.format(title=imgName, imgFilename=imgName)
-            yield ItemHtmlTuple(imgName, url, imgName, tmpHtml, "", "")
+            yield ItemHtmlTuple(imgName, url, imgName, BeautifulSoup(tmpHtml, 'lxml'), "", "")
 
     # 更新已经推送的序号和标题到数据库
     def UpdateLastDelivered(self, bookname, chapterTitle, num):

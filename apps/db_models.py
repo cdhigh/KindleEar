@@ -38,8 +38,8 @@ class Book(db.Model):
             return sorted(Feed.all().filter("book = ", self.key()), key=attrgetter('time'))
             
     @property
-    def feedscount(self):
-        mkey = '%d.feedscount'%self.key().id()
+    def feedsCount(self):
+        mkey = '%d.feedsCount'%self.key().id()
         mfc = memcache.get(mkey)
         if mfc is not None:
             return mfc
@@ -65,7 +65,7 @@ class KeUser(db.Model): # kindleEar User
     expires = db.DateTimeProperty() #超过了此日期后账号自动停止推送
     own_feeds = db.ReferenceProperty(Book) # 每个用户都有自己的自定义RSS
     use_title_in_feed = db.BooleanProperty() # 文章标题优先选择订阅源中的还是网页中的
-    titlefmt = db.StringProperty() #在元数据标题中添加日期的格式
+    title_fmt = db.StringProperty() #在元数据标题中添加日期的格式
     merge_books = db.BooleanProperty() #是否合并书籍成一本
     
     share_fuckgfw = db.BooleanProperty() #归档和分享时是否需要翻墙

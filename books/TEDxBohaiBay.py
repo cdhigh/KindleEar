@@ -7,7 +7,7 @@ import datetime
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from lib.urlopener import UrlOpener
-from books.base_book import BaseFeedBook, RssItemTuple
+from books.base_book import BaseFeedBook, ItemRssTuple
 
 def getBook():
     return TEDxBohaiBay
@@ -29,7 +29,7 @@ class TEDxBohaiBay(BaseFeedBook):
             ('TED渤海湾', 'http://chuansongme.com/account/tedxbohaibay'),
            ]
 
-    #返回一个 RssItemTuple 列表，里面包含了接下来需要抓取的链接或描述
+    #返回一个 ItemRssTuple 列表，里面包含了接下来需要抓取的链接或描述
     def ParseFeedUrls(self):
         urls = []
         for feed in self.feeds:
@@ -65,7 +65,7 @@ class TEDxBohaiBay(BaseFeedBook):
 
                 href = title['href'] if title['href'].startswith('http') else urljoin(url, title['href'])
 
-                urls.append(RssItemTuple(feedTitle, title.get_text(), href, ""))
+                urls.append(ItemRssTuple(feedTitle, title.get_text(), href, ""))
 
         return urls
 

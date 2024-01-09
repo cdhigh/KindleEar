@@ -7,6 +7,10 @@ Readme of english version refers to [Readme_EN.md](https://github.com/cdhigh/Kin
 
 
 
+<a href="https://www.buymeacoffee.com/cdhigh" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+
+
+
 # 简介
 这是一个运行在Google App Engine(GAE)上的Kindle个人推送服务应用，生成排版精美的杂志模式mobi/epub格式自动每天推送至您的Kindle或其他邮箱。
 
@@ -29,35 +33,24 @@ Readme of english version refers to [Readme_EN.md](https://github.com/cdhigh/Kin
 
 2. [创建一个Application](https://console.developers.google.com/project)，注意不用申请GCE，那个是60天试用的，而GAE是限额范围内永久免费的。  
 
-3. 安装 [Python 2.7.x](https://www.python.org/downloads/)。  
+3. 安装 [Python 3.x](https://www.python.org/downloads/)。  
 
-4. 安装 [GAE SDK](https://storage.cloud.google.com/cloud-sdk-release)，选择273之前的版本，比如下面几个链接。  
-    [google-cloud-sdk-273.0.0-windows-x86_64-bundled-python.zip](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86_64-bundled-python.zip)
-    [google-cloud-sdk-273.0.0-darwin-x86.tar.gz](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-darwin-x86.tar.gz)
-    [google-cloud-sdk-273.0.0-darwin-x86_64.tar.gz](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-darwin-x86_64.tar.gz)
-    [google-cloud-sdk-273.0.0-linux-x86.tar.gz](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-linux-x86.tar.gz)
-    [google-cloud-sdk-273.0.0-linux-x86_64.tar.gz](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-linux-x86_64.tar.gz)
-    [google-cloud-sdk-273.0.0-windows-x86-bundled-python.zip](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86-bundled-python.zip)
-    [google-cloud-sdk-273.0.0-windows-x86.zip](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86.zip)
-    [google-cloud-sdk-273.0.0-windows-x86_64.zip](https://storage.googleapis.com/cloud-sdk-release/google-cloud-sdk-273.0.0-windows-x86_64.zip)
+4. 安装 [GAE SDK](https://storage.cloud.google.com/cloud-sdk-release)
 
 5. 下载 [KindleEar](https://github.com/cdhigh/KindleEar/archive/master.zip) ，解压到一个特定的目录。
 
-6. 在以下三个文件中修改一些参数：  
+6. 在以下文件中修改一些参数：  
 
   文件              |  待修改内容  | 说明                   |  
 -------------------|-------------|-----------------------|  
 app.yaml           | application | 你的ApplicationId      |  
-module-worker.yaml | application | 你的ApplicationId      |  
+worker.yaml        | application | 你的ApplicationId      |  
 config.py          | SRC_EMAIL   | 创建GAE工程的GMAIL邮箱   |  
 config.py          | DOMAIN      | 你申请的应用的域名        |  
-
-> 如果使用gcloud部署，需要注释掉yaml文件中的application/version项。
 
 7. 转到GAE SDK安装目录(默认为：*C:\Program Files\Google\google_appengine*) 
 
 8. 部署命令：  
-    * 删除app.yaml和module-worker.yaml开头的两行：application /  version  
     * `gcloud auth login`  
     * `gcloud config set project 你的ApplicationId`  
     * `gcloud app deploy --version=1 app.yaml module-worker.yaml`  
@@ -71,7 +64,7 @@ config.py          | DOMAIN      | 你申请的应用的域名        |
 9. 全部完成后就可以尝试打开域名：  
 *http://appid.appspot.com*  (appid是你申请的application名字)  
 比如作者的网站域名为：<http://kindleear.appspot.com/>  
-**注：初始用户名为 admin，密码为 admin，建议登录后及时修改密码。** 
+**注：初始用户名为 admin， 密码为 admin，建议登录后及时修改密码。** 
 
 10. 更详细一点的说明请参照Github上的 [FAQ](http://htmlpreview.github.io/?https://github.com/cdhigh/KindleEar/blob/master/static/faq.html) 或作者网站的 [FAQ](http://kindleear.appspot.com/static/faq.html) 链接。有关部署失败，部署后"internal server error"等问题都有解释。  
 **不建议使用GAE Launcher部署KindleEar，除非你知道怎么设置Extra Flags等参数。**

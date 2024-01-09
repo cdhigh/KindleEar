@@ -67,7 +67,7 @@ def SettingPost():
         user.book_type = forms.get('booktype', 'epub')
         user.device = forms.get('devicetype', 'kindle')
         user.use_title_in_feed = bool(forms.titlefrom == 'feed')
-        user.titlefmt = forms.titlefmt
+        user.title_fmt = forms.titlefmt
         alldays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         user.send_days = [day for day in alldays if forms.get(day)]
         user.merge_books = bool(forms.get('mergebooks'))

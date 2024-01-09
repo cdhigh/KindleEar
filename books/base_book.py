@@ -32,11 +32,12 @@ xHtmlFrameTemplate = u"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transition
 <body>{bodyTitle}<p>{content}</p></body></html>"""
 
 #分析RSS的XML返回的每一项的结构
-RssItemTuple = namedtuple("RssItemTuple", "section title url desc")
+ItemRssTuple = namedtuple("ItemRssTuple", "section title url desc")
 
 #Items()返回的数据结构
-#每个HTML，thumbnailUrl为文章第一个图片文件的url
-ItemHtmlTuple = namedtuple("ItemHtmlTuple", "section url title content brief thumbnailUrl")
+#soup: BeautifulSoup实例
+#thumbnailUrl: 文章中第一个图片文件的url
+ItemHtmlTuple = namedtuple("ItemHtmlTuple", "section url title soup brief thumbnailUrl")
 
 #每个图片
 #图片的isThumbnail仅当其为article的第一个img为True
@@ -174,16 +175,16 @@ class BaseFeedBook:
     def PostProcess(self, soup):
         return None
 
-    #Items()生成器里面每个Feed返回给MOBI生成模块前对内容的最后处理机会
-    #content为网页字符串，记得返回处理后的字符串
-    def ProcessBeforeYield(self, content):
-        return content
-
     #------------------------------------------------------------
     # 下面的内容为类实现细节
     #------------------------------------------------------------
+    #log: logging实例
+    #imgIndex: 初始图像文件名序号
+    #opts: OptionValues实例，定义在makeoeb.py
+    #user: 账号数据库行实例
     def __init__(self, log=None, imgIndex=0, opts=None, user=None):
-        self.log = default_log if log is None else log
+        global default_log
+        self.log = log if log else default_log
         self.compiled_urlfilters = []
         self.img_index = imgIndex
         self.opts = opts
@@ -233,7 +234,7 @@ class BaseFeedBook:
                 encoding = 'utf-8'
             return xHtmlFrameTemplate.format(encoding=encoding, title=title, bodyTitle=t, content=content)
 
-    #分析RSS的XML文件，返回一个 RssItemTuple 列表，里面包含了接下来需要抓取的链接或描述
+    #分析RSS的XML文件，返回一个 ItemRssTuple 列表，里面包含了接下来需要抓取的链接或描述
     def ParseFeedUrls(self):
         urls = []
         tNow = datetime.datetime.utcnow()
@@ -299,7 +300,7 @@ class BaseFeedBook:
                     #针对URL里面有unicode字符的处理，否则会出现Bad request
                     #后面参数里面的那一堆“乱码”是要求不处理ASCII的特殊符号，只处理非ASCII字符
                     urlFeed = quote_plus(urlFeed, r'''~`!@#$%^&*()|\\/,.<>;:"'{}[]?=-_+''')
-                    urls.append(RssItemTuple(section, title, urlFeed, desc))
+                    urls.append(ItemRssTuple(section, title, urlFeed, desc))
             else:
                 self.log.warn('fetch rss failed({}):{}'.format(UrlOpener.CodeMap(result.status_code), url))
                 
@@ -309,7 +310,7 @@ class BaseFeedBook:
     #每次返回一个命名元组，可能为 ItemHtmlTuple, ItemImageTuple, ItemCssTuple
     def Items(self):
         useTitleInFeed = self.user.use_title_in_feed if self.user else False
-        urls = self.ParseFeedUrls() #返回 [RssItemTuple,...]
+        urls = self.ParseFeedUrls() #返回 [ItemRssTuple,...]
         readability = self.Readability if self.fulltext_by_readability else self.ReadabilityBySoup
         prevSection = None
         opener = UrlOpener(self.host, timeout=self.timeout, headers=self.extra_header)
@@ -337,7 +338,7 @@ class BaseFeedBook:
     #使用readability-lxml处理全文信息
     #因为图片文件占内存，为了节省内存，这个函数也做为生成器
     #resp: 可能为字符串(描述片段生成的HTML)，也可能为 requests.Response 实例
-    #rssItem: RssItemTuple 实例
+    #rssItem: ItemRssTuple 实例
     #返回可能为：ItemHtmlTuple, ItemImageTuple, ItemCssTuple
     def Readability(self, resp, rssItem):
         url = rssItem.url
@@ -364,7 +365,7 @@ class BaseFeedBook:
                     imgFn = "img{}.{}".format(self.ImgIndex, imgType.replace("jpeg", "jpg"))
                     yield ItemImageTuple(imgMime, url, imgFn, resp.content, False)
                     tmpHtml = imageHtmlTemplate.format(title="Picture", imgFilename=imgFn) #HTML容器
-                    yield ItemHtmlTuple("", url, "Picture", tmpHtml, "", "")
+                    yield ItemHtmlTuple("", url, "Picture", BeautifulSoup(tmpHtml, "lxml"), "", "")
                 else:
                     self.log.warn("Invalid article:{}".format(url))
                 return None
@@ -432,22 +433,17 @@ class BaseFeedBook:
         if qrImg:
             yield ItemImageTuple("image/jpeg", url, qrImg[0], qrImg[1], False)
 
-        #提取文章内容的前面一部分做为摘要
-        brief = self.ExtractBrief(soup)
-        
-        content = str(soup)
-        soup = None
-        
         if self.user and self.user.use_title_in_feed:
             title = rssItem.title
 
-        content = self.ProcessBeforeYield(content)
-        yield ItemHtmlTuple(rssItem.section, url, title, content, brief, thumbnailUrl)
+        #提取文章内容的前面一部分做为摘要
+        brief = self.ExtractBrief(soup)
+        yield ItemHtmlTuple(rssItem.section, url, title, soup, brief, thumbnailUrl)
         
     #使用BeautifulSoup手动解析网页，提取正文内容
     #因为图片文件占内存，为了节省内存，这个函数也做为生成器
     #resp: 可能为字符串(描述片段生成的HTML)，也可能为 requests.Response 实例
-    #rssItem: RssItemTuple 实例
+    #rssItem: ItemRssTuple 实例
     #返回可能为：ItemHtmlTuple, ItemImageTuple, ItemCssTuple
     def ReadabilityBySoup(self, resp, rssItem):
         article = resp if isinstance(resp, str) else resp.text
@@ -503,17 +499,12 @@ class BaseFeedBook:
         if qrImg:
             yield ItemImageTuple("image/jpeg", url, qrImg[0], qrImg[1], False)
         
-        #提取文章内容的前面一部分做为摘要
-        brief = self.ExtractBrief(soup)
-
-        content = str(soup)
-        soup = None
-        
         if self.user and self.user.use_title_in_feed:
             title = rssItem.title
 
-        content = self.ProcessBeforeYield(content)
-        yield ItemHtmlTuple(rssItem.section, url, title, content, brief, thumbnailUrl)
+        #提取文章内容的前面一部分做为摘要
+        brief = self.ExtractBrief(soup)
+        yield ItemHtmlTuple(rssItem.section, url, title, soup, brief, thumbnailUrl)
     
     #根据书籍 keep_only_tags 属性，创建一个新的 body 标签替代原先的
     #返回新创建的 body 标签

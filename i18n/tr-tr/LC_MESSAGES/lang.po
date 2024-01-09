@@ -70,8 +70,8 @@ msgstr "Kullanıcı adı mevcut değil veya sizin silmeye yetkiniz yok!"
 msgid "Title or url is empty!"
 msgstr "URL veya başlık hatalı"
 
-msgid "Book(s) (%s) put to queue!"
-msgstr "%s kitapları işlem sırasına eklendi"
+msgid "Book(s) ({}) put to queue!"
+msgstr "{} kitapları işlem sırasına eklendi"
 
 msgid "No book to deliver!"
 msgstr "Gönderilecek kitap yok!"

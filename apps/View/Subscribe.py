@@ -53,7 +53,7 @@ def MySubscriptionPost():  # 添加自定义RSS
 
     Feed(title=title, url=url, book=user.own_feeds, isfulltext=isfulltext,
         time=datetime.datetime.utcnow()).put()
-    memcache.delete('{}.feedscount'.format(user.own_feeds.key().id()))
+    memcache.delete('{}.feedsCount'.format(user.own_feeds.key().id()))
     redirect('/my')
 
 #添加/删除自定义RSS订阅的AJAX处理函数
@@ -102,7 +102,7 @@ def FeedsAjaxPost(self, actType):
             time=datetime.datetime.utcnow())
         fd.put()
         respDict['feedid'] = fd.key().id()
-        memcache.delete('{}.feedscount'.format(user.own_feeds.key().id()))
+        memcache.delete('{}.feedsCount'.format(user.own_feeds.key().id()))
 
         #如果是从共享库中订阅的，则通知共享服务器，提供订阅数量信息，以便排序
         if fromSharedLibrary:

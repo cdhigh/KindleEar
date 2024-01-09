@@ -9,9 +9,12 @@ qrcode
 python-dateutil
 css_parser
 beautifulsoup4
+gunicorn
 bottle
 bottle-beaker
 six
 feedparser
 google-cloud-tasks
+google-cloud-datastore
+datastore-entity
 appengine-python-standard>=1.0.0

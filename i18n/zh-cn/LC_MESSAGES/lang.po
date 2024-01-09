@@ -70,8 +70,8 @@ msgstr "用户名为空或你没有权限删除此账号！"
 msgid "Title or url is empty!"
 msgstr "标题和URL都不能为空！"
 
-msgid "Book(s) (%s) put to queue!"
-msgstr "书籍 (%s) 已放入推送队列！"
+msgid "Book(s) ({}) put to queue!"
+msgstr "书籍 ({}) 已放入推送队列！"
 
 msgid "No book to deliver!"
 msgstr "没有需要推送的书籍！"
