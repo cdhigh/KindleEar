@@ -20,8 +20,8 @@ from config import *
 INIT_TOC_CSS='.pagebreak{page-break-before:always;}h1{font-size:2.0em;}h2{font-size:1.5em;}h3{font-size:1.4em;}h4{font-size:1.2em;}h5{font-size:1.1em;}h6{font-size:1.0em;}'
 ItemNcxTocTuple = namedtuple("ItemNcxTocTuple", "klass title href brief thumbnailUrl")
 
-def MimeFromFilename(f):
-    #从文件名生成MIME
+#从文件名生成MIME，只针对图像文件
+def ImageMimeFromName(f):
     f = f.lower()
     if f.endswith(('.gif', '.png', 'bmp')):
         return 'image/{}'.format(f[-3:])
@@ -72,7 +72,7 @@ def CreateOeb(log, opts, encoding='utf-8'):
     return OEBBook(log, html_preprocessor, pretty_print=pretty_print, input_encoding=encoding)
 
 #OEB的一些生成选项
-def getOpts(outputType='kindle', bookMode='periodical'):
+def GetOpts(outputType='kindle', bookMode='periodical'):
     from calibre.customize.profiles import (KindleOutput, KindlePaperWhiteOutput, KindleDXOutput, KindleFireOutput, 
         KindleVoyageOutput, KindlePaperWhite3Output, KindleOasisOutput, OutputProfile)
     from config import REDUCE_IMAGE_TO
@@ -144,7 +144,7 @@ def setMetaData(oeb, title='Feeds', lang='zh-cn', date=None, creator='KindleEar'
 #创建OEB的两级目录，第一级目录为段(section)目录，第二级目录为段下面每个html的目录
 #sections为有序字典，关键词为段名，元素为ItemHtmlTuple
 #tocThumbnails为字典，关键词为图片原始URL，元素为其在oeb内的href
-#此函数的初始版本的主要代码由rexdf贡献
+#此函数主要代码由rexdf贡献
 def InsertToc(oeb, sections, tocThumbnails, insertHtmlToc=True, insertThumbnail=True):
     if 'custom.css' in oeb.manifest.hrefs:
         linkCss = '<link charset="utf-8" href="custom.css" rel="stylesheet" type="text/css" />'

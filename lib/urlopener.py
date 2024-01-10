@@ -5,7 +5,6 @@
 2024: 移植到Python3后改用requests，其实已经很好了，但是requests默认没有超时时间，
 所以还是继续使用此模块封装超时时间吧，并且去掉自动重试功能"""
 import requests
-from config import CONNECT_TIMEOUT
 
 class UrlOpener:
     _codeMapDict = {
@@ -63,7 +62,7 @@ class UrlOpener:
         des = cls._codeMapDict.get(errCode, None)
         return '%d %s' % (errCode, des) if des else str(errCode)
     
-    def __init__(self, host=None, timeout=CONNECT_TIMEOUT, headers=None):
+    def __init__(self, host=None, timeout=30, headers=None):
         self.host = host
         self.timeout = timeout
         self.initHeaders = headers

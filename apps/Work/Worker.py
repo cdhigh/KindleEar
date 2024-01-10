@@ -90,7 +90,7 @@ def Worker():
 
     #创建 OEBBook，并设置一些基本属性
     log = default_log
-    opts = getOpts(user.device, bookMode)
+    opts = GetOpts(user.device, bookMode)
     oeb = CreateOeb(log, opts)
     oeb.container = ServerContainer(log)
     bookTitle = "{} {}".format(bookForMeta.title, local_time(titleFmt, tz)) if titleFmt else bookForMeta.title
@@ -112,7 +112,7 @@ def Worker():
                 log.warn("Book '{}' does not exist".format(bk.title))
                 continue
             book = cBook(imgIndex=imgIndex, opts=opts, user=user)
-            book.url_filters = [flt.url for flt in user.urlfilter]
+            book.url_filters = [flt.url for flt in user.url_filter]
             if bk.needs_subscription: #需要登录
                 subsInfo = user.subscription_info(bk.title)
                 if subsInfo:
@@ -139,7 +139,7 @@ def Worker():
                     ProcessComicRSS(username, user, feed)
                 else:
                     book.feeds.append((feed.title, feed.url, feed.isfulltext))
-            book.url_filters = [flt.url for flt in user.urlfilter]
+            book.url_filters = [flt.url for flt in user.url_filter]
         
         #书的质量可能不一，一本书的异常不能影响其他书籍的推送
         try:
@@ -164,7 +164,7 @@ def Worker():
     volumeTitle = ''
     if itemCnt > 0:
         #插入单独的目录页
-        InsertToc(oeb, sections, tocThumbnails, GENERATE_HTML_TOC, GENERATE_TOC_THUMBNAIL)
+        InsertToc(oeb, sections, tocThumbnails)
         oIO = io.BytesIO()
         o = EPUBOutput() if bookType == "epub" else MOBIOutput()
         o.convert(oeb, oIO, opts, log)
@@ -196,7 +196,7 @@ def Worker():
 def AddMastheadCoverToOeb(user, oeb, mhFile, cvFile, bookForMeta)
     if mhFile: #设置报头
         id_, href = oeb.manifest.generate('masthead', mhFile) # size:600*60
-        oeb.manifest.add(id_, href, MimeFromFilename(mhFile))
+        oeb.manifest.add(id_, href, ImageMimeFromName(mhFile))
         oeb.guide.add('masthead', 'Masthead Image', href)
     
     #设置封面
@@ -227,13 +227,13 @@ def AddMastheadCoverToOeb(user, oeb, mhFile, cvFile, bookForMeta)
             oeb.manifest.add(id_, href, imgMime, data=imgData)
         else:
             id_, href = oeb.manifest.generate('cover', cvFile)
-            oeb.manifest.add(id_, href, MimeFromFilename(cvFile))
+            oeb.manifest.add(id_, href, ImageMimeFromName(cvFile))
         oeb.guide.add('cover', 'Cover', href)
         oeb.metadata.add('cover', id_)
 
 #单独处理漫画RSS
 def ProcessComicRSS(userName, user, feed):
-    opts = getOpts(user.device, "comic")
+    opts = GetOpts(user.device, "comic")
     for comicClass in ComicBaseClasses:
         if feed.url.startswith(comicClass.accept_domains):
             book = comicClass(opts=opts, user=user)
@@ -249,7 +249,7 @@ def ProcessComicRSS(userName, user, feed):
     book.oldest_article = 7
     book.fulltext_by_readability = True
     book.feeds = [(feed.title, feed.url)]
-    book.url_filters = [flt.url for flt in user.urlfilter]
+    book.url_filters = [flt.url for flt in user.url_filter]
 
     return PushComicBook(userName, user, book, opts)
 
@@ -258,7 +258,7 @@ def PushComicBook(userName, user, book, opts=None):
     global default_log
     log = default_log
     if not opts:
-        opts = getOpts(user.device, "comic")
+        opts = GetOpts(user.device, "comic")
     oeb = CreateOeb(log, opts)
     pubType = 'book:book:KindleEar'
     language = 'zh-cn'
@@ -268,11 +268,11 @@ def PushComicBook(userName, user, book, opts=None):
 
     #guide
     id_, href = oeb.manifest.generate('masthead', DEFAULT_MASTHEAD) # size:600*60
-    oeb.manifest.add(id_, href, MimeFromFilename(DEFAULT_MASTHEAD))
+    oeb.manifest.add(id_, href, ImageMimeFromName(DEFAULT_MASTHEAD))
     oeb.guide.add('masthead', 'Masthead Image', href)
 
     id_, href = oeb.manifest.generate('cover', DEFAULT_COVER)
-    item = oeb.manifest.add(id_, href, MimeFromFilename(DEFAULT_COVER))
+    item = oeb.manifest.add(id_, href, ImageMimeFromName(DEFAULT_COVER))
 
     oeb.guide.add('cover', 'Cover', href)
     oeb.metadata.add('cover', id_)

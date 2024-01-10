@@ -17,27 +17,12 @@ DEFAULT_MASTHEAD = "mh_default.gif" #default masthead
 DEFAULT_COVER = "cv_default.jpg" #default cover, leave it empty will not add cover to book
 DEFAULT_COVER_BV = DEFAULT_COVER #default cover for merged-book, None indicates paste all covers into one, =DEFAULT_COVER enable the using of uploaded image.
 
-MY_FEEDS_TITLE = 'KindleEar'
-MY_FEEDS_DESC = 'RSS from KindleEar'
-
-#default timeout for network connection
-CONNECTION_TIMEOUT = 30
-
 #The administrator's login name
 ADMIN_NAME = "admin"
 
 #generate brief description for toc item or not.
 GENERATE_TOC_DESC = True
 TOC_DESC_WORD_LIMIT = 500
-
-#title for table of contents
-TABLE_OF_CONTENTS = 'Table Of Contents'
-
-#description of toc contains image or not
-GENERATE_TOC_THUMBNAIL = True
-
-#if generate other html toc or not, just for reading in pc
-GENERATE_HTML_TOC = True
 
 #if convert color image to gray or not, good for reducing size of book if you read it in Kindle only
 COLOR_TO_GRAY = True
@@ -50,22 +35,8 @@ THRESHOLD_SPLIT_LONG_IMAGE = 750
 #or you can set it to None, and choose device type in webpage 'setting'
 REDUCE_IMAGE_TO = None #(600,800)
 
-#clean css in dealing with content from string@appid.appspotmail.com or not
-DELETE_CSS_FOR_APPSPOTMAIL = True
-
-#if word count more than the number, the email received by appspotmail will 
-#be transfered to kindle directly, otherwise, will fetch the webpage for links in email.
-WORDCNT_THRESHOLD_FOR_APMAIL = 100
-
-#subject of email will be truncated based limit of word count
-SUBJECT_WORDCNT_FOR_APMAIL = 16
-
 #retry count when failed in sendmail to kindle, 0-dont retry
 SENDMAIL_RETRY_CNT = 0
-
-#GAE restrict postfix of attachment in email to send
-#True indicates KindleEar will replace the dot to underline to send mail if it failed.
-SENDMAIL_ALL_POSTFIX = False
 
 #text for link to share or archive
 #SHARE_FUCK_GFW_SRV: (For users in China)如果你要翻墙的话，请设置为其中一个转发服务器

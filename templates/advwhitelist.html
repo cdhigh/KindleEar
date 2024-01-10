@@ -12,8 +12,8 @@
             <small>{{_("mail sent to %sxxx@<em>appid</em>.appspotmail.com will be transfered to your email.")|format('' if user.name=="admin" else user.name+"__")}}</small>
         </p>
         <div class="box-list">
-            {% if user.whitelist.count() -%}
-                {%- for lst in user.whitelist -%}
+            {% if user.white_list.count() -%}
+                {%- for lst in user.white_list -%}
                     <div class="box">
                         {{ lst.mail }}
                         <div class="cornerControls">

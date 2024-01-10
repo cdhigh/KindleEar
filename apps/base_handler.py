@@ -162,13 +162,8 @@ def send_to_kindle(userName, to, title, bookType, attachment, tz=TIMEZONE, fileW
             deliver_log(userName, str(to), title, len(attachment), tz=tz, status='wrong SRC_EMAIL')
             break
         except InvalidAttachmentTypeError as e: #继续发送一次
-            if SENDMAIL_ALL_POSTFIX:
-                fileName = fileName.replace('.', '_')
-                title = title.replace('.', '_')
-            else:
-                default_log.warn('InvalidAttachmentTypeError when sendmail to {}:{}'.format(to, fileName))
-                deliver_log(userName, str(to), title, len(attachment), tz=tz, status='invalid postfix')
-                break
+            fileName = fileName.replace('.', '_')
+            title = title.replace('.', '_')
         except DeadlineExceededError as e:
             status = "sendgrid timeout" if sgEnable and sgApikey else "timeout"
             deliver_log(userName, str(to), title, len(attachment), tz=tz, status=status)

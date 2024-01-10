@@ -10,8 +10,8 @@
         <legend><h3>{{_("Url Filter")}}</h3></legend>
         <p><small>{{_("Urls in list would not be downloaded.")}}</small></p>
         <div class="box-list">
-            {% if user.urlfilter.count() -%}
-                {% for urlflt in user.urlfilter -%}
+            {% if user.url_filter.count() -%}
+                {% for urlflt in user.url_filter -%}
                     <div class="box">
                         {%if urlflt.url|length>70 %}
                             {{ urlflt.url[:70] }}...<span>{{ urlflt.url }}</span>

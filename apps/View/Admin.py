@@ -63,7 +63,7 @@ def AdminPost(self):
             except:
                 tips = _("The password includes non-ascii chars!")
             else:
-                myfeeds = Book(title=MY_FEEDS_TITLE, description=MY_FEEDS_DESC,
+                myfeeds = Book(title="KindleEar", description="RSS from KindleEar",
                     builtin=False, keep_image=True, oldest_article=7, 
                     needs_subscription=False, separate=False)
                 myfeeds.put()
@@ -153,11 +153,11 @@ def DelAccountPost(name=None):
                 u.own_feeds.delete()
                 
             #删掉白名单和过滤器
-            whitelists = list(u.whitelist)
-            urlfilters = list(u.urlfilter)
-            for d in whitelists:
+            whiteLists = list(u.white_list)
+            urlFilters = list(u.url_filter)
+            for d in whiteLists:
                 d.delete()
-            for d in urlfilters:
+            for d in urlFilters:
                 d.delete()
             
             # 删掉订阅记录

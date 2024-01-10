@@ -18,7 +18,7 @@ def InitialAdminAccount():
     if u:
         return True
 
-    myFeeds = Book(title=MY_FEEDS_TITLE, description=MY_FEEDS_DESC, builtin=False, 
+    myFeeds = Book(title="KindleEar", description="RSS from KindleEar", builtin=False, 
             keep_image=True, oldest_article=7, needs_subscription=False, separate=False)
     myFeeds.put()
     secretKey = new_secret_key()

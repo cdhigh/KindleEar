@@ -111,7 +111,7 @@ def auth_code(string, key, operation='DECODE'):
         else:
             return ''
     else:
-        return base64.urlsafe_b64encode(result)
+        return base64.urlsafe_b64encode(result.encode('utf-8'))
 
 
 #基于readability-lxml修改的提取网页标题的函数，增加CJK语种支持

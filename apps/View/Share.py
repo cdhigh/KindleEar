@@ -36,6 +36,7 @@ def Share(self):
     
     url = unquote_plus(url)
     
+    #from lib.debug_utils import debug_mail
     #debug_mail(content)
     
     if action in ('evernote', 'wiz'): #保存至evernote/wiz
@@ -61,7 +62,7 @@ def SaveToEvernoteWiz(user, action, orgUrl):
     book.language = user.own_feeds.language
     book.keep_image = user.own_feeds.keep_image
     book.feeds = [(action, orgUrl)]
-    book.url_filters = [flt.url for flt in user.urlfilter]
+    book.url_filters = [flt.url for flt in user.url_filter]
     
     attachments = [] #(filename, attachment),]
     html = ''

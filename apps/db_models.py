@@ -98,11 +98,11 @@ class KeUser(db.Model): # kindleEar User
     sg_apikey = db.StringProperty() #SendGrid API Key
     
     @property
-    def whitelist(self):
+    def white_list(self):
         return WhiteList.all().filter('user = ', self.key())
     
     @property
-    def urlfilter(self):
+    def url_filter(self):
         return UrlFilter.all().filter('user = ', self.key())
     
     #获取此账号对应的书籍的网站登陆信息
