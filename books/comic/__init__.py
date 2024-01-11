@@ -10,7 +10,7 @@ from books.base_comic_book import BaseComicBook
 
 ComicBaseClasses = []
 for comicFile in os.listdir(os.path.dirname(__file__)):
-    if comicFile.startswith('base_') and comicFile.endswith(.py):
+    if comicFile.startswith('base_') and comicFile.endswith('.py'):
         comicName = os.path.splitext(comicFile)[0]
         try:
             moduleComic = __import__('books.comic.' + comicName, fromlist='*')

@@ -3,33 +3,16 @@
 #登录页面
 
 import hashlib, datetime, time
-import json
-from bottle import route, post, redirect
+from flask import Blueprint, url_for, render_template, redirect, session
 from apps.base_handler import *
 from apps.db_models import *
 from books import BookClasses, BookClass
 from apps.utils import new_secret_key
 from config import *
 
-#判断管理员账号是否存在
-#如果管理员账号不存在，创建一个，并返回False，否则返回True
-def InitialAdminAccount():
-    u = KeUser.all().filter("name = ", ADMIN_NAME).get()
-    if u:
-        return True
+bpLogin = Blueprint('bpLogin', __name__)
 
-    myFeeds = Book(title="KindleEar", description="RSS from KindleEar", builtin=False, 
-            keep_image=True, oldest_article=7, needs_subscription=False, separate=False)
-    myFeeds.put()
-    secretKey = new_secret_key()
-    password = hashlib.md5((ADMIN_NAME + secretKey).encode()).hexdigest()
-    au = KeUser(name=ADMIN_NAME, passwd=password, kindle_email='', enable_send=False, 
-        send_time=8, timezone=TIMEZONE, book_type="epub", device='kindle', expires=None, 
-        own_feeds=myFeeds, merge_books=False, secret_key=secretKey, expiration_days=0)
-    au.put()
-    return False
-    
-@route("/login")
+@bpLogin.route("/login")
 def Login():
     # 第一次登陆时如果没有管理员帐号，
     # 则增加一个管理员帐号 ADMIN_NAME，密码 ADMIN_NAME，后续可以修改密码
@@ -37,29 +20,29 @@ def Login():
     if InitialAdminAccount():
         tips = _("Please input username and password.")
     else:
-        tips = _("Please use {}/{} to login at first time.".format(ADMIN_NAME, ADMIN_NAME))
+        tips = _("Please use {}/{} to login at first time.").format(ADMIN_NAME, ADMIN_NAME)
     
-    if current_session().login == 1:
-        redirect('/')
+    if session.login == 1:
+        return redirect('/')
     else:
-        return render_page('login.html', "Login", tips=tips)
+        return render_template('login.html', tips=tips)
 
-@post("/login")
+@bpLogin.post("/login")
 def LoginPost():
-    name = request.forms.u.strip()
-    passwd = request.forms.p
+    name = request.form.get('u', '').strip()
+    passwd = request.form.get('p', '')
     specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}']
+    tips = ''
     if not name:
         tips = _("Username is empty!")
-        return self.render('login.html', "Login", nickname='', tips=tips)
     elif len(name) > 25:
         tips = _("The len of username reached the limit of 25 chars!")
-        return render_page('login.html', "Login", nickname='', tips=tips, username=name)
     elif any(char in name for char in specialChars):
         tips = _("The username includes unsafe chars!")
-        return render_page('login.html', "Login", nickname='', tips=tips)
+
+    if tips:
+        return render_template('login.html', tips=tips)
     
-    session = current_session()
     InitialAdminAccount() #确认管理员账号是否存在
     
     u = KeUser.all().filter("name = ", name).get()
@@ -72,7 +55,7 @@ def LoginPost():
     if u:
         session.login = 1
         session.userName = name
-        session.save()
+        session.role = 'admin' if name == ADMIN_NAME else 'user'
         if u.expires and u.expiration_days > 0: #用户登陆后自动续期
             days = u.expiration_days
             u.expires = datetime.datetime.utcnow() + datetime.timedelta(days=days)
@@ -106,34 +89,47 @@ def LoginPost():
         for bk in bksToDelete:
             bk.delete()
         
-        if u.kindle_email:
-            redirect('/my')
-        else:
-            redirect('/setting')
+        return redirect(url_for("MySubscription") if u.kindle_email else url_for("/setting"))
     else:  #账号或密码错
         time.sleep(5) #防止暴力破解
         tips = _("The username not exist or password is wrong!")
-        lang = session..lang
-        if lang and lang.startswith('zh'):
+        lang = session.get('langCode', '')
+        if lang.startswith('zh'):
             tips += '&nbsp;&nbsp;&nbsp;&nbsp;<a href="/static/faq.html#forgotpwd" target="_blank">' + _('Forgot password?') + '</a>'
         else:
             tips += '&nbsp;&nbsp;&nbsp;&nbsp;<a href="/static/faq_en.html#forgotpwd" target="_blank">' + _('Forgot password?') + '</a>'
         session.login = 0
         session.userName = ''
-        session.save()
-        return render_page('login.html', "Login", nickname='', tips=tips, username=name)
+        session.role = ''
+        return render_template('login.html', tips=tips, userName=name)
 
-@route("/logout")
+#判断管理员账号是否存在
+#如果管理员账号不存在，创建一个，并返回False，否则返回True
+def InitialAdminAccount():
+    u = KeUser.all().filter("name = ", ADMIN_NAME).get()
+    if u:
+        return True
+
+    myFeeds = Book(title="KindleEar", description="RSS from KindleEar", builtin=False, 
+            keep_image=True, oldest_article=7, needs_subscription=False, separate=False)
+    myFeeds.put()
+    secretKey = new_secret_key()
+    password = hashlib.md5((ADMIN_NAME + secretKey).encode()).hexdigest()
+    au = KeUser(name=ADMIN_NAME, passwd=password, kindle_email='', enable_send=False, 
+        send_time=8, timezone=TIMEZONE, book_type="epub", device='kindle', expires=None, 
+        own_feeds=myFeeds, merge_books=False, secret_key=secretKey, expiration_days=0)
+    au.put()
+    return False
+
+@bpLogin.route("/logout")
 def Logout(self):
-    session = current_session()
     session.login = 0
     session.userName = ''
-    session.lang = ''
-    session.save()
-    redirect('/')
+    session.role = ''
+    return redirect('/')
 
 #for ajax parser, if login required, retuan a dict 
-@route("/needloginforajax")
+@bpLogin.get("/needloginforajax")
 def NeedLoginAjax():
-    response.content_type = 'application/json'
-    return json.dumps({'status': _('login required')})
+    return {'status': _('login required')}
+

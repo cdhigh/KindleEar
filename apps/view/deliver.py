@@ -3,12 +3,14 @@
 #投递相关功能
 
 from collections import defaultdict
-from bottle import route, request
-from apps.back_end import create_http_task
+from flask import Blueprint, render_template, request
+from apps.back_end.task_queue_adpt import create_http_task
 from apps.base_handler import *
 from apps.db_models import *
 from apps.utils import local_time
 from books import BookClass
+
+bpDeliver = Blueprint('bpDeliver', __name__)
 
 #根据设置，将书籍预先放到队列之后一起推送，或马上单独推送
 #queueToPush: 一个defaultdict(list)实例
@@ -30,16 +32,15 @@ def queueOneBook(queueToPush, user, bookId, separate, feedsId=None):
 #queueToPush: 一个defaultdict(list)实例
 def flushQueueToPush(queueToPush):
     for name in queueToPush:
-        param = {'u': name, 'id_': ','.join(queueToPush[name])}
-        create_http_task("/worker", param)
+        create_http_task("/worker", {'u': name, 'id_': ','.join(queueToPush[name])})
 
 #判断需要推送哪些书籍
-@route("/deliver")
+@bpDeliver.route("/deliver")
 def Deliver():
-    query = request.query
-    userName = query.u
-    id_ = query.id_
-    feedsId = query.feedsId
+    args = request.args
+    userName = args.get('u')
+    id_ = args.get('id_')
+    feedsId = args.get('feedsId')
     if id_: #多个ID使用','分隔
         id_ = [int(item) for item in id_.split(',') if item.isdigit()]
     
@@ -49,7 +50,7 @@ def Deliver():
     if userName: #现在投递【测试使用】，不需要判断时间和星期
         user = KeUser.all().filter("name = ", userName).get()
         if not user or not user.kindle_email:
-            return render_page('autoback.html', "Delivering", tips=_('The username not exist or the email of kindle is empty.'))
+            return render_template('autoback.html', tips=_('The username not exist or the email of kindle is empty.'))
 
         sent = []
         if id_: #推送特定账号指定的书籍，这里不判断特定账号是否已经订阅了指定的书籍，只要提供就推送
@@ -60,14 +61,14 @@ def Deliver():
         for book in booksToPush:
             queueOneBook(queueToPush, user, book.key().id(), book.separate, feedsId)
             sent.append(book.title)
-        self.flushqueue()
+        self.flushQueueToPush()
 
         if len(sent):
             tips = _("Book(s) ({}) put to queue!").format(', '.join(sent))
         else:
             tips = _("No book to deliver!")
 
-        return render_page('autoback.html', "Delivering", tips=tips)
+        return render_template('autoback.html', tips=tips)
     
     #定时cron调用
     sentCnt = 0

@@ -13,12 +13,35 @@ SERVER_LOCATION = "us-central1"
 
 TIMEZONE = 8  #Default timezone, you can modify it in webpage after deployed
 
-DEFAULT_MASTHEAD = "mh_default.gif" #default masthead
-DEFAULT_COVER = "cv_default.jpg" #default cover, leave it empty will not add cover to book
-DEFAULT_COVER_BV = DEFAULT_COVER #default cover for merged-book, None indicates paste all covers into one, =DEFAULT_COVER enable the using of uploaded image.
+#Choose the backend service for sending emails, either "gae", "sendgrid", "smtp"
+SEND_MAIL_SERVICE = "gae"
+
+#If SEND_MAIL_SERVICE is configured as sendgrid, these properties need to be set correctly
+#SENDGRID_APIKEY = ""
+
+#If SEND_MAIL_SERVICE is configured as smtp, these properties need to be set correctly
+#SMTP_HOST = "smtp.gmail.com"
+#SMTP_HOST_USER = "your_name@gmail.com"
+#SMTP_HOST_PASSWORD = "password"
+#SMTP_PORT = 587
+#SMTP_USE_TLS = True
+
+#If you need to use google appengine email receiving service, please set it to True
+USE_GAE_INBOUND_EMAIL = True
+
+#Select the type of task queue, "gae", "celery", "cron"
+TASK_QUEUE_TYPE = "gae"
+
+#------------------------------------------------------------------------------------
+#Configurations below this line generally do not need to be modified
+#------------------------------------------------------------------------------------
 
 #The administrator's login name
 ADMIN_NAME = "admin"
+
+DEFAULT_MASTHEAD = "mh_default.gif" #default masthead
+DEFAULT_COVER = "cv_default.jpg" #default cover, leave it empty will not add cover to book
+DEFAULT_COVER_BV = DEFAULT_COVER #default cover for merged-book, None indicates paste all covers into one, =DEFAULT_COVER enable the using of uploaded image.
 
 #generate brief description for toc item or not.
 GENERATE_TOC_DESC = True
@@ -34,9 +57,6 @@ THRESHOLD_SPLIT_LONG_IMAGE = 750
 #reduce dimension of image to (Width,Height)
 #or you can set it to None, and choose device type in webpage 'setting'
 REDUCE_IMAGE_TO = None #(600,800)
-
-#retry count when failed in sendmail to kindle, 0-dont retry
-SENDMAIL_RETRY_CNT = 0
 
 #text for link to share or archive
 #SHARE_FUCK_GFW_SRV: (For users in China)如果你要翻墙的话，请设置为其中一个转发服务器

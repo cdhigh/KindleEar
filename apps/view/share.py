@@ -2,32 +2,31 @@
 # -*- coding:utf-8 -*-
 #保存到evernote或分享到社交媒体功能
 
-from urllib.parse import unquote_plus
 import hashlib
+from urllib.parse import unquote_plus
 from bs4 import BeautifulSoup
-from google.appengine.api import mail
-from apps.BaseHandler import BaseHandler
-from apps.dbModels import *
-from apps.utils import hide_email, etagged, ke_encrypt, ke_decrypt
-from bottle import route, request
+from flask import Blueprint, render_template, request
+from apps.base_handler import *
+from apps.db_models import *
+from apps.utils import hide_email, ke_encrypt, ke_decrypt
+from apps.back_end.send_mail_adpt import send_html_mail
 from books.base_url_book import BaseUrlBook
 from lib.pocket import Pocket
-from lib.urlopener import URLOpener
+from lib.urlopener import UrlOpener
 from config import SHARE_FUCK_GFW_SRV, POCKET_CONSUMER_KEY
 
-#控制分享到EverNote时图像文件是直接显示(False)还是做为附件(True)
-EMBEDDED_SHARE_IMAGE = True
+bpShare = Blueprint('bpShare', __name__)
 
 SHARE_INFO_TPL = """<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <title>{title}</title></head><body><p style="text-align:center;font-size:1.5em;">{info}</p></body></html>"""
 
-@route("/share")
+@bpShare.route("/share")
 def Share(self):
-    forms = request.query
-    action = forms.act
-    userName = forms.u
-    url = forms.url
-    if not all((userName, url, action)):
+    args = request.args
+    action = args.get('act')
+    userName = args.get('u')
+    url = args.get('url')
+    if not all((action, userName, url)):
         return "Some parameter is missing or wrong!<br />"
     
     user = KeUser.all().filter("name = ", userName).get()
@@ -68,16 +67,10 @@ def SaveToEvernoteWiz(user, action, orgUrl):
     html = ''
     title = action
     
-    # 对于html文件，变量名字自文档
-    # 对于图片文件，section为图片mime,url为原始链接,title为文件名,content为二进制内容
     #每次返回一个命名元组，可能为 ItemHtmlTuple, ItemImageTuple, ItemCssTuple(在这里忽略)
-    #sec_or_media, url, title, content, brief, thumbnail
     for item in book.Items():
         if isinstance(item, ItemImageTuple):
-            if EMBEDDED_SHARE_IMAGE:
-                attachments.append(mail.Attachment(item.fileName, item.content, content_id='<{}>'.format(item.fileName)))
-            else:
-                attachments.append((item.fileName, item.content))
+            attachments.append((item.fileName, item.content))
         elif isinstance(item, ItemHtmlTuple):
             soup = item.soup
             
@@ -89,14 +82,11 @@ def SaveToEvernoteWiz(user, action, orgUrl):
             p.append(a)
             soup.html.body.insert(0, p)
             
-            if EMBEDDED_SHARE_IMAGE: #内嵌图片标识
-                for img in soup.find_all('img', attrs={'src': True}):
-                    img['src'] = 'cid:' + img['src']
-            else: #标注图片位置
-                for img in soup.find_all('img', attrs={'src': True}):
-                    p = soup.new_tag('p')
-                    p.string = 'Image : ' + img['src']
-                    img.insert_after(p)
+            #标注图片位置
+            for img in soup.find_all('img', attrs={'src': True}):
+                p = soup.new_tag('p')
+                p.string = 'Image : ' + img['src']
+                img.insert_after(p)
                 
             try:
                 title = soup.html.head.title.string

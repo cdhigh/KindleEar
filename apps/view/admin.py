@@ -3,63 +3,67 @@
 #账号管理页面
 
 import hashlib, datetime
-
-from bottle import route, post, redirect
-
+from flask import Blueprint, request, url_for, render_template, redirect, session
 from apps.base_handler import *
 from apps.db_models import *
 from apps.utils import new_secret_key, str_to_int
-
 from config import *
 
+bpAdmin = Blueprint('bpAdmin', __name__)
+
 # 账户管理页面
-@route("/admin")
+@bpAdmin.route("/admin")
+@login_required
 def Admin():
-    user = get_current_user()
+    user = get_login_user()
 
     #只有管理员才能管理其他用户
     users = KeUser.all() if user.name == ADMIN_NAME else None
-    return render_page('admin.html', 'Admin', current=ADMIN_NAME, user=user, users=users)
+    return render_template('admin.html', title='Admin', tab='admin', user=user, users=users)
 
-@post("/admin")
+@bpAdmin.post("/admin")
+@login_required
 def AdminPost(self):
-    forms = request.forms
-    u, up1, up2 = forms.u, forms.up1, forms.up2
-    expiration = str_to_int(forms.get('expiration', '0'))
-    op, p1, p2 = forms.op, forms.p1, forms.p2
-    user = get_current_user()
+    form = request.form
+    userName = form.get('u') #用于添加账号
+    password1 = form.get('up1')
+    password2 = form.get('up2')
+    oldPassword = form.get('op') #用于修改账号密码
+    newP1 = form.get('p1')
+    newP2 = form.get('p2')
+    expiration = str_to_int(form.get('expiration', '0'))
+    
+    user = get_login_user()
     users = KeUser.all() if user.name == ADMIN_NAME else None
     
-    if all((op, p1, p2)): #修改当前登陆账号的密码
+    if all((oldPassword, newP1, newP2)): #修改当前登陆账号的密码
         secret_key = user.secret_key or ''
         try:
-            pwd = hashlib.md5((op + secret_key).encode()).hexdigest()
-            newpwd = hashlib.md5((p1 + secret_key).encode()).hexdigest()
+            pwd = hashlib.md5((oldPassword + secret_key).encode()).hexdigest()
+            newPwd = hashlib.md5((newP1 + secret_key).encode()).hexdigest()
         except:
             tips = _("The password includes non-ascii chars!")
         else:
             if user.passwd != pwd:
                 tips = _("Old password is wrong!")
-            elif p1 != p2:
+            elif newP1 != newP2:
                 tips = _("The two new passwords are dismatch!")
             else:
                 tips = _("Change password success!")
-                user.passwd = newpwd
+                user.passwd = newPwd
                 user.put()
-        return render_page('admin.html', "Admin", current=ADMIN_NAME, user=user, users=users, chpwdtips=tips)
-    elif all((u, up1, up2)): #添加账户
-        if user.name != ADMIN_NAME:
-            redirect('/')
-        elif not u:
-            tips = _("Username is empty!")
-        elif up1 != up2:
+        return render_template('admin.html', tab='admin', user=user, users=users, chpwdtips=tips)
+    elif all((userName, password1, password2)): #添加账户
+        if user.name != ADMIN_NAME: #只有管理员能添加账号
+            return redirect('/')
+        elif password1 != password2:
             tips = _("The two new passwords are dismatch!")
-        elif KeUser.all().filter("name = ", u).get():
+        elif KeUser.all().filter("name = ", userName).get():
             tips = _("Already exist the username!")
         else:
             secret_key = new_secret_key()
             try:
-                pwd = hashlib.md5((up1 + secret_key).encode()).hexdigest()
+                pwd = hashlib.md5((password1 + secret_key).encode()).hexdigest()
             except:
                 tips = _("The password includes non-ascii chars!")
             else:
@@ -67,7 +71,7 @@ def AdminPost(self):
                     builtin=False, keep_image=True, oldest_article=7, 
                     needs_subscription=False, separate=False)
                 myfeeds.put()
-                au = KeUser(name=u, passwd=pwd, kindle_email='', enable_send=False,
+                au = KeUser(name=userName, passwd=pwd, kindle_email='', enable_send=False,
                     send_time=7, timezone=TIMEZONE, book_type="epub",
                     own_feeds=myfeeds, merge_books=False, secret_key=secret_key, expiration_days=expiration)
                 if expiration:
@@ -76,14 +80,14 @@ def AdminPost(self):
                 au.put()
                 users = KeUser.all() if user.name == ADMIN_NAME else None
                 tips = _("Add a account success!")
-        return render_page('admin.html', "Admin", current=ADMIN_NAME, user=user, users=users, actips=tips)
+        return render_template('admin.html', tab='admin', user=user, users=users, actips=tips)
     else:
         return Admin()
 
 #管理员修改其他账户的密码
-@route("/mgrpwd/<name>")
+@bpAdmin.route("/mgrpwd/<name>")
+@login_required(ADMIN_NAME)
 def AdminManagePassword(name):
-    login_required(ADMIN_NAME)
     u = KeUser.all().filter("name = ", name).get()
     expiration = 0
     if not u:
@@ -92,14 +96,17 @@ def AdminManagePassword(name):
         tips = _("Please input new password to confirm!")
         expiration = u.expiration_days
 
-    return render_page('adminmgrpwd.html', "Change password", tips=tips, username=name, expiration=expiration)
+    return render_template('adminmgrpwd.html', tips=tips, userName=name, expiration=expiration)
 
-@post("/mgrpwd/<name>")
-def AdminManagePasswordPost(name=None):
-    login_required(ADMIN_NAME)
-    forms = request.forms
-    name, p1, p2 = forms.u, forms.p1, forms.p2
-    expiration = str_to_int(forms.get('ep', '0'))
+@bpAdmin.post("/mgrpwd/<name>")
+@login_required(ADMIN_NAME)
+def AdminManagePasswordPost(name):
+    form = request.form
+    name = form.get('name')
+    p1 = form.get('p1')
+    p2 = form.get('p2')
+    expiration = str_to_int(form.get('ep', '0'))
+    tips = _("Username is empty!")
 
     if name:
         u = KeUser.all().filter("name = ", name).get()
@@ -123,26 +130,24 @@ def AdminManagePasswordPost(name=None):
                 u.put()
                 strBackPage = '&nbsp;&nbsp;&nbsp;&nbsp;<a href="/admin">Click here to go back</a>'
                 tips = _("Change password success!") + strBackPage
-    else:
-        tips = _("Username is empty!")
     
-    return render_page('adminmgrpwd.html', "Change password", tips=tips, username=name)
-        
+    return render_template('adminmgrpwd.html', tips=tips, userName=name)
+    
 #删除一个账号
-@route("/delaccount/<name>")
+@bpAdmin.route("/delaccount/<name>")
+@login_required
 def DelAccount(name):
-    session = login_required()
-    if (session.userName == ADMIN_NAME) or (name and name == session.userName):
+    if (name != ADMIN_NAME) and (session.userName in (ADMIN_NAME, name)):
         tips = _("Please confirm to delete the account!")
-        return render_page('delaccount.html', "Delete account", tips=tips, username=name)
+        return render_template('delaccount.html', tips=tips, userName=name)
     else:
-        redirect('/')
+        return redirect('/')
 
-@post("/delaccount/<name>")
-def DelAccountPost(name=None):
-    session = login_required()
-    name = request.forms.u
-    if name and (name == ADMIN_NAME) and (session.userName in (ADMIN_NAME, name)):
+@bpAdmin.post("/delaccount/<name>")
+@login_required
+def DelAccountPost(name):
+    name = request.form.get('u')
+    if (name != ADMIN_NAME) and (session.userName in (ADMIN_NAME, name)):
         u = KeUser.all().filter("name = ", name).get()
         if not u:
             tips = _("The username '{}' not exist!").format(name)
@@ -153,11 +158,9 @@ def DelAccountPost(name=None):
                 u.own_feeds.delete()
                 
             #删掉白名单和过滤器
-            whiteLists = list(u.white_list)
-            urlFilters = list(u.url_filter)
-            for d in whiteLists:
+            for d in list(u.white_list):
                 d.delete()
-            for d in urlFilters:
+            for d in list(u.url_filter):
                 d.delete()
             
             # 删掉订阅记录
@@ -175,10 +178,7 @@ def DelAccountPost(name=None):
             
             u.delete()
             
-            if session.username == name:
-                redirect('/logout')
-            else:
-                redirect('/admin')
+            return redirect(url_for("Logout") if session.userName == name else url_for("Admin"))
     else:
         tips = _("The username is empty or you dont have right to delete it!")
-    return render_page('delaccount.html', "Delete account", tips=tips, username=name)
+    return render_template('delaccount.html', tips=tips, userName=name)

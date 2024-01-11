@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block titleTag -%}
+<title>{{ _("Admin") }} - KindleEar</title>
+{% endblock -%}
 
 {% block bodytag -%}
 <body class="admin">
@@ -30,7 +33,7 @@
         </fieldset>
     </form>
 
-    {% if nickname == 'admin' -%}
+    {% if session.get('role') == 'admin' -%}
     <form class="pure-form pure-form-aligned" action="" method="POST" style="margin-top:10px;">
         <fieldset>
             <legend><h3>{{_("Add Account")}}</h3></legend>

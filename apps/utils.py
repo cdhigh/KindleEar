@@ -2,14 +2,9 @@
 # -*- coding:utf-8 -*-
 #一些常用工具函数
 
-import os, sys
-from functools import wraps
-from hashlib import md5
-import web
+import os, sys, hashlib, base64, random, datetime
+from urllib.parse import urlparse
 from config import *
-import datetime
-import gettext
-import re
 
 #当异常出现时，使用此函数返回真实引发异常的文件名，函数名和行号
 def get_exc_location():
@@ -56,10 +51,30 @@ def hide_email(email):
         return newEmails[0]
     else:
         return newEmails
-    
+
+#隐藏真实的网址
+def hide_website(site):
+    if not site:
+        return ''
+        
+    parts = urlparse(site)
+    path = parts.path if parts.path else parts.netloc
+    if '.' in path:
+        pathArray = path.split('.')
+        if len(pathArray[0]) > 4:
+            pathArray[0] = pathArray[0][:2] + '**' + pathArray[0][-1]
+        else:
+            pathArray[0] = pathArray[0][0] + '**'
+            pathArray[1] = pathArray[1][0] + '**'
+        site = '.'.join(pathArray)
+    elif len(path) > 4:
+        site = path[:2] + '**' + path[-1]
+    else:
+        site = path[0] + '**'
+    return site
+
 #-----------以下几个函数为安全相关的
 def new_secret_key(length=8):
-    import random
     allchars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXZY0123456789'
     return ''.join([random.choice(allchars) for i in range(length)])
     
@@ -112,79 +127,3 @@ def auth_code(string, key, operation='DECODE'):
             return ''
     else:
         return base64.urlsafe_b64encode(result.encode('utf-8'))
-
-
-#基于readability-lxml修改的提取网页标题的函数，增加CJK语种支持
-def shorten_webpage_title(title):
-    if not title:
-        return ""
-    
-    zhPattern = re.compile('[\u4e00-\u9fff]+') # CJK unicode range
-    
-    #去除多余空格和转换一些HTML转义字符
-    title = " ".join(title.split())
-    entities = {"\u2014": "-", "\u2013": "-", "&mdash;": "-", "&ndash;": "-",
-        "\u00A0": " ", "\u00AB": '"', "\u00BB": '"', "&quot;": '"'}
-    for c, r in entities.items():
-        if c in title:
-            title = title.replace(c, r)
-    
-    orig = title
-
-    candidates = set()
-
-    for item in [".//h1", ".//h2", ".//h3"]:
-        for e in list(doc.iterfind(item)):
-            if e.text:
-                add_match(candidates, e.text, orig)
-            if e.text_content():
-                add_match(candidates, e.text_content(), orig)
-
-    for item in TITLE_CSS_HEURISTICS:
-        for e in doc.cssselect(item):
-            if e.text:
-                add_match(candidates, e.text, orig)
-            if e.text_content():
-                add_match(candidates, e.text_content(), orig)
-
-    if candidates:
-        title = sorted(candidates, key=len)[-1]
-    else:
-        for delimiter in [" | ", " - ", " :: ", " / "]:
-            if delimiter in title:
-                parts = orig.split(delimiter)
-                lp0 = parts[0].split() #split by space
-                lpl = parts[-1].split()
-                if len(lp0) >= 4:
-                    title = parts[0]
-                    break
-                # added by cdhigh, CJK? no use space to split words
-                elif zhPattern.search(parts[0]) and len(parts[0]) > 4:
-                    title = parts[0]
-                    break
-                elif len(lpl) >= 4:
-                    title = parts[-1]
-                    break
-                # added by cdhigh, CJK? no use space to split words
-                elif zhPattern.search(parts[-1]) and len(parts[-1]) > 4:
-                    title = parts[-1]
-                    break
-        else:
-            if ": " in title:
-                parts = orig.split(": ")
-                if len(parts[-1].split()) >= 4:
-                    title = parts[-1]
-                # added by cdhigh
-                elif zhPattern.search(parts[-1]) and len(parts[-1]) > 4:
-                    title = parts[-1]
-                else:
-                    title = orig.split(": ", 1)[1]
-    
-    # added by cdhigh
-    if zhPattern.search(title):
-        if not 4 < len(title) < 100:
-            return orig
-    elif not 15 < len(title) < 150:
-        return orig
-    
-    return title

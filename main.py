@@ -7,77 +7,81 @@
 
 __Author__ = "cdhigh"
 
-import os, sys, datetime, logging, builtins, hashlib, time
+import os, sys, logging, builtins
+from flask import Flask, render_template, session, request, g
+from flask_babel import Babel, gettext
 
-__Version__ = '3.1'
-
-sys.path.insert(0, 'lib')
+__Version__ = '3.0'
 
 # for debug
 # 本地启动调试服务器：python.exe dev_appserver.py c:\kindleear
 IsRunInLocal = (os.environ.get('SERVER_SOFTWARE', '').startswith('Development'))
 log = logging.getLogger()
-builtins.__dict__['__Version__'] = __Version__
+log.setLevel(logging.INFO if IsRunInLocal else logging.WARN)
 builtins.__dict__['default_log'] = log
 builtins.__dict__['IsRunInLocal'] = IsRunInLocal
+builtins.__dict__['_'] = gettext
 
-supported_languages = ('en', 'zh-cn', 'tr-tr') #不支持的语种则使用第一个语言
-builtins.__dict__['supported_languages'] = supported_languages
-#gettext.install('lang', 'i18n', unicode=True) #for calibre startup
+sys.path.insert(0, 'lib')
+from books import RegisterBuiltinBooks
+from apps.view.login import bpLogin  #Blueprints
+from apps.view.admin import bpAdmin
+from apps.view.adv import bpAdv
+from apps.view.deliver import bpDeliver
+from apps.view.library import bpLibrary
+from apps.view.logs import bpLogs
+from apps.view.setting import bpSetting
+from apps.view.share import bpShare
+from apps.view.subscribe import bpSubscribe
+from apps.work.worker import bdWorker
+from apps.work.url2book import bpUrl2Book
 
-log.setLevel(logging.INFO if IsRunInLocal else logging.WARN)
+RegisterBuiltinBooks() #添加内置书籍到数据库
 
-from bottle import default_app, route, run, hook
-import jinja2
-from bottle.ext import beaker
+app = Flask(_name__)
+babel = Babel(app)
+app.secret_key = 'fdjlkdfjx32QLL2'
 
-from books import BookClasses
+#使用GAE来接收邮件
+if USE_GAE_INBOUND_EMAIL:
+    from google.appengine.api import wrap_wsgi_app
+    from apps.view.inbound_email import bpInBoundEmail
+    app.wsgi_app = wrap_wsgi_app(app.wsgi_app)  #启用GAE邮件服务
+    app.register_blueprint(bpInBoundEmail)
 
-from apps.base_handler import set_session_lang
-from apps.view import *
+#多语种支持
+@babel.localeselector
+def GetLocale():
+    #手动设置过要显示的语种有限
+    langCode = session.get('langCode')
+    if langCode:
+        return langCode
+    #根据浏览器自动设置
+    return request.accept_languages.best_match(['zh_cn', 'tr_tr', 'en'])
 
-from apps.dbModels import Book
-from apps.BaseHandler import BaseHandler
-
-for book in BookClasses():  #添加内置书籍
-    if memcache.get(book.title): #使用memcache加速
-        continue
-    b = Book.all().filter("title = ", book.title).get()
-    if not b:
-        b = Book(title=book.title, description=book.description, builtin=True, 
-            needs_subscription=book.needs_subscription, separate=False)
-        b.put()
-        memcache.add(book.title, book.description, 86400)
-
-#让jinja2到工程根目录下的templates子目录加载模板
-jinja2Env = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'),
-                            extensions=["jinja2.ext.do", "jinja2.ext.i18n"])
-builtins.__dict__['jinja2Env'] = jinja2Env
-
-#Bottle session configuration
-sessionOpts = {
-    'session.type': 'file',
-    'session.cookie_expires': 300,
-    'session.data_dir': '/tmp',  #Cloud 平台只有这个目录是可写的
-    'session.auto': True
-}
-
-hook.add_hook('before_request', set_session_lang)
-app = beaker.middleware.SessionMiddleware(default_app(), sessionOpts) #app为Cloud需要的接口名字
-
-#print(str(os.environ))
-#reload(sys)
-#sys.setdefaultencoding('utf-8')
-
-@route('/')
+@app.route('/')
 def Home():
     return render_page('home.html', "Home")
 
-@route('/test')
-def Test():
-    s = ''
-    for d in os.environ:
-        s += "<pre><p>" + str(d).rjust(28) + " | " + str(os.environ[d]) + "</p></pre>"
-    return s
+@app.before_request
+def BeforeRequest():
+    g.version = __Version__
 
-#run(host='localhost', port=8080, debug=True)
+@app.route('/env')
+def Test():
+    strEnv = []
+    for d in os.environ:
+        strEnv.append("<pre><p>" + str(d).rjust(28) + " | " + str(os.environ[d]) + "</p></pre>")
+    return ''.join(strEnv)
+
+app.register_blueprint(bpLogin)
+app.register_blueprint(bpAdmin)
+app.register_blueprint(bpAdv)
+app.register_blueprint(bpDeliver)
+app.register_blueprint(bpLibrary)
+app.register_blueprint(bpLogs)
+app.register_blueprint(bpSetting)
+app.register_blueprint(bpShare)
+app.register_blueprint(bpSubscribe)
+app.register_blueprint(bpWorker)
+app.register_blueprint(bpUrl2Book)

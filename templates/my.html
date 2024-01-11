@@ -1,5 +1,7 @@
 {% extends "base.html" %}
-
+{% block titleTag -%}
+<title>{{ _("Feeds") }} - KindleEar</title>
+{% endblock -%}
 {% block bodytag -%}
 <body class="my-rss">
 {% endblock -%}
@@ -12,7 +14,7 @@
         <div class="book box pure-form pure-form-aligned" id="divAddFeedCmdPanel">
             <div class="pure-control-group titleRow pure-g">
                 <div class="pure-u-3-5 pure-u-sm-3-4 pure-u-md-5-6">
-                    <input type="text" name="t" id="title_to_add" class="pure-u-23-24 pure-input-rounded" placeholder="{{ _('Title')}}"
+                    <input type="text" name="rss_title" id="title_to_add" class="pure-u-23-24 pure-input-rounded" placeholder="{{ _('Title')}}"
                     {% if title_to_add %}value="{{title_to_add}}"{% endif %}/>
                 </div>
                 <div class="pure-u-2-5 pure-u-sm-1-4 pure-u-md-1-6">
@@ -66,7 +68,7 @@
     <legend><h3>{{ _("Subscribed") }}</h3></legend>
     <div id="mybooks" class="box-list">
         <div id="nosub" class="book box" style="display:none">{{_("No have book subscribed")}}</div>
-        {% for book in books if nickname in book.users -%}
+        {% for book in books if session.get('userName') in book.users -%}
         <div class="book box">
             <div class="titleRow">
                 {{ book.title }}
@@ -99,7 +101,7 @@
     <legend><h3>{{ _("Unsubscribed") }}</h3></legend>
     <div id="books" class="box-list">
         <div id="nounsub" class="book box" style="display:none">{{ _("No have book unsubscribed") }}</div>
-        {% for book in books if nickname not in book.users -%}
+        {% for book in books if session.get('userName') not in book.users -%}
         <div class="book box">
             <div class="titleRow">{{book.title}}
                 <input type="checkbox" id="separate_{{book.key().id()}}" />

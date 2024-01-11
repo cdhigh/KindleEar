@@ -1,4 +1,7 @@
 {% extends "advbase.html" %}
+{% block titleTag -%}
+<title>{{ _("Deliver now") }} - KindleEar</title>
+{% endblock -%}
 {% block advcontent -%}
 <div class="pure-form pure-form-aligned">
     <fieldset>
@@ -36,7 +39,7 @@
         </div>
         {% if booksnum > 0 and ((books[0].builtin == True and books) or ((books[0].builtin == False and books[0].feeds.count() >= 1) or booksnum >= 2)) %}
         <div style="text-align:center;">
-            <a href="/deliver?u={{nickname}}" value="{{ _('Deliver') }}" id="deliverButton" class="pure-button pure-button-primary pure-input-rounded">{{ _('Deliver') }}</a>
+            <a href="/deliver?u={{session.get('userName', '')}}" value="{{ _('Deliver') }}" id="deliverButton" class="pure-button pure-button-primary pure-input-rounded">{{ _('Deliver') }}</a>
         </div>
         {% endif %}
     </fieldset>
@@ -62,9 +65,9 @@
         }
         var feedsNum = feedsId.length;
         if ((feedsNum > 0) && (feedsNum != inputsNum)) {
-            deliverButton.href = "/deliver?u={{nickname}}&id_=" + bookId + "&feedsId=" + feedsId.join(",");
+            deliverButton.href = "/deliver?u={{session.get('userName', '')}}&id_=" + bookId + "&feedsId=" + feedsId.join(",");
         } else {
-            deliverButton.href = "/deliver?u={{nickname}}&id_=" + bookId;
+            deliverButton.href = "/deliver?u={{session.get('userName', '')}}&id_=" + bookId;
         }
     }
 
@@ -81,9 +84,9 @@
         }
         var booksNum = booksId.length;
         if ((booksNum > 0) && (booksNum != inputsNum)) {
-            deliverButton.href = "/deliver?u={{nickname}}&id_=" + booksId.join(",");
+            deliverButton.href = "/deliver?u={{session.get('userName', '')}}&id_=" + booksId.join(",");
         } else {
-            deliverButton.href = "/deliver?u={{nickname}}";
+            deliverButton.href = "/deliver?u={{session.get('userName', '')}}";
         }
     };
 

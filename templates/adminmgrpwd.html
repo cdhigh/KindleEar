@@ -1,4 +1,8 @@
 {% extends "base.html" %}
+{% block titleTag -%}
+<title>{{ _("Change password") }} - KindleEar</title>
+{% endblock -%}
+
 {% block menubar -%}
 {% endblock -%}
 {% block content -%}
@@ -9,7 +13,7 @@
     <form class="pure-form pure-form-aligned" action="" method="POST">
         <div class="pure-control-group">
             <label for="u">{{ _("Username") }}</label>
-            <input id="u" name="u" type="text" placeholder="{{ _('Username') }}" {% if username %}value="{{username}}"{% endif %} class="pure-u-1 pure-u-sm-1-2" />
+            <input id="u" name="u" type="text" placeholder="{{ _('Username') }}" {% if userName %}value="{{userName}}"{% endif %} class="pure-u-1 pure-u-sm-1-2" />
         </div>
         <div class="pure-control-group">
             <label for="p1">{{ _("New password") }}</label>

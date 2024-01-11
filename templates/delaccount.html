@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block titleTag -%}
+<title>{{ _("Delete account") }} - KindleEar</title>
+{% endblock -%}
 
 {% block menubar -%}
 {% endblock -%}
@@ -11,7 +14,7 @@
     <form class="pure-form pure-form-aligned" action="" method="POST">
         <div class="pure-control-group">
             <label for="u">{{_("Username")}}</label>
-            <input id="u" name="u" type="text" placeholder="Username" {% if username %}value="{{username}}"{% endif %} readonly="true" class="pure-u-1 pure-u-sm-1-2" />
+            <input id="u" name="u" type="text" placeholder="Username" {% if userName %}value="{{userName}}"{% endif %} readonly="true" class="pure-u-1 pure-u-sm-1-2" />
         </div>
         <div class="pure-control-group" style="text-align:center;">
             <button type="submit" class="pure-button pure-button-primary">{{_("Delete")}}</button>

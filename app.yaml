@@ -19,6 +19,7 @@ entrypoint: gunicorn -b :$PORT -w 1 main:app
 
 inbound_services:
 - mail
+- mail_bounce
 
 handlers:
 - url: /robots.txt

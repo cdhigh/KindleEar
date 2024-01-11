@@ -34,7 +34,7 @@
         <div class="pure-u-1 pure-u-md-1-5">
             <div class="pure-menu">
                 <ul class="pure-menu-list submenu-box">
-                    {% if advcurr=='delivernow' -%}
+                    {% if advCurr=='delivernow' -%}
                     <li class="pure-menu-item pure-menu-selected">
                         <span>{{_("Deliver now")}}</span>
                     </li>
@@ -43,7 +43,7 @@
                         <a href="/advdelivernow" class="pure-menu-link">{{_("Deliver now")}}</a>
                     </li>
                     {% endif -%}
-                    {% if advcurr=='whitelist' -%}
+                    {% if advCurr=='whitelist' -%}
                     <li class="pure-menu-item pure-menu-selected">
                         <span>{{_("White List")}}</span>
                     </li>
@@ -52,7 +52,7 @@
                         <a href="/advwhitelist" class="pure-menu-link">{{_("White List")}}</a>
                     </li>
                     {% endif -%}
-                    {% if advcurr=='archive' -%}
+                    {% if advCurr=='archive' -%}
                     <li class="pure-menu-item pure-menu-selected">
                         <span>{{_("Archive")}}</span>
                     </li>
@@ -61,7 +61,7 @@
                         <a href="/advarchive" class="pure-menu-link">{{_("Archive")}}</a>
                     </li>
                     {% endif -%}
-                    {% if advcurr=='urlfilter' -%}
+                    {% if advCurr=='urlfilter' -%}
                     <li class="pure-menu-item pure-menu-selected">
                         <span>{{_("Url Filter")}}</span>
                     </li>
@@ -70,7 +70,7 @@
                         <a href="/advurlfilter" class="pure-menu-link">{{_("Url Filter")}}</a>
                     </li>
                     {% endif -%}
-                    {% if advcurr=='import' -%}
+                    {% if advCurr=='import' -%}
                     <li class="pure-menu-item pure-menu-selected">
                         <span>{{_("Import Feeds")}}</span>
                     </li>
@@ -79,7 +79,7 @@
                         <a href="/advimport" class="pure-menu-link">{{_("Import Feeds")}}</a>
                     </li>
                     {% endif -%}
-                    {% if advcurr=='uploadcoverimage' -%}
+                    {% if advCurr=='uploadcoverimage' -%}
                     <li class="pure-menu-item pure-menu-selected">
                         <span>{{_("Cover Image")}}</span>
                     </li>
@@ -88,7 +88,7 @@
                         <a href="/advuploadcoverimage" class="pure-menu-link">{{_("Cover Image")}}</a>
                     </li>
                     {% endif -%}
-                    {% if advcurr=='uploadcss' -%}
+                    {% if advCurr=='uploadcss' -%}
                     <li class="pure-menu-item pure-menu-selected">
                         <span>{{_("Stylesheet")}}</span>
                     </li>

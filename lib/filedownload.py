@@ -4,10 +4,7 @@
 更新：切换到Python3后GAE限制提高到32M，不再需要分块下载
 """
 from collections import namedtuple
-from urllib.parse import urljoin, urlparse
-import Cookie, time, re
-import requests
-from google.appengine.runtime.apiproxy_errors import OverQuotaError
+from urllib.parse import urlparse
 from lib.urlopener import UrlOpener
 
 DownloadedFileTuple = namedtuple("DownloadedFileTuple", "status fileName content")

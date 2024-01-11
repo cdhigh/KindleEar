@@ -2,12 +2,10 @@
 # -*- coding:utf-8 -*-
 #管理订阅页面
 
-import datetime, json
+import datetime
 from operator import attrgetter
 from urllib.parse import urljoin
-from bottle import route, request, post, redirect, response
-from google.appengine.api import memcache
-from apps.utils import etagged
+from flask import Blueprint, render_template, request, redirect, url_for
 from apps.base_handler import *
 from apps.db_models import *
 from lib.urlopener import UrlOpener
@@ -17,77 +15,79 @@ from books.comic import ComicBaseClasses
 from config import *
 from apps.view.library import KINDLEEAR_SITE, SHARED_LIBRARY_MGR_KINDLEEAR, SHARED_LIB_MGR_CMD_SUBSFROMSHARED
 
-# 管理我的订阅和杂志列表
-@route("/my")
-def MySubscription(self, tips=None):
-    user = get_current_user()
-    query = request.query
-    titleToAdd = query.title_to_add
-    urlToAdd = query.url_to_add
+bpSubscribe = Blueprint('bpSubscribe', __name__)
+
+#管理我的订阅和杂志列表
+@bpSubscribe.route("/my")
+@bpSubscribe.route("/my/<tips>")
+@login_required
+def MySubscription(tips=None):
+    user = get_login_user()
+    titleToAdd = request.args.get('title_to_add')
+    urlToAdd = request.args.get('url_to_add')
     myfeeds = user.own_feeds.feeds if user.own_feeds else None
     books = list(Book.all().filter("builtin = ", True))
     # 简单排个序，为什么不用数据库直接排序是因为Datastore数据库需要建立索引才能排序
     books.sort(key=attrgetter("title"))
 
-    return render_page("my.html", "Feeds", current="my", user=user, books=books,
+    return render_page("my.html", tab="my", user=user, books=books,
         myfeeds=myfeeds, comic_base_classes=ComicBaseClasses, tips=tips,
-        subscribe_url=urlparse.urljoin(DOMAIN, self.__url__), title_to_add=titleToAdd,
+        subscribe_url=url_for("MySubscription"), title_to_add=titleToAdd,
         url_to_add=urlToAdd)
 
-@post("/my")
+@bpSubscribe.post("/my")
+@login_required
 def MySubscriptionPost():  # 添加自定义RSS
-    user = get_current_user()
-    forms = request.forms
-    title = forms.t
-    url = forms.url
-    isfulltext = bool(forms.get('fulltext'))
+    user = get_login_user()
+    form = request.form
+    title = form.get('rss_title')
+    url = form.get('url')
+    isfulltext = bool(form.get('fulltext'))
     if not title or not url:
-        return MySubscription(_("Title or url is empty!"))
+        return redirect(url_for("MySubscription", tips=(_("Title or url is empty!"))))
 
     if not url.lower().startswith('http'): #http and https
         url = 'https://' + url
 
     #判断是否重复
     if url.lower() in (item.url.lower() for item in user.own_feeds.feeds):
-        return MySubscription(_("Duplicated subscription!"))
+        return redirect(url_for("MySubscription", tips=(_("Duplicated subscription!"))))
 
     Feed(title=title, url=url, book=user.own_feeds, isfulltext=isfulltext,
         time=datetime.datetime.utcnow()).put()
-    memcache.delete('{}.feedsCount'.format(user.own_feeds.key().id()))
-    redirect('/my')
+    return redirect(url_for("MySubscription"))
 
 #添加/删除自定义RSS订阅的AJAX处理函数
-@post("/feeds/<actType>")
+@bpSubscribe.post("/feeds/<actType>")
+@login_required(forAjax=True)
 def FeedsAjaxPost(self, actType):
-    user = get_current_user(forAjax=True)
-    response.content_type = 'application/json'
-    forms = request.forms
+    user = get_login_user(forAjax=True)
+    form = request.form
     actType = actType.lower()
 
     if actType == 'delete':
-        feedId = forms.feedid
         try:
-            feedId = int(feedId)
+            feedId = int(form.get('feedid'))
         except:
-            return json.dumps({'status': _('The id is invalid!')})
+            return {'status': _('The id is invalid!')}
 
         feed = Feed.get_by_id(feedId)
         if feed:
             feed.delete()
-            return json.dumps({'status': 'ok'})
+            return {'status': 'ok'}
         else:
-            return json.dumps({'status': _('The feed ({}) not exist!').format(feedId)})
+            return {'status': _('The feed ({}) not exist!').format(feedId)}
     elif actType == 'add':
-        title = forms.title
-        url = forms.url
-        isfulltext = bool(forms.get('fulltext', '').lower() == 'true')
-        fromSharedLibrary = bool(forms.get('fromsharedlibrary', '').lower() == 'true')
+        title = form.get('title')
+        url = form.get('url')
+        isfulltext = bool(form.get('fulltext', '').lower() == 'true')
+        fromSharedLibrary = bool(form.get('fromsharedlibrary', '').lower() == 'true')
 
         respDict = {'status':'ok', 'title':title, 'url':url, 'isfulltext':isfulltext}
 
         if not title or not url:
             respDict['status'] = _("Title or Url is empty!")
-            return json.dumps(respDict)
+            return respDict
 
         if not url.lower().startswith('http'):
             url = 'https://' + url
@@ -96,21 +96,20 @@ def FeedsAjaxPost(self, actType):
         #判断是否重复
         if url.lower() in (item.url.lower() for item in user.own_feeds.feeds):
             respDict['status'] = _("Duplicated subscription!")
-            return json.dumps(respDict)
+            return respDict
 
         fd = Feed(title=title, url=url, book=user.own_feeds, isfulltext=isfulltext,
             time=datetime.datetime.utcnow())
         fd.put()
         respDict['feedid'] = fd.key().id()
-        memcache.delete('{}.feedsCount'.format(user.own_feeds.key().id()))
-
+        
         #如果是从共享库中订阅的，则通知共享服务器，提供订阅数量信息，以便排序
         if fromSharedLibrary:
             SendNewSubscription(title, url)
 
-        return json.dumps(respDict)
+        return respDict
     else:
-        return json.dumps({'status': 'Unknown command: {}'.format(actType)})
+        return {'status': 'Unknown command: {}'.format(actType)}
 
 #通知共享服务器，有一个新的订阅
 def SendNewSubscription(title, url):
@@ -121,20 +120,19 @@ def SendNewSubscription(title, url):
     opener.open(srvUrl, data) #只管杀不管埋，不用管能否成功了
 
 #订阅/退订内置书籍的AJAX处理函数
-@post("/books/<actType>")
+@bpSubscribe.post("/books/<actType>")
+@login_required
 def BooksAjaxPost(self, actType):
-    user = get_current_user(forAjax=True)
-    response.content_type = 'application/json'
-    forms = request.forms
-    id_ = forms.id_
+    user = get_login_user(forAjax=True)
+    form = request.form
     try:
-        id_ = int(id_)
+        id_ = int(form.get('id_'))
     except:
-        return json.dumps({'status': _('The id is invalid!')})
+        return {'status': _('The id is invalid!')}
 
     bk = Book.get_by_id(id_)
     if not bk:
-        return json.dumps({'status': _('The book ({}) not exist!').format(id_)})
+        return {'status': _('The book ({}) not exist!').format(id_)}
 
     actType = actType.lower()
     if actType == 'unsubscribe':
@@ -144,19 +142,19 @@ def BooksAjaxPost(self, actType):
             bk.put()
 
         #为安全起见，退订后也删除网站登陆信息（如果有的话）
-        subs_info = user.subscription_info(bk.title)
-        if subs_info:
-            subs_info.delete()
+        subsInfo = user.subscription_info(bk.title)
+        if subsInfo:
+            subsInfo.delete()
 
-        return json.dumps({'status':'ok', 'title': bk.title, 'desc': bk.description})
+        return {'status':'ok', 'title': bk.title, 'desc': bk.description}
     elif actType == 'subscribe':
-        separate = forms.separate
+        separate = form.get('separate')
 
-        respDict = {'status':'ok'}
+        respDict = {'status': 'ok'}
 
         bkcls = BookClass(bk.title)
         if not bkcls:
-            return json.dumps({'status': 'The book ({}) not exist!'.format(id_)})
+            return {'status': 'The book ({}) not exist!'.format(id_)}
 
         #如果是漫画类，则不管是否选择了“单独推送”，都自动变成“单独推送”
         if issubclass(bkcls, BaseComicBook):
@@ -172,14 +170,14 @@ def BooksAjaxPost(self, actType):
         respDict['needs_subscription'] = bk.needs_subscription
         respDict['subscription_info'] = bool(user.subscription_info(bk.title))
         respDict['separate'] = bk.separate
-        return json.dumps(respDict)
+        return respDict
     else:
-        return json.dumps({'status': 'Unknown command: {}'.format(actType)})
+        return {'status': 'Unknown command: {}'.format(actType)}
 
 #订阅一本书
-@route("/subscribe/<id_>")
+@bpSubscribe.route("/subscribe/<id_>")
+@login_required
 def Subscribe(id_):
-    session = login_required()
     try:
         id_ = int(id_)
     except:
@@ -203,12 +201,13 @@ def Subscribe(id_):
         bk.users.append(session.userName)
         bk.separate = bool(separate in ('true', '1'))
         bk.put()
-    redirect('/my')
+    return redirect(url_for("MySubscription"))
 
 #取消一个订阅
-@route("/unsubscribe/<id_>")
+@bpSubscribe.route("/unsubscribe/<id_>")
+@login_required
 def Unsubscribe(self, id_):
-    user = get_current_user()
+    user = get_login_user()
     try:
         id_ = int(id_)
     except:
@@ -218,7 +217,6 @@ def Unsubscribe(self, id_):
     if not bk:
         return 'The book ({}) not exist!'.format(id_)
 
-    session = current_session()
     if session.userName in bk.users:
         bk.users.remove(session.userName)
         bk.separate = False
@@ -229,11 +227,12 @@ def Unsubscribe(self, id_):
     if subsInfo:
         subsInfo.delete()
 
-    redirect('/my')
+    return redirect(url_for("MySubscription"))
 
-@route("/delfeed/<id_>")
+@bpSubscribe.route("/delfeed/<id_>")
+@login_required
 def DelFeed(id_):
-    user = get_current_user()
+    user = get_login_user()
     try:
         id_ = int(id_)
     except:
@@ -243,12 +242,13 @@ def DelFeed(id_):
     if feed:
         feed.delete()
 
-    redirect('/my')
+    return redirect(url_for("MySubscription"))
 
-@route("/booklogininfo/<id_>")
 #修改书籍的网站登陆信息
-def BookLoginInfo(self, id_, tips=None):
-    user = get_current_user()
+@bpSubscribe.route("/booklogininfo/<id_>")
+@login_required
+def BookLoginInfo(id_, tips=None):
+    user = get_login_user()
     try:
         bk = Book.get_by_id(int(id_))
     except:
@@ -257,13 +257,14 @@ def BookLoginInfo(self, id_, tips=None):
         return 'The book not exist!'
 
     subsInfo = user.subscription_info(bk.title)
-    return render_page('booklogininfo.html', "Book Login Infomation", bk=bk, subs_info=subsInfo, tips=tips)
+    return render_template('booklogininfo.html', bk=bk, subs_info=subsInfo, tips=tips)
 
-@post("/booklogininfo/<id_>")
+@bpSubscribe.post("/booklogininfo/<id_>")
+@login_required
 def BookLoginInfoPost(id_):
-    user = get_current_user()
-    account = request.forms.account
-    password = request.forms.password
+    user = get_login_user()
+    account = request.form.get('account')
+    password = request.form.get('password')
 
     try:
         bk = Book.get_by_id(int(id_))
@@ -287,4 +288,4 @@ def BookLoginInfoPost(id_):
         subsInfo.password = password
         subsInfo.put()
 
-    redirect('/my')
+    return redirect(url_for("MySubscription"))

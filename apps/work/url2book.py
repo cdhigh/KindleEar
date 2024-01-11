@@ -3,28 +3,31 @@
 #实现接收到邮件后抓取URL然后制作成电子书
 
 import zlib, base64, io
-from bottle import route, request
+from flask import Blueprint, request
 from apps.base_handler import *
 from apps.db_models import *
 from apps.utils import local_time
+from apps.back_end.send_mail_adpt import send_to_kindle
 from lib.makeoeb import *
 from books.base_book import BaseUrlBook
 from config import *
 
+bpUrl2Book = Blueprint('bpUrl2Book', __name__)
+
 #抓取指定链接，转换成附件推送
-@route("/url2book")
+@bpUrl2Book.route("/url2book")
 def Url2Book():
     global default_log
     log = default_log
-    query = request.query
-    userName = query.u
-    urls = query.urls
-    subject = query.subj
-    to = query.to
-    language = query.lng
-    keepImage = bool(query.kimg == '1')
-    bookType = query.get("type", "epub")
-    tz = int(query.get("tz", TIMEZONE))
+    args = request.args
+    userName = args.get('u')
+    urls = args.get('urls')
+    subject = args.get('subj')
+    to = args.get('to')
+    language = args.get('lng')
+    keepImage = bool(args.get('kimg') == '1')
+    bookType = args.get("type", "epub")
+    tz = int(args.get("tz", TIMEZONE))
     if not all((userName, urls, subject, to, language, bookType, tz)):
         return "Some parameter missing!<br />"
     

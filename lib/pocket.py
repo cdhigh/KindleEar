@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Pocketd V3 API封装，使用OAuth 2.
@@ -42,20 +42,16 @@ item = pocket.add(url='http://getpocket.com/developer/docs/authentication')
 return json.dumps(item)
 """
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
-
+import json
 from lib.urlopener import UrlOpener
 
-class APIError(StandardError):
+class APIError(Exception):
     def __init__(self, status_code, x_error_code, x_error, request):
         self.status_code = status_code
         self.x_error_code = x_error_code
         self.x_error = x_error
         self.request = request
-        StandardError.__init__(self, x_error)
+        super().__init__(x_error)
         
     def __str__(self):
         #APIError: HTTP Status:403, X-Error-Code:158, X-Error:"User rejected code.", request: Get access token
@@ -79,8 +75,8 @@ class Pocket(object):
         self.opener = UrlOpener(headers=POCKET_HEADERS)
         
     def _post(self, method_url, **kw):
-        ret = self.opener.open(method_url, data=json.dumps(kw))
-        if ret.status_code != 200 or not ret.content:
+        ret = self.opener.open(method_url, data=kw)
+        if ret.status_code != 200:
             raise APIError(ret.status_code, ret.headers.get('X-Error-Code',''), ret.headers.get('X-Error',''), 'Get access token')
         return json.loads(ret.content)
         

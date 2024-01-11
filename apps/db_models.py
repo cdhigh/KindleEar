@@ -8,7 +8,6 @@
 # rexdf <https://github.com/rexdf>
 from operator import attrgetter
 from google.appengine.ext import db
-from google.appengine.api import memcache
 from google.appengine.api.datastore_errors import NeedIndexError
 from apps.utils import ke_encrypt, ke_decrypt
 
@@ -39,14 +38,8 @@ class Book(db.Model):
             
     @property
     def feedsCount(self):
-        mkey = '%d.feedsCount'%self.key().id()
-        mfc = memcache.get(mkey)
-        if mfc is not None:
-            return mfc
-        else:
-            fc = self.feeds.count()
-            memcache.add(mkey, fc, 86400)
-            return fc
+        return self.feeds.count()
+        
     @property
     def owner(self):
         return KeUser.all().filter('own_feeds = ', self.key())
@@ -94,9 +87,6 @@ class KeUser(db.Model): # kindleEar User
     remove_hyperlinks = db.StringProperty() #added 2018-05-02 去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
     author_format = db.StringProperty() #added 2020-09-17 修正Kindle 5.9.x固件的bug【将作者显示为日期】
 
-    sg_enable = db.BooleanProperty() #是否使用SendGrid
-    sg_apikey = db.StringProperty() #SendGrid API Key
-    
     @property
     def white_list(self):
         return WhiteList.all().filter('user = ', self.key())

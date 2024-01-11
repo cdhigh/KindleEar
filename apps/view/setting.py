@@ -2,10 +2,12 @@
 # -*- coding:utf-8 -*-
 #设置页面
 
-from bottle import route, pos, redirect, request
+from flask import Blueprint, render_template, request, redirect
 from apps.base_handler import *
 from apps.db_models import *
 from config import *
+
+bpSetting = Blueprint('bpSetting', __name__)
 
 #各种语言的语种代码和文字描述的对应关系
 def LangMap(): 
@@ -36,23 +38,24 @@ def LangMap():
         "tl": _("Tagalog"),
         "ha": _("Hausa"),}
 
-@route("/setting")
+@bpSetting.route("/setting")
+@login_required
 def Setting(self, tips=None):
-    user = get_current_user()
+    user = get_login_user()
     if not user.own_feeds.language:
         user.own_feeds.language = "zh-cn"
 
-    return render_page('setting.html', "Settings",
-        current='setting', user=user, mail_sender=SRC_EMAIL, tips=tips, lang_map=LangMap())
+    return render_template('setting.html', tab='set', user=user, mailSender=SRC_EMAIL, tips=tips, lang_map=LangMap())
 
-@post("/setting")
+@bpSetting.post("/setting")
+@login_required
 def SettingPost():
-    user = get_current_user()
-    forms = request.forms
-    keMail = forms.kindleemail
-    myTitle = forms.rt
-    sgEnable = bool(forms.get('sgenable'))
-    sgApikey = forms.sgapikey
+    user = get_login_user()
+    form = request.form
+    keMail = form.get('kindle_email')
+    myTitle = form.get('rss_title')
+    sgEnable = bool(form.get('sg_enable'))
+    sgApikey = form.get('sg_apikey')
     if not keMail:
         tips = _("Kindle E-mail is requied!")
     elif not myTitle:
@@ -61,43 +64,41 @@ def SettingPost():
         tips = _("Need sendgrid ApiKey!")
     else:
         user.kindle_email = keMail.strip(';, ')
-        user.timezone = int(forms.get('timezone', TIMEZONE))
-        user.send_time = int(forms.get('sendtime', '0'))
-        user.enable_send = bool(forms.get('enablesend'))
-        user.book_type = forms.get('booktype', 'epub')
-        user.device = forms.get('devicetype', 'kindle')
-        user.use_title_in_feed = bool(forms.titlefrom == 'feed')
-        user.title_fmt = forms.titlefmt
+        user.timezone = int(form.get('timezone', TIMEZONE))
+        user.send_time = int(form.get('send_time', '0'))
+        user.enable_send = bool(form.get('enable_send'))
+        user.book_type = form.get('book_type', 'epub')
+        user.device = form.get('device_type', 'kindle')
+        user.use_title_in_feed = bool(form.get('title_from') == 'feed')
+        user.title_fmt = form.get('title_fmt')
         alldays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        user.send_days = [day for day in alldays if forms.get(day)]
-        user.merge_books = bool(forms.get('mergebooks'))
-        user.book_mode = forms.bookmode
-        user.remove_hyperlinks = forms.removehyperlinks
-        user.author_format = forms.authorformat
+        user.send_days = [day for day in alldays if form.get(day)]
+        user.merge_books = bool(form.get('merge_books'))
+        user.book_mode = form.get('bookmode')
+        user.remove_hyperlinks = form.get('removehyperlinks')
+        user.author_format = form.get('author_format')
         user.sg_enable = sgEnable
         user.sg_apikey = sgApikey
         user.put()
 
         myfeeds = user.own_feeds
-        myfeeds.language = forms.get("lng", "en-us")
+        myfeeds.language = form.get("book_language", "en-us")
         myfeeds.title = myTitle
-        myfeeds.keep_image = bool(forms.get("keepimage"))
-        myfeeds.oldest_article = int(forms.get('oldest', 7))
-        myfeeds.users = [user.name] if forms.enablerss else []
+        myfeeds.keep_image = bool(form.get("keep_image"))
+        myfeeds.oldest_article = int(form.get('oldest', 7))
+        myfeeds.users = [user.name] if form.get('enable_rss') else []
         myfeeds.put()
         tips = _("Settings Saved!")
 
-    return render_page('setting.html', "Settings",
-        current='setting', user=user, mail_sender=SRC_EMAIL, tips=tips, lang_map=LangMap())
+    return render_template('setting.html', tab='set', user=user, mailSender=SRC_EMAIL, tips=tips, langMap=LangMap())
 
-@route("/lang/<lang>")
-def SetLang(lang):
+#设置国际化语种
+@bpSetting.route("/setlocale/<langCode>")
+def SetLang(langCode):
     global supported_languages
-    session = current_session()
-    lang = lang.lower()
-    if lang not in supported_languages:
+    langCode = langCode.lower()
+    if langCode not in supported_languages:
         return "language invalid!"
-    session.lang = lang
-    session.save()
-    redirect('/')
+    session.langCode = langCode
+    return redirect('/')
 

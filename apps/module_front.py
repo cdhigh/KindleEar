@@ -54,14 +54,11 @@ from apps.utils import fix_filesizeformat
 #sys.setdefaultencoding('utf-8')
 
 for book in BookClasses():  #添加内置书籍
-    if memcache.get(book.title): #使用memcache加速
-        continue
     b = Book.all().filter("title = ", book.title).get()
     if not b:
         b = Book(title=book.title, description=book.description, builtin=True, 
             needs_subscription=book.needs_subscription, separate=False)
         b.put()
-        memcache.add(book.title, book.description, 86400)
 
 class Test(BaseHandler):
     def GET(self):
@@ -73,11 +70,6 @@ class Test(BaseHandler):
 main.urls += ["/test", "Test",]
 
 application = web.application(main.urls, globals())
-store = MemcacheStore(memcache)
-session = web.session.Session(application, store, initializer={'username':'', 'login':0, 'lang':'', 'pocket_request_token':''})
-jjenv = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'),
-                            extensions=["jinja2.ext.do",'jinja2.ext.i18n'])
-jjenv.filters['filesizeformat'] = fix_filesizeformat
 
 app = application.wsgifunc()
 

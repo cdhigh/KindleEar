@@ -38,3 +38,13 @@ for root, dirs, files in listBkDirs:
                     RegisterBook(bk)
             except Exception as e:
                 default_log.warn("Book '{}' import failed : {}".format(bookModuleName, e))
+
+
+#添加内置书籍到数据库
+def RegisterBuiltinBooks():
+    for book in _booksclasses:
+        b = Book.all().filter("title = ", book.title).get()
+        if not b:
+            b = Book(title=book.title, description=book.description, builtin=True, 
+                needs_subscription=book.needs_subscription, separate=False)
+            b.put()

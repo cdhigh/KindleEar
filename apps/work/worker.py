@@ -3,12 +3,12 @@
 #后台实际的推送任务，由任务队列触发
 
 from collections import defaultdict
-import datetime, time, imghdr, random, io
-from PIL import Image
-from bottle import route, request
+import datetime, time, imghdr, io
+from flask import Blueprint, request
 from apps.base_handler import *
 from apps.db_models import *
-from apps.utils import local_time, get_exc_location
+from apps.utils import local_time
+from apps.back_end.send_mail_adpt import send_to_kindle
 from lib.makeoeb import *
 from calibre.ebooks.conversion.mobioutput import MOBIOutput
 from calibre.ebooks.conversion.epuboutput import EPUBOutput
@@ -23,18 +23,20 @@ except ImportError:
     ComicBaseClasses = []
     comic_domains = tuple()
 
+bpWorker = Blueprint('bpWorker', __name__)
+
 #<https://cloud.google.com/tasks/docs/creating-appengine-handlers>
 #如果是Task触发的，则环境变量会包含以下一些变量
 #X-AppEngine-QueueName/X-AppEngine-TaskName/X-AppEngine-TaskRetryCount/X-AppEngine-TaskExecutionCount/X-AppEngine-TaskETA
 
 # 实际下载文章和生成电子书并且发送邮件
-@route("/worker")
+@bpWorker.route("/worker")
 def Worker():
     global default_log
-    query = request.query
-    userName = query.u
-    bookId = query.id_  #如果有多本书，使用','分隔
-    feedsId = query.feedsId
+    args = request.args
+    userName = args.get('u')
+    bookId = args.get('id_')  #如果有多本书，使用','分隔
+    feedsId = args.get('feedsId')
     
     user = KeUser.all().filter("name = ", userName).get()
     if not user:
@@ -193,7 +195,7 @@ def Worker():
 #mhFile: masthead文件路径
 #cvFile: cover文件路径
 #bookForMeta: 提供一些基本信息的书本实例
-def AddMastheadCoverToOeb(user, oeb, mhFile, cvFile, bookForMeta)
+def AddMastheadCoverToOeb(user, oeb, mhFile, cvFile, bookForMeta):
     if mhFile: #设置报头
         id_, href = oeb.manifest.generate('masthead', mhFile) # size:600*60
         oeb.manifest.add(id_, href, ImageMimeFromName(mhFile))

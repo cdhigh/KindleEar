@@ -1,5 +1,7 @@
 {% extends "base.html" %}
-
+{% block titleTag -%}
+<title>{{ _("Home") }} - KindleEar</title>
+{% endblock -%}
 {% block bodytag -%}
 <body onload="javascript:var u=document.getElementById('u');if(u){u.focus();}" class="index">
 {% endblock -%}
@@ -8,7 +10,7 @@
 <div class="banner">
     <div class="banner-head">
         <h1>{{_("Free Forever.")}}{{_("Good News Always Come With You.")}}</h1>
-        {% if nickname -%}
+        {% if session.get('userName') -%}
             <a class="pure-button pure-button-primary" href="/my">{{_("Feeds")}}</a>
             <a class="pure-button pure-button-primary" href="/logout" style="margin-left:.6em;">{{_('Logout')}}</a>
         {% else -%}

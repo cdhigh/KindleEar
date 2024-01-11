@@ -7,17 +7,14 @@ cdhigh <https://github.com/cdhigh>
 """
 import os, re, imghdr, datetime, hashlib, io
 from collections import namedtuple
-from urllib.parse import urljoin, urlparse, urlunparse, urlencode, parse_qs, unquote_plus, quote_plus
-
-from bs4 import BeautifulSoup, Comment, NavigableString, CData, Tag
+from PIL import Image
+from bs4 import BeautifulSoup, Comment
 import feedparser
+from urllib.parse import urljoin, urlparse, urlunparse, urlencode, parse_qs, unquote_plus, quote_plus
 from lib import readability #修改了其htmls.py|shorten_title()
 from lib.urlopener import UrlOpener
-from apps.dbModels import LastDelivered
-
-from PIL import Image
+from apps.db_models import LastDelivered
 from lib.image_tools import split_image_by_height, compress_image
-
 from config import *
 
 #通过一个图像文件生成一个HTML文件的模板

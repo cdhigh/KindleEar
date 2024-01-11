@@ -4,7 +4,7 @@
 
 import datetime, json
 from urllib.parse import urljoin, urlparse
-from bottle import route, post, response, request
+from flask import Blueprint, render_template, request
 from apps.base_handler import *
 from apps.db_models import *
 from lib.urlopener import UrlOpener
@@ -18,10 +18,13 @@ SHARED_LIB_MGR_CMD_SUBSFROMSHARED = "subscribedfromshared"
 SHARED_LIBRARY_CAT_KINDLEEAR = "/kindleearappspotlibrarycategory"
 KINDLEEAR_SITE_KEY = "kindleear.lucky!"
 
+bpLibrary = Blueprint('bpLibrary', __name__)
+
 #网友共享的订阅源数据
-@route("/library")
+@bpLibrary.route("/library")
+@login_required
 def SharedLibrary():
-    user = get_current_user()
+    user = get_login_user()
 
     #连接分享服务器获取数据
     sharedData = []
@@ -32,25 +35,24 @@ def SharedLibrary():
     if result.status_code == 200:
         sharedData = json.loads(result.text)
     else:
-        tips = _('Cannot fetch data from kindleear.appspot.com, status: ') + UrlOpener.CodeMap(result.status_code)
+        tips = _('Cannot fetch data from {}, status: {}').format(KINDLEEAR_SITE, UrlOpener.CodeMap(result.status_code))
 
-    return render_page('sharedlibrary.html', "Shared",
-        current='shared', user=user, shared_data=sharedData, tips=tips)
+    return render_template('sharedlibrary.html', tab='shared', user=user, shared_data=sharedData, tips=tips)
 
 #分享了一个订阅源
-@post("/library")
+@bpLibrary.post("/library")
+@login_required(forAjax=True)
 def SharedLibraryPost():
-    user = get_current_user(forAjax=True)
-    response.content_type = 'application/json'
-    forms = request.forms
-    category = forms.category
-    title = forms.title
-    feedUrl = forms.url
-    isfulltext = bool(forms.get('isfulltext', '').lower() == 'true')
-    creator = forms.creator
+    user = get_login_user(forAjax=True)
+    form = request.form
+    category = form.get('category')
+    title = form.get('title')
+    feedUrl = form.get('url')
+    isfulltext = bool(form.get('isfulltext', '').lower() == 'true')
+    creator = form.get('creator')
 
     if not title or not feedUrl:
-        return json.dumps({'status': _("Title or Url is empty!")})
+        return {'status': _("Title or Url is empty!")}
 
     opener = UrlOpener()
     url = urljoin(KINDLEEAR_SITE, SHARED_LIBRARY_KINDLEEAR)
@@ -60,16 +62,16 @@ def SharedLibraryPost():
     if result.status_code == 200:
         return result.text
     else:
-        return json.dumps({'status': 'Cannot submit data to {}, status: {}'.format(
-            KINDLEEAR_SITE, UrlOpener.CodeMap(result.status_code))})
+        return {'status': 'Cannot submit data to {}, status: {}'.format(
+            KINDLEEAR_SITE, UrlOpener.CodeMap(result.status_code))}
 
-@post("/library/mgr/<mgrType>")
+@bpLibrary.post("/library/mgr/<mgrType>")
+@login_required(forAjax=True)
 def SharedLibraryMgrPost(self, mgrType):
-    user = get_current_user(forAjax=True)
+    user = get_login_user(forAjax=True)
     if mgrType == SHARED_LIB_MGR_CMD_REPORTINVALID: #报告一个源失效了
-        response.content_type = 'application/json'
-        title = request.forms.title
-        feedUrl = request.forms.url
+        title = request.form.get('title')
+        feedUrl = request.form.get('url')
 
         opener = UrlOpener()
         path = SHARED_LIBRARY_MGR_KINDLEEAR + mgrType
@@ -79,16 +81,16 @@ def SharedLibraryMgrPost(self, mgrType):
         if result.status_code == 200:
             return result.text
         else:
-            return json.dumps({'status': _('Cannot fetch data from kindleear.appspot.com, status: ') + UrlOpener.CodeMap(result.status_code)})
+            return {'status': _('Cannot fetch data from {}, status: {}').format(KINDLEEAR_SITE, UrlOpener.CodeMap(result.status_code))}
     else:
-        return json.dumps({'status': 'unknown command: {}'.format(mgrType)})
+        return {'status': 'Unknown command: {}'.format(mgrType)}
 
 #共享的订阅源的分类信息
-@route("/library/category")
+@bpLibrary.route("/library/category")
+@login_required(forAjax=True)
 def SharedLibraryCategory():
-    user = get_current_user(forAjax=True)
-    response.content_type = 'application/json'
-
+    user = get_login_user(forAjax=True)
+    
     #连接分享服务器获取数据
     respDict = {'status': 'ok', 'categories': []}
 
@@ -102,20 +104,18 @@ def SharedLibraryCategory():
         respDict['status'] = _('Cannot fetch data from {}, status: {}').format(
             KINDLEEAR_SITE, UrlOpener.CodeMap(result.status_code))
 
-    return json.dumps(respDict)
+    return respDict
 
 #===========================================================================================================
 #             以下函数仅为 kindleear.appspot.com 使用
 #===========================================================================================================
 
 #共享库订阅源数据(仅用于kindleear.appspot.com"官方"共享服务器)
-@route(SHARED_LIBRARY_KINDLEEAR)
+@bpLibrary.route(SHARED_LIBRARY_KINDLEEAR)
 def SharedLibrarykindleearAppspotCom():
-    key = request.query.key #避免爬虫消耗资源
+    key = request.args.key #避免爬虫消耗资源
     if key != KINDLEEAR_SITE_KEY:
-        return ''
-
-    response.content_type = 'application/json'
+        return {}
 
     #本来想在服务器端分页的，但是好像CPU/数据库存取资源比带宽资源更紧张，所以干脆一次性提供给客户端，由客户端分页和分类
     #如果后续发现这样不理想，也可以考虑修改为服务器端分页
@@ -124,45 +124,31 @@ def SharedLibrarykindleearAppspotCom():
     for d in SharedRss.all().fetch(limit=10000):
         sharedData.append({'t':d.title, 'u':d.url, 'f':d.isfulltext, 'c':d.category, 's':d.subscribed,
             'd':int((d.created_time - datetime.datetime(1970, 1, 1)).total_seconds())})
-    return json.dumps(sharedData)
+    return sharedData
 
 #网友分享了一个订阅链接
-@post(SHARED_LIBRARY_KINDLEEAR)
+@bpLibrary.post(SHARED_LIBRARY_KINDLEEAR)
 def SharedLibrarykindleearAppspotComPost():
-    forms = request.forms
-    key = forms.key
+    from apps.utils import hide_website
+    form = request.form
+    key = form.get('key')
     if key != KINDLEEAR_SITE_KEY: #避免爬虫消耗资源
-        return ''
+        return {}
 
-    category = forms.category
-    title = forms.title
-    url = forms.url
-    isfulltext = bool(forms.get('isfulltext', '').lower() == 'true')
-    creator = forms.creator
+    category = form.get('category')
+    title = form.get('title')
+    url = form.get('url')
+    isfulltext = bool(form.get('isfulltext', '').lower() == 'true')
+    creator = form.get('creator')
 
-    response.content_type = 'application/json'
     respDict = {'status':'ok', 'category':category, 'title':title, 'url':url, 'isfulltext':isfulltext, 'creator':creator}
 
     if not title or not url:
         respDict['status'] = _("Title or Url is empty!")
-        return json.dumps(respDict)
+        return respDict
 
     #将贡献者的网址加密
-    if creator:
-        parts = urlparse(creator)
-        path = parts.path if parts.path else parts.netloc
-        if '.' in path:
-            pathArray = path.split('.')
-            if len(pathArray[0]) > 4:
-                pathArray[0] = pathArray[0][:2] + '**' + pathArray[0][-1]
-            else:
-                pathArray[0] = pathArray[0][0] + '**'
-                pathArray[1] = pathArray[1][0] + '**'
-            creator = '.'.join(pathArray)
-        elif len(path) > 4:
-            creator = path[:2] + '**' + path[-1]
-        else:
-            creator = path[0] + '**'
+    creator = hide_website(creator)
 
     #判断是否存在，如果存在，则更新分类或必要的信息，同时返回成功
     now = datetime.datetime.utcnow()
@@ -175,19 +161,19 @@ def SharedLibrarykindleearAppspotComPost():
         if category:
             prevCategory = dbItem.category
             dbItem.category = category
-        dbItem.put()
     else:
-        SharedRss(title=title, url=url, category=category, isfulltext=isfulltext, creator=creator,
-            subscribed=1, created_time=now, invalid_report_days=0, last_invalid_report_time=now).put()
+        dbItem = SharedRss(title=title, url=url, category=category, isfulltext=isfulltext, creator=creator,
+            subscribed=1, created_time=now, invalid_report_days=0, last_invalid_report_time=now)
+    dbItem.put()
 
     #更新分类信息，用于缓存
     if category:
         cItem = SharedRssCategory.all().filter('name = ', category).get()
         if cItem:
             cItem.last_updated = now
-            cItem.put()
         else:
-            SharedRssCategory(name=category, last_updated=now).put()
+            cItem = SharedRssCategory(name=category, last_updated=now)
+        cItem.put()
 
     if prevCategory:
         catItem = SharedRss.all().filter('category = ', prevCategory).get()
@@ -196,19 +182,19 @@ def SharedLibrarykindleearAppspotComPost():
             if sItem:
                 sItem.delete()
 
-    return json.dumps(respDict)
+    return respDict
 
 #共享库的订阅源信息管理
-@post(SHARED_LIBRARY_MGR_KINDLEEAR + "<mgrType>")
+@bpLibrary.post(SHARED_LIBRARY_MGR_KINDLEEAR + "<mgrType>")
 def SharedLibraryMgrkindleearAppspotComPost(mgrType):
     if mgrType == SHARED_LIB_MGR_CMD_REPORTINVALID: #报告一个源失效了
-        title = request.forms.title
-        url = request.forms.url
+        title = request.form.get('title')
+        url = request.form.get('url')
         respDict = {'status': 'ok', 'title': title, 'url': url}
 
         if not url:
             respDict['status'] = _("Url is empty!")
-            return json.dumps(respDict)
+            return respDict
 
         if not url.lower().startswith('http'):
             url = 'https://' + url
@@ -218,7 +204,7 @@ def SharedLibraryMgrkindleearAppspotComPost(mgrType):
         dbItem = SharedRss.all().filter('url = ', url).get()
         if not dbItem:
             respDict['status'] = _("URL not found in database!")
-            return json.dumps(respDict)
+            return respDict
 
         #希望能做到“免维护”，在一定数量的失效报告之后，自动删除对应的源，这其实是要求不要有人恶作剧
         now = datetime.datetime.utcnow()
@@ -244,7 +230,7 @@ def SharedLibraryMgrkindleearAppspotComPost(mgrType):
             dbItem.last_invalid_report_time = now
             dbItem.put()
 
-        return json.dumps(respDict)
+        return respDict
     elif mgrType == SHARED_LIB_MGR_CMD_SUBSFROMSHARED: #有用户订阅了一个共享库里面的链接
         title = request.forms.title
         url = request.forms.url
@@ -252,7 +238,7 @@ def SharedLibraryMgrkindleearAppspotComPost(mgrType):
 
         if not url:
             respDict['status'] = _("Url is empty!")
-            return json.dumps(respDict)
+            return respDict
 
         if not url.lower().startswith('http'):
             url = 'https://' + url
@@ -266,17 +252,16 @@ def SharedLibraryMgrkindleearAppspotComPost(mgrType):
         else:
             respDict['status'] = _("URL not found in database!")
 
-        return json.dumps(respDict)
+        return respDict
 
     else:
-        return json.dumps({'status': 'Unknown command: {}'.format(mgrType)})
+        return {'status': 'Unknown command: {}'.format(mgrType)}
 
 #共享库的订阅源数据分类信息(仅用于kindleear.appspot.com"官方"共享服务器)
-@route(SHARED_LIBRARY_CAT_KINDLEEAR)
+@bpLibrary.route(SHARED_LIBRARY_CAT_KINDLEEAR)
 def SharedLibraryCategorykindleearAppspotCom():
-    key = request.query.key #避免爬虫消耗IO资源
+    key = request.args.get('key') #避免爬虫消耗IO资源
     if key != KINDLEEAR_SITE_KEY:
-        return ''
+        return {}
 
-    response.content_type = 'application/json'
-    return json.dumps([item.name for item in SharedRssCategory.all().order('-last_updated')])
+    return [item.name for item in SharedRssCategory.all().order('-last_updated')]
