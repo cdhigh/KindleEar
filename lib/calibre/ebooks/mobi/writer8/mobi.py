@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# vim:fileencoding=UTF-8:ts=4:sw=4:sta:et:sts=4:ai
-from __future__ import (unicode_literals, division, absolute_import,
-                        print_function)
+
 
 __license__   = 'GPL v3'
 __copyright__ = '2012, Kovid Goyal <kovid@kovidgoyal.net>'
@@ -13,12 +11,13 @@ from struct import pack
 from calibre.ebooks.mobi.utils import RECORD_SIZE, utf8_text
 from calibre.ebooks.mobi.writer8.header import Header
 from calibre.ebooks.mobi.writer2 import (PALMDOC, UNCOMPRESSED)
-#from calibre.ebooks.mobi.langcodes import iana2mobi
+from calibre.ebooks.mobi.langcodes import iana2mobi
 from calibre.ebooks.mobi.writer8.exth import build_exth
 from calibre.utils.filenames import ascii_filename
 
 NULL_INDEX = 0xffffffff
 FLIS = b'FLIS\0\0\0\x08\0\x41\0\0\0\0\0\0\xff\xff\xff\xff\0\x01\0\x03\0\0\0\x03\0\0\0\x01'+ b'\xff'*4
+
 
 def fcis(text_length):
     fcis = b'FCIS\x00\x00\x00\x14\x00\x00\x00\x10\x00\x00\x00\x02\x00\x00\x00\x00'
@@ -27,7 +26,9 @@ def fcis(text_length):
     fcis += b'\x28\x00\x00\x00\x08\x00\x01\x00\x01\x00\x00\x00\x00'
     return fcis
 
-class MOBIHeader(Header): # {{{
+
+class MOBIHeader(Header):  # {{{
+
     '''
     Represents the first record in a MOBI file, contains all the metadata about
     the file.
@@ -59,7 +60,7 @@ class MOBIHeader(Header): # {{{
     ident = b'MOBI'
 
     # 20: Header length
-    header_length = 248
+    header_length = 264
 
     # 24: Book Type (0x2 - Book, 0x101 - News hierarchical, 0x102 - News
     # (flat), 0x103 - News magazine same as 0x101)
@@ -115,9 +116,8 @@ class MOBIHeader(Header): # {{{
     # 112: Huff/CDIC compression
     huff_first_record
     huff_count
-
-    # 120: Unknown (Maybe DATP related, maybe HUFF/CDIC related)
-    maybe_datp = zeroes(8)
+    huff_table_offset = zeroes(4)
+    huff_table_length = zeroes(4)
 
     # 128: EXTH flags
     exth_flags = DYN
@@ -174,7 +174,13 @@ class MOBIHeader(Header): # {{{
     datp_index = NULL
     guide_index = DYN
 
-    # 264: EXTH
+    # 264: Unknown
+    unknown5 = nulls(4)
+    unknown6 = zeroes(4)
+    unknown7 = nulls(4)
+    unknown8 = zeroes(4)
+
+    # 280: EXTH
     exth = DYN
 
     # Full title
@@ -192,14 +198,15 @@ class MOBIHeader(Header): # {{{
     def __init__(self, file_version=8):
         self.DEFINITION = self.DEFINITION.format(file_version=file_version,
                 record_size=RECORD_SIZE)
-        super(MOBIHeader, self).__init__()
+        super().__init__()
 
     def format_value(self, name, val):
         if name == 'compression':
             val = PALMDOC if val else UNCOMPRESSED
-        return super(MOBIHeader, self).format_value(name, val)
+        return super().format_value(name, val)
 
 # }}}
+
 
 HEADER_FIELDS = {'compression', 'text_length', 'last_text_record', 'book_type',
                     'first_non_text_record', 'title_length', 'language_code',
@@ -208,14 +215,20 @@ HEADER_FIELDS = {'compression', 'text_length', 'last_text_record', 'book_type',
                     'guide_index', 'exth', 'full_title', 'extra_data_flags',
                     'flis_record', 'fcis_record', 'uid'}
 
-class KF8Book(object):
 
-    def __init__(self, oeb, writer, for_joint=False):
-        self.oeb, self.for_joint, self.writer = oeb, for_joint, writer
-		self.build_records(oeb, writer, for_joint)
+class KF8Book:
+
+    def __init__(self, writer, for_joint=False):
+        self.build_records(writer, for_joint)
         self.used_images = writer.used_images
+        self.page_progression_direction = writer.oeb.spine.page_progression_direction
+        self.primary_writing_mode = writer.oeb.metadata.primary_writing_mode
+        if self.page_progression_direction == 'rtl' and not self.primary_writing_mode:
+            # Without this the Kindle renderer does not respect
+            # page_progression_direction
+            self.primary_writing_mode = 'horizontal-rl'
 
-    def build_records(self, oeb, writer, for_joint):
+    def build_records(self, writer, for_joint):
         metadata = writer.oeb.metadata
         # The text records
         for x in ('last_text_record_idx', 'first_non_text_record_idx'):
@@ -262,19 +275,19 @@ class KF8Book(object):
         self.records.append(fcis(self.text_length))
 
         # EOF
-        self.records.append(b'\xe9\x8e\r\n') # EOF record
+        self.records.append(b'\xe9\x8e\r\n')  # EOF record
 
         # Miscellaneous header fields
         self.compression = writer.compress
         self.book_type = 0x101 if writer.opts.mobi_periodical else 2
-        self.full_title = utf8_text(unicode(metadata.title[0]))
+        self.full_title = utf8_text(str(metadata.title[0]))
         self.title_length = len(self.full_title)
         self.extra_data_flags = 0b1
         if writer.has_tbs:
             self.extra_data_flags |= 0b10
         self.uid = random.randint(0, 0xffffffff)
 
-        self.language_code = self.iana2mobi()
+        self.language_code = iana2mobi(str(metadata.language[0]))
         self.exth_flags = 0b1010000
         if writer.opts.mobi_periodical:
             self.exth_flags |= 0b1000
@@ -292,49 +305,48 @@ class KF8Book(object):
         code to customize various values after build_records() has been
         called'''
         opts = self.opts
-        self.exth = build_exth(self.metadata,
-                prefer_author_sort=opts.prefer_author_sort,
-                is_periodical=opts.mobi_periodical,
-                share_not_sync=opts.share_not_sync,
-                cover_offset=self.cover_offset,
-                thumbnail_offset=self.thumbnail_offset,
-                num_of_resources=self.num_of_resources,
-                kf8_unknown_count=self.kuc, be_kindlegen2=True,
-                start_offset=self.start_offset, mobi_doctype=self.book_type,
-                opts=opts)
+        self.exth = build_exth(
+            self.metadata,
+            prefer_author_sort=opts.prefer_author_sort,
+            is_periodical=opts.mobi_periodical,
+            share_not_sync=opts.share_not_sync,
+            cover_offset=self.cover_offset,
+            thumbnail_offset=self.thumbnail_offset,
+            num_of_resources=self.num_of_resources,
+            kf8_unknown_count=self.kuc, be_kindlegen2=True,
+            start_offset=self.start_offset, mobi_doctype=self.book_type,
+            page_progression_direction=self.page_progression_direction,
+            primary_writing_mode=self.primary_writing_mode
+        )
 
         kwargs = {field:getattr(self, field) for field in HEADER_FIELDS}
         return MOBIHeader()(**kwargs)
 
-    def iana2mobi(self):
-        return pack('>HBB', 0, 4, 8)
-
+    #outPath为一个BytesIO
     def write(self, outpath):
         records = [self.record0] + self.records[1:]
 
-#        with open(outpath, 'wb') as f:
-        if outpath != None:
-            f = outpath
+        f = outpath
+        f.seek(0)
+        # Write PalmDB Header
 
-            # Write PalmDB Header
+        title = ascii_filename(self.full_title.decode('utf-8')).replace(' ', '_')
+        if not isinstance(title, bytes):
+            title = title.encode('ascii')
+        title = title[:31]
+        title += (b'\0' * (32 - len(title)))
+        now = int(time.time())
+        nrecords = len(records)
+        f.write(title)
+        f.write(pack(b'>HHIIIIII', 0, 0, now, now, 0, 0, 0, 0))
+        f.write(b'BOOKMOBI')
+        f.write(pack(b'>IIH', (2*nrecords)-1, 0, nrecords))
+        offset = f.tell() + (8 * nrecords) + 2
+        for i, record in enumerate(records):
+            f.write(pack(b'>I', offset))
+            f.write(b'\0' + pack(b'>I', 2*i)[1:])
+            offset += len(record)
+        f.write(b'\0\0')
 
-            title = ascii_filename(self.full_title.decode('utf-8'))
-#            title = ascii_filename(self.full_title.decode('utf-8')).replace(
-#                    ' ', '_')[:31]
-            title += (b'\0' * (32 - len(title)))
-            now = int(time.time())
-            nrecords = len(records)
-            f.write(title)
-            f.write(pack(b'>HHIIIIII', 0, 0, now, now, 0, 0, 0, 0))
-            f.write(b'BOOKMOBI')
-            f.write(pack(b'>IIH', (2*nrecords)-1, 0, nrecords))
-            offset = f.tell() + (8 * nrecords) + 2
-            for i, record in enumerate(records):
-                f.write(pack(b'>I', offset))
-                f.write(b'\0' + pack(b'>I', 2*i)[1:])
-                offset += len(record)
-            f.write(b'\0\0')
-
-            for rec in records:
-                f.write(rec)
-
+        for rec in records:
+            f.write(rec)

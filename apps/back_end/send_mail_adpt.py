@@ -90,7 +90,7 @@ if SEND_MAIL_SERVICE == "gae":
         else:
             info = 'sendmail to {} failed: {}'.format(to, str(e))
             status = "failed"
-        default_log.warn(info)
+        default_log.warning(info)
         deliver_log(userName, str(to), title, bookSize, tz=tz, status=status)
 elif SEND_MAIL_SERVICE == "sendgrid":
     #SendGrid发送邮件
@@ -120,10 +120,10 @@ elif SEND_MAIL_SERVICE == "sendgrid":
 
         response = sgClient.send(message)
         if response.status_code not in (200, 202):
-            default_log.warn('Sendgrid failed, error code: {}'.format(response.status_code))
+            default_log.warning('Sendgrid failed, error code: {}'.format(response.status_code))
 
     #记录SendGrid发送邮件的异常
     def record_sendmail_Error(userName, to, title, bookSize, tz, e):
         global default_log
-        default_log.warn('Sendgrid failed, error: {}'.format(e))
+        default_log.warning('Sendgrid failed, error: {}'.format(e))
         deliver_log(userName, str(to), title, bookSize, tz=tz, status="failed")

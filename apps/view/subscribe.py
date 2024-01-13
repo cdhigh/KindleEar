@@ -7,7 +7,7 @@ from operator import attrgetter
 from urllib.parse import urljoin
 from flask import Blueprint, render_template, request, redirect, url_for
 from apps.base_handler import *
-from apps.db_models import *
+from apps.back_end.db_models import *
 from lib.urlopener import UrlOpener
 from books import BookClasses, BookClass
 from books.base_comic_book import BaseComicBook
@@ -18,8 +18,8 @@ from apps.view.library import KINDLEEAR_SITE, SHARED_LIBRARY_MGR_KINDLEEAR, SHAR
 bpSubscribe = Blueprint('bpSubscribe', __name__)
 
 #管理我的订阅和杂志列表
-@bpSubscribe.route("/my")
-@bpSubscribe.route("/my/<tips>")
+@bpSubscribe.route("/my", endpoint='MySubscription')
+@bpSubscribe.route("/my/<tips>", endpoint='MySubscription')
 @login_required
 def MySubscription(tips=None):
     user = get_login_user()
@@ -35,7 +35,7 @@ def MySubscription(tips=None):
         subscribe_url=url_for("MySubscription"), title_to_add=titleToAdd,
         url_to_add=urlToAdd)
 
-@bpSubscribe.post("/my")
+@bpSubscribe.post("/my", endpoint='MySubscriptionPost')
 @login_required
 def MySubscriptionPost():  # 添加自定义RSS
     user = get_login_user()
@@ -58,7 +58,7 @@ def MySubscriptionPost():  # 添加自定义RSS
     return redirect(url_for("MySubscription"))
 
 #添加/删除自定义RSS订阅的AJAX处理函数
-@bpSubscribe.post("/feeds/<actType>")
+@bpSubscribe.post("/feeds/<actType>", endpoint='FeedsAjaxPost')
 @login_required(forAjax=True)
 def FeedsAjaxPost(self, actType):
     user = get_login_user(forAjax=True)
@@ -120,7 +120,7 @@ def SendNewSubscription(title, url):
     opener.open(srvUrl, data) #只管杀不管埋，不用管能否成功了
 
 #订阅/退订内置书籍的AJAX处理函数
-@bpSubscribe.post("/books/<actType>")
+@bpSubscribe.post("/books/<actType>", endpoint='BooksAjaxPost')
 @login_required
 def BooksAjaxPost(self, actType):
     user = get_login_user(forAjax=True)
@@ -175,7 +175,7 @@ def BooksAjaxPost(self, actType):
         return {'status': 'Unknown command: {}'.format(actType)}
 
 #订阅一本书
-@bpSubscribe.route("/subscribe/<id_>")
+@bpSubscribe.route("/subscribe/<id_>", endpoint='Subscribe')
 @login_required
 def Subscribe(id_):
     try:
@@ -204,7 +204,7 @@ def Subscribe(id_):
     return redirect(url_for("MySubscription"))
 
 #取消一个订阅
-@bpSubscribe.route("/unsubscribe/<id_>")
+@bpSubscribe.route("/unsubscribe/<id_>", endpoint='Unsubscribe')
 @login_required
 def Unsubscribe(self, id_):
     user = get_login_user()
@@ -229,7 +229,7 @@ def Unsubscribe(self, id_):
 
     return redirect(url_for("MySubscription"))
 
-@bpSubscribe.route("/delfeed/<id_>")
+@bpSubscribe.route("/delfeed/<id_>", endpoint='DelFeed')
 @login_required
 def DelFeed(id_):
     user = get_login_user()
@@ -245,7 +245,7 @@ def DelFeed(id_):
     return redirect(url_for("MySubscription"))
 
 #修改书籍的网站登陆信息
-@bpSubscribe.route("/booklogininfo/<id_>")
+@bpSubscribe.route("/booklogininfo/<id_>", endpoint='BookLoginInfo')
 @login_required
 def BookLoginInfo(id_, tips=None):
     user = get_login_user()
@@ -259,7 +259,7 @@ def BookLoginInfo(id_, tips=None):
     subsInfo = user.subscription_info(bk.title)
     return render_template('booklogininfo.html', bk=bk, subs_info=subsInfo, tips=tips)
 
-@bpSubscribe.post("/booklogininfo/<id_>")
+@bpSubscribe.post("/booklogininfo/<id_>", endpoint='BookLoginInfoPost')
 @login_required
 def BookLoginInfoPost(id_):
     user = get_login_user()

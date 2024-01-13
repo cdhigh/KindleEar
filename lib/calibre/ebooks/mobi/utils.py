@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# vim:fileencoding=UTF-8:ts=4:sw=4:sta:et:sts=4:ai
-from __future__ import (unicode_literals, division, absolute_import,
-                        print_function)
+
 
 __license__   = 'GPL v3'
 __copyright__ = '2011, Kovid Goyal <kovid@kovidgoyal.net>'
@@ -13,17 +11,39 @@ from io import BytesIO
 
 from calibre.utils.imghdr import what
 from calibre.ebooks import normalize
+from polyglot.builtins import as_bytes
+from tinycss.color3 import parse_color_string
 
 IMAGE_MAX_SIZE = 10 * 1024 * 1024
-RECORD_SIZE = 0x1000 # 4096 (Text record size (uncompressed))
+RECORD_SIZE = 0x1000  # 4096 (Text record size (uncompressed))
 
-def decode_string(raw, codec='utf-8', ordt_map=''):
-    length, = struct.unpack(b'>B', raw[0])
+
+class PolyglotDict(dict):
+
+    def __setitem__(self, key, val):
+        if isinstance(key, str):
+            key = key.encode('utf-8')
+        dict.__setitem__(self, key, val)
+
+    def __getitem__(self, key):
+        if isinstance(key, str):
+            key = key.encode('utf-8')
+        return dict.__getitem__(self, key)
+
+    def __contains__(self, key):
+        if isinstance(key, str):
+            key = key.encode('utf-8')
+        return dict.__contains__(self, key)
+
+
+def decode_string(raw, codec='utf-8', ordt_map=None):
+    length, = struct.unpack(b'>B', raw[0:1])
     raw = raw[1:1+length]
     consumed = length+1
     if ordt_map:
-        return ''.join(ordt_map[ord(x)] for x in raw), consumed
+        return ''.join(ordt_map[x] for x in bytearray(raw)), consumed
     return raw.decode(codec), consumed
+
 
 def decode_hex_number(raw, codec='utf-8'):
     '''
@@ -40,10 +60,12 @@ def decode_hex_number(raw, codec='utf-8'):
     raw, consumed = decode_string(raw, codec=codec)
     return int(raw, 16), consumed
 
+
 def encode_string(raw):
-    ans = bytearray(bytes(raw))
+    ans = bytearray(as_bytes(raw))
     ans.insert(0, len(ans))
     return bytes(ans)
+
 
 def encode_number_as_hex(num):
     '''
@@ -53,11 +75,12 @@ def encode_number_as_hex(num):
     The bytes that follow are simply the hexadecimal representation of the
     number.
     '''
-    num = bytes(hex(num)[2:].upper())
+    num = hex(num)[2:].upper().encode('ascii')
     nlen = len(num)
     if nlen % 2 != 0:
         num = b'0'+num
     return encode_string(num)
+
 
 def encint(value, forward=True):
     '''
@@ -86,7 +109,7 @@ def encint(value, forward=True):
     byts = bytearray()
     while True:
         b = value & 0b01111111
-        value >>= 7 # shift value to the right by 7 bits
+        value >>= 7  # shift value to the right by 7 bits
 
         byts.append(b)
         if value == 0:
@@ -94,6 +117,7 @@ def encint(value, forward=True):
     byts[0 if forward else -1] |= 0b10000000
     byts.reverse()
     return bytes(byts)
+
 
 def decint(raw, forward=True):
     '''
@@ -116,10 +140,11 @@ def decint(raw, forward=True):
     if not forward:
         byts.reverse()
     for byte in byts:
-        val <<= 7 # Shift value to the left by 7 bits
+        val <<= 7  # Shift value to the left by 7 bits
         val |= byte
 
     return val, len(byts)
+
 
 def test_decint(num):
     for d in (True, False):
@@ -128,6 +153,11 @@ def test_decint(num):
         if (num, sz) != decint(raw, forward=d):
             raise ValueError('Failed for num %d, forward=%r: %r != %r' % (
                 num, d, (num, sz), decint(raw, forward=d)))
+
+
+def rescale_image(data, maxsizeb=IMAGE_MAX_SIZE, dimen=None):
+    return data
+
 
 def get_trailing_data(record, extra_data_flags):
     '''
@@ -153,12 +183,13 @@ def get_trailing_data(record, extra_data_flags):
     if extra_data_flags & 0b1:
         # Only the first two bits are used for the size since there can
         # never be more than 3 trailing multibyte chars
-        sz = (ord(record[-1]) & 0b11) + 1
+        sz = (ord(record[-1:]) & 0b11) + 1
         consumed = 1
         if sz > consumed:
             data[0] = record[-sz:-consumed]
         record = record[:-sz]
     return data, record
+
 
 def encode_trailing_data(raw):
     '''
@@ -180,6 +211,7 @@ def encode_trailing_data(raw):
         lsize += 1
     return raw + encoded
 
+
 def encode_fvwi(val, flags, flag_size=4):
     '''
     Encode the value val and the flag_size bits from flags as a fvwi. This encoding is
@@ -187,7 +219,7 @@ def encode_fvwi(val, flags, flag_size=4):
     bytestring.
     '''
     ans = val << flag_size
-    for i in xrange(flag_size):
+    for i in range(flag_size):
         ans |= (flags & (1 << i))
     return encint(ans)
 
@@ -199,7 +231,7 @@ def decode_fvwi(byts, flag_size=4):
     arg, consumed = decint(bytes(byts))
     val = arg >> flag_size
     flags = 0
-    for i in xrange(flag_size):
+    for i in range(flag_size):
         flags |= (arg & (1 << i))
     return val, flags, consumed
 
@@ -207,7 +239,7 @@ def decode_fvwi(byts, flag_size=4):
 def decode_tbs(byts, flag_size=4):
     '''
     Trailing byte sequences for indexing consists of series of fvwi numbers.
-    This function reads the fvwi number and its associated flags. It them uses
+    This function reads the fvwi number and its associated flags. It then uses
     the flags to read any more numbers that belong to the series. The flags are
     the lowest 4 bits of the vwi (see the encode_fvwi function above).
 
@@ -226,7 +258,7 @@ def decode_tbs(byts, flag_size=4):
         extra[0b0010] = x
         consumed += consumed2
     if flags & 0b0100:
-        extra[0b0100] = ord(byts[0])
+        extra[0b0100] = ord(byts[0:1])
         byts = byts[1:]
         consumed += 1
     if flags & 0b0001:
@@ -235,6 +267,7 @@ def decode_tbs(byts, flag_size=4):
         extra[0b0001] = x
         consumed += consumed2
     return val, extra, consumed
+
 
 def encode_tbs(val, extra, flag_size=4):
     '''
@@ -254,6 +287,7 @@ def encode_tbs(val, extra, flag_size=4):
         ans += encint(extra[0b0001])
     return ans
 
+
 def utf8_text(text):
     '''
     Convert a possibly null string to utf-8 bytes, guaranteeing to return a non
@@ -261,12 +295,13 @@ def utf8_text(text):
     '''
     if text and text.strip():
         text = text.strip()
-        if not isinstance(text, unicode):
+        if not isinstance(text, str):
             text = text.decode('utf-8', 'replace')
         text = normalize(text).encode('utf-8')
     else:
         text = _('Unknown').encode('utf-8')
     return text
+
 
 def align_block(raw, multiple=4, pad=b'\0'):
     '''
@@ -274,7 +309,8 @@ def align_block(raw, multiple=4, pad=b'\0'):
     of 4.
     '''
     extra = len(raw) % multiple
-    if extra == 0: return raw
+    if extra == 0:
+        return raw
     return raw + pad*(multiple - extra)
 
 
@@ -309,6 +345,7 @@ def detect_periodical(toc, log=None):
             return False
     return True
 
+
 def count_set_bits(num):
     if num < 0:
         num = -num
@@ -318,10 +355,12 @@ def count_set_bits(num):
         num >>= 1
     return ans
 
+
 def to_base(num, base=32, min_num_digits=None):
     digits = string.digits + string.ascii_uppercase
     sign = 1 if num >= 0 else -1
-    if num == 0: return ('0' if min_num_digits is None else '0'*min_num_digits)
+    if num == 0:
+        return ('0' if min_num_digits is None else '0'*min_num_digits)
     num *= sign
     ans = []
     while num:
@@ -335,7 +374,12 @@ def to_base(num, base=32, min_num_digits=None):
     return ''.join(ans)
 
 
+def mobify_image(data):
+    return data
+
 # Font records {{{
+
+
 def read_font_record(data, extent=1040):
     '''
     Return the font encoded in the MOBI FONT record represented by data.
@@ -386,8 +430,8 @@ def read_font_record(data, extent=1040):
         extent = len(font_data) if extent is None else extent
         extent = min(extent, len(font_data))
 
-        for n in xrange(extent):
-            buf[n] ^= key[n%xor_len] # XOR of buf and key
+        for n in range(extent):
+            buf[n] ^= key[n%xor_len]  # XOR of buf and key
 
         font_data = bytes(buf)
         ans['encrypted'] = True
@@ -411,6 +455,7 @@ def read_font_record(data, extent=1040):
 
     return ans
 
+
 def write_font_record(data, obfuscate=True, compress=True):
     '''
     Write the ttf/otf font represented by data into a font record. See
@@ -429,7 +474,7 @@ def write_font_record(data, obfuscate=True, compress=True):
         xor_key = os.urandom(key_len)
         key = bytearray(xor_key)
         data = bytearray(data)
-        for i in xrange(1040):
+        for i in range(1040):
             data[i] ^= key[i%key_len]
         data = bytes(data)
 
@@ -442,6 +487,7 @@ def write_font_record(data, obfuscate=True, compress=True):
     return header + xor_key + data
 
 # }}}
+
 
 def create_text_record(text):
     '''
@@ -493,7 +539,8 @@ def create_text_record(text):
 
     return data, overlap
 
-class CNCX(object): # {{{
+
+class CNCX:  # {{{
 
     '''
     Create the CNCX records. These are records containing all the strings from
@@ -509,17 +556,14 @@ class CNCX(object): # {{{
         self.records = []
         offset = 0
         buf = BytesIO()
-        for key in tuple(self.strings.iterkeys()):
-            utf8 = utf8_text(key[:self.MAX_STRING_LENGTH])
+        RECORD_LIMIT = 0x10000 - 1024  # kindlegen appears to use 1024, PDB limit is 0x10000
+        for key in self.strings:
+            utf8 = utf8_text(str(key)[:self.MAX_STRING_LENGTH])
             l = len(utf8)
             sz_bytes = encint(l)
             raw = sz_bytes + utf8
-            if 0xfbf8 - buf.tell() < 6 + len(raw):
-                # Records in PDB files cannot be larger than 0x10000, so we
-                # stop well before that.
-                pad = 0xfbf8 - buf.tell()
-                buf.write(b'\0' * pad)
-                self.records.append(buf.getvalue())
+            if buf.tell() + len(raw) > RECORD_LIMIT:
+                self.records.append(align_block(buf.getvalue()))
                 buf.seek(0), buf.truncate(0)
                 offset = len(self.records) * 0x10000
             buf.write(raw)
@@ -542,8 +586,18 @@ class CNCX(object): # {{{
 
 # }}}
 
+
 def is_guide_ref_start(ref):
     return (ref.title.lower() == 'start' or
             (ref.type and ref.type.lower() in {'start',
                     'other.start', 'text'}))
 
+
+def convert_color_for_font_tag(val):
+    rgba = parse_color_string(str(val or ''))
+    if rgba is None or rgba == 'currentColor':
+        return str(val)
+    def clamp(x):
+        return min(x, max(0, x), 1)
+    rgb = map(clamp, rgba[:3])
+    return '#' + ''.join(map(lambda x:'%02x' % int(x * 255), rgb))

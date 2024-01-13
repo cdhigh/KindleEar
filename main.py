@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-#KindleEar入口
+#KindleEar入口文件，向外提供 app 实例
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #Author:
 # cdhigh <https://github.com/cdhigh>
@@ -22,7 +22,8 @@ builtins.__dict__['default_log'] = log
 builtins.__dict__['IsRunInLocal'] = IsRunInLocal
 builtins.__dict__['_'] = gettext
 
-sys.path.insert(0, 'lib')
+sys.path.insert(0, 'lib') #for calibre
+
 from books import RegisterBuiltinBooks
 from apps.view.login import bpLogin  #Blueprints
 from apps.view.admin import bpAdmin
@@ -33,24 +34,14 @@ from apps.view.logs import bpLogs
 from apps.view.setting import bpSetting
 from apps.view.share import bpShare
 from apps.view.subscribe import bpSubscribe
-from apps.work.worker import bdWorker
+from apps.work.worker import bpWorker
 from apps.work.url2book import bpUrl2Book
+from apps.back_end.db_models import ConnectToDatabase, closeDatabase
+from config import USE_GAE_INBOUND_EMAIL
 
 RegisterBuiltinBooks() #添加内置书籍到数据库
 
-app = Flask(_name__)
-babel = Babel(app)
-app.secret_key = 'fdjlkdfjx32QLL2'
-
-#使用GAE来接收邮件
-if USE_GAE_INBOUND_EMAIL:
-    from google.appengine.api import wrap_wsgi_app
-    from apps.view.inbound_email import bpInBoundEmail
-    app.wsgi_app = wrap_wsgi_app(app.wsgi_app)  #启用GAE邮件服务
-    app.register_blueprint(bpInBoundEmail)
-
 #多语种支持
-@babel.localeselector
 def GetLocale():
     #手动设置过要显示的语种有限
     langCode = session.get('langCode')
@@ -59,6 +50,18 @@ def GetLocale():
     #根据浏览器自动设置
     return request.accept_languages.best_match(['zh_cn', 'tr_tr', 'en'])
 
+app = Flask(__name__)
+babel = Babel(app)
+app.secret_key = 'fdjlkdfjx32QLL2'
+babel.init_app(app, locale_selector=GetLocale)
+
+#使用GAE来接收邮件
+if USE_GAE_INBOUND_EMAIL:
+    from google.appengine.api import wrap_wsgi_app
+    from apps.view.inbound_email import bpInBoundEmail
+    app.wsgi_app = wrap_wsgi_app(app.wsgi_app)  #启用GAE邮件服务
+    app.register_blueprint(bpInBoundEmail)
+
 @app.route('/')
 def Home():
     return render_page('home.html', "Home")
@@ -66,6 +69,11 @@ def Home():
 @app.before_request
 def BeforeRequest():
     g.version = __Version__
+    connectToDatabase()
+
+@app.teardown_request
+def TeardownRequest(exc=None):
+    closeDataBase()
 
 @app.route('/env')
 def Test():

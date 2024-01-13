@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 __license__ = 'GPL 3'
 __copyright__ = '2010, Hiroshi Miura <miurahr@linux.com>'
 __docformat__ = 'restructuredtext en'
@@ -63,7 +61,8 @@ import re
 from calibre.ebooks.unihandecode.unicodepoints import CODEPOINTS
 from calibre.ebooks.unihandecode.zhcodepoints import CODEPOINTS as HANCODES
 
-class Unidecoder(object):
+
+class Unidecoder:
 
     codepoints = {}
 
@@ -72,7 +71,7 @@ class Unidecoder(object):
         self.codepoints.update(HANCODES)
 
     def decode(self, text):
-        # Replace characters larger than 127 with their ASCII equivelent.
+        # Replace characters larger than 127 with their ASCII equivalent.
         return re.sub('[^\x00-\x7f]',lambda x: self.replace_point(x.group()), text)
 
     def replace_point(self, codepoint):
@@ -92,19 +91,16 @@ class Unidecoder(object):
         '''
         Find what group character is a part of.
         '''
-        # Code groups withing CODEPOINTS take the form 'xAB'
-        try:#python2
-            return 'x%02x' % (ord(unicode(character)) >> 8)
-        except:
-            return 'x%02x' % (ord(character) >> 8)
+        # Code groups within CODEPOINTS take the form 'xAB'
+        if not isinstance(character, str):
+            character = str(character, "utf-8")
+        return 'x%02x' % (ord(character) >> 8)
 
     def grouped_point(self, character):
         '''
         Return the location the replacement character is in the list for a
         the group character is a part of.
         '''
-        try:#python2
-            return ord(unicode(character)) & 255
-        except:
-            return ord(character) & 255
-
+        if not isinstance(character, str):
+            character = str(character, "utf-8")
+        return ord(character) & 255

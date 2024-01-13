@@ -6,7 +6,7 @@ import os, datetime, hashlib, time, base64
 from functools import wraps
 from urllib.parse import urlparse
 from flask import request, redirect, render_template, session, url_for
-from apps.db_models import *
+from apps.back_end.db_models import *
 from config import TIMEZONE
 
 #一些共同的工具函数，工具函数都是小写+下划线形式
@@ -39,4 +39,4 @@ def deliver_log(name, to, book, size, status='ok', tz=TIMEZONE):
            book=book, status=status)
         dl.put()
     except Exception as e:
-        default_log.warn('DeliverLog failed to save: {}'.format(e))
+        default_log.warning('DeliverLog failed to save: {}'.format(e))

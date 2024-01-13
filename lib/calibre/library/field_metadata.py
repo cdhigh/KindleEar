@@ -3,26 +3,14 @@ Created on 25 May 2010
 
 @author: charles
 '''
-import copy, traceback
+
+import traceback
 from collections import OrderedDict
 
 from calibre.utils.config_base import tweaks
-
-class TagsIcons(dict):
-    '''
-    If the client wants icons to be in the tag structure, this class must be
-    instantiated and filled in with real icons. If this class is instantiated
-    and passed to get_categories, All items must be given a value not None
-    '''
-
-    category_icons = ['authors', 'series', 'formats', 'publisher', 'rating',
-                      'news',    'tags',   'custom:', 'user:',     'search',
-                      'identifiers', 'languages', 'gst']
-    def __init__(self, icon_dict):
-        for a in self.category_icons:
-            if a not in icon_dict:
-                raise ValueError('Missing category icon [%s]'%a)
-            self[a] = icon_dict[a]
+from calibre.utils.icu import lower as icu_lower
+from calibre.utils.localization import _, ngettext
+from polyglot.builtins import iteritems, itervalues
 
 category_icon_map = {
                     'authors'    : 'user_profile.png',
@@ -40,67 +28,14 @@ category_icon_map = {
                     'languages'  : 'languages.png',
             }
 
+# Builtin metadata {{{
 
-class FieldMetadata(dict):
-    '''
-    key: the key to the dictionary is:
-    - for standard fields, the metadata field name.
-    - for custom fields, the metadata field name prefixed by '#'
-    This is done to create two 'namespaces' so the names don't clash
 
-    label: the actual column label. No prefixing.
-
-    datatype: the type of information in the field. Valid values are listed in
-    VALID_DATA_TYPES below.
-    is_multiple: valid for the text datatype. If {}, the field is to be
-    treated as a single term. If not None, it contains a dict of the form
-            {'cache_to_list': ',',
-             'ui_to_list': ',',
-             'list_to_ui': ', '}
-    where the cache_to_list contains the character used to split the value in
-    the meta2 table, ui_to_list contains the character used to create a list
-    from a value shown in the ui (each resulting value must be strip()ed and
-    empty values removed), and list_to_ui contains the string used in join()
-    to create a displayable string from the list.
-
-    kind == field: is a db field.
-    kind == category: standard tag category that isn't a field. see news.
-    kind == user: user-defined tag category.
-    kind == search: saved-searches category.
-
-    is_category: is a tag browser category. If true, then:
-       table: name of the db table used to construct item list
-       column: name of the column in the normalized table to join on
-       link_column: name of the column in the connection table to join on. This
-                    key should not be present if there is no link table
-       category_sort: the field in the normalized table to sort on. This
-                      key must be present if is_category is True
-       If these are None, then the category constructor must know how
-       to build the item list (e.g., formats, news).
-       The order below is the order that the categories will
-       appear in the tags pane.
-
-    name: the text that is to be used when displaying the field. Column headings
-    in the GUI, etc.
-
-    search_terms: the terms that can be used to identify the field when
-    searching. They can be thought of as aliases for metadata keys, but are only
-    valid when passed to search().
-
-    is_custom: the field has been added by the user.
-
-    rec_index: the index of the field in the db metadata record.
-
-    is_csp: field contains colon-separated pairs. Must also be text, is_multiple
-
-    '''
-
-    VALID_DATA_TYPES = frozenset([None, 'rating', 'text', 'comments', 'datetime',
-                'int', 'float', 'bool', 'series', 'composite', 'enumeration'])
-
-    # Builtin metadata {{{
-
-    _field_metadata_prototype = [
+def _builtin_field_metadata():
+    # This is a function so that changing the UI language allows newly created
+    # field metadata objects to have correctly translated labels for builtin
+    # fields.
+    return [
             ('authors',   {'table':'authors',
                            'column':'name',
                            'link_column':'author',
@@ -137,7 +72,7 @@ class FieldMetadata(dict):
                            'datatype':'series',
                            'is_multiple':{},
                            'kind':'field',
-                           'name':'Series',
+                           'name':ngettext('Series', 'Series', 1),
                            'search_terms':['series'],
                            'is_custom':False,
                            'is_category':True,
@@ -161,7 +96,7 @@ class FieldMetadata(dict):
                            'datatype':'text',
                            'is_multiple':{},
                            'kind':'field',
-                           'name':_('Publishers'),
+                           'name':_('Publisher'),
                            'search_terms':['publisher'],
                            'is_custom':False,
                            'is_category':True,
@@ -220,7 +155,7 @@ class FieldMetadata(dict):
                             'datatype':'text',
                            'is_multiple':{},
                            'kind':'field',
-                           'name':_('Author Sort'),
+                           'name':_('Author sort'),
                            'search_terms':['author_sort'],
                            'is_custom':False,
                            'is_category':False,
@@ -262,8 +197,8 @@ class FieldMetadata(dict):
                            'datatype':'int',
                            'is_multiple':{},
                            'kind':'field',
-                           'name':None,
-                           'search_terms':[],
+                           'name': _('Id'),
+                           'search_terms':['id'],
                            'is_custom':False,
                            'is_category':False,
                            'is_csp': False}),
@@ -282,7 +217,7 @@ class FieldMetadata(dict):
                            'datatype':'text',
                            'is_multiple':{},
                            'kind':'field',
-                           'name':_('On Device'),
+                           'name':_('On device'),
                            'search_terms':['ondevice'],
                            'is_custom':False,
                            'is_category':False,
@@ -317,6 +252,16 @@ class FieldMetadata(dict):
                            'is_custom':False,
                            'is_category':False,
                            'is_csp': False}),
+            ('in_tag_browser', {'table':None,
+                           'column':None,
+                           'datatype':'text',
+                           'is_multiple':{},
+                           'kind':'field',
+                           'name': None,
+                           'search_terms':['in_tag_browser'],
+                           'is_custom':False,
+                           'is_category':False,
+                           'is_csp': False}),
             ('series_index',{'table':None,
                              'column':None,
                              'datatype':'float',
@@ -332,7 +277,7 @@ class FieldMetadata(dict):
                            'datatype':'text',
                            'is_multiple':{},
                            'kind':'field',
-                           'name':_('Series Sort'),
+                           'name':_('Series sort'),
                            'search_terms':['series_sort'],
                            'is_custom':False,
                            'is_category':False,
@@ -342,7 +287,7 @@ class FieldMetadata(dict):
                            'datatype':'text',
                            'is_multiple':{},
                            'kind':'field',
-                           'name':_('Title Sort'),
+                           'name':_('Title sort'),
                            'search_terms':['title_sort'],
                            'is_custom':False,
                            'is_category':False,
@@ -383,20 +328,78 @@ class FieldMetadata(dict):
                            'is_multiple':{},
                            'kind':'field',
                            'name':None,
-                           'search_terms':[],
+                           'search_terms':['uuid'],
                            'is_custom':False,
                            'is_category':False,
                            'is_csp': False}),
         ]
-    # }}}
+# }}}
+
+
+class FieldMetadata:
+    '''
+    key: the key to the dictionary is:
+    - for standard fields, the metadata field name.
+    - for custom fields, the metadata field name prefixed by '#'
+    This is done to create two 'namespaces' so the names don't clash
+
+    label: the actual column label. No prefixing.
+
+    datatype: the type of information in the field. Valid values are listed in
+    VALID_DATA_TYPES below.
+    is_multiple: valid for the text datatype. If {}, the field is to be
+    treated as a single term. If not None, it contains a dict of the form
+            {'cache_to_list': ',',
+             'ui_to_list': ',',
+             'list_to_ui': ', '}
+    where the cache_to_list contains the character used to split the value in
+    the meta2 table, ui_to_list contains the character used to create a list
+    from a value shown in the ui (each resulting value must be strip()ed and
+    empty values removed), and list_to_ui contains the string used in join()
+    to create a displayable string from the list.
+
+    kind == field: is a db field.
+    kind == category: standard tag category that isn't a field. see news.
+    kind == user: user-defined tag category.
+    kind == search: saved-searches category.
+
+    is_category: is a tag browser category. If true, then:
+       table: name of the db table used to construct item list
+       column: name of the column in the normalized table to join on
+       link_column: name of the column in the connection table to join on. This
+                    key should not be present if there is no link table
+       category_sort: the field in the normalized table to sort on. This
+                      key must be present if is_category is True
+       If these are None, then the category constructor must know how
+       to build the item list (e.g., formats, news).
+       The order below is the order that the categories will
+       appear in the tags pane.
+
+    name: the text that is to be used when displaying the field. Column headings
+    in the GUI, etc.
+
+    search_terms: the terms that can be used to identify the field when
+    searching. They can be thought of as aliases for metadata keys, but are only
+    valid when passed to search().
+
+    is_custom: the field has been added by the user.
+
+    rec_index: the index of the field in the db metadata record.
+
+    is_csp: field contains colon-separated pairs. Must also be text, is_multiple
+
+    '''
+
+    VALID_DATA_TYPES = frozenset([None, 'rating', 'text', 'comments', 'datetime',
+                'int', 'float', 'bool', 'series', 'composite', 'enumeration'])
 
     # search labels that are not db columns
-    search_items = [    'all',
-                        'search',
-                    ]
+    search_items = ['all', 'search', 'vl', 'template']
+    custom_field_prefix = '#'
+    __calibre_serializable__ = True
 
     def __init__(self):
-        self._field_metadata = copy.deepcopy(self._field_metadata_prototype)
+        self._field_metadata = _builtin_field_metadata()
         self._tb_cats = OrderedDict()
         self._tb_custom_fields = {}
         self._search_term_map = {}
@@ -415,7 +418,6 @@ class FieldMetadata(dict):
                         'date_format': tweaks['gui_pubdate_display_format']}
         self._tb_cats['last_modified']['display'] = {
                         'date_format': tweaks['gui_last_modified_display_format']}
-        self.custom_field_prefix = '#'
         self.get = self._tb_cats.get
 
     def __getitem__(self, key):
@@ -430,30 +432,47 @@ class FieldMetadata(dict):
         del self._tb_cats[key]
 
     def __iter__(self):
-        for key in self._tb_cats:
-            yield key
+        yield from self._tb_cats
 
     def __contains__(self, key):
-        return self.has_key(key)
+        return key in self._tb_cats or key == 'title_sort'
 
     def has_key(self, key):
-        if key == 'title_sort':
-            return True
-        return key in self._tb_cats
+        return key in self
 
     def keys(self):
-        return self._tb_cats.keys()
+        return list(self._tb_cats.keys())
+
+    def __eq__(self, other):
+        if not isinstance(other, FieldMetadata):
+            return False
+        for attr in ('_tb_custom_fields', '_search_term_map', 'custom_label_to_key_map', 'custom_field_prefix'):
+            if getattr(self, attr) != getattr(other, attr):
+                return False
+        return dict(self._tb_cats) == dict(other._tb_cats)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def sortable_field_keys(self):
         return [k for k in self._tb_cats.keys()
                 if self._tb_cats[k]['kind']=='field' and
                    self._tb_cats[k]['datatype'] is not None]
 
+    def ui_sortable_field_keys(self):
+        ans = {k:self._tb_cats[k]['name'] for k in set(self.sortable_field_keys()) - {
+            'sort', 'author_sort', 'au_map', 'series_sort', 'marked',
+            'series_index', 'path', 'formats', 'identifiers', 'uuid',
+            'comments',
+        } if self._tb_cats[k]['name']}
+        ans['cover'] = _('Has cover')
+        return ans
+
     def displayable_field_keys(self):
         return [k for k in self._tb_cats.keys()
                 if self._tb_cats[k]['kind']=='field' and
                    self._tb_cats[k]['datatype'] is not None and
-                   k not in ('au_map', 'marked', 'ondevice', 'cover') and
+                   k not in ('au_map', 'marked', 'ondevice', 'cover', 'series_sort', 'in_tag_browser') and
                    not self.is_series_index(k)]
 
     def standard_field_keys(self):
@@ -474,25 +493,24 @@ class FieldMetadata(dict):
         return [k for k in self._tb_cats.keys() if self._tb_cats[k]['kind']=='field']
 
     def iterkeys(self):
-        for key in self._tb_cats:
-            yield key
+        yield from self._tb_cats
 
     def itervalues(self):
-        return self._tb_cats.itervalues()
+        return itervalues(self._tb_cats)
 
     def values(self):
-        return self._tb_cats.values()
+        return list(self._tb_cats.values())
 
     def iteritems(self):
         for key in self._tb_cats:
             yield (key, self._tb_cats[key])
+    iter_items = iteritems
 
     def custom_iteritems(self):
-        for key, meta in self._tb_custom_fields.iteritems():
-            yield (key, meta)
+        yield from iteritems(self._tb_custom_fields)
 
     def items(self):
-        return list(self.iteritems())
+        return list(self.iter_items())
 
     def is_custom_field(self, key):
         return key.startswith(self.custom_field_prefix)
@@ -502,12 +520,15 @@ class FieldMetadata(dict):
         return self.is_custom_field(key) or key.startswith('@')
 
     def ignorable_field_keys(self):
-        return [k for k in self._tb_cats.iterkeys() if self.is_ignorable_field(k)]
+        return [k for k in self._tb_cats if self.is_ignorable_field(k)]
 
     def is_series_index(self, key):
-        m = self[key]
-        return (m['datatype'] == 'float' and key.endswith('_index') and
-                key[:-6] in self)
+        try:
+            m = self._tb_cats[key]
+            return (m['datatype'] == 'float' and key.endswith('_index') and
+                    key[:-6] in self._tb_cats)
+        except (KeyError, ValueError, TypeError, AttributeError):
+            return False
 
     def key_to_label(self, key):
         if 'label' not in self._tb_cats[key]:
@@ -619,8 +640,10 @@ class FieldMetadata(dict):
                                 'is_category':True,    'is_csp': False}
         self._add_search_terms_to_map(label, st)
 
-    def add_search_category(self, label, name):
+    def add_search_category(self, label, name, fail_on_existing=True):
         if label in self._tb_cats:
+            if not fail_on_existing:
+                return
             raise ValueError('Duplicate user field [%s]'%(label))
         self._tb_cats[label] = {'table':None,        'column':None,
                                 'datatype':None,     'is_multiple':{},
@@ -660,3 +683,27 @@ class FieldMetadata(dict):
         return [k for k in self._tb_cats.keys()
                 if self._tb_cats[k]['kind']=='field' and
                    len(self._tb_cats[k]['search_terms']) > 0]
+
+
+# The following two methods are to support serialization
+# Note that they do not create copies of internal structures, for performance,
+# so they are not safe to use for anything else
+def fm_as_dict(self):
+    return {
+        'custom_fields': self._tb_custom_fields,
+        'search_term_map': self._search_term_map,
+        'custom_label_to_key_map': self.custom_label_to_key_map,
+        'user_categories': {k:v for k, v in iteritems(self._tb_cats) if v['kind'] == 'user'},
+        'search_categories': {k:v for k, v in iteritems(self._tb_cats) if v['kind'] == 'search'},
+    }
+
+
+def fm_from_dict(src):
+    ans = FieldMetadata()
+    ans._tb_custom_fields = src['custom_fields']
+    ans._search_term_map = src['search_term_map']
+    ans.custom_label_to_key_map = src['custom_label_to_key_map']
+    for q in ('custom_fields', 'user_categories', 'search_categories'):
+        for k, v in iteritems(src[q]):
+            ans._tb_cats[k] = v
+    return ans

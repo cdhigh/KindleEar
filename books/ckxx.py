@@ -50,12 +50,12 @@ class CKXX(BaseFeedBook):
                 soup = BeautifulSoup(result.content, 'html.parser')
                 # 找出当前页面文章列表中所有文章条目'
                 sections = soup.find_all(name='div', class_='column-news')
-                # self.log.warn('find %d sections' % len(sections))
+                # self.log.warning('find %d sections' % len(sections))
                 for section in sections:
                     tag = section.find (name='ul', class_='column-title')
                     sectionName = tag.a.li.string
                     tuwens = section.find_all (name='div', class_=re.compile("tuwen-block-"))   
-                    # self.log.warn('%s find %d tuwen' % (sectionName, len(tuwens)))
+                    # self.log.warning('%s find %d tuwen' % (sectionName, len(tuwens)))
                     for tuwen in tuwens:
                         articles = tuwen.find_all ('a')
                         title = ''
@@ -64,20 +64,20 @@ class CKXX(BaseFeedBook):
                             if not article.img:
                                 title = article.string
                                 link = article.get('href')  # 获取文章链接
-                                self.log.warn('title : %s, link: %s' % (title, link))
+                                self.log.warning('title : %s, link: %s' % (title, link))
                                 break
                         urls.append((sectionName, title, link, None))  # 把文章元组加入列表
                     texts = section.find_all (name='li', class_=re.compile("list-text-")) 
-                    # self.log.warn('%s find %d texts' % (sectionName, len(texts)))  
+                    # self.log.warning('%s find %d texts' % (sectionName, len(texts)))  
                     for text in texts:                       
                         title = text.a.string
                         link = text.a.get('href')  # 获取文章链接
-                        self.log.warn('title : %s, link: %s' % (title, link))
+                        self.log.warning('title : %s, link: %s' % (title, link))
                         urls.append((sectionName, title, link, None))  # 把文章元组加入列表
 
             # 如果请求失败通知到日志输出中
             else:
-                self.log.warn('Fetch article failed(%s):%s' %
+                self.log.warning('Fetch article failed(%s):%s' %
                               (URLOpener.CodeMap(result.status_code), url))
         # 返回提取到的所有文章列表
         return urls

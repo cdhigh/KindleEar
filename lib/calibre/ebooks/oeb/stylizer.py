@@ -1,217 +1,302 @@
-# -*- encoding: utf-8 -*-
-
 '''
 CSS property propagation class.
 '''
-from __future__ import with_statement
 
 __license__   = 'GPL v3'
 __copyright__ = '2008, Marshall T. Vandegrift <llasram@gmail.com>'
 
-import os, itertools, re, logging, copy, unicodedata
+import copy
+import logging
+import numbers
+import os
+import re
+import unicodedata
+from css_parser import (
+    CSSParser, log as css_parser_log, parseString, parseStyle, profile as cssprofiles,
+    profiles, replaceUrls,
+)
+from css_parser.css import CSSFontFaceRule, CSSPageRule, CSSStyleRule, cssproperties
+from operator import itemgetter
 from weakref import WeakKeyDictionary
 from xml.dom import SyntaxErr as CSSSyntaxError
-from cssutils.css import (CSSStyleRule, CSSPageRule, CSSFontFaceRule,
-        cssproperties)
-try:
-    from cssutils.css import PropertyValue
-except ImportError:
-    raise RuntimeError('You need cssutils >= 0.9.9 for calibre')
-from cssutils import (profile as cssprofiles, parseString, parseStyle, log as
-        cssutils_log, CSSParser, profiles, replaceUrls)
-from lxml import etree
-from cssselect import HTMLTranslator
 
-from calibre import force_unicode
+from calibre import as_unicode, force_unicode
 from calibre.ebooks import unit_convert
-from calibre.ebooks.oeb.base import XHTML, XHTML_NS, CSS_MIME, OEB_STYLES
-from calibre.ebooks.oeb.base import XPNSMAP, xpath, urlnormalize
+from calibre.ebooks.oeb.base import (
+    CSS_MIME, OEB_STYLES, XHTML, XHTML_NS, urlnormalize, xpath,
+)
+from calibre.ebooks.oeb.normalize_css import DEFAULTS, normalizers
+from calibre.utils.resources import get_path as P
+from css_selectors import INAPPROPRIATE_PSEUDO_CLASSES, Select, SelectorError
+from polyglot.builtins import iteritems
+from tinycss.media3 import CSSMedia3Parser
 
-cssutils_log.setLevel(logging.WARN)
+css_parser_log.setLevel(logging.WARN)
+
+#默认HTML_CSS
+_default_html_css_str = """@namespace url(http://www.w3.org/1999/xhtml);
+@namespace svg url(http://www.w3.org/2000/svg);
+div,map,dt,isindex,form{display: block;}
+body{display: block;}
+p,dl,multicol{display: block;margin: 1em 0;}
+dd{display: block;margin-left: 40px;}
+blockquote{display: block;margin: 1em;}
+address{display: block;font-style: italic;}
+center{display: block;text-align: center;}
+blockquote[type=cite]{display: block;margin: 1em 0em;border-color: blue;border-width: thin;}
+h1{display: block;font-size: 2em;font-weight: bold;margin: .67em 0;}
+h2{display: block;font-size: 1.5em;font-weight: bold;margin: .83em 0;}
+h3{display: block;font-size: 1.17em;font-weight: bold;margin: 1em 0;}
+h4{display: block;font-weight: bold;margin: 1.33em 0;}
+h5{display: block;font-size: 0.83em;font-weight: bold;margin: 1.67em 0;}
+h6{display: block;font-size: 0.67em;font-weight: bold;margin: 2.33em 0;}
+pre{display: block;font-family: monospace;white-space: pre-wrap;margin: 1em 0;}
+table{display: table;border-spacing: 2px;border-collapse: separate;margin-top: 0;margin-bottom: 0;text-indent: 0;}
+table[align="left"]{float: left;}
+table[align="right"]{float: right;}
+table[rules]:not([rules="none"]){border-collapse: collapse;}
+caption{display: table-caption;text-align: center;}
+table[align="center"] > caption{margin-left: auto;margin-right: auto;}
+table[align="center"] > caption[align="left"]{margin-right: 0;}
+table[align="center"] > caption[align="right"]{margin-left: 0;}
+tr{display: table-row;vertical-align: inherit;}
+col{display: table-column;}
+colgroup{display: table-column-group;}
+tbody{display: table-row-group;vertical-align: middle;}
+thead{display: table-header-group;vertical-align: middle;}
+tfoot{display: table-footer-group;vertical-align: middle;}
+table > tr{vertical-align: middle;}
+td{display: table-cell;vertical-align: inherit;text-align: inherit;padding: 1px;}
+th{display: table-cell;vertical-align: inherit;font-weight: bold;padding: 1px;}
+b,strong{font-weight: bold;}
+i,cite,em,var,dfn{font-style: italic;}
+tt,code,kbd,samp{font-family: monospace;}
+u,ins{text-decoration: underline;}
+s,strike,del{text-decoration: line-through;}
+blink{text-decoration: blink;}
+big{font-size: larger;}
+small{font-size: smaller;}
+sub{vertical-align: sub;font-size: smaller;line-height: normal;}
+sup{vertical-align: super;font-size: smaller;line-height: normal;}
+nobr{white-space: nowrap;}
+abbr[title],acronym[title]{border-bottom: dotted 1px;}
+ul,menu,dir{display: block;list-style-type: disc;margin: 1em 0;}
+ol{display: block;list-style-type: decimal;margin: 1em 0;}
+ol[type="a"]{list-style-type: lower-alpha;}
+ol[type="A"]{list-style-type: upper-alpha;}
+ol[type="i"]{list-style-type: lower-roman;}
+ol[type="I"]{  list-style-type: upper-roman;}
+li{display: list-item;}
+ul ul,ul ol,ul dir,ul menu,ul dl,ol ul,ol ol,ol dir,ol menu,ol dl,dir ul,dir ol,dir dir,dir menu,dir dl,menu ul,menu ol,menu dir,menu menu,menu dl,dl ul,dl ol,dl dir,dl menu,dl dl{margin-top: 0;margin-bottom: 0;}
+ol ul,ul ul,menu ul,dir ul,ol menu,ul menu,menu menu,dir menu,ol dir,ul dir,menu dir,dir dir{list-style-type: circle;}
+ol ol ul,ol ul ul,ol menu ul,ol dir ul,ol ol menu,ol ul menu,ol menu menu,ol dir menu,ol ol dir,ol ul dir,ol menu dir,ol dir dir,ul ol ul,ul ul ul,ul menu ul,ul dir ul,ul ol menu,ul ul menu,ul menu menu,ul dir menu,ul ol dir,ul ul dir,ul menu dir,ul dir dir,menu ol ul,menu ul ul,menu menu ul,menu dir ul,menu ol menu,menu ul menu,menu menu menu,menu dir menu,menu ol dir,menu ul dir,menu menu dir,menu dir dir,dir ol ul,dir ul ul,dir menu ul,dir dir ul,dir ol menu,dir ul menu,dir menu menu,dir dir menu,dir ol dir,dir ul dir,dir menu dir,dir dir dir{list-style-type: square;}
+hr{display: block;height: 2px;border: 1px inset;margin: 0.5em auto 0.5em auto;color: gray;}
+hr[size="1"]{border-style: solid none none none;}
+img[usemap], object[usemap]{color: blue;}
+frameset{display: block !important;position: static !important;float: none !important;border: none !important;}
+frame{border: none !important;}
+iframe{border: 2px inset;}
+noframes{display: none;}
+spacer{position: static !important;float: none !important;}
+area,base,basefont,head,meta,script,style,title,noembed,param,link{display: none;}
+br{display: block;}
+img,object,svg|svg{width: auto;height: auto;}"""
 
 _html_css_stylesheet = None
-css_to_xpath = HTMLTranslator().css_to_xpath
+
+
+def validate_color(col):
+    return cssprofiles.validateWithProfile('color',
+                col,
+                profiles=[profiles.Profiles.CSS_LEVEL_2])[1]
+
 
 def html_css_stylesheet():
     global _html_css_stylesheet
     if _html_css_stylesheet is None:
-        html_css = open(os.path.join(os.path.dirname(__file__), 'html.css'), 'rb').read()
-        _html_css_stylesheet = parseString(html_css, validate=False)
-        _html_css_stylesheet.namespaces['h'] = XHTML_NS
+        _html_css_stylesheet = parseString(_default_html_css_str, validate=False)
     return _html_css_stylesheet
 
-XHTML_CSS_NAMESPACE = '@namespace "%s";\n' % XHTML_NS
+INHERITED = {
+    'azimuth', 'border-collapse', 'border-spacing', 'caption-side', 'color',
+    'cursor', 'direction', 'elevation', 'empty-cells', 'font-family',
+    'font-size', 'font-style', 'font-variant', 'font-weight', 'letter-spacing',
+    'line-height', 'list-style-image', 'list-style-position',
+    'list-style-type', 'orphans', 'page-break-inside', 'pitch-range', 'pitch',
+    'quotes', 'richness', 'speak-header', 'speak-numeral', 'speak-punctuation',
+    'speak', 'speech-rate', 'stress', 'text-align', 'text-indent',
+    'text-transform', 'visibility', 'voice-family', 'volume', 'white-space',
+    'widows', 'word-spacing', 'text-shadow',
+}
 
-INHERITED = set(['azimuth', 'border-collapse', 'border-spacing',
-                 'caption-side', 'color', 'cursor', 'direction', 'elevation',
-                 'empty-cells', 'font-family', 'font-size', 'font-style',
-                 'font-variant', 'font-weight', 'letter-spacing',
-                 'line-height', 'list-style-image', 'list-style-position',
-                 'list-style-type', 'orphans', 'page-break-inside',
-                 'pitch-range', 'pitch', 'quotes', 'richness', 'speak-header',
-                 'speak-numeral', 'speak-punctuation', 'speak', 'speech-rate',
-                 'stress', 'text-align', 'text-indent', 'text-transform',
-                 'visibility', 'voice-family', 'volume', 'white-space',
-                 'widows', 'word-spacing'])
+FONT_SIZE_NAMES = {
+    'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'
+}
 
-DEFAULTS = {'azimuth': 'center', 'background-attachment': 'scroll',
-            'background-color': 'transparent', 'background-image': 'none',
-            'background-position': '0% 0%', 'background-repeat': 'repeat',
-            'border-bottom-color': ':color', 'border-bottom-style': 'none',
-            'border-bottom-width': 'medium', 'border-collapse': 'separate',
-            'border-left-color': ':color', 'border-left-style': 'none',
-            'border-left-width': 'medium', 'border-right-color': ':color',
-            'border-right-style': 'none', 'border-right-width': 'medium',
-            'border-spacing': 0, 'border-top-color': ':color',
-            'border-top-style': 'none', 'border-top-width': 'medium', 'bottom':
-            'auto', 'caption-side': 'top', 'clear': 'none', 'clip': 'auto',
-            'color': 'black', 'content': 'normal', 'counter-increment': 'none',
-            'counter-reset': 'none', 'cue-after': 'none', 'cue-before': 'none',
-            'cursor': 'auto', 'direction': 'ltr', 'display': 'inline',
-            'elevation': 'level', 'empty-cells': 'show', 'float': 'none',
-            'font-family': 'serif', 'font-size': 'medium', 'font-style':
-            'normal', 'font-variant': 'normal', 'font-weight': 'normal',
-            'height': 'auto', 'left': 'auto', 'letter-spacing': 'normal',
-            'line-height': 'normal', 'list-style-image': 'none',
-            'list-style-position': 'outside', 'list-style-type': 'disc',
-            'margin-bottom': 0, 'margin-left': 0, 'margin-right': 0,
-            'margin-top': 0, 'max-height': 'none', 'max-width': 'none',
-            'min-height': 0, 'min-width': 0, 'orphans': '2',
-            'outline-color': 'invert', 'outline-style': 'none',
-            'outline-width': 'medium', 'overflow': 'visible', 'padding-bottom':
-            0, 'padding-left': 0, 'padding-right': 0, 'padding-top': 0,
-            'page-break-after': 'auto', 'page-break-before': 'auto',
-            'page-break-inside': 'auto', 'pause-after': 0, 'pause-before':
-            0, 'pitch': 'medium', 'pitch-range': '50', 'play-during': 'auto',
-            'position': 'static', 'quotes': u"'“' '”' '‘' '’'", 'richness':
-            '50', 'right': 'auto', 'speak': 'normal', 'speak-header': 'once',
-            'speak-numeral': 'continuous', 'speak-punctuation': 'none',
-            'speech-rate': 'medium', 'stress': '50', 'table-layout': 'auto',
-            'text-align': 'auto', 'text-decoration': 'none', 'text-indent':
-            0, 'text-transform': 'none', 'top': 'auto', 'unicode-bidi':
-            'normal', 'vertical-align': 'baseline', 'visibility': 'visible',
-            'voice-family': 'default', 'volume': 'medium', 'white-space':
-            'normal', 'widows': '2', 'width': 'auto', 'word-spacing': 'normal',
-            'z-index': 'auto'}
+ALLOWED_MEDIA_TYPES = frozenset({'screen', 'all', 'aural', 'amzn-kf8'})
+IGNORED_MEDIA_FEATURES = frozenset('width min-width max-width height min-height max-height device-width min-device-width max-device-width device-height min-device-height max-device-height aspect-ratio min-aspect-ratio max-aspect-ratio device-aspect-ratio min-device-aspect-ratio max-device-aspect-ratio color min-color max-color color-index min-color-index max-color-index monochrome min-monochrome max-monochrome -webkit-min-device-pixel-ratio resolution min-resolution max-resolution scan grid'.split())  # noqa
 
-FONT_SIZE_NAMES = set(['xx-small', 'x-small', 'small', 'medium', 'large',
-                       'x-large', 'xx-large'])
 
-def xpath_lower_case(arg):
-    'An ASCII lowercase function for XPath'
-    return ("translate(%s, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', "
-            "'abcdefghijklmnopqrstuvwxyz')")%arg
-is_non_whitespace = re.compile(r'^[^ \t\r\n\f]+$').match
+def media_ok(raw):
+    if not raw:
+        return True
+    if raw == 'amzn-mobi':  # Optimization for the common case
+        return False
 
-class CaseInsensitiveAttributesTranslator(HTMLTranslator):
-    'Treat class and id CSS selectors case-insensitively'
+    def query_ok(mq):
+        matched = True
+        if mq.media_type not in ALLOWED_MEDIA_TYPES:
+            matched = False
+        # Media queries that test for device specific features always fail
+        for media_feature, expr in mq.expressions:
+            if media_feature in IGNORED_MEDIA_FEATURES:
+                matched = False
+        return mq.negated ^ matched
 
-    def xpath_class(self, class_selector):
-        """Translate a class selector."""
-        x = self.xpath(class_selector.selector)
-        if is_non_whitespace(class_selector.class_name):
-            x.add_condition(
-                "%s and contains(concat(' ', normalize-space(%s), ' '), %s)"
-                % ('@class', xpath_lower_case('@class'), self.xpath_literal(
-                    ' '+class_selector.class_name.lower()+' ')))
-        else:
-            x.add_condition('0')
-        return x
+    try:
+        for mq in CSSMedia3Parser().parse_stylesheet('@media %s {}' % raw).rules[0].media:
+            if query_ok(mq):
+                return True
+        return False
+    except Exception:
+        pass
+    return True
 
-    def xpath_hash(self, id_selector):
-        """Translate an ID selector."""
-        x = self.xpath(id_selector.selector)
-        return self.xpath_attrib_equals(x, xpath_lower_case('@id'),
-                (id_selector.id.lower()))
 
-ci_css_to_xpath = CaseInsensitiveAttributesTranslator().css_to_xpath
+def test_media_ok():
+    assert media_ok(None)
+    assert media_ok('')
+    assert not media_ok('amzn-mobi')
+    assert media_ok('amzn-kf8')
+    assert media_ok('screen')
+    assert media_ok('only screen')
+    assert not media_ok('not screen')
+    assert not media_ok('(device-width:10px)')
+    assert media_ok('screen, (device-width:10px)')
+    assert not media_ok('screen and (device-width:10px)')
 
-NULL_NAMESPACE_REGEX = re.compile(ur'''(name\(\) = ['"])h:''')
-def fix_namespace(raw):
-    '''
-    cssselect uses name() = 'h:p' to select tags for some CSS selectors (e.g.
-    h|p+h|p).
-    However, since for us the XHTML namespace is the default namespace (with no
-    prefix), name() is the same as local-name(). So this is a hack to
-    workaround the problem.
-    '''
-    return NULL_NAMESPACE_REGEX.sub(ur'\1', raw)
 
-class CSSSelector(object):
+class style_map(dict):
 
-    def __init__(self, css, log=None, namespaces=XPNSMAP):
-        self.namespaces = namespaces
-        self.sel = self.build_selector(css, log)
-        self.css = css
-        self.used_ci_sel = False
+    def __init__(self):
+        super().__init__()
+        self.important_properties = set()
 
-    def build_selector(self, css, log, func=css_to_xpath):
-        try:
-            return etree.XPath(fix_namespace(func(css)), namespaces=self.namespaces)
-        except:
-            if log is not None:
-                log.exception('Failed to parse CSS selector: %r'%css)
-        return None
 
-    def __call__(self, node, log):
-        if self.sel is None:
-            return []
-        try:
-            ans = self.sel(node)
-        except:
-            log.exception(u'Failed to run CSS selector: %s'%self.css)
-            return []
+class StylizerRules:
 
-        if not ans:
-            # Try a case insensitive version
-            if not hasattr(self, 'ci_sel'):
-                self.ci_sel = self.build_selector(self.css, log, ci_css_to_xpath)
-                if self.ci_sel is not None:
-                    try:
-                        ans = self.ci_sel(node)
-                    except:
-                        log.exception(u'Failed to run case-insensitive CSS selector: %s'%self.css)
-                        return []
-                    if ans:
-                        if not self.used_ci_sel:
-                            log.warn('Interpreting class and id values '
-                                'case-insensitively in selector: %s'%self.css)
-                        self.used_ci_sel = True
-        return ans
+    def __init__(self, opts, profile, stylesheets):
+        self.opts, self.profile, self.stylesheets = opts, profile, stylesheets
 
-_selector_cache = {}
+        index = 0
+        self.rules = []
+        self.page_rule = {}
+        self.font_face_rules = []
+        for sheet_index, stylesheet in enumerate(stylesheets):
+            href = stylesheet.href
+            for rule in stylesheet.cssRules:
+                if rule.type == rule.MEDIA_RULE:
+                    if media_ok(rule.media.mediaText):
+                        for subrule in rule.cssRules:
+                            self.rules.extend(self.flatten_rule(subrule, href, index, is_user_agent_sheet=sheet_index==0))
+                            index += 1
+                else:
+                    self.rules.extend(self.flatten_rule(rule, href, index, is_user_agent_sheet=sheet_index==0))
+                    index = index + 1
+        self.rules.sort(key=itemgetter(0))  # sort by specificity
 
-MIN_SPACE_RE = re.compile(r' *([>~+]) *')
+    def flatten_rule(self, rule, href, index, is_user_agent_sheet=False):
+        results = []
+        sheet_index = 0 if is_user_agent_sheet else 1
+        if isinstance(rule, CSSStyleRule):
+            style = self.flatten_style(rule.style)
+            for selector in rule.selectorList:
+                specificity = (sheet_index,) + selector.specificity + (index,)
+                text = selector.selectorText
+                selector = list(selector.seq)
+                results.append((specificity, selector, style, text, href))
+        elif isinstance(rule, CSSPageRule):
+            style = self.flatten_style(rule.style)
+            self.page_rule.update(style)
+        elif isinstance(rule, CSSFontFaceRule):
+            if rule.style.length > 1:
+                # Ignore the meaningless font face rules generated by the
+                # benighted MS Word that contain only a font-family declaration
+                # and nothing else
+                self.font_face_rules.append(rule)
+        return results
 
-def get_css_selector(raw_selector, log):
-    css = MIN_SPACE_RE.sub(r'\1', raw_selector)
-    ans = _selector_cache.get(css, None)
-    if ans is None:
-        ans = CSSSelector(css, log)
-        _selector_cache[css] = ans
-    return ans
+    def flatten_style(self, cssstyle):
+        style = style_map()
+        for prop in cssstyle:
+            name = prop.name
+            normalizer = normalizers.get(name, None)
+            is_important = prop.priority == 'important'
+            if normalizer is not None:
+                for name, val in normalizer(name, prop.propertyValue).items():
+                    style[name] = val
+                    if is_important:
+                        style.important_properties.add(name)
+            elif name == 'text-align':
+                style['text-align'] = self._apply_text_align(prop.value)
+                if is_important:
+                    style.important_properties.add(name)
+            else:
+                style[name] = prop.value
+                if is_important:
+                    style.important_properties.add(name)
+        if 'font-size' in style:
+            size = style['font-size']
+            if size == 'normal':
+                size = 'medium'
+            if size == 'smallest':
+                size = 'xx-small'
+            if size in FONT_SIZE_NAMES:
+                style['font-size'] = "%.1frem" % (self.profile.fnames[size] / float(self.profile.fbase))
+        if '-epub-writing-mode' in style:
+            for x in ('-webkit-writing-mode', 'writing-mode'):
+                style[x] = style.get(x, style['-epub-writing-mode'])
+        return style
 
-class Stylizer(object):
+    def _apply_text_align(self, text):
+        if text in ('left', 'justify') and self.opts.change_justification in ('left', 'justify'):
+            text = self.opts.change_justification
+        return text
+
+    def same_rules(self, opts, profile, stylesheets):
+        if self.opts != opts:
+            # it's unlikely to happen, but better safe than sorry
+            return False
+        if self.profile != profile:
+            return False
+        if len(self.stylesheets) != len(stylesheets):
+            return False
+        for index, stylesheet in enumerate(self.stylesheets):
+            if stylesheet != stylesheets[index]:
+                return False
+        return True
+
+
+class Stylizer:
     STYLESHEETS = WeakKeyDictionary()
 
     def __init__(self, tree, path, oeb, opts, profile=None,
-            extra_css='', user_css=''):
+            extra_css='', user_css='', base_css=''):
         self.oeb, self.opts = oeb, opts
         self.profile = profile
         if self.profile is None:
             self.profile = opts.output_profile
+        self.body_font_size = self.profile.fbase
         self.logger = oeb.logger
         item = oeb.manifest.hrefs[path]
         basename = os.path.basename(path)
         cssname = os.path.splitext(basename)[0] + '.css'
         stylesheets = [html_css_stylesheet()]
-        head = xpath(tree, '/h:html/h:head')
-        if head:
-            head = head[0]
-        else:
-            head = []
+        if base_css:
+            stylesheets.append(parseString(base_css, validate=False))
+        style_tags = xpath(tree, '//*[local-name()="style" or local-name()="link"]')
 
-        # Add cssutils parsing profiles from output_profile
+        # Add css_parser parsing profiles from output_profile
         for profile in self.opts.output_profile.extra_css_modules:
             cssprofiles.addProfile(profile['name'],
                                         profile['props'],
@@ -219,30 +304,27 @@ class Stylizer(object):
 
         parser = CSSParser(fetcher=self._fetch_css_file,
                 log=logging.getLogger('calibre.css'))
-        self.font_face_rules = []
-        for elem in head:
-            if (elem.tag == XHTML('style') and
-                elem.get('type', CSS_MIME) in OEB_STYLES):
-                text = elem.text if elem.text else u''
+        for elem in style_tags:
+            if (elem.tag == XHTML('style') and elem.get('type', CSS_MIME) in OEB_STYLES and media_ok(elem.get('media'))):
+                text = elem.text if elem.text else ''
                 for x in elem:
                     t = getattr(x, 'text', None)
                     if t:
-                        text += u'\n\n' + force_unicode(t, u'utf-8')
+                        text += '\n\n' + force_unicode(t, 'utf-8')
                     t = getattr(x, 'tail', None)
                     if t:
-                        text += u'\n\n' + force_unicode(t, u'utf-8')
+                        text += '\n\n' + force_unicode(t, 'utf-8')
                 if text:
-                    text = oeb.css_preprocessor(text, add_namespace=False)
+                    text = oeb.css_preprocessor(text)
                     # We handle @import rules separately
                     parser.setFetcher(lambda x: ('utf-8', b''))
                     stylesheet = parser.parseString(text, href=cssname,
                             validate=False)
                     parser.setFetcher(self._fetch_css_file)
-                    #stylesheet.namespaces['h'] = XHTML_NS
                     for rule in stylesheet.cssRules:
                         if rule.type == rule.IMPORT_RULE:
                             ihref = item.abshref(rule.href)
-                            if rule.media.mediaText == 'amzn-mobi':
+                            if not media_ok(rule.media.mediaText):
                                 continue
                             hrefs = self.oeb.manifest.hrefs
                             if ihref not in hrefs:
@@ -258,9 +340,10 @@ class Stylizer(object):
                     replaceUrls(stylesheet, item.abshref,
                             ignoreImportRules=True)
                     stylesheets.append(stylesheet)
-            elif elem.tag == XHTML('link') and elem.get('href') \
-                 and elem.get('rel', 'stylesheet').lower() == 'stylesheet' \
-                 and elem.get('type', CSS_MIME).lower() in OEB_STYLES:
+            elif (elem.tag == XHTML('link') and elem.get('href') and elem.get(
+                    'rel', 'stylesheet').lower() == 'stylesheet' and elem.get(
+                    'type', CSS_MIME).lower() in OEB_STYLES and media_ok(elem.get('media'))
+                ):
                 href = urlnormalize(elem.attrib['href'])
                 path = item.abshref(href)
                 sitem = oeb.manifest.hrefs.get(path, None)
@@ -279,56 +362,47 @@ class Stylizer(object):
         for w, x in csses.items():
             if x:
                 try:
-                    text = XHTML_CSS_NAMESPACE + x
+                    text = x
                     stylesheet = parser.parseString(text, href=cssname,
                             validate=False)
-                    #stylesheet.namespaces['h'] = XHTML_NS
                     stylesheets.append(stylesheet)
-                except:
+                except Exception:
                     self.logger.exception('Failed to parse %s, ignoring.'%w)
                     self.logger.debug('Bad css: ')
                     self.logger.debug(x)
-        rules = []
-        index = 0
-        self.stylesheets = set()
-        self.page_rule = {}
-        for stylesheet in stylesheets:
-            href = stylesheet.href
-            self.stylesheets.add(href)
-            for rule in stylesheet.cssRules:
-                if rule.type == rule.MEDIA_RULE:
-                    media = {rule.media.item(i) for i in
-                             xrange(rule.media.length)}
-                    if not media.intersection({'all', 'screen', 'amzn-kf8'}):
-                        continue
-                    for subrule in rule.cssRules:
-                        rules.extend(self.flatten_rule(subrule, href, index))
-                        index += 1
-                else:
-                    rules.extend(self.flatten_rule(rule, href, index))
-                    index = index + 1
-        rules.sort()
-        self.rules = rules
+
+        # using oeb to store the rules, page rule and font face rules
+        # and generating them again if opts, profile or stylesheets are different
+        if (not hasattr(self.oeb, 'stylizer_rules')) \
+            or not self.oeb.stylizer_rules.same_rules(self.opts, self.profile, stylesheets):
+            self.oeb.stylizer_rules = StylizerRules(self.opts, self.profile, stylesheets)
+        self.rules = self.oeb.stylizer_rules.rules
+        self.page_rule = self.oeb.stylizer_rules.page_rule
+        self.font_face_rules = self.oeb.stylizer_rules.font_face_rules
+        self.flatten_style = self.oeb.stylizer_rules.flatten_style
+
         self._styles = {}
-        pseudo_pat = re.compile(ur':(first-letter|first-line|link|hover|visited|active|focus|before|after)', re.I)
-        for _, _, cssdict, text, _ in rules:
+        pseudo_pat = re.compile(':{1,2}(%s)' % ('|'.join(INAPPROPRIATE_PSEUDO_CLASSES)), re.I)
+        select = Select(tree, ignore_inappropriate_pseudo_classes=True)
+
+        for _, _, cssdict, text, _ in self.rules:
             fl = pseudo_pat.search(text)
-            if fl is not None:
-                text = text.replace(fl.group(), '')
-            selector = get_css_selector(text, self.oeb.log)
-            matches = selector(tree, self.logger)
+            try:
+                matches = tuple(select(text))
+            except SelectorError as err:
+                self.logger.error(f'Ignoring CSS rule with invalid selector: {text!r} ({as_unicode(err)})')
+                continue
+
             if fl is not None:
                 fl = fl.group(1)
                 if fl == 'first-letter' and getattr(self.oeb,
-                        'plumber_output_format', '').lower() == u'mobi':
+                        'plumber_output_format', '').lower() in {'mobi', 'docx'}:
                     # Fake first-letter
-                    from lxml.builder import ElementMaker
-                    E = ElementMaker(namespace=XHTML_NS)
                     for elem in matches:
-                        for x in elem.iter():
+                        for x in elem.iter('*'):
                             if x.text:
                                 punctuation_chars = []
-                                text = unicode(x.text)
+                                text = str(x.text)
                                 while text:
                                     category = unicodedata.category(text[0])
                                     if category[0] not in {'P', 'Z'}:
@@ -336,9 +410,11 @@ class Stylizer(object):
                                     punctuation_chars.append(text[0])
                                     text = text[1:]
 
-                                special_text = u''.join(punctuation_chars) + \
-                                        (text[0] if text else u'')
-                                span = E.span(special_text)
+                                special_text = ''.join(punctuation_chars) + \
+                                        (text[0] if text else '')
+                                span = x.makeelement('{%s}span' % XHTML_NS)
+                                span.text = special_text
+                                span.set('data-fake-first-letter', '1')
                                 span.tail = text[1:]
                                 x.text = None
                                 x.insert(0, span)
@@ -352,7 +428,7 @@ class Stylizer(object):
                     self.style(elem)._update_cssdict(cssdict)
         for elem in xpath(tree, '//h:*[@style]'):
             self.style(elem)._apply_style_attr(url_replacer=item.abshref)
-        num_pat = re.compile(r'\d+$')
+        num_pat = re.compile(r'[0-9.]+$')
         for elem in xpath(tree, '//h:img[@width or @height]'):
             style = self.style(elem)
             # Check if either height or width is not default
@@ -384,139 +460,9 @@ class Stylizer(object):
             self.logger.warn('CSS import of non-CSS file %r' % path)
             return (None, None)
         data = item.data.cssText
+        if not isinstance(data, bytes):
+            data = data.encode('utf-8')
         return ('utf-8', data)
-
-    def flatten_rule(self, rule, href, index):
-        results = []
-        if isinstance(rule, CSSStyleRule):
-            style = self.flatten_style(rule.style)
-            for selector in rule.selectorList:
-                specificity = selector.specificity + (index,)
-                text = selector.selectorText
-                selector = list(selector.seq)
-                results.append((specificity, selector, style, text, href))
-        elif isinstance(rule, CSSPageRule):
-            style = self.flatten_style(rule.style)
-            self.page_rule.update(style)
-        elif isinstance(rule, CSSFontFaceRule):
-            if rule.style.length > 1:
-                # Ignore the meaningless font face rules generated by the
-                # benighted MS Word that contain only a font-family declaration
-                # and nothing else
-                self.font_face_rules.append(rule)
-        return results
-
-    def flatten_style(self, cssstyle):
-        style = {}
-        for prop in cssstyle:
-            name = prop.name
-            if name in ('margin', 'padding'):
-                style.update(self._normalize_edge(prop.cssValue, name))
-            elif name == 'font':
-                style.update(self._normalize_font(prop.cssValue))
-            elif name == 'list-style':
-                style.update(self._normalize_list_style(prop.cssValue))
-            elif name == 'text-align':
-                style.update(self._normalize_text_align(prop.cssValue))
-            else:
-                style[name] = prop.value
-        if 'font-size' in style:
-            size = style['font-size']
-            if size == 'normal':
-                size = 'medium'
-            if size == 'smallest':
-                size = 'xx-small'
-            if size in FONT_SIZE_NAMES:
-                style['font-size'] = "%dpt" % self.profile.fnames[size]
-        return style
-
-    def _normalize_edge(self, cssvalue, name):
-        style = {}
-        if isinstance(cssvalue, PropertyValue):
-            primitives = [v.cssText for v in cssvalue]
-        else:
-            primitives = [cssvalue.cssText]
-        if len(primitives) == 1:
-            value, = primitives
-            values = [value, value, value, value]
-        elif len(primitives) == 2:
-            vert, horiz = primitives
-            values = [vert, horiz, vert, horiz]
-        elif len(primitives) == 3:
-            top, horiz, bottom = primitives
-            values = [top, horiz, bottom, horiz]
-        else:
-            values = primitives[:4]
-        edges = ('top', 'right', 'bottom', 'left')
-        for edge, value in itertools.izip(edges, values):
-            style["%s-%s" % (name, edge)] = value
-        return style
-
-    def _normalize_list_style(self, cssvalue):
-        composition = ('list-style-type', 'list-style-position',
-                       'list-style-image')
-        style = {}
-        if cssvalue.cssText == 'inherit':
-            for key in composition:
-                style[key] = 'inherit'
-        else:
-            try:
-                primitives = [v.cssText for v in cssvalue]
-            except TypeError:
-                primitives = [cssvalue.cssText]
-            primitives.reverse()
-            value = primitives.pop()
-            for key in composition:
-                if cssprofiles.validate(key, value):
-                    style[key] = value
-                    if not primitives:
-                        break
-                    value = primitives.pop()
-            for key in composition:
-                if key not in style:
-                    style[key] = DEFAULTS[key]
-
-        return style
-
-    def _normalize_text_align(self, cssvalue):
-        style = {}
-        text = cssvalue.cssText
-        if text == 'inherit':
-            style['text-align'] = 'inherit'
-        else:
-            if text in ('left', 'justify') and self.opts.change_justification in ('left', 'justify'):
-                val = self.opts.change_justification
-                style['text-align'] = val
-            else:
-                style['text-align'] = text
-        return style
-
-    def _normalize_font(self, cssvalue):
-        composition = ('font-style', 'font-variant', 'font-weight',
-                       'font-size', 'line-height', 'font-family')
-        style = {}
-        if cssvalue.cssText == 'inherit':
-            for key in composition:
-                style[key] = 'inherit'
-        else:
-            try:
-                primitives = [v.cssText for v in cssvalue]
-            except TypeError:
-                primitives = [cssvalue.cssText]
-            primitives.reverse()
-            value = primitives.pop()
-            for key in composition:
-                if cssprofiles.validate(key, value):
-                    style[key] = value
-                    if not primitives:
-                        break
-                    value = primitives.pop()
-            for key in composition:
-                if key not in style:
-                    val = ('inherit' if key in {'font-family', 'font-size'}
-                        else 'normal')
-                    style[key] = val
-        return style
 
     def style(self, element):
         try:
@@ -535,34 +481,56 @@ class Stylizer(object):
                 size = float(style['font-size'][:-2])
                 style['font-size'] = "%.2fpt" % (size * font_scale)
             style = ';\n    '.join(': '.join(item) for item in style.items())
-            rules.append('%s {\n    %s;\n}' % (selector, style))
+            rules.append(f'{selector} {{\n    {style};\n}}')
         return '\n'.join(rules)
 
 
-class Style(object):
+no_important_properties = frozenset()
+
+
+class Style:
     MS_PAT = re.compile(r'^\s*(mso-|panose-|text-underline|tab-interval)')
 
     def __init__(self, element, stylizer):
         self._element = element
         self._profile = stylizer.profile
         self._stylizer = stylizer
-        self._style = {}
+        self._style = style_map()
         self._fontSize = None
         self._width = None
         self._height = None
         self._lineHeight = None
         self._bgcolor = None
+        self._fgcolor = None
         self._pseudo_classes = {}
         stylizer._styles[element] = self
 
     def set(self, prop, val):
         self._style[prop] = val
 
-    def drop(self, prop):
-        self._style.pop(prop, None)
+    def drop(self, prop, default=None):
+        return self._style.pop(prop, default)
 
     def _update_cssdict(self, cssdict):
-        self._style.update(cssdict)
+        self._update_style(cssdict)
+
+    def _update_style(self, cssdict):
+        current_ip = getattr(self._style, 'important_properties', no_important_properties)
+        if current_ip is no_important_properties:
+            s = style_map()
+            s.update(self._style)
+            self._style = s
+            current_ip = self._style.important_properties
+        update_ip = getattr(cssdict, 'important_properties', no_important_properties)
+        for name, val in cssdict.items():
+            override = False
+            if name in update_ip:
+                current_ip.add(name)
+                override = True
+            elif name not in current_ip:
+                override = True
+            if override:
+                self._style[name] = val
 
     def _update_pseudo_class(self, name, cssdict):
         orig = self._pseudo_classes.get(name, {})
@@ -584,10 +552,13 @@ class Style(object):
             return
         if url_replacer is not None:
             replaceUrls(style, url_replacer, ignoreImportRules=True)
-        self._style.update(self._stylizer.flatten_style(style))
+        self._update_style(self._stylizer.flatten_style(style))
 
     def _has_parent(self):
-        return (self._element.getparent() is not None)
+        try:
+            return self._element.getparent() is not None
+        except AttributeError:
+            return False  # self._element is None
 
     def _get_parent(self):
         elem = self._element.getparent()
@@ -602,17 +573,16 @@ class Style(object):
         return self._unit_convert(self._get(name))
 
     def _get(self, name):
-        result = None
-        if name in self._style:
-            result = self._style[name]
-        if (result == 'inherit'
-            or (result is None and name in INHERITED
-                and self._has_parent())):
+        result = self._style.get(name, None)
+        if (result == 'inherit' or (result is None and name in INHERITED and self._has_parent())):
             stylizer = self._stylizer
             result = stylizer.style(self._element.getparent())._get(name)
         if result is None:
             result = DEFAULTS[name]
         return result
+
+    def get(self, name, default=None):
+        return self._style.get(name, default)
 
     def _unit_convert(self, value, base=None, font=None):
         'Return value in pts'
@@ -620,10 +590,20 @@ class Style(object):
             base = self.width
         if not font and font != 0:
             font = self.fontSize
-        return unit_convert(value, base, font, self._profile.dpi)
+        return unit_convert(value, base, font, self._profile.dpi, body_font_size=self._stylizer.body_font_size)
 
     def pt_to_px(self, value):
-        return (self._profile.dpi / 72.0) * value
+        return (self._profile.dpi / 72) * value
+
+    @property
+    def color(self):
+        if self._fgcolor is None:
+            val = self._get('color')
+            if val and validate_color(val):
+                self._fgcolor = val
+            else:
+                self._fgcolor = DEFAULTS['color']
+        return self._fgcolor
 
     @property
     def backgroundColor(self):
@@ -632,11 +612,6 @@ class Style(object):
         background shortcut properties. Note that inheritance/default values
         are not used. None is returned if no background color is set.
         '''
-
-        def validate_color(col):
-            return cssprofiles.validateWithProfile('color',
-                        col,
-                        profiles=[profiles.Profiles.CSS_LEVEL_2])[1]
 
         if self._bgcolor is None:
             col = None
@@ -648,7 +623,7 @@ class Style(object):
                 if val is not None:
                     try:
                         style = parseStyle('background: '+val, validate=False)
-                        val = style.getProperty('background').cssValue
+                        val = style.getProperty('background').propertyValue
                         try:
                             val = list(val)
                         except:
@@ -656,6 +631,8 @@ class Style(object):
                             val = [val]
                         for c in val:
                             c = c.cssText
+                            if isinstance(c, bytes):
+                                c = c.decode('utf-8', 'replace')
                             if validate_color(c):
                                 col = c
                                 break
@@ -693,7 +670,7 @@ class Style(object):
                     result = size
             else:
                 result = self._unit_convert(value, base=base, font=base)
-                if not isinstance(result, (int, float, long)):
+                if not isinstance(result, numbers.Number):
                     return base
                 if result < 0:
                     result = normalize_fontsize("smaller", base)
@@ -715,6 +692,46 @@ class Style(object):
             self._fontSize = result
         return self._fontSize
 
+    def img_dimension(self, attr, img_size):
+        ans = None
+        parent = self._get_parent()
+        if parent is not None:
+            base = getattr(parent, attr)
+        else:
+            base = getattr(self._profile, attr + '_pts')
+        x = self._style.get(attr)
+        if x is not None:
+            if x == 'auto':
+                ans = self._unit_convert(str(img_size) + 'px', base=base)
+            else:
+                x = self._unit_convert(x, base=base)
+                if isinstance(x, numbers.Number):
+                    ans = x
+        if ans is None:
+            x = self._element.get(attr)
+            if x is not None:
+                x = self._unit_convert(x + 'px', base=base)
+                if isinstance(x, numbers.Number):
+                    ans = x
+        if ans is None:
+            ans = self._unit_convert(str(img_size) + 'px', base=base)
+        maa = self._style.get('max-' + attr)
+        if maa is not None:
+            x = self._unit_convert(maa, base=base)
+            if isinstance(x, numbers.Number) and (ans is None or x < ans):
+                ans = x
+        return ans
+
+    def img_size(self, width, height):
+        ' Return the final size of an <img> given that it points to an image of size widthxheight '
+        w, h = self._get('width'), self._get('height')
+        answ, ansh = self.img_dimension('width', width), self.img_dimension('height', height)
+        if w == 'auto' and h != 'auto':
+            answ = (float(width)/height) * ansh
+        elif h == 'auto' and w != 'auto':
+            ansh = (float(height)/width) * answ
+        return answ, ansh
+
     @property
     def width(self):
         if self._width is None:
@@ -733,17 +750,24 @@ class Style(object):
                 result = base
             else:
                 result = self._unit_convert(width, base=base)
-            if isinstance(result, (unicode, str, bytes)):
+            if isinstance(result, (str, bytes)):
                 result = self._profile.width
             self._width = result
             if 'max-width' in self._style:
                 result = self._unit_convert(self._style['max-width'], base=base)
-                if isinstance(result, (unicode, str, bytes)):
+                if isinstance(result, (str, bytes)):
                     result = self._width
                 if result < self._width:
                     self._width = result
 
         return self._width
+
+    @property
+    def parent_width(self):
+        parent = self._get_parent()
+        if parent is None:
+            return self.width
+        return parent.width
 
     @property
     def height(self):
@@ -763,12 +787,12 @@ class Style(object):
                 result = base
             else:
                 result = self._unit_convert(height, base=base)
-            if isinstance(result, (unicode, str, bytes)):
+            if isinstance(result, (str, bytes)):
                 result = self._profile.height
             self._height = result
             if 'max-height' in self._style:
                 result = self._unit_convert(self._style['max-height'], base=base)
-                if isinstance(result, (unicode, str, bytes)):
+                if isinstance(result, (str, bytes)):
                     result = self._height
                 if result < self._height:
                     self._height = result
@@ -817,28 +841,63 @@ class Style(object):
         return css
 
     @property
+    def first_vertical_align(self):
+        ''' For docx output where tags are not nested, we cannot directly
+        simulate the HTML vertical-align rendering model. Instead use the
+        approximation of considering the first non-default vertical-align '''
+        val = self['vertical-align']
+        if val != 'baseline':
+            raw_val = self._get('vertical-align')
+            if '%' in raw_val:
+                val = self._unit_convert(raw_val, base=self['line-height'])
+            return val
+        parent = self._get_parent()
+        if parent is not None and 'inline' in parent['display']:
+            return parent.first_vertical_align
+
+    @property
     def marginTop(self):
         return self._unit_convert(
-            self._get('margin-top'), base=self.height)
+            self._get('margin-top'), base=self.parent_width)
 
     @property
     def marginBottom(self):
         return self._unit_convert(
-            self._get('margin-bottom'), base=self.height)
+            self._get('margin-bottom'), base=self.parent_width)
+
+    @property
+    def marginLeft(self):
+        return self._unit_convert(
+            self._get('margin-left'), base=self.parent_width)
+
+    @property
+    def marginRight(self):
+        return self._unit_convert(
+            self._get('margin-right'), base=self.parent_width)
 
     @property
     def paddingTop(self):
         return self._unit_convert(
-            self._get('padding-top'), base=self.height)
+            self._get('padding-top'), base=self.parent_width)
 
     @property
     def paddingBottom(self):
         return self._unit_convert(
-            self._get('padding-bottom'), base=self.height)
+            self._get('padding-bottom'), base=self.parent_width)
+
+    @property
+    def paddingLeft(self):
+        return self._unit_convert(
+            self._get('padding-left'), base=self.parent_width)
+
+    @property
+    def paddingRight(self):
+        return self._unit_convert(
+            self._get('padding-right'), base=self.parent_width)
 
     def __str__(self):
-        items = sorted(self._style.items())
-        return '; '.join("%s: %s" % (key, val) for key, val in items)
+        items = sorted(iteritems(self._style))
+        return '; '.join(f"{key}: {val}" for key, val in items)
 
     def cssdict(self):
         return dict(self._style)
@@ -846,10 +905,13 @@ class Style(object):
     def pseudo_classes(self, filter_css):
         if filter_css:
             css = copy.deepcopy(self._pseudo_classes)
-            for psel, cssdict in css.iteritems():
+            for psel, cssdict in iteritems(css):
                 for k in filter_css:
                     cssdict.pop(k, None)
         else:
             css = self._pseudo_classes
-        return {k:v for k, v in css.iteritems() if v}
+        return {k:v for k, v in iteritems(css) if v}
 
+    @property
+    def is_hidden(self):
+        return self._style.get('display') == 'none' or self._style.get('visibility') == 'hidden'

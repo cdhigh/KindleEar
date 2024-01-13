@@ -13,7 +13,7 @@ import feedparser
 from urllib.parse import urljoin, urlparse, urlunparse, urlencode, parse_qs, unquote_plus, quote_plus
 from lib import readability #修改了其htmls.py|shorten_title()
 from lib.urlopener import UrlOpener
-from apps.db_models import LastDelivered
+from apps.back_end.db_models import LastDelivered
 from lib.image_tools import split_image_by_height, compress_image
 from config import *
 
@@ -288,7 +288,7 @@ class BaseFeedBook:
 
                         if not desc:
                             if urlFeed:
-                                self.log.warn('Fulltext item ({}) has no desc, fetch article from web.'.format(title))
+                                self.log.warning('Fulltext item ({}) has no desc, fetch article from web.'.format(title))
                             else:
                                 continue
                     
@@ -300,7 +300,7 @@ class BaseFeedBook:
                     urlFeed = quote_plus(urlFeed, r'''~`!@#$%^&*()|\\/,.<>;:"'{}[]?=-_+''')
                     urls.append(ItemRssTuple(section, title, urlFeed, desc))
             else:
-                self.log.warn('fetch rss failed({}):{}'.format(UrlOpener.CodeMap(result.status_code), url))
+                self.log.warning('fetch rss failed({}):{}'.format(UrlOpener.CodeMap(result.status_code), url))
                 
         return urls
 
@@ -324,7 +324,7 @@ class BaseFeedBook:
                         #    debug_mail(result.text, 'login_result.html')
                         #    debug_save_ftp(result.text, 'login_result.html')
                         #else:
-                        #    self.log.warn('func login return none!')                        
+                        #    self.log.warning('func login return none!')                        
         
                 resp = self.FetchArticle(rssItem.url, opener)
                 if not resp:
@@ -366,7 +366,7 @@ class BaseFeedBook:
                     tmpHtml = imageHtmlTemplate.format(title="Picture", imgFilename=imgFn) #HTML容器
                     yield ItemHtmlTuple("", url, "Picture", BeautifulSoup(tmpHtml, "lxml"), "", "")
                 else:
-                    self.log.warn("Invalid article:{}".format(url))
+                    self.log.warning("Invalid article:{}".format(url))
                 return None
             
         soup = BeautifulSoup(summary, "lxml")
@@ -384,7 +384,7 @@ class BaseFeedBook:
             soup = BeautifulSoup(summary, "lxml")
             bodyTag = soup.find('body')
             if not bodyTag: #再次失败
-                self.log.warn('Extract article content failed:{}'.format(url))
+                self.log.warning('Extract article content failed:{}'.format(url))
                 return None
                 
             headTag = soup.find('head')
@@ -454,7 +454,7 @@ class BaseFeedBook:
         soup = BeautifulSoup(content, "lxml")
         headTag = soup.find('head')
         if not headTag:
-            self.log.warn("Object soup invalid:{}".format(url))
+            self.log.warning("Object soup invalid:{}".format(url))
             return None
 
         titleTag = soup.find('title')
@@ -567,7 +567,7 @@ class BaseFeedBook:
                 
             imgResult = opener.open(imgUrl)
             if imgResult.status_code != 200:
-                self.log.warn('Fetch img failed({}):{}'.format(UrlOpener.CodeMap(imgResult.status_code), imgUrl))
+                self.log.warning('Fetch img failed({}):{}'.format(UrlOpener.CodeMap(imgResult.status_code), imgUrl))
                 imgTag.decompose()
                 continue
 
@@ -705,7 +705,7 @@ class BaseFeedBook:
                 imgUrl = imgUrl.replace('http://', 'https://')
             
             if self.IsFiltered(imgUrl):
-                self.log.warn('Image filtered:{}'.format(imgUrl))
+                self.log.warning('Image filtered:{}'.format(imgUrl))
                 img.decompose()
                 continue
             
@@ -900,7 +900,7 @@ class BaseFeedBook:
         form = self.SelectLoginForm(soup)
         
         if not form:
-            self.log.warn('Cannot found login form!')
+            self.log.warning('Cannot found login form!')
             return
         
         self.log.info('Form selected for login:name({}),id({}),class({})'.format(form.get('name'), form.get('id'), form.get('class')))
@@ -920,7 +920,7 @@ class BaseFeedBook:
                     break
         
         if not fieldName or not fieldPwd:
-            self.log.warn('Cant determine fields for account and password in login form!')
+            self.log.warning('Cant determine fields for account and password in login form!')
             return
             
         #直接返回其他元素（包括隐藏元素）
@@ -995,7 +995,7 @@ class BaseFeedBook:
         result = opener.open(url)
         status_code = result.status_code
         if status_code not in (200, 206):
-            self.log.warn('Fetch page failed({}):{}.'.format(UrlOpener.CodeMap(status_code), url))
+            self.log.warning('Fetch page failed({}):{}.'.format(UrlOpener.CodeMap(status_code), url))
             return None
         else:
             #from lib.debug_utils import debug_mail

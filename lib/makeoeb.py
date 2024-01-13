@@ -7,18 +7,15 @@ import os, uuid, datetime
 from collections import deque
 from collections import namedtuple
 
-#这两个是必须先引入的，会有一些全局初始化
-import calibre.startup
-import calibre.utils.resources
-
-from calibre.ebooks.conversion.mobioutput import MOBIOutput
-from calibre.ebooks.conversion.epuboutput import EPUBOutput
+from calibre.ebooks.conversion.plugins.mobi_output import MOBIOutput, AZW3Output
+from calibre.ebooks.conversion.plugins.epub_output import EPUBOutput
 
 from config import *
 
 #TOC(Table of Contents)初始默认CSS
 INIT_TOC_CSS='.pagebreak{page-break-before:always;}h1{font-size:2.0em;}h2{font-size:1.5em;}h3{font-size:1.4em;}h4{font-size:1.2em;}h5{font-size:1.1em;}h6{font-size:1.0em;}'
 ItemNcxTocTuple = namedtuple("ItemNcxTocTuple", "klass title href brief thumbnailUrl")
+TABLE_OF_CONTENTS = "Table of Contents"
 
 #从文件名生成MIME，只针对图像文件
 def ImageMimeFromName(f):
@@ -51,7 +48,7 @@ class ServerContainer(object):
             with open(path, "rb") as f:
                 d = f.read()
         except Exception as e:
-            self.log.warn("read file '{}' failed : {}".format(path, e))
+            self.log.warning("read file '{}' failed : {}".format(path, e))
         
         return d
     def write(self, path):
@@ -73,11 +70,10 @@ def CreateOeb(log, opts, encoding='utf-8'):
 
 #OEB的一些生成选项
 def GetOpts(outputType='kindle', bookMode='periodical'):
-    from calibre.customize.profiles import (KindleOutput, KindlePaperWhiteOutput, KindleDXOutput, KindleFireOutput, 
-        KindleVoyageOutput, KindlePaperWhite3Output, KindleOasisOutput, OutputProfile)
+    from calibre.customize.profiles import output_profiles, KindleOutput
     from config import REDUCE_IMAGE_TO
     opts = OptionValues()
-    setattr(opts, "pretty_print", False)
+    setattr(opts, "pretty_print", True)
     setattr(opts, "prefer_author_sort", True)
     setattr(opts, "share_not_sync", False)
     setattr(opts, "mobi_file_type", 'both' if bookMode == 'comic' else 'old') #mobi_file_type='old' | 'both'
@@ -87,18 +83,13 @@ def GetOpts(outputType='kindle', bookMode='periodical'):
     setattr(opts, "mobi_toc_at_start", False)
     setattr(opts, "linearize_tables", True)
     setattr(opts, "source", None)
-    outputdic = {
-        'kindle': KindleOutput,
-        'kindledx': KindleDXOutput,
-        'kindlepw': KindlePaperWhiteOutput,
-        'kindlefire': KindleFireOutput,
-        'kindlevoyage': KindleVoyageOutput,
-        'kindlepw3': KindlePaperWhite3Output,
-        'kindlepw4': KindlePaperWhite3Output,
-        'kindleoasis': KindleOasisOutput,
-        'others': OutputProfile,
-        }
-    OutputDevice = outputdic.get(outputType, KindleOutput)
+    #找到对应的设备分辨率之类的信息
+    for prfType in output_profiles:
+        if prfType.short_name == outputType:
+            OutputDevice = prfType
+            break
+        else:
+            OutputDevice = KindleOutput
     setattr(opts, "dest", OutputDevice(None))
     setattr(opts, "output_profile", OutputDevice(None))
     setattr(opts, "mobi_ignore_margins", True)
@@ -122,6 +113,9 @@ def GetOpts(outputType='kindle', bookMode='periodical'):
     setattr(opts, "preserve_cover_aspect_ratio", True)
     setattr(opts, "epub_flatten", False)
     setattr(opts, "epub_dont_compress", False)
+    setattr(opts, "epub_inline_toc", False)
+    setattr(opts, "epub_version", 2)
+    setattr(opts, "expand_css", False)
     setattr(opts, "verbose", 0)
     
     #extra customed by KindleEar

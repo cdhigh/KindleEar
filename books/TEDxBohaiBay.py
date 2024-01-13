@@ -37,7 +37,7 @@ class TEDxBohaiBay(BaseFeedBook):
             opener = UrlOpener(self.host, timeout=self.timeout)
             result = opener.open(url)
             if result.status_code != 200:
-                self.log.warn('fetch webpage failed({}):{}'.format(result.status_code, url))
+                self.log.warning('fetch webpage failed({}):{}'.format(result.status_code, url))
                 continue
 
             soup = BeautifulSoup(result.text, 'lxml')
@@ -54,7 +54,7 @@ class TEDxBohaiBay(BaseFeedBook):
                 try:
                     pubDate = datetime.datetime.strptime(pubDate.string, '%Y-%m-%d')
                 except Exception as e:
-                    self.log.warn('Parse pubdate failed for [{}]: {}'.format(url, pubDate.string))
+                    self.log.warning('Parse pubdate failed for [{}]: {}'.format(url, pubDate.string))
                     continue
 
                 #确定文章是否需要推送，时区固定为北京时间

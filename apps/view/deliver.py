@@ -6,7 +6,7 @@ from collections import defaultdict
 from flask import Blueprint, render_template, request
 from apps.back_end.task_queue_adpt import create_http_task
 from apps.base_handler import *
-from apps.db_models import *
+from apps.back_end.db_models import *
 from apps.utils import local_time
 from books import BookClass
 

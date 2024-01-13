@@ -5,6 +5,7 @@
 #自动加载books目录和子目录下的所有书籍文件，所有的自定义基类(不是最终的书籍实现)请以base.py结尾，比如xxxxbase.py
 #各子目录下必须要有一个__init__.py文件，否则不会导入对应子目录下的书籍
 import os
+#from apps.back_end.db_models import Book
 
 _booksclasses = []
 def RegisterBook(book):
@@ -37,11 +38,12 @@ for root, dirs, files in listBkDirs:
                     bk = mBook.getBook()
                     RegisterBook(bk)
             except Exception as e:
-                default_log.warn("Book '{}' import failed : {}".format(bookModuleName, e))
+                default_log.warning("Book '{}' import failed : {}".format(bookModuleName, e))
 
 
 #添加内置书籍到数据库
 def RegisterBuiltinBooks():
+    return #TODO
     for book in _booksclasses:
         b = Book.all().filter("title = ", book.title).get()
         if not b:

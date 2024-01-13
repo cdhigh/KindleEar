@@ -69,7 +69,7 @@ class ZhihuDaily(BaseFeedBook):
                     urls.append(ItemRssTuple(section, item['title'], self.url4forwarder(urlFeed), ""))
                     urlAdded.add(urlFeed)
         else:
-            self.log.warn('fetch rss failed({}):{}'.format(UrlOpener.CodeMap(result.status_code), url))
+            self.log.warning('fetch rss failed({}):{}'.format(UrlOpener.CodeMap(result.status_code), url))
         return urls
 
             

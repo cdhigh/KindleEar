@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #  kakasi.py
 #
 # Copyright 2011 Hiroshi Miura <miurahr@linux.com>
@@ -21,11 +20,13 @@
 # *
 # */
 
+
 from calibre.ebooks.unihandecode.pykakasi.j2h import J2H
 from calibre.ebooks.unihandecode.pykakasi.h2a import H2a
 from calibre.ebooks.unihandecode.pykakasi.k2a import K2a
 
-class kakasi(object):
+
+class kakasi:
 
     j2h = None
     h2a = None
@@ -35,7 +36,6 @@ class kakasi(object):
         self.j2h = J2H()
         self.h2a = H2a()
         self.k2a = K2a()
-
 
     def do(self, text):
         otext =  ''
@@ -94,4 +94,3 @@ class kakasi(object):
                 i += 1
 
         return otext
-

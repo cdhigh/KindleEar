@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# vim:fileencoding=UTF-8:ts=4:sw=4:sta:et:sts=4:ai
-from __future__ import (unicode_literals, division, absolute_import,
-                        print_function)
+
 
 __license__   = 'GPL v3'
 __copyright__ = '2012, Kovid Goyal <kovid@kovidgoyal.net>'
@@ -14,9 +12,10 @@ from xml.sax.saxutils import escape
 
 from lxml import etree
 
+from calibre import my_unichr
 from calibre.ebooks.oeb.base import XHTML_NS, extract
-from calibre.constants import ispy3
-from calibre.ebooks.mobi.utils import to_base
+from calibre.ebooks.mobi.utils import to_base, PolyglotDict
+from polyglot.builtins import iteritems, as_bytes
 
 CHUNK_SIZE = 8192
 
@@ -33,13 +32,15 @@ aid_able_tags = {'a', 'abbr', 'address', 'article', 'aside', 'audio', 'b',
 'span', 'strong', 'sub', 'summary', 'sup', 'textarea', 'time', 'ul', 'var',
 'video'}
 
-_self_closing_pat = re.compile(bytes(
-    r'<(?P<tag>%s)(?=[\s/])(?P<arg>[^>]*)/>'%('|'.join(aid_able_tags|{'script',
-        'style', 'title', 'head'}))),
+_self_closing_pat = re.compile(
+    br'<(?P<tag>%s)(?=[\s/])(?P<arg>[^>]*)/>'%('|'.join(aid_able_tags|{'script',
+        'style', 'title', 'head'})).encode('ascii'),
     re.IGNORECASE)
+
 
 def close_self_closing_tags(raw):
     return _self_closing_pat.sub(br'<\g<tag>\g<arg>></\g<tag>>', raw)
+
 
 def path_to_node(node):
     ans = []
@@ -50,13 +51,13 @@ def path_to_node(node):
         parent = parent.getparent()
     return tuple(reversed(ans))
 
+
 def node_from_path(root, path):
     parent = root
     for idx in path:
         parent = parent[idx]
     return parent
 
-mychr = chr if ispy3 else unichr
 
 def tostring(raw, **kwargs):
     ''' lxml *sometimes* represents non-ascii characters as hex entities in
@@ -67,15 +68,16 @@ def tostring(raw, **kwargs):
 
     xml_declaration = kwargs.pop('xml_declaration', False)
     encoding = kwargs.pop('encoding', 'UTF-8')
-    kwargs['encoding'] = unicode
+    kwargs['encoding'] = str
     kwargs['xml_declaration'] = False
     ans = etree.tostring(raw, **kwargs)
     if xml_declaration:
         ans = '<?xml version="1.0" encoding="%s"?>\n'%encoding + ans
-    return re.sub(r'&#x([0-9A-Fa-f]+);', lambda m:mychr(int(m.group(1), 16)),
+    return re.sub(r'&#x([0-9A-Fa-f]+);', lambda m:my_unichr(int(m.group(1), 16)),
             ans).encode(encoding)
 
-class Chunk(object):
+
+class Chunk:
 
     def __init__(self, raw, selector):
         self.raw = raw
@@ -98,7 +100,8 @@ class Chunk(object):
 
     __str__ = __repr__
 
-class Skeleton(object):
+
+class Skeleton:
 
     def __init__(self, file_number, item, root, chunks):
         self.file_number, self.item = file_number, item
@@ -112,7 +115,7 @@ class Skeleton(object):
 
     def render(self, root):
         raw = tostring(root, xml_declaration=True)
-        raw = raw.replace(b'<html', bytes('<html xmlns="%s"'%XHTML_NS), 1)
+        raw = raw.replace(b'<html', ('<html xmlns="%s"'%XHTML_NS).encode('ascii'), 1)
         raw = close_self_closing_tags(raw)
         return raw
 
@@ -144,13 +147,14 @@ class Skeleton(object):
         return ans
 
     def __len__(self):
-        return len(self.skeleton) + sum([len(x.raw) for x in self.chunks])
+        return len(self.skeleton) + sum(len(x.raw) for x in self.chunks)
 
     @property
     def raw_text(self):
         return b''.join([self.skeleton] + [x.raw for x in self.chunks])
 
-class Chunker(object):
+
+class Chunker:
 
     def __init__(self, oeb, data_func, placeholder_map):
         self.oeb, self.log = oeb, oeb.log
@@ -165,6 +169,8 @@ class Chunker(object):
 
         for i, item in enumerate(self.oeb.spine):
             root = self.remove_namespaces(self.data(item))
+            for child in root.xpath('//*[@aid]'):
+                child.set('aid', child.attrib.pop('aid'))  # kindlegen always puts the aid last
             body = root.xpath('//body')[0]
             body.tail = '\n'
 
@@ -173,7 +179,7 @@ class Chunker(object):
                     with_tail=True))
                 orig_dumps[-1] = close_self_closing_tags(
                         orig_dumps[-1].replace(b'<html',
-                        bytes('<html xmlns="%s"'%XHTML_NS), 1))
+                        ('<html xmlns="%s"'%XHTML_NS).encode('ascii'), 1))
 
             # First pass: break up document into rendered strings of length no
             # more than CHUNK_SIZE
@@ -199,11 +205,11 @@ class Chunker(object):
 
         # Set internal links
         text = b''.join(x.raw_text for x in self.skeletons)
-        self.text = self.set_internal_links(text)
+        self.text = self.set_internal_links(text, b''.join(x.rebuild() for x in self.skeletons))
 
     def remove_namespaces(self, root):
         lang = None
-        for attr, val in root.attrib.iteritems():
+        for attr, val in iteritems(root.attrib):
             if attr.rpartition('}')[-1] == 'lang':
                 lang = val
 
@@ -216,6 +222,10 @@ class Chunker(object):
         # preceding layers should have removed svg and any other non html
         # namespaced tags.
         attrib = {'lang':lang} if lang else {}
+        if 'class' in root.attrib:
+            attrib['class'] = root.attrib['class']
+        if 'style' in root.attrib:
+            attrib['style'] = root.attrib['style']
         nroot = etree.Element('html', attrib=attrib)
         nroot.text = root.text
         nroot.tail = '\n'
@@ -233,9 +243,12 @@ class Chunker(object):
                 tn = tag.tag
                 if tn is not None:
                     tn = tn.rpartition('}')[-1]
-                elem = nroot.makeelement(tn,
-                        attrib={k.rpartition('}')[-1]:v for k, v in
-                            tag.attrib.iteritems()})
+                attrib = {k.rpartition('}')[-1]:v for k, v in iteritems(tag.attrib)}
+                try:
+                    elem = nroot.makeelement(tn, attrib=attrib)
+                except ValueError:
+                    attrib = {k:v for k, v in iteritems(attrib) if ':' not in k}
+                    elem = nroot.makeelement(tn, attrib=attrib)
                 elem.text = tag.text
             elem.tail = tag.tail
             parent = node_from_path(nroot, path_to_node(tag.getparent()))
@@ -250,7 +263,7 @@ class Chunker(object):
         first_chunk_idx = len(chunks)
 
         # First handle any text
-        if tag.text and tag.text.strip(): # Leave pure whitespace in the skel
+        if tag.text and tag.text.strip():  # Leave pure whitespace in the skel
             chunks.extend(self.chunk_up_text(tag.text))
             tag.text = None
 
@@ -265,7 +278,7 @@ class Chunker(object):
             raw = close_self_closing_tags(raw)
             if len(raw) > CHUNK_SIZE and child.get('aid', None):
                 self.step_into_tag(child, chunks)
-                if child.tail and child.tail.strip(): # Leave pure whitespace
+                if child.tail and child.tail.strip():  # Leave pure whitespace
                     chunks.extend(self.chunk_up_text(child.tail))
                     child.tail = None
             else:
@@ -313,9 +326,9 @@ class Chunker(object):
         for chunk in chunks[1:]:
             prev = ans[-1]
             if (
-                    chunk.starts_tags or # Starts a tag in the skel
-                    len(chunk) + len(prev) > CHUNK_SIZE or # Too large
-                    prev.ends_tags # Prev chunk ended a tag
+                    chunk.starts_tags or  # Starts a tag in the skel
+                    len(chunk) + len(prev) > CHUNK_SIZE or  # Too large
+                    prev.ends_tags  # Prev chunk ended a tag
                     ):
                 ans.append(chunk)
             else:
@@ -344,16 +357,16 @@ class Chunker(object):
                 cp += len(chunk.raw)
                 num += 1
 
-    def set_internal_links(self, text):
+    def set_internal_links(self, text, rebuilt_text):
         ''' Update the internal link placeholders to point to the correct
         location, based on the chunk table.'''
-        # A kindle:pos:fid link contains two base 32 numbers of the form
+        # A kindle:pos:fid:off link contains two base 32 numbers of the form
         # XXXX:YYYYYYYYYY
         # The first number is an index into the chunk table and the second is
         # an offset from the start of the chunk to the start of the tag pointed
         # to by the link.
-        aid_map = {} # Map of aid to (pos, fid)
-        for match in re.finditer(br'<[^>]+? aid=[\'"]([A-Z0-9]+)[\'"]', text):
+        aid_map = PolyglotDict()  # Map of aid to (fid, offset_from_start_of_chunk, offset_from_start_of_text)
+        for match in re.finditer(br'<[^>]+? [ac]id=[\'"]([cA-Z0-9]+)[\'"]', rebuilt_text):
             offset = match.start()
             pos_fid = None
             for chunk in self.chunk_table:
@@ -367,8 +380,8 @@ class Chunker(object):
                     pos_fid = (chunk.sequence_number, 0, offset)
                     break
                 if chunk is self.chunk_table[-1]:
-                    # This can happen for aids very close to the end of the the
-                    # end of the text (https://bugs.launchpad.net/bugs/1011330)
+                    # This can happen for aids very close to the end of the
+                    # text (https://bugs.launchpad.net/bugs/1011330)
                     pos_fid = (chunk.sequence_number, offset-chunk.insert_pos,
                             offset)
             if pos_fid is None:
@@ -381,10 +394,10 @@ class Chunker(object):
         def to_placeholder(aid):
             pos, fid, _ = aid_map[aid]
             pos, fid = to_base(pos, min_num_digits=4), to_href(fid)
-            return bytes(':off:'.join((pos, fid)))
+            return ':off:'.join((pos, fid)).encode('utf-8')
 
-        placeholder_map = {bytes(k):to_placeholder(v) for k, v in
-                self.placeholder_map.iteritems()}
+        placeholder_map = {as_bytes(k):to_placeholder(v) for k, v in
+                iteritems(self.placeholder_map)}
 
         # Now update the links
         def sub(match):
@@ -402,7 +415,7 @@ class Chunker(object):
     def dump(self, orig_dumps):
         import tempfile, shutil, os
         tdir = os.path.join(tempfile.gettempdir(), 'skeleton')
-        self.log.info('Skeletons dumped to:%s' % tdir)
+        self.log('Skeletons dumped to:', tdir)
         if os.path.exists(tdir):
             shutil.rmtree(tdir)
         orig = os.path.join(tdir, 'orig')
@@ -427,6 +440,4 @@ class Chunker(object):
             raise ValueError('The before and after HTML differs. Run a diff '
                     'tool on the orig and rebuilt directories')
         else:
-            self.log.info('Skeleton HTML before and after is identical.')
-
-
+            self.log('Skeleton HTML before and after is identical.')

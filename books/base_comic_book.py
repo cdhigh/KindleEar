@@ -50,7 +50,7 @@ class BaseComicBook(BaseFeedBook):
                 self.log.info("Add {}: {}".format(chapterTitle, chapterUrl))
                 imgList = self.GetImgList(chapterUrl)
                 if not imgList:
-                    self.log.warn("can not found image list: {}".format(chapterUrl))
+                    self.log.warning("can not found image list: {}".format(chapterUrl))
                     break
                 nextChapterIndex += 1
                 chapters.append(ComicItemTuple(bookName, chapterTitle, imgList, chapterUrl, nextChapterIndex))

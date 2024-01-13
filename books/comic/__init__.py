@@ -20,6 +20,6 @@ for comicFile in os.listdir(os.path.dirname(__file__)):
                 if type(member) == typeofBase and issubclass(member, BaseComicBook) and (member is not BaseComicBook):
                     ComicBaseClasses.append(member)
         except Exception as e:
-            default_log.warn("Comic base book '{}' import failed: {}".format(comicName, e))
+            default_log.warning("Comic base book '{}' import failed: {}".format(comicName, e))
 
 comic_domains = tuple(itertools.chain(*[x.accept_domains for x in ComicBaseClasses]))

@@ -5,14 +5,14 @@
 import hashlib, datetime
 from flask import Blueprint, request, url_for, render_template, redirect, session
 from apps.base_handler import *
-from apps.db_models import *
+from apps.back_end.db_models import *
 from apps.utils import new_secret_key, str_to_int
 from config import *
 
 bpAdmin = Blueprint('bpAdmin', __name__)
 
 # 账户管理页面
-@bpAdmin.route("/admin")
+@bpAdmin.route("/admin", endpoint='Admin')
 @login_required
 def Admin():
     user = get_login_user()
@@ -21,9 +21,9 @@ def Admin():
     users = KeUser.all() if user.name == ADMIN_NAME else None
     return render_template('admin.html', title='Admin', tab='admin', user=user, users=users)
 
-@bpAdmin.post("/admin")
+@bpAdmin.post("/admin", endpoint='AdminPost')
 @login_required
-def AdminPost(self):
+def AdminPost():
     form = request.form
     userName = form.get('u') #用于添加账号
     password1 = form.get('up1')
@@ -54,8 +54,11 @@ def AdminPost(self):
                 user.put()
         return render_template('admin.html', tab='admin', user=user, users=users, chpwdtips=tips)
     elif all((userName, password1, password2)): #添加账户
+        specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}', ',', ';', '|']
         if user.name != ADMIN_NAME: #只有管理员能添加账号
             return redirect('/')
+        elif any([char in name for char in specialChars]):
+            tips = _("The username includes unsafe chars!")
         elif password1 != password2:
             tips = _("The two new passwords are dismatch!")
         elif KeUser.all().filter("name = ", userName).get():
@@ -85,7 +88,7 @@ def AdminPost(self):
         return Admin()
 
 #管理员修改其他账户的密码
-@bpAdmin.route("/mgrpwd/<name>")
+@bpAdmin.route("/mgrpwd/<name>", endpoint='AdminManagePassword')
 @login_required(ADMIN_NAME)
 def AdminManagePassword(name):
     u = KeUser.all().filter("name = ", name).get()
@@ -98,7 +101,7 @@ def AdminManagePassword(name):
 
     return render_template('adminmgrpwd.html', tips=tips, userName=name, expiration=expiration)
 
-@bpAdmin.post("/mgrpwd/<name>")
+@bpAdmin.post("/mgrpwd/<name>", endpoint='AdminManagePasswordPost')
 @login_required(ADMIN_NAME)
 def AdminManagePasswordPost(name):
     form = request.form
@@ -134,7 +137,7 @@ def AdminManagePasswordPost(name):
     return render_template('adminmgrpwd.html', tips=tips, userName=name)
     
 #删除一个账号
-@bpAdmin.route("/delaccount/<name>")
+@bpAdmin.route("/delaccount/<name>", endpoint='DelAccount')
 @login_required
 def DelAccount(name):
     if (name != ADMIN_NAME) and (session.userName in (ADMIN_NAME, name)):
@@ -143,7 +146,7 @@ def DelAccount(name):
     else:
         return redirect('/')
 
-@bpAdmin.post("/delaccount/<name>")
+@bpAdmin.post("/delaccount/<name>", endpoint='DelAccountPost')
 @login_required
 def DelAccountPost(name):
     name = request.form.get('u')

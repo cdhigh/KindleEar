@@ -5,11 +5,11 @@
 import zlib, base64, io
 from flask import Blueprint, request
 from apps.base_handler import *
-from apps.db_models import *
-from apps.utils import local_time
+from apps.back_end.db_models import *
 from apps.back_end.send_mail_adpt import send_to_kindle
+from apps.utils import local_time
 from lib.makeoeb import *
-from books.base_book import BaseUrlBook
+from books.base_url_book import BaseUrlBook
 from config import *
 
 bpUrl2Book = Blueprint('bpUrl2Book', __name__)

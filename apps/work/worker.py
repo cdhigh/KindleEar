@@ -6,12 +6,12 @@ from collections import defaultdict
 import datetime, time, imghdr, io
 from flask import Blueprint, request
 from apps.base_handler import *
-from apps.db_models import *
-from apps.utils import local_time
 from apps.back_end.send_mail_adpt import send_to_kindle
+from apps.back_end.db_models import *
+from apps.utils import local_time
 from lib.makeoeb import *
-from calibre.ebooks.conversion.mobioutput import MOBIOutput
-from calibre.ebooks.conversion.epuboutput import EPUBOutput
+from calibre.ebooks.conversion.plugins.mobi_output import MOBIOutput, AZW3Output
+from calibre.ebooks.conversion.plugins.epub_output import EPUBOutput
 from books import BookClasses, BookClass
 from books.base_book import BaseFeedBook
 from books.base_comic_book import BaseComicBook
@@ -19,7 +19,7 @@ from books.base_comic_book import BaseComicBook
 try:
     from books.comic import ComicBaseClasses, comic_domains
 except ImportError:
-    default_log.warn('Failed to import comic base classes.')
+    default_log.warning('Failed to import comic base classes.')
     ComicBaseClasses = []
     comic_domains = tuple()
 
@@ -111,7 +111,7 @@ def Worker():
         if bk.builtin:
             cBook = BookClass(bk.title)
             if not cBook:
-                log.warn("Book '{}' does not exist".format(bk.title))
+                log.warning("Book '{}' does not exist".format(bk.title))
                 continue
             book = cBook(imgIndex=imgIndex, opts=opts, user=user)
             book.url_filters = [flt.url for flt in user.url_filter]
@@ -160,7 +160,7 @@ def Worker():
                     sections[item.section].append(item)
                     itemCnt += 1
         except Exception as e:
-            log.warn("Failed to push <{}>: {}".format(book.title, e))
+            log.warning("Failed to push <{}>: {}".format(book.title, e))
             continue
     
     volumeTitle = ''
@@ -213,7 +213,7 @@ def AddMastheadCoverToOeb(user, oeb, mhFile, cvFile, bookForMeta):
             try:
                 imgData = bookForMeta().cvFile()
             except:
-                default_log.warn("Failed to fetch cover for book [{}]".format(bookForMeta.title))
+                default_log.warning("Failed to fetch cover for book [{}]".format(bookForMeta.title))
                 cvFile = DEFAULT_COVER
 
             if imgData:
@@ -221,7 +221,7 @@ def AddMastheadCoverToOeb(user, oeb, mhFile, cvFile, bookForMeta):
                 if imgType: #如果是合法图片
                     imgMime = "image/{}".format(imgType)
                 else:
-                    default_log.warn('Content of cover is invalid : {}'.format(bookForMeta.title))
+                    default_log.warning('Content of cover is invalid : {}'.format(bookForMeta.title))
                     imgData = None
         
         if imgData and imgMime:
@@ -241,7 +241,7 @@ def ProcessComicRSS(userName, user, feed):
             book = comicClass(opts=opts, user=user)
             break
     else:
-        log.warn("There is No base class for {}".format(feed.title))
+        log.warning("There is No base class for {}".format(feed.title))
         return
 
     book.title = feed.title

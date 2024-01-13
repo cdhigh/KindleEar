@@ -7,7 +7,7 @@ from urllib.parse import unquote_plus
 from bs4 import BeautifulSoup
 from flask import Blueprint, render_template, request
 from apps.base_handler import *
-from apps.db_models import *
+from apps.back_end.db_models import *
 from apps.utils import hide_email, ke_encrypt, ke_decrypt
 from apps.back_end.send_mail_adpt import send_html_mail
 from books.base_url_book import BaseUrlBook
@@ -50,10 +50,10 @@ def Share(self):
 def SaveToEvernoteWiz(user, action, orgUrl):
     global default_log
     if action == 'evernote' and (not user.evernote or not user.evernote_mail):
-        default_log.warn('No have evernote mail yet.')
+        default_log.warning('No have evernote mail yet.')
         return "No have evernote mail yet."
     elif action == 'wiz' and (not user.wiz or not user.wiz_mail):
-        default_log.warn('No have wiz mail yet.')
+        default_log.warning('No have wiz mail yet.')
         return "No have wiz mail yet."
         
     book = BaseUrlBook(user=user)

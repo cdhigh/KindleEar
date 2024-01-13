@@ -20,7 +20,7 @@ class BaseWebpageBook(BaseFeedBook):
             result = opener.open(url)
             status_code = result.status_code
             if status_code != 200:
-                self.log.warn('Fetch article failed({}):{}'.format(UrlOpener.CodeMap(status_code), url))
+                self.log.warning('Fetch article failed({}):{}'.format(UrlOpener.CodeMap(status_code), url))
                 continue
             
             content =  self.PreProcess(result.text)

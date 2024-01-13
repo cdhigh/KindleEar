@@ -1,30 +1,31 @@
 #!/usr/bin/env python
-# vim:fileencoding=UTF-8:ts=4:sw=4:sta:et:sts=4:ai
+
 
 __license__   = 'GPL v3'
 __copyright__ = '2010, Kovid Goyal <kovid@kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
 import posixpath
-from urlparse import urldefrag, urlparse
 
 from lxml import etree
 
 from calibre.ebooks.oeb.base import rewrite_links, urlnormalize
+from polyglot.urllib import urldefrag, urlparse
 
-class RenameFiles(object): # {{{
+
+class RenameFiles:  # {{{
 
     '''
     Rename files and adjust all links pointing to them. Note that the spine
     and manifest are not touched by this transform.
     '''
 
-    def __init__(self, rename_map, renamed_items_map = None):
+    def __init__(self, rename_map, renamed_items_map=None):
         self.rename_map = rename_map
         self.renamed_items_map = renamed_items_map
 
     def __call__(self, oeb, opts):
-        import cssutils
+        import css_parser
         self.log = oeb.logger
         self.opts = opts
         self.oeb = oeb
@@ -34,7 +35,7 @@ class RenameFiles(object): # {{{
             if etree.iselement(item.data):
                 rewrite_links(self.current_item.data, self.url_replacer)
             elif hasattr(item.data, 'cssText'):
-                cssutils.replaceUrls(item.data, self.url_replacer)
+                css_parser.replaceUrls(item.data, self.url_replacer)
 
         if self.oeb.guide:
             for ref in self.oeb.guide.values():
@@ -85,7 +86,8 @@ class RenameFiles(object): # {{{
 
 # }}}
 
-class UniqueFilenames(object): # {{{
+
+class UniqueFilenames:  # {{{
 
     'Ensure that every item in the manifest has a unique filename'
 
@@ -94,7 +96,7 @@ class UniqueFilenames(object): # {{{
         self.opts = opts
         self.oeb = oeb
 
-        self.seen_filenames = set([])
+        self.seen_filenames = set()
         self.rename_map = {}
 
         for item in list(oeb.manifest.items):
@@ -125,7 +127,6 @@ class UniqueFilenames(object): # {{{
             renamer = RenameFiles(self.rename_map)
             renamer(oeb, opts)
 
-
     def unique_suffix(self, fname):
         base, ext = posixpath.splitext(fname)
         c = 0
@@ -137,9 +138,10 @@ class UniqueFilenames(object): # {{{
                 return suffix
 # }}}
 
-class FlatFilenames(object): # {{{
 
-    'Ensure that every item in the manifest has a unique filename without subdirectories.'
+class FlatFilenames:  # {{{
+
+    'Ensure that every item in the manifest has a unique filename without subfolders.'
 
     def __call__(self, oeb, opts):
         self.log = oeb.logger
@@ -182,4 +184,3 @@ class FlatFilenames(object): # {{{
             renamer = RenameFiles(self.rename_map, self.renamed_items_map)
             renamer(oeb, opts)
 # }}}
-

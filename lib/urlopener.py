@@ -96,7 +96,7 @@ class UrlOpener:
                 else:
                     r = self.session.get(url, headers=self.GetHeaders(url, headers), timeout=self.timeout)
             except Exception as e:
-                default_log.warn("url {} failed {}.".format(url, str(e)))
+                default_log.warning("url {} failed {}.".format(url, str(e)))
         
         #有些网页头部没有编码信息，则使用chardet检测编码，否则requests会认为text类型的编码为"ISO-8859-1"
         if "charset" not in r.headers.get("Content-Type", "").lower():

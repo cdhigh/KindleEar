@@ -1,14 +1,14 @@
 '''
 HTML-TOC-adding transform.
 '''
-from __future__ import with_statement
 
 __license__   = 'GPL v3'
 __copyright__ = '2008, Marshall T. Vandegrift <llasram@gmail.com>'
 
-from calibre.ebooks.oeb.base import XML, XHTML, XHTML_NS
-from calibre.ebooks.oeb.base import XHTML_MIME, CSS_MIME
-from calibre.ebooks.oeb.base import element, XPath
+from calibre.ebooks.oeb.base import (
+    CSS_MIME, XHTML, XHTML_MIME, XHTML_NS, XML, XPath, element,
+)
+from calibre.utils.localization import __
 
 __all__ = ['HTMLTOCAdder']
 
@@ -44,7 +44,9 @@ body > .calibre_toc_block {
 """
     }
 
-class HTMLTOCAdder(object):
+
+class HTMLTOCAdder:
+
     def __init__(self, title=None, style='nested', position='end'):
         self.title = title
         self.style = style
@@ -102,7 +104,7 @@ class HTMLTOCAdder(object):
                 href=css_href)
         body = element(contents, XHTML('body'),
                        attrib={'class': 'calibre_toc'})
-        h1 = element(body, XHTML('h1'),
+        h1 = element(body, XHTML('h2'),
                      attrib={'class': 'calibre_toc_header'})
         h1.text = title
         self.add_toc_level(body, oeb.toc)

@@ -62,10 +62,10 @@ class KFTouTiao(BaseFeedBook):
             if result.status_code == 200 and result.content:
                 # 将页面内容转换成BeatifulSoup对象
                 soup = BeautifulSoup(result.content, 'html.parser')
-                # self.log.warn('title : %s' % soup.title)
+                # self.log.warning('title : %s' % soup.title)
                 # 找出当前页面文章列表中所有文章条目'
                 items = soup.find_all(name='div', class_="content")
-                self.log.warn('find : %d articles.' % len(items))
+                self.log.warning('find : %d articles.' % len(items))
                 # 循环处理每个文章条目
                 count = 0
                 for item in items:
@@ -73,17 +73,17 @@ class KFTouTiao(BaseFeedBook):
                     link = item.a.get('href') # 获取文章链接
                     link = BaseFeedBook.urljoin("https://toutiao.io", link) # 合成文章链接
                     link = self.getRealUrl (link)
-                    self.log.warn('Fetch article : %s' % link)
+                    self.log.warning('Fetch article : %s' % link)
                     if string.find (link, 'zhihu.com') != -1:
                         link = self.url4forwarder(url)
-                        self.log.warn('transport : %s' % link)                        
+                        self.log.warning('transport : %s' % link)                        
                     urls.append((topic, title, link, None)) # 把文章元组加入列表
                     count = count + 1
                     if count >= 30 :
                         break
             # 如果请求失败通知到日志输出中
             else:
-                self.log.warn('Fetch article failed(%s):%s' % \
+                self.log.warning('Fetch article failed(%s):%s' % \
                     (UrlOpener.CodeMap(result.status_code), url))
         # 返回提取到的所有文章列表
         return urls
@@ -100,7 +100,7 @@ class KFTouTiao(BaseFeedBook):
             # 对微信公众号文章做清洗
             if siteName:
                 if siteName == u'微信公众平台' :
-                    #self.log.warn("it's WeChat article.")
+                    #self.log.warning("it's WeChat article.")
                     # 需要填充title字段，否则微信公众号文章会没有标题
                     soup.title.string = soup.find (attrs={"property":"og:title"})['content']
 

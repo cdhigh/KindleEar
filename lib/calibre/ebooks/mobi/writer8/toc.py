@@ -1,16 +1,15 @@
 #!/usr/bin/env python
-# vim:fileencoding=UTF-8:ts=4:sw=4:sta:et:sts=4:ai
-from __future__ import (unicode_literals, division, absolute_import,
-                        print_function)
+
 
 __license__   = 'GPL v3'
 __copyright__ = '2012, Kovid Goyal <kovid@kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
-from lxml import etree
-
-from calibre.ebooks.oeb.base import (urlnormalize, XPath, XHTML_NS, XHTML,
-        XHTML_MIME)
+from calibre.ebooks.oeb.base import (
+    XHTML, XHTML_MIME, XHTML_NS, XPath, css_text, urlnormalize,
+)
+from calibre.utils.localization import __
+from calibre.utils.xml_parse import safe_xml_fromstring
 
 DEFAULT_TITLE = __('Table of Contents')
 
@@ -34,6 +33,7 @@ TEMPLATE = '''
 </html>
 '''
 
+
 def find_previous_calibre_inline_toc(oeb):
     if 'toc' in oeb.guide:
         href = urlnormalize(oeb.guide['toc'].href.partition('#')[0])
@@ -42,9 +42,10 @@ def find_previous_calibre_inline_toc(oeb):
             if (hasattr(item.data, 'xpath') and XPath('//h:body[@id="calibre_generated_inline_toc"]')(item.data)):
                 return item
 
-class TOCAdder(object):
 
-    def __init__(self, oeb, opts, replace_previous_inline_toc=False, ignore_existing_toc=False):
+class TOCAdder:
+
+    def __init__(self, oeb, opts, replace_previous_inline_toc=True, ignore_existing_toc=False):
         self.oeb, self.opts, self.log = oeb, opts, oeb.log
         self.title = opts.toc_title or DEFAULT_TITLE
         self.at_start = opts.mobi_toc_at_start
@@ -53,7 +54,7 @@ class TOCAdder(object):
         self.has_toc = oeb.toc and oeb.toc.count() > 1
 
         self.tocitem = tocitem = None
-        if find_previous_calibre_inline_toc:
+        if replace_previous_inline_toc:
             tocitem = self.tocitem = find_previous_calibre_inline_toc(oeb)
         if ignore_existing_toc and 'toc' in oeb.guide:
             oeb.guide.remove('toc')
@@ -78,16 +79,16 @@ class TOCAdder(object):
             getattr(opts, 'mobi_passthrough', False)):
             return
 
-        self.log.info('\tGenerating in-line ToC')
+        self.log('\tGenerating in-line ToC')
 
         embed_css = ''
         s = getattr(oeb, 'store_embed_font_rules', None)
         if getattr(s, 'body_font_family', None):
-            css = [x.cssText for x in s.rules] + [
+            css = [css_text(x) for x in s.rules] + [
                     'body { font-family: %s }'%s.body_font_family]
             embed_css = '\n\n'.join(css)
 
-        root = etree.fromstring(TEMPLATE.format(xhtmlns=XHTML_NS,
+        root = safe_xml_fromstring(TEMPLATE.format(xhtmlns=XHTML_NS,
             title=self.title, embed_css=embed_css,
             extra_css=(opts.extra_css or '')))
         parent = XPath('//h:ul')(root)[0]
@@ -137,4 +138,3 @@ class TOCAdder(object):
         if self.added_toc_guide_entry:
             self.oeb.guide.remove('toc')
             self.added_toc_guide_entry = False
-

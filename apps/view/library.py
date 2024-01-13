@@ -6,7 +6,7 @@ import datetime, json
 from urllib.parse import urljoin, urlparse
 from flask import Blueprint, render_template, request
 from apps.base_handler import *
-from apps.db_models import *
+from apps.back_end.db_models import *
 from lib.urlopener import UrlOpener
 
 #几个"官方"服务的地址
@@ -21,7 +21,7 @@ KINDLEEAR_SITE_KEY = "kindleear.lucky!"
 bpLibrary = Blueprint('bpLibrary', __name__)
 
 #网友共享的订阅源数据
-@bpLibrary.route("/library")
+@bpLibrary.route("/library", endpoint='SharedLibrary')
 @login_required
 def SharedLibrary():
     user = get_login_user()
@@ -40,7 +40,7 @@ def SharedLibrary():
     return render_template('sharedlibrary.html', tab='shared', user=user, shared_data=sharedData, tips=tips)
 
 #分享了一个订阅源
-@bpLibrary.post("/library")
+@bpLibrary.post("/library", endpoint='SharedLibraryPost')
 @login_required(forAjax=True)
 def SharedLibraryPost():
     user = get_login_user(forAjax=True)
@@ -65,7 +65,7 @@ def SharedLibraryPost():
         return {'status': 'Cannot submit data to {}, status: {}'.format(
             KINDLEEAR_SITE, UrlOpener.CodeMap(result.status_code))}
 
-@bpLibrary.post("/library/mgr/<mgrType>")
+@bpLibrary.post("/library/mgr/<mgrType>", endpoint='SharedLibraryMgrPost')
 @login_required(forAjax=True)
 def SharedLibraryMgrPost(self, mgrType):
     user = get_login_user(forAjax=True)
@@ -86,7 +86,7 @@ def SharedLibraryMgrPost(self, mgrType):
         return {'status': 'Unknown command: {}'.format(mgrType)}
 
 #共享的订阅源的分类信息
-@bpLibrary.route("/library/category")
+@bpLibrary.route("/library/category", endpoint='SharedLibraryCategory')
 @login_required(forAjax=True)
 def SharedLibraryCategory():
     user = get_login_user(forAjax=True)

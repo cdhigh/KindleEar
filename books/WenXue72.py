@@ -70,7 +70,7 @@ class WenXue72(BaseFeedBook):
                         item = item.next_sibling
             # 如果请求失败通知到日志输出中
             else:
-                self.log.warn('Fetch article failed(%s):%s' %
+                self.log.warning('Fetch article failed(%s):%s' %
                               (URLOpener.CodeMap(result.status_code), url))
         # 返回提取到的所有文章列表
         return urls

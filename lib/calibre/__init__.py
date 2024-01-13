@@ -3,14 +3,24 @@ __license__   = 'GPL v3'
 __copyright__ = '2008, Kovid Goyal <kovid@kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
-import sys, os, re, time
+import sys, os, re, time, builtins
+from polyglot.builtins import codepoint_to_chr, hasenv, native_string_type
+from math import floor
 from functools import partial
 
-from calibre.constants import (iswindows, 
-        preferred_encoding, __appname__, __version__, __author__,
-        winerror, filesystem_encoding, plugins, config_dir)
+from calibre.constants import (preferred_encoding, __appname__, __version__, __author__,
+        plugins, filesystem_encoding, config_dir)
+import calibre.utils.resources #这个模块也有初始化代码
+from calibre.utils.icu import safe_chr
+from calibre.prints import prints
+from calibre.utils.resources import get_path as P
+from calibre.utils.icu import lower as icu_lower, title_case, upper as icu_upper
+builtins.__dict__['icu_lower'] = icu_lower
+builtins.__dict__['icu_upper'] = icu_upper
+builtins.__dict__['icu_title'] = title_case
 
 _mt_inited = False
+
 def _init_mimetypes():
     global _mt_inited
     import mimetypes
@@ -30,6 +40,7 @@ def _init_mimetypes():
     mimetypes.add_type("image/png", ".png")
     mimetypes.add_type("image/gif", ".gif")
     mimetypes.add_type("image/bmp", ".bmp")
+    mimetypes.add_type("image/webp", ".webp")
     _mt_inited = True
 
 def guess_type(*args, **kwargs):
@@ -37,6 +48,7 @@ def guess_type(*args, **kwargs):
     if not _mt_inited:
         _init_mimetypes()
     return mimetypes.guess_type(*args, **kwargs)
+
 
 def guess_all_extensions(*args, **kwargs):
     import mimetypes
@@ -54,27 +66,23 @@ def guess_extension(*args, **kwargs):
         ext = '.pdb'
     return ext
 
+
 def get_types_map():
     import mimetypes
     if not _mt_inited:
         _init_mimetypes()
     return mimetypes.types_map
 
+
 def to_unicode(raw, encoding='utf-8', errors='strict'):
-    if isinstance(raw, unicode):
+    if isinstance(raw, str):
         return raw
     return raw.decode(encoding, errors)
 
-def patheq(p1, p2):
-    p = os.path
-    d = lambda x : p.normcase(p.normpath(p.realpath(p.normpath(x))))
-    if not p1 or not p2:
-        return False
-    return d(p1) == d(p2)
 
 def unicode_path(path, abs=False):
-    if not isinstance(path, unicode):
-        path = path.decode(sys.getfilesystemencoding())
+    if isinstance(path, bytes):
+        path = path.decode(filesystem_encoding)
     if abs:
         path = os.path.abspath(path)
     return path
@@ -82,51 +90,25 @@ def unicode_path(path, abs=False):
 def confirm_config_name(name):
     return name + '_again'
 
-def sanitize_file_name(name, substitute='_', as_unicode=False):
-    '''
-    Sanitize the filename `name`. All invalid characters are replaced by `substitute`.
-    The set of invalid characters is the union of the invalid characters in Windows,
-    OS X and Linux. Also removes leading and trailing whitespace.
-    **WARNING:** This function also replaces path separators, so only pass file names
-    and not full paths to it.
-    *NOTE:* This function always returns byte strings, not unicode objects. The byte strings
-    are encoded in the filesystem encoding of the platform, or UTF-8.
-    '''
-    if isinstance(name, unicode):
-        name = name.encode(filesystem_encoding, 'ignore')
-    _filename_sanitize = re.compile(r'[\xae\0\\|\?\*<":>\+/]')
-    
-    one = _filename_sanitize.sub(substitute, name)
-    one = re.sub(r'\s', ' ', one).strip()
-    bname, ext = os.path.splitext(one)
-    one = re.sub(r'^\.+$', '_', bname)
-    if as_unicode:
-        one = one.decode(filesystem_encoding)
-    one = one.replace('..', substitute)
-    one += ext
-    # Windows doesn't like path components that end with a period
-    if one and one[-1] in ('.', ' '):
-        one = one[:-1]+'_'
-    # Names starting with a period are hidden on Unix
-    if one.startswith('.'):
-        one = '_' + one[1:]
-    return one
 
-def sanitize_file_name_unicode(name, substitute='_'):
+_filename_sanitize_unicode = frozenset(('\\', '|', '?', '*', '<',        # no2to3
+    '"', ':', '>', '+', '/') + tuple(map(codepoint_to_chr, range(32))))  # no2to3
+
+
+def sanitize_file_name(name, substitute='_'):
     '''
     Sanitize the filename `name`. All invalid characters are replaced by `substitute`.
     The set of invalid characters is the union of the invalid characters in Windows,
-    OS X and Linux. Also removes leading and trailing whitespace.
+    macOS and Linux. Also removes leading and trailing whitespace.
     **WARNING:** This function also replaces path separators, so only pass file names
     and not full paths to it.
     '''
     if isbytestring(name):
-        return sanitize_file_name(name, substitute=substitute, as_unicode=True)
-    _filename_sanitize_unicode = frozenset([u'\\', u'|', u'?', u'*', u'<',
-        u'"', u':', u'>', u'+', u'/'] + list(map(unichr, xrange(32))))
-    chars = [substitute if c in _filename_sanitize_unicode else c for c in
-            name]
-    one = u''.join(chars)
+        name = name.decode(filesystem_encoding, 'replace')
+    if isbytestring(substitute):
+        substitute = substitute.decode(filesystem_encoding, 'replace')
+    chars = (substitute if c in _filename_sanitize_unicode else c for c in name)
+    one = ''.join(chars)
     one = re.sub(r'\s', ' ', one).strip()
     bname, ext = os.path.splitext(one)
     one = re.sub(r'^\.+$', '_', bname)
@@ -140,105 +122,99 @@ def sanitize_file_name_unicode(name, substitute='_'):
         one = '_' + one[1:]
     return one
 
-def sanitize_file_name2(name, substitute='_'):
-    '''
-    Sanitize filenames removing invalid chars. Keeps unicode names as unicode
-    and bytestrings as bytestrings
-    '''
-    if isbytestring(name):
-        return sanitize_file_name(name, substitute=substitute)
-    return sanitize_file_name_unicode(name, substitute=substitute)
 
-def prints(*args, **kwargs):
-    '''
-    Print unicode arguments safely by encoding them to preferred_encoding
-    Has the same signature as the print function from Python 3, except for the
-    additional keyword argument safe_encode, which if set to True will cause the
-    function to use repr when encoding fails.
-    '''
-    file = kwargs.get('file', sys.stdout)
-    sep  = kwargs.get('sep', ' ')
-    end  = kwargs.get('end', '\n')
-    enc = preferred_encoding
-    safe_encode = kwargs.get('safe_encode', False)
-    if 'CALIBRE_WORKER' in os.environ:
-        enc = 'utf-8'
-    for i, arg in enumerate(args):
-        if isinstance(arg, unicode):
-            try:
-                arg = arg.encode(enc)
-            except UnicodeEncodeError:
-                try:
-                    arg = arg.encode('utf-8')
-                except:
-                    if not safe_encode:
-                        raise
-                    arg = repr(arg)
-        if not isinstance(arg, str):
-            try:
-                arg = str(arg)
-            except ValueError:
-                arg = unicode(arg)
-            if isinstance(arg, unicode):
-                try:
-                    arg = arg.encode(enc)
-                except UnicodeEncodeError:
-                    try:
-                        arg = arg.encode('utf-8')
-                    except:
-                        if not safe_encode:
-                            raise
-                        arg = repr(arg)
+sanitize_file_name2 = sanitize_file_name_unicode = sanitize_file_name
 
-        try:
-            file.write(arg)
-        except:
-            import repr as reprlib
-            file.write(reprlib.repr(arg))
-        if i != len(args)-1:
-            file.write(bytes(sep))
-    file.write(bytes(end))
 
-def filename_to_utf8(name):
-    '''Return C{name} encoded in utf8. Unhandled characters are replaced. '''
-    if isinstance(name, unicode):
-        return name.encode('utf8')
-    codec = 'cp1252' if iswindows else 'utf8'
-    return name.decode(codec, 'replace').encode('utf8')
+class CommandLineError(Exception):
+    pass
 
 def extract(path, dir):
     extractor = None
+    # First use the file header to identify its type
+    with open(path, 'rb') as f:
+        id_ = f.read(3)
+    if id_ == b'Rar':
+        from calibre.utils.unrar import extract as rarextract
+        extractor = rarextract
+    elif id_.startswith(b'PK'):
+        from calibre.libunzip import extract as zipextract
+        extractor = zipextract
+    elif id_.startswith(b'7z'):
+        from calibre.utils.seven_zip import extract as seven_extract
+        extractor = seven_extract
+    if extractor is None:
+        # Fallback to file extension
+        ext = os.path.splitext(path)[1][1:].lower()
+        if ext in ('zip', 'cbz', 'epub', 'oebzip'):
+            from calibre.libunzip import extract as zipextract
+            extractor = zipextract
+        elif ext in ('cbr', 'rar'):
+            from calibre.utils.unrar import extract as rarextract
+            extractor = rarextract
+        elif ext in ('cb7', '7z'):
+            from calibre.utils.seven_zip import extract as seven_extract
+            extractor = seven_extract
     if extractor is None:
         raise Exception('Unknown archive type')
     extractor(path, dir)
 
+def fit_image(width, height, pwidth, pheight):
+    '''
+    Fit image in box of width pwidth and height pheight.
+    @param width: Width of image
+    @param height: Height of image
+    @param pwidth: Width of box
+    @param pheight: Height of box
+    @return: scaled, new_width, new_height. scaled is True iff new_width and/or new_height is different from width or height.
+    '''
+    if height < 1 or width < 1:
+        return False, int(width), int(height)
+    scaled = height > pheight or width > pwidth
+    if height > pheight:
+        corrf = pheight / float(height)
+        width, height = floor(corrf*width), pheight
+    if width > pwidth:
+        corrf = pwidth / float(width)
+        width, height = pwidth, floor(corrf*height)
+    if height > pheight:
+        corrf = pheight / float(height)
+        width, height = floor(corrf*width), pheight
 
-class CurrentDir(object):
+    return scaled, int(width), int(height)
+
+
+class CurrentDir:
 
     def __init__(self, path):
         self.path = path
         self.cwd = None
 
     def __enter__(self, *args):
-        self.cwd = os.getcwdu()
+        self.cwd = os.getcwd()
         os.chdir(self.path)
         return self.cwd
 
     def __exit__(self, *args):
         try:
             os.chdir(self.cwd)
-        except:
+        except OSError:
             # The previous CWD no longer exists
             pass
 
 
+_ncpus = None
+
+
+def detect_ncpus():
+    global _ncpus
+    if _ncpus is None:
+        _ncpus = max(1, os.cpu_count() or 1)
+    return _ncpus
+
+
 relpath = os.path.relpath
-def english_sort(x, y):
-    '''
-    Comapare two english phrases ignoring starting prepositions.
-    '''
-    _spat = re.compile(r'^the\s+|^a\s+|^an\s+', re.IGNORECASE)
-    return cmp(_spat.sub('', x), _spat.sub('', y))
+
 
 def walk(dir):
     ''' A nice interface to os.walk '''
@@ -246,11 +222,12 @@ def walk(dir):
         for f in record[-1]:
             yield os.path.join(record[0], f)
 
+
 def strftime(fmt, t=None):
     ''' A version of strftime that returns unicode strings and tries to handle dates
     before 1900 '''
     if not fmt:
-        return u''
+        return ''
     if t is None:
         t = time.localtime()
     if hasattr(t, 'timetuple'):
@@ -262,30 +239,29 @@ def strftime(fmt, t=None):
         t = list(t)
         orig_year = t[0]
         t[0] = replacement
+        t = time.struct_time(t)
     ans = None
-    if iswindows:
-        if isinstance(fmt, unicode):
-            fmt = fmt.encode('mbcs')
-        fmt = fmt.replace(b'%e', b'%#d')
-        ans = plugins['winutil'][0].strftime(fmt, t)
-    else:
-        ans = time.strftime(fmt, t).decode(preferred_encoding, 'replace')
+    if isinstance(fmt, bytes):
+        fmt = fmt.decode('utf-8', 'replace')
+    ans = time.strftime(fmt, t)
     if early_year:
         ans = ans.replace('_early year hack##', str(orig_year))
     return ans
 
+
 def my_unichr(num):
     try:
-        return unichr(num)
+        return safe_chr(num)
     except (ValueError, OverflowError):
-        return u'?'
+        return '?'
+
 
 def entity_to_unicode(match, exceptions=[], encoding='cp1252',
         result_exceptions={}):
     '''
     :param match: A match object such that '&'+match.group(1)';' is the entity.
 
-    :param exceptions: A list of entities to not convert (Each entry is the name of the entity, for e.g. 'apos' or '#1234'
+    :param exceptions: A list of entities to not convert (Each entry is the name of the entity, e.g. 'apos' or '#1234'
 
     :param encoding: The encoding to use to decode numeric entities between 128 and 256.
     If None, the Unicode UCS encoding is used. A common encoding is cp1252.
@@ -301,7 +277,7 @@ def entity_to_unicode(match, exceptions=[], encoding='cp1252',
     ent = match.group(1)
     if ent in exceptions:
         return '&'+ent+';'
-    if ent in {'apos', 'squot'}: # squot is generated by some broken CMS software
+    if ent in {'apos', 'squot'}:  # squot is generated by some broken CMS software
         return check("'")
     if ent == 'hellips':
         ent = 'hellip'
@@ -316,33 +292,37 @@ def entity_to_unicode(match, exceptions=[], encoding='cp1252',
         if encoding is None or num > 255:
             return check(my_unichr(num))
         try:
-            return check(chr(num).decode(encoding))
+            return check(bytes(bytearray((num,))).decode(encoding))
         except UnicodeDecodeError:
             return check(my_unichr(num))
-    from calibre.utils.html5_entities import entity_map
+    from calibre.ebooks.html_entities import html5_entities
     try:
-        return check(entity_map[ent])
+        return check(html5_entities[ent])
     except KeyError:
         pass
-    from htmlentitydefs import name2codepoint
+    from polyglot.html_entities import name2codepoint
     try:
         return check(my_unichr(name2codepoint[ent]))
     except KeyError:
         return '&'+ent+';'
 
+
 _ent_pat = re.compile(r'&(\S+?);')
-xml_entity_to_unicode = partial(entity_to_unicode, result_exceptions = {
+xml_entity_to_unicode = partial(entity_to_unicode, result_exceptions={
     '"' : '&quot;',
     "'" : '&apos;',
     '<' : '&lt;',
     '>' : '&gt;',
     '&' : '&amp;'})
 
+
 def replace_entities(raw, encoding='cp1252'):
     return _ent_pat.sub(partial(entity_to_unicode, encoding=encoding), raw)
 
+
 def xml_replace_entities(raw, encoding='cp1252'):
     return _ent_pat.sub(partial(xml_entity_to_unicode, encoding=encoding), raw)
+
 
 def prepare_string_for_xml(raw, attribute=False):
     raw = _ent_pat.sub(entity_to_unicode, raw)
@@ -351,37 +331,39 @@ def prepare_string_for_xml(raw, attribute=False):
         raw = raw.replace('"', '&quot;').replace("'", '&apos;')
     return raw
 
+
 def isbytestring(obj):
-    return isinstance(obj, (str, bytes))
+    return isinstance(obj, bytes)
+
 
 def force_unicode(obj, enc=preferred_encoding):
     if isbytestring(obj):
         try:
             obj = obj.decode(enc)
-        except:
+        except Exception:
             try:
                 obj = obj.decode(filesystem_encoding if enc ==
                         preferred_encoding else preferred_encoding)
-            except:
+            except Exception:
                 try:
                     obj = obj.decode('utf-8')
-                except:
+                except Exception:
                     obj = repr(obj)
                     if isbytestring(obj):
                         obj = obj.decode('utf-8')
     return obj
 
+
 def as_unicode(obj, enc=preferred_encoding):
     if not isbytestring(obj):
         try:
-            obj = unicode(obj)
-        except:
+            obj = str(obj)
+        except Exception:
             try:
-                obj = str(obj)
-            except:
+                obj = native_string_type(obj)
+            except Exception:
                 obj = repr(obj)
     return force_unicode(obj, enc=enc)
-
 
 def human_readable(size, sep=' '):
     """ Convert a size in bytes into a human readable form """
@@ -396,22 +378,4 @@ def human_readable(size, sep=' '):
     if size.endswith('.0'):
         size = size[:-2]
     return size + sep + suffix
-
-def remove_bracketed_text(src,
-        brackets={u'(':u')', u'[':u']', u'{':u'}'}):
-    from collections import Counter
-    counts = Counter()
-    buf = []
-    src = force_unicode(src)
-    rmap = dict([(v, k) for k, v in brackets.iteritems()])
-    for char in src:
-        if char in brackets:
-            counts[char] += 1
-        elif char in rmap:
-            idx = rmap[char]
-            if counts[idx] > 0:
-                counts[idx] -= 1
-        elif sum(counts.itervalues()) < 1:
-            buf.append(char)
-    return u''.join(buf)
 

@@ -4,7 +4,7 @@
 
 from flask import Blueprint, render_template, request, redirect
 from apps.base_handler import *
-from apps.db_models import *
+from apps.back_end.db_models import *
 from config import *
 
 bpSetting = Blueprint('bpSetting', __name__)
@@ -38,7 +38,7 @@ def LangMap():
         "tl": _("Tagalog"),
         "ha": _("Hausa"),}
 
-@bpSetting.route("/setting")
+@bpSetting.route("/setting", endpoint='Setting')
 @login_required
 def Setting(self, tips=None):
     user = get_login_user()
@@ -47,7 +47,7 @@ def Setting(self, tips=None):
 
     return render_template('setting.html', tab='set', user=user, mailSender=SRC_EMAIL, tips=tips, lang_map=LangMap())
 
-@bpSetting.post("/setting")
+@bpSetting.post("/setting", endpoint='SettingPost')
 @login_required
 def SettingPost():
     user = get_login_user()

@@ -20,7 +20,7 @@ class CartoonMadBaseBook(BaseComicBook):
 
         result = opener.open(url)
         if result.status_code != 200:
-            self.log.warn('Fetch comic page failed: {}'.format(url))
+            self.log.warning('Fetch comic page failed: {}'.format(url))
             return chapterList
 
         soup = BeautifulSoup(result.content, 'lxml')

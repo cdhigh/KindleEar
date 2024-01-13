@@ -11,7 +11,13 @@ DOMAIN = "http://kindleear.appspot.com/" #Your domain of app
 APP_ID = "kindleear"
 SERVER_LOCATION = "us-central1"
 
-TIMEZONE = 8  #Default timezone, you can modify it in webpage after deployed
+#Choose the database engine
+DATABASE_ENGINE = "sqlite"  #"datastore", "mysql", "sqlite", "mongo", "postgresql", "cockroachdb"
+DATABASE_HOST = "localhost"
+DATABASE_PORT = 3306
+DATABASE_USERNAME = "userName"
+DATABASE_PASSWORD = "password"
+DATABASE_NAME = "name"
 
 #Choose the backend service for sending emails, either "gae", "sendgrid", "smtp"
 SEND_MAIL_SERVICE = "gae"
@@ -31,6 +37,8 @@ USE_GAE_INBOUND_EMAIL = True
 
 #Select the type of task queue, "gae", "celery", "cron"
 TASK_QUEUE_TYPE = "gae"
+
+TIMEZONE = 8  #Default timezone, you can modify it in webpage after deployed
 
 #------------------------------------------------------------------------------------
 #Configurations below this line generally do not need to be modified

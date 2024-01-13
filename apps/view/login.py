@@ -5,7 +5,7 @@
 import hashlib, datetime, time
 from flask import Blueprint, url_for, render_template, redirect, session
 from apps.base_handler import *
-from apps.db_models import *
+from apps.back_end.db_models import *
 from books import BookClasses, BookClass
 from apps.utils import new_secret_key
 from config import *
@@ -31,13 +31,13 @@ def Login():
 def LoginPost():
     name = request.form.get('u', '').strip()
     passwd = request.form.get('p', '')
-    specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}']
+    specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}', ',', ';', '|']
     tips = ''
     if not name:
         tips = _("Username is empty!")
     elif len(name) > 25:
         tips = _("The len of username reached the limit of 25 chars!")
-    elif any(char in name for char in specialChars):
+    elif any([char in name for char in specialChars]):
         tips = _("The username includes unsafe chars!")
 
     if tips:
@@ -129,7 +129,7 @@ def Logout(self):
     return redirect('/')
 
 #for ajax parser, if login required, retuan a dict 
-@bpLogin.get("/needloginforajax")
+@bpLogin.route("/needloginforajax")
 def NeedLoginAjax():
     return {'status': _('login required')}
 

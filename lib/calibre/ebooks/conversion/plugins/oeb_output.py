@@ -1,0 +1,117 @@
+__license__ = 'GPL 3'
+__copyright__ = '2009, Kovid Goyal <kovid@kovidgoyal.net>'
+__docformat__ = 'restructuredtext en'
+
+import os, re, io
+
+
+from calibre.customize.conversion import (OutputFormatPlugin,
+        OptionRecommendation)
+from calibre import CurrentDir
+
+
+class OEBOutput(OutputFormatPlugin):
+
+    name = 'OEB Output'
+    author = 'Kovid Goyal'
+    file_type = 'oeb'
+    commit_name = 'oeb_output'
+
+    recommendations = {('pretty_print', True, OptionRecommendation.HIGH)}
+
+    #output_path已经修改为一个列表，每个文件保存为 (fileName, bytes)
+    def convert(self, oeb_book, output_path, opts, log):
+        from polyglot.urllib import unquote
+        from lxml import etree
+
+        self.log, self.opts = log, opts
+        from calibre.ebooks.oeb.base import OPF_MIME, NCX_MIME, PAGE_MAP_MIME, OEB_STYLES
+        from calibre.ebooks.oeb.normalize_css import condense_sheet
+        
+        results = oeb_book.to_opf2(page_map=True)
+        for key in (OPF_MIME, NCX_MIME, PAGE_MAP_MIME):
+            href, root = results.pop(key, [None, None])
+            if root is not None:
+                if key == OPF_MIME:
+                    try:
+                        self.workaround_nook_cover_bug(root)
+                    except:
+                        self.log.exception('Something went wrong while trying to'
+                                ' workaround Nook cover bug, ignoring')
+                    try:
+                        self.workaround_pocketbook_cover_bug(root)
+                    except:
+                        self.log.exception('Something went wrong while trying to'
+                                ' workaround Pocketbook cover bug, ignoring')
+                    self.adjust_mime_types(root)
+                raw = etree.tostring(root, pretty_print=True,
+                        encoding='utf-8', xml_declaration=True) #Type: bytes
+                if key == OPF_MIME:
+                    # Needed as I can't get lxml to output opf:role and
+                    # not output <opf:metadata> as well
+                    raw = re.sub(br'(<[/]{0,1})opf:', br'\1', raw)
+                output_path.append((href, raw))
+                
+        for item in oeb_book.manifest:
+            if (
+                    not self.opts.expand_css and item.media_type in OEB_STYLES and hasattr(
+                        item.data, 'cssText') and 'nook' not in self.opts.output_profile.short_name):
+                condense_sheet(item.data)
+
+            output_path.append((item.href, item.bytes_representation))
+            path = os.path.abspath(unquote(item.href))
+            item.unload_data_from_memory(memory=path)
+
+    def adjust_mime_types(self, root):
+        from calibre.ebooks.oeb.polish.utils import adjust_mime_for_epub
+        for x in root.xpath('//*[local-name() = "manifest"]/*[local-name() = "item"]'):
+            mt = x.get('media-type')
+            if mt:
+                nmt = adjust_mime_for_epub(filename=os.path.basename(x.get('href') or ''), mime=mt)
+                if nmt != mt:
+                    x.set('media-type', nmt)
+
+    def workaround_nook_cover_bug(self, root):  # {{{
+        cov = root.xpath('//*[local-name() = "meta" and @name="cover" and'
+                ' @content != "cover"]')
+
+        def manifest_items_with_id(id_):
+            return root.xpath('//*[local-name() = "manifest"]/*[local-name() = "item" '
+                ' and @id="%s"]'%id_)
+
+        if len(cov) == 1:
+            cov = cov[0]
+            covid = cov.get('content', '')
+
+            if covid:
+                manifest_item = manifest_items_with_id(covid)
+                if len(manifest_item) == 1 and \
+                        manifest_item[0].get('media-type',
+                                '').startswith('image/'):
+                    self.log.warn('The cover image has an id != "cover". Renaming'
+                            ' to work around bug in Nook Color')
+
+                    from calibre.ebooks.oeb.base import uuid_id
+                    newid = uuid_id()
+
+                    for item in manifest_items_with_id('cover'):
+                        item.set('id', newid)
+
+                    for x in root.xpath('//*[@idref="cover"]'):
+                        x.set('idref', newid)
+
+                    manifest_item = manifest_item[0]
+                    manifest_item.set('id', 'cover')
+                    cov.set('content', 'cover')
+    # }}}
+
+    def workaround_pocketbook_cover_bug(self, root):  # {{{
+        m = root.xpath('//*[local-name() = "manifest"]/*[local-name() = "item" '
+                ' and @id="cover"]')
+        if len(m) == 1:
+            m = m[0]
+            p = m.getparent()
+            p.remove(m)
+            p.insert(0, m)
+    # }}}
+

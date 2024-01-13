@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# vim:fileencoding=UTF-8:ts=4:sw=4:sta:et:sts=4:ai
-from __future__ import (unicode_literals, division, absolute_import,
-                        print_function)
+
 
 __license__   = 'GPL v3'
 __copyright__ = '2012, Kovid Goyal <kovid@kovidgoyal.net>'
@@ -11,7 +9,7 @@ DOC = '''
 Trailing Byte Sequences contain information about which index entries touch a
 particular text record. Every text records has a set of trailing byte
 sequences. In order to figure out the sequence for a given text record, you
-have to first calculate all the indices that start, end, span and anre
+have to first calculate all the indices that start, end, span and are
 contained within that text record. Then arrange the indices into 'strands',
 where each strand is a hierarchical progression from the top level index down.
 For the exact algorithm, see separate_strands(). The strands are then encoded
@@ -23,10 +21,12 @@ from operator import attrgetter
 
 from calibre.ebooks.mobi.utils import (encode_trailing_data,
         encode_tbs)
+from polyglot.builtins import iteritems, itervalues
 
 Entry = namedtuple('IndexEntry', 'index start length depth parent '
         'first_child last_child title action start_offset length_offset '
         'text_record_length')
+
 
 def fill_entry(entry, start_offset, text_record_length):
     length_offset = start_offset + entry.length
@@ -37,6 +37,7 @@ def fill_entry(entry, start_offset, text_record_length):
 
     return Entry(*(entry[:-4] + (action, start_offset, length_offset,
         text_record_length)))
+
 
 def populate_strand(parent, entries):
     ans = [parent]
@@ -53,18 +54,18 @@ def populate_strand(parent, entries):
         current_index = parent.index
         siblings = []
         for entry in list(entries):
-            if (entry.depth == parent.depth and entry.parent == parent.parent
-                    and entry.index == current_index+1):
+            if (entry.depth == parent.depth and entry.parent == parent.parent and entry.index == current_index+1):
                 current_index += 1
                 entries.remove(entry)
                 children = [c for c in entries if c.parent == entry.index]
                 if children:
                     siblings += populate_strand(entry, entries)
-                    break # Cannot add more siblings, as we have added children
+                    break  # Cannot add more siblings, as we have added children
                 else:
                     siblings.append(entry)
         ans += siblings
     return ans
+
 
 def separate_strands(entries):
     ans = []
@@ -78,6 +79,7 @@ def separate_strands(entries):
             layers[entry.depth].append(entry)
         ans.append(layers)
     return ans
+
 
 def collect_indexing_data(entries, text_record_lengths):
     ''' For every text record calculate which index entries start, end, span or
@@ -106,8 +108,10 @@ def collect_indexing_data(entries, text_record_lengths):
 
     return data
 
+
 class NegativeStrandIndex(Exception):
     pass
+
 
 def encode_strands_as_sequences(strands, tbs_type=8):
     ''' Encode the list of strands for a single text record into a list of
@@ -117,7 +121,7 @@ def encode_strands_as_sequences(strands, tbs_type=8):
     max_length_offset = 0
     first_entry = None
     for strand in strands:
-        for entries in strand.itervalues():
+        for entries in itervalues(strand):
             for entry in entries:
                 if first_entry is None:
                     first_entry = entry
@@ -126,7 +130,7 @@ def encode_strands_as_sequences(strands, tbs_type=8):
 
     for strand in strands:
         strand_seqs = []
-        for depth, entries in strand.iteritems():
+        for depth, entries in iteritems(strand):
             extra = {}
             if entries[-1].action == 'spans':
                 extra[0b1] = 0
@@ -171,14 +175,16 @@ def encode_strands_as_sequences(strands, tbs_type=8):
 
     return ans
 
+
 def sequences_to_bytes(sequences):
     ans = []
     flag_size = 3
     for val, extra in sequences:
         ans.append(encode_tbs(val, extra, flag_size))
-        flag_size = 4 # only the first sequence has flag size 3 as all
-                      # subsequent sequences could need the 0b1000 flag
+        flag_size = 4  # only the first sequence has flag size 3 as all
+        # subsequent sequences could need the 0b1000 flag
     return b''.join(ans)
+
 
 def calculate_all_tbs(indexing_data, tbs_type=8):
     rmap = {}
@@ -187,6 +193,7 @@ def calculate_all_tbs(indexing_data, tbs_type=8):
         tbs_bytes = sequences_to_bytes(sequences)
         rmap[i+1] = tbs_bytes
     return rmap
+
 
 def apply_trailing_byte_sequences(index_table, records, text_record_lengths):
     entries = tuple(Entry(r['index'], r['offset'], r['length'], r['depth'],
@@ -199,9 +206,7 @@ def apply_trailing_byte_sequences(index_table, records, text_record_lengths):
     except NegativeStrandIndex:
         rmap = calculate_all_tbs(indexing_data, tbs_type=5)
 
-    for i, tbs_bytes in rmap.iteritems():
+    for i, tbs_bytes in iteritems(rmap):
         records[i] += encode_trailing_data(tbs_bytes)
 
     return True
-
-

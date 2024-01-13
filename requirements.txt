@@ -13,6 +13,12 @@ Flask==3.0.0
 flask-babel==4.0.0
 six
 feedparser==6.0.11
+html5-parser==0.4.12
+peewee==3.17.0
+#psycopg2
+#pymysql
+#umongo==3.1.0
+#udatastore==0.1.7
 google-cloud-tasks==2.15.0
 google-cloud-datastore
 datastore-entity

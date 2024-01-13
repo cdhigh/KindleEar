@@ -6,12 +6,12 @@ from operator import attrgetter
 import datetime
 from flask import Blueprint, request, url_for, render_template
 from apps.base_handler import *
-from apps.db_models import *
+from apps.back_end.db_models import *
 from google.appengine.api.datastore_errors import NeedIndexError
 
 bpLogs = Blueprint('bpLogs', __name__)
 
-@bpLogs.route("/logs")
+@bpLogs.route("/logs", endpoint='Mylogs')
 @login_required
 def Mylogs():
     user = get_login_user()
@@ -73,7 +73,7 @@ def RemoveLogs():
     return "{} lines delivery log removed.<br />".format(cnt)
 
 #修改/删除已推送期号的AJAX处理函数
-@bpLogs.post("/lastdelivered/<mgrType>")
+@bpLogs.post("/lastdelivered/<mgrType>", endpoint='LastDeliveredAjaxPost')
 @login_required(forAjax=True)
 def LastDeliveredAjaxPost(mgrType):
     user = get_login_user(forAjax=True)

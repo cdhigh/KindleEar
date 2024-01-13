@@ -5,12 +5,12 @@
 
 import re, zlib, base64, io
 from urllib.parse import urljoin
-from email.Header import decode_header
+from email.header import decode_header
 from email.utils import parseaddr, collapse_rfc2231_value
 from bs4 import BeautifulSoup
 from flask import Blueprint, request
 from apps.back_end.task_queue_adpt import create_http_task
-from apps.db_models import KeUser, Book, WhiteList
+from apps.back_end.db_models import KeUser, Book, WhiteList
 from apps.base_handler import *
 from apps.utils import local_time
 from apps.back_end.send_mail_adpt import send_to_kindle
@@ -74,7 +74,7 @@ def IsSpamMail(sender, user):
 @bpInBoundEmail.post("/_ah/bounce")
 def ReceiveBounce():
     msg = mail.BounceNotification(dict(request.form.lists()))
-    default_log.warn("Bounce original: {}, notification: {}".format(msg.original, msg.notification))
+    default_log.warning("Bounce original: {}, notification: {}".format(msg.original, msg.notification))
     return "OK", 200
 
 #有新的邮件到达
@@ -100,7 +100,7 @@ def ReceiveMail(path):
     sender = parseaddr(message.sender)[1]
     if IsSpamMail(sender, user):
         self.response.out.write("Spam mail!")
-        log.warn('Spam mail from : {}'.format(sender))
+        log.warning('Spam mail from : {}'.format(sender))
         return "OK", 200
     
     if hasattr(message, 'subject'):
@@ -130,7 +130,7 @@ def ReceiveMail(path):
     try:
         allBodies = [body.decode() for cType, body in message.bodies('text/html')]
     except:
-        log.warn('Decode html bodies of mail failed.')
+        log.warning('Decode html bodies of mail failed.')
         allBodies = []
     
     #此邮件为纯文本邮件，将文本信息转换为HTML格式
@@ -139,7 +139,7 @@ def ReceiveMail(path):
         try:
             allBodies = [body.decode() for cType, body in txtBodies]
         except:
-            log.warn('Decode text bodies of mail failed.')
+            log.warning('Decode text bodies of mail failed.')
             allBodies = []
         bodies = ''.join(allBodies)
         if not bodies:
@@ -321,6 +321,6 @@ def TrigDeliver(subject, userName):
             if trigBook:
                 bkIds.append(str(trigBook.key().id()))
             else:
-                log.warn('Book not found : {}'.format(bk.strip()))
+                log.warning('Book not found : {}'.format(bk.strip()))
         if bkIds:
             create_http_task('/worker', {'u': userName, 'id_': ','.join(bkIds)})
