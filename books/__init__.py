@@ -45,8 +45,8 @@ for root, dirs, files in listBkDirs:
 def RegisterBuiltinBooks():
     return #TODO
     for book in _booksclasses:
-        b = Book.all().filter("title = ", book.title).get()
+        b = Book.get_one(Book.title == book.title)
         if not b:
             b = Book(title=book.title, description=book.description, builtin=True, 
                 needs_subscription=book.needs_subscription, separate=False)
-            b.put()
+            b.save()

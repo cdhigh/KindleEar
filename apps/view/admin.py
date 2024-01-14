@@ -13,16 +13,16 @@ bpAdmin = Blueprint('bpAdmin', __name__)
 
 # 账户管理页面
 @bpAdmin.route("/admin", endpoint='Admin')
-@login_required
+@login_required()
 def Admin():
     user = get_login_user()
 
     #只有管理员才能管理其他用户
-    users = KeUser.all() if user.name == ADMIN_NAME else None
+    users = KeUser.get_all() if user.name == ADMIN_NAME else None
     return render_template('admin.html', title='Admin', tab='admin', user=user, users=users)
 
 @bpAdmin.post("/admin", endpoint='AdminPost')
-@login_required
+@login_required()
 def AdminPost():
     form = request.form
     userName = form.get('u') #用于添加账号
@@ -34,7 +34,7 @@ def AdminPost():
     expiration = str_to_int(form.get('expiration', '0'))
     
     user = get_login_user()
-    users = KeUser.all() if user.name == ADMIN_NAME else None
+    users = KeUser.get_all() if user.name == ADMIN_NAME else None
     
     if all((oldPassword, newP1, newP2)): #修改当前登陆账号的密码
         secret_key = user.secret_key or ''
@@ -51,7 +51,7 @@ def AdminPost():
             else:
                 tips = _("Change password success!")
                 user.passwd = newPwd
-                user.put()
+                user.save()
         return render_template('admin.html', tab='admin', user=user, users=users, chpwdtips=tips)
     elif all((userName, password1, password2)): #添加账户
         specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}', ',', ';', '|']
@@ -61,7 +61,7 @@ def AdminPost():
             tips = _("The username includes unsafe chars!")
         elif password1 != password2:
             tips = _("The two new passwords are dismatch!")
-        elif KeUser.all().filter("name = ", userName).get():
+        elif KeUser.get_one(KeUser.name == userName):
             tips = _("Already exist the username!")
         else:
             secret_key = new_secret_key()
@@ -73,15 +73,15 @@ def AdminPost():
                 myfeeds = Book(title="KindleEar", description="RSS from KindleEar",
                     builtin=False, keep_image=True, oldest_article=7, 
                     needs_subscription=False, separate=False)
-                myfeeds.put()
+                myfeeds.save()
                 au = KeUser(name=userName, passwd=pwd, kindle_email='', enable_send=False,
-                    send_time=7, timezone=TIMEZONE, book_type="epub",
-                    own_feeds=myfeeds, merge_books=False, secret_key=secret_key, expiration_days=expiration)
+                    send_time=7, timezone=TIMEZONE, book_type="epub", own_feeds=myfeeds.reference_key_or_id, 
+                    merge_books=False, secret_key=secret_key, expiration_days=expiration)
                 if expiration:
                     au.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
 
-                au.put()
-                users = KeUser.all() if user.name == ADMIN_NAME else None
+                au.save()
+                users = KeUser.get_all() if user.name == ADMIN_NAME else None
                 tips = _("Add a account success!")
         return render_template('admin.html', tab='admin', user=user, users=users, actips=tips)
     else:
@@ -91,7 +91,7 @@ def AdminPost():
 @bpAdmin.route("/mgrpwd/<name>", endpoint='AdminManagePassword')
 @login_required(ADMIN_NAME)
 def AdminManagePassword(name):
-    u = KeUser.all().filter("name = ", name).get()
+    u = KeUser.get_one(KeUser.name == name)
     expiration = 0
     if not u:
         tips = _("The username '{}' not exist!").format(name)
@@ -112,7 +112,7 @@ def AdminManagePasswordPost(name):
     tips = _("Username is empty!")
 
     if name:
-        u = KeUser.all().filter("name = ", name).get()
+        u = KeUser.get_one(KeUser.name == name)
         if not u:
             tips = _("The username '{}' not exist!").format(name)
         elif p1 != p2:
@@ -130,7 +130,7 @@ def AdminManagePasswordPost(name):
                     u.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
                 else:
                     u.expires = None
-                u.put()
+                u.save()
                 strBackPage = '&nbsp;&nbsp;&nbsp;&nbsp;<a href="/admin">Click here to go back</a>'
                 tips = _("Change password success!") + strBackPage
     
@@ -138,50 +138,26 @@ def AdminManagePasswordPost(name):
     
 #删除一个账号
 @bpAdmin.route("/delaccount/<name>", endpoint='DelAccount')
-@login_required
+@login_required()
 def DelAccount(name):
-    if (name != ADMIN_NAME) and (session.userName in (ADMIN_NAME, name)):
+    if (name != ADMIN_NAME) and (session.get('userName') in (ADMIN_NAME, name)):
         tips = _("Please confirm to delete the account!")
         return render_template('delaccount.html', tips=tips, userName=name)
     else:
         return redirect('/')
 
 @bpAdmin.post("/delaccount/<name>", endpoint='DelAccountPost')
-@login_required
+@login_required()
 def DelAccountPost(name):
     name = request.form.get('u')
-    if (name != ADMIN_NAME) and (session.userName in (ADMIN_NAME, name)):
-        u = KeUser.all().filter("name = ", name).get()
+    if (name != ADMIN_NAME) and (session.get('userName') in (ADMIN_NAME, name)):
+        u = KeUser.get_one(KeUser.name == name)
         if not u:
             tips = _("The username '{}' not exist!").format(name)
         else:
-            if u.own_feeds:
-                for feed in list(u.own_feeds.feeds):
-                    feed.delete()
-                u.own_feeds.delete()
-                
-            #删掉白名单和过滤器
-            for d in list(u.white_list):
-                d.delete()
-            for d in list(u.url_filter):
-                d.delete()
-            
-            # 删掉订阅记录
-            for book in Book.all():
-                if book.users and name in book.users:
-                    book.users.remove(name)
-                    book.put()
-            
-            #删掉推送记录
-            db.delete(DeliverLog.all().filter('username = ', name))
-            
-            #删掉书籍登陆信息
-            for subs_info in SubscriptionInfo.all().filter('user = ', u.key()):
-                subs_info.delete()
-            
+            u.erase_traces() #删除自己订阅的书，白名单，过滤器等，就是完全的清理
             u.delete()
-            
-            return redirect(url_for("Logout") if session.userName == name else url_for("Admin"))
+            return redirect(url_for("bpLogin.Logout") if session.get('userName') == name else url_for("bpAdmin.Admin"))
     else:
         tips = _("The username is empty or you dont have right to delete it!")
     return render_template('delaccount.html', tips=tips, userName=name)

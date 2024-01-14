@@ -66,7 +66,7 @@
         </tbody>
     </table>
     {% else -%}
-    <div class="notice-box">{{_('Has no log')}}</div>
+    <div class="notice-box">{{_('There is no log')}}</div>
     {% endif -%}
 
     {% if logs -%}
@@ -134,18 +134,18 @@
         </thead>
         <tbody>
         {% for log in lastDelivered -%}
-        <tr id="lastDelivered_{{ log.key().id() }}">
+        <tr id="lastDelivered_{{ log.key_or_id_string }}">
             <td>{{ log.username }}</td>
             <td>{{ log.datetime.strftime('%Y-%m-%d %H:%M') }}</td>
             <td>{{ log.bookname }}</td>
-            <td id="lastDelivered_num_{{ log.key().id() }}">{%if log.num %} {{ log.num }} {% else %} - {% endif %}</td>
-            <td id="lastDelivered_rec_{{ log.key().id() }}">{%if log.record %} {{ log.record }} {% else %} - {% endif %}</td>
+            <td id="lastDelivered_num_{{ log.key_or_id_string }}">{%if log.num %} {{ log.num }} {% else %} - {% endif %}</td>
+            <td id="lastDelivered_rec_{{ log.key_or_id_string }}">{%if log.record %} {{ log.record }} {% else %} - {% endif %}</td>
             {% if log.num -%}
             <td>
-                <a href="#" onclick="ChangeLastDelivered({{ log.key().id() }});return false;" class="actionButton">{{_("Change")}}</a>
+                <a href="#" onclick="ChangeLastDelivered({{ log.key_or_id_string }});return false;" class="actionButton">{{_("Change")}}</a>
             {% else -%}
             {% endif -%}
-                <a href="#" onclick="DeleteLastDelivered({{ log.key().id() }});return false;" class="actionButton">{{_("Delete")}}</a>
+                <a href="#" onclick="DeleteLastDelivered({{ log.key_or_id_string }});return false;" class="actionButton">{{_("Delete")}}</a>
             </td>
         </tr>
         {% endfor -%}

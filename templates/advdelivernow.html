@@ -13,8 +13,8 @@
             {% endif %}
             {% if booksnum == 1 and books[0].builtin == False -%}
                 {% for item in books[0].feeds %}
-                <label for="{{ item.key().id() }}" class="pure-checkbox box">
-                    <input id="{{ item.key().id() }}" bookid="{{ books[0].key().id() }}" type="checkbox" checked="1" onclick="UpdateDeliverFeedLink();" />
+                <label for="{{ item.key_or_id_string }}" class="pure-checkbox box">
+                    <input id="{{ item.key_or_id_string }}" bookid="{{ books[0].key_or_id_string }}" type="checkbox" checked="1" onclick="UpdateDeliverFeedLink();" />
                     <span>{{item.title}}</span>
                 </label>
                 {% endfor %}
@@ -26,8 +26,8 @@
                 {% endif %}
             {%- elif booksnum > 0 -%}
                 {% for item in books %}
-                <label for="{{ item.key().id() }}" class="pure-checkbox box">
-                    <input id="{{ item.key().id() }}" type="checkbox" checked="1" onclick="UpdateDeliverLink();" />
+                <label for="{{ item.key_or_id_string }}" class="pure-checkbox box">
+                    <input id="{{ item.key_or_id_string }}" type="checkbox" checked="1" onclick="UpdateDeliverLink();" />
                     <span>{{ item.title }}</span>
                 </label>
                 {% endfor %}

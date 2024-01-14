@@ -12,12 +12,12 @@ APP_ID = "kindleear"
 SERVER_LOCATION = "us-central1"
 
 #Choose the database engine
-DATABASE_ENGINE = "sqlite"  #"datastore", "mysql", "sqlite", "mongo", "postgresql", "cockroachdb"
+DATABASE_ENGINE = "sqlite"  #"datastore", "mysql", "sqlite", "postgresql", "cockroachdb"
 DATABASE_HOST = "localhost"
-DATABASE_PORT = 3306
-DATABASE_USERNAME = "userName"
-DATABASE_PASSWORD = "password"
-DATABASE_NAME = "name"
+DATABASE_PORT = 0
+DATABASE_USERNAME = ""
+DATABASE_PASSWORD = ""
+DATABASE_NAME = "test.db"
 
 #Choose the backend service for sending emails, either "gae", "sendgrid", "smtp"
 SEND_MAIL_SERVICE = "gae"

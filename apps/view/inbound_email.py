@@ -64,11 +64,9 @@ def IsSpamMail(sender, user):
         return True
 
     mailHost = sender.split('@')[1]
-    wlFilter = user.white_list.filter('mail = ', '*').get() or \
-       user.white_list.filter('mail = ', sender.lower()).get() or \
-       user.white_list.filter('mail = ', '@' + mailHost.lower()).get()
+    whitelist = [item.mail.lower() for item in user.white_lists]
 
-    return not wlFilter
+    return not (('*' in whitelist) or (sender.lower() in whitelist) or (f'@{mail_host}' in whitelist))
 
 #GAE的退信通知
 @bpInBoundEmail.post("/_ah/bounce")
@@ -88,10 +86,10 @@ def ReceiveMail(path):
     #从接收地址提取账号名和真实地址
     userName, to = extractUsernameFromEmail(message.to)
     
-    user = KeUser.all().filter('name = ', userName).get()
+    user = KeUser.get_one(KeUser.name == userName)
     if not user:
         userName = ADMIN_NAME
-        user = KeUser.all().filter('name = ', userName).get()
+        user = KeUser.get_one(KeUser.name == userName)
     
     if not user or not user.kindle_email:
         return "OK", 200
@@ -317,9 +315,9 @@ def TrigDeliver(subject, userName):
     else:
         bkIds = []
         for bk in subject.split(','):
-            trigBook = Book.all().filter('title = ', bk.strip()).get()
+            trigBook = Book.get_one(Book.title == bk.strip())
             if trigBook:
-                bkIds.append(str(trigBook.key().id()))
+                bkIds.append(trigBook.key_or_id_string)
             else:
                 log.warning('Book not found : {}'.format(bk.strip()))
         if bkIds:

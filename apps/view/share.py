@@ -21,7 +21,7 @@ SHARE_INFO_TPL = """<html><head><meta http-equiv="Content-Type" content="text/ht
         <title>{title}</title></head><body><p style="text-align:center;font-size:1.5em;">{info}</p></body></html>"""
 
 @bpShare.route("/share")
-def Share(self):
+def Share():
     args = request.args
     action = args.get('act')
     userName = args.get('u')
@@ -29,7 +29,7 @@ def Share(self):
     if not all((action, userName, url)):
         return "Some parameter is missing or wrong!<br />"
     
-    user = KeUser.all().filter("name = ", userName).get()
+    user = KeUser.get_one(KeUser.name == userName)
     if not user or not user.kindle_email:
         return "User not exist!<br />"
     
@@ -61,7 +61,7 @@ def SaveToEvernoteWiz(user, action, orgUrl):
     book.language = user.own_feeds.language
     book.keep_image = user.own_feeds.keep_image
     book.feeds = [(action, orgUrl)]
-    book.url_filters = [flt.url for flt in user.url_filter]
+    book.url_filters = [flt.url for flt in user.url_filters]
     
     attachments = [] #(filename, attachment),]
     html = ''

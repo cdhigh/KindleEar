@@ -21,7 +21,7 @@
             <input id="password" name="password" type="password" placeholder="Password" 
             {% if subs_info and subs_info.password %}value="{{subs_info.password}}"{% endif %} />
         </div>
-        <input name="id" type="hidden" value="{{bk.key().id()}}" />
+        <input name="id" type="hidden" value="{{bk.key_or_id_string}}" />
         {% if tips -%}
         <p style="color:red;font-weight:bold;">{{tips}}</p>
         {% else -%}

@@ -233,7 +233,7 @@ msgstr "收件人"
 msgid "Status"
 msgstr "状态"
 
-msgid "Has no log"
+msgid "There is no log"
 msgstr "还没有投递过"
 
 msgid "Subscribed"

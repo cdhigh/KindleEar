@@ -236,7 +236,7 @@ msgstr "Kime"
 msgid "Status"
 msgstr "Durum"
 
-msgid "Has no log"
+msgid "There is no log"
 msgstr "Kayıt yok."
 
 msgid "Subscribed"

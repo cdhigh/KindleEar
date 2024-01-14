@@ -17,18 +17,21 @@ from config import TIMEZONE
 def login_required(userName=None, forAjax=False):
     def decorator(func):
         @wraps(func)
-        def wrapper(*args, **kwds):
-            if (session.get('login') == 1) and (not userName or (userName == session.get('userName'))):
+        def wrapper(*args, **kwargs):
+            print(f"login: {session.get('login')}")
+            print(f"Name: {session.get('userName')}")
+            if ((session.get('login') == 1) and (not userName or (userName == session.get('userName')))
+                and get_login_user()):
                 return func(*args, **kwargs)
             else:
-                return redirect(url_for("NeedLoginAjax") if forAjax else url_for("Login"))
+                return redirect(url_for("bpLogin.NeedLoginAjax") if forAjax else url_for("bpLogin.Login"))
         return wrapper
     return decorator
 
 #查询当前登录用户名，在使用此函数前最好保证已经登录
 #返回一个数据库行实例，而不是一个字符串
 def get_login_user():
-    return KeUser.all().filter("name = ", session.get('userName')).get()
+    return KeUser.get_one(KeUser.name == session.get('userName', ''))
     
 #记录投递记录到数据库
 def deliver_log(name, to, book, size, status='ok', tz=TIMEZONE):
@@ -37,6 +40,6 @@ def deliver_log(name, to, book, size, status='ok', tz=TIMEZONE):
         dl = DeliverLog(username=name, to=to, size=size,
            time=local_time(tz=tz), datetime=datetime.datetime.utcnow(),
            book=book, status=status)
-        dl.put()
+        dl.save()
     except Exception as e:
         default_log.warning('DeliverLog failed to save: {}'.format(e))

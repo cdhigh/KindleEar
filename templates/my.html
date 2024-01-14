@@ -58,7 +58,7 @@
             </div>
             <div class="cornerControls">
                 <a href="javascript:;" onclick="startShareRss('{{feed.title}}', '{{feed.url}}', {% if feed.isfulltext %}'true'{% else %}'false'{% endif %});return false;" class="actionButton act">{{_("Share")}}</a>
-                <a href="javascript:;" onclick="delFeed(this, {{feed.key().id()}});return false;" class="actionButton">{{ _("Delete") }}</a>
+                <a href="javascript:;" onclick="delFeed(this, {{feed.key_or_id_string}});return false;" class="actionButton">{{ _("Delete") }}</a>
             </div>
         </div>
         {% endfor -%}
@@ -85,10 +85,10 @@
             </div>
             <div class="cornerControls">
                 {% if book.needs_subscription -%}
-                    <a href="/booklogininfo/{{book.key().id()}}" class="actionButton" {% if not user.subscription_info(book.title) -%} style="color:red;" {%- endif %}
+                    <a href="/booklogininfo/{{book.key_or_id_string}}" class="actionButton" {% if not user.subscription_info(book.title) -%} style="color:red;" {%- endif %}
                 >{{_("Login Info")}}</a>
                 {% endif -%}
-                <a href="javascript:;" onclick="doUnsubscribe(this,{{book.key().id()}});return false;" class="actionButton">{{ _("Unsubscribe") }}</a>
+                <a href="javascript:;" onclick="doUnsubscribe(this,{{book.key_or_id_string}});return false;" class="actionButton">{{ _("Unsubscribe") }}</a>
             </div>
         </div>
         {% else -%}
@@ -104,8 +104,8 @@
         {% for book in books if session.get('userName') not in book.users -%}
         <div class="book box">
             <div class="titleRow">{{book.title}}
-                <input type="checkbox" id="separate_{{book.key().id()}}" />
-                <img alt="{{ _('Separate') }}" src="static/separate.gif" border="0" onclick="toggleSeparate('{{book.key().id()}}');" />
+                <input type="checkbox" id="separate_{{book.key_or_id_string}}" />
+                <img alt="{{ _('Separate') }}" src="static/separate.gif" border="0" onclick="toggleSeparate('{{book.key_or_id_string}}');" />
             </div>
             <div class="summaryRow">
                 {% if book.description|length>80 -%}
@@ -115,7 +115,7 @@
                 {% endif -%}
             </div>
             <div class="cornerControls">
-                <a href="javascript:;" onclick="doSubscribe(this,{{book.key().id()}});return false;" class="actionButton act">{{ _("Subscribe") }}</a>
+                <a href="javascript:;" onclick="doSubscribe(this,{{book.key_or_id_string}});return false;" class="actionButton act">{{ _("Subscribe") }}</a>
             </div>
         </div>
         {% else -%}

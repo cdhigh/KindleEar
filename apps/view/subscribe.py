@@ -20,58 +20,54 @@ bpSubscribe = Blueprint('bpSubscribe', __name__)
 #管理我的订阅和杂志列表
 @bpSubscribe.route("/my", endpoint='MySubscription')
 @bpSubscribe.route("/my/<tips>", endpoint='MySubscription')
-@login_required
+@login_required()
 def MySubscription(tips=None):
     user = get_login_user()
     titleToAdd = request.args.get('title_to_add')
     urlToAdd = request.args.get('url_to_add')
     myfeeds = user.own_feeds.feeds if user.own_feeds else None
-    books = list(Book.all().filter("builtin = ", True))
-    # 简单排个序，为什么不用数据库直接排序是因为Datastore数据库需要建立索引才能排序
+    books = list(Book.get_all(Book.builtin == True))
+    #简单排个序，为什么不用数据库直接排序是因为Datastore数据库需要建立索引才能排序
     books.sort(key=attrgetter("title"))
 
-    return render_page("my.html", tab="my", user=user, books=books,
+    return render_template("my.html", tab="my", user=user, books=books,
         myfeeds=myfeeds, comic_base_classes=ComicBaseClasses, tips=tips,
-        subscribe_url=url_for("MySubscription"), title_to_add=titleToAdd,
+        subscribe_url=url_for("bpSubscribe.MySubscription"), title_to_add=titleToAdd,
         url_to_add=urlToAdd)
 
 @bpSubscribe.post("/my", endpoint='MySubscriptionPost')
-@login_required
-def MySubscriptionPost():  # 添加自定义RSS
+@login_required()
+def MySubscriptionPost():  #添加自定义RSS
     user = get_login_user()
     form = request.form
     title = form.get('rss_title')
     url = form.get('url')
     isfulltext = bool(form.get('fulltext'))
     if not title or not url:
-        return redirect(url_for("MySubscription", tips=(_("Title or url is empty!"))))
+        return redirect(url_for("bpSubscribe.MySubscription", tips=(_("Title or url is empty!"))))
 
     if not url.lower().startswith('http'): #http and https
         url = 'https://' + url
 
     #判断是否重复
     if url.lower() in (item.url.lower() for item in user.own_feeds.feeds):
-        return redirect(url_for("MySubscription", tips=(_("Duplicated subscription!"))))
+        return redirect(url_for("bpSubscribe.MySubscription", tips=(_("Duplicated subscription!"))))
 
-    Feed(title=title, url=url, book=user.own_feeds, isfulltext=isfulltext,
-        time=datetime.datetime.utcnow()).put()
-    return redirect(url_for("MySubscription"))
+    Feed(title=title, url=url, book=user.own_feeds.reference_key_or_id, isfulltext=isfulltext,
+        time=datetime.datetime.utcnow()).save()
+    return redirect(url_for("bpSubscribe.MySubscription"))
 
 #添加/删除自定义RSS订阅的AJAX处理函数
 @bpSubscribe.post("/feeds/<actType>", endpoint='FeedsAjaxPost')
 @login_required(forAjax=True)
-def FeedsAjaxPost(self, actType):
+def FeedsAjaxPost(actType):
     user = get_login_user(forAjax=True)
     form = request.form
     actType = actType.lower()
 
     if actType == 'delete':
-        try:
-            feedId = int(form.get('feedid'))
-        except:
-            return {'status': _('The id is invalid!')}
-
-        feed = Feed.get_by_id(feedId)
+        feedId = form.feedid
+        feed = Feed.get_by_id_or_none(feedId)
         if feed:
             feed.delete()
             return {'status': 'ok'}
@@ -94,14 +90,14 @@ def FeedsAjaxPost(self, actType):
             respDict['url'] = url
 
         #判断是否重复
-        if url.lower() in (item.url.lower() for item in user.own_feeds.feeds):
+        if url.lower() in [item.url.lower() for item in user.my_custom_rss_book.feeds]:
             respDict['status'] = _("Duplicated subscription!")
             return respDict
 
-        fd = Feed(title=title, url=url, book=user.own_feeds, isfulltext=isfulltext,
+        fd = Feed(title=title, url=url, book=user.my_custom_rss_book.reference_key_or_id, isfulltext=isfulltext,
             time=datetime.datetime.utcnow())
-        fd.put()
-        respDict['feedid'] = fd.key().id()
+        fd.save()
+        respDict['feedid'] = fd.key_or_id_string
         
         #如果是从共享库中订阅的，则通知共享服务器，提供订阅数量信息，以便排序
         if fromSharedLibrary:
@@ -121,16 +117,12 @@ def SendNewSubscription(title, url):
 
 #订阅/退订内置书籍的AJAX处理函数
 @bpSubscribe.post("/books/<actType>", endpoint='BooksAjaxPost')
-@login_required
-def BooksAjaxPost(self, actType):
+@login_required()
+def BooksAjaxPost(actType):
     user = get_login_user(forAjax=True)
     form = request.form
-    try:
-        id_ = int(form.get('id_'))
-    except:
-        return {'status': _('The id is invalid!')}
-
-    bk = Book.get_by_id(id_)
+    id_ = form.get('id_')
+    bk = Book.get_by_id_or_none(id_)
     if not bk:
         return {'status': _('The book ({}) not exist!').format(id_)}
 
@@ -139,7 +131,7 @@ def BooksAjaxPost(self, actType):
         if user.name in bk.users:
             bk.users.remove(user.name)
             bk.separate = False
-            bk.put()
+            bk.save()
 
         #为安全起见，退订后也删除网站登陆信息（如果有的话）
         subsInfo = user.subscription_info(bk.title)
@@ -149,9 +141,7 @@ def BooksAjaxPost(self, actType):
         return {'status':'ok', 'title': bk.title, 'desc': bk.description}
     elif actType == 'subscribe':
         separate = form.get('separate')
-
         respDict = {'status': 'ok'}
-
         bkcls = BookClass(bk.title)
         if not bkcls:
             return {'status': 'The book ({}) not exist!'.format(id_)}
@@ -163,7 +153,7 @@ def BooksAjaxPost(self, actType):
         if user.name not in bk.users:
             bk.users.append(user.name)
             bk.separate = bool(separate.lower() in ('true', '1'))
-            bk.put()
+            bk.save()
 
         respDict['title'] = bk.title
         respDict['desc'] = bk.description
@@ -176,14 +166,9 @@ def BooksAjaxPost(self, actType):
 
 #订阅一本书
 @bpSubscribe.route("/subscribe/<id_>", endpoint='Subscribe')
-@login_required
+@login_required()
 def Subscribe(id_):
-    try:
-        id_ = int(id_)
-    except:
-        return "The id is invalid!<br />"
-
-    bk = Book.get_by_id(id_)
+    bk = Book.get_by_id_or_none(id_)
     if not bk:
         return 'The book ({}) not exist!'.format(id_)
 
@@ -197,62 +182,51 @@ def Subscribe(id_):
     else:
         separate = request.query.get('separate', 'true')
 
-    if session.userName not in bk.users:
-        bk.users.append(session.userName)
+    userName = session.get('userName')
+    if userName and userName not in bk.users:
+        bk.users.append(userName)
         bk.separate = bool(separate in ('true', '1'))
-        bk.put()
-    return redirect(url_for("MySubscription"))
+        bk.save()
+    return redirect(url_for("bpSubscribe.MySubscription"))
 
 #取消一个订阅
 @bpSubscribe.route("/unsubscribe/<id_>", endpoint='Unsubscribe')
-@login_required
-def Unsubscribe(self, id_):
+@login_required()
+def Unsubscribe(id_):
     user = get_login_user()
-    try:
-        id_ = int(id_)
-    except:
-        return "The id is invalid!<br />"
-
-    bk = Book.get_by_id(id_)
+    bk = Book.get_by_id_or_none(id_)
     if not bk:
         return 'The book ({}) not exist!'.format(id_)
 
-    if session.userName in bk.users:
-        bk.users.remove(session.userName)
+    userName = session.get('userName')
+    if userName in bk.users:
+        bk.users.remove(userName)
         bk.separate = False
-        bk.put()
+        bk.save()
 
     #为安全起见，退订后也删除网站登陆信息（如果有的话）
     subsInfo = user.subscription_info(bk.title)
     if subsInfo:
         subsInfo.delete()
 
-    return redirect(url_for("MySubscription"))
+    return redirect(url_for("bpSubscribe.MySubscription"))
 
 @bpSubscribe.route("/delfeed/<id_>", endpoint='DelFeed')
-@login_required
+@login_required()
 def DelFeed(id_):
     user = get_login_user()
-    try:
-        id_ = int(id_)
-    except:
-        return "The id is invalid!<br />"
-
-    feed = Feed.get_by_id(id_)
+    feed = Feed.get_by_id_or_none(id_)
     if feed:
         feed.delete()
 
-    return redirect(url_for("MySubscription"))
+    return redirect(url_for("bpSubscribe.MySubscription"))
 
 #修改书籍的网站登陆信息
 @bpSubscribe.route("/booklogininfo/<id_>", endpoint='BookLoginInfo')
-@login_required
+@login_required()
 def BookLoginInfo(id_, tips=None):
     user = get_login_user()
-    try:
-        bk = Book.get_by_id(int(id_))
-    except:
-        bk = None
+    bk = Book.get_by_id_or_none(id_)
     if not bk:
         return 'The book not exist!'
 
@@ -260,16 +234,12 @@ def BookLoginInfo(id_, tips=None):
     return render_template('booklogininfo.html', bk=bk, subs_info=subsInfo, tips=tips)
 
 @bpSubscribe.post("/booklogininfo/<id_>", endpoint='BookLoginInfoPost')
-@login_required
+@login_required()
 def BookLoginInfoPost(id_):
     user = get_login_user()
     account = request.form.get('account')
     password = request.form.get('password')
-
-    try:
-        bk = Book.get_by_id(int(id_))
-    except:
-        bk = None
+    bk = Book.get_by_id_or_none(id_)
     if not bk:
         return 'The book not exist!'
 
@@ -281,11 +251,11 @@ def BookLoginInfoPost(id_):
         else:
             subsInfo.account = account
             subsInfo.password = password
-            subsInfo.put()
+            subsInfo.save()
     elif account and password:
-        subsInfo = SubscriptionInfo(account=account, user=user, title=bk.title)
-        subsInfo.put() #先保存一次才有user信息，然后才能加密
+        subsInfo = SubscriptionInfo(account=account, user=user.reference_key_or_id, title=bk.title)
+        subsInfo.save() #先保存一次才有user信息，然后才能加密
         subsInfo.password = password
-        subsInfo.put()
+        subsInfo.save()
 
-    return redirect(url_for("MySubscription"))
+    return redirect(url_for("bpSubscribe.MySubscription"))

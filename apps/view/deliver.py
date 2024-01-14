@@ -42,24 +42,24 @@ def Deliver():
     id_ = args.get('id_')
     feedsId = args.get('feedsId')
     if id_: #多个ID使用','分隔
-        id_ = [int(item) for item in id_.split(',') if item.isdigit()]
+        id_ = id_.split(',')
     
     queueToPush = defaultdict(list)
     
-    books = Book.all()
+    books = list(Book.get_all())
     if userName: #现在投递【测试使用】，不需要判断时间和星期
-        user = KeUser.all().filter("name = ", userName).get()
+        user = KeUser.get_one(KeUser.name == userName)
         if not user or not user.kindle_email:
             return render_template('autoback.html', tips=_('The username not exist or the email of kindle is empty.'))
 
         sent = []
         if id_: #推送特定账号指定的书籍，这里不判断特定账号是否已经订阅了指定的书籍，只要提供就推送
-            booksToPush = [Book.get_by_id(item) for item in id_ if Book.get_by_id(item)]
+            booksToPush = list(filter(bool, [Book.get_by_id_or_none(item) for item in id_]))
         else: #推送特定账号所有的书籍
             booksToPush = [item for item in books if userName in item.users]
         
         for book in booksToPush:
-            queueOneBook(queueToPush, user, book.key().id(), book.separate, feedsId)
+            queueOneBook(queueToPush, user, book.key_or_id_string, book.separate, feedsId)
             sent.append(book.title)
         self.flushQueueToPush()
 
@@ -84,7 +84,7 @@ def Deliver():
         
         #确定此书是否需要下载
         for u in book.users:
-            user = KeUser.all().filter("enable_send = ", True).filter("name = ", u).get()
+            user = KeUser.select().where(KeUser.enable_send == True).where(KeUer.name == u).first()
             if not user or not user.kindle_email:
                 continue
                 
@@ -114,7 +114,7 @@ def Deliver():
                 continue
             
             #到了这里才是需要推送的
-            queueOneBook(queueToPush, user, book.key().id(), book.separate)
+            queueOneBook(queueToPush, user, book.key_or_id_string, book.separate)
             sentCnt += 1
     flushQueueToPush()
     return "Put {} books to queue!".format(sentCnt)

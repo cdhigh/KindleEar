@@ -18,27 +18,27 @@ bpAdv = Blueprint('bpAdv', __name__)
 #高级设置的主入口
 @bpAdv.route("/adv")
 def AdvSettings():
-    return redirect(url_for("AdvDeliverNow"))
+    return redirect(url_for("bpAdv.AdvDeliverNow"))
 
 #现在推送
 @bpAdv.route("/advdelivernow", endpoint='AdvDeliverNow')
-@login_required
+@login_required()
 def AdvDeliverNow():
     user = get_login_user()
-    books = [item for item in Book.all() if user.name in item.users]
+    books = [item for item in Book.get_all() if user.name in item.users]
     return render_template('advdelivernow.html', tab='advset', user=user, 
         advCurr='delivernow', books=books, booksnum=len(books))
 
 #设置邮件白名单
 @bpAdv.route("/advwhitelist", endpoint='AdvWhiteList')
-@login_required
+@login_required()
 def AdvWhiteList():
     user = get_login_user()
     return render_template('advwhitelist.html', tab='advset',
-        user=user, advCurr='whitelist')
+        user=user, advCurr='whitelist', adminName=ADMIN_NAME)
 
 @bpAdv.post("/advwhitelist", endpoint='AdvWhiteListPost')
-@login_required
+@login_required()
 def AdvWhiteListPost():
     user = get_login_user()
     wlist = request.form.get('wlist')
@@ -47,12 +47,12 @@ def AdvWhiteListPost():
         if wlist.startswith('*@'): #输入*@xx.xx则修改为@xx.xx
             wlist = wlist[2:]
         if wlist:
-            WhiteList(mail=wlist, user=user).put()
-    return redirect(url_for('AdvWhiteList'))
+            WhiteList(mail=wlist, user=user.reference_key_or_id).save()
+    return redirect(url_for('bpAdv.AdvWhiteList'))
 
 #设置归档和分享配置项
 @bpAdv.route("/advarchive", endpoint='AdvArchive')
-@login_required
+@login_required()
 def AdvArchive():
     user = get_login_user()
     
@@ -63,7 +63,7 @@ def AdvArchive():
         shareontwitter=SHARE_ON_TWITTER, shareontumblr=SHARE_ON_TUMBLR, openinbrowser=OPEN_IN_BROWSER)
 
 @bpAdv.post("/advarchive", endpoint='AdvArchivePost')
-@login_required
+@login_required()
 def AdvArchivePost():
     user = get_login_user()
     form = request.form
@@ -108,53 +108,53 @@ def AdvArchivePost():
     user.tumblr = tumblr
     user.browser = browser
     user.qrcode = qrcode
-    user.put()
-    return redirect(url_for("AdvArchive"))
+    user.save()
+    return redirect(url_for("bpAdv.AdvArchive"))
 
 #设置URL过滤器
 @bpAdv.route("/advurlfilter", endpoint='AdvUrlFilter')
-@login_required
+@login_required()
 def AdvUrlFilter():
     user = get_login_user()
     return render_template('advurlfilter.html', tab='advset', user=user, advCurr='urlfilter')
 
 @bpAdv.post("/advurlfilter", endpoint='AdvUrlFilterPost')
-@login_required
+@login_required()
 def AdvUrlFilterPost():
     user = get_login_user()
     url = request.form.get('url')
     if url:
-        UrlFilter(url=url, user=user).put()
-    return redirect(url_for("AdvUrlFilter"))
+        UrlFilter(url=url, user=user.reference_key_or_id).save()
+    return redirect(url_for("bpAdv.AdvUrlFilter"))
 
 #删除白名单或URL过滤器项目
 @bpAdv.route("/advdel", endpoint='AdvDel')
-@login_required
+@login_required()
 def AdvDel():
     user = get_login_user()
     urlId = request.form.get('delurlid')
     wList = request.form.get('delwlist')
-    if urlId and urlId.isdigit():
-        flt = UrlFilter.get_by_id(int(urlId))
+    if urlId:
+        flt = UrlFilter.get_by_id_or_none(urlId)
         if flt:
             flt.delete()
-        return redirect(url_for("AdvUrlFilter"))
-    if wList and wList.isdigit():
-        wlist = WhiteList.get_by_id(int(wList))
+        return redirect(url_for("bpAdv.AdvUrlFilter"))
+    if wList:
+        wlist = WhiteList.get_by_id_or_none(wList)
         if wlist:
             wlist.delete()
-        return redirect(url_for("AdvWhiteList"))
-    return redirect(url_for("Admin"))
+        return redirect(url_for("bpAdv.AdvWhiteList"))
+    return redirect(url_for("bpAdv.Admin"))
 
 #导入自定义rss订阅列表，当前支持Opml格式
 @bpAdv.route("/advimport", endpoint='AdvImport')
-@login_required
+@login_required()
 def AdvImport(tips=None):
     user = get_login_user()
     return render_template('advimport.html', tab='advset', user=user, advCurr='import', tips=tips)
 
 @bpAdv.post("/advimport", endpoint='AdvImportPost')
-@login_required
+@login_required()
 def AdvImportPost():
     import opml
     upload = request.files.get('import_file')
@@ -175,19 +175,19 @@ def AdvImportPost():
             else:
                 isfulltext = defaultIsFullText
                 
-            if title and url:
-                rss = Feed.all().filter('book = ', user.own_feeds).filter("url = ", url).get() #查询是否有重复的
+            if title and url: #查询是否有重复的
+                rss = [item for item in user.all_custom_rss if item.url == url]
                 if rss:
                     rss.title = title
                     rss.isfulltext = isfulltext
-                    rss.put()
+                    rss.save()
                 else:
-                    Feed(title=title, url=url, book=user.own_feeds, isfulltext=isfulltext,
-                        time=datetime.datetime.utcnow()).put()
+                    Feed(title=title, url=url, book=user.own_feeds.reference_key_or_id, isfulltext=isfulltext,
+                        time=datetime.datetime.utcnow()).save()
                         
-        return redirect(url_for("MySubscription"))
+        return redirect(url_for("bpSubscribe.MySubscription"))
     else:
-        return redirect(url_for("AdvImport"))
+        return redirect(url_for("bpAdv.AdvImport"))
     
 #遍历opml的outline元素，支持不限层数的嵌套
 def walkOpmlOutline(outline):
@@ -203,7 +203,7 @@ def walkOpmlOutline(outline):
 
 #生成自定义rss订阅列表的Opml格式文件，让用户下载保存
 @bpAdv.route("/advexport", endpoint='AdvExport')
-@login_required
+@login_required()
 def AdvExport():
     user = get_login_user()
     
@@ -226,7 +226,7 @@ def AdvExport():
     if user.timezone != 0:
         date += '+{:02d}00'.format(user.timezone) if (user.timezone > 0) else '-{:02d}00'.format(abs(user.timezone))
     outLines = []
-    for feed in Feed.all().filter('book = ', user.own_feeds):
+    for feed in user.all_custom_rss:
         outLines.append('        <outline type="rss" text="{}" xmlUrl="{}" isFulltext="{}" />'.format(
             (feed.title, quote_plus(feed.url), feed.isfulltext)))
     outLines = '\n'.join(outLines)
@@ -239,12 +239,12 @@ def AdvExport():
 def AdvUploadCoverImage(tips=None):
     user = get_login_user()
     return render_template('advcoverimage.html', tab='advset',
-        user=user, advCurr='uploadcoverimage', formaction=url_for("AdvUploadCoverImageAjaxPost"), 
-        deletecoverhref=url_for("AdvDeleteCoverImageAjaxPost"), tips=tips)
+        user=user, advCurr='uploadcoverimage', formaction=url_for("bpAdv.AdvUploadCoverImageAjaxPost"), 
+        deletecoverhref=url_for("bpAdv.AdvDeleteCoverImageAjaxPost"), tips=tips)
 
 #AJAX接口的上传封面图片处理函数
 @bpAdv.post("/advuploadcoverimageajax", endpoint='AdvUploadCoverImageAjaxPost')
-@login_required
+@login_required()
 def AdvUploadCoverImageAjaxPost():
     MAX_IMAGE_PIXEL = 1024
     ret = 'ok'
@@ -260,8 +260,8 @@ def AdvUploadCoverImageAjaxPost():
             imgInst = imgInst.resize((int(width * ratio), int(height * ratio)))
         data = io.BytesIO()
         imgInst.save(data, 'JPEG')
-        user.cover = db.Blob(data.getvalue())
-        user.put()
+        user.cover = data.getvalue()
+        user.save()
     except Exception as e:
         ret = str(e)
         
@@ -269,53 +269,56 @@ def AdvUploadCoverImageAjaxPost():
 
 #删除上传的封面图片
 @bpAdv.post("/advdeletecoverimageajax", endpoint='AdvDeleteCoverImageAjaxPost')
-@login_required
+@login_required()
 def AdvDeleteCoverImageAjaxPost():
     user = get_login_user(forAjax=True)
     if request.form.get('action') == 'delete':
         user.cover = None
-        user.put()
+        user.save()
     
     return {'status': 'ok'}
 
 #在本地选择一个样式文件上传做为所有书籍的样式
 @bpAdv.route("/advuploadcss", endpoint='AdvUploadCss')
-@login_required
+@login_required()
 def AdvUploadCss(tips=None):
     user = get_login_user()
     return render_template('advuploadcss.html', tab='advset',
-        user=user, advCurr='uploadcss', formaction=url_for("AdvUploadCssAjaxPost"), 
-        deletecsshref=url_for("AdvDeleteCssAjaxPost"), tips=tips)
+        user=user, advCurr='uploadcss', formaction=url_for("bpAdv.AdvUploadCssAjaxPost"), 
+        deletecsshref=url_for("bpAdv.AdvDeleteCssAjaxPost"), tips=tips)
 
 #AJAX接口的上传CSS处理函数
 @bpAdv.post("/advuploadcssajax", endpoint='AdvUploadCssAjaxPost')
-@login_required
+@login_required()
 def AdvUploadCssAjaxPost():
     ret = 'ok'
     user = get_login_user(forAjax=True)
-    upload = request.files.get('css_file')
-    if upload:
-        #这里应该要验证样式表的有效性，但是现在先忽略了
-        user.css_content = db.Text(upload.file.read(), encoding="utf-8")
-        user.put()
+    if 'css_file' in request.files:
+        #werkzeug.datastructures.FileStorage对象
+        upload = request.files['css_file'] #有filename属性，有read()/close()
+        if upload:
+            #这里应该要验证样式表的有效性，但是现在先忽略了
+            user.css_content = upload.read().decode('utf-8')
+            user.save()
+            upload.close()
     
     return ret
 
 #删除上传的CSS
 @bpAdv.post("/advdeletecssajax", endpoint='AdvDeleteCssAjaxPost')
-@login_required
+@login_required()
 def AdvDeleteCssAjaxPost():
     ret = {'status': 'ok'}
     user = get_login_user(forAjax=True)
     if request.form.get('action') == 'delete':
         user.css_content = ''
-        user.put()
+        user.save()
     
     return ret
 
 #读取数据库中的图像二进制数据，如果为dbimage/cover则返回当前用户的封面图片
 @bpAdv.route("/dbimage/<id_>", endpoint='DbImage')
-@login_required
+@login_required()
 def DbImage(id_):
     if id_ != 'cover':
         return ''
@@ -328,7 +331,7 @@ def DbImage(id_):
 
 #集成各种网络服务OAuth2认证的相关处理
 @bpAdv.route("/oauth2/<authType>", endpoint='AdvOAuth2')
-@login_required
+@login_required()
 def AdvOAuth2(authType):
     if authType.lower() != 'pocket':
         return 'Auth Type ({}) Unsupported!'.format(authType)
@@ -342,12 +345,12 @@ def AdvOAuth2(authType):
     except Exception as e:
         return render_template('tipsback.html', title='Authorization Error', urltoback='/advarchive', tips=_('Authorization Error!<br/>{}').format(e))
 
-    session.pocket_request_token = request_token
+    session['pocket_request_token'] = request_token
     return redirect(url)
         
 #OAuth2认证过程的回调
 @bpAdv.route("/oauth2cb/<authType>", endpoint='AdvOAuth2Callback')
-@login_required
+@login_required()
 def AdvOAuth2Callback(authType):
     if authType.lower() != 'pocket':
         return 'Auth Type ({}) Unsupported!'.format(authType)
@@ -360,20 +363,20 @@ def AdvOAuth2Callback(authType):
         resp = pocket.get_access_token(request_token)
         user.pocket_access_token = resp.get('access_token', '')
         user.pocket_acc_token_hash = hashlib.md5(user.pocket_access_token.encode()).hexdigest()
-        user.put()
+        user.save()
         return render_template('tipsback.html', title='Success authorized', urltoback='/advarchive', tips=_('Success authorized by Pocket!'))
     except Exception as e:
         user.pocket_access_token = ''
         user.pocket_acc_token_hash = ''
         user.pocket = False
-        user.put()
+        user.save()
         return render_template('tipsback.html', title='Failed to authorize', urltoback='/advarchive', 
             tips=_('Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>{}').format(e))
 
 #通过AJAX验证密码等信息的函数
 @bpAdv.post("/verifyajax/verifType", endpoint='VerifyAjaxPost')
-@login_required
-def VerifyAjaxPost(self, verifType):
+@login_required()
+def VerifyAjaxPost(verifType):
     INSTAPAPER_API_AUTH_URL = "https://www.instapaper.com/api/authenticate"
     
     respDict = {'status': 'ok', 'correct': 0}

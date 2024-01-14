@@ -6,10 +6,14 @@
 # cdhigh <https://github.com/cdhigh>
 #Contributors:
 # rexdf <https://github.com/rexdf>
-
+import os, sys, json
+if __name__ == '__main__': #调试使用，调试时为了单独执行此文件
+    thisDir = os.path.dirname(os.path.abspath(__file__))
+    appDir = os.path.normpath(os.path.join(thisDir, "..", ".."))
+    sys.path.insert(0, appDir)
+    sys.path.insert(0, os.path.join(appDir, 'lib'))
 from apps.utils import ke_encrypt, ke_decrypt
 from peewee import *
-from playhouse.shortcuts import model_to_dict
 from config import DATABASE_ENGINE, DATABASE_HOST, DATABASE_PORT, DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_NAME
 
 #用于在数据库结构升级后的兼容设计，数据库结构和前一版本不兼容则需要升级此版本号
@@ -32,120 +36,151 @@ else:
     raise Exception("database engine '{}' not supported yet".format(DATABASE_ENGINE))
 
 #调用此函数正式连接到数据库（打开数据库）
-def connectToDatabase():
+def ConnectToDatabase():
     global dbInstance
     dbInstance.connect(reuse_if_open=True)
 
 #关闭数据库连接
-def closeDataBase():
+def CloseDatabase():
     global dbInstance
     if not dbInstance.is_closed():
         dbInstance.close()
+
+#自定义字段，在本应用用来保存列表
+class ListField(TextField):
+    def db_value(self, value):
+        return json.dumps(value)
+
+    def python_value(self, value):
+        if value is not None:
+            return json.loads(value)
+
+def listfield_default():
+    return []
 
 #数据表的共同基类
 class MyBaseModel(Model):
     class Meta:
         database = dbInstance
-        
-    #为了方便使用，新增此接口，查询不到返回None，而不抛出异常
+    
     @classmethod
-    def GetOne(cls, *query, **kwargs):
+    def get_all(cls, *query):
+        if query:
+            return cls.select().where(*query).execute()
+        else:
+            return cls.select().execute()
+
+    @classmethod
+    def get_one(cls, *query):
+        return cls.get_or_none(*query)
+
+    #如果取不到，返回None
+    @classmethod
+    def get_by_id_or_none(cls, id_):
         try:
-            return cls.get(*query,**kwargs)
-        except DoesNotExist:
+            return cls.get_by_id(int(id_))
+        except:
             return None
 
-    #兼容GAE的一个接口
-    @classmethod
-    def get_by_id(cls, id_):
-        try:
-            return cls.get(cls.id == id_)
-        except DoesNotExist:
-            return None
+    #返回Key/Id的字符串表达
+    @property
+    def key_or_id_string(self):
+        return str(self.id)
 
-    #将当前行数据转换为一个字典结构，由子类使用，不进行任何转换
-    def ToRawDict(self):
-        return {field: getattr(self, field) for field in self._meta.fields}
-        
-    #将当前行数据转换为一个字典结构，由子类使用，将外键转换为ID，日期转换为字符串
-    def ToDict(self):
-        ret = model_to_dict(self)
-        for key in ret:
-            data = ret[key]
-            if isinstance(data, datetime.datetime):
-                ret[key] = data.strftime('%Y-%m-%d %H:%M:%S')
-        return ret
-
-    #另一个转换行数据为字典的函数，如果不想再依赖playhouse可以使用这个
-    def ToDict1(self):
-        ret = {}
-        for field in self._meta.fields:
-            data = getattr(self, field)
-            if isinstance(data, MyBaseModel): #外键，则仅返回其外键ID
-                data = data.id
-            elif isinstance(data, datetime.datetime):
-                data = data.strftime('%Y-%m-%d %H:%M:%S')
-            ret[field] = data
-        return ret
+    #做外键使用的字符串或ID
+    @property
+    def reference_key_or_id(self):
+        return self
 
 #--------------db models----------------
 class Book(MyBaseModel):
     title = CharField(unique=True)
     description = CharField()
-    users = CharField() #账号名之间使用逗号分割
+    users = ListField(default=listfield_default) #有哪些账号订阅了这本书
     builtin = BooleanField()
     needs_subscription = BooleanField() #是否需要登陆网页
     separate = BooleanField() #是否单独推送
     
     #====自定义书籍
-    language = CharField()
-    masthead_file = CharField() # GIF 600*60
-    cover_file = CharField()
-    keep_image = BooleanField()
-    oldest_article = IntegerField()
+    language = CharField(default='')
+    masthead_file = CharField(default='') # GIF 600*60
+    cover_file = CharField(default='')
+    keep_image = BooleanField(default=True)
+    oldest_article = IntegerField(default=7)
+
+    #feeds, owner 属性为KeUser自动添加的
     
 class KeUser(MyBaseModel): # kindleEar User
-    name = CharField(required=True, unique=True)
-    passwd = CharField(required=True)
+    name = CharField(unique=True)
+    passwd = CharField()
     expiration_days = IntegerField(default=0) #账号超期设置值，0为永久有效
     secret_key = CharField(default='')
-    kindle_email = CharField()
-    enable_send = BooleanField()
-    send_days = CharField() #如果有多个日期，之间使用逗号分割
-    send_time = IntegerField()
-    timezone = IntegerField()
-    book_type = CharField() #mobi,epub
-    device = CharField()
-    expires = DateTimeField() #超过了此日期后账号自动停止推送
-    own_feeds = ForeignKeyField(Book, backref='owner') # 每个用户都有自己的自定义RSS，也给Book增加一个owner
-    use_title_in_feed = BooleanField() # 文章标题优先选择订阅源中的还是网页中的
-    title_fmt = CharField() #在元数据标题中添加日期的格式
-    author_format = CharField() #修正Kindle 5.9.x固件的bug【将作者显示为日期】
-    book_mode = CharField() #书籍模式，'periodical'|'comic'，漫画模式可以直接全屏
-    merge_books = BooleanField() #是否合并书籍成一本
-    remove_hyperlinks = CharField() #去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
+    kindle_email = CharField(default='')
+    enable_send = BooleanField(default=False)
+    send_days = ListField(default=listfield_default)
+    send_time = IntegerField(default=0)
+    timezone = IntegerField(default=0)
+    book_type = CharField(default='epub') #mobi,epub
+    device = CharField(default='')
+    expires = DateTimeField(null=True) #超过了此日期后账号自动停止推送
+    own_feeds = ForeignKeyField(Book, backref='owner') # 每个用户都有自己的自定义RSS，也给Book增加一个owner,my_custom_rss_book
+    use_title_in_feed = BooleanField(default=True) # 文章标题优先选择订阅源中的还是网页中的
+    title_fmt = CharField(default='') #在元数据标题中添加日期的格式
+    author_format = CharField(default='') #修正Kindle 5.9.x固件的bug【将作者显示为日期】
+    book_mode = CharField(default='') #书籍模式，'periodical'|'comic'，漫画模式可以直接全屏
+    merge_books = BooleanField(default=True) #是否合并书籍成一本
+    remove_hyperlinks = CharField(default='') #去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
     
-    share_fuckgfw = BooleanField() #归档和分享时是否需要翻墙
-    evernote = BooleanField() #是否分享至evernote
-    evernote_mail = CharField() #evernote邮件地址
-    wiz = BooleanField() #为知笔记
-    wiz_mail = CharField()
-    pocket = BooleanField() #send to add@getpocket.com
-    pocket_access_token = CharField()
-    pocket_acc_token_hash = CharField()
-    instapaper = BooleanField()
-    instapaper_username = CharField()
-    instapaper_password = CharField()
-    xweibo = BooleanField()
-    tweibo = BooleanField()
-    facebook = BooleanField() #分享链接到facebook
-    twitter = BooleanField()
-    tumblr = BooleanField()
-    browser = BooleanField()
-    qrcode = BooleanField() #是否在文章末尾添加文章网址的QRCODE
-    cover = BlobField() #保存各用户的自定义封面图片二进制内容
-    css_content = TextField() #保存用户上传的css样式表
+    share_fuckgfw = BooleanField(default=False) #归档和分享时是否需要翻墙
+    evernote = BooleanField(default=False) #是否分享至evernote
+    evernote_mail = CharField(default='') #evernote邮件地址
+    wiz = BooleanField(default=False) #为知笔记
+    wiz_mail = CharField(default='')
+    pocket = BooleanField(default=False) #send to add@getpocket.com
+    pocket_access_token = CharField(default='')
+    pocket_acc_token_hash = CharField(default='')
+    instapaper = BooleanField(default=False)
+    instapaper_username = CharField(default='')
+    instapaper_password = CharField(default='')
+    xweibo = BooleanField(default=False)
+    tweibo = BooleanField(default=False)
+    facebook = BooleanField(default=False) #分享链接到facebook
+    twitter = BooleanField(default=False)
+    tumblr = BooleanField(default=False)
+    browser = BooleanField(default=False)
+    qrcode = BooleanField(default=False) #是否在文章末尾添加文章网址的QRCODE
+    cover = BlobField(null=True) #保存各用户的自定义封面图片二进制内容
+    css_content = TextField(default='') #保存用户上传的css样式表
 
+    #white_list, url_filter, subscr_infos 都是反向引用
+
+    #自己所属的RSS集合代表的书
+    @property
+    def my_custom_rss_book(self):
+        return self.own_feeds
+
+    #自己直接所属的RSS列表，返回[Feed]
+    @property
+    def all_custom_rss(self):
+        return self.own_feeds.feeds
+
+    #删除自己订阅的书，白名单，过滤器等，就是完全的清理
+    def erase_traces(self):
+        if self.own_feeds:
+            map(lambda x: x.delete(), list(self.own_feeds.feeds))
+            self.own_feeds.delete()
+        map(lambda x: x.delete(), list(u.white_lists))
+        map(lambda x: x.delete(), list(u.url_filters))
+        map(lambda x: x.delete(), list(u.subscr_infos))
+        DeliverLog.delete().where(DeliverLog.username == self.name).execute() #推送记录
+        LastDelivered.delete().where(LastDelivered.username == self.name).execute()
+        for book in Book.get_all(): #订阅记录
+            subscrUsers = book.users
+            if self.name in subscrUsers:
+                subscrUsers.remove(name)
+                book.users = subscrUsers
+                book.save()
+            
 #自定义RSS订阅源
 class Feed(MyBaseModel):
     title = CharField()
@@ -174,17 +209,18 @@ class LastDelivered(MyBaseModel):
     
 class WhiteList(MyBaseModel):
     mail = CharField()
-    user = ForeignKeyField(KeUser, backref='white_list')
+    user = ForeignKeyField(KeUser, backref='white_lists')
 
 class UrlFilter(MyBaseModel):
     url = CharField()
-    user = ForeignKeyField(KeUser, backref='url_filter')
-    
+    user = ForeignKeyField(KeUser, backref='url_filters')
+
+#某些网站需要会员才能阅读
 class SubscriptionInfo(MyBaseModel):
-    title = CharField()
+    title = CharField()   #书籍的标题
     account = CharField()
     encrypted_pwd = CharField()
-    user = ForeignKeyField(KeUser, backref='subscription_info')
+    user = ForeignKeyField(KeUser, backref='subscr_infos')
     
     @property
     def password(self):
@@ -209,7 +245,7 @@ class SharedRss(MyBaseModel):
     #返回数据库中所有的分类
     @classmethod
     def categories(self):
-        return [item.category for item in SharedRss.select(SharedRss.category)]
+        return set([item.category for item in SharedRss.select(SharedRss.category)])
     
 #Buffer for category of shared rss [for kindleear.appspot.com only]
 class SharedRssCategory(MyBaseModel):
@@ -217,13 +253,15 @@ class SharedRssCategory(MyBaseModel):
     last_updated = DateTimeField() #for sort
 
 #当前仅使用 name='dbTableVersion' 行保存数据库格式版本
-class SerialNo(MyBaseModel):
+class AppInfo(MyBaseModel):
     name = CharField()
-    sn = IntegerField()
+    value = IntegerField()
+    description = CharField(null=True)
+    comment = CharField(null=True)
 
 #创建数据库表格，一个数据库只需要创建一次
 #如果是sql数据库，可以使用force=True删掉之前的数据库文件
-def createDatabaseTable(force=False):
+def CreateDatabaseTable(force=False):
     if force and DATABASE_ENGINE == "sqlite":
         try:
             os.remove(dbName)
@@ -240,7 +278,11 @@ def createDatabaseTable(force=False):
     SubscriptionInfo.create_table()
     SharedRss.create_table()
     SharedRssCategory.create_table()
-    SerialNo.create_table()
+    AppInfo.create_table()
     
-    SerialNo.create(name='dbTableVersion', sn=__DB_VERSION__)
-    
+    AppInfo(name='dbTableVersion', value=__DB_VERSION__).save()
+
+
+if __name__ == '__main__':
+    if DATABASE_ENGINE == 'sqlite':
+        CreateDatabaseTable()

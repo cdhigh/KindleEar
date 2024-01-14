@@ -37,7 +37,8 @@ class BaseComicBook(BaseFeedBook):
             bookName, url = item[0], item[1]
             self.log.info("Parsing Feed {} for {}".format(url, bookName))
 
-            lastDeliver = LastDelivered.all().filter("username = ", username).filter("bookname = ", bookName).get()
+            lastDeliver = (LastDelivered.select().where(LastDelivered.username == username).
+                where(LastDelivered.bookname == bookName).first())
             if not lastDeliver:
                 self.log.info("These is no log in db LastDelivered for name: {}, set to 0".format(bookName))
                 nextChapterIndex = 0
@@ -184,29 +185,17 @@ class BaseComicBook(BaseFeedBook):
     # 更新已经推送的序号和标题到数据库
     def UpdateLastDelivered(self, bookname, chapterTitle, num):
         userName = self.UserName
-        dbItem = (
-            LastDelivered.all()
-            .filter("username = ", userName)
-            .filter("bookname = ", bookname)
-            .get()
-        )
+        dbItem = (LastDelivered.select().where(LastDelivered.username == userName)
+            .where(LastDelivered.bookname == bookname).first())
         self.last_delivered_volume = chapterTitle
-        now = datetime.datetime.utcnow() + datetime.timedelta(
-            hours=TIMEZONE
-        )
+        now = datetime.datetime.utcnow() + datetime.timedelta(hours=TIMEZONE)
         if dbItem:
             dbItem.num = num
             dbItem.record = self.last_delivered_volume
             dbItem.datetime = now
         else:
-            dbItem = LastDelivered(
-                username=userName,
-                bookname=bookname,
-                num=num,
-                record=self.last_delivered_volume,
-                datetime=now,
-            )
-        dbItem.put()
+            dbItem = LastDelivered(username=userName, bookname=bookname, num=num, record=self.last_delivered_volume, datetime=now)
+        dbItem.save()
 
     #如果一个漫画图片为横屏，则将其分隔成2个图片
     def SplitComicWideImage(self, data):

@@ -64,7 +64,7 @@ def Url2Book():
         log.info('[DEBUG] debug file sent!')
         return 'Debug file sent!'
         
-    user = KeUser.all().filter("name = ", userName).get()
+    user = KeUser.get_one(KeUser.name == userName)
     if not user or not user.kindle_email:
         return "User not exist!"
     
@@ -76,7 +76,7 @@ def Url2Book():
     book.language = language
     book.keep_image = keepImage
     book.feeds = [(subject, url) for url in urls.split('|')]
-    book.url_filters = [flt.url for flt in user.url_filter]
+    book.url_filters = [flt.url for flt in user.url_filters]
     
     # 创建 OEB
     oeb = CreateOeb(log, opts)

@@ -31,12 +31,13 @@ from apps.view.adv import bpAdv
 from apps.view.deliver import bpDeliver
 from apps.view.library import bpLibrary
 from apps.view.logs import bpLogs
-from apps.view.setting import bpSetting
+from apps.view.setting import bpSetting, supported_languages
 from apps.view.share import bpShare
 from apps.view.subscribe import bpSubscribe
 from apps.work.worker import bpWorker
 from apps.work.url2book import bpUrl2Book
-from apps.back_end.db_models import ConnectToDatabase, closeDatabase
+from apps.back_end.db_models import ConnectToDatabase, CloseDatabase
+from apps.utils import new_secret_key
 from config import USE_GAE_INBOUND_EMAIL
 
 RegisterBuiltinBooks() #添加内置书籍到数据库
@@ -48,11 +49,12 @@ def GetLocale():
     if langCode:
         return langCode
     #根据浏览器自动设置
-    return request.accept_languages.best_match(['zh_cn', 'tr_tr', 'en'])
+    return request.accept_languages.best_match(supported_languages)
 
 app = Flask(__name__)
 babel = Babel(app)
-app.secret_key = 'fdjlkdfjx32QLL2'
+app.config['SECRET_KEY'] = 'fdjlkdfjx32QLL2' #new_secret_key()
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000
 babel.init_app(app, locale_selector=GetLocale)
 
 #使用GAE来接收邮件
@@ -64,16 +66,16 @@ if USE_GAE_INBOUND_EMAIL:
 
 @app.route('/')
 def Home():
-    return render_page('home.html', "Home")
+    return render_template('home.html')
 
 @app.before_request
 def BeforeRequest():
     g.version = __Version__
-    connectToDatabase()
+    ConnectToDatabase()
 
 @app.teardown_request
 def TeardownRequest(exc=None):
-    closeDataBase()
+    CloseDatabase()
 
 @app.route('/env')
 def Test():

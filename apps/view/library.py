@@ -3,6 +3,7 @@
 #网友共享的订阅源数据
 
 import datetime, json
+from operator import attrgetter
 from urllib.parse import urljoin, urlparse
 from flask import Blueprint, render_template, request
 from apps.base_handler import *
@@ -22,7 +23,7 @@ bpLibrary = Blueprint('bpLibrary', __name__)
 
 #网友共享的订阅源数据
 @bpLibrary.route("/library", endpoint='SharedLibrary')
-@login_required
+@login_required()
 def SharedLibrary():
     user = get_login_user()
 
@@ -67,7 +68,7 @@ def SharedLibraryPost():
 
 @bpLibrary.post("/library/mgr/<mgrType>", endpoint='SharedLibraryMgrPost')
 @login_required(forAjax=True)
-def SharedLibraryMgrPost(self, mgrType):
+def SharedLibraryMgrPost(mgrType):
     user = get_login_user(forAjax=True)
     if mgrType == SHARED_LIB_MGR_CMD_REPORTINVALID: #报告一个源失效了
         title = request.form.get('title')
@@ -119,9 +120,8 @@ def SharedLibrarykindleearAppspotCom():
 
     #本来想在服务器端分页的，但是好像CPU/数据库存取资源比带宽资源更紧张，所以干脆一次性提供给客户端，由客户端分页和分类
     #如果后续发现这样不理想，也可以考虑修改为服务器端分页
-    #qry = SharedRss.all().order('-subscribed').order('-created_time').fetch(limit=10000)
     sharedData = []
-    for d in SharedRss.all().fetch(limit=10000):
+    for d in SharedRss.get_all():
         sharedData.append({'t':d.title, 'u':d.url, 'f':d.isfulltext, 'c':d.category, 's':d.subscribed,
             'd':int((d.created_time - datetime.datetime(1970, 1, 1)).total_seconds())})
     return sharedData
@@ -152,7 +152,7 @@ def SharedLibrarykindleearAppspotComPost():
 
     #判断是否存在，如果存在，则更新分类或必要的信息，同时返回成功
     now = datetime.datetime.utcnow()
-    dbItem = SharedRss.all().filter('url = ', url).get()
+    dbItem = SharedRss.get_one(SharedRss.url == url)
     prevCategory = ''
     if dbItem:
         dbItem.title = title
@@ -164,21 +164,21 @@ def SharedLibrarykindleearAppspotComPost():
     else:
         dbItem = SharedRss(title=title, url=url, category=category, isfulltext=isfulltext, creator=creator,
             subscribed=1, created_time=now, invalid_report_days=0, last_invalid_report_time=now)
-    dbItem.put()
+    dbItem.save()
 
     #更新分类信息，用于缓存
     if category:
-        cItem = SharedRssCategory.all().filter('name = ', category).get()
+        cItem = SharedRssCategory.get_one(SharedRssCategory.name == category)
         if cItem:
             cItem.last_updated = now
         else:
             cItem = SharedRssCategory(name=category, last_updated=now)
-        cItem.put()
+        cItem.save()
 
     if prevCategory:
-        catItem = SharedRss.all().filter('category = ', prevCategory).get()
+        catItem = SharedRss.get_one(SharedRss.category == prevCategory)
         if not catItem: #没有其他订阅源使用此分类了
-            sItem = SharedRssCategory.all().filter('name = ', prevCategory).get()
+            sItem = SharedRssCategory.get_one(SharedRssCategory.name == prevCategory)
             if sItem:
                 sItem.delete()
 
@@ -201,7 +201,7 @@ def SharedLibraryMgrkindleearAppspotComPost(mgrType):
             respDict['url'] = url
 
         #判断是否存在
-        dbItem = SharedRss.all().filter('url = ', url).get()
+        dbItem = SharedRss.get_one(SharedRss.url == url)
         if not dbItem:
             respDict['status'] = _("URL not found in database!")
             return respDict
@@ -223,12 +223,12 @@ def SharedLibraryMgrkindleearAppspotComPost(mgrType):
             #更新分类信息
             allCategories = SharedRss.categories()
             if category not in allCategories:
-                cItem = SharedRssCategory.all().filter('name = ', category).get()
+                cItem = SharedRssCategory.get_one(SharedRssCategory.name == category)
                 if cItem:
                     cItem.delete()
         else:
             dbItem.last_invalid_report_time = now
-            dbItem.put()
+            dbItem.save()
 
         return respDict
     elif mgrType == SHARED_LIB_MGR_CMD_SUBSFROMSHARED: #有用户订阅了一个共享库里面的链接
@@ -245,10 +245,10 @@ def SharedLibraryMgrkindleearAppspotComPost(mgrType):
             respDict['url'] = url
 
         #判断是否存在
-        dbItem = SharedRss.all().filter('url = ', url).get()
+        dbItem = SharedRss.get_one(SharedRss.url == url)
         if dbItem:
             dbItem.subscribed += 1
-            dbItem.put()
+            dbItem.save()
         else:
             respDict['status'] = _("URL not found in database!")
 
@@ -264,4 +264,6 @@ def SharedLibraryCategorykindleearAppspotCom():
     if key != KINDLEEAR_SITE_KEY:
         return {}
 
-    return [item.name for item in SharedRssCategory.all().order('-last_updated')]
+    cats = list(SharedRssCategory.get_all())
+    cats.sort(key=attrgetter('last_updated'), reverse=True)
+    return cats

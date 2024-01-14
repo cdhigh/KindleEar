@@ -12,8 +12,8 @@
         <legend><h3>{{_("Url Filter")}}</h3></legend>
         <p><small>{{_("Urls in list would not be downloaded.")}}</small></p>
         <div class="box-list">
-            {% if user.url_filter.count() -%}
-                {% for urlflt in user.url_filter -%}
+            {% if user.url_filters -%}
+                {% for urlflt in user.url_filters -%}
                     <div class="box">
                         {%if urlflt.url|length>70 %}
                             {{ urlflt.url[:70] }}...<span>{{ urlflt.url }}</span>
@@ -21,7 +21,7 @@
                             {{ urlflt.url }}
                         {% endif %}
                         <div class="cornerControls">
-                            <a href="/advdel?delurlid={{urlflt.key().id()}}" class="actionButton">{{_("Delete")}}</a>
+                            <a href="/advdel?delurlid={{urlflt.key_or_id_string}}" class="actionButton">{{_("Delete")}}</a>
                         </div>
                     </div>
                 {% endfor -%}

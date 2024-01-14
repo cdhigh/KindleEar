@@ -1,4 +1,9 @@
 *.pyc
 .DS_Store
+*.db
+*.mobi
+*.epub
+*.azw3
 
+tests/*
 .idea/

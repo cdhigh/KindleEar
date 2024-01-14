@@ -11,16 +11,20 @@
 <form class="pure-form pure-form-aligned" action="" method="POST">
     <fieldset>
         <legend><h3>{{_("White List")}}</h3></legend>
-        <p>
-            <small>{{_("mail sent to %sxxx@<em>appid</em>.appspotmail.com will be transfered to your email.")|format('' if user.name=="admin" else user.name+"__")}}</small>
-        </p>
+        <p> <small>
+        {% if (user.name == adminName) %}
+        {{_("mail sent to xxx@appid.appspotmail.com will be transfered to your email.") }}
+        {% else %}
+        {{_("mail sent to %s__xxx@appid.appspotmail.com will be transfered to your email.")|format(user.name)}}
+        {% endif %}
+        </small></p>
         <div class="box-list">
-            {% if user.white_list.count() -%}
-                {%- for lst in user.white_list -%}
+            {% if user.white_lists -%}
+                {%- for lst in user.white_lists -%}
                     <div class="box">
                         {{ lst.mail }}
                         <div class="cornerControls">
-                            <a href="/advdel?delwlist={{ lst.key().id() }}" class="actionButton">{{ _("Delete") }}</a>
+                            <a href="/advdel?delwlist={{ lst.key_or_id_string }}" class="actionButton">{{ _("Delete") }}</a>
                         </div>
                     </div>
                 {%- endfor -%}

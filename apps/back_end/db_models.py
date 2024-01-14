@@ -9,7 +9,7 @@
 
 from config import DATABASE_ENGINE
 
-if DATABASE_ENGINE in ("mysql", "sqlite", "postgresql", "cockroachdb"):
-    from apps.back_end.db_models_sql import *
-else:
+if DATABASE_ENGINE == "datastore":
     from apps.back_end.db_models_nosql import *
+else:
+    from apps.back_end.db_models_sql import *

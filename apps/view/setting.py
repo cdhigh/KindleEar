@@ -2,12 +2,14 @@
 # -*- coding:utf-8 -*-
 #设置页面
 
-from flask import Blueprint, render_template, request, redirect
+from flask import Blueprint, render_template, request, redirect, session
 from apps.base_handler import *
 from apps.back_end.db_models import *
 from config import *
 
 bpSetting = Blueprint('bpSetting', __name__)
+
+supported_languages = ['zh_cn', 'tr_tr', 'en']
 
 #各种语言的语种代码和文字描述的对应关系
 def LangMap(): 
@@ -39,16 +41,16 @@ def LangMap():
         "ha": _("Hausa"),}
 
 @bpSetting.route("/setting", endpoint='Setting')
-@login_required
-def Setting(self, tips=None):
+@login_required()
+def Setting(tips=None):
     user = get_login_user()
     if not user.own_feeds.language:
         user.own_feeds.language = "zh-cn"
 
-    return render_template('setting.html', tab='set', user=user, mailSender=SRC_EMAIL, tips=tips, lang_map=LangMap())
+    return render_template('setting.html', tab='set', user=user, tips=tips, mailSender=SRC_EMAIL, lang_map=LangMap())
 
 @bpSetting.post("/setting", endpoint='SettingPost')
-@login_required
+@login_required()
 def SettingPost():
     user = get_login_user()
     form = request.form
@@ -79,18 +81,19 @@ def SettingPost():
         user.author_format = form.get('author_format')
         user.sg_enable = sgEnable
         user.sg_apikey = sgApikey
-        user.put()
+        user.save()
 
-        myfeeds = user.own_feeds
-        myfeeds.language = form.get("book_language", "en-us")
-        myfeeds.title = myTitle
-        myfeeds.keep_image = bool(form.get("keep_image"))
-        myfeeds.oldest_article = int(form.get('oldest', 7))
-        myfeeds.users = [user.name] if form.get('enable_rss') else []
-        myfeeds.put()
+        myFeedBook = user.my_custom_rss_book
+        if myFeedBook:
+            myFeedBook.language = form.get("book_language", "en-us")
+            myFeedBook.title = myTitle
+            myFeedBook.keep_image = bool(form.get("keep_image"))
+            myFeedBook.oldest_article = int(form.get('oldest', 7))
+            myFeedBook.users = [user.name] if form.get('enable_rss') else []
+            myFeedBook.save()
         tips = _("Settings Saved!")
 
-    return render_template('setting.html', tab='set', user=user, mailSender=SRC_EMAIL, tips=tips, langMap=LangMap())
+    return render_template('setting.html', tab='set', user=user, tips=tips, mailSender=SRC_EMAIL, langMap=LangMap())
 
 #设置国际化语种
 @bpSetting.route("/setlocale/<langCode>")
@@ -98,7 +101,7 @@ def SetLang(langCode):
     global supported_languages
     langCode = langCode.lower()
     if langCode not in supported_languages:
-        return "language invalid!"
-    session.langCode = langCode
+        langCode = "en"
+    session['langCode'] = langCode
     return redirect('/')
 

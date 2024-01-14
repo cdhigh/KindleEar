@@ -6,6 +6,7 @@
 <body class="settings">
 {% endblock -%}
 
+{% set my_custom_rss_book = user.my_custom_rss_book if user else None %}
 {% block content -%}
     <div class="main">
     {% if user and user.expires -%}
@@ -148,13 +149,13 @@
             <legend><h3>{{_("Custom Rss Setting")}}</h3></legend>
             <div class="pure-control-group">
                 <label><em class="required">*</em> {{_("Title")}}</label>
-                <input type="text" name="rss_title" value="{% if user and user.ownfeeds %}{{ user.ownfeeds.title }}{% endif %}" required class="pure-u-1 pure-u-sm-1-2" />
+                <input type="text" name="rss_title" value="{% if user and my_custom_rss_book %}{{ my_custom_rss_book.title }}{% endif %}" required class="pure-u-1 pure-u-sm-1-2" />
             </div>
             <div class="pure-control-group">
                 <label>{{_("Language")}}</label>
                 <select class="pure-u-1 pure-u-sm-1-2" name="book_language">
                 {% for langCode in langMap -%}
-                    {% if user.ownfeeds.language == lang_map -%}
+                    {% if my_custom_rss_book.language == lang_map -%}
                     <option value="{{lang_map}}" selected="selected">{{langMap[lang_map]}}</option>
                     {% else -%}
                     <option value="{{lang_map}}">{{langMap[lang_map]}}</option>
@@ -165,22 +166,22 @@
             <div class="pure-control-group">
                 <label>{{_("Oldest article")}}</label>
                 <select class="pure-u-1 pure-u-sm-1-2" name="oldest">
-                    <option value="0" {% if not user.ownfeeds.oldest_article %}selected="selected"{% endif %}>{{_("No limit")}}</option>
-                    <option value="1" {% if user.ownfeeds.oldest_article==1 %}selected="selected"{% endif %}>{{_("1 Day")}}</option>
-                    <option value="2" {% if user.ownfeeds.oldest_article==2 %}selected="selected"{% endif %}>{{_("2 Days")}}</option>
-                    <option value="3" {% if user.ownfeeds.oldest_article==3 %}selected="selected"{% endif %}>{{_("3 Days")}}</option>
-                    <option value="4" {% if user.ownfeeds.oldest_article==4 %}selected="selected"{% endif %}>{{_("4 Days")}}</option>
-                    <option value="5" {% if user.ownfeeds.oldest_article==5 %}selected="selected"{% endif %}>{{_("5 Days")}}</option>
-                    <option value="6" {% if user.ownfeeds.oldest_article==6 %}selected="selected"{% endif %}>{{_("6 Days")}}</option>
-                    <option value="7" {% if user.ownfeeds.oldest_article>=7 %}selected="selected"{% endif %}>{{_("7 Days")}}</option>
+                    <option value="0" {% if not my_custom_rss_book.oldest_article %}selected="selected"{% endif %}>{{_("No limit")}}</option>
+                    <option value="1" {% if my_custom_rss_book.oldest_article==1 %}selected="selected"{% endif %}>{{_("1 Day")}}</option>
+                    <option value="2" {% if my_custom_rss_book.oldest_article==2 %}selected="selected"{% endif %}>{{_("2 Days")}}</option>
+                    <option value="3" {% if my_custom_rss_book.oldest_article==3 %}selected="selected"{% endif %}>{{_("3 Days")}}</option>
+                    <option value="4" {% if my_custom_rss_book.oldest_article==4 %}selected="selected"{% endif %}>{{_("4 Days")}}</option>
+                    <option value="5" {% if my_custom_rss_book.oldest_article==5 %}selected="selected"{% endif %}>{{_("5 Days")}}</option>
+                    <option value="6" {% if my_custom_rss_book.oldest_article==6 %}selected="selected"{% endif %}>{{_("6 Days")}}</option>
+                    <option value="7" {% if my_custom_rss_book.oldest_article>=7 %}selected="selected"{% endif %}>{{_("7 Days")}}</option>
                 </select>
             </div>
             <div class="pure-control-group">
-                <input type="checkbox" id="ki" name="keep_image" {% if user and user.ownfeeds.keep_image %}checked="1"{% endif %} />
+                <input type="checkbox" id="ki" name="keep_image" {% if user and my_custom_rss_book.keep_image %}checked="1"{% endif %} />
                 <span style="cursor:default;" onclick="toggleweekbtn('ki');">{{_("Keep images")}}</span>
             </div>
             <div class="pure-control-group">
-                <input type="checkbox" id="er" name="enable_rss" {% if user and session.get('userName') in user.ownfeeds.users %}checked="1"{% endif %} />
+                <input type="checkbox" id="er" name="enable_rss" {% if user and session.get('userName') in my_custom_rss_book.users %}checked="1"{% endif %} />
                 <span style="cursor:default;" onclick="toggleweekbtn('er');">{{_("Enable deliver custom rss")}}</span><br />
                 <small style="padding-left:1.7em;">{{_("This switch only effective when 'Enable deliver' is enabled.")}}</small>
             </div>

@@ -38,7 +38,7 @@ def Worker():
     bookId = args.get('id_')  #如果有多本书，使用','分隔
     feedsId = args.get('feedsId')
     
-    user = KeUser.all().filter("name = ", userName).get()
+    user = KeUser.get_one(KeUser.name == userName)
     if not user:
         return "User not exist!"
     
@@ -114,7 +114,7 @@ def Worker():
                 log.warning("Book '{}' does not exist".format(bk.title))
                 continue
             book = cBook(imgIndex=imgIndex, opts=opts, user=user)
-            book.url_filters = [flt.url for flt in user.url_filter]
+            book.url_filters = [flt.url for flt in user.url_filters]
             if bk.needs_subscription: #需要登录
                 subsInfo = user.subscription_info(bk.title)
                 if subsInfo:
@@ -141,7 +141,7 @@ def Worker():
                     ProcessComicRSS(username, user, feed)
                 else:
                     book.feeds.append((feed.title, feed.url, feed.isfulltext))
-            book.url_filters = [flt.url for flt in user.url_filter]
+            book.url_filters = [flt.url for flt in user.url_filters]
         
         #书的质量可能不一，一本书的异常不能影响其他书籍的推送
         try:
@@ -170,11 +170,8 @@ def Worker():
         oIO = io.BytesIO()
         o = EPUBOutput() if bookType == "epub" else MOBIOutput()
         o.convert(oeb, oIO, opts, log)
-        try:
-            ultimaLog = DeliverLog.all().order('-time').get()
-        except:
-            ultimaLog = sorted(DeliverLog.all(), key=attrgetter('time'), reverse=True)
-            ultimaLog = ultimaLog[0] if ultimaLog else None
+        ultimaLog = sorted(DeliverLog.get_all(), key=attrgetter('datetime'), reverse=True)
+        ultimaLog = ultimaLog[0] if ultimaLog else None
         if ultimaLog:
             diff = datetime.datetime.utcnow() - ultimaLog.datetime
             if diff.days * 86400 + diff.seconds < 10:
@@ -251,7 +248,7 @@ def ProcessComicRSS(userName, user, feed):
     book.oldest_article = 7
     book.fulltext_by_readability = True
     book.feeds = [(feed.title, feed.url)]
-    book.url_filters = [flt.url for flt in user.url_filter]
+    book.url_filters = [flt.url for flt in user.url_filters]
 
     return PushComicBook(userName, user, book, opts)
 
@@ -322,12 +319,8 @@ def PushComicBook(userName, user, book, opts=None):
             oIO = io.BytesIO()
             o = EPUBOutput() if user.book_type == "epub" else MOBIOutput()
             o.convert(oeb, oIO, opts, log)
-            try:
-                ultima_log = DeliverLog.all().order("-time").get()
-            except:
-                ultima_log = sorted(DeliverLog.all(), key=attrgetter("time"), reverse=True)
-                ultima_log = ultima_log[0] if ultima_log else None
-
+            ultima_log = sorted(DeliverLog.get_all(), key=attrgetter("datetime"), reverse=True)
+            ultima_log = ultima_log[0] if ultima_log else None
             if ultima_log:
                 diff = datetime.datetime.utcnow() - ultima_log.datetime
                 if diff.days * 86400 + diff.seconds < 10:
