@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #关系数据库行结构定义，使用peewee ORM
-#Visit https://github.com/cdhigh/KindleEar for the latest version
-#Author:
-# cdhigh <https://github.com/cdhigh>
-#Contributors:
-# rexdf <https://github.com/rexdf>
+#根据以前的经验，经常出现有网友部署时没有成功建立数据库索引，所以现在排序在应用内处理，数据量不大
+#Author: cdhigh <https://github.com/cdhigh>
 import os, sys, json
 if __name__ == '__main__': #调试使用，调试时为了单独执行此文件
     thisDir = os.path.dirname(os.path.abspath(__file__))
@@ -14,12 +11,15 @@ if __name__ == '__main__': #调试使用，调试时为了单独执行此文件
     sys.path.insert(0, os.path.join(appDir, 'lib'))
 from apps.utils import ke_encrypt, ke_decrypt
 from peewee import *
+from playhouse.db_url import connect
 from config import DATABASE_ENGINE, DATABASE_HOST, DATABASE_PORT, DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_NAME
 
 #用于在数据库结构升级后的兼容设计，数据库结构和前一版本不兼容则需要升级此版本号
 __DB_VERSION__ = 1
 
-if DATABASE_ENGINE == "sqlite":
+if '://' in DATABASE_NAME:
+    dbInstance = connect(DATABASE_NAME)
+elif DATABASE_ENGINE == "sqlite":
     thisDir = os.path.dirname(os.path.abspath(__file__))
     dbName = os.path.normpath(os.path.join(thisDir, "..", "..", DATABASE_NAME))
     dbInstance = SqliteDatabase(dbName, check_same_thread=False)
@@ -123,7 +123,7 @@ class KeUser(MyBaseModel): # kindleEar User
     book_type = CharField(default='epub') #mobi,epub
     device = CharField(default='')
     expires = DateTimeField(null=True) #超过了此日期后账号自动停止推送
-    own_feeds = ForeignKeyField(Book, backref='owner') # 每个用户都有自己的自定义RSS，也给Book增加一个owner,my_custom_rss_book
+    own_feeds = ForeignKeyField(Book, backref='owner') # 每个用户都有自己的自定义RSS，也给Book增加一个owner,my_rss_book
     use_title_in_feed = BooleanField(default=True) # 文章标题优先选择订阅源中的还是网页中的
     title_fmt = CharField(default='') #在元数据标题中添加日期的格式
     author_format = CharField(default='') #修正Kindle 5.9.x固件的bug【将作者显示为日期】
@@ -151,12 +151,14 @@ class KeUser(MyBaseModel): # kindleEar User
     qrcode = BooleanField(default=False) #是否在文章末尾添加文章网址的QRCODE
     cover = BlobField(null=True) #保存各用户的自定义封面图片二进制内容
     css_content = TextField(default='') #保存用户上传的css样式表
-
+    sg_enable = BooleanField(default=False)
+    sg_apikey = CharField(default='')
+    
     #white_list, url_filter, subscr_infos 都是反向引用
-
+    
     #自己所属的RSS集合代表的书
     @property
-    def my_custom_rss_book(self):
+    def my_rss_book(self):
         return self.own_feeds
 
     #自己直接所属的RSS列表，返回[Feed]
@@ -239,9 +241,10 @@ class SharedRss(MyBaseModel):
     creator = CharField()
     created_time = DateTimeField()
     subscribed = IntegerField(default=0) #for sort
+    last_subscribed_time = DateTimeField(null=True)
     invalid_report_days = IntegerField(default=0) #some one reported it is a invalid link
-    last_invalid_report_time = DateTimeField() #a rss will be deleted after some days of reported_invalid
-    
+    last_invalid_report_time = DateTimeField(null=True) #a rss will be deleted after some days of reported_invalid
+
     #返回数据库中所有的分类
     @classmethod
     def categories(self):

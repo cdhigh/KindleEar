@@ -7,6 +7,9 @@
     {% block titleTag -%}
     <title>{{ _(title) }} - KindleEar</title>
     {% endblock -%}
+    <link rel="shortcut icon" href="static/favicon.ico" type="image/x-icon" />
+    <link rel="bookmark" href="static/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="static/favicon.ico" type="image/x-icon" />
     <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
     <link rel="stylesheet" href="/static/pure-min.css" type="text/css" charset="utf-8"/>
     <link rel="stylesheet" href="/static/grids-responsive-min.css" type="text/css" charset="utf-8"/>
@@ -81,13 +84,13 @@
             }
         }
         //Add a method 'format' to string
-        String.prototype.format = function(){
-            var args = Array.prototype.slice.call(arguments);
-            var count = 0;
-            return this.replace(/%s/g, function(s,i){
-                return args[count++];
-            });
-        }
+        //usage: "{0}, {1}".format('tx', 'txt')
+        String.prototype.format = function() {
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function(match, number) {
+          return typeof args[number] != 'undefined' ? args[number] : match;
+        });
+      };
     </script>
     {% block javascriptinhead %}{% endblock -%}
     {% block cssfiles %}{% endblock -%}

@@ -5,19 +5,19 @@ KindleEar配置文件，请务必修改开始两个配置（如果使用uploader
 """
 
 SRC_EMAIL = "akindleear@gmail.com"  #Your gmail account for sending mail to Kindle
-DOMAIN = "http://kindleear.appspot.com/" #Your domain of app
+DOMAIN = "http://kindleear.appspot.com" #Your domain of app
 #Need for taskqueue, Refers to <https://cloud.google.com/appengine/docs/locations>
 #Upper right corner at <https://console.cloud.google.com/appengine?project=your_app_id>
 APP_ID = "kindleear"
 SERVER_LOCATION = "us-central1"
 
-#Choose the database engine
+#Choose the database engine, you can also set Database URL to DATABASE_NAME
 DATABASE_ENGINE = "sqlite"  #"datastore", "mysql", "sqlite", "postgresql", "cockroachdb"
+DATABASE_NAME = "test.db"
 DATABASE_HOST = "localhost"
 DATABASE_PORT = 0
 DATABASE_USERNAME = ""
 DATABASE_PASSWORD = ""
-DATABASE_NAME = "test.db"
 
 #Choose the backend service for sending emails, either "gae", "sendgrid", "smtp"
 SEND_MAIL_SERVICE = "gae"

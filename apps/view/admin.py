@@ -4,6 +4,7 @@
 
 import hashlib, datetime
 from flask import Blueprint, request, url_for, render_template, redirect, session
+from flask_babel import gettext as _
 from apps.base_handler import *
 from apps.back_end.db_models import *
 from apps.utils import new_secret_key, str_to_int

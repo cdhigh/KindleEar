@@ -33,6 +33,7 @@ def ImageMimeFromName(f):
 class OptionValues(object):
     pass
 
+#用做服务器环境下的文件读写桩对象
 class ServerContainer(object):
     def __init__(self, log=None):
         self.log = log if log else default_log
@@ -59,14 +60,21 @@ class ServerContainer(object):
         return []
 
 #创建一个空的OEB书籍
-def CreateOeb(log, opts, encoding='utf-8'):
+#opts: OptionValues实例，描述书籍的一些元信息
+#log: 用来记录错误信息的Logging实例，为空则使用 default_log
+#container: 用来读写文件的桩对象，如果为空，则自动创建一个 ServerContainer
+#encoding: OEB的文件编码
+def CreateEmptyOeb(opts, log=None, container=None, encoding='utf-8'):
     from calibre.ebooks.conversion.preprocess import HTMLPreProcessor
     from calibre.ebooks.oeb.base import OEBBook
+    log = log if log else default_log
     html_preprocessor = HTMLPreProcessor(log, opts)
     if not encoding:
         encoding = None
     pretty_print = opts.pretty_print if opts else False
-    return OEBBook(log, html_preprocessor, pretty_print=pretty_print, input_encoding=encoding)
+    oeb = OEBBook(log, html_preprocessor, pretty_print=pretty_print, input_encoding=encoding)
+    oeb.container = container or ServerContainer(log)
+    return oeb
 
 #OEB的一些生成选项
 def GetOpts(outputType='kindle', bookMode='periodical'):

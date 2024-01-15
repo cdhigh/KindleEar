@@ -5,6 +5,7 @@
 import datetime, hashlib, io
 from urllib.parse import quote_plus, urljoin
 from flask import Blueprint, url_for, render_template, redirect, session, send_file
+from flask_babel import gettext as _
 from PIL import Image
 from apps.base_handler import *
 from apps.back_end.db_models import *
@@ -55,19 +56,27 @@ def AdvWhiteListPost():
 @login_required()
 def AdvArchive():
     user = get_login_user()
+
+    #jinja自动转义非常麻烦，在代码中先把翻译写好再传过去吧
+    appendStrs = {}
+    appendStrs["evernote"] = _("Append hyperlink '{}' to article").format(SAVE_TO_EVERNOTE)
+    appendStrs["wiz"] = _("Append hyperlink '{}' to article").format(SAVE_TO_WIZ)
+    appendStrs["pocket"] = _("Append hyperlink '{}' to article").format(SAVE_TO_POCKET)
+    appendStrs["instapaper"] = _("Append hyperlink '{}' to article").format(SAVE_TO_INSTAPAPER)
+    appendStrs["xweibo"] = _("Append hyperlink '{}' to article").format(SHARE_ON_XWEIBO)
+    appendStrs["tweibo"] = _("Append hyperlink '{}' to article").format(SHARE_ON_TWEIBO)
+    appendStrs["facebook"] = _("Append hyperlink '{}' to article").format(SHARE_ON_FACEBOOK)
+    appendStrs["twitter"] = _("Append hyperlink '{}' to article").format(SHARE_ON_TWITTER)
+    appendStrs["tumblr"] = _("Append hyperlink '{}' to article").format(SHARE_ON_TUMBLR)
+    appendStrs["browser"] = _("Append hyperlink '{}' to article").format(OPEN_IN_BROWSER)
     
-    return render_template('advarchive.html', tab='advset', user=user, advCurr='archive',
-        savetoevernote=SAVE_TO_EVERNOTE, savetowiz=SAVE_TO_WIZ, savetopocket=SAVE_TO_POCKET, 
-        savetoinstapaper=SAVE_TO_INSTAPAPER, ke_decrypt=ke_decrypt,
-        shareonxweibo=SHARE_ON_XWEIBO, shareontweibo=SHARE_ON_TWEIBO, shareonfacebook=SHARE_ON_FACEBOOK,
-        shareontwitter=SHARE_ON_TWITTER, shareontumblr=SHARE_ON_TUMBLR, openinbrowser=OPEN_IN_BROWSER)
+    return render_template('advarchive.html', tab='advset', user=user, advCurr='archive', appendStrs=appendStrs)
 
 @bpAdv.post("/advarchive", endpoint='AdvArchivePost')
 @login_required()
 def AdvArchivePost():
     user = get_login_user()
     form = request.form
-    fuckgfw = bool(form.get('fuckgfw'))
     evernoteMail = form.get('evernote_mail')
     evernote = bool(form.get('evernote')) and evernoteMail
     wizMail = form.get('wiz_mail')
@@ -92,7 +101,6 @@ def AdvArchivePost():
         instapaperUsername = ''
         instapaperPassword = ''
     
-    user.share_fuckgfw = fuckgfw
     user.evernote = evernote
     user.evernote_mail = evernoteMail
     user.wiz = wiz
@@ -144,7 +152,7 @@ def AdvDel():
         if wlist:
             wlist.delete()
         return redirect(url_for("bpAdv.AdvWhiteList"))
-    return redirect(url_for("bpAdv.Admin"))
+    return redirect(url_for("bpAdmin.Admin"))
 
 #导入自定义rss订阅列表，当前支持Opml格式
 @bpAdv.route("/advimport", endpoint='AdvImport')
@@ -182,7 +190,7 @@ def AdvImportPost():
                     rss.isfulltext = isfulltext
                     rss.save()
                 else:
-                    Feed(title=title, url=url, book=user.own_feeds.reference_key_or_id, isfulltext=isfulltext,
+                    Feed(title=title, url=url, book=user.my_rss_book.reference_key_or_id, isfulltext=isfulltext,
                         time=datetime.datetime.utcnow()).save()
                         
         return redirect(url_for("bpSubscribe.MySubscription"))
@@ -248,7 +256,7 @@ def AdvUploadCoverImage(tips=None):
 def AdvUploadCoverImageAjaxPost():
     MAX_IMAGE_PIXEL = 1024
     ret = 'ok'
-    user = get_login_user(forAjax=True)
+    user = get_login_user()
     try:
         upload = request.files.get('cover_file')
         #将图像转换为JPEG格式，同时限制分辨率不超过1024
@@ -271,7 +279,7 @@ def AdvUploadCoverImageAjaxPost():
 @bpAdv.post("/advdeletecoverimageajax", endpoint='AdvDeleteCoverImageAjaxPost')
 @login_required()
 def AdvDeleteCoverImageAjaxPost():
-    user = get_login_user(forAjax=True)
+    user = get_login_user()
     if request.form.get('action') == 'delete':
         user.cover = None
         user.save()
@@ -292,7 +300,7 @@ def AdvUploadCss(tips=None):
 @login_required()
 def AdvUploadCssAjaxPost():
     ret = 'ok'
-    user = get_login_user(forAjax=True)
+    user = get_login_user()
     if 'css_file' in request.files:
         #werkzeug.datastructures.FileStorage对象
         upload = request.files['css_file'] #有filename属性，有read()/close()
@@ -309,7 +317,7 @@ def AdvUploadCssAjaxPost():
 @login_required()
 def AdvDeleteCssAjaxPost():
     ret = {'status': 'ok'}
-    user = get_login_user(forAjax=True)
+    user = get_login_user()
     if request.form.get('action') == 'delete':
         user.css_content = ''
         user.save()
@@ -384,7 +392,7 @@ def VerifyAjaxPost(verifType):
         respDict['status'] = _('Request type [{}] unsupported').format(verifType)
         return respDict
     
-    user = get_login_user(forAjax=True)
+    user = get_login_user()
     
     userName = request.forms.username
     password = request.forms.password

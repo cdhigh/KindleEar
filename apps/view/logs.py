@@ -4,6 +4,7 @@
 import datetime
 from operator import attrgetter
 from flask import Blueprint, request, render_template
+from flask_babel import gettext as _
 from apps.base_handler import *
 from apps.back_end.db_models import *
 from google.appengine.api.datastore_errors import NeedIndexError
@@ -74,7 +75,7 @@ def RemoveLogs():
 @bpLogs.post("/lastdelivered/<mgrType>", endpoint='LastDeliveredAjaxPost')
 @login_required(forAjax=True)
 def LastDeliveredAjaxPost(mgrType):
-    user = get_login_user(forAjax=True)
+    user = get_login_user()
     mgrType = mgrType.lower()
 
     if mgrType == 'delete':

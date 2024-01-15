@@ -8,7 +8,6 @@
 
 {% block content -%}
 <div class="main">
-    {% if myfeeds -%}
     <legend><h3>{{_("Custom Rss")}}</legend>
     <div id="ownfeeds" class="box-list">
         <div class="book box pure-form pure-form-aligned" id="divAddFeedCmdPanel">
@@ -32,7 +31,7 @@
                 <a href="javascript:;" onclick="addFeed();return false;" class="actionButton add">{{_("Add")}}</a>
             </div>
             {% if tips -%}
-                <div class="notice-box">{{tips}}</div>
+                <div class="notice-box">{{tips|safe}}</div>
             {% endif -%}
         </div>
 
@@ -63,11 +62,10 @@
         </div>
         {% endfor -%}
     </div>
-    {% endif -%}
-
+    
     <legend><h3>{{ _("Subscribed") }}</h3></legend>
     <div id="mybooks" class="box-list">
-        <div id="nosub" class="book box" style="display:none">{{_("No have book subscribed")}}</div>
+        <div id="nosub" class="book box" style="display:none">{{_("There are no subscribed books")}}</div>
         {% for book in books if session.get('userName') in book.users -%}
         <div class="book box">
             <div class="titleRow">
@@ -264,7 +262,7 @@ function appendFeedDiv(title, isfulltext, url, feedid) {
     if (isfulltext) {
         newTitleDiv.appendChild(document.createTextNode(' '));
         var imgNode = document.createElement("img");
-        imgNode.setAttribute("alt", {{'"' + _("Fulltext") + '"'}});
+        imgNode.setAttribute("alt", "{{_("Fulltext")}}");
         imgNode.setAttribute("src", "static/fulltext.gif");
         imgNode.setAttribute("border", "0");
         newTitleDiv.appendChild(imgNode);
@@ -472,7 +470,7 @@ function showShareDialog(title, feedUrl, isfulltext){
     console.log(title);
     var modal = new tingle.modal({footer:true});
     var strContent = "{{_('<h1>Share links, share happiness</h1>')}}";
-    strContent += "{{_('<p>Category for [%s]:</p>')}}".format(title);
+    strContent += "{{_('<p>Category for [{0}]:</p>', title=title)|safe}}".format(title);
     strContent += '<div class="select-editable"><select onchange="this.nextElementSibling.value=this.value"><option value=""></option>';
     for (var idx in g_rss_categories){
         strContent += '<option value="' + g_rss_categories[idx] + '">' + g_rss_categories[idx] + '</option>';

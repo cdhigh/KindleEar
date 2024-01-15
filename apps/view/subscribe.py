@@ -6,6 +6,7 @@ import datetime
 from operator import attrgetter
 from urllib.parse import urljoin
 from flask import Blueprint, render_template, request, redirect, url_for
+from flask_babel import gettext as _
 from apps.base_handler import *
 from apps.back_end.db_models import *
 from lib.urlopener import UrlOpener
@@ -19,13 +20,13 @@ bpSubscribe = Blueprint('bpSubscribe', __name__)
 
 #管理我的订阅和杂志列表
 @bpSubscribe.route("/my", endpoint='MySubscription')
-@bpSubscribe.route("/my/<tips>", endpoint='MySubscription')
 @login_required()
 def MySubscription(tips=None):
     user = get_login_user()
     titleToAdd = request.args.get('title_to_add')
     urlToAdd = request.args.get('url_to_add')
-    myfeeds = user.own_feeds.feeds if user.own_feeds else None
+    customRssBook = user.my_rss_book
+    myfeeds = customRssBook.feeds if customRssBook else []
     books = list(Book.get_all(Book.builtin == True))
     #简单排个序，为什么不用数据库直接排序是因为Datastore数据库需要建立索引才能排序
     books.sort(key=attrgetter("title"))
@@ -50,10 +51,10 @@ def MySubscriptionPost():  #添加自定义RSS
         url = 'https://' + url
 
     #判断是否重复
-    if url.lower() in (item.url.lower() for item in user.own_feeds.feeds):
+    if url.lower() in (item.url.lower() for item in user.my_rss_book.feeds):
         return redirect(url_for("bpSubscribe.MySubscription", tips=(_("Duplicated subscription!"))))
 
-    Feed(title=title, url=url, book=user.own_feeds.reference_key_or_id, isfulltext=isfulltext,
+    Feed(title=title, url=url, book=user.my_rss_book.reference_key_or_id, isfulltext=isfulltext,
         time=datetime.datetime.utcnow()).save()
     return redirect(url_for("bpSubscribe.MySubscription"))
 
@@ -61,12 +62,12 @@ def MySubscriptionPost():  #添加自定义RSS
 @bpSubscribe.post("/feeds/<actType>", endpoint='FeedsAjaxPost')
 @login_required(forAjax=True)
 def FeedsAjaxPost(actType):
-    user = get_login_user(forAjax=True)
+    user = get_login_user()
     form = request.form
     actType = actType.lower()
 
     if actType == 'delete':
-        feedId = form.feedid
+        feedId = form.get('feedid')
         feed = Feed.get_by_id_or_none(feedId)
         if feed:
             feed.delete()
@@ -90,11 +91,11 @@ def FeedsAjaxPost(actType):
             respDict['url'] = url
 
         #判断是否重复
-        if url.lower() in [item.url.lower() for item in user.my_custom_rss_book.feeds]:
+        if url.lower() in [item.url.lower() for item in user.my_rss_book.feeds]:
             respDict['status'] = _("Duplicated subscription!")
             return respDict
 
-        fd = Feed(title=title, url=url, book=user.my_custom_rss_book.reference_key_or_id, isfulltext=isfulltext,
+        fd = Feed(title=title, url=url, book=user.my_rss_book.reference_key_or_id, isfulltext=isfulltext,
             time=datetime.datetime.utcnow())
         fd.save()
         respDict['feedid'] = fd.key_or_id_string
@@ -119,7 +120,7 @@ def SendNewSubscription(title, url):
 @bpSubscribe.post("/books/<actType>", endpoint='BooksAjaxPost')
 @login_required()
 def BooksAjaxPost(actType):
-    user = get_login_user(forAjax=True)
+    user = get_login_user()
     form = request.form
     id_ = form.get('id_')
     bk = Book.get_by_id_or_none(id_)

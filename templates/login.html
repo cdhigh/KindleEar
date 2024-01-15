@@ -25,9 +25,9 @@
 
 {% block content -%}
 <div class="main" id="fs_login">
-    {% for message in get_flashed_messages() -%}
-    <div class="notice-box">{{message|safe}}</div>
-    {% endfor -%}
+    {% if tips -%}
+    <div class="notice-box">{{tips|safe}}</div>
+    {% endif -%}
     <form action="/login" method="POST" class="pure-form pure-form-aligned">
         <div class="pure-control-group">
             <label for="u">{{_("Username")}}</label>
@@ -41,6 +41,6 @@
             <button type="submit" class="pure-button pure-button-primary pure-input-rounded">{{_("Login")}}</button>
         </div>
     </form>
-    <p id="note">{{_("The website dont allow register, you can ask owner for a account.")}}</p>
+    <p id="note">{{_("The website doesn't allow registration. You can ask the owner for an account.")}}</p>
 </div>
 {% endblock -%}

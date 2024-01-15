@@ -86,7 +86,7 @@ button {
     font-family: Palatino, STSong, SimSun, serif;
     font-size: 1.5em;
     text-transform: none;
-    font-weight: bold;
+    font-weight: 200;
     color: #222;
 }
 
@@ -108,7 +108,7 @@ button {
 
 .app-menu .pure-menu-list {
     margin: 0 auto;
-    max-width: 800px;
+    max-width: 1024px;
 }
 
 @media only screen and (min-width: 480px) {
@@ -145,7 +145,7 @@ button {
 .main {
     margin: 0 auto;
     padding: 20px;
-    max-width: 800px;
+    max-width: 1024px;
 }
 
 /*
@@ -179,7 +179,7 @@ button {
     margin: 0 0 .67em;
     font-size: 3.8em;
     color: white;
-    font-weight: 100;
+    font-weight: 200;
     text-shadow: 0 1px 1px black;
 }
 
@@ -465,8 +465,8 @@ table.pure-table thead {
      position:relative;
      background-color:white;
      border:solid gray 1px;
-     width:200px;
-     height:20px;
+     width:250px;
+     height:34px;
  }
 
  .select-editable select {
@@ -475,7 +475,7 @@ table.pure-table thead {
      left:0px;
      font-size:14px;
      border:none;
-     width:200px;
+     width:250px;
      margin:0;
  }
 
@@ -483,8 +483,8 @@ table.pure-table thead {
      position:absolute;
      top:0px;
      left:0px;
-     width:180px;
-     height:19px;
+     width:230px;
+     height:34px;
      padding:1px;
      font-size:12px;
      border:solid gray 1px;

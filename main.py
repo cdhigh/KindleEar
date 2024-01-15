@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-#KindleEar入口文件，向外提供 app 实例
+#KindleEar 入口文件，向外提供 app 实例
 #Visit https://github.com/cdhigh/KindleEar for the latest version
-#Author:
-# cdhigh <https://github.com/cdhigh>
+#Author: cdhigh <https://github.com/cdhigh>
 
 __Author__ = "cdhigh"
 
 import os, sys, logging, builtins
-from flask import Flask, render_template, session, request, g
+from flask import Flask, render_template, session, request, g, send_from_directory
 from flask_babel import Babel, gettext
+#from jinja2 import Environment, FileSystemLoader
 
 __Version__ = '3.0'
 
@@ -21,7 +21,7 @@ log.setLevel(logging.INFO if IsRunInLocal else logging.WARN)
 builtins.__dict__['default_log'] = log
 builtins.__dict__['IsRunInLocal'] = IsRunInLocal
 builtins.__dict__['_'] = gettext
-
+appDir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, 'lib') #for calibre
 
 from books import RegisterBuiltinBooks
@@ -52,10 +52,14 @@ def GetLocale():
     return request.accept_languages.best_match(supported_languages)
 
 app = Flask(__name__)
+#H对Flask的一个Hack，全局关闭autoescape
+#app.jinja_env = Environment(loader=FileSystemLoader([os.path.join(appDir, 'templates')]), autoescape=False)
+#jinja_environment = app.jinja_env
 babel = Babel(app)
 app.config['SECRET_KEY'] = 'fdjlkdfjx32QLL2' #new_secret_key()
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000
 babel.init_app(app, locale_selector=GetLocale)
+app.config["BABEL_TRANSLATION_DIRECTORIES"] = os.path.abspath('translations/')
 
 #使用GAE来接收邮件
 if USE_GAE_INBOUND_EMAIL:
@@ -67,6 +71,10 @@ if USE_GAE_INBOUND_EMAIL:
 @app.route('/')
 def Home():
     return render_template('home.html')
+
+@app.route('/images/<path:image_file>')
+def ImageFileRoute(image_file):
+    return send_from_directory('images', image_file)
 
 @app.before_request
 def BeforeRequest():
@@ -95,3 +103,7 @@ app.register_blueprint(bpShare)
 app.register_blueprint(bpSubscribe)
 app.register_blueprint(bpWorker)
 app.register_blueprint(bpUrl2Book)
+
+#调试目的
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', debug=False)

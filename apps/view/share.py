@@ -6,6 +6,7 @@ import hashlib
 from urllib.parse import unquote_plus
 from bs4 import BeautifulSoup
 from flask import Blueprint, render_template, request
+from flask_babel import gettext as _
 from apps.base_handler import *
 from apps.back_end.db_models import *
 from apps.utils import hide_email, ke_encrypt, ke_decrypt
@@ -57,9 +58,10 @@ def SaveToEvernoteWiz(user, action, orgUrl):
         return "No have wiz mail yet."
         
     book = BaseUrlBook(user=user)
+    rssBook = user.my_rss_book
     book.title = book.description = action
-    book.language = user.own_feeds.language
-    book.keep_image = user.own_feeds.keep_image
+    book.language = rssBook.language
+    book.keep_image = rssBook.keep_image
     book.feeds = [(action, orgUrl)]
     book.url_filters = [flt.url for flt in user.url_filters]
     

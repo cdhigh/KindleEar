@@ -939,7 +939,7 @@ class BaseFeedBook:
             #self.log.debug('Login url : ' + targetUrl)
             return opener.open(targetUrl)
         else:
-            #self.log.info('field_dic:%s' % repr(fieldsDic))
+            #self.log.info('field_dic:{}'.format(repr(fieldsDic)))
             targetUrl = action
             return opener.open(targetUrl, data=fieldsDic)
     

@@ -228,8 +228,8 @@ def ReceiveMail(path):
                  'to': user.kindle_email,
                  'tz': user.timezone,
                  'subj': subject[:SUBJECT_WORDCNT_FOR_APMAIL],
-                 'lng': user.own_feeds.language,
-                 'kimg': '1' if user.own_feeds.keep_image else '0'}
+                 'lng': user.my_rss_book.language,
+                 'kimg': '1' if user.my_rss_book.keep_image else '0'}
         create_http_task('/url2book', params)
     else: #直接转发邮件正文
         from lib.makeoeb import ImageMimeFromName
@@ -251,8 +251,7 @@ def ReceiveMail(path):
         #有图片的话，要生成MOBI或EPUB才行
         #而且多看邮箱不支持html推送，也先转换epub再推送
         if imageContents or (user.book_type == "epub"):
-            from lib.makeoeb import (GetOpts, CreateOeb, setMetaData,
-                                ServerContainer, EPUBOutput, MOBIOutput)
+            from lib.makeoeb import (GetOpts, CreateEmptyOeb, setMetaData, EPUBOutput, MOBIOutput)
             
             #仿照Amazon的转换服务器的处理，去掉CSS
             if DELETE_CSS_FOR_APPSPOTMAIL:
@@ -268,11 +267,11 @@ def ReceiveMail(path):
                     img['src'] = img['src'][4:]
             
             opts = GetOpts()
-            oeb = CreateOeb(log, opts)
+            oeb = CreateEmptyOeb(opts, log)
             
-            setMetaData(oeb, subject[:SUBJECT_WORDCNT_FOR_APMAIL], user.own_feeds.language, 
+            setMetaData(oeb, subject[:SUBJECT_WORDCNT_FOR_APMAIL], user.my_rss_book.language, 
                 local_time(tz=user.timezone), pubtype='book:book:KindleEar')
-            oeb.container = ServerContainer(log)
+
             id_, href = oeb.manifest.generate(id='page', href='page.html')
             manif = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=str(soup))
             oeb.spine.add(manif, False)

@@ -9,7 +9,8 @@
 <div class="main">
     {% if tips -%}
         <div class="notice-box">
-            {{tips}}
+            {{tips|safe}}
+            <br />
             <a href="{% if urltoback is defined and urltoback %}{{urltoback}}{%else%}javascript:history.go(-1);{%endif%}">
                 {{_("Click to back")}}
             </a>

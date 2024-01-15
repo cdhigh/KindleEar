@@ -8,7 +8,7 @@
 {% block content -%}
 <div class="main">
     {% if tips -%}
-        <div class="notice-box">{{tips}}</div>
+        <div class="notice-box">{{tips|safe}}</div>
     {% endif -%}
     <form class="pure-form pure-form-aligned" action="" method="POST">
         <div class="pure-control-group">
@@ -27,10 +27,12 @@
             <label for="ep">{{_("Expiration")}}</label>
             <select class="pure-u-1 pure-u-sm-1-2 bool" name="ep">
                 <option value="0" {% if expiration == 0 %}selected="selected"{% endif %}>{{_("Never expire")}}</option>
+                <option value="7" {% if expiration == 7 %}selected="selected"{% endif %}>{{_("7 Days")}}</option>
                 <option value="30" {% if expiration == 30 %}selected="selected"{% endif %}>{{_("1 Month")}}</option>
                 <option value="90" {% if expiration == 90 %}selected="selected"{% endif %}>{{_("3 Months")}}</option>
                 <option value="180" {% if expiration == 180 %}selected="selected"{% endif %}>{{_("6 Months")}}</option>
                 <option value="365" {% if expiration == 365 %}selected="selected"{% endif %}>{{_("1 Year")}}</option>
+                <option value="730" {% if expiration == 730 %}selected="selected"{% endif %}>{{_("2 Years")}}</option>
             </select>
         </div>
         <div class="pure-control-group" style="text-align:center;">

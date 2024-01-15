@@ -70,8 +70,7 @@ class TestCalibre:
         bookMode = 'periodical'
         log = default_log
         opts = GetOpts("kindle", bookMode)
-        oeb = CreateOeb(log, opts)
-        oeb.container = WindowsTestContainer(log)
+        oeb = CreateEmptyOeb(opts, log)
         bookTitle = "test"
         pubType = 'book:book:KindleEar' if bookMode == 'comic' else 'periodical:magazine:KindleEar'
         author = 'KindleEar'

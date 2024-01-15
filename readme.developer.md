@@ -41,6 +41,14 @@
 # KindleEar额外自带的Python库，这些库不用pip安装，不在requirements.txt里面
 * readability-lxml: 修改了其htmls.py|shorten_title()
 
+# Python托管平台的一些了解
+* [appengine](https://cloud.google.com)：必须绑定信用卡，但有免费额度，有收发邮件服务，任务队列，后台进程
+* [Heroku](https://www.heroku.com): 没有免费额度，入门套餐也需要付费
+* [Pythonanywhere](https://www.pythonanywhere.com): 有免费计划，不支持任务队列，有每天两次的预定任务计划
+* [Adaptable](https://adaptable.io): 免费计划不支持任何形式的任务队列和后台任务，5分钟内必须完成应答请求
+* [render](https://render.com): 有免费计划，没有免费cron额度
+* []()
+
 # 常用链接
 [App Engine 文档](https://cloud.google.com/appengine/docs)
 [Cloud Tasks]https://cloud.google.com/tasks/docs

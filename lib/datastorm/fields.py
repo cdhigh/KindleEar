@@ -52,6 +52,15 @@ class BaseField(FieldABC):
     def __ge__(self, other: Any) -> Filter:
         return self._generate_filter(">=", other)
 
+    #用来排序的，如果是升序，asc()可以省略
+    @classmethod
+    def asc(self):
+        return self.field_name
+        
+    @classmethod
+    def desc(self):
+        return '-{}'.format(self.field_name)
+
     def __repr__(self):
         return "< {field_type} name={field_name} >".format(field_type=self.__class__.__name__,
                                                            field_name=self.field_name)  # pragma: no cover

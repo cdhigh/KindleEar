@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-#datastore数据库结构定义，使用datastorm ODM管理
-#<https://datastorm.readthedocs.io/en/latest/>
+#datastore数据库结构定义，使用经过修改的datastorm ODM库管理
+#datastorm 源 <https://github.com/JavierLuna/datastorm>
+#datastorm 文档 <https://datastorm.readthedocs.io/en/latest/>
+#cloud datastore 文档 <https://cloud.google.com/datastore/docs/concepts/queries>
 #使用的datastorm是自己修改过的，接口尽量和peewee保持一致，并且尽量不要使用peewee的高级特性
 #可以使用Key实例的 to_legacy_urlsafe().decode()/from_legacy_urlsafe() 来模拟SQL的外键
+#根据以前的经验，经常出现有网友部署时没有成功建立数据库索引，所以现在排序在应用内处理，数据量不大
 #Author: cdhigh <https://github.com/cdhigh/KindleEar>
 
 from apps.utils import ke_encrypt, ke_decrypt
@@ -91,6 +94,7 @@ class KeUser(MyBaseModel): # kindleEar User
     __kind__ = "KeUser"
     name = fields.StringField()
     passwd = fields.StringField()
+    expiration_days = fields.IntField() #账号超期设置值，0为永久有效
     secret_key = fields.StringField()
     kindle_email = fields.StringField()
     enable_send = fields.BooleanField()
@@ -100,11 +104,13 @@ class KeUser(MyBaseModel): # kindleEar User
     book_type = fields.StringField() #mobi,epub
     device = fields.StringField()
     expires = fields.DateTimeField() #超过了此日期后账号自动停止推送
-    own_feeds = fields.StringField(default='') # 每个用户都有自己的自定义RSS，保存对应Book实例的Key, my_custom_rss_book
-    use_title_in_feed = fields.BooleanField() # 文章标题优先选择订阅源中的还是网页中的
+    own_feeds = fields.StringField(default='') #每个用户都有自己的自定义RSS，保存对应Book实例的Key, my_rss_book
+    use_title_in_feed = fields.BooleanField() #文章标题优先选择订阅源中的还是网页中的
     title_fmt = fields.StringField() #在元数据标题中添加日期的格式
+    author_format = fields.StringField() #修正Kindle 5.9.x固件的bug【将作者显示为日期】
+    book_mode = fields.StringField() #书籍模式，'periodical'|'comic'，漫画模式可以直接全屏
     merge_books = fields.BooleanField() #是否合并书籍成一本
-    
+    remove_hyperlinks = fields.StringField() #去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
     share_fuckgfw = fields.BooleanField() #归档和分享时是否需要翻墙
     evernote = fields.BooleanField() #是否分享至evernote
     evernote_mail = fields.StringField() #evernote邮件地址
@@ -125,21 +131,18 @@ class KeUser(MyBaseModel): # kindleEar User
     qrcode = fields.BooleanField() #是否在文章末尾添加文章网址的QRCODE
     cover = fields.AnyField() #保存各用户的自定义封面图片二进制内容
     css_content = fields.StringField() #added 2019-09-12 保存用户上传的css样式表
-    
-    book_mode = fields.StringField() #added 2017-08-31 书籍模式，'periodical'|'comic'，漫画模式可以直接全屏
-    expiration_days = fields.IntField() #added 2018-01-07 账号超期设置值，0为永久有效
-    remove_hyperlinks = fields.StringField() #added 2018-05-02 去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
-    author_format = fields.StringField() #added 2020-09-17 修正Kindle 5.9.x固件的bug【将作者显示为日期】
+    sg_enable = BooleanField(default=False)
+    sg_apikey = CharField(default='')
 
     #自己所属的RSS集合代表的书
     @property
-    def my_custom_rss_book(self):
+    def my_rss_book(self):
         return Book.get_by_id_or_none(DataStoreKey.from_legacy_urlsafe(self.own_feeds))
 
     #自己直接所属的RSS列表，返回[Feed]
     @property
     def all_custom_rss(self):
-        rssBook = self.my_custom_rss_book
+        rssBook = self.my_rss_book
         if rssBook:
             bookKey = rssBook.key.to_legacy_urlsafe().decode()
             return Feed.get_all(Feed.book == bookKey)

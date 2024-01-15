@@ -29,7 +29,7 @@
             <div class="l-box">
                 <h3 class="information-head">{{_("Inherited From Calibre")}}</h3>
                 <p>
-                    {{_("With the powerful %s, you can now effortlessly generate epub/mobi books within a Python-hosted environment and seamlessly transfer them to your eReader or other reading devices.")}}
+                    {{_("With the powerful %(calibre)s, you can now effortlessly generate epub and mobi books within a Python-hosted environment and seamlessly transfer them to your eReader or other reading devices.", calibre='<a href="https://calibre-ebook.com/" target="_blank">Calibre</a>')|safe}}
                 </p>
             </div>
         </div>
@@ -38,7 +38,7 @@
             <div class="l-box">
                 <h3 class="information-head">{{_("Share Your Ideas")}}</h3>
                 <p>
-                    {{_("With my")}} <a href="https://github.com/cdhigh/kindleear" target="_blank">{{_("open source KindleEar application")}}</a>{{_(", You can deploy your own server to push news feeds to your kindle dialy or share the service with your friends.")}}
+                    {{_("With my open source %(app_name)s application, You can deploy your own server to push news feeds to your kindle dialy or share the service with your friends.", app_name='<a href="https://github.com/cdhigh/kindleear" target="_blank">KindleEar</a>')|safe}}
                 </p>
             </div>
         </div>

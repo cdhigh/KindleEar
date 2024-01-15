@@ -16,6 +16,7 @@ class QueryBuilder:
         filters = filters or []
         self._filters = filters + entity_class.__base_filters__
         self._order = order or []
+        self._limit = 0
 
     #修改为和peewee接口一致，原来为 filter()，改成 where()
     def where(self, *filters: Filter):
@@ -30,11 +31,14 @@ class QueryBuilder:
         self._filters.append(Filter("__key__", "=", key))
         return self.first()
 
-    def order(self, field: Union[BaseField, str], inverted: bool = False):
+    #修改为用法和peewee一样，order_by(Model.Field.desc())/order_by(Model.Field)
+    def order_by(self, field: Union[BaseField, str]):
         order_field = field.field_name if isinstance(field, BaseField) else field
-        order_field = "-" + order_field if inverted else order_field  # type: ignore
         self._order.append(order_field)
         return self
+
+    def limit(self, limit: int):
+        self._limit = limit
 
     #这个修饰函数是类似SQL的select函数里面的参数，只获取部分字段，可以考虑将这部分功能移到select函数
     def only(self, *args: List[str]):
@@ -48,20 +52,25 @@ class QueryBuilder:
     #    return None if raw_entity is None else self._make_entity_instance(raw_entity.key, raw_entity)
     get = first
 
-    #select()之后需要调用此函数才提供数据，原来版本为 all()，改成 execute()
+    #select()之后需要调用此函数才提供数据
     def execute(self, page_size: int = 500, parent_key: Key = None):
         query = self._get_query(parent_key)
         query = self._build_query(query)
 
         cursor = None
+        limit = self._limit
+        batch_size = min(page_size, limit) if limit else page_size
+        count = 0
         while True:
             last_yielded_entity = None
-            query_iter = query.fetch(start_cursor=cursor, limit=page_size)
-            for raw_entity in query_iter:
+            query_iter = query.fetch(start_cursor=cursor, limit=batch_size)
+            for raw_entity in query_iter: #逐个返回Python化的实体对象
                 last_yielded_entity = self._make_entity_instance(raw_entity.key, raw_entity)
                 yield last_yielded_entity
+                cnt += 1
             cursor = query_iter.next_page_token
-            if not cursor or last_yielded_entity is None:
+            #last_yielded_entity要用is None，避免实体类重载了__bool__()
+            if not cursor or (last_yielded_entity is None) or (limit and (cnt >= limit)):
                 break
 
     def _modify_filters(self, query):
@@ -92,6 +101,9 @@ class QueryBuilder:
             pass
 
         return result
+
+    def __iter__(self):
+        return iter(self.execute())
 
     def _make_entity_instance(self, key: Key, attr_data: dict):
         entity = self._entity_class(key)

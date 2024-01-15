@@ -12,11 +12,7 @@
     <fieldset>
         <legend><h3>{{_("White List")}}</h3></legend>
         <p> <small>
-        {% if (user.name == adminName) %}
-        {{_("mail sent to xxx@appid.appspotmail.com will be transfered to your email.") }}
-        {% else %}
-        {{_("mail sent to %s__xxx@appid.appspotmail.com will be transfered to your email.")|format(user.name)}}
-        {% endif %}
+        {{_("Emails sent to %(name)sxxx@appid.appspotmail.com will be transferred to your email.", name='' if (user.name == adminName) else user.name + '__')}}
         </small></p>
         <div class="box-list">
             {% if user.white_lists -%}

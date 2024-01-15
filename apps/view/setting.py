@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #设置页面
-
+import locale
 from flask import Blueprint, render_template, request, redirect, session
+from flask_babel import gettext as _
 from apps.base_handler import *
 from apps.back_end.db_models import *
 from config import *
@@ -44,10 +45,7 @@ def LangMap():
 @login_required()
 def Setting(tips=None):
     user = get_login_user()
-    if not user.own_feeds.language:
-        user.own_feeds.language = "zh-cn"
-
-    return render_template('setting.html', tab='set', user=user, tips=tips, mailSender=SRC_EMAIL, lang_map=LangMap())
+    return render_template('setting.html', tab='set', user=user, tips=tips, mailSender=SRC_EMAIL, langMap=LangMap())
 
 @bpSetting.post("/setting", endpoint='SettingPost')
 @login_required()
@@ -56,14 +54,10 @@ def SettingPost():
     form = request.form
     keMail = form.get('kindle_email')
     myTitle = form.get('rss_title')
-    sgEnable = bool(form.get('sg_enable'))
-    sgApikey = form.get('sg_apikey')
     if not keMail:
         tips = _("Kindle E-mail is requied!")
     elif not myTitle:
         tips = _("Title is requied!")
-    elif sgEnable and (not sgApikey):
-        tips = _("Need sendgrid ApiKey!")
     else:
         user.kindle_email = keMail.strip(';, ')
         user.timezone = int(form.get('timezone', TIMEZONE))
@@ -79,11 +73,9 @@ def SettingPost():
         user.book_mode = form.get('bookmode')
         user.remove_hyperlinks = form.get('removehyperlinks')
         user.author_format = form.get('author_format')
-        user.sg_enable = sgEnable
-        user.sg_apikey = sgApikey
         user.save()
 
-        myFeedBook = user.my_custom_rss_book
+        myFeedBook = user.my_rss_book
         if myFeedBook:
             myFeedBook.language = form.get("book_language", "en-us")
             myFeedBook.title = myTitle
@@ -99,6 +91,7 @@ def SettingPost():
 @bpSetting.route("/setlocale/<langCode>")
 def SetLang(langCode):
     global supported_languages
+    print(f'lang: {langCode}')
     langCode = langCode.lower()
     if langCode not in supported_languages:
         langCode = "en"

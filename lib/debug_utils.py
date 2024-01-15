@@ -18,7 +18,7 @@ def debug_fetch(url, name='page.html'):
     if result.status_code == 200 and result.content:
         debug_mail(result.content, name)
     else:
-        default_log.warning('debug_fetch failed: code:%d, url:%s' % (result.status_code, url))
+        default_log.warning('debug_fetch failed: code:{}, url:{}'.format(result.status_code, url))
 
 #本地调试使用，在本地创建一个FTP服务器后，将调试文件通过FTP保存到本地
 #因为只是调试使用，所以就没有那么复杂的处理了，要提前保证目标目录存在
@@ -37,6 +37,6 @@ def debug_save_ftp(content, name='page.html', root='', server='127.0.0.1', port=
     
     #为简单起见，就不删除FTP服务器的同名文件，取而代之的就是将当前时间附加到文件名后
     name = name.replace('.', datetime.datetime.now().strftime('_%H_%M_%S.'))
-    ftp.storbinary('STOR %s' % name, StringIO(content))
+    ftp.storbinary('STOR {}'.format(name), StringIO(content))
     ftp.set_debuglevel(0)
     ftp.quit()

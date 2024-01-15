@@ -26,7 +26,6 @@ class AbstractDSEntity(type):
             attr.field_name = key
         return attr
 
-
 class BaseEntity:
     __kind__: str = None  # type: ignore #kind类似SQL里面的表名
     __base_filters__: List[Filter] = []
@@ -53,7 +52,10 @@ class BaseEntity:
     def get(cls, **kwargs):
         return QueryBuilder(cls).where(**kwargs).first()
 
-    get_or_none = get
+    #和peewee一致
+    @classmethod
+    def get_or_none(cls, **kwargs):
+        return cls.get(**kwargs)
 
     @classmethod
     def get_by_key(cls, key: Union[Key, str]):

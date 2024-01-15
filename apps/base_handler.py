@@ -18,8 +18,6 @@ def login_required(userName=None, forAjax=False):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            print(f"login: {session.get('login')}")
-            print(f"Name: {session.get('userName')}")
             if ((session.get('login') == 1) and (not userName or (userName == session.get('userName')))
                 and get_login_user()):
                 return func(*args, **kwargs)

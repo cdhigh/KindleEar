@@ -60,7 +60,7 @@ class UrlOpener:
     @classmethod
     def CodeMap(cls, errCode):
         des = cls._codeMapDict.get(errCode, None)
-        return '%d %s' % (errCode, des) if des else str(errCode)
+        return '{} {}'.format(errCode, des) if des else str(errCode)
     
     def __init__(self, host=None, timeout=30, headers=None):
         self.host = host
@@ -108,7 +108,7 @@ class UrlOpener:
             "User-Agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         }
-        if self.addReferer and (self.host or url):
+        if self.host or url:
             headers["Referer"] = self.host if self.host else url
         
         if self.initHeaders:

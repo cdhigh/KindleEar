@@ -60,7 +60,7 @@
     
     <span id="whatis"></span>
     <h2>KindleEar是什么？</h2>
-    <p>KindleEar是部署在Google Appengine上的免费应用，主要功能是自动定期通过RSS收集网络文章然后制作成图文并茂的电子书推送至你的Kindle。</p>
+    <p>KindleEar是开源免费网络应用，可以部署在大多数支持Python的托管平台，包括但不限于google appengine，Heroku，Pythonanywhere，主要功能是自动定期通过RSS收集网络文章然后制作成图文并茂的电子书推送至你的Kindle。</p>
     <p class="answer">主要特性：
     <ul>
      <li>自定义RSS</li>
@@ -329,10 +329,10 @@
     </ul>
     备注：
     <ul>
-        <li>Pocket对应用授权采用Oauth v2技术，只有Pocket才知道你的账号和密码；</li>
+        <li>Pocket对应用授权采用 Oauth 2.0 技术，只有Pocket才知道你的账号和密码；</li>
         <li>此应用仅申请了添加文章权限，没有权限修改和删除你的账户中的已有文章，也没有权限查看你的文章列表；</li>
         <li>在Pocket申请到的授权码保存在你自己的应用数据库中，其他人搭建的KindleEar没有权限访问你的账户；</li>
-        <li>如果你更注重隐私和安全，你也可以自己在Pocket上申请一个开发者的Consumer Key，然后修改config.py中的POCKET_CONSUMER_KEY。</li>
+        <li>如果你更注重隐私和安全，你也可以自己在Pocket上 <a href="https://getpocket.com/developer/apps/new">申请一个开发者的Consumer Key</a>，然后修改config.py中的POCKET_CONSUMER_KEY。</li>
         <li>如果需要反向将Pocket的文章推送至Kindle，可以打开Pocket的自定义RSS功能，在Pocket控制面板的“隐私控制”|“RSS 订阅源”可以找到你的专有RSS订阅地址，把它加入KindleEar的订阅列表中即可。</li>
         <li>而因Instapaper仅提供了简单的认证API，所以 'Save to <a href="https://www.instapaper.com">Instapaper</a>' 功能需要输入账号和密码，但是密码是加密后保存在你自己的应用的数据库中的。</li>
     </ul>

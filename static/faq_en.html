@@ -269,24 +269,24 @@
     
     <span id="savetopocket"></span>
     <h2>How to use the feature 'Save to Pocket'?</h2>
-    <p class="answer">The <a href="https://getpocket.com/">Pocket</a> is a popular 'Read It Later' service.
-    The service allows the user to save an article or web page to the cloud for later reading. The article is then sent to the user's Pocket list (synced to all of their devices) for offline reading. Pocket removes clutter from articles and allows the user to adjust text settings for easier reading.<br/>
-    Now you can save an article of your Kindle to your pocket's account, and then you can read it in other devices later.<br/><br/>
+    <p class="answer">The <a href="https://getpocket.com/">Pocket</a> is a widely used 'Read It Later' service that enables users to save articles or web pages to the cloud for future reading. These articles are then synced to the user's Pocket list, accessible across all their devices, facilitating offline reading. Pocket streamlines articles by removing clutter and provides customizable text settings for a more comfortable reading experience.Now, you have the option to save a Kindle article to your Pocket account, allowing you to read it on other devices at your convenience.<br/>
     Follows steps to enjoy this feature:
     <ul>
-        <li>Get an account of pocket;</li>
-        <li>Click [Authorize] of section 'Save to Pocket' in KindleEar's page 'Advance' |' Share';</li>
-        <li>Choose "Append hyperlink 'Save to Pocket' to article" in KindleEar's page 'Advance' | 'Share'.</li>
+        <li>Create a Pocket account;</li>
+        <li>Click on [Authorize] in the 'Save to Pocket' section on KindleEar's 'Advanced' | 'Archive' page;</li>
+        <li>Select "Append hyperlink 'Save to Pocket' to article".</li>
     </ul>
+
     Remarks:
     <ul>
-        <li>Authorization use OAuth v2 technology, only Pocket knows your username and password;</li>
-        <li>This application requests 'Add' permission only, asks for neither 'Modify' nor 'Delete', can't retrieve your article list too.</li>
-        <li>The Pocket's access token stored in your database, KindleEar application of other guys do not have permission to access your Pocket account;</li>
-        <li>If you worry about privacy and security, you can apply an new developer Consumer Key in Pocket website, and then change variable POCKET_CONSUMER_KEY in config.py.</li>
-        <li>If you want KindleEar deliver your unread articles to KinleEar, you can find a RSS address in Pocket page, and add it to list of subscription of KindleEar.</li>
-        <li>Both username and password are requested to active the feature 'Save to <a href="https://www.instapaper.com">Instapaper</a>', but the password is encrypted before be saved to database. </li>
+        <li>Authorization utilizes OAuth v2 technology, ensuring that only Pocket has access to your username and password;</li>
+        <li>This application requests only 'Add' permission, without asking for 'Modify' or 'Delete', and it cannot retrieve your article list;</li>
+        <li>The Pocket's access token is stored in your database, preventing other KindleEar applications from accessing your Pocket account;</li>
+        <li>If you are concerned about privacy and security, you can <a href="https://getpocket.com/developer/apps/new">apply for a new developer Consumer Key</a> on the Pocket website and then update the variable POCKET_CONSUMER_KEY in config.py;</li>
+        <li>If you want KindleEar to deliver your unread articles to KindleEar, find an RSS address on the Pocket page and add it to the list of subscriptions in KindleEar;</li>
+        <li>Both the username and password are required to activate the 'Save to <a href="https://www.instapaper.com">Instapaper</a>' feature, but the password is encrypted before being saved to the database.</li>
     </ul>
+
     </p>
     
     <span id="wrongemail"></span>

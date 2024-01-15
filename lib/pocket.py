@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Pocketd V3 API封装，使用OAuth 2.
+Pocketd V3 API封装，使用OAuth 2.0
 Author: cdhigh
 用法：
 Step 1: Obtain a platform consumer key
@@ -55,24 +55,24 @@ class APIError(Exception):
         
     def __str__(self):
         #APIError: HTTP Status:403, X-Error-Code:158, X-Error:"User rejected code.", request: Get access token
-        return 'APIError: HTTP Status:%d, X-Error-Code:%s, X-Error:"%s", request: %s' \
-            % (self.status_code, self.x_error_code, self.x_error, self.request)
-
-REQUEST_TOKEN_URL = 'https://getpocket.com/v3/oauth/request'
-AUTH_TOKEN_URL = 'https://getpocket.com/auth/authorize?request_token=%(request_token)s&redirect_uri=%(redirect_uri)s'
-ACCESS_TOKEN_URL = 'https://getpocket.com/v3/oauth/authorize'
-
-POCKET_HEADERS = {
-    'Content-Type': 'application/json; charset=UTF-8',
-    'X-Accept': 'application/json'
-}
+        return ('APIError: HTTP Status:{}, X-Error-Code:{}, X-Error:"{}", request: {}'.
+            format(self.status_code, self.x_error_code, self.x_error, self.request))
 
 class Pocket(object):
+    REQUEST_TOKEN_URL = 'https://getpocket.com/v3/oauth/request'
+    AUTH_TOKEN_URL = 'https://getpocket.com/auth/authorize?request_token=%(request_token)s&redirect_uri=%(redirect_uri)s'
+    ACCESS_TOKEN_URL = 'https://getpocket.com/v3/oauth/authorize'
+
+    POCKET_HEADERS = {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'X-Accept': 'application/json'
+    }
+
     def __init__(self, consumer_key, redirect_uri=None):
         self.consumer_key = str(consumer_key)
         self.redirect_uri = redirect_uri
         self.access_token = None
-        self.opener = UrlOpener(headers=POCKET_HEADERS)
+        self.opener = UrlOpener(headers=self.POCKET_HEADERS)
         
     def _post(self, method_url, **kw):
         ret = self.opener.open(method_url, data=kw)
@@ -87,18 +87,18 @@ class Pocket(object):
 
     def get_request_token(self):
         #此步仅用来直接通过一次http获取一个request_token(code)，pocket不会回调redirect_uri
-        ret = self._post(REQUEST_TOKEN_URL, consumer_key=self.consumer_key, redirect_uri=self.redirect_uri)
+        ret = self._post(self.REQUEST_TOKEN_URL, consumer_key=self.consumer_key, redirect_uri=self.redirect_uri)
         return ret.get('code', '')
         
     def get_authorize_url(self, code):
         if not self.redirect_uri:
             raise APIError(400, '140', 'Missing redirect url.', 'Get access token')
-        url = AUTH_TOKEN_URL % {'request_token' : code, 'redirect_uri' : self.redirect_uri}
+        url = self.AUTH_TOKEN_URL % {'request_token' : code, 'redirect_uri' : self.redirect_uri}
         return url
         
     def get_access_token(self, code):
         # access token : {"access_token":"dcba4321-dcba-4321-dcba-4321dc","username":"pocketuser"}.
-        ret = self._post(ACCESS_TOKEN_URL, consumer_key=self.consumer_key, code=code)
+        ret = self._post(self.ACCESS_TOKEN_URL, consumer_key=self.consumer_key, code=code)
         self.access_token = ret.get('access_token', '')
         return ret
 

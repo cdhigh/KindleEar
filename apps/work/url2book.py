@@ -79,8 +79,7 @@ def Url2Book():
     book.url_filters = [flt.url for flt in user.url_filters]
     
     # 创建 OEB
-    oeb = CreateOeb(log, opts)
-    oeb.container = ServerContainer(log)
+    oeb = CreateEmptyOeb(opts, log)
     
     if len(book.feeds) > 1:
         setMetaData(oeb, subject, language, local_time(tz=tz))

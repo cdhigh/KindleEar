@@ -10,7 +10,7 @@
 <div class="main">
     <form class="pure-form pure-form-aligned" action="" method="POST">
       <fieldset>
-        <legend>{{_("Input website login info for book '%s'")|format('<strong>' + bk.title + '</strong>')|safe}}</legend>
+        <legend>{{_("Input website login info for book '{}'")||safe}}.format('<strong>' + bk.title + '</strong>')</legend>
         <div class="pure-control-group">
             <label for="account">{{_("Account")}}</label>
             <input id="account" name="account" type="text" placeholder="Account" 

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #网友共享的订阅源数据
-
 import datetime, json
 from operator import attrgetter
 from urllib.parse import urljoin, urlparse
 from flask import Blueprint, render_template, request
+from flask_babel import gettext as _
 from apps.base_handler import *
 from apps.back_end.db_models import *
 from lib.urlopener import UrlOpener
@@ -44,7 +44,7 @@ def SharedLibrary():
 @bpLibrary.post("/library", endpoint='SharedLibraryPost')
 @login_required(forAjax=True)
 def SharedLibraryPost():
-    user = get_login_user(forAjax=True)
+    user = get_login_user()
     form = request.form
     category = form.get('category')
     title = form.get('title')
@@ -69,7 +69,7 @@ def SharedLibraryPost():
 @bpLibrary.post("/library/mgr/<mgrType>", endpoint='SharedLibraryMgrPost')
 @login_required(forAjax=True)
 def SharedLibraryMgrPost(mgrType):
-    user = get_login_user(forAjax=True)
+    user = get_login_user()
     if mgrType == SHARED_LIB_MGR_CMD_REPORTINVALID: #报告一个源失效了
         title = request.form.get('title')
         feedUrl = request.form.get('url')
@@ -90,7 +90,7 @@ def SharedLibraryMgrPost(mgrType):
 @bpLibrary.route("/library/category", endpoint='SharedLibraryCategory')
 @login_required(forAjax=True)
 def SharedLibraryCategory():
-    user = get_login_user(forAjax=True)
+    user = get_login_user()
     
     #连接分享服务器获取数据
     respDict = {'status': 'ok', 'categories': []}
@@ -114,16 +114,17 @@ def SharedLibraryCategory():
 #共享库订阅源数据(仅用于kindleear.appspot.com"官方"共享服务器)
 @bpLibrary.route(SHARED_LIBRARY_KINDLEEAR)
 def SharedLibrarykindleearAppspotCom():
-    key = request.args.key #避免爬虫消耗资源
+    key = request.args.get('key') #避免爬虫消耗资源
     if key != KINDLEEAR_SITE_KEY:
-        return {}
+        return []
 
     #本来想在服务器端分页的，但是好像CPU/数据库存取资源比带宽资源更紧张，所以干脆一次性提供给客户端，由客户端分页和分类
     #如果后续发现这样不理想，也可以考虑修改为服务器端分页
-    sharedData = []
-    for d in SharedRss.get_all():
-        sharedData.append({'t':d.title, 'u':d.url, 'f':d.isfulltext, 'c':d.category, 's':d.subscribed,
-            'd':int((d.created_time - datetime.datetime(1970, 1, 1)).total_seconds())})
+    timeOrg = datetime.datetime(1970, 1, 1)
+    sharedData = [{'t': d.title, 'u': d.url, 'f': d.isfulltext, 'c': d.category, 's': d.subscribed,
+            'd': int((d.created_time - timeOrg).total_seconds()),} 
+            for d in SharedRss.select().limit(1000).execute() ]
+    
     return sharedData
 
 #网友分享了一个订阅链接
@@ -187,6 +188,7 @@ def SharedLibrarykindleearAppspotComPost():
 #共享库的订阅源信息管理
 @bpLibrary.post(SHARED_LIBRARY_MGR_KINDLEEAR + "<mgrType>")
 def SharedLibraryMgrkindleearAppspotComPost(mgrType):
+    now = datetime.datetime.utcnow()
     if mgrType == SHARED_LIB_MGR_CMD_REPORTINVALID: #报告一个源失效了
         title = request.form.get('title')
         url = request.form.get('url')
@@ -206,23 +208,21 @@ def SharedLibraryMgrkindleearAppspotComPost(mgrType):
             respDict['status'] = _("URL not found in database!")
             return respDict
 
-        #希望能做到“免维护”，在一定数量的失效报告之后，自动删除对应的源，这其实是要求不要有人恶作剧
-        now = datetime.datetime.utcnow()
+        #希望能做到“免维护”，在一定数量的失效报告之后，自动删除对应的源，假定前提是人性本善
         delta = abs(now - dbItem.last_invalid_report_time)
         deltaDays = delta.days
 
-        if deltaDays > 180:
+        if deltaDays > 180: #半年内没有人报告失效则重新计数
             dbItem.invalid_report_days = 1
-        elif delta.days >= 1:
+        elif delta.days >= 1: #一天内报告多次只算一次
             dbItem.invalid_report_days += 1
 
-        if dbItem.invalid_report_days > 5:
+        if dbItem.invalid_report_days > 5: #相当于半年内有5次源失效报告则自动删除
             category = dbItem.category
             dbItem.delete()
 
-            #更新分类信息
-            allCategories = SharedRss.categories()
-            if category not in allCategories:
+            #如果删除的源是它所在的分类下面最后一个，则其分类信息也一并删除
+            if SharedRss.get_one(SharedRss.category == category) is None:
                 cItem = SharedRssCategory.get_one(SharedRssCategory.name == category)
                 if cItem:
                     cItem.delete()
@@ -244,10 +244,11 @@ def SharedLibraryMgrkindleearAppspotComPost(mgrType):
             url = 'https://' + url
             respDict['url'] = url
 
-        #判断是否存在
+        #更新数据库实体
         dbItem = SharedRss.get_one(SharedRss.url == url)
         if dbItem:
             dbItem.subscribed += 1
+            dbItem.last_subscribed_time = now
             dbItem.save()
         else:
             respDict['status'] = _("URL not found in database!")

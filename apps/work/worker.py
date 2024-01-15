@@ -34,83 +34,72 @@ bpWorker = Blueprint('bpWorker', __name__)
 def Worker():
     global default_log
     args = request.args
-    userName = args.get('u')
-    bookId = args.get('id_')  #如果有多本书，使用','分隔
-    feedsId = args.get('feedsId')
-    
+    userName = args.get('u', '')
+    bookId = args.get('id_', '')  #如果有多本书，使用','分隔
+    feedIds = args.get('feedIds', '')
+
+    return WorkerImpl(userName, bookId.split(','), feedIds.split(','))
+
+#执行实际抓取网页生成电子书任务
+#userName: 需要执行任务的账号名
+#bookIdList: 需要投递的书籍ID列表
+#rssIdList: 自定义RSS的ID列表，如果为空则推送指定账号的所有自定义RSS
+#返回执行结果字符串
+def WorkerImpl(userName: str, bookIdList: list, rssIdList: list=None):
+    if not userName or not bookIdList:
+        return "Parameters invalid."
+
     user = KeUser.get_one(KeUser.name == userName)
     if not user:
-        return "User not exist!"
+        return "User not exist"
     
     to = user.kindle_email
     if (';' in to) or (',' in to):
         to = to.replace(',', ';').replace(' ', '').split(';')
-    
-    bookType = user.book_type #mobi,epub
-    bookMode = user.book_mode or 'periodical' #periodical,comic
-    titleFmt = user.title_fmt
-    tz = user.timezone
-    authorFmt = user.author_format
-    
-    bkList = []
-    #推送一些特定的书籍
-    if bookId:
-        bookId = [int(item) for item in bookId.split(',') if item.isdigit()]
-        bkList = list(filter(bool, map(Feed.get_by_id, bookId)))
 
-    if not bkList:
+    bkInstList = list(filter(bool, map(Book.get_by_id_or_none, bookIdList)))
+    if not bkInstList:
         return "There are no books to push."
-                
-    #仅推送自定义RSS
-    feedList = []
-    if feedsId:
-        feedsId = [int(item) for item in feedsId.split(',') if item.isdigit()]
-        feedList = list(filter(bool, map(Feed.get_by_id, feedsId)))
+    
+    #仅推送对应书籍内的部分自定义RSS
+    feedList = list(filter(bool, map(Feed.get_by_id_or_none, (rssIdList or []))))
 
     bookForMeta = None
     mhFile = DEFAULT_MASTHEAD
     cvFile = DEFAULT_COVER
 
-    if len(bkList) == 1:
-        singleBook = bkList[0]
+    #仅一本书
+    if len(bkInstList) == 1:
+        singleBook = bkInstList[0]
         if singleBook.builtin:
             bookForMeta = BookClass(singleBook.title)
             mhFile = bookForMeta.masthead_file
             cvFile = bookForMeta.cover_file
-
-            #如果单独推送一个继承自BaseComicBook的书籍，则自动设置为漫画模式
-            if issubclass(bookForMeta, BaseComicBook):
-                bookMode = 'comic'
         else: #单独的推送自定义RSS
             bookForMeta = singleBook
     else: #多本书合并推送时使用“自定义RSS”的元属性
-        bookForMeta = user.own_feeds
+        bookForMeta = user.my_rss_book
         cvFile = DEFAULT_COVER_BV if user.merge_books else DEFAULT_COVER
     
     if not bookForMeta:
         return "There are no books to push."
 
     #创建 OEBBook，并设置一些基本属性
-    log = default_log
-    opts = GetOpts(user.device, bookMode)
-    oeb = CreateOeb(log, opts)
-    oeb.container = ServerContainer(log)
-    bookTitle = "{} {}".format(bookForMeta.title, local_time(titleFmt, tz)) if titleFmt else bookForMeta.title
-    pubType = 'book:book:KindleEar' if bookMode == 'comic' else 'periodical:magazine:KindleEar'
-    author = local_time(authorFmt, tz) if authorFmt else 'KindleEar' #修正Kindle固件5.9.x将作者显示为日期的BUG    
-    setMetaData(oeb, bookTitle, bookForMeta.language, local_time("%Y-%m-%d", tz), pubType=pubType, creator=author)
-    
+    oeb = CreateOeb(user, bookForMeta.title, bookForMeta.language)
+
     AddMastheadCoverToOeb(user, oeb, mhFile, cvFile, bookForMeta) #将报头和封面添加到电子书
         
     itemCnt = 0
     imgIndex = 0
     sections = defaultdict(list)
     tocThumbnails = {} #map img-url -> manifest-href
+    log = default_log
 
-    for bk in bkList:
+    for bk in bkInstList:
         if bk.builtin:
             cBook = BookClass(bk.title)
             if not cBook:
+                bk.delete() #删除数据库内容
                 log.warning("Book '{}' does not exist".format(bk.title))
                 continue
             book = cBook(imgIndex=imgIndex, opts=opts, user=user)
@@ -163,7 +152,7 @@ def Worker():
             log.warning("Failed to push <{}>: {}".format(book.title, e))
             continue
     
-    volumeTitle = ''
+    bookType = user.book_type #mobi,epub
     if itemCnt > 0:
         #插入单独的目录页
         InsertToc(oeb, sections, tocThumbnails)
@@ -176,15 +165,33 @@ def Worker():
             diff = datetime.datetime.utcnow() - ultimaLog.datetime
             if diff.days * 86400 + diff.seconds < 10:
                 time.sleep(5)
-        send_to_kindle(username, to, bookForMeta.title + volumeTitle, bookType, oIO.getvalue(), tz)
+        send_to_kindle(username, to, bookForMeta.title, bookType, oIO.getvalue(), tz)
         rs = "{}.{} Sent".format(bookTitle, bookType)
-        #log.info(rs)
         return rs
     else:
-        deliver_log(username, str(to), bookForMeta.title + volumeTitle, 0, status='nonews', tz=tz)
+        deliver_log(username, str(to), bookForMeta.title, 0, status='nonews', tz=tz)
         rs = "No new feeds available."
-        #log.info(rs)
         return rs
+
+#创建OEB并设置一些基础信息
+#user: 用户账号实例
+#title: 书籍标题
+#language: 书籍语种，kindle用来查词时使用，调用不同的词典
+#返回一个OEBBook实例
+def CreateOeb(user: KeUser, title: str, language: str):
+    bookMode = user.book_mode or 'periodical' #periodical,comic
+    titleFmt = user.title_fmt
+    tz = user.timezone
+    authorFmt = user.author_format
+
+    opts = GetOpts(user.device, bookMode)
+    oeb = CreateEmptyOeb(opts)
+    
+    bookTitle = "{} {}".format(title, local_time(titleFmt, tz)) if titleFmt else title
+    pubType = 'book:book:KindleEar' if bookMode == 'comic' else 'periodical:magazine:KindleEar'
+    author = local_time(authorFmt, tz) if authorFmt else 'KindleEar' #修正Kindle固件5.9.x将作者显示为日期的BUG    
+    setMetaData(oeb, bookTitle, language, local_time("%Y-%m-%d", tz), pubType=pubType, creator=author)
+    return oeb
 
 #将报头和封面添加到电子书
 #user: 账号数据库行实例
@@ -258,13 +265,12 @@ def PushComicBook(userName, user, book, opts=None):
     log = default_log
     if not opts:
         opts = GetOpts(user.device, "comic")
-    oeb = CreateOeb(log, opts)
+    oeb = CreateEmptyOeb(log, opts)
     pubType = 'book:book:KindleEar'
     language = 'zh-cn'
 
     setMetaData(oeb, book.title, language, local_time("%Y-%m-%d", user.timezone), pubType=pubType)
-    oeb.container = ServerContainer(log)
-
+    
     #guide
     id_, href = oeb.manifest.generate('masthead', DEFAULT_MASTHEAD) # size:600*60
     oeb.manifest.add(id_, href, ImageMimeFromName(DEFAULT_MASTHEAD))

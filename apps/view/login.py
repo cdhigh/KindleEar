@@ -3,7 +3,8 @@
 #登录页面
 
 import hashlib, datetime, time
-from flask import Blueprint, url_for, render_template, redirect, session, flash
+from flask import Blueprint, url_for, render_template, redirect, session
+from flask_babel import gettext as _
 from apps.base_handler import *
 from apps.back_end.db_models import *
 from books import BookClasses, BookClass
@@ -18,14 +19,14 @@ def Login():
     # 则增加一个管理员帐号 ADMIN_NAME，密码 ADMIN_NAME，后续可以修改密码
     tips = ''
     if InitialAdminAccount():
-        flash(_("Please input username and password."))
+        tips = (_("Please input username and password."))
     else:
-        flash(_("Please use {}/{} to login at first time.").format(ADMIN_NAME, ADMIN_NAME))
+        tips = (_("Please use {}/{} to login at first time.").format(ADMIN_NAME, ADMIN_NAME))
     
     if session.get('login') == 1:
         return redirect('/')
     else:
-        return render_template('login.html')
+        return render_template('login.html', tips=tips)
 
 @bpLogin.post("/login")
 def LoginPost():
@@ -41,8 +42,7 @@ def LoginPost():
         tips = _("The username includes unsafe chars!")
 
     if tips:
-        flash(tips)
-        return render_template('login.html')
+        return render_template('login.html', tips=tips)
     
     InitialAdminAccount() #确认管理员账号是否存在
     
@@ -99,11 +99,11 @@ def LoginPost():
             tips += '<br/><a href="/static/faq.html#forgotpwd" target="_blank">' + _('Forgot password?') + '</a>'
         else:
             tips += '<br/><a href="/static/faq_en.html#forgotpwd" target="_blank">' + _('Forgot password?') + '</a>'
-        flash(tips)
+        
         session['login'] = 0
         session['userName'] = ''
         session['role'] = ''
-        return render_template('login.html', userName=name)
+        return render_template('login.html', userName=name, tips=tips)
 
 #判断管理员账号是否存在
 #如果管理员账号不存在，创建一个，并返回False，否则返回True
