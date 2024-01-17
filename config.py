@@ -5,7 +5,7 @@ KindleEar配置文件，请务必修改开始两个配置（如果使用uploader
 """
 
 SRC_EMAIL = "akindleear@gmail.com"  #Your gmail account for sending mail to Kindle
-DOMAIN = "http://kindleear.appspot.com" #Your domain of app
+KE_DOMAIN = "http://kindleear.appspot.com" #Your domain of app
 #Need for taskqueue, Refers to <https://cloud.google.com/appengine/docs/locations>
 #Upper right corner at <https://console.cloud.google.com/appengine?project=your_app_id>
 APP_ID = "kindleear"
@@ -37,6 +37,13 @@ USE_GAE_INBOUND_EMAIL = True
 
 #Select the type of task queue, "gae", "celery", "cron"
 TASK_QUEUE_TYPE = "gae"
+
+#If TEMP_DIR set to empty string, memory will be used for temporary files.
+#Can be an absolute path or a relative path
+TEMP_DIR = ''
+
+#If the depolyment plataform supports multi threads, set this option will boost the download speed
+DOWNLOAD_THREAD_NUM = 1
 
 TIMEZONE = 8  #Default timezone, you can modify it in webpage after deployed
 

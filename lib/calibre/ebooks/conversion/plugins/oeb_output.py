@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
 __license__ = 'GPL 3'
 __copyright__ = '2009, Kovid Goyal <kovid@kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
@@ -8,7 +10,7 @@ import os, re, io
 from calibre.customize.conversion import (OutputFormatPlugin,
         OptionRecommendation)
 from calibre import CurrentDir
-
+from filesystem_dict import FileSystemDict
 
 class OEBOutput(OutputFormatPlugin):
 
@@ -19,48 +21,63 @@ class OEBOutput(OutputFormatPlugin):
 
     recommendations = {('pretty_print', True, OptionRecommendation.HIGH)}
 
-    #output_path已经修改为一个列表，每个文件保存为 (fileName, bytes)
-    def convert(self, oeb_book, output_path, opts, log):
+    #output_path: 输出目录或 FileSystemDict 实例
+    def convert(self, oeb_book, output_path, input_plugin, opts, log):
         from polyglot.urllib import unquote
         from lxml import etree
 
         self.log, self.opts = log, opts
+        if not isinstance(output_path, FileSystemDict) and not os.path.exists(output_path):
+            os.makedirs(output_path)
         from calibre.ebooks.oeb.base import OPF_MIME, NCX_MIME, PAGE_MAP_MIME, OEB_STYLES
         from calibre.ebooks.oeb.normalize_css import condense_sheet
-        
-        results = oeb_book.to_opf2(page_map=True)
-        for key in (OPF_MIME, NCX_MIME, PAGE_MAP_MIME):
-            href, root = results.pop(key, [None, None])
-            if root is not None:
-                if key == OPF_MIME:
-                    try:
-                        self.workaround_nook_cover_bug(root)
-                    except:
-                        self.log.exception('Something went wrong while trying to'
-                                ' workaround Nook cover bug, ignoring')
-                    try:
-                        self.workaround_pocketbook_cover_bug(root)
-                    except:
-                        self.log.exception('Something went wrong while trying to'
-                                ' workaround Pocketbook cover bug, ignoring')
-                    self.adjust_mime_types(root)
-                raw = etree.tostring(root, pretty_print=True,
-                        encoding='utf-8', xml_declaration=True) #Type: bytes
-                if key == OPF_MIME:
-                    # Needed as I can't get lxml to output opf:role and
-                    # not output <opf:metadata> as well
-                    raw = re.sub(br'(<[/]{0,1})opf:', br'\1', raw)
-                output_path.append((href, raw))
-                
-        for item in oeb_book.manifest:
-            if (
-                    not self.opts.expand_css and item.media_type in OEB_STYLES and hasattr(
-                        item.data, 'cssText') and 'nook' not in self.opts.output_profile.short_name):
-                condense_sheet(item.data)
+        output_path_obj = output_path if isinstance(output_path, FileSystemDict) else CurrentDir(output_path)
+        with output_path_obj:
+            results = oeb_book.to_opf2(page_map=True)
+            for key in (OPF_MIME, NCX_MIME, PAGE_MAP_MIME):
+                href, root = results.pop(key, [None, None])
+                if root is not None:
+                    if key == OPF_MIME:
+                        try:
+                            self.workaround_nook_cover_bug(root)
+                        except:
+                            self.log.exception('Something went wrong while trying to'
+                                    ' workaround Nook cover bug, ignoring')
+                        try:
+                            self.workaround_pocketbook_cover_bug(root)
+                        except:
+                            self.log.exception('Something went wrong while trying to'
+                                    ' workaround Pocketbook cover bug, ignoring')
+                        #self.migrate_lang_code(root)
+                        self.adjust_mime_types(root)
+                    raw = etree.tostring(root, pretty_print=True,
+                            encoding='utf-8', xml_declaration=True)
+                    if key == OPF_MIME:
+                        # Needed as I can't get lxml to output opf:role and
+                        # not output <opf:metadata> as well
+                        raw = re.sub(br'(<[/]{0,1})opf:', br'\1', raw)
+                    if isinstance(output_path, FileSystemDict):
+                        output_path[href] = raw
+                    else:
+                        with open(href, 'wb') as f:
+                            f.write(raw)
 
-            output_path.append((item.href, item.bytes_representation))
-            path = os.path.abspath(unquote(item.href))
-            item.unload_data_from_memory(memory=path)
+            for item in oeb_book.manifest:
+                if (not self.opts.expand_css and item.media_type in OEB_STYLES and hasattr(
+                            item.data, 'cssText') and 'nook' not in self.opts.output_profile.short_name):
+                    condense_sheet(item.data)
+
+                path = unquote(item.href)
+                if isinstance(output_path, FileSystemDict):
+                    output_path[path] = item.bytes_representation
+                else:
+                    path = os.path.abspath(path)
+                    dir = os.path.dirname(path)
+                    if not os.path.exists(dir):
+                        os.makedirs(dir)
+                    with open(path, 'wb') as f:
+                        f.write(item.bytes_representation)
+                    item.unload_data_from_memory(memory=path)
 
     def adjust_mime_types(self, root):
         from calibre.ebooks.oeb.polish.utils import adjust_mime_for_epub
@@ -115,3 +132,10 @@ class OEBOutput(OutputFormatPlugin):
             p.insert(0, m)
     # }}}
 
+    def migrate_lang_code(self, root):  # {{{
+        from calibre.utils.localization import lang_as_iso639_1
+        for lang in root.xpath('//*[local-name() = "language"]'):
+            clc = lang_as_iso639_1(lang.text)
+            if clc:
+                lang.text = clc
+    # }}}

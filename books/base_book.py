@@ -853,12 +853,12 @@ class BaseFeedBook:
     #生成保存内容或分享文章链接的KindleEar调用链接
     def MakeShareLink(self, sharetype, user, url, soup):
         if sharetype in ('evernote', 'wiz'):
-            href = "{}/share?act={}&u={}&url=".format(DOMAIN, sharetype, user.name)
+            href = "{}/share?act={}&u={}&url=".format(KE_DOMAIN, sharetype, user.name)
         elif sharetype == 'pocket':
-            href = '{}/share?act=pocket&u={}&h={}&t={}&url='.format(DOMAIN, user.name, (hashlib.md5(user.pocket_acc_token_hash or '').hexdigest()), 
+            href = '{}/share?act=pocket&u={}&h={}&t={}&url='.format(KE_DOMAIN, user.name, (hashlib.md5(user.pocket_acc_token_hash or '').hexdigest()), 
                                                         soup.html.head.title.string)
         elif sharetype == 'instapaper':
-            href = '{}/share?act=instapaper&u={}&n={}&t={}&url='.format(DOMAIN, user.name, user.instapaper_username or '', soup.html.head.title.string)
+            href = '{}/share?act=instapaper&u={}&n={}&t={}&url='.format(KE_DOMAIN, user.name, user.instapaper_username or '', soup.html.head.title.string)
         elif sharetype == 'xweibo':
             href = 'http://v.t.sina.com.cn/share/share.php?url='
         elif sharetype == 'tweibo':

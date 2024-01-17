@@ -347,6 +347,7 @@ def countrycode_to_name(cc, localize=True):
 
 
 def canonicalize_lang(raw):
+    return raw
     if not raw:
         return None
     if not isinstance(raw, str):

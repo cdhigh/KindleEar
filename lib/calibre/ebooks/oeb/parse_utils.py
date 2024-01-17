@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
 
 
 __license__   = 'GPL v3'
@@ -10,11 +11,9 @@ import re
 from lxml import etree, html
 
 from calibre import xml_replace_entities, force_unicode
-from calibre.utils.xml_parse import safe_xml_fromstring
 from calibre.constants import filesystem_encoding
 from calibre.ebooks.chardet import xml_to_unicode, strip_encoding_declarations
 from polyglot.builtins import iteritems, itervalues, string_or_bytes
-
 RECOVER_PARSER = etree.XMLParser(recover=True, no_network=True, resolve_entities=False)
 XHTML_NS     = 'http://www.w3.org/1999/xhtml'
 XMLNS_NS     = 'http://www.w3.org/2000/xmlns/'
@@ -45,7 +44,6 @@ def xpath(elem, expr):
 
 def XPath(expr):
     return etree.XPath(expr, namespaces={'h':XHTML_NS})
-
 
 META_XP = XPath('/h:html/h:head/h:meta[@http-equiv="Content-Type"]')
 
@@ -92,21 +90,124 @@ def node_depth(node):
     return ans
 
 
+def fix_self_closing_cdata_tags(data):
+    from html5lib.constants import cdataElements, rcdataElements
+    return re.sub(r'<\s*(%s)\s*[^>]*/\s*>' % ('|'.join(cdataElements|rcdataElements)), r'<\1></\1>', data, flags=re.I)
+
+
 def html5_parse(data, max_nesting_depth=100):
-    from calibre.utils.cleantext import clean_xml_chars
-    data = parse_html5(clean_xml_chars(data), maybe_xhtml=True, keep_doctype=False, sanitize_names=True)
-    return data
+    import html5lib, warnings
+    # HTML5 parsing algorithm idiocy: http://code.google.com/p/html5lib/issues/detail?id=195
+    data = fix_self_closing_cdata_tags(data)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        try:
+            data = html5lib.parse(data, treebuilder='lxml').getroot()
+        except ValueError:
+            from calibre.utils.cleantext import clean_xml_chars
+            data = html5lib.parse(clean_xml_chars(data), treebuilder='lxml').getroot()
+
+    # Check that the asinine HTML 5 algorithm did not result in a tree with
+    # insane nesting depths
+    for x in data.iterdescendants():
+        if isinstance(x.tag, string_or_bytes) and len(x) == 0:  # Leaf node
+            depth = node_depth(x)
+            if depth > max_nesting_depth:
+                raise ValueError('html5lib resulted in a tree with nesting'
+                        ' depth > %d'%max_nesting_depth)
+
+    # html5lib has the most inelegant handling of namespaces I have ever seen
+    # Try to reconstitute destroyed namespace info
+    xmlns_declaration = '{%s}'%XMLNS_NS
+    non_html5_namespaces = {}
+    seen_namespaces = set()
+    for elem in tuple(data.iter(tag=etree.Element)):
+        elem.attrib.pop('xmlns', None)
+        # Set lang correctly
+        xl = elem.attrib.pop('xmlU0003Alang', None)
+        if xl is not None and 'lang' not in elem.attrib:
+            elem.attrib['lang'] = xl
+        namespaces = {}
+        for x in tuple(elem.attrib):
+            if x.startswith('xmlnsU') or x.startswith(xmlns_declaration):
+                # A namespace declaration
+                val = elem.attrib.pop(x)
+                if x.startswith('xmlnsU0003A'):
+                    prefix = x[11:]
+                    namespaces[prefix] = val
+
+        remapped_namespaces = {}
+        if namespaces:
+            # Some destroyed namespace declarations were found
+            p = elem.getparent()
+            if p is None:
+                # We handle the root node later
+                non_html5_namespaces = namespaces
+            else:
+                idx = p.index(elem)
+                p.remove(elem)
+                elem = clone_element(elem, nsmap=namespaces)
+                p.insert(idx, elem)
+                remapped_namespaces = {ns:namespaces[ns] for ns in set(namespaces) - set(elem.nsmap)}
+
+        b = barename(elem.tag)
+        idx = b.find('U0003A')
+        if idx > -1:
+            prefix, tag = b[:idx], b[idx+6:]
+            ns = elem.nsmap.get(prefix, None)
+            if ns is None:
+                ns = non_html5_namespaces.get(prefix, None)
+            if ns is None:
+                ns = remapped_namespaces.get(prefix, None)
+            if ns is not None:
+                elem.tag = '{%s}%s'%(ns, tag)
+
+        for b in tuple(elem.attrib):
+            idx = b.find('U0003A')
+            if idx > -1:
+                prefix, tag = b[:idx], b[idx+6:]
+                ns = elem.nsmap.get(prefix, None)
+                if ns is None:
+                    ns = non_html5_namespaces.get(prefix, None)
+                if ns is None:
+                    ns = remapped_namespaces.get(prefix, None)
+                if ns is not None:
+                    elem.attrib['{%s}%s'%(ns, tag)] = elem.attrib.pop(b)
+
+        seen_namespaces |= set(elem.nsmap.values())
+
+    nsmap = dict(html5lib.constants.namespaces)
+    nsmap[None] = nsmap.pop('html')
+    non_html5_namespaces.update(nsmap)
+    nsmap = non_html5_namespaces
+
+    data = clone_element(data, nsmap=nsmap, in_context=False)
+
+    # Remove unused namespace declarations
+    fnsmap = {k:v for k,v in nsmap.items() if v in seen_namespaces and v !=
+            XMLNS_NS}
+    return clone_element(data, nsmap=fnsmap, in_context=False)
 
 
-def _html4_parse(data):
-    data = html.fromstring(data)
+def _html4_parse(data, prefer_soup=False):
+    if prefer_soup:
+        from calibre.utils.soupparser import fromstring
+        data = fromstring(data)
+    else:
+        data = html.fromstring(data)
     data.attrib.pop('xmlns', None)
     for elem in data.iter(tag=etree.Comment):
         if elem.text:
             elem.text = elem.text.strip('-')
     data = etree.tostring(data, encoding='unicode')
 
-    data = safe_xml_fromstring(data)
+    # Setting huge_tree=True causes crashes in windows with large files
+    parser = etree.XMLParser(no_network=True)
+    try:
+        data = etree.fromstring(data, parser=parser)
+    except etree.XMLSyntaxError:
+        data = etree.fromstring(data, parser=RECOVER_PARSER)
     return data
 
 
@@ -127,15 +228,6 @@ def clean_word_doc(data, log):
                 r'<(%s):([a-zA-Z0-9]+)[^>/]*?/>'%('|'.join(prefixes)))
         data = pat.sub('', data)
     return data
-
-
-def ensure_namespace_prefixes(node, nsmap):
-    namespace_uris = frozenset(itervalues(nsmap))
-    fnsmap = {k:v for k, v in iteritems(node.nsmap) if v not in namespace_uris}
-    fnsmap.update(nsmap)
-    if fnsmap != dict(node.nsmap):
-        node = clone_element(node, nsmap=fnsmap, in_context=False)
-    return node
 
 
 class HTML5Doc(ValueError):
@@ -163,6 +255,12 @@ def parse_html(data, log=None, decoder=None, preprocessor=None,
             data = xml_to_unicode(data)[0]
 
     data = strip_encoding_declarations(data)
+    if preprocessor is not None:
+        data = preprocessor(data)
+
+    # There could be null bytes in data if it had &#0; entities in it
+    data = data.replace('\0', '')
+
     # Remove DOCTYPE declaration as it messes up parsing
     # In particular, it causes tostring to insert xmlns
     # declarations, which messes up the coercing logic
@@ -175,11 +273,10 @@ def parse_html(data, log=None, decoder=None, preprocessor=None,
         pre = data[:idx]
         data = data[idx:]
         if '<!DOCTYPE' in pre:  # Handle user defined entities
+            has_html4_doctype = re.search(r'<!DOCTYPE\s+[^>]+HTML\s+4.0[^.]+>', pre) is not None
             # kindlegen produces invalid xhtml with uppercase attribute names
             # if fed HTML 4 with uppercase attribute names, so try to detect
             # and compensate for that.
-            has_html4_doctype = re.search(r'<!DOCTYPE\s+[^>]+HTML\s+4.0[^.]+>', pre) is not None
-            # Process private entities
             user_entities = {}
             for match in re.finditer(r'<!ENTITY\s+(\S+)\s+([^>]+)', pre):
                 val = match.group(2)
@@ -187,33 +284,31 @@ def parse_html(data, log=None, decoder=None, preprocessor=None,
                     val = val[1:-1]
                 user_entities[match.group(1)] = val
             if user_entities:
-                pat = re.compile(r'&(%s);'%('|'.join(list(user_entities.keys()))))
+                pat = re.compile(r'&(%s);'%('|'.join(user_entities.keys())))
                 data = pat.sub(lambda m:user_entities[m.group(1)], data)
 
-    if preprocessor is not None:
-        data = preprocessor(data)
-
-    # There could be null bytes in data if it had &#0; entities in it
-    data = data.replace('\0', '')
     data = raw = clean_word_doc(data, log)
+
+    # Setting huge_tree=True causes crashes in windows with large files
+    parser = etree.XMLParser(no_network=True)
 
     # Try with more & more drastic measures to parse
     try:
-        data = safe_xml_fromstring(data, recover=False)
+        data = etree.fromstring(data, parser=parser)
         check_for_html5(pre, data)
     except (HTML5Doc, etree.XMLSyntaxError):
         log.debug('Initial parse failed, using more'
                 ' forgiving parsers')
         raw = data = xml_replace_entities(raw)
         try:
-            data = safe_xml_fromstring(data, recover=False)
+            data = etree.fromstring(data, parser=parser)
             check_for_html5(pre, data)
         except (HTML5Doc, etree.XMLSyntaxError):
             log.debug('Parsing %s as HTML' % filename)
             data = raw
             try:
                 data = html5_parse(data)
-            except Exception:
+            except:
                 log.exception(
                     'HTML 5 parsing failed, falling back to older parsers')
                 data = _html4_parse(data)
@@ -224,7 +319,7 @@ def parse_html(data, log=None, decoder=None, preprocessor=None,
         for x in data.iterdescendants():
             try:
                 x.tag = x.tag.lower()
-                for key, val in list(iteritems(x.attrib)):
+                for key, val in list(x.attrib.items()):
                     del x.attrib[key]
                     key = key.lower()
                     x.attrib[key] = val
@@ -235,7 +330,7 @@ def parse_html(data, log=None, decoder=None, preprocessor=None,
         if barename(data.tag) in non_html_file_tags:
             raise NotHTML(data.tag)
         log.warn('File %r does not appear to be (X)HTML'%filename)
-        nroot = safe_xml_fromstring('<html></html>')
+        nroot = etree.fromstring('<html></html>')
         has_body = False
         for child in list(data):
             if isinstance(child.tag, (str, bytes)) and barename(child.tag) == 'body':
@@ -244,7 +339,7 @@ def parse_html(data, log=None, decoder=None, preprocessor=None,
         parent = nroot
         if not has_body:
             log.warn('File %r appears to be a HTML fragment'%filename)
-            nroot = safe_xml_fromstring('<html><body/></html>')
+            nroot = etree.fromstring('<html><body/></html>')
             parent = nroot[0]
         for child in list(data.iter()):
             oparent = child.getparent()
@@ -260,12 +355,12 @@ def parse_html(data, log=None, decoder=None, preprocessor=None,
         data = etree.tostring(data, encoding='unicode')
 
         try:
-            data = safe_xml_fromstring(data, recover=False)
+            data = etree.fromstring(data, parser=parser)
         except:
             data = data.replace(':=', '=').replace(':>', '>')
             data = data.replace('<http:/>', '')
             try:
-                data = safe_xml_fromstring(data, recover=False)
+                data = etree.fromstring(data, parser=parser)
             except etree.XMLSyntaxError:
                 log.warn('Stripping comments from %s'%
                         filename)
@@ -276,11 +371,12 @@ def parse_html(data, log=None, decoder=None, preprocessor=None,
                     '')
                 data = data.replace("<?xml version='1.0' encoding='utf-8'??>", '')
                 try:
-                    data = safe_xml_fromstring(data)
+                    data = etree.fromstring(data,
+                            parser=RECOVER_PARSER)
                 except etree.XMLSyntaxError:
                     log.warn('Stripping meta tags from %s'% filename)
                     data = re.sub(r'<meta\s+[^>]+?>', '', data)
-                    data = safe_xml_fromstring(data)
+                    data = etree.fromstring(data, parser=RECOVER_PARSER)
     elif namespace(data.tag) != XHTML_NS:
         # OEB_DOC_NS, but possibly others
         ns = namespace(data.tag)
@@ -295,8 +391,11 @@ def parse_html(data, log=None, decoder=None, preprocessor=None,
             nroot.append(elem)
         data = nroot
 
-    # Remove non default prefixes referring to the XHTML namespace
-    data = ensure_namespace_prefixes(data, {None: XHTML_NS})
+    fnsmap = {k:v for k, v in data.nsmap.items() if v != XHTML_NS}
+    fnsmap[None] = XHTML_NS
+    if fnsmap != dict(data.nsmap):
+        # Remove non default prefixes referring to the XHTML namespace
+        data = clone_element(data, nsmap=fnsmap, in_context=False)
 
     data = merge_multiple_html_heads_and_bodies(data, log)
     # Ensure has a <head/>
@@ -378,3 +477,5 @@ def parse_html(data, log=None, decoder=None, preprocessor=None,
         child.tail = '\n  '
 
     return data
+
+

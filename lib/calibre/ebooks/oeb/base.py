@@ -1083,7 +1083,8 @@ class Manifest:
             if isinstance(self._data, bytes):
                 if memory is None:
                     from calibre.ptempfile import PersistentTemporaryFile
-                    pt = PersistentTemporaryFile(suffix='_oeb_base_mem_unloader.img')
+                    temp_dir = os.environ.get('TEMP_DIR')
+                    pt = PersistentTemporaryFile(suffix='_oeb_base_mem_unloader.img', dir=temp_dir)
                     with pt:
                         pt.write(self._data)
                     self.oeb._temp_files.append(pt.name)

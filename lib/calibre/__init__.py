@@ -9,7 +9,7 @@ from math import floor
 from functools import partial
 
 from calibre.constants import (preferred_encoding, __appname__, __version__, __author__,
-        plugins, filesystem_encoding, config_dir)
+        iswindows, plugins, filesystem_encoding, config_dir)
 import calibre.utils.resources #这个模块也有初始化代码
 from calibre.utils.icu import safe_chr
 from calibre.prints import prints
@@ -379,3 +379,7 @@ def human_readable(size, sep=' '):
         size = size[:-2]
     return size + sep + suffix
 
+def browser(honor_time=True, max_time=2, user_agent=None, verify_ssl_certificates=True, handle_refresh=True, **kw):
+    from urlopener_browser import UrlOpenerBrowser
+    return UrlOpenerBrowser()
+    

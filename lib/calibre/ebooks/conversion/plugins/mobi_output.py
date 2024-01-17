@@ -56,7 +56,7 @@ class MOBIOutput(OutputFormatPlugin):
             help=_('Title for any generated in-line table of contents.')
         ),
         OptionRecommendation(name='dont_compress',
-            recommended_value=False, level=OptionRecommendation.LOW,
+            recommended_value=True, level=OptionRecommendation.LOW,
             help=_('Disable compression of the file contents.')
         ),
         OptionRecommendation(name='personal_doc', recommended_value='[PDOC]',
@@ -170,7 +170,7 @@ class MOBIOutput(OutputFormatPlugin):
             # Fix up the periodical href to point to first section href
             toc.nodes[0].href = toc.nodes[0].nodes[0].href
 
-    def convert(self, oeb, output_path, opts, log):
+    def convert(self, oeb, output_path, input_plugin, opts, log):
         from calibre.ebooks.mobi.writer2.resources import Resources
         self.log, self.opts, self.oeb = log, opts, oeb
 
@@ -198,14 +198,15 @@ class MOBIOutput(OutputFormatPlugin):
             extract_mobi(output_path, opts)
             return
 
-        self.write_mobi(output_path, kf8, resources)
+        #self.log('Creating MOBI 6 output')
+        self.write_mobi(input_plugin, output_path, kf8, resources)
 
     def create_kf8(self, resources, for_joint=False):
         from calibre.ebooks.mobi.writer8.main import create_kf8_book
         return create_kf8_book(self.oeb, self.opts, resources,
                 for_joint=for_joint)
 
-    def write_mobi(self, output_path, kf8, resources):
+    def write_mobi(self, input_plugin, output_path, kf8, resources):
         from calibre.ebooks.mobi.mobiml import MobiMLizer
         from calibre.ebooks.oeb.transforms.manglecase import CaseMangler
         from calibre.ebooks.oeb.transforms.htmltoc import HTMLTOCAdder
@@ -284,7 +285,7 @@ class AZW3Output(OutputFormatPlugin):
         ),
     }
 
-    def convert(self, oeb, output_path, opts, log):
+    def convert(self, oeb, output_path, input_plugin, opts, log):
         from calibre.ebooks.mobi.writer2.resources import Resources
         from calibre.ebooks.mobi.writer8.main import create_kf8_book
         from calibre.ebooks.mobi.writer8.cleanup import remove_duplicate_anchors

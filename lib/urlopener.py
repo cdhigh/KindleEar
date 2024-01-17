@@ -5,6 +5,7 @@
 2024: 移植到Python3后改用requests，其实已经很好了，但是requests默认没有超时时间，
 所以还是继续使用此模块封装超时时间吧，并且去掉自动重试功能"""
 import requests
+from urllib.request import urlopen #用来进行base64 data url解码
 
 class UrlOpener:
     _codeMapDict = {
@@ -68,10 +69,11 @@ class UrlOpener:
         self.initHeaders = headers
         self.session = requests.session()
         
-    def open(self, url, data=None, headers=None):
+    def open(self, url, data=None, headers=None, timeout=None):
         #出现异常时response不是合法的对象，使用一个模拟的
         r = requests.models.Response()
         r.status_code = 555
+        timeout = timeout if timeout else self.timeout
         
         #竟然实际中还碰到以//开头的URL，真是大千世界无奇不有
         if url.startswith(r"//"):
@@ -80,21 +82,26 @@ class UrlOpener:
             url = "https://" + url
             
         if url.startswith("data:"): #网页内嵌内容data url
-            import base64, re
+            #import base64, re
             #data:image/png;base64,iVBORw...
-            rxDataUri = re.compile("^data:(?P<mime>[a-z]+/[a-z]+);base64,(?P<data>.*)$", re.I | re.M | re.DOTALL)
-            m = rxDataUri.match(url)
+            #rxDataUri = re.compile("^data:(?P<mime>[a-z]+/[a-z]+);base64,(?P<data>.*)$", re.I | re.M | re.DOTALL)
+            #m = rxDataUri.match(url)
+            #try:
+            #    r._content = base64.b64decode(m.group("data").encode("ascii")) #return bytes
+            #    r.status_code = 200
+            #except Exception as e:
+            #    r.status_code = 404
             try:
-                r._content = base64.b64decode(m.group("data").encode("ascii")) #return bytes
+                r._content = urlopen(url).read()
                 r.status_code = 200
-            except Exception as e:
+            except Exception:
                 r.status_code = 404
         else:
             try:
                 if data:
-                    r = self.session.post(url, data=data, headers=self.GetHeaders(url, headers), timeout=self.timeout)
+                    r = self.session.post(url, data=data, headers=self.GetHeaders(url, headers), timeout=timeout)
                 else:
-                    r = self.session.get(url, headers=self.GetHeaders(url, headers), timeout=self.timeout)
+                    r = self.session.get(url, headers=self.GetHeaders(url, headers), timeout=timeout)
             except Exception as e:
                 default_log.warning("url {} failed {}.".format(url, str(e)))
         

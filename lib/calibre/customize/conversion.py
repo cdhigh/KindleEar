@@ -5,7 +5,7 @@ import re, os, shutil, numbers
 
 from calibre import CurrentDir
 from calibre.customize import Plugin
-
+from filesystem_dict import FileSystemDict
 
 class ConversionOption:
 
@@ -195,7 +195,7 @@ class InputFormatPlugin(Plugin):
         '''
         raise NotImplementedError()
 
-    def convert(self, stream, options, file_ext, log, accelerators):
+    def convert(self, stream, options, file_ext, log, accelerators, output_dir):
         '''
         This method must be implemented in sub-classes. It must return
         the path to the created OPF file or an :class:`OEBBook` instance.
@@ -225,22 +225,14 @@ class InputFormatPlugin(Plugin):
         '''
         raise NotImplementedError()
 
-    def __call__(self, stream, options, file_ext, log,
-                 accelerators, output_dir):
-        try:
-            log('InputFormatPlugin: %s running'%self.name)
-            if hasattr(stream, 'name'):
-                log('on', stream.name)
-        except:
-            # In case stdout is broken
-            pass
-
-        with CurrentDir(output_dir):
-            for x in os.listdir('.'):
-                shutil.rmtree(x) if os.path.isdir(x) else os.remove(x)
-
-            ret = self.convert(stream, options, file_ext,
-                               log, accelerators)
+    def __call__(self, stream, options, file_ext, log, accelerators, output_dir):
+        if isinstance(output_dir, FileSystemDict):
+            ret = self.convert(stream, options, file_ext, log, accelerators, output_dir)
+        else:
+            with CurrentDir(output_dir):
+                for x in os.listdir('.'):
+                    shutil.rmtree(x) if os.path.isdir(x) else os.remove(x)
+                ret = self.convert(stream, options, file_ext, log, accelerators, output_dir)
 
         return ret
 

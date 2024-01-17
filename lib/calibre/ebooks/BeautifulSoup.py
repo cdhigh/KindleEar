@@ -7,7 +7,7 @@ from bs4 import (  # noqa
     CData, Comment, Declaration, NavigableString, ProcessingInstruction,
     SoupStrainer, Tag, __version__
 )
-
+import html5lib
 
 def parse_html(markup):
     from calibre.ebooks.chardet import strip_encoding_declarations, xml_to_unicode, substitute_entites
@@ -18,8 +18,9 @@ def parse_html(markup):
     else:
         markup = xml_to_unicode(markup, strip_encoding_pats=True, resolve_entities=True)[0]
     markup = clean_xml_chars(markup)
-    from html5_parser.soup import parse
-    return parse(markup, return_root=False)
+    #from html5_parser.soup import parse
+    #return parse(markup, return_root=False)
+    return bs4.BeautifulSoup(markup, 'lxml')
 
 
 def prettify(soup):

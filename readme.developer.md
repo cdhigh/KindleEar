@@ -52,3 +52,4 @@
 # 常用链接
 [App Engine 文档](https://cloud.google.com/appengine/docs)
 [Cloud Tasks]https://cloud.google.com/tasks/docs
+[Adding your favorite news website](https://manual.calibre-ebook.com/news.html)

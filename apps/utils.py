@@ -21,11 +21,11 @@ def get_exc_location():
     return fileName, funcName, lineNo
 
 #字符串转整数，出错则返回0
-def str_to_int(txt):
+def str_to_int(txt, default=0):
     try:
         return int(txt.strip())
     except:
-        return 0
+        return default
 
 def local_time(fmt="%Y-%m-%d %H:%M", tz=TIMEZONE):
     return (datetime.datetime.utcnow() + datetime.timedelta(hours=tz)).strftime(fmt)

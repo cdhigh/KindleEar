@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
 """
 Container-/OPF-based input OEBBook reader.
 """
@@ -30,6 +32,8 @@ from calibre.utils.localization import __, get_lang
 from calibre.utils.xml_parse import safe_xml_fromstring
 from polyglot.urllib import unquote, urldefrag, urlparse
 
+from filesystem_dict import FileSystemDict, FsDictContainer
+
 __all__ = ['OEBReader']
 
 
@@ -60,13 +64,16 @@ class OEBReader:
         """Generate a Reader instance from command-line options."""
         return cls()
 
+    #外面调用此函数从一堆文件里面创建OEBBook实例
+    #oeb: calibre.ebooks.oeb.base.OEBBook 实例
+    #path: 包含opf文件的目录名或一个FileSystemDict实例
     def __call__(self, oeb, path):
         """Read the book at :param:`path` into the :class:`OEBBook` object
         :param:`oeb`.
         """
         self.oeb = oeb
         self.logger = self.log = oeb.logger
-        oeb.container = self.Container(path, self.logger)
+        oeb.container = FsDictContainer(path, self.logger) if isinstance(path, FileSystemDict) else DirContainer(path, self.logger)
         oeb.container.log = oeb.log
         opf = self._read_opf()
         self._all_from_opf(opf)

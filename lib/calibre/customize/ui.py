@@ -12,7 +12,6 @@ from calibre.customize import (CatalogPlugin, FileTypePlugin, PluginNotFound,
                               StoreBase as Store, EditBookToolPlugin,
                               LibraryClosedPlugin, PluginInstallationType)
 from calibre.customize.conversion import InputFormatPlugin, OutputFormatPlugin
-from calibre.customize.zipplugin import loader
 from calibre.customize.profiles import InputProfile, OutputProfile
 from calibre.customize.builtins import plugins as builtin_plugins
 from calibre.ebooks.metadata import MetaInformation
@@ -52,16 +51,6 @@ def find_plugin(name):
         if plugin.name == name:
             return plugin
 
-
-def load_plugin(path_to_zip_file):  # {{{
-    '''
-    Load plugin from ZIP file or raise InvalidPlugin error
-
-    :return: A :class:`Plugin` instance.
-    '''
-    return loader.load(path_to_zip_file)
-
-# }}}
 
 # Enable/disable plugins {{{
 
@@ -503,54 +492,7 @@ def can_set_metadata(ftype):
 
 # }}}
 
-# Add/remove plugins {{{
-
-
-def add_plugin(path_to_zip_file):
-    make_config_dir()
-    plugin = load_plugin(path_to_zip_file)
-    if plugin.name in builtin_names:
-        raise NameConflict(
-            'A builtin plugin with the name %r already exists' % plugin.name)
-    if plugin.name in get_system_plugins():
-        raise NameConflict(
-            'A system plugin with the name %r already exists' % plugin.name)
-    plugin = initialize_plugin(plugin, path_to_zip_file, PluginInstallationType.EXTERNAL)
-    plugins = config['plugins']
-    zfp = os.path.join(plugin_dir, plugin.name+'.zip')
-    if os.path.exists(zfp):
-        os.remove(zfp)
-    shutil.copyfile(path_to_zip_file, zfp)
-    plugins[plugin.name] = zfp
-    config['plugins'] = plugins
-    initialize_plugins()
-    return plugin
-
-
-def remove_plugin(plugin_or_name):
-    name = getattr(plugin_or_name, 'name', plugin_or_name)
-    plugins = config['plugins']
-    removed = False
-    if name in plugins:
-        removed = True
-        try:
-            zfp = os.path.join(plugin_dir, name+'.zip')
-            if os.path.exists(zfp):
-                os.remove(zfp)
-            zfp = plugins[name]
-            if os.path.exists(zfp):
-                os.remove(zfp)
-        except:
-            pass
-        plugins.pop(name)
-    config['plugins'] = plugins
-    initialize_plugins()
-    return removed
-
-# }}}
-
 # Input/Output format plugins {{{
-
 
 def input_format_plugins():
     for plugin in _initialized_plugins:
@@ -765,29 +707,6 @@ initialize_plugins()
 def initialized_plugins():
     yield from _initialized_plugins
 
-# }}}
-
-# CLI {{{
-
-
-def build_plugin(path):
-    from calibre import prints
-    from calibre.ptempfile import PersistentTemporaryFile
-    from calibre.utils.zipfile import ZipFile, ZIP_STORED
-    path = str(path)
-    names = frozenset(os.listdir(path))
-    if '__init__.py' not in names:
-        prints(path, ' is not a valid plugin')
-        raise SystemExit(1)
-    t = PersistentTemporaryFile('.zip')
-    with ZipFile(t, 'w', ZIP_STORED) as zf:
-        zf.add_dir(path, simple_filter=lambda x:x in {'.git', '.bzr', '.svn', '.hg'})
-    t.close()
-    plugin = add_plugin(t.name)
-    os.remove(t.name)
-    prints('Plugin updated:', plugin.name, plugin.version)
-
-
 def option_parser():
     parser = OptionParser(usage=_('''\
     %prog options
@@ -812,58 +731,3 @@ def option_parser():
                       help=_('Disable the named plugin'))
     return parser
 
-
-def main(args=sys.argv):
-    parser = option_parser()
-    if len(args) < 2:
-        parser.print_help()
-        return 1
-    opts, args = parser.parse_args(args)
-    if opts.add_plugin is not None:
-        plugin = add_plugin(opts.add_plugin)
-        print('Plugin added:', plugin.name, plugin.version)
-    if opts.build_plugin is not None:
-        build_plugin(opts.build_plugin)
-    if opts.remove_plugin is not None:
-        if remove_plugin(opts.remove_plugin):
-            print('Plugin removed')
-        else:
-            print('No custom plugin named', opts.remove_plugin)
-    if opts.customize_plugin is not None:
-        name, custom = opts.customize_plugin.split(',')
-        plugin = find_plugin(name.strip())
-        if plugin is None:
-            print('No plugin with the name %s exists'%name)
-            return 1
-        customize_plugin(plugin, custom)
-    if opts.enable_plugin is not None:
-        enable_plugin(opts.enable_plugin.strip())
-    if opts.disable_plugin is not None:
-        disable_plugin(opts.disable_plugin.strip())
-    if opts.list_plugins:
-        type_len = name_len = 0
-        for plugin in initialized_plugins():
-            type_len, name_len = max(type_len, len(plugin.type)), max(name_len, len(plugin.name))
-        fmt = f'%-{type_len+1}s%-{name_len+1}s%-15s%-15s%s'
-        print(fmt%tuple('Type|Name|Version|Disabled|Site Customization'.split('|')))
-        print()
-        for plugin in initialized_plugins():
-            print(fmt%(
-                                plugin.type, plugin.name,
-                                plugin.version, is_disabled(plugin),
-                                plugin_customization(plugin)
-                                ))
-            print('\t', plugin.description)
-            if plugin.is_customizable():
-                try:
-                    print('\t', plugin.customization_help())
-                except NotImplementedError:
-                    pass
-            print()
-
-    return 0
-
-
-if __name__ == '__main__':
-    sys.exit(main())
-# }}}

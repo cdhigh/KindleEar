@@ -232,8 +232,8 @@ class ThreadSafeLog(Log):
 class ThreadSafeWrapper(Log):
 
     def __init__(self, other_log):
-        Log.__init__(self, level=other_log.filter_level)
-        self.outputs = list(other_log.outputs)
+        Log.__init__(self)
+        #self.outputs = list(other_log.outputs)
         self._lock = Lock()
 
     def prints(self, *args, **kwargs):

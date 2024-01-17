@@ -16,7 +16,7 @@ from calibre.ebooks.oeb.normalize_css import normalize_filter_css, normalizers
 from calibre.ebooks.oeb.polish.pretty import (
     pretty_script_or_style, pretty_xml_tree, serialize,
 )
-from calibre.utils.icu import lower as icu_lower, numeric_sort_key
+from calibre.utils.icu import lower as icu_lower
 from calibre.utils.localization import ngettext
 from css_selectors import Select, SelectorError, SelectorSyntaxError, parse
 from polyglot.builtins import iteritems, itervalues
@@ -458,7 +458,7 @@ def sort_sheet(container, sheet_or_text):
     sheet = container.parse_css(sheet_or_text) if isinstance(sheet_or_text, str) else sheet_or_text
 
     def text_sort_key(x):
-        return numeric_sort_key(str(x or ''))
+        return str(x or '')
 
     def selector_sort_key(x):
         return (x.specificity, text_sort_key(x.selectorText))

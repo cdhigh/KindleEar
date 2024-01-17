@@ -12,6 +12,7 @@ from calibre.customize.conversion import (OutputFormatPlugin,
 from calibre.ptempfile import TemporaryDirectory
 from calibre import CurrentDir
 from polyglot.builtins import as_bytes
+from filesystem_dict import FileSystemDict
 
 block_level_tags = (
       'address',
@@ -187,7 +188,13 @@ class EPUBOutput(OutputFormatPlugin):
 
     # }}}
 
-    def convert(self, oeb, output_path, opts, log):
+    #外部调用此函数将一个OEBBook转换为epub
+    #oeb: OEBBook 实例
+    #output_path: 输出文件名或io.BytesIO实例
+    #input_plugin: 输入插件实例
+    #opts: 选项
+    #log: logger
+    def convert(self, oeb, output_path, input_plugin, opts, log):
         self.log, self.opts, self.oeb = log, opts, oeb
 
         if self.opts.epub_inline_toc:
@@ -207,6 +214,9 @@ class EPUBOutput(OutputFormatPlugin):
         self.workaround_ade_quirks()
         self.workaround_webkit_quirks()
         self.upshift_markup()
+
+        from calibre.ebooks.oeb.transforms.rescale import RescaleImages
+        RescaleImages(check_colorspaces=True)(oeb, opts, max_size=self.opts.epub_max_image_size)
 
         from calibre.ebooks.oeb.transforms.split import Split
         split = Split(not self.opts.dont_split_on_page_breaks,
@@ -236,7 +246,7 @@ class EPUBOutput(OutputFormatPlugin):
             if x.get(OPF('scheme'), None).lower() == 'uuid' or str(x).startswith('urn:uuid:'):
                 uuid = str(x).split(':')[-1]
                 break
-        encrypted_fonts = []
+        encrypted_fonts = getattr(input_plugin, 'encrypted_fonts', [])
 
         if uuid is None:
             self.log.warn('No UUID identifier found')
@@ -252,42 +262,78 @@ class EPUBOutput(OutputFormatPlugin):
                 if str(x) == uuid:
                     x.content = 'urn:uuid:'+uuid
 
-        tdir = [] #模拟一个目录，里面每个文件都是(fileName, bytes)
-        #from calibre.customize.ui import plugin_for_output_format
-        from calibre.ebooks.conversion.plugins.oeb_output import OEBOutput
-        metadata_xml = None
-        extra_entries = []
-        if self.is_periodical:
-            if self.opts.output_profile.epub_periodical_format == 'sony':
-                from calibre.ebooks.epub.periodical import sony_metadata
-                metadata_xml, atom_xml = sony_metadata(oeb)
-                extra_entries = [('atom.xml', 'application/atom+xml', atom_xml)]
-        #oeb_output = plugin_for_output_format('oeb')
-        OEBOutput().convert(oeb, tdir, opts, log)
-        opf = [f for f,c in tdir if f.endswith('.opf')][0]
-        for idx, (f,c) in enumerate(tdir):
-            if f.endswith('.ncx'):
-                tdir[idx] = (f, self.condense_ncx(c))
-                break
-        encryption = None
-        #if encrypted_fonts:
-        #    encryption = self.encrypt_fonts(encrypted_fonts, tdir, uuid)
-        #if self.opts.epub_version == '3':
-        #    encryption = self.upgrade_to_epub3(tdir, opf, encryption)
+        temp_dir = os.environ.get('TEMP_DIR')
+        target_dir = TemporaryDirectory('_epub_output', dir=temp_dir) if temp_dir else FileSystemDict()
+        with target_dir as tdir:
+            from calibre.customize.ui import plugin_for_output_format
+            metadata_xml = None
+            extra_entries = []
+            if self.is_periodical:
+                if self.opts.output_profile.epub_periodical_format == 'sony':
+                    from calibre.ebooks.epub.periodical import sony_metadata
+                    metadata_xml, atom_xml = sony_metadata(oeb)
+                    extra_entries = [('atom.xml', 'application/atom+xml', atom_xml)]
+            oeb_output = plugin_for_output_format('oeb')
+            oeb_output.convert(oeb, tdir, input_plugin, opts, log)
+            if isinstance(tdir, FileSystemDict):
+                opf = [x for x in tdir if x.endswith('.opf')][0]
+                for x in tdir:
+                    if x.endswith('.ncx'):
+                        ncx_file = x
+                        ncx_content = io.BytesIO(tdir[x])
+                        new_ncx_content = self.condense_ncx(ncx_content)
+                        if new_ncx_content:
+                            tdir[x] = new_ncx_content
+                        break
+            else:
+                opf = [x for x in os.listdir(tdir) if x.endswith('.opf')][0]
+                for x in os.listdir(tdir):
+                    if x.endswith('.ncx'):
+                        ncx_file = os.path.join(tdir, x)
+                        with open(ncx_file, 'rb') as f:
+                            ncx_content = io.BytesIO(f.read())
+                        new_ncx_content = self.condense_ncx(ncx_content)
+                        if new_ncx_content:
+                            with open(ncx_file, 'wb') as f:
+                                f.write(new_ncx_content)
+                        break
 
-        from calibre.ebooks.epub import initialize_container
-        compression = ZIP_STORED if self.opts.epub_dont_compress else ZIP_DEFLATED
-        with initialize_container(output_path, os.path.basename(opf),
-                extra_entries=extra_entries, compression=compression) as epub:
-            for f,c in tdir:
-                epub.writestr('OEBPS/{}'.format(f), c, compression==compression)
+            encryption = None
+            if encrypted_fonts:
+                encryption = self.encrypt_fonts(encrypted_fonts, tdir, uuid)
+            if self.opts.epub_version == '3':
+                encryption = self.upgrade_to_epub3(tdir, opf, encryption)
 
-            if encryption is not None:
-                epub.writestr('META-INF/encryption.xml', as_bytes(encryption))
-            if metadata_xml is not None:
-                epub.writestr('META-INF/metadata.xml', metadata_xml.encode('utf-8'))
+            from calibre.ebooks.epub import initialize_container
+            with initialize_container(output_path, os.path.basename(opf), extra_entries=extra_entries) as epub:
+                if isinstance(tdir, FileSystemDict):
+                    add_fsdict_to_zip(epub, tdir)
+                else:
+                    epub.add_dir(tdir)
+                if encryption is not None:
+                    epub.writestr('META-INF/encryption.xml', as_bytes(encryption))
+                if metadata_xml is not None:
+                    epub.writestr('META-INF/metadata.xml',
+                            metadata_xml.encode('utf-8'))
+            if opts.extract_to is not None:
+                from calibre.utils.zipfile import ZipFile
+                if os.path.exists(opts.extract_to):
+                    if os.path.isdir(opts.extract_to):
+                        shutil.rmtree(opts.extract_to)
+                    else:
+                        os.remove(opts.extract_to)
+                os.mkdir(opts.extract_to)
+                with ZipFile(output_path) as zf:
+                    zf.extractall(path=opts.extract_to)
+                self.log.info('EPUB extracted to', opts.extract_to)
 
-    #tdir为一个列表[(fileName, bytes),]
+    #类似Zipfile.add_dir，这个函数将 FileSystemDict 里面的所有文件添加到一个zip
+    #epub: zip文件
+    #fsdict: FileSystemDict实例
+    def add_fsdict_to_zip(self, epub, fsdict):
+        for f in fsdict:
+            epub.writestr(f, fsdict[f])
+
     def upgrade_to_epub3(self, tdir, opf, encryption=None):
         self.log.info('Upgrading to EPUB 3...')
         from calibre.ebooks.epub import simple_container_xml
@@ -367,6 +413,7 @@ class EPUBOutput(OutputFormatPlugin):
                 return ans
     # }}}
 
+    #输入 BytesIO，输出二进制内容
     def condense_ncx(self, ncx_path):  # {{{
         from lxml import etree
         if not self.opts.pretty_print:
@@ -376,10 +423,9 @@ class EPUBOutput(OutputFormatPlugin):
                     tag.text = tag.text.strip()
                 if tag.tail:
                     tag.tail = tag.tail.strip()
-            return io.BytesIO(etree.tostring(tree.getroot(), encoding='utf-8'))
-        else:
-            return ncx_path
-            
+            compressed = etree.tostring(tree.getroot(), encoding='utf-8')
+            return compressed
+        return None
     # }}}
 
     def workaround_ade_quirks(self):  # {{{

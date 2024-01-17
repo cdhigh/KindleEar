@@ -345,7 +345,7 @@ def AdvOAuth2(authType):
         return 'Auth Type ({}) Unsupported!'.format(authType)
         
     user = get_login_user()
-    cbUrl = urljoin(DOMAIN, '/oauth2cb/pocket?redirect=/advarchive')
+    cbUrl = urljoin(KE_DOMAIN, '/oauth2cb/pocket?redirect=/advarchive')
     pocket = Pocket(POCKET_CONSUMER_KEY, cbUrl)
     try:
         request_token = pocket.get_request_token()

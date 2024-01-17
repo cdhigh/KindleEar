@@ -53,3 +53,4 @@ class Plugins(collections.abc.Mapping):
 
 plugins = Plugins()
 config_dir = ""
+DEBUG = False

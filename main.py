@@ -38,7 +38,14 @@ from apps.work.worker import bpWorker
 from apps.work.url2book import bpUrl2Book
 from apps.back_end.db_models import ConnectToDatabase, CloseDatabase
 from apps.utils import new_secret_key
-from config import USE_GAE_INBOUND_EMAIL
+from config import *
+
+#将config.py里面的部分配置信息写到 os.environ
+def SetOsEnvByConfigPy():
+    os.environ['TEMP_DIR'] = TEMP_DIR
+    os.environ['DOWNLOAD_THREAD_NUM'] = str(DOWNLOAD_THREAD_NUM)
+
+SetOsEnvByConfigPy()
 
 RegisterBuiltinBooks() #添加内置书籍到数据库
 

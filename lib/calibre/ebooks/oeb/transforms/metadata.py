@@ -106,7 +106,7 @@ class MergeMetadata:
     def __call__(self, oeb, mi, opts, override_input_metadata=False):
         self.oeb, self.log = oeb, oeb.log
         m = self.oeb.metadata
-        self.log('Merging user specified metadata...')
+        self.log.info('Merging user specified metadata...')
         meta_info_to_oeb_metadata(mi, m, oeb.log,
                 override_input_metadata=override_input_metadata)
         cover_id = self.set_cover(mi, opts.prefer_metadata_cover)
@@ -210,7 +210,7 @@ class MergeMetadata:
                 text = ''
             text = re.sub(r'\s+', '', text)
             if not text and not XPath('//h:img|//svg:svg')(item.data):
-                self.log('Removing %s as it is a wrapper around'
+                self.log.info('Removing %s as it is a wrapper around'
                         ' the cover image'%item.href)
                 self.oeb.spine.remove(item)
                 self.oeb.manifest.remove(item)

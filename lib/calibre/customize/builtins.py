@@ -32,12 +32,14 @@ class MOBIMetadataWriter(MetadataWriterPlugin):
         from calibre.ebooks.metadata.mobi import set_metadata
         set_metadata(stream, mi)
 
+from calibre.ebooks.conversion.plugins.recipe_input import RecipeInput
 from calibre.ebooks.conversion.plugins.epub_input import EPUBInput
 from calibre.ebooks.conversion.plugins.epub_output import EPUBOutput
 from calibre.ebooks.conversion.plugins.mobi_output import (MOBIOutput, AZW3Output)
 from calibre.ebooks.conversion.plugins.oeb_output import OEBOutput
 
-plugins = [EPUBMetadataWriter, MOBIMetadataWriter, EPUBOutput, MOBIOutput, AZW3Output,]
+plugins = [RecipeInput, EPUBOutput, MOBIOutput, AZW3Output, OEBOutput, EPUBMetadataWriter, MOBIMetadataWriter]
 
 from calibre.customize.profiles import input_profiles, output_profiles
-plugins += input_profiles + output_profiles
+plugins += input_profiles
+plugins += output_profiles

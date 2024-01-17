@@ -144,7 +144,7 @@ class Resources:
     def convert_webp(self, item):
         from calibre.utils.img import image_and_format_from_data, image_to_data
         img, fmt = image_and_format_from_data(item.data)
-        if fmt == 'webp' and not img.isNull():
+        if fmt.lower() == 'webp':
             self.log.info(f'Converting WebP image {item.href} to PNG')
             item.data = image_to_data(img, fmt='PNG')
             item.media_type = 'image/png'

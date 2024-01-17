@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
 
 __license__   = 'GPL v3'
 __copyright__ = '2008, Kovid Goyal kovid@kovidgoyal.net'
@@ -36,6 +37,7 @@ from calibre.utils.xml_parse import safe_xml_fromstring
 from polyglot.builtins import iteritems
 from polyglot.urllib import unquote, urlparse
 
+from filesystem_dict import FileSystemDict
 pretty_print_opf = False
 
 
@@ -78,24 +80,28 @@ class Resource:  # {{{
             self.mime_type = None
         if self.mime_type is None:
             self.mime_type = 'application/octet-stream'
-        if is_path:
+        if is_path: #本地文件
             path = href_or_path
-            if not os.path.isabs(path):
-                path = os.path.abspath(os.path.join(basedir, path))
+            if not isinstance(basedir, FileSystemDict):
+                if not os.path.isabs(path):
+                    path = os.path.abspath(os.path.join(basedir, path))
             if isinstance(path, bytes):
                 path = path.decode(filesystem_encoding)
             self.path = path
-        else:
+        else: #url
             href_or_path = href_or_path
             url = urlparse(href_or_path)
             if url[0] not in ('', 'file'):
                 self._href = href_or_path
-            else:
+            else: #还是本地文件
                 pc = url[2]
                 if isinstance(pc, str):
                     pc = pc.encode('utf-8')
                 pc = pc.decode('utf-8')
-                self.path = os.path.abspath(os.path.join(basedir, pc.replace('/', os.sep)))
+                if isinstance(basedir, FileSystemDict):
+                    self.path = pc.replace('/', os.sep)
+                else:
+                    self.path = os.path.abspath(os.path.join(basedir, pc.replace('/', os.sep)))
                 self.fragment = url[-1]
 
     def href(self, basedir=None):
@@ -107,17 +113,21 @@ class Resource:  # {{{
         If this resource has no basedir, then the current working directory is used as the basedir.
         '''
         if basedir is None:
-            if self._basedir:
+            if isinstance(self._basedir, FileSystemDict):
+                basedir = ''
+            elif self._basedir:
                 basedir = self._basedir
             else:
                 basedir = os.getcwd()
-        if self.path is None:
+        if self.path is None: #是网络文件
             return self._href
         frag = ('#' + self.fragment) if self.fragment else ''
         if self.path == basedir:
             return frag
+        rpath = self.path
         try:
-            rpath = os.path.relpath(self.path, basedir)
+            if not isinstance(self._basedir, FileSystemDict):
+                rpath = os.path.relpath(self.path, basedir)
         except ValueError:  # On windows path and basedir could be on different drives
             rpath = self.path
         if isinstance(rpath, bytes):
@@ -128,7 +138,7 @@ class Resource:  # {{{
         self._basedir = path
 
     def basedir(self):
-        return self._basedir
+        return self._basedir if not isinstance(self._basedir, FileSystemDict) else ''
 
     def __repr__(self):
         return 'Resource(%s, %s)'%(repr(self.path), repr(self.href()))
@@ -1398,7 +1408,7 @@ class OPFCreator(Metadata):
         to convert paths to files into relative paths.
         '''
         Metadata.__init__(self, title='', other=other)
-        self.base_path = os.path.abspath(base_path)
+        self.base_path = base_path if isinstance(base_path, FileSystemDict) else os.path.abspath(base_path)
         self.page_progression_direction = None
         self.primary_writing_mode = None
         if self.application_id is None:
@@ -1418,9 +1428,9 @@ class OPFCreator(Metadata):
 
         `entries`: List of (path, mime-type) If mime-type is None it is autodetected
         '''
-        entries = list(map(lambda x: x if os.path.isabs(x[0]) else
-                      (os.path.abspath(os.path.join(self.base_path, x[0])), x[1]),
-                      entries))
+        if not isinstance(self.base_path, FileSystemDict):
+            entries = list(map(lambda x: x if os.path.isabs(x[0]) else
+                      (os.path.abspath(os.path.join(self.base_path, x[0])), x[1]), entries))
         self.manifest = Manifest.from_paths(entries)
         self.manifest.set_basedir(self.base_path)
 
@@ -1450,8 +1460,9 @@ class OPFCreator(Metadata):
 
         `entries`: List of paths
         '''
-        entries = list(map(lambda x: x if os.path.isabs(x) else
-                      os.path.abspath(os.path.join(self.base_path, x)), entries))
+        if not isinstance(self.base_path, FileSystemDict):
+            entries = list(map(lambda x: x if os.path.isabs(x) else
+                          os.path.abspath(os.path.join(self.base_path, x)), entries))
         self.spine = Spine.from_paths(entries, self.manifest)
 
     def set_toc(self, toc):
@@ -1487,8 +1498,9 @@ class OPFCreator(Metadata):
             self.guide = Guide()
         if self.cover:
             cover = self.cover
-            if not os.path.isabs(cover):
-                cover = os.path.abspath(os.path.join(self.base_path, cover))
+            if not isinstance(self.base_path, FileSystemDict):
+                if not os.path.isabs(cover):
+                    cover = os.path.abspath(os.path.join(self.base_path, cover))
             self.guide.set_cover(cover)
         self.guide.set_basedir(self.base_path)
 
