@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
 
 __license__   = 'GPL v3'
 __copyright__ = '2010, Kovid Goyal <kovid at kovidgoyal.net>'
@@ -44,7 +44,6 @@ def parse_html_toc(data):
 
 
 class TOC(list):
-
     def __init__(self, href=None, fragment=None, text=None, parent=None,
             play_order=0, base_path=os.getcwd(), type='unknown', author=None,
             description=None, toc_thumbnail=None):
@@ -60,7 +59,7 @@ class TOC(list):
         self.author = author
         self.description = description
         self.toc_thumbnail = toc_thumbnail
-
+        
     def __str__(self):
         lines = ['TOC: %s#%s %s'%(self.href, self.fragment, self.text)]
         for child in self:
@@ -127,7 +126,8 @@ class TOC(list):
             path = os.path.join(self.base_path, path)
         return path
 
-    def read_from_opf(self, opfreader):
+    #增加的fs为FsDictStub对象
+    def read_from_opf(self, opfreader, fs):
         toc = opfreader.soup.find('spine', toc=True)
         if toc is not None:
             toc = toc['toc']
@@ -147,7 +147,7 @@ class TOC(list):
                 if not os.path.isabs(toc):
                     toc = os.path.join(self.base_path, toc)
                 try:
-                    if not os.path.exists(toc):
+                    if not fs.exists(toc):
                         bn  = os.path.basename(toc)
                         bn  = bn.replace('_top.htm', '_toc.htm')  # Bug in BAEN OPF files
                         toc = os.path.join(os.path.dirname(toc), bn)
@@ -158,24 +158,24 @@ class TOC(list):
             else:
                 path = opfreader.manifest.item(toc.lower())
                 path = getattr(path, 'path', path)
-                if path and os.access(path, os.R_OK):
+                if path: # and os.access(path, os.R_OK):
                     try:
-                        self.read_ncx_toc(path)
+                        self.read_ncx_toc(path, fs)
                     except Exception as err:
                         print('WARNING: Invalid NCX file:', err)
                     return
-                cwd = os.path.abspath(self.base_path)
-                m = glob.glob(os.path.join(cwd, '*.ncx'))
+                m = fs.glob(os.path.join(self.base_path, '*.ncx'))
                 if m:
                     toc = m[0]
-                    self.read_ncx_toc(toc)
+                    self.read_ncx_toc(toc, fs)
 
-    def read_ncx_toc(self, toc, root=None):
+    #增加的参数fs为FsDictStub对象
+    def read_ncx_toc(self, toc, fs, root=None):
         self.base_path = os.path.dirname(toc)
         if root is None:
-            with open(toc, 'rb') as f:
-                raw  = xml_to_unicode(f.read(), assume_utf8=True,
-                        strip_encoding_pats=True)[0]
+            data = fs.read(toc, 'rb')
+            raw  = xml_to_unicode(data, assume_utf8=True,
+                    strip_encoding_pats=True)[0]
             root = safe_xml_fromstring(raw)
         xpn = {'re': 'http://exslt.org/regular-expressions'}
         XPath = functools.partial(etree.XPath, namespaces=xpn)
@@ -225,10 +225,11 @@ class TOC(list):
         for child in np_path(nm):
             process_navpoint(child, self)
 
-    def read_html_toc(self, toc):
+    #增加的参数fs为FsDictStub对象
+    def read_html_toc(self, toc, fs):
         self.base_path = os.path.dirname(toc)
-        with open(toc, 'rb') as f:
-            parsed_toc = parse_html_toc(f.read())
+        data = fs.read(toc, 'rb')
+        parsed_toc = parse_html_toc(data)
         for href, fragment, txt in parsed_toc:
             add = True
             for i in self.flat():

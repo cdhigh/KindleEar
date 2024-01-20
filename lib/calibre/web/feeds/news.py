@@ -35,9 +35,10 @@ from calibre.web.fetch.simple import (
 )
 from calibre.web.fetch.utils import prepare_masthead_image
 from polyglot.builtins import string_or_bytes
-
+from lxml.html import document_fromstring, fragment_fromstring, tostring
+from lib import readability
 from urlopener_browser import UrlOpenerBrowser
-from filesystem_dict import FileSystemDict
+from filesystem_dict import FsDictStub
 from default_cv_mh import get_default_cover_data, get_default_masthead_data
 
 def classes(classes):
@@ -76,14 +77,14 @@ class BasicNewsRecipe(Recipe):
     '''
 
     #: The title to use for the e-book
-    title                  = _('Unknown News Source')
+    title                  = 'Unknown News Source'
 
     #: A couple of lines that describe the content this recipe downloads.
     #: This will be used primarily in a GUI that presents a list of recipes.
     description = ''
 
     #: The author of this recipe
-    __author__             = __appname__
+    __author__             = "KindleEar"
 
     #: Minimum calibre version needed to use this recipe
     requires_version = (0, 6, 0)
@@ -95,10 +96,10 @@ class BasicNewsRecipe(Recipe):
     #: Maximum number of articles to download from each feed. This is primarily
     #: useful for feeds that don't have article dates. For most feeds, you should
     #: use :attr:`BasicNewsRecipe.oldest_article`
-    max_articles_per_feed  = 100
+    max_articles_per_feed  = 30
 
     #: Oldest article to download from this news source. In days.
-    oldest_article         = 7.0
+    oldest_article         = 7
 
     #: Number of levels of links to follow on article webpages
     recursions             = 0
@@ -118,7 +119,7 @@ class BasicNewsRecipe(Recipe):
     simultaneous_downloads = 5
 
     #: Timeout for fetching files from server in seconds
-    timeout                = 120.0
+    timeout                = 60
 
     #: The format string for the date shown on the first page.
     #: By default: Day_Name, Day_Number Month_Name Year
@@ -173,7 +174,7 @@ class BasicNewsRecipe(Recipe):
     #: the algorithms from the readability project. Setting this to True, means
     #: that you do not have to worry about cleaning up the downloaded HTML
     #: manually (though manual cleanup will always be superior).
-    auto_cleanup = False
+    auto_cleanup = True
 
     #: Specify elements that the auto cleanup algorithm should never remove.
     #: The syntax is a XPath expression. For example::
@@ -186,7 +187,7 @@ class BasicNewsRecipe(Recipe):
     #:                     will keep all divs with id="article-image" and spans
     #:                     with class="important"
     #:
-    auto_cleanup_keep = None
+    auto_cleanup_keep = ['image-block', 'image-block-caption', 'image-block-ins']
 
     #: Specify any extra :term:`CSS` that should be added to downloaded :term:`HTML` files.
     #: It will be inserted into `<style>` tags, just before the closing
@@ -313,27 +314,11 @@ class BasicNewsRecipe(Recipe):
     #: The CSS that is used to style the templates, i.e., the navigation bars and
     #: the Tables of Contents. Rather than overriding this variable, you should
     #: use `extra_css` in your recipe to customize look and feel.
-    template_css = '''
-            .article_date {
-                color: gray; font-family: monospace;
-            }
-
-            .article_description {
-                text-indent: 0pt;
-            }
-
-            a.article {
-                font-weight: bold; text-align:left;
-            }
-
-            a.feed {
-                font-weight: bold;
-            }
-
-            .calibre_navbar {
-                font-family:monospace;
-            }
-    '''
+    template_css = '''.article_date {color: gray; font-family: monospace;}
+        .article_description {text-indent: 0pt;}
+        a.article {font-weight: bold; text-align:left;}
+        a.feed {font-weight: bold;}
+        .calibre_navbar {font-family:monospace;}'''
 
     #: By default, calibre will use a default image for the masthead (Kindle only).
     #: Override this in your recipe to provide a URL to use as a masthead.
@@ -743,25 +728,28 @@ class BasicNewsRecipe(Recipe):
             return parse(_raw)
         return BeautifulSoup(_raw)
 
+    #提取正文
     def extract_readable_article(self, html, url):
-        '''
-        Extracts main article content from 'html', cleans up and returns as a (article_html, extracted_title) tuple.
-        Based on the original readability algorithm by Arc90.
-        '''
-        from lxml.html import document_fromstring, fragment_fromstring, tostring
-
-        from calibre.ebooks.readability import readability
-
-        doc = readability.Document(html, self.log, url=url,
-                keep_elements=self.auto_cleanup_keep)
-        article_html = doc.summary()
-        extracted_title = doc.title()
-
+        try:
+            doc = readability.Document(html, positive_keywords=self.auto_cleanup_keep, url=url)
+            article_html = doc.summary()
+            title = doc.title()
+            extracted_title = doc.short_title()
+        except: #如果readability解析失败，则启用备用算法
+            from lib.simpleextract import simple_extract
+            article_html, title = simple_extract(html)
+            extracted_title = title
+            
         try:
             frag = fragment_fromstring(article_html)
         except:
             doc = document_fromstring(article_html)
             frag = doc.xpath('//body')[-1]
+
+        if not title:
+            title = frag.xpath('//title')
+            extracted_title = title
+
         if frag.tag == 'html':
             root = frag
         elif frag.tag == 'body':
@@ -778,7 +766,7 @@ class BasicNewsRecipe(Recipe):
         body = root.xpath('//body')[0]
         has_title = False
         for x in body.iterdescendants():
-            if x.text == extracted_title:
+            if x.text == title:
                 has_title = True
         inline_titles = body.xpath('//h1|//h2')
         if not has_title and not inline_titles:
@@ -787,7 +775,6 @@ class BasicNewsRecipe(Recipe):
             body.insert(0, heading)
 
         raw_html = tostring(root, encoding='unicode')
-
         return raw_html
 
     def sort_index_by(self, index, weights):
@@ -904,20 +891,24 @@ class BasicNewsRecipe(Recipe):
         '''
         pass
 
-    def __init__(self, options, log, progress_reporter, output_dir):
+    def __init__(self, options, log, progress_reporter, output_dir, fs):
         '''
         Initialize the recipe.
         :param options: Parsed commandline options
         :param log:  Logging object
         :param progress_reporter: A Callable that takes two arguments: progress (a number between 0 and 1) and a string message. The message should be optional.
-        :param output_dir: output_dir name or FileSystemDict object
+        :param output_dir: output_dir name
+        :param fs: FsDictStub object
         '''
+        if not os.path.isabs(str(output_dir)):
+            raise Exception('output_dir have to be a abs path')
         self.log = log #ThreadSafeWrapper(log)
         if not isinstance(self.title, str):
             self.title = str(self.title, 'utf-8', 'replace')
 
         self.debug = options.verbose > 1
         self.output_dir = output_dir
+        self.fs = fs
         self.verbose = options.verbose
         self.test = options.test
         if self.test and not isinstance(self.test, tuple):
@@ -1103,6 +1094,7 @@ class BasicNewsRecipe(Recipe):
             lang = None
         return lang
 
+    #从Feed实例列表生成最顶层的index.html内容
     def feeds2index(self, feeds):
         templ = (templates.TouchscreenIndexTemplate if self.touchscreen else
                 templates.IndexTemplate)
@@ -1139,13 +1131,9 @@ class BasicNewsRecipe(Recipe):
     def feed2index(self, f, feeds):
         feed = feeds[f]
         if feed.image_url is not None:  # Download feed image
-            if isinstance(self.output_dir, FileSystemDict):
-                imgdir = 'images'
-            else:
-                imgdir = os.path.join(self.output_dir, 'images')
-                if not os.path.isdir(imgdir):
-                    os.makedirs(imgdir)
-
+            imgdir = os.path.join(self.output_dir, 'images')
+            self.fs.makedirs(imgdir)
+            
             if feed.image_url in self.image_map:
                 feed.image_url = self.image_map[feed.image_url]
             else:
@@ -1156,11 +1144,7 @@ class BasicNewsRecipe(Recipe):
                         img = os.path.join(imgdir, 'feed_image_%d%s'%(self.image_counter, os.path.splitext(bn)[-1]))
                         try:
                             with closing(self.browser.open(feed.image_url, timeout=self.timeout)) as r:
-                                if isinstance(self.output_dir, FileSystemDict):
-                                    self.output_dir[img] = r.read()
-                                else:
-                                    with open(img, 'wb') as fi:
-                                        fi.write(r.read())
+                                self.fs.write(img, r.read(), 'wb')
                             self.image_counter += 1
                             feed.image_url = img
                             self.image_map[feed.image_url] = img
@@ -1177,6 +1161,16 @@ class BasicNewsRecipe(Recipe):
         return templ.generate(f, feeds, self.description_limiter,
                               extra_css=css).render(doctype='xhtml')
 
+    #下载一个url指定的网页和其内部的所有链接
+    #url: 要下载的url
+    #dir_: 下载的文件要保存的目录
+    #f: Feed索引号
+    #a: 文章索引号
+    #num_of_feeds: Feed总数
+    #返回：(file, downloads[], failures[]): 
+    #       file: url网页内容保存的文件名
+    #       downloads[]: 网页内的链接所对应的文件保存的文件名
+    #       failures[]: 下载失败的url列表
     def _fetch_article(self, url, dir_, f, a, num_of_feeds, preloaded=None):
         br = self.browser
         if hasattr(self.get_browser, 'is_base_class_implementation'):
@@ -1186,8 +1180,8 @@ class BasicNewsRecipe(Recipe):
         else:
             br = self.clone_browser(self.browser)
         self.web2disk_options.browser = br
-        self.web2disk_options.filesystem_dict = self.output_dir if isinstance(self.output_dir, FileSystemDict) else None
-        fetcher = RecursiveFetcher(self.web2disk_options, self.log,
+        self.web2disk_options.dir = dir_
+        fetcher = RecursiveFetcher(self.web2disk_options, self.fs, self.log,
                 self.image_map, self.css_map,
                 (url, f, a, num_of_feeds))
         fetcher.browser = br
@@ -1199,8 +1193,8 @@ class BasicNewsRecipe(Recipe):
             fetcher.preloaded_urls[url] = preloaded
         
         res, path, failures = fetcher.start_fetch(url), fetcher.downloaded_paths, fetcher.failed_links
-        if not res or not (self.output_dir.exists(res) if isinstance(self.output_dir, FileSystemDict) else os.path.exists(res)):
-            msg = _('Could not fetch article.') + ' '
+        if not res or not self.fs.exists(res):
+            msg = _('Could not fetch article.') + ' ' + url + ' '
             if self.debug:
                 msg += _('The debug traceback is available earlier in this log')
             else:
@@ -1220,22 +1214,22 @@ class BasicNewsRecipe(Recipe):
                 data = data.encode(self.encoding or 'utf-8')
             url = x.get('url', url)
         else:
-            with open(x, 'rb') as of:
-                data = of.read()
-            os.remove(x)
+            data = self.fs.read(x, 'rb')
+            self.fs.delete(x)
         return self._fetch_article(url, dir_, f, a, num_of_feeds, preloaded=data)
 
+    #下载全文RSS
+    #article: calibre.web.feeds.__init__.Article 实例
+    #dir_: 下载的内容要保存的目录，包括html文本和里面的图像文件
+    #f: Feed索引号
+    #a: 文章索引号
+    #num_of_feeds: Feed总数
     def fetch_embedded_article(self, article, dir_, f, a, num_of_feeds):
         templ = templates.EmbeddedContent()
-        raw = templ.generate(article).render('html')
-        if isinstance(self.output_dir, FileSystemDict):
-            temp_name = FileSystemDict.make_tempfile('_feeds2disk.html')
-            self.output_dir[temp_name] = raw
-            url = ('file:' + temp_name) if iswindows else ('file://' + temp_name)
-        else:
-            with PersistentTemporaryFile('_feeds2disk.html', dir=self.output_dir) as pt:
-                pt.write(raw)
-                url = ('file:'+pt.name) if iswindows else ('file://'+pt.name)
+        raw = templ.generate(article).render('html') #raw是utf-8编码的二进制内容
+        with self.fs.make_tempfile(suffix='_feeds2disk.html', dir=self.output_dir) as pt:
+            pt.write(raw)
+            url = ('file:'+pt.name) if iswindows else ('file://'+pt.name)
         return self._fetch_article(url, dir_, f, a, num_of_feeds)
 
     def remove_duplicate_articles(self, feeds):
@@ -1261,6 +1255,7 @@ class BasicNewsRecipe(Recipe):
             feeds = [f for f in feeds if len(f) > 0]
         return feeds
 
+    #实际下载feeds并创建index.html
     def build_index(self):
         self.report_progress(0, _('Fetching feeds...'))
         feeds = None
@@ -1291,13 +1286,8 @@ class BasicNewsRecipe(Recipe):
         self.has_single_feed = len(feeds) == 1
 
         html = self.feeds2index(feeds)
-        if isinstance(self.output_dir, FileSystemDict):
-            index = 'index.html'
-            self.output_dir[index] = html
-        else:
-            index = os.path.join(self.output_dir, 'index.html')
-            with open(index, 'wb') as fi:
-                fi.write(html)
+        index = os.path.join(self.output_dir, 'index.html')
+        self.fs.write(index, html, 'wb')
 
         self.jobs = []
 
@@ -1308,20 +1298,16 @@ class BasicNewsRecipe(Recipe):
 
         self.feed_objects = feeds
         for f, feed in enumerate(feeds):
-            feed_dir = 'feed_{}'.format(f)
-            if not isinstance(self.output_dir, FileSystemDict):
-                feed_dir = os.path.join(self.output_dir, feed_dir)
-                if not os.path.isdir(feed_dir):
-                    os.makedirs(feed_dir)
+            feed_dir = os.path.join(self.output_dir, f'feed_{f}')
+            self.fs.makedirs(feed_dir)
 
             for a, article in enumerate(feed):
                 if a >= self.max_articles_per_feed:
                     break
 
-                art_dir = os.path.join(feed_dir, 'article_{}'.format(a))
-                if not isinstance(self.output_dir, FileSystemDict):
-                    if not os.path.isdir(art_dir):
-                        os.makedirs(art_dir)
+                art_dir = os.path.join(feed_dir, f'article_{a}')
+                self.fs.makedirs(art_dir)
+
                 try:
                     url = self.print_version(article.url)
                 except NotImplementedError:
@@ -1332,11 +1318,13 @@ class BasicNewsRecipe(Recipe):
                 if not url:
                     continue
 
+                #设置多线程爬取网页的回调函数
                 if self.use_embedded_content or (self.use_embedded_content is None and feed.has_embedded_content()):
                     func, arg = self.fetch_embedded_article, article
+                elif self.articles_are_obfuscated:
+                    func, arg = self.fetch_obfuscated_article, url
                 else:
-                    fetch_func = self.fetch_obfuscated_article if self.articles_are_obfuscated else self.fetch_article
-                    func, arg = fetch_func, url
+                    func, arg = self.fetch_article, url
 
                 #param: callable, args, kwds, requestID, callback, exc_callback):
                 req = WorkRequest(func, (arg, art_dir, f, a, len(feed)),
@@ -1362,7 +1350,7 @@ class BasicNewsRecipe(Recipe):
                     time.sleep(0.1)
                 except NoResultsPending:
                     break
-        else:
+        else: #如果是单线程，为了更好的兼容性，在同一个线程抓取网页，上面的线程池即使是单线程，也是另一个线程
             for req in self.jobs:
                 try:
                     req.callback(req, req.callable(*req.args, **req.kwds))
@@ -1373,15 +1361,9 @@ class BasicNewsRecipe(Recipe):
 
         for f, feed in enumerate(feeds):
             html = self.feed2index(f,feeds)
-            if isinstance(self.output_dir, FileSystemDict):
-                index_html_path = os.path.join('feed_%d'%f, 'index.html')
-                self.output_dir[index_html_path] = html
-            else:
-                feed_dir = os.path.join(self.output_dir, 'feed_%d'%f)
-                index_html_path = os.path.join(feed_dir, 'index.html')
-                with open(index_html_path, 'wb') as fi:
-                    fi.write(html)
-
+            feed_dir = os.path.join(self.output_dir, f'feed_{f}', 'index.html')
+            self.fs.write(feed_dir, html, 'wb')
+            
         self.create_opf(feeds)
         self.report_progress(1, _('Feeds downloaded to %s')%index)
 
@@ -1398,25 +1380,19 @@ class BasicNewsRecipe(Recipe):
             if not cu:
                 return
             cdata = None
-            if hasattr(cu, 'read'):
+            if hasattr(cu, 'read'): #一个文件类的对象
                 cdata = cu.read()
                 cu = getattr(cu, 'name', 'cover.jpg')
-            elif os.access(cu, os.R_OK):
-                with open(cu, 'rb') as f:
-                    cdata = f.read()
-            else:
+            elif os.access(cu, os.R_OK): #recipe里面设置了本地封面图像文件
+                cdata = self.fs.read(cu, 'rb')
+            else: #要求使用网络图像做为封面
                 self.report_progress(1, _('Downloading cover from %s')%cu)
                 with closing(self.browser.open(cu, timeout=self.timeout)) as r:
                     cdata = r.read()
             if not cdata:
                 return
-            if isinstance(self.output_dir, FileSystemDict):
-                self.cover_path = 'cover.jpg'
-                self.output_dir[self.cover_path] = cdata
-            else:
-                self.cover_path = os.path.join(self.output_dir, 'cover.jpg')
-                with open(self.cover_path, 'wb') as f:
-                    f.write(cdata)
+            self.cover_path = os.path.join(self.output_dir, 'cover.jpg')
+            self.fs.write(self.cover_path, cdata, 'wb')
             
     def download_cover(self):
         self.cover_path = None
@@ -1427,6 +1403,7 @@ class BasicNewsRecipe(Recipe):
             self.cover_path = None
 
     def _download_masthead(self, mu):
+        return
         if hasattr(mu, 'rpartition'):
             ext = mu.rpartition('.')[-1]
             if '?' in ext:
@@ -1437,19 +1414,16 @@ class BasicNewsRecipe(Recipe):
         mpath = os.path.join(self.output_dir, 'masthead_source.'+ext)
         outfile = os.path.join(self.output_dir, 'mastheadImage.gif')
         if hasattr(mu, 'read'):
-            with open(mpath, 'wb') as mfile:
-                mfile.write(mu.read())
+            self.fs.write(mpath, mu.read(), 'wb')
         elif os.access(mu, os.R_OK):
-            with open(mpath, 'wb') as mfile:
-                mfile.write(open(mu, 'rb').read())
+            self.fs.write(mpath, open(mu, 'rb').read(), 'wb')
         else:
-            with open(mpath, 'wb') as mfile, closing(self.browser.open(mu, timeout=self.timeout)) as r:
-                mfile.write(r.read())
+            with closing(self.browser.open(mu, timeout=self.timeout)) as r:
+                self.fs.write(mpath, r.read(), 'wb')
             self.report_progress(1, _('Masthead image downloaded'))
         self.prepare_masthead_image(mpath, outfile)
         self.masthead_path = outfile
-        if os.path.exists(mpath):
-            os.remove(mpath)
+        self.fs.delete(mpath)
 
     def download_masthead(self, url):
         try:
@@ -1458,14 +1432,9 @@ class BasicNewsRecipe(Recipe):
             self.log.exception("Failed to download supplied masthead_url")
 
     def resolve_masthead(self):
-        mastheadRawData = get_default_masthead_data()
-        if isinstance(self.output_dir, FileSystemDict):
-            self.masthead_path = 'mastheadImage.gif'
-            self.output_dir[self.masthead_path] = mastheadRawData
-        else:
-            self.masthead_path = os.path.join(self.output_dir, 'mastheadImage.gif')
-            with open(self.masthead_path, 'wb') as f:
-                f.write(mastheadRawData)
+        masthead_raw_data = get_default_masthead_data()
+        self.masthead_path = os.path.join(self.output_dir, 'mastheadImage.gif')
+        self.fs.write(self.masthead_path, masthead_raw_data, 'wb')
 
     def default_cover(self, cover_file):
         return
@@ -1493,9 +1462,12 @@ class BasicNewsRecipe(Recipe):
         '''
         return nowf()
 
-    def create_opf(self, feeds, dir=None):
-        if dir is None:
-            dir = self.output_dir
+    #通过Feed对象列表构建一个opf文件
+    #feeds: Feed对象列表
+    #dir_: 将opf保存到哪个目录
+    def create_opf(self, feeds, dir_=None):
+        if dir_ is None:
+            dir_ = self.output_dir
         title = self.short_title()
         pdate = self.publication_date()
         if self.output_profile.periodical_date_in_title:
@@ -1527,44 +1499,27 @@ class BasicNewsRecipe(Recipe):
         if language is not None:
             mi.language = language
         mi.pubdate = pdate
-        if isinstance(dir, FileSystemDict):
-            opf_path = 'index.opf'
-            ncx_path = 'index.ncx'
-        else:
-            opf_path = os.path.join(dir, 'index.opf')
-            ncx_path = os.path.join(dir, 'index.ncx')
-
-        opf = OPFCreator(dir, mi)
+        
+        opf = OPFCreator(dir_, mi, self.fs)
         # Add mastheadImage entry to <guide> section
         mp = getattr(self, 'masthead_path', None)
         if mp is not None: # and os.access(mp, os.R_OK):
             from calibre.ebooks.metadata.opf2 import Guide
-            ref = Guide.Reference(os.path.basename(self.masthead_path), 
-                self.output_dir if isinstance(self.output_dir, FileSystemDict) else os.getcwd())
+            ref = Guide.Reference(os.path.basename(self.masthead_path), dir_)
             ref.type = 'masthead'
             ref.title = 'Masthead Image'
             opf.guide.append(ref)
 
-        if isinstance(dir, FileSystemDict):
-            manifest = ['feed_%d'%i for i in range(len(feeds))]
-            manifest.append('index.html')
-            manifest.append('index.ncx')
-        else:
-            manifest = [os.path.join(dir, 'feed_%d'%i) for i in range(len(feeds))]
-            manifest.append(os.path.join(dir, 'index.html'))
-            manifest.append(os.path.join(dir, 'index.ncx'))
-
+        manifest = [os.path.join(dir_, 'feed_%d'%i) for i in range(len(feeds))]
+        manifest.append(os.path.join(dir_, 'index.html'))
+        
         # Get cover
         cpath = getattr(self, 'cover_path', None)
         if cpath is None:
             cover_data = get_default_cover_data()
-            cpath = 'cover.jpg'
-            if isinstance(self.output_dir, FileSystemDict):
-                self.output_dir[cpath] = cover_data
-            else:
-                cpath = os.path.join(dir, cpath)
-                with open(cpath, 'wb') as f:
-                    f.write(cover_data)
+            cpath = os.path.join(dir_, 'cover.jpg')
+            self.cover_path = cpath
+            self.fs.write(cpath, cover_data, 'wb')
         
         opf.cover = cpath
         manifest.append(cpath)
@@ -1572,9 +1527,13 @@ class BasicNewsRecipe(Recipe):
         # Get masthead
         mpath = getattr(self, 'masthead_path', None)
         if mpath is not None: # and os.access(mpath, os.R_OK):
-            manifest.append(mpath)
+            manifest.append(os.path.join(dir_, mpath))
 
         opf.create_manifest_from_files_in(manifest)
+
+        #上面的语句执行时ncx还没有生成，要在函数末才生成，需要手动添加
+        opf.manifest.add_item(os.path.join(dir_, 'index.ncx'), mime_type="application/x-dtbncx+xml")
+
         for mani in opf.manifest:
             if mani.path.endswith('.ncx'):
                 mani.id = 'ncx'
@@ -1582,7 +1541,7 @@ class BasicNewsRecipe(Recipe):
                 mani.id = 'masthead-image'
 
         entries = ['index.html']
-        toc = TOC(base_path=dir)
+        toc = TOC(base_path=dir_)
         self.play_order_counter = 0
         self.play_order_map = {}
 
@@ -1623,20 +1582,18 @@ class BasicNewsRecipe(Recipe):
                                 arelpath, entry['anchor'], entry['title'] or _('Unknown section'),
                                 play_order=po
                             )
+                    #这段注释后的代码是添加navbar的
                     #last = os.path.join(adir, 'index.html')
                     #src = None
-                    #if not isinstance(self.output_dir, FileSystemDict):
-                    #    last = os.path.join(self.output_dir, last)
-                    #    for sp in a.sub_pages:
-                    #        prefix = os.path.commonprefix([opf_path, sp])
-                    #        relp = sp[len(prefix):]
-                    #        entries.append(relp.replace(os.sep, '/'))
-                    #        last = sp
-                    #    if os.path.exists(last):
-                    #        with open(last, 'rb') as fi:
-                    #            src = fi.read().decode('utf-8')
-                    #else:
-                    #    src = self.output_dir.get(last)
+                    #last = os.path.join(self.output_dir, last)
+                    #for sp in a.sub_pages:
+                    #    prefix = os.path.commonprefix([opf_path, sp])
+                    #    relp = sp[len(prefix):]
+                    #    entries.append(relp.replace(os.sep, '/'))
+                    #    last = sp
+                    #if os.path.exists(last):
+                    #    with open(last, 'rb') as fi:
+                    #        src = fi.read().decode('utf-8')
                     #if src:
                         #soup = BeautifulSoup(src)
                         #body = soup.find('body')
@@ -1673,31 +1630,31 @@ class BasicNewsRecipe(Recipe):
             entries.append('feed_%d/index.html'%0)
             feed_index(0, toc)
 
-        if not isinstance(dir, FileSystemDict):
-            for i, p in enumerate(entries):
-                entries[i] = os.path.join(dir, p.replace('/', os.sep))
+        for i, p in enumerate(entries):
+            entries[i] = os.path.join(dir_, p.replace('/', os.sep))
         opf.create_spine(entries)
         opf.set_toc(toc)
 
-        if isinstance(dir, FileSystemDict):
-            opf_file = io.BytesIO()
-            ncx_file = io.BytesIO()
-            opf.render(opf_file, ncx_file)
-            dir[opf_path] = opf_file.getvalue()
-            dir[ncx_path] = ncx_file.getvalue()
-        else:
-            with open(opf_path, 'wb') as opf_file, open(ncx_path, 'wb') as ncx_file:
-                opf.render(opf_file, ncx_file)
+        opf_file = io.BytesIO()
+        ncx_file = io.BytesIO()
+        opf.render(opf_file, ncx_file)
+        opf_path = os.path.join(dir_, 'index.opf')
+        ncx_path = os.path.join(dir_, 'index.ncx')
+        self.fs.write(opf_path, opf_file.getvalue(), 'wb')
+        self.fs.write(ncx_path, ncx_file.getvalue(), 'wb')
 
+    #下载完成后会回调此函数
+    #request: 传给线程池的请求对象 calibre.utils.threadpool.WorkRequest
+    #result: _fetch_article()执行结果，一个元祖 (file, downloads[], failures[])
+    #       file: url网页保存的文件名
+    #       downloads[]: 网页内的链接所对应的文件保存的文件名
+    #       failures[]: 下载失败的url列表
     def article_downloaded(self, request, result):
-        index = os.path.join(os.path.dirname(result[0]), 'index.html')
-        if index != result[0]:
-            if isinstance(self.output_dir, FileSystemDict):
-                self.output_dir.rename(result[0], index)
-            else:
-                if os.path.exists(index):
-                    os.remove(index)
-                os.rename(result[0], index)
+        file_name, downloads, failures = result
+        index = os.path.join(os.path.dirname(file_name), 'index.html')
+        if index != file_name:
+            self.fs.rename(file_name, index)
+        
         a = request.requestID[1]
 
         article = request.article
@@ -1705,12 +1662,12 @@ class BasicNewsRecipe(Recipe):
         article.orig_url = article.url
         article.url = 'article_%d/index.html'%a
         article.downloaded = True
-        article.sub_pages  = result[1][1:]
+        article.sub_pages  = downloads[1:]
         self.jobs_done += 1
         self.report_progress(float(self.jobs_done)/len(self.jobs),
             _('Article downloaded: %s')%force_unicode(article.title))
-        if result[2]:
-            self.partial_failures.append((request.feed.title, article.title, article.url, result[2]))
+        if failures:
+            self.partial_failures.append((request.feed.title, article.title, article.url, failures))
 
     def error_in_article_download(self, request, traceback):
         self.jobs_done += 1
@@ -1727,7 +1684,8 @@ class BasicNewsRecipe(Recipe):
                     _('Article download failed: %s')%force_unicode(request.article.title))
             self.failed_downloads.append((request.feed, request.article, traceback))
 
-    #(calibre\web\feeds\__init__.py)
+    #Feed类定义在 calibre\web\feeds\__init__.py
+    #从recipe里面定义的feed列表返回一个Feed实例列表
     def parse_feeds(self):
         '''
         Create a list of articles from the list of feeds returned by :meth:`BasicNewsRecipe.get_feeds`.
@@ -1757,16 +1715,12 @@ class BasicNewsRecipe(Recipe):
                     url = purl._replace(netloc=hostname).geturl()
                     if purl.username and purl.password:
                         br.add_password(url, purl.username, purl.password)
-                with closing(br.open_novisit(url, timeout=self.timeout)) as f:
+                with closing(br.open(url, timeout=self.timeout)) as f:
                     raw = f.read()
-                parsed_feeds.append(feed_from_xml(
-                    raw, title=title, log=self.log,
-                    oldest_article=self.oldest_article,
-                    max_articles_per_feed=self.max_articles_per_feed,
-                    get_article_url=self.get_article_url
-                ))
+                parsed_feeds.append(feed_from_xml(raw, title=title, log=self.log, oldest_article=self.oldest_article,
+                    max_articles_per_feed=self.max_articles_per_feed, get_article_url=self.get_article_url))
             except Exception as err:
-                feed = Feed()
+                feed = Feed() #创建一个空的Feed返回
                 msg = 'Failed feed: %s'%(title if title else url)
                 feed.populate_from_preparsed_feed(msg, [])
                 feed.description = as_unicode(err)
@@ -1884,15 +1838,15 @@ class CustomIndexRecipe(BasicNewsRecipe):
         mi = OPFCreator(self.output_dir, mi)
         mi.create_manifest_from_files_in([self.output_dir])
         mi.create_spine([os.path.join(self.output_dir, 'index.html')])
-        with open(os.path.join(self.output_dir, 'index.opf'), 'wb') as opf_file:
-            mi.render(opf_file)
+        opf_file = io.BytesIO()
+        mi.render(opf_file)
+        self.fs.write(os.path.join(self.output_dir, 'index.opf'), opf_file.getvalue(), 'wb')
 
     def download(self):
-        index = os.path.abspath(self.custom_index())
+        index = self.custom_index()
         url = 'file:'+index if iswindows else 'file://'+index
         self.web2disk_options.browser = self.clone_browser(self.browser)
-        self.web2disk_options.filesystem_dict = self.output_dir if isinstance(self.output_dir, FileSystemDict) else None
-        fetcher = RecursiveFetcher(self.web2disk_options, self.log)
+        fetcher = RecursiveFetcher(self.web2disk_options, self.fs, self.log)
         fetcher.base_dir = self.output_dir
         fetcher.current_dir = self.output_dir
         fetcher.show_progress = False

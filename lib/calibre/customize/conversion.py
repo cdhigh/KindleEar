@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
 '''
 Defines the plugin system for conversions.
 '''
@@ -5,7 +7,6 @@ import re, os, shutil, numbers
 
 from calibre import CurrentDir
 from calibre.customize import Plugin
-from filesystem_dict import FileSystemDict
 
 class ConversionOption:
 
@@ -195,7 +196,8 @@ class InputFormatPlugin(Plugin):
         '''
         raise NotImplementedError()
 
-    def convert(self, stream, options, file_ext, log, accelerators, output_dir):
+    #增加参数fs: FsDictStub 对象，由它根据情况使用内存缓存或使用磁盘缓存
+    def convert(self, stream, options, file_ext, log, accelerators, output_dir, fs):
         '''
         This method must be implemented in sub-classes. It must return
         the path to the created OPF file or an :class:`OEBBook` instance.
@@ -225,14 +227,11 @@ class InputFormatPlugin(Plugin):
         '''
         raise NotImplementedError()
 
-    def __call__(self, stream, options, file_ext, log, accelerators, output_dir):
-        if isinstance(output_dir, FileSystemDict):
-            ret = self.convert(stream, options, file_ext, log, accelerators, output_dir)
-        else:
-            with CurrentDir(output_dir):
-                for x in os.listdir('.'):
-                    shutil.rmtree(x) if os.path.isdir(x) else os.remove(x)
-                ret = self.convert(stream, options, file_ext, log, accelerators, output_dir)
+    #增加参数fs: FsDictStub 对象，由它根据情况使用内存缓存或使用磁盘缓存
+    def __call__(self, stream, options, file_ext, log, accelerators, output_dir, fs):
+        with fs.current_dir(output_dir):
+            fs.clear_dir(output_dir)
+            ret = self.convert(stream, options, file_ext, log, accelerators, output_dir, fs)
 
         return ret
 
@@ -310,7 +309,8 @@ class OutputFormatPlugin(Plugin):
         Plugin.__init__(self, *args)
         self.report_progress = DummyReporter()
 
-    def convert(self, oeb_book, output, opts, log):
+    #增加参数fs: FsDictStub 对象，由它根据情况使用内存缓存或使用磁盘缓存
+    def convert(self, oeb_book, output, opts, log, fs):
         '''
         Render the contents of `oeb_book` (which is an instance of
         :class:`calibre.ebooks.oeb.OEBBook`) to the file specified by output.

@@ -5,6 +5,7 @@
 import io
 from urllib.parse import urlparse
 from urlopener import UrlOpener
+from calibre import iswindows
 
 class BrowserStateError(Exception):
     pass
@@ -36,12 +37,21 @@ class UrlOpenerBrowser:
 
     #返回的对象要有一个read()
     def open(self, url: str, data: dict=None, timeout: int=30):
+        is_local = False
+        if url.startswith('file://'):
+            url = url[7:]
+            is_local = True
+        elif url.startswith('file:'):
+            url = url[5:]
+            is_local = True
+        if is_local:
+            if iswindows and url.startswith(('/', '\\')):
+                url = url[1:]
+            with open(url, 'rb') as f:
+                return UrlOpenerBytesIO(f.read(), url)
+                
         resp = self.opener.open(url, data, timeout=timeout)
         if resp.status_code == 200:
-            #url_parts = urlparse(url)
-            #if url_parts.path.lower().endswith(('.html', '.htm', '.xml', '.php', '.css', '.js')):
-            #    return UrlOpenerBytesIO(resp.text.encode('utf-8'), url)
-            #else:
             return UrlOpenerBytesIO(resp.content, url)
         else:
             return UrlOpenerBytesIO('', url)

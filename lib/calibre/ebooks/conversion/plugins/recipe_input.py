@@ -10,7 +10,6 @@ import os, io
 from calibre.customize.conversion import InputFormatPlugin, OptionRecommendation
 from calibre.constants import numeric_version
 from calibre import walk
-from filesystem_dict import FileSystemDict
 
 class RecipeDisabled(Exception):
     pass
@@ -58,9 +57,10 @@ class RecipeInput(InputFormatPlugin):
 
     #执行转换完成后返回生成的 opf 文件路径，只是路径，不包含文件名
     #recipe_or_file: 可以为文件名或BytesIO()
-    #output_dir: 可以传入字符串或 FileSystemDict 实例
-    #返回 opf文件的全路径名或传入的output_dir实例
-    def convert(self, recipe_or_file, opts, file_ext, log, accelerators, output_dir):
+    #output_dir: 输出目录
+    #fs: plumber生成的FsDictStub实例
+    #返回 opf文件的全路径名或传入的fs实例
+    def convert(self, recipe_or_file, opts, file_ext, log, accelerators, output_dir, fs):
         from calibre.web.feeds.recipes import compile_recipe
         opts.output_profile.flow_size = 0
         orig_no_inline_navbars = opts.no_inline_navbars
@@ -75,27 +75,21 @@ class RecipeInput(InputFormatPlugin):
         except Exception as e:
             raise ValueError('Failed to compile recipe "{}": {}'.format(recipe_or_file, e))
 
-        try:
-            ro = recipe(opts, log, report_progress, output_dir)
-            ro.download()
-        except Exception as e:
-            raise ValueError('Failed to execute recipe "{}": {}'.format(recipe_or_file, e))
+        #try:
+        #生成 BasicNewsRecipe 对象并执行下载任务
+        ro = recipe(opts, log, report_progress, output_dir, fs)
+        ro.download()
+        #except Exception as e:
+        #    raise ValueError('Failed to execute recipe "{}": {}'.format(recipe_or_file, e))
         
         self.recipe_object = ro
         for key, val in self.recipe_object.conversion_options.items():
             setattr(opts, key, val)
         opts.no_inline_navbars = orig_no_inline_navbars
-
-        if not isinstance(output_dir, FileSystemDict):
-            for f in os.listdir('.'):
-                if f.endswith('.opf'):
-                    return os.path.abspath(f)
-            for f in walk('.'):
-                if f.endswith('.opf'):
-                    return os.path.abspath(f)
-        else:
-            return output_dir
-
+        
+        fs.find_opf_path()
+        return fs
+        
     def postprocess_book(self, oeb, opts, log):
         if self.recipe_object is not None:
             self.recipe_object.internal_postprocess_book(oeb, opts, log)

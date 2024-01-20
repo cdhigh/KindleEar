@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
 
 
 __license__   = 'GPL v3'
@@ -170,7 +171,8 @@ class MOBIOutput(OutputFormatPlugin):
             # Fix up the periodical href to point to first section href
             toc.nodes[0].href = toc.nodes[0].nodes[0].href
 
-    def convert(self, oeb, output_path, input_plugin, opts, log):
+    #增加参数fs: FsDictStub 对象，由它根据情况使用内存缓存或使用磁盘缓存
+    def convert(self, oeb, output_path, input_plugin, opts, log, fs):
         from calibre.ebooks.mobi.writer2.resources import Resources
         self.log, self.opts, self.oeb = log, opts, oeb
 
@@ -285,6 +287,7 @@ class AZW3Output(OutputFormatPlugin):
         ),
     }
 
+    #外面调用此接口生成mobi电子书
     def convert(self, oeb, output_path, input_plugin, opts, log):
         from calibre.ebooks.mobi.writer2.resources import Resources
         from calibre.ebooks.mobi.writer8.main import create_kf8_book

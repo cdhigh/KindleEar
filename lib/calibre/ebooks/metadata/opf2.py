@@ -11,7 +11,7 @@ lxml based OPF parser.
 
 import copy
 import functools
-import glob
+#import glob
 import io
 import json
 import os
@@ -37,7 +37,6 @@ from calibre.utils.xml_parse import safe_xml_fromstring
 from polyglot.builtins import iteritems
 from polyglot.urllib import unquote, urlparse
 
-from filesystem_dict import FileSystemDict
 pretty_print_opf = False
 
 
@@ -82,9 +81,8 @@ class Resource:  # {{{
             self.mime_type = 'application/octet-stream'
         if is_path: #本地文件
             path = href_or_path
-            if not isinstance(basedir, FileSystemDict):
-                if not os.path.isabs(path):
-                    path = os.path.abspath(os.path.join(basedir, path))
+            if not os.path.isabs(path):
+                path = os.path.join(basedir, path)
             if isinstance(path, bytes):
                 path = path.decode(filesystem_encoding)
             self.path = path
@@ -98,10 +96,7 @@ class Resource:  # {{{
                 if isinstance(pc, str):
                     pc = pc.encode('utf-8')
                 pc = pc.decode('utf-8')
-                if isinstance(basedir, FileSystemDict):
-                    self.path = pc.replace('/', os.sep)
-                else:
-                    self.path = os.path.abspath(os.path.join(basedir, pc.replace('/', os.sep)))
+                self.path = os.path.join(basedir, pc.replace('/', os.sep))
                 self.fragment = url[-1]
 
     def href(self, basedir=None):
@@ -113,9 +108,7 @@ class Resource:  # {{{
         If this resource has no basedir, then the current working directory is used as the basedir.
         '''
         if basedir is None:
-            if isinstance(self._basedir, FileSystemDict):
-                basedir = ''
-            elif self._basedir:
+            if self._basedir:
                 basedir = self._basedir
             else:
                 basedir = os.getcwd()
@@ -124,10 +117,8 @@ class Resource:  # {{{
         frag = ('#' + self.fragment) if self.fragment else ''
         if self.path == basedir:
             return frag
-        rpath = self.path
         try:
-            if not isinstance(self._basedir, FileSystemDict):
-                rpath = os.path.relpath(self.path, basedir)
+            rpath = os.path.relpath(self.path, basedir)
         except ValueError:  # On windows path and basedir could be on different drives
             rpath = self.path
         if isinstance(rpath, bytes):
@@ -138,7 +129,7 @@ class Resource:  # {{{
         self._basedir = path
 
     def basedir(self):
-        return self._basedir if not isinstance(self._basedir, FileSystemDict) else ''
+        return self._basedir
 
     def __repr__(self):
         return 'Resource(%s, %s)'%(repr(self.path), repr(self.href()))
@@ -182,16 +173,6 @@ class ResourceCollection:  # {{{
     def replace(self, start, end, items):
         'Same as list[start:end] = items'
         self._resources[start:end] = items
-
-    @staticmethod
-    def from_directory_contents(top, topdown=True):
-        collection = ResourceCollection()
-        for spec in os.walk(top, topdown=topdown):
-            path = os.path.abspath(os.path.join(spec[0], spec[1]))
-            res = Resource.from_path(path)
-            res.set_basedir(top)
-            collection.append(res)
-        return collection
 
     def set_basedir(self, path):
         for res in self:
@@ -259,13 +240,13 @@ class Manifest(ResourceCollection):  # {{{
         return m
 
     @staticmethod
-    def from_paths(entries):
+    def from_paths(entries, basedir):
         '''
         `entries`: List of (path, mime-type) If mime-type is None it is autodetected
         '''
         m = Manifest()
         for path, mt in entries:
-            mi = ManifestItem(path, is_path=True)
+            mi = ManifestItem(path, basedir, is_path=True)
             if mt:
                 mi.mime_type = mt
             mi.id = 'id%d'%m.next_id
@@ -292,9 +273,9 @@ class Manifest(ResourceCollection):  # {{{
                 return i
 
     def id_for_path(self, path):
-        path = os.path.normpath(os.path.abspath(path))
+        path = os.path.normpath(path).replace('\\', '/')
         for i in self:
-            if i.path and os.path.normpath(i.path) == path:
+            if i.path and os.path.normpath(i.path).replace('\\', '/') == path:
                 return i.id
 
     def path_for_id(self, id):
@@ -325,7 +306,7 @@ class Spine(ResourceCollection):  # {{{
                     (self.path, self.id, self.is_linear)
 
     @staticmethod
-    def from_opf_spine_element(itemrefs, manifest):
+    def from_opf_spine_element(itemrefs, manifest, basedir):
         s = Spine(manifest)
         seen = set()
         path_map = {i.id:i.path for i in s.manifest}
@@ -334,7 +315,7 @@ class Spine(ResourceCollection):  # {{{
             if idref is not None:
                 path = path_map.get(idref)
                 if path and path not in seen:
-                    r = Spine.Item(lambda x:idref, path, is_path=True)
+                    r = Spine.Item(lambda x:idref, path, basedir=basedir, is_path=True)
                     r.is_linear = itemref.get('linear', 'yes') == 'yes'
                     r.idref = idref
                     s.append(r)
@@ -342,11 +323,11 @@ class Spine(ResourceCollection):  # {{{
         return s
 
     @staticmethod
-    def from_paths(paths, manifest):
+    def from_paths(paths, manifest, basedir):
         s = Spine(manifest)
         for path in paths:
             try:
-                s.append(Spine.Item(s.manifest.id_for_path, path, is_path=True))
+                s.append(Spine.Item(s.manifest.id_for_path, path, basedir=basedir, is_path=True))
             except:
                 continue
         return s
@@ -355,17 +336,17 @@ class Spine(ResourceCollection):  # {{{
         ResourceCollection.__init__(self)
         self.manifest = manifest
 
-    def replace(self, start, end, ids):
+    def replace(self, start, end, ids, basedir):
         '''
         Replace the items between start (inclusive) and end (not inclusive) with
         with the items identified by ids. ids can be a list of any length.
         '''
         items = []
-        for id in ids:
-            path = self.manifest.path_for_id(id)
+        for id_ in ids:
+            path = self.manifest.path_for_id(id_)
             if path is None:
                 raise ValueError('id %s not in manifest')
-            items.append(Spine.Item(lambda x: id, path, is_path=True))
+            items.append(Spine.Item(lambda x: id_, path, basedir=basedir, is_path=True))
         ResourceCollection.replace(start, end, items)
 
     def linear_items(self):
@@ -637,12 +618,14 @@ class OPF:  # {{{
                                     renderer=dump_dict)
     link_maps = LinkMapsField()
 
-    def __init__(self, stream, basedir=os.getcwd(), unquote_urls=True,
-            populate_spine=True, try_to_guess_cover=False, preparsed_opf=None, read_toc=True):
+    #增加fs参数，为一个FsDictStub对象
+    def __init__(self, stream, basedir=os.getcwd(), unquote_urls=True, populate_spine=True, 
+            try_to_guess_cover=False, preparsed_opf=None, read_toc=True, fs=None):
         self.try_to_guess_cover = try_to_guess_cover
-        self.basedir  = self.base_dir = basedir
+        self.fs = fs
+        self.basedir  = self.base_dir = basedir if not fs else fs.path
         self.path_to_html_toc = self.html_toc_fragment = None
-        self.root = parse_opf(stream) if preparsed_opf is None else preparsed_opf
+        self.root = parse_opf(stream) if preparsed_opf is None else preparsed_opf #str->etree
         try:
             self.package_version = float(self.root.get('version', None))
         except (AttributeError, TypeError, ValueError):
@@ -662,7 +645,7 @@ class OPF:  # {{{
         self.spine = None
         s = self.spine_path(self.root)
         if populate_spine and s:
-            self.spine = Spine.from_opf_spine_element(s, self.manifest)
+            self.spine = Spine.from_opf_spine_element(s, self.manifest, basedir)
         self.guide = None
         guide = self.guide_path(self.root)
         self.guide = Guide.from_opf_guide(guide, basedir) if guide else None
@@ -750,18 +733,18 @@ class OPF:  # {{{
             if is_ncx or toc.lower() in ('ncx', 'ncxtoc'):
                 path = self.manifest.path_for_id(toc)
                 if path:
-                    self.toc.read_ncx_toc(path)
+                    path = os.path.join(self.base_dir, path)
+                    self.toc.read_ncx_toc(path, self.fs)
                 else:
-                    f = glob.glob(os.path.join(self.base_dir, '*.ncx'))
+                    f = self.fs.glob(os.path.join(self.base_dir, '*.ncx'))
                     if f:
-                        self.toc.read_ncx_toc(f[0])
+                        self.toc.read_ncx_toc(f[0], self.fs)
             else:
-                self.path_to_html_toc, self.html_toc_fragment = \
-                    toc.partition('#')[0], toc.partition('#')[-1]
-                if not os.access(self.path_to_html_toc, os.R_OK) or \
-                        not os.path.isfile(self.path_to_html_toc):
+                self.path_to_html_toc, self.html_toc_fragment = toc.partition('#')[0], toc.partition('#')[-1]
+                #if not os.access(self.path_to_html_toc, os.R_OK) or not os.path.isfile(self.path_to_html_toc):
+                if not self.fs.isfile(self.path_to_html_toc):
                     self.path_to_html_toc = None
-                self.toc.read_html_toc(toc)
+                self.toc.read_html_toc(toc, self.fs)
         except:
             pass
 
@@ -1265,7 +1248,7 @@ class OPF:  # {{{
                         mid = item.get('id')
                         if mid:
                             path = self.manifest.path_for_id(mid)
-                            if path and os.path.exists(path):
+                            if path and self.fs.exists(path):
                                 return path
 
     @property
@@ -1399,8 +1382,10 @@ class OPF:  # {{{
 
 
 class OPFCreator(Metadata):
-
-    def __init__(self, base_path, other):
+    #base_path: OPF文件所在的目录名
+    #other: MetaInformation对象
+    #fs: BasicNewsRecipe的构造函数里面创建的文件桩 FsDictStub
+    def __init__(self, base_path, other, fs):
         '''
         Initialize.
         @param base_path: An absolute path to the folder in which this OPF file
@@ -1408,9 +1393,10 @@ class OPFCreator(Metadata):
         to convert paths to files into relative paths.
         '''
         Metadata.__init__(self, title='', other=other)
-        self.base_path = base_path if isinstance(base_path, FileSystemDict) else os.path.abspath(base_path)
+        self.base_path = base_path
         self.page_progression_direction = None
         self.primary_writing_mode = None
+        self.fs = fs
         if self.application_id is None:
             self.application_id = str(uuid.uuid4())
         if not isinstance(self.toc, TOC):
@@ -1428,29 +1414,18 @@ class OPFCreator(Metadata):
 
         `entries`: List of (path, mime-type) If mime-type is None it is autodetected
         '''
-        if not isinstance(self.base_path, FileSystemDict):
-            entries = list(map(lambda x: x if os.path.isabs(x[0]) else
-                      (os.path.abspath(os.path.join(self.base_path, x[0])), x[1]), entries))
-        self.manifest = Manifest.from_paths(entries)
+        entries = list(map(lambda x: x if os.path.isabs(x[0]) else
+                  (os.path.join(self.base_path, x[0]), x[1]), entries))
+        self.manifest = Manifest.from_paths(entries, self.base_path)
         self.manifest.set_basedir(self.base_path)
 
-    def create_manifest_from_files_in(self, files_and_dirs,
-            exclude=lambda x:False):
+    #从一个文件或文件夹列表里面添加所有的文件
+    #files_and_dirs: 一个列表，里面的元素可能是文件名或目录名
+    #exclude: 可调用对象，根据文件名判断是否需要排除
+    def create_manifest_from_files_in(self, files_and_dirs, exclude=lambda x:False):
         entries = []
-
-        def dodir(dir):
-            for spec in os.walk(dir):
-                root, files = spec[0], spec[-1]
-                for name in files:
-                    path = os.path.join(root, name)
-                    if os.path.isfile(path) and not exclude(path):
-                        entries.append((path, None))
-
         for i in files_and_dirs:
-            if os.path.isdir(i):
-                dodir(i)
-            else:
-                entries.append((i, None))
+            entries.extend([(item, None) for item in self.fs.walk(i) if not exclude(item)])
 
         self.create_manifest(entries)
 
@@ -1460,10 +1435,8 @@ class OPFCreator(Metadata):
 
         `entries`: List of paths
         '''
-        if not isinstance(self.base_path, FileSystemDict):
-            entries = list(map(lambda x: x if os.path.isabs(x) else
-                          os.path.abspath(os.path.join(self.base_path, x)), entries))
-        self.spine = Spine.from_paths(entries, self.manifest)
+        entries = list(map(lambda x: x if os.path.isabs(x) else os.path.join(self.base_path, x), entries))
+        self.spine = Spine.from_paths(entries, self.manifest, self.base_path)
 
     def set_toc(self, toc):
         '''
@@ -1478,6 +1451,7 @@ class OPFCreator(Metadata):
         self.guide = Guide.from_opf_guide(guide_element, self.base_path)
         self.guide.set_basedir(self.base_path)
 
+    #结果输出到一个流对象
     def render(self, opf_stream=sys.stdout, ncx_stream=None,
                ncx_manifest_entry=None, encoding=None, process_guide=None):
         if encoding is None:
@@ -1498,9 +1472,8 @@ class OPFCreator(Metadata):
             self.guide = Guide()
         if self.cover:
             cover = self.cover
-            if not isinstance(self.base_path, FileSystemDict):
-                if not os.path.isabs(cover):
-                    cover = os.path.abspath(os.path.join(self.base_path, cover))
+            if not os.path.isabs(cover):
+                cover = os.path.join(self.base_path, cover)
             self.guide.set_cover(cover)
         self.guide.set_basedir(self.base_path)
 

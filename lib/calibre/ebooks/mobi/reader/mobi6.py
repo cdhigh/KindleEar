@@ -162,7 +162,7 @@ class MobiReader:
             raise DRMError(name)
 
     def extract_content(self, output_dir, parse_cache):
-        output_dir = os.path.abspath(output_dir)
+        #output_dir = os.path.abspath(output_dir)
         self.check_for_drm()
         processed_records = self.extract_text()
         if self.debug is not None:

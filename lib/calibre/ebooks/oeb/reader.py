@@ -32,8 +32,6 @@ from calibre.utils.localization import __, get_lang
 from calibre.utils.xml_parse import safe_xml_fromstring
 from polyglot.urllib import unquote, urldefrag, urlparse
 
-from filesystem_dict import FileSystemDict, FsDictContainer
-
 __all__ = ['OEBReader']
 
 
@@ -64,16 +62,17 @@ class OEBReader:
         """Generate a Reader instance from command-line options."""
         return cls()
 
-    #外面调用此函数从一堆文件里面创建OEBBook实例
+    #plumber.run() -> create_oebbook()调用此函数从一堆文件里面创建OEBBook实例
     #oeb: calibre.ebooks.oeb.base.OEBBook 实例
-    #path: 包含opf文件的目录名或一个FileSystemDict实例
-    def __call__(self, oeb, path):
+    #fs: FsDictStub对象，其opfname属性为opf文件的路径全名
+    def __call__(self, oeb, fs):
         """Read the book at :param:`path` into the :class:`OEBBook` object
         :param:`oeb`.
         """
         self.oeb = oeb
         self.logger = self.log = oeb.logger
-        oeb.container = FsDictContainer(path, self.logger) if isinstance(path, FileSystemDict) else DirContainer(path, self.logger)
+        self.fs = fs
+        oeb.container = fs
         oeb.container.log = oeb.log
         opf = self._read_opf()
         self._all_from_opf(opf)
@@ -134,12 +133,12 @@ class OEBReader:
             raise OEBError('Invalid namespace %r for OPF document' % ns)
         opf = self._clean_opf(opf)
         return opf
-
+        
     def _metadata_from_opf(self, opf):
         from calibre.ebooks.metadata.opf2 import OPF
         from calibre.ebooks.oeb.transforms.metadata import meta_info_to_oeb_metadata
         stream = io.BytesIO(etree.tostring(opf, xml_declaration=True, encoding='utf-8'))
-        o = OPF(stream)
+        o = OPF(stream, basedir=self.fs.path, fs=self.fs) #在这里读opf，转换为内存etree
         pwm = o.primary_writing_mode
         if pwm:
             self.oeb.metadata.primary_writing_mode = pwm
@@ -701,12 +700,12 @@ class OEBReader:
 
     def _all_from_opf(self, opf):
         self.oeb.version = opf.get('version', '1.2')
-        self._metadata_from_opf(opf)
-        self._manifest_from_opf(opf)
-        self._spine_from_opf(opf)
+        self._metadata_from_opf(opf) #书籍的基本描述信息
+        self._manifest_from_opf(opf) #manifest是电子书内所有的文件汇总，列出OEBPS文档及相关的文档
+        self._spine_from_opf(opf) #书脊，提供书籍的线性阅读次序
         self._manifest_remove_duplicates()
-        self._guide_from_opf(opf)
-        item = self._find_ncx(opf)
+        self._guide_from_opf(opf) #指南,依次列出电子书的特定页面, 例如封面、目录、序言等, 属性值指向文件保存地址
+        item = self._find_ncx(opf) #ncx,目录文件
         self._toc_from_opf(opf, item)
         self._pages_from_opf(opf, item)
         # self._ensure_cover_image()

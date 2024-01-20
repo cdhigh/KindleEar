@@ -14,18 +14,18 @@ Various run time constants.
 '''
 
 
-#_plat = sys.platform.lower()
-iswindows = False #'win32' in _plat or 'win64' in _plat
-ismacos = isosx = False #'darwin' in _plat
-isnewosx  = False #ismacos and getattr(sys, 'new_app_bundle', False)
-isfreebsd = False #'freebsd' in _plat
-isnetbsd = False #'netbsd' in _plat
-isdragonflybsd = False #'dragonfly' in _plat
-isbsd = False #isfreebsd or isnetbsd or isdragonflybsd
-ishaiku = False #'haiku1' in _plat
-islinux   = False #not (iswindows or ismacos or isbsd or ishaiku)
-isfrozen  = False #hasattr(sys, 'frozen')
-isunix = False #ismacos or islinux or ishaiku
+_plat = sys.platform.lower()
+iswindows = 'win32' in _plat or 'win64' in _plat
+ismacos = isosx = 'darwin' in _plat
+isnewosx  = ismacos and getattr(sys, 'new_app_bundle', False)
+isfreebsd = 'freebsd' in _plat
+isnetbsd = 'netbsd' in _plat
+isdragonflybsd = 'dragonfly' in _plat
+isbsd = isfreebsd or isnetbsd or isdragonflybsd
+ishaiku = 'haiku1' in _plat
+islinux   = not (iswindows or ismacos or isbsd or ishaiku)
+isfrozen  = hasattr(sys, 'frozen')
+isunix = ismacos or islinux or ishaiku
 ispy3 = sys.version_info.major > 2
 is64bit = True
 try:

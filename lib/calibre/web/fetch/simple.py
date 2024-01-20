@@ -15,10 +15,8 @@ import os
 import re
 import socket
 import sys
-import threading
 import time
 import traceback
-from urllib.request import urlopen
 
 from calibre import browser, relpath, unicode_path
 from calibre.constants import filesystem_encoding, iswindows
@@ -35,7 +33,6 @@ from polyglot.urllib import (
     URLError, quote, url2pathname, urljoin, urlparse, urlsplit, urlunparse,
     urlunsplit
 )
-from filesystem_dict import FileSystemDict
 
 class AbortArticle(Exception):
     pass
@@ -44,16 +41,6 @@ class AbortArticle(Exception):
 class FetchError(Exception):
     pass
 
-#一个假的threading.RLock
-class fakeRLock:
-    def acquire(self, blocking=True, timeout=- 1):
-        pass
-    def release(self):
-        pass
-    def __enter__(self):
-        return self.acquire()
-    def __exit__(self, type=None, value=None, traceback=None):
-        return self.release()
 
 class closing:
 
@@ -98,8 +85,11 @@ def basename(url):
         return 'index.html'
     return res
 
-#将soup保存到本地
-def save_soup(soup, target, filesystem_dict=None):
+#将soup保存到本地，同时将文件内的链接和图像之类的资源修改为相对路径
+#soup: BeautifulSoup对象
+#target: 目标目录
+#fs: BasicNewsRecipe的构造函数里面创建的文件桩 FsDictStub
+def save_soup(soup, target, fs):
     for meta in soup.find_all('meta', content=True):
         if 'charset' in meta['content'].lower():
             meta.extract()
@@ -115,16 +105,12 @@ def save_soup(soup, target, filesystem_dict=None):
     for tag in soup.find_all(['img', 'link', 'a']):
         for key in ('src', 'href'):
             path = tag.get(key, None)
-            if path and os.path.isfile(path) and os.path.exists(path) and os.path.isabs(path):
+            if path and fs.isfile(path) and os.path.isabs(path):
                 tag[key] = unicode_path(relpath(path, selfdir).replace(os.sep, '/'))
 
     html = str(soup)
-    if filesystem_dict:
-        filesystem_dict[target] = html.encode('utf-8')
-    else:
-        with open(target, 'wb') as f:
-            f.write(html.encode('utf-8'))
-
+    fs.write(target, html.encode('utf-8'), 'wb')
+    
 class response(bytes):
 
     def __new__(cls, *args):
@@ -147,16 +133,16 @@ class RecursiveFetcher:
     #                       )
     CSS_IMPORT_PATTERN = re.compile(r'\@import\s+url\((.*?)\)', re.IGNORECASE)
     default_timeout = socket.getdefaulttimeout()  # Needed here as it is used in __del__
-
-    def __init__(self, options, log, image_map={}, css_map={}, job_info=None):
-        bd = options.dir
+    #options: 下载选项
+    #fs: BasicNewsRecipe的构造函数里面创建的文件桩 FsDictStub
+    def __init__(self, options, fs, log, image_map={}, css_map={}, job_info=None):
+        bd = options.dir #下载的内容将要保存到哪个目录
         if not isinstance(bd, str):
             bd = bd.decode(filesystem_encoding)
-
-        self.filesystem_dict = getattr(options, 'filesystem_dict', None) #如果使用了文件系统模拟字典
-        self.base_dir = os.path.abspath(os.path.expanduser(bd))
-        if not os.path.exists(self.base_dir):
-            os.makedirs(self.base_dir)
+        self.base_dir = bd
+        assert(os.path.isabs(self.base_dir))
+        self.fs = fs
+        fs.makedirs(self.base_dir)
         self.log = log
         self.verbose = options.verbose
         self.timeout = options.timeout
@@ -170,10 +156,10 @@ class RecursiveFetcher:
         self.last_fetch_at = 0.
         self.filemap = {}
         self.imagemap = image_map
-        self.imagemap_lock = fakeRLock() if self.filesystem_dict else threading.RLock()
+        self.imagemap_lock = fs.creatRLock()
         self.stylemap = css_map
         self.image_url_processor = None
-        self.stylemap_lock = fakeRLock() if self.filesystem_dict else threading.RLock()
+        self.stylemap_lock = fs.creatRLock()
         self.downloaded_paths = []
         self.current_dir = self.base_dir
         self.files = 0
@@ -282,14 +268,8 @@ class RecursiveFetcher:
             url = url[is_local:]
             if iswindows and url.startswith('/'):
                 url = url[1:]
-            if self.filesystem_dict:
-                data = response(self.filesystem_dict.get(url, ''))
-                data.newurl = 'file:'+url  # This is what mechanize does for
-            else:
-                with open(url, 'rb') as f:
-                    data = response(f.read())
-                    data.newurl = 'file:'+url  # This is what mechanize does for
-                    # local URLs
+            data = response(self.fs.read(url, 'rb'))
+            data.newurl = 'file:'+url  # This is what mechanize does for local URLs
             self.log.debug(f'Fetched {url} in {time.monotonic() - st:.1f} seconds')
             return data
         #开始是网络文件
@@ -298,10 +278,10 @@ class RecursiveFetcher:
         if delta < delay:
             time.sleep(delay - delta)
         url = canonicalize_url(url)
-        open_func = getattr(self.browser, 'open_novisit', self.browser.open)
+        
         try:
-            with closing(open_func(url, timeout=self.timeout)) as f:
-                data = response(f.read()+f.read())
+            with closing(self.browser.open(url, timeout=self.timeout)) as f:
+                data = response(f.read())
                 data.newurl = f.geturl()
         except URLError as err:
             if hasattr(err, 'code') and err.code in responses:
@@ -315,8 +295,8 @@ class RecursiveFetcher:
             if is_temp:  # Connection reset by peer or Name or service not known
                 self.log.debug('Temporary error, retrying in 1 second')
                 time.sleep(1)
-                with closing(open_func(url, timeout=self.timeout)) as f:
-                    data = response(f.read()+f.read())
+                with closing(self.browser.open(url, timeout=self.timeout)) as f:
+                    data = response(f.read())
                     data.newurl = f.geturl()
             else:
                 raise err
@@ -357,9 +337,8 @@ class RecursiveFetcher:
 
     def process_stylesheets(self, soup, baseurl):
         diskpath = unicode_path(os.path.join(self.current_dir, 'stylesheets'))
-        if not self.filesystem_dict:
-            if not os.path.exists(diskpath):
-                os.mkdir(diskpath)
+        self.fs.mkdir(diskpath)
+        
         for c, tag in enumerate(soup.find_all(name=['link', 'style'])):
             try:
                 mtype = tag['type']
@@ -386,11 +365,7 @@ class RecursiveFetcher:
                 stylepath = os.path.join(diskpath, 'style'+str(c)+'.css')
                 with self.stylemap_lock:
                     self.stylemap[iurl] = stylepath
-                if self.filesystem_dict:
-                    self.filesystem_dict[stylepath] = data
-                else:
-                    with open(stylepath, 'wb') as x:
-                        x.write(data)
+                self.fs.write(stylepath, data, 'wb')
                 tag['href'] = stylepath
             else:
                 for ns in tag.find_all(text=True):
@@ -416,11 +391,7 @@ class RecursiveFetcher:
                         stylepath = os.path.join(diskpath, 'style'+str(c)+'.css')
                         with self.stylemap_lock:
                             self.stylemap[iurl] = stylepath
-                        if self.filesystem_dict:
-                            self.filesystem_dict[stylepath] = data
-                        else:
-                            with open(stylepath, 'wb') as x:
-                                x.write(data)
+                        self.fs.write(stylepath, data, 'wb')
                         ns.replaceWith(src.replace(m.group(1), stylepath))
 
     def rescale_image(self, data):
@@ -428,15 +399,14 @@ class RecursiveFetcher:
 
     def process_images(self, soup, baseurl):
         diskpath = unicode_path(os.path.join(self.current_dir, 'images'))
-        if not self.filesystem_dict:
-            if not os.path.exists(diskpath):
-                os.mkdir(diskpath)
+        self.fs.mkdir(diskpath)
+        
         c = 0
         for tag in soup.find_all('img', src=True):
             iurl = tag['src']
             if iurl.startswith('data:'):
                 try:
-                    data = urlopen(iurl).read()
+                    data = self.browser.open(iurl).read()
                 except Exception:
                     self.log.exception('Failed to decode embedded image')
                     continue
@@ -473,11 +443,7 @@ class RecursiveFetcher:
                 imgpath = os.path.join(diskpath, fname+'.svg')
                 with self.imagemap_lock:
                     self.imagemap[iurl] = imgpath
-                if self.filesystem_dict:
-                    self.filesystem_dict[imgpath] = data
-                else:
-                    with open(imgpath, 'wb') as x:
-                        x.write(data)
+                self.fs.write(imgpath, data, 'wb')
                 tag['src'] = imgpath
             else:
                 from calibre.utils.img import image_from_data, image_to_data
@@ -498,11 +464,7 @@ class RecursiveFetcher:
                     imgpath = os.path.join(diskpath, fname+'.'+itype)
                     with self.imagemap_lock:
                         self.imagemap[iurl] = imgpath
-                    if self.filesystem_dict:
-                        self.filesystem_dict[imgpath] = data
-                    else:
-                        with open(imgpath, 'wb') as x:
-                            x.write(data)
+                    self.fs.write(imgpath, data, 'wb')
                     tag['src'] = imgpath
                     #except Exception:
                     #traceback.print_exc()
@@ -545,9 +507,8 @@ class RecursiveFetcher:
     def process_links(self, soup, baseurl, recursion_level, into_dir='links'):
         res = ''
         diskpath = os.path.join(self.current_dir, into_dir)
-        if not self.filesystem_dict:
-            if not os.path.exists(diskpath):
-                os.mkdir(diskpath)
+        self.fs.mkdir(diskpath)
+        
         prev_dir = self.current_dir
         if 1:
             self.current_dir = diskpath
@@ -569,9 +530,8 @@ class RecursiveFetcher:
                     return res
                 linkdir = 'link'+str(c) if into_dir else ''
                 linkdiskpath = os.path.join(diskpath, linkdir)
-                if not self.filesystem_dict:
-                    if not os.path.exists(linkdiskpath):
-                        os.mkdir(linkdiskpath)
+                self.fs.mkdir(linkdiskpath)
+                
                 if 1:
                     self.current_dir = linkdiskpath
                     dsrc = self.fetch_url(iurl)
@@ -625,7 +585,7 @@ class RecursiveFetcher:
                         if c==0 and recursion_level == 0:
                             self.called_first = True
 
-                    save_soup(soup, res, self.filesystem_dict)
+                    save_soup(soup, res, self.fs)
                     self.localize_link(tag, 'href', res)
                     
                     #except Exception as err:
@@ -677,23 +637,3 @@ def option_parser(usage=_('%prog URL\n\nWhere URL is for example https://google.
                       default=False, action='store_true', dest='verbose')
     return parser
 
-
-def create_fetcher(options, image_map={}, log=None):
-    if log is None:
-        log = Log(level=Log.DEBUG) if options.verbose else Log()
-    return RecursiveFetcher(options, log, image_map={})
-
-
-def main(args=sys.argv):
-    parser = option_parser()
-    options, args = parser.parse_args(args)
-    if len(args) != 2:
-        parser.print_help()
-        return 1
-
-    fetcher = create_fetcher(options)
-    fetcher.start_fetch(args[1])
-
-
-if __name__ == '__main__':
-    sys.exit(main())

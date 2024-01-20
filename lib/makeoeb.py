@@ -80,55 +80,63 @@ def CreateEmptyOeb(opts, log=None, container=None, encoding='utf-8'):
 def GetOpts(outputType='kindle', bookMode='periodical'):
     from calibre.customize.profiles import output_profiles, KindleOutput
     from config import REDUCE_IMAGE_TO
-    opts = OptionValues()
-    setattr(opts, "pretty_print", True)
-    setattr(opts, "prefer_author_sort", True)
-    setattr(opts, "share_not_sync", False)
-    setattr(opts, "mobi_file_type", 'both' if bookMode == 'comic' else 'old') #mobi_file_type='old' | 'both'
-    setattr(opts, "dont_compress", True)
-    setattr(opts, "no_inline_toc", True)
-    setattr(opts, "toc_title", "Table of Contents")
-    setattr(opts, "mobi_toc_at_start", False)
-    setattr(opts, "linearize_tables", True)
-    setattr(opts, "source", None)
     #找到对应的设备分辨率之类的信息
+    OutputDevice = KindleOutput
     for prfType in output_profiles:
         if prfType.short_name == outputType:
             OutputDevice = prfType
             break
-        else:
-            OutputDevice = KindleOutput
-    setattr(opts, "dest", OutputDevice(None))
-    setattr(opts, "output_profile", OutputDevice(None))
-    setattr(opts, "mobi_ignore_margins", True)
-    setattr(opts, "extract_to", None)
-    setattr(opts, "change_justification", "Left")
-    setattr(opts, "process_images", True)
-    setattr(opts, "mobi_keep_original_images", False)
-    setattr(opts, "graying_image", COLOR_TO_GRAY) #changed
-    setattr(opts, "image_png_to_jpg", COLOR_TO_GRAY) #changed
-    setattr(opts, "fix_indents", False)
+
+    opts = OptionValues()
+    opts.book_mode = bookMode
+    opts.pretty_print = True
+    opts.prefer_author_sort = True
+    opts.share_not_sync = False
+    opts.mobi_file_type = 'both' if bookMode == 'comic' else 'old' #mobi_file_type='old' | 'both'
+    opts.dont_compress = True
+    opts.no_inline_toc = True
+    opts.toc_title = "Table of Contents"
+    opts.mobi_toc_at_start = False
+    opts.linearize_tables = True
+    opts.source = None
+    opts.dest = OutputDevice(None)
+    opts.output_profile = OutputDevice(None)
+    opts.mobi_ignore_margins = True
+    opts.extract_to = None
+    opts.change_justification = "Left"
+    opts.process_images = True
+    opts.mobi_keep_original_images = False
+    opts.graying_image = COLOR_TO_GRAY #changed
+    opts.image_png_to_jpg = COLOR_TO_GRAY #changed
+    opts.fix_indents = False
+    opts.dont_split_on_page_breaks = False
+    opts.flow_size = 260
+    opts.no_default_epub_cover = True
+    opts.no_svg_cover = True
+    opts.preserve_cover_aspect_ratio = True
+    opts.epub_flatten = False
+    opts.epub_dont_compress = False
+    opts.epub_inline_toc = False
+    opts.epub_version = 2
+    opts.expand_css = False
+    opts.verbose = 0
+    opts.test = 0
+    opts.no_inline_navbars = True
+    opts.needs_subscription = False
+    opts.process_images_immediately = True
+    opts.dont_download_recipe = True
+    opts.original_recipe_input_arg = ''
+    opts.username = ''
+    opts.password = ''
+    opts.lrf = None
+    
     if REDUCE_IMAGE_TO:
-        setattr(opts, "reduce_image_to", REDUCE_IMAGE_TO)
+        opts.reduce_image_to = REDUCE_IMAGE_TO
+    elif bookMode == 'comic':
+        opts.reduce_image_to = OutputDevice.comic_screen_size
     else:
-        setattr(opts, "reduce_image_to", OutputDevice.comic_screen_size if bookMode == 'comic' else OutputDevice.screen_size)
+        opts.reduce_image_to = OutputDevice.screen_size
     
-    #epub
-    setattr(opts, "dont_split_on_page_breaks", False)
-    setattr(opts, "flow_size", 260)
-    setattr(opts, "no_default_epub_cover", True)
-    setattr(opts, "no_svg_cover", True)
-    setattr(opts, "preserve_cover_aspect_ratio", True)
-    setattr(opts, "epub_flatten", False)
-    setattr(opts, "epub_dont_compress", False)
-    setattr(opts, "epub_inline_toc", False)
-    setattr(opts, "epub_version", 2)
-    setattr(opts, "expand_css", False)
-    setattr(opts, "verbose", 0)
-    
-    #extra customed by KindleEar
-    setattr(opts, "process_images_immediately", True)
-    setattr(opts, "book_mode", bookMode)
     return opts
     
 def setMetaData(oeb, title='Feeds', lang='zh-cn', date=None, creator='KindleEar',

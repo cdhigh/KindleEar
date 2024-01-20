@@ -38,6 +38,9 @@
   > `net stop MongoDB`  #停止后台服务
   > `mongod.exe --remove`  #删除后台服务`
 
+# 电子书简要生成流程
+  build_ebook.ConvertToEbook() -> plumber.run() -> recipe_input.convert() -> news.BasicNewsRecipe.download()
+  plumber.create_oebbook() -> OEBReader.call() -> output_plugin.convert()
 # KindleEar额外自带的Python库，这些库不用pip安装，不在requirements.txt里面
 * readability-lxml: 修改了其htmls.py|shorten_title()
 

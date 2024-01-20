@@ -77,7 +77,7 @@ def text_length(i):
 def compile_pattern(elements):
     if not elements:
         return None
-    elif isinstance(elements, re._pattern_type):
+    elif isinstance(elements, re.Pattern):
         return elements
     elif isinstance(elements, (str_, bytes_)):
         if isinstance(elements, bytes_):

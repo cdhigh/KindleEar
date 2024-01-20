@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 """
 此文件包含一个简单（不够好）的网页正文提取模块，修改自开源代码，
@@ -10,8 +10,9 @@
 """
 import re
 
+#使用简单算法提取正文文本，content为unicode文本
+#返回 content, title
 def simple_extract(content):
-    """使用简单算法提取正文文本，content为unicode文本。"""
     if not content:
         return ''
     
@@ -20,9 +21,12 @@ def simple_extract(content):
         content = content.replace('>', '>\n')
     
     content = remove_empty_line(remove_js_css(content))
+    regxTitle = re.compile(r'''<title>(.*?)</title>''',re.I|re.M|re.S)
+    result = regxTitle.search(content)
+    title = result.group(1) if result else ''
     left,right = rc_extract(content)
     content = '\n'.join(content.split('\n')[left:right])
-    return content
+    return content, title
     
 """
 采用“基于文本密度的方法”来简单提取正文内容

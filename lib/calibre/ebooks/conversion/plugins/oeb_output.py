@@ -10,7 +10,6 @@ import os, re, io
 from calibre.customize.conversion import (OutputFormatPlugin,
         OptionRecommendation)
 from calibre import CurrentDir
-from filesystem_dict import FileSystemDict
 
 class OEBOutput(OutputFormatPlugin):
 
@@ -21,18 +20,19 @@ class OEBOutput(OutputFormatPlugin):
 
     recommendations = {('pretty_print', True, OptionRecommendation.HIGH)}
 
-    #output_path: 输出目录或 FileSystemDict 实例
-    def convert(self, oeb_book, output_path, input_plugin, opts, log):
+    #在输出目录里面输出opf/ncx和其他的manifest文件
+    #output_path: 输出目录
+    #fs: FsDictStub对象
+    def convert(self, oeb_book, output_path, input_plugin, opts, log, fs):
         from polyglot.urllib import unquote
         from lxml import etree
 
         self.log, self.opts = log, opts
-        if not isinstance(output_path, FileSystemDict) and not os.path.exists(output_path):
-            os.makedirs(output_path)
+        self.fs = fs
+        fs.makedirs(output_path)
         from calibre.ebooks.oeb.base import OPF_MIME, NCX_MIME, PAGE_MAP_MIME, OEB_STYLES
         from calibre.ebooks.oeb.normalize_css import condense_sheet
-        output_path_obj = output_path if isinstance(output_path, FileSystemDict) else CurrentDir(output_path)
-        with output_path_obj:
+        with fs.current_dir(output_path):
             results = oeb_book.to_opf2(page_map=True)
             for key in (OPF_MIME, NCX_MIME, PAGE_MAP_MIME):
                 href, root = results.pop(key, [None, None])
@@ -56,11 +56,7 @@ class OEBOutput(OutputFormatPlugin):
                         # Needed as I can't get lxml to output opf:role and
                         # not output <opf:metadata> as well
                         raw = re.sub(br'(<[/]{0,1})opf:', br'\1', raw)
-                    if isinstance(output_path, FileSystemDict):
-                        output_path[href] = raw
-                    else:
-                        with open(href, 'wb') as f:
-                            f.write(raw)
+                    fs.write(href, raw, 'wb')
 
             for item in oeb_book.manifest:
                 if (not self.opts.expand_css and item.media_type in OEB_STYLES and hasattr(
@@ -68,16 +64,8 @@ class OEBOutput(OutputFormatPlugin):
                     condense_sheet(item.data)
 
                 path = unquote(item.href)
-                if isinstance(output_path, FileSystemDict):
-                    output_path[path] = item.bytes_representation
-                else:
-                    path = os.path.abspath(path)
-                    dir = os.path.dirname(path)
-                    if not os.path.exists(dir):
-                        os.makedirs(dir)
-                    with open(path, 'wb') as f:
-                        f.write(item.bytes_representation)
-                    item.unload_data_from_memory(memory=path)
+                fs.write(path, item.bytes_representation, 'wb')
+                item.unload_data_from_memory(memory=path)
 
     def adjust_mime_types(self, root):
         from calibre.ebooks.oeb.polish.utils import adjust_mime_for_epub

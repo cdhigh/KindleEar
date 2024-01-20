@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-"""Configures for KindleEar, the First two variable is must to modify.
-KindleEar配置文件，请务必修改开始两个配置（如果使用uploader，则uploader自动帮你修改）
+"""Configures for KindleEar, the First some variable is must to modify.
+KindleEar配置文件，请务必修改开始几个配置
+如果有的配置是从环境变量获取，也可以使用os.envrion['name']方式
 """
 
 SRC_EMAIL = "akindleear@gmail.com"  #Your gmail account for sending mail to Kindle
@@ -38,8 +39,8 @@ USE_GAE_INBOUND_EMAIL = True
 #Select the type of task queue, "gae", "celery", "cron"
 TASK_QUEUE_TYPE = "gae"
 
-#If TEMP_DIR set to empty string, memory will be used for temporary files.
-#Can be an absolute path or a relative path
+#If this option is empty, temporary files will be stored in memory
+#Setting this option can reduce memory consumption and supports both relative and absolute paths
 TEMP_DIR = ''
 
 #If the depolyment plataform supports multi threads, set this option will boost the download speed

@@ -21,7 +21,7 @@ from calibre import (extract, walk, isbytestring, filesystem_encoding,
 from calibre.constants import __version__
 from polyglot.builtins import string_or_bytes
 
-from filesystem_dict import FileSystemDict, FsDictContainer
+from filesystem_dict import FsDictStub
 
 DEBUG_README=b'''
 This debug folder contains snapshots of the e-book as it passes through the
@@ -85,8 +85,8 @@ class Plumber:
         'tags', 'book_producer', 'language', 'pubdate', 'timestamp'
         ]
 
-    #input: 输入目录，里面包含了opf文件，或 一个 InputFormatPlugin 实例
-    #output: 输出文件名，也可能是一个BytesIO，如果是BytesIO，则传递另一个参数output_fmt说明输出格式
+    #input: 输入目录绝对路径名，里面包含了opf文件，或InputFormatPlugin实例
+    #output: 输出文件绝对路径名，也可能是一个BytesIO，如果是BytesIO，则传递另一个参数output_fmt说明输出格式
     def __init__(self, input, output, log, report_progress=DummyReporter(),
             dummy=False, merge_plugin_recs=True, abort_after_input_dump=False,
             override_input_metadata=False, for_regex_wizard=False, view_kepub=False, 
@@ -101,8 +101,10 @@ class Plumber:
             output = output.decode(filesystem_encoding)
         self.original_input_arg = input
         self.for_regex_wizard = for_regex_wizard
-        self.input = input if isinstance(input, InputFormatPlugin) else os.path.abspath(input)
-        self.output = output if isinstance(output, io.BytesIO) else os.path.abspath(output)
+        assert(isinstance(input, InputFormatPlugin) or os.path.isabs(input))
+        assert(isinstance(output, io.BytesIO) or os.path.isabs(output))
+        self.input = input
+        self.output = output
         self.log = log
         self.ui_reporter = report_progress
         self.abort_after_input_dump = abort_after_input_dump
@@ -247,7 +249,9 @@ class Plumber:
         for source in (self.input_plugin, self.output_plugin):
             self.merge_plugin_recs(source)
 
-    def merge_ui_recommendations(self, recommendations):
+    #在外面设置电子书生成的参数
+    # {'name1': value1, 'name2': value2}
+    def merge_ui_recommendations(self, recommendations: dict):
         '''
         Merge recommendations from the UI. As long as the UI recommendation
         level is >= the baseline recommended level, the UI value is used,
@@ -262,13 +266,13 @@ class Plumber:
                 if b == '[]':
                     b = None
             return a == b
-
-        for name, val, level in recommendations:
+        
+        for name in (recommendations or {}):
+            val = recommendations[name]
             rec = self.get_option_by_name(name)
-            if rec is not None and rec.level <= level and rec.level < rec.HIGH:
+            if rec is not None:
                 changed = not eq(name, rec.recommended_value, val)
                 rec.recommended_value = val
-                rec.level = level
                 if changed:
                     self.changed_options.add(rec)
 
@@ -319,22 +323,22 @@ class Plumber:
         from calibre.ebooks.metadata import MetaInformation
         from calibre.ebooks.metadata.opf2 import OPF
         mi = MetaInformation(None, [])
-        if self.opts.read_metadata_from_opf is not None:
-            self.opts.read_metadata_from_opf = os.path.abspath(
-                                            self.opts.read_metadata_from_opf)
-            with open(self.opts.read_metadata_from_opf, 'rb') as stream:
-                opf = OPF(stream, os.path.dirname(self.opts.read_metadata_from_opf))
-            mi = opf.to_book_metadata()
+        #if self.opts.read_metadata_from_opf is not None:
+        #    self.opts.read_metadata_from_opf = os.path.abspath(
+        #                                    self.opts.read_metadata_from_opf)
+        #    with open(self.opts.read_metadata_from_opf, 'rb') as stream:
+        #        opf = OPF(stream, os.path.dirname(self.opts.read_metadata_from_opf))
+        #    mi = opf.to_book_metadata()
         self.opts_to_mi(mi)
-        if mi.cover:
-            if mi.cover.startswith('http:') or mi.cover.startswith('https:'):
-                mi.cover = self.download_cover(mi.cover)
-            ext = mi.cover.rpartition('.')[-1].lower().strip()
-            if ext not in ('png', 'jpg', 'jpeg', 'gif'):
-                ext = 'jpg'
-            with open(mi.cover, 'rb') as stream:
-                mi.cover_data = (ext, stream.read())
-            mi.cover = None
+        #if mi.cover:
+        #    if mi.cover.startswith('http:') or mi.cover.startswith('https:'):
+        #        mi.cover = self.download_cover(mi.cover)
+        #    ext = mi.cover.rpartition('.')[-1].lower().strip()
+        #    if ext not in ('png', 'jpg', 'jpeg', 'gif'):
+        #        ext = 'jpg'
+        #    with open(mi.cover, 'rb') as stream:
+        #        mi.cover_data = (ext, stream.read())
+        #    mi.cover = None
         self.user_metadata = mi
 
     def setup_options(self):
@@ -365,6 +369,7 @@ class Plumber:
         set_profile(output_profiles, 'output')
 
         self.read_user_metadata()
+
         self.opts.no_inline_navbars = self.opts.output_profile.supports_mobi_indexing \
                 and self.output_fmt == 'mobi'
         if self.opts.verbose:
@@ -407,7 +412,7 @@ class Plumber:
             self.dump_oeb(ret, out_dir)
         if self.input_fmt == 'recipe':
             zf = ZipFile(os.path.join(self.opts.debug_pipeline,
-                'periodical.downloaded_recipe'), 'w')
+                'periodical.downloaded_recipe.zip'), 'w')
             zf.add_dir(out_dir)
             with self.input_plugin:
                 self.input_plugin.save_download(zf)
@@ -436,8 +441,8 @@ class Plumber:
             self.opts.debug_pipeline = os.path.abspath(self.opts.debug_pipeline)
             if not os.path.exists(self.opts.debug_pipeline):
                 os.makedirs(self.opts.debug_pipeline)
-            with open(os.path.join(self.opts.debug_pipeline, 'README.txt'), 'wb') as f:
-                f.write(DEBUG_README)
+            #with open(os.path.join(self.opts.debug_pipeline, 'README.txt'), 'wb') as f:
+            #    f.write(DEBUG_README)
             for x in ('input', 'parsed', 'structure', 'processed'):
                 x = os.path.join(self.opts.debug_pipeline, x)
                 if os.path.exists(x):
@@ -462,16 +467,31 @@ class Plumber:
         if self.for_regex_wizard:
             self.input_plugin.for_viewer = True
         self.output_plugin.specialize_options(self.log, self.opts, self.input_fmt)
-        temp_dir = os.environ.get('TEMP_DIR')
-        tdir = PersistentTemporaryDirectory('_plumber', dir=temp_dir) if temp_dir else FileSystemDict()
+        #根据需要，创建临时目录或创建内存缓存
+        system_temp_dir = os.environ.get('TEMP_DIR')
+        if system_temp_dir:
+            tdir = PersistentTemporaryDirectory(prefix='plumber_', dir=system_temp_dir)
+            fs = FsDictStub(tdir)
+        else:
+            tdir = '/'
+            fs = FsDictStub(None)
+        
         with self.input_plugin:
             #调用calibre.customize.conversion.InputFormatPlugin.__call__()，然后调用输入插件的convert()在目标目录生成一大堆文件，包含opf
-            #__call__()返回包含opf的目录名，或传入的 FileSystemDict 实例
-            self.oeb = self.input_plugin(stream, self.opts, self.input_fmt, self.log, accelerators, tdir)
-            if self.opts.debug_pipeline is not None:
-                self.dump_input(self.oeb, tdir)
-                if self.abort_after_input_dump:
-                    return
+            #__call__()返回传入的 fs 实例，其属性 opfname 保存了opf文件的路径名
+            self.oeb = self.input_plugin(stream, self.opts, self.input_fmt, self.log, accelerators, tdir, fs)
+
+            #如果只是要制作epub的话，到目前为止，工作已经完成大半
+            #将self.oeb指向的目录拷贝到OEBPS目录，加一个mimetype和一个META-INF/container.xml文件，这两个文件内容是固定的
+            #再将这些文件和文件夹一起打包为zip格式，就是完整的epub电子书了
+            #if self.opts.debug_pipeline is not None:
+            #   fs.dump(self.opts.debug_pipeline)
+            #   if self.abort_after_input_dump:
+            #       return
+            #if self.opts.debug_pipeline is not None:
+            #    self.dump_input(self.oeb, tdir)
+            #    if self.abort_after_input_dump:
+            #        return
             if self.input_fmt in ('recipe', 'downloaded_recipe'):
                 self.opts_to_mi(self.user_metadata)
             if not hasattr(self.oeb, 'manifest'): #从一堆文件里面创建OEBBook实例
@@ -635,9 +655,17 @@ class Plumber:
         self.output_plugin.report_progress = our
         our(0., _('Running %s plugin')%self.output_plugin.name)
 
+        #创建输出临时文件缓存
+        if system_temp_dir:
+            prefix = self.output_plugin.commit_name or 'output_'
+            tmpdir = PersistentTemporaryDirectory(prefix=prefix, dir=system_temp_dir)
+            fs = FsDictStub(tmpdir)
+        else:
+            fs = FsDictStub(None)
+
         #这才是启动输出转换，生成电子书
         with self.output_plugin:
-            self.output_plugin.convert(self.oeb, self.output, self.input_plugin, self.opts, self.log)
+            self.output_plugin.convert(self.oeb, self.output, self.input_plugin, self.opts, self.log, fs)
         self.oeb.clean_temp_files()
         self.ui_reporter(1.)
         if not isinstance(self.output, io.BytesIO):
@@ -653,8 +681,8 @@ def set_regex_wizard_callback(f):
 
 
 #从一堆文件里面创建OEBBook实例
-#path_or_stream: 包含opf文件的目录名或一个FileSystemDict实例
-def create_oebbook(log, path_or_stream, opts, reader=None,
+#fs: FsDictStub对象，其opfname属性为opf文件的路径全名
+def create_oebbook(log, fs, opts, reader=None,
         encoding='utf-8', populate=True, for_regex_wizard=False, specialize=None, removed_items=()):
     '''
     Create an OEBBook.
@@ -675,7 +703,7 @@ def create_oebbook(log, path_or_stream, opts, reader=None,
         from calibre.ebooks.oeb.reader import OEBReader
         reader = OEBReader
 
-    reader()(oeb, path_or_stream)
+    reader()(oeb, fs)
     return oeb
 
 
