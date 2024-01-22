@@ -1,7 +1,6 @@
 /*
  * -- BASE STYLES --
  */
-
 html,
 body {
     height: 100%;
@@ -273,6 +272,10 @@ button {
     padding-left: .5em;
 }
 
+.box-list .book .titleRow input {
+    margin-left: 10px;
+}
+
 .box-list .book .titleRow img {
     vertical-align: -3px;
 }
@@ -293,6 +296,7 @@ button {
 
 .box-list .book .summaryRow {
     word-wrap: break-word;
+    font-size: 0.5em;
 }
 
 .box-list .book .summaryRow a {
@@ -540,4 +544,144 @@ table.pure-table thead {
 .paging .pageinfo {
   width: 60px;
   border: none;
+}
+
+.width1_3 {
+  width: calc(100% / 3);
+}
+
+.right_1_3 {
+  width: calc(100% / 3);
+  justify-self: end;
+}
+
+.width100 {
+  width: 100%;
+}
+
+.noborder {
+    border: none;
+    background: white;
+    overflow: hidden;
+}
+
+/* Feed列表的汉堡菜单按钮及其弹出子按钮*/
+.hamburger-btn {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background-color: silver;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.hamburger-btn:hover {
+    background-color: #5FBCDD;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.additional-btns {
+    position: absolute;
+    top: 50%;
+    right: 70px;
+    transform: translateY(-50%);
+    display: none;
+}
+
+.additional-btn {
+    width: 35px;
+    height: 35px;
+    margin-left: 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.additional-btn:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.btn-A { background-color: #F70187; /* A按钮为红色背景 */ }
+.btn-B { background-color: #9b59b6; /* B为紫色背景 */ }
+.btn-C { background-color: #6DC66E; /* C为浅绿色背景 */ }
+.btn-D { background-color: #3498db; /* D为浅蓝色背景 */ }
+
+.upload-recipe {
+    display: inline-block;
+    margin-left: 20px;
+    margin-right: 20px;
+    text-align: center;
+    vertical-align: 15px;
+}
+.upload-recipe-btn {
+    margin-top: .5em;
+    text-align: center;
+    border: none;
+    border-radius: 2em;
+    padding: 0px 10px;
+    color: white;
+    width: 120px;
+    height: 40px;
+    background-color: #0078E7;
+}
+
+.upload-recipe-btn:hover{
+    background-color: #0765bb;
+}
+
+/* iconfont 相关*/
+@font-face {
+  font-family: "iconfont";
+  src: url('/static/iconfont.woff') format('woff'),
+       url('/static/iconfont.ttf') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 20px;
+  font-style: normal;
+  color: white;
+  vertical-align: 5px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-add:before {
+  content: "\e609";
+}
+
+.icon-push:before {
+  content: "\e62a";
+}
+
+.icon-subscribe:before {
+  content: "\e600";
+}
+
+.icon-share:before {
+  content: "\e739";
+}
+
+.icon-sourcecode:before {
+  content: "\e604";
+}
+
+.icon-offcloud:before {
+  content: "\e694";
+}
+
+.icon-delete:before {
+  content: "\e645";
+}
+
+.icon-upload:before {
+  content: "\e7e0";
 }

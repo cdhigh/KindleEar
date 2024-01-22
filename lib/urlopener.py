@@ -8,68 +8,13 @@ import requests
 from urllib.request import urlopen #用来进行base64 data url解码
 
 class UrlOpener:
-    _codeMapDict = {
-        200 : 'Ok',
-        201 : 'Created',
-        202 : 'Accepted',
-        203 : 'Non-Authoritative Information',
-        204 : 'No Content',
-        205 : 'Reset Content',
-        206 : 'Partial Content',
-        300 : 'Multiple Choices',
-        301 : 'Moved Permanently',
-        302 : 'Found',
-        303 : 'See Other',
-        304 : 'Not Modified',
-        305 : 'Use Proxy',
-        307 : 'Temporary Redirect',
-        400 : 'Bad Request',
-        401 : 'Unauthorized',
-        402 : 'Payment Required',
-        403 : 'Forbidden',
-        404 : 'Not Found',
-        405 : 'Method Not Allowed',
-        406 : 'Not Acceptable',
-        407 : 'Proxy Authentication Required',
-        408 : 'Request Timeout',
-        409 : 'Conflict',
-        410 : 'Gone',
-        411 : 'Length Required',
-        412 : 'Precondition Failed',
-        413 : 'Request Entity Too Large',
-        414 : 'Request-URI Too Long',
-        415 : 'Unsupported Media Type',
-        416 : 'Requested Range Not Satisfiable',
-        417 : 'Expectation Failed',
-        500 : 'Internal Server Error',
-        501 : 'Not Implemented',
-        502 : 'Bad Gateway',
-        503 : 'Service Unavailable',
-        504 : 'Gateway Timeout',
-        505 : 'HTTP Version Not Supported',
-        
-        #------- Custom Code -----------------
-        529 : 'OverQuotaError',
-        530 : 'Timeout',
-        531 : 'ResponseTooLargeError',
-        532 : 'SSLCertificateError',
-        533 : 'UnAuthorizedError',
-        534 : 'DownloadError',
-        535 : 'GeneralDownloadError',
-    }
-    
-    @classmethod
-    def CodeMap(cls, errCode):
-        des = cls._codeMapDict.get(errCode, None)
-        return '{} {}'.format(errCode, des) if des else str(errCode)
-    
     def __init__(self, host=None, timeout=30, headers=None):
         self.host = host
         self.timeout = timeout
         self.initHeaders = headers
         self.session = requests.session()
         
-    def open(self, url, data=None, headers=None, timeout=None):
+    def open(self, url, data=None, headers=None, timeout=None, **kwargs):
         #出现异常时response不是合法的对象，使用一个模拟的
         r = requests.models.Response()
         r.status_code = 555
@@ -123,3 +68,57 @@ class UrlOpener:
         if extHeaders:
             headers.update(extHeaders)
         return headers
+
+    @classmethod
+    def CodeMap(cls, errCode):
+        des = cls._codeMapDict.get(errCode, None)
+        return '{} {}'.format(errCode, des) if des else str(errCode)
+    _codeMapDict = {
+        200 : 'Ok',
+        201 : 'Created',
+        202 : 'Accepted',
+        203 : 'Non-Authoritative Information',
+        204 : 'No Content',
+        205 : 'Reset Content',
+        206 : 'Partial Content',
+        300 : 'Multiple Choices',
+        301 : 'Moved Permanently',
+        302 : 'Found',
+        303 : 'See Other',
+        304 : 'Not Modified',
+        305 : 'Use Proxy',
+        307 : 'Temporary Redirect',
+        400 : 'Bad Request',
+        401 : 'Unauthorized',
+        402 : 'Payment Required',
+        403 : 'Forbidden',
+        404 : 'Not Found',
+        405 : 'Method Not Allowed',
+        406 : 'Not Acceptable',
+        407 : 'Proxy Authentication Required',
+        408 : 'Request Timeout',
+        409 : 'Conflict',
+        410 : 'Gone',
+        411 : 'Length Required',
+        412 : 'Precondition Failed',
+        413 : 'Request Entity Too Large',
+        414 : 'Request-URI Too Long',
+        415 : 'Unsupported Media Type',
+        416 : 'Requested Range Not Satisfiable',
+        417 : 'Expectation Failed',
+        500 : 'Internal Server Error',
+        501 : 'Not Implemented',
+        502 : 'Bad Gateway',
+        503 : 'Service Unavailable',
+        504 : 'Gateway Timeout',
+        505 : 'HTTP Version Not Supported',
+        
+        #------- Custom Code -----------------
+        529 : 'OverQuotaError',
+        530 : 'Timeout',
+        531 : 'ResponseTooLargeError',
+        532 : 'SSLCertificateError',
+        533 : 'UnAuthorizedError',
+        534 : 'DownloadError',
+        535 : 'GeneralDownloadError',
+    }

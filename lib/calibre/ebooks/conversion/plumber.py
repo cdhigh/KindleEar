@@ -656,6 +656,7 @@ class Plumber:
         our(0., _('Running %s plugin')%self.output_plugin.name)
 
         #创建输出临时文件缓存
+        fs.clear()
         if system_temp_dir:
             prefix = self.output_plugin.commit_name or 'output_'
             tmpdir = PersistentTemporaryDirectory(prefix=prefix, dir=system_temp_dir)

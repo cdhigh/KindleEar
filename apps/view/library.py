@@ -232,8 +232,8 @@ def SharedLibraryMgrkindleearAppspotComPost(mgrType):
 
         return respDict
     elif mgrType == SHARED_LIB_MGR_CMD_SUBSFROMSHARED: #有用户订阅了一个共享库里面的链接
-        title = request.forms.title
-        url = request.forms.url
+        title = request.form.get('title')
+        url = request.form.get('url')
         respDict = {'status': 'ok', 'title': title, 'url': url}
 
         if not url:

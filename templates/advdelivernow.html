@@ -20,8 +20,8 @@
                 {% endfor %}
                 {% if books[0].feeds.count() > 0 %}
                 <div class="cornerControls" style="padding:.5em 0;text-align:center;">
-                    <a href="#" class="actionButton act" onclick="SelectAll();UpdateDeliverFeedLink();return false;">{{ _("Select all") }}</a>
-                    <a href="#" class="actionButton act" onclick="SelectNone();UpdateDeliverFeedLink();return false;">{{ _("Select none") }}</a>
+                    <a href="#" class="actionButton" onclick="SelectAll();UpdateDeliverFeedLink();return false;">{{ _("Select all") }}</a>
+                    <a href="#" class="actionButton" onclick="SelectNone();UpdateDeliverFeedLink();return false;">{{ _("Select none") }}</a>
                 </div>
                 {% endif %}
             {%- elif booksnum > 0 -%}
@@ -32,8 +32,8 @@
                 </label>
                 {% endfor %}
                 <div class="cornerControls" style="padding:.5em 0;text-align:center;">
-                    <a href="#" class="actionButton act" onclick="SelectAll();UpdateDeliverLink();return false;">{{ _("Select all") }}</a>
-                    <a href="#" class="actionButton act" onclick="SelectNone();UpdateDeliverLink();return false;">{{ _("Select none") }}</a>
+                    <a href="#" class="actionButton" onclick="SelectAll();UpdateDeliverLink();return false;">{{ _("Select all") }}</a>
+                    <a href="#" class="actionButton" onclick="SelectNone();UpdateDeliverLink();return false;">{{ _("Select none") }}</a>
                 </div>
             {%- endif %}
         </div>

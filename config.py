@@ -75,10 +75,6 @@ THRESHOLD_SPLIT_LONG_IMAGE = 750
 REDUCE_IMAGE_TO = None #(600,800)
 
 #text for link to share or archive
-#SHARE_FUCK_GFW_SRV: (For users in China)如果你要翻墙的话，请设置为其中一个转发服务器
-#翻墙转发服务器源码：http://github.com/cdhigh/forwarder
-#SHARE_FUCK_GFW_SRV = "http://forwarder.ap01.aws.af.cm/?k=xzSlE&t=60&u={}"
-SHARE_FUCK_GFW_SRV = "http://kforwarder.herokuapp.com/?k=xzSlE&t=60&u={}"
 SAVE_TO_EVERNOTE = "Save to Evernote"
 SAVE_TO_WIZ = "Save to Wiz"
 SAVE_TO_POCKET = "Save to Pocket"
@@ -86,7 +82,7 @@ SAVE_TO_INSTAPAPER = "Save to Instapaper"
 SHARE_ON_XWEIBO = "Share on Sina Weibo"
 SHARE_ON_TWEIBO = "Share on Tencent Weibo"
 SHARE_ON_FACEBOOK = "Share on Facebook"
-SHARE_ON_TWITTER = "Tweet it"
+SHARE_ON_TWITTER = "X (Tweet) it"
 SHARE_ON_TUMBLR = "Share on Tumblr"
 OPEN_IN_BROWSER = "Open in Browser"
 

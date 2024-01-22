@@ -28,7 +28,7 @@
                 {% if url_to_add %}value="{{url_to_add}}"{% endif %}/>
             </div>
             <div class="cornerControls">
-                <a href="javascript:;" onclick="addFeed();return false;" class="actionButton add">{{_("Add")}}</a>
+                <a href="javascript:;" onclick="AddCustomRss();return false;" class="actionButton add">{{_("Add")}}</a>
             </div>
             {% if tips -%}
                 <div class="notice-box">{{tips|safe}}</div>
@@ -56,7 +56,7 @@
                 </a>
             </div>
             <div class="cornerControls">
-                <a href="javascript:;" onclick="startShareRss('{{feed.title}}', '{{feed.url}}', {% if feed.isfulltext %}'true'{% else %}'false'{% endif %});return false;" class="actionButton act">{{_("Share")}}</a>
+                <a href="javascript:;" onclick="startShareRss('{{feed.title}}', '{{feed.url}}', {% if feed.isfulltext %}'true'{% else %}'false'{% endif %});return false;" class="actionButton">{{_("Share")}}</a>
                 <a href="javascript:;" onclick="delFeed(this, {{feed.key_or_id_string}});return false;" class="actionButton">{{ _("Delete") }}</a>
             </div>
         </div>
@@ -96,31 +96,15 @@
         {% endfor -%}
     </div>
 
-    <legend><h3>{{ _("Unsubscribed") }}</h3></legend>
-    <div id="books" class="box-list">
-        <div id="nounsub" class="book box" style="display:none">{{ _("No have book unsubscribed") }}</div>
-        {% for book in books if session.get('userName') not in book.users -%}
-        <div class="book box">
-            <div class="titleRow">{{book.title}}
-                <input type="checkbox" id="separate_{{book.key_or_id_string}}" />
-                <img alt="{{ _('Separate') }}" src="static/separate.gif" border="0" onclick="toggleSeparate('{{book.key_or_id_string}}');" />
-            </div>
-            <div class="summaryRow">
-                {% if book.description|length>80 -%}
-                    {{book.description[:80]}}...
-                {% else -%}
-                    {{ book.description }}
-                {% endif -%}
-            </div>
-            <div class="cornerControls">
-                <a href="javascript:;" onclick="doSubscribe(this,{{book.key_or_id_string}});return false;" class="actionButton act">{{ _("Subscribe") }}</a>
-            </div>
-        </div>
-        {% else -%}
-        <script type="text/javascript">
-        document.getElementById('nounsub').style.display = "block";
-        </script>
-        {% endfor -%}
+    <legend><h3>{{ _("Library") }} </h3></legend>
+    <div class="pure-g box-list noborder">
+        <div class="pure-u-1-3 width1_3 pure-form"><select class="pure-input-rounded width100" id="language_pick">
+        </select></div>
+        <div class="pure-u-1-6"><div class="upload-recipe"><button class="upload-recipe-btn" title="{{_('Upload your custom recipe')}}"onclick="alert(\'上传\')"><i class="iconfont icon-upload"></i></button></div></div>
+        <div class="pure-u-3-6"><div class="pure-form"><input type="text" name="search" id="search_recipe" class="pure-input-rounded" placeholder="{{ _('Search')}}" /></div></div>
+    </div>
+    <div id="all_recipes" class="box-list">
+        <div id="nounsub" class="book box" style="display:none">{{ _("There are No recipes unsubscribed") }}</div>
     </div>
 
     <legend><h3>{{ _("Bookmarklet") }}</h3></legend>
@@ -140,19 +124,154 @@
 
 {% block js -%}
 <script type="text/javascript">
-function toggleFulltext() {
-  var btnft = document.getElementById("fulltext");
-  btnft.checked = !btnft.checked;
-}
-function toggleSeparate(id) {
-  id = "separate_" + id
-  var btnft = document.getElementById(id);
-  btnft.checked = !btnft.checked;
+//连接服务器获取内置recipe列表，并按照语言建立一个字典，字典键为语言，值为信息字典列表
+var all_builtin_recipes = {};
+var show_menu_box;
+$(document).ready(function(){
+  $.get('/builtin_recipes.xml?x=1',function(xml) {
+    var user_lang = BrowserLanguage();
+    $(xml).find("recipe").each(function() {
+      var title=$(this).attr("title");
+      var language=$(this).attr("language").toLowerCase();
+      var needs_subscription=$(this).attr("needs_subscription");
+      var description=$(this).attr("description");
+      var id_=$(this).attr("id");
+
+      //忽略各国语言方言，仅取'_'前的部分
+      var dashIndex = language.indexOf('_');
+      if (dashIndex != -1) {
+        language = language.substring(0, dashIndex);
+      }
+      const languageNames = new Intl.DisplayNames([user_lang], {type: 'language'}); //将语种代码翻译为各国语言词汇
+
+      if (!all_builtin_recipes[language]) {
+        all_builtin_recipes[language] = [];
+        var new_language=$('<option value="' + language +'">' + languageNames.of(language) + '</option>');
+        $("#language_pick").append(new_language);
+      }
+      all_builtin_recipes[language].push({ title: title, description: description, needs_subscription: needs_subscription, id_: id_ });
+    });
+    //自动触发和用户浏览器同样语种的选项
+    $("#language_pick").find("option[value='" + user_lang + "']").attr("selected", true);
+    $("#language_pick").val(user_lang).trigger('change');
+  });
+
+  // 点击页面任意位置自动隐藏弹出来的ABC圆形按钮
+  $(document).click(function (e) {
+    if (!$(e.target).closest('.hamburger-btn, .additional-btns').length) {
+      $('.additional-btns').stop(true).hide();
+    }
+  });
+});
+
+//选择了一项语种，将对应语种的recipe显示出来
+$("#language_pick").on("change", function(){
+  PopulateRecipes();
+});
+
+//在指定语言里面搜索标题或描述
+$("#search_recipe").on("keyup", function() {
+  PopulateRecipes($(this).val());
+});
+
+//使用符合条件的recipe动态填充网页显示列表
+//参数 txt: 如果提供，则标题或描述里面有这个子字符串的才显示，用于搜索
+function PopulateRecipes(txt) {
+  $("#all_recipes").empty();
+  var lang_selected=$("#language_pick").val();
+  recipes = all_builtin_recipes[lang_selected];
+  if (!recipes) {
+    return;
+  }
+  //console.log(txt);
+  for (var idx = 0; idx < recipes.length; idx++) {
+    var recipe = recipes[idx];
+    var title = recipe["title"];
+    var desc = recipe["description"];
+    var id_ = recipe["id_"].replace(":", "__"); //冒号替换为双下划线，方便通过url传送
+    if (!txt || (title.indexOf(txt) != -1) || (desc.indexOf(txt) != -1)) {
+      var row_str = ['<div class="book box"><div class="titleRow">'];
+      row_str.push(title);
+      row_str.push('</div><div class="summaryRow">');
+      row_str.push(desc);
+      row_str.push('</div>');
+
+      hamb_arg = [];
+      if (id_.startsWith("b")) { //增加汉堡按钮弹出菜单代码
+        hamb_arg.push({btn_class: 'btn-A', btn_title: '{{_("Delete")}}', btn_icon: 'icon-delete', btn_act: "alert('删除')"});
+        hamb_arg.push({btn_class: 'btn-B', btn_title: '{{_("View Source Code")}}', btn_icon: 'icon-sourcecode', btn_act: "alert('源码')"});
+      }
+      hamb_arg.push({btn_class: 'btn-C', btn_title: '{{_("Subscribe Separately")}}', btn_icon: 'icon-push', btn_act: "alert('单独订阅')"});
+      hamb_arg.push({btn_class: 'btn-D', btn_title: '{{_("Merged Subscription")}}', btn_icon: 'icon-subscribe', btn_act: "alert('合并订阅')"});
+      
+      row_str.push(AddHamburgerButton(hamb_arg));
+      row_str.push('</div>');
+      var new_item = $(row_str.join(''));
+      $("#all_recipes").append(new_item);
+    }
+  }
 }
 
-//点击了订阅内置书籍
+//添加汉堡弹出菜单按钮，arg为一个列表，里面的元素为要弹出的菜单项，如果里面有引号的话，需要使用单引号
+function AddHamburgerButton(arg) {
+  var btn_str = [];
+  btn_str.push('<button class="hamburger-btn" onclick="ToggleAdditionalBtns(this)">☰</button>');
+  btn_str.push('<div class="additional-btns">');
+  for (var idx = 0; idx < arg.length; idx++) {
+    var item = arg[idx];
+    var btn_class = item['btn_class'];
+    var btn_title = item['btn_title'];
+    var btn_icon = item['btn_icon'];
+    var btn_act = item['btn_act'];
+    btn_str.push('<button class="additional-btn ');
+    btn_str.push(btn_class);
+    btn_str.push('" title="');
+    btn_str.push(btn_title);
+    btn_str.push('" onclick="');
+    btn_str.push(btn_act);
+    btn_str.push('"><i class="iconfont ');
+    btn_str.push(btn_icon);
+    btn_str.push('"></i></button>');
+  }
+  return btn_str.join('');
+}
+
+var additionalBtns;
+function ToggleAdditionalBtns(button) {
+    if (typeof additionalBtns != 'undefined') {
+        additionalBtns.stop(true).hide();
+    }
+    additionalBtns = $(button).next('.additional-btns');
+    additionalBtns.toggle(200);
+}
+
+//检测浏览器语言
+function BrowserLanguage() {
+    var lang = "";
+  if (navigator.userLanguage) {
+    lang = navigator.userLanguage.toLowerCase();  
+  } else {
+    lang = navigator.language.toLowerCase();  
+  }
+  if (lang.indexOf('-') != -1) {
+    return lang.substring(0, lang.indexOf('-'));
+  } else {
+    return lang.substring(0, 2);
+  }
+}
+
+function toggleFulltext() {
+  var btnft = $("#fulltext");
+  btnft.val(!btnft.val());
+}
+function toggleSeparate(id_) {
+  var btnft = $("#separate_" + id_);
+  btnft.val(!btnft.val());
+}
+
+//点击了订阅内置Recipe
 function doSubscribe(obj, id_) {
-    var separate = document.getElementById("separate_" + id_).checked;
+    var separate = $("#separate_" + id_).checked;
 
     ajax({url:"/books/subscribe", type: "POST",
         data: {id_: id_, separate: separate},
@@ -228,72 +347,32 @@ function delFeed(obj, feedid) {
 }
 
 //用户点击了添加自定义RSS按钮
-function addFeed() {
-    var title_to_add = document.getElementById('title_to_add');
-    var isfulltext = document.getElementById('fulltext');
-    var url_to_add = document.getElementById('url_to_add');
-    ajax({url: "/feeds/add", type: "POST",
-        data: {title: title_to_add.value, fulltext: fulltext.checked, url: url_to_add.value},
-        success: function (resp, xml) {
-            if (resp.status == "ok") {
-                appendFeedDiv(resp.title, resp.isfulltext, resp.url, resp.feedid);
-                title_to_add.value = "";
-                url_to_add.value = "";
+function AddCustomRss() {
+    var title_to_add = $('#title_to_add');
+    var isfulltext = $('#fulltext');
+    var url_to_add = $('#url_to_add');
+    $.post("feeds/add", {title: title_to_add.val(), fulltext: isfulltext.val(), url: url_to_add.val()},
+        function (data) {
+            if (data.status == "ok") {
+                AppendCustomRssDiv(data.title, data.isfulltext, data.url, data.feedid);
+                title_to_add.val("");
+                url_to_add.val("");
             } else {
-                alert("{{_('Cannot add this feed, Error:')}}" + resp.status);
+                alert("{{_('Cannot add this feed, Error:')}}" + data.status);
             }
         },
-        fail: function (status) {
-            alert("{{_('Error when try to add this feed. Status:')}}" + status);
-        }
-    });
+    );
 }
 
 //新建一个自定义RSS书籍，添加到订阅列表
-function appendFeedDiv(title, isfulltext, url, feedid) {
-    var newFeedDiv = document.createElement("div");
-    newFeedDiv.className = "book box";
-
-    var newTitleDiv = document.createElement("div");
-    newTitleDiv.className = "titleRow";
-
-    var titleNode = document.createTextNode(title);
-    newTitleDiv.appendChild(titleNode);
+function AppendCustomRssDiv(title, isfulltext, url, feedid) {
+    var row_str = ['<div class="book box"><div class="titleRow">'];
+    row_str.push(title);
     if (isfulltext) {
-        newTitleDiv.appendChild(document.createTextNode(' '));
-        var imgNode = document.createElement("img");
-        imgNode.setAttribute("alt", "{{_("Fulltext")}}");
-        imgNode.setAttribute("src", "static/fulltext.gif");
-        imgNode.setAttribute("border", "0");
-        newTitleDiv.appendChild(imgNode);
+        row_str.push('<img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" />');
     }
-    var comicSites = [
-        {% for ComicBaseClass in comic_base_classes -%}
-        [
-            "{{_(ComicBaseClass.__name__.rstrip('BaseBook'))}}",
-            [
-                {% for domain in ComicBaseClass.accept_domains -%}
-                    "{{domain}}",
-                {%- endfor %}
-            ],
-        ],
-        {%- endfor %}
-    ];
-    comicSites.forEach(function (comicSite) {
-        var comicSiteDomains = comicSite[1];
-        if (comicSiteDomains.some(function(domain) {
-            return url.startsWith(domain)
-        })) {
-            newTitleDiv.appendChild(document.createTextNode(' '));
-            var imgNode = document.createElement("img");
-            imgNode.setAttribute("alt", comicSite[0]);
-            imgNode.setAttribute("src", "static/comic.gif");
-            imgNode.setAttribute("border", "0");
-            newTitleDiv.appendChild(imgNode);
-        }
-    })
-    newFeedDiv.appendChild(newTitleDiv);
-
+    row_str.push('</div><div class="summaryRow"');
+    
     var sumRowDiv = document.createElement("div");
     sumRowDiv.className = "summaryRow";
     var aa =   document.createElement("a");
@@ -313,7 +392,7 @@ function appendFeedDiv(title, isfulltext, url, feedid) {
     newCornerDiv.className = "cornerControls";
 
     var atoShare = document.createElement("a");
-    atoShare.className = "actionButton act";
+    atoShare.className = "actionButton";
     atoShare.setAttribute("href", "#");
     var sShare = "startShareRss('" + title + "', '" + url + "', ";
     if (isfulltext){
@@ -421,7 +500,7 @@ function appendBookToBooks(id_, title, desc) {
     var cornDiv = document.createElement("div");
     cornDiv.className = "cornerControls";
     var a = document.createElement("a");
-    a.className = "actionButton act";
+    a.className = "actionButton";
     a.setAttribute("href", "#");
     a.setAttribute("onclick", "doSubscribe(this," + id_ + ");return false;");
     a.appendChild(document.createTextNode("{{_('Subscribe')}}"));

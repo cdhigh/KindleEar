@@ -57,6 +57,13 @@ class FileSystemDict(dict):
         #    for key in path.split('/'):
         #        pass
 
+    #全部清除，释放内存
+    def clear(self):
+        self.dirs = None
+        for key in list(self.keys()):
+            self[key] = None
+            del self[key]
+
     #将字典的文件缓存保存到一个磁盘目录
     def dump(self, path: str):
         assert(os.path.isabs(path))
@@ -185,6 +192,10 @@ class FsDictStub(object):
         return self.fs_dict.isdir(path) if self.fs_dict else os.path.isdir(path)
     def __str__(self):
         return self.path
+    def clear(self):
+        if self.fs_dict:
+            self.fs_dict.clear()
+        self.fs_dict = None
 
     def namelist(self):
         if self.fs_dict:

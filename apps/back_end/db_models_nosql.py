@@ -111,28 +111,16 @@ class KeUser(MyBaseModel): # kindleEar User
     book_mode = fields.StringField() #书籍模式，'periodical'|'comic'，漫画模式可以直接全屏
     merge_books = fields.BooleanField() #是否合并书籍成一本
     remove_hyperlinks = fields.StringField() #去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
+
+    share_key = fields.StringField(default='')
+    share_links = fields.DictField() #evernote/wiz/pocket/instapaper包含子字典，微博/facebook/twitter等仅包含0/1
     share_fuckgfw = fields.BooleanField() #归档和分享时是否需要翻墙
-    evernote = fields.BooleanField() #是否分享至evernote
-    evernote_mail = fields.StringField() #evernote邮件地址
-    wiz = fields.BooleanField() #为知笔记
-    wiz_mail = fields.StringField()
-    pocket = fields.BooleanField() #send to add@getpocket.com
-    pocket_access_token = fields.StringField()
-    pocket_acc_token_hash = fields.StringField()
-    instapaper = fields.BooleanField()
-    instapaper_username = fields.StringField()
-    instapaper_password = fields.StringField()
-    xweibo = fields.BooleanField()
-    tweibo = fields.BooleanField()
-    facebook = fields.BooleanField() #分享链接到facebook
-    twitter = fields.BooleanField()
-    tumblr = fields.BooleanField()
-    browser = fields.BooleanField()
-    qrcode = fields.BooleanField() #是否在文章末尾添加文章网址的QRCODE
+
     cover = fields.AnyField() #保存各用户的自定义封面图片二进制内容
     css_content = fields.StringField() #added 2019-09-12 保存用户上传的css样式表
-    sg_enable = BooleanField(default=False)
-    sg_apikey = CharField(default='')
+    sg_enable = fields.BooleanField(default=False)
+    sg_apikey = fields.StringField(default='')
+    custom = fields.DictField() #留着扩展，避免后续一些小特性还需要升级数据表结构
 
     #自己所属的RSS集合代表的书
     @property

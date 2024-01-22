@@ -24,7 +24,7 @@
             <legend><h3>{{_("Base Setting")}}</h3></legend>
             <div class="pure-control-group">
                 <label for="aligned-name"><em class="required">*</em> {{_("Kindle E-mail")}}</label>
-                <input type="text" name="kindle_email" value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" placeholder="{{_("Seperated by semicolon")}}" class="pure-u-1 pure-u-sm-1-2" required />
+                <input type="email" name="kindle_email" value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" placeholder="{{_("Seperated by semicolon")}}" class="pure-u-1 pure-u-sm-1-2" required multiple />
             </div>
             <div class="pure-control-group">
                 <label>{{_("Time zone")}}</label>

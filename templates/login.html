@@ -13,10 +13,6 @@
 </style>
 {% endblock -%}
 
-{% block bodytag -%}
-<body onload="document.getElementById('u').focus();">
-{% endblock -%}
-
 {% block header_loginfo -%}
 {% endblock %}
 
@@ -31,7 +27,7 @@
     <form action="/login" method="POST" class="pure-form pure-form-aligned">
         <div class="pure-control-group">
             <label for="u">{{_("Username")}}</label>
-            <input id="u" name="u" type="text" placeholder="{{ _('Username') }}" {% if userName %}value="{{ userName }}"{% endif %} class="pure-u-1 pure-u-sm-1-2" />
+            <input id="u" name="u" type="text" placeholder="{{ _('Username') }}" {% if userName %}value="{{ userName }}"{% endif %} class="pure-u-1 pure-u-sm-1-2" autofocus />
         </div>
         <div class="pure-control-group">
             <label for="p">{{_("Password")}}</label>

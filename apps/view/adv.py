@@ -69,53 +69,63 @@ def AdvArchive():
     appendStrs["twitter"] = _("Append hyperlink '{}' to article").format(SHARE_ON_TWITTER)
     appendStrs["tumblr"] = _("Append hyperlink '{}' to article").format(SHARE_ON_TUMBLR)
     appendStrs["browser"] = _("Append hyperlink '{}' to article").format(OPEN_IN_BROWSER)
+    shareLinks = user.share_links
+    evernote = shareLinks.get('evernote', {})
+    wiz = shareLinks.get('wiz', {})
+    pocket = shareLinks.get('pocket', {})
+    instapaper = shareLinks.get('instapaper', {})
+
     
-    return render_template('advarchive.html', tab='advset', user=user, advCurr='archive', appendStrs=appendStrs)
+    return render_template('advarchive.html', tab='advset', user=user, advCurr='archive', appendStrs=appendStrs,
+        shareLinks=shareLinks)
 
 @bpAdv.post("/advarchive", endpoint='AdvArchivePost')
 @login_required()
 def AdvArchivePost():
     user = get_login_user()
     form = request.form
-    evernoteMail = form.get('evernote_mail')
+    evernoteMail = form.get('evernote_mail', '').strip()
     evernote = bool(form.get('evernote')) and evernoteMail
-    wizMail = form.get('wiz_mail')
+
+    wizMail = form.get('wiz_mail', '').strip()
     wiz = bool(form.get('wiz')) and wizMail
+
     pocket = bool(form.get('pocket'))
+
     instapaper = bool(form.get('instapaper'))
-    instapaperUsername = form.get('instapaper_username')
-    instapaperPassword = form.get('instapaper_password')
-    
-    xweibo = bool(form.get('xweibo'))
-    tweibo = bool(form.get('tweibo'))
-    facebook = bool(form.get('facebook'))
-    twitter = bool(form.get('twitter'))
-    tumblr = bool(form.get('tumblr'))
-    browser = bool(form.get('browser'))
-    qrcode = bool(form.get('qrcode'))
-    
+    instaName = form.get('instapaper_username', '').strip()
+    instaPwd = form.get('instapaper_password', '')
     #将instapaper的密码加密
-    if instapaperUsername and instapaperPassword:
-        instapaperPassword = ke_encrypt(instapaperPassword, user.secret_key or '')
+    if instaName and instaPwd:
+        instaPwd = ke_encrypt(instaPwd, user.secret_key or '')
     else:
-        instapaperUsername = ''
-        instapaperPassword = ''
+        instaName = ''
+        instaPwd = ''
     
-    user.evernote = evernote
-    user.evernote_mail = evernoteMail
-    user.wiz = wiz
-    user.wiz_mail = wizMail
-    user.pocket = pocket
-    user.instapaper = instapaper
-    user.instapaper_username = instapaperUsername
-    user.instapaper_password = instapaperPassword
-    user.xweibo = xweibo
-    user.tweibo = tweibo
-    user.facebook = facebook
-    user.twitter = twitter
-    user.tumblr = tumblr
-    user.browser = browser
-    user.qrcode = qrcode
+    oldShrlinks = user.share_links
+    oldPocket = oldShrlinks.get('pocket')
+    accessToken = oldPocket.get('access_token', '') if oldPocket else ''
+    shareLinks = {}
+    shareLinks['evernote'] = {'enable': '1' if evernote else '', 'email': evernoteMail}
+    shareLinks['wiz'] = {'enable': '1' if wiz else '', 'email': wizMail}
+    shareLinks['pocket'] = {'enable': '1' if pocket else '', 'access_token': accessToken}
+    shareLinks['instapaper'] = {'enable': '1' if instapaper else '', 'username': instaName, 'password': instaPwd}
+    if bool(form.get('xweibo')):
+        shareLinks['xweibo'] = 1 #只管键有无，值不重要
+    if bool(form.get('tweibo')):
+        shareLinks['tweibo'] = 1
+    if bool(form.get('facebook')):
+        shareLinks['facebook'] = 1
+    if bool(form.get('x')):
+        shareLinks['x'] = 1
+    if bool(form.get('tumblr')):
+        shareLinks['tumblr'] = 1
+    if bool(form.get('browser')):
+        shareLinks['browser'] = 1
+    if bool(form.get('qrcode')):
+        shareLinks['qrcode'] = 1
+    
+    user.share_links = shareLinks
     user.save()
     return redirect(url_for("bpAdv.AdvArchive"))
 
@@ -335,7 +345,7 @@ def DbImage(id_):
     if user.cover:
         return send_file(io.BytesIO(user.cover), mimetype='image/jpeg')
     else:
-        return "not cover"
+        return "no cover"
 
 #集成各种网络服务OAuth2认证的相关处理
 @bpAdv.route("/oauth2/<authType>", endpoint='AdvOAuth2')
@@ -365,18 +375,19 @@ def AdvOAuth2Callback(authType):
         
     user = get_login_user()
     
-    pocket = Pocket(POCKET_CONSUMER_KEY)
+    pocketInst = Pocket(POCKET_CONSUMER_KEY)
     request_token = session.get('pocket_request_token', '')
+    shareLinks = user.share_links
     try:
-        resp = pocket.get_access_token(request_token)
-        user.pocket_access_token = resp.get('access_token', '')
-        user.pocket_acc_token_hash = hashlib.md5(user.pocket_access_token.encode()).hexdigest()
+        resp = pocketInst.get_access_token(request_token)
+        pocket = shareLinks.get('pocket', {})
+        pocket['access_token'] = resp.get('access_token', '')
+        user.share_links = shareLinks
         user.save()
         return render_template('tipsback.html', title='Success authorized', urltoback='/advarchive', tips=_('Success authorized by Pocket!'))
     except Exception as e:
-        user.pocket_access_token = ''
-        user.pocket_acc_token_hash = ''
-        user.pocket = False
+        shareLinks[pocket] = {'enable': '', 'access_token': ''}
+        user.share_links = shareLinks
         user.save()
         return render_template('tipsback.html', title='Failed to authorize', urltoback='/advarchive', 
             tips=_('Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>{}').format(e))
@@ -394,8 +405,8 @@ def VerifyAjaxPost(verifType):
     
     user = get_login_user()
     
-    userName = request.forms.username
-    password = request.forms.password
+    userName = request.form.get('username', '')
+    password = request.form.get('password', '')
     opener = UrlOpener()
     apiParameters = {'username': userName, 'password':password}
     ret = opener.open(INSTAPAPER_API_AUTH_URL, data=apiParameters)

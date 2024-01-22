@@ -37,6 +37,7 @@ from calibre.web.fetch.utils import prepare_masthead_image
 from polyglot.builtins import string_or_bytes
 from lxml.html import document_fromstring, fragment_fromstring, tostring
 from lib import readability
+from urlopener import UrlOpener
 from urlopener_browser import UrlOpenerBrowser
 from filesystem_dict import FsDictStub
 from default_cv_mh import get_default_cover_data, get_default_masthead_data

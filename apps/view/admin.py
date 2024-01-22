@@ -77,7 +77,7 @@ def AdminPost():
                 myfeeds.save()
                 au = KeUser(name=userName, passwd=pwd, kindle_email='', enable_send=False,
                     send_time=7, timezone=TIMEZONE, book_type="epub", own_feeds=myfeeds.reference_key_or_id, 
-                    merge_books=False, secret_key=secret_key, expiration_days=expiration)
+                    merge_books=False, secret_key=secret_key, expiration_days=expiration, share_key=new_secret_key())
                 if expiration:
                     au.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
 

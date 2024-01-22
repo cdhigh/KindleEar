@@ -14,7 +14,7 @@ from apps.back_end.send_mail_adpt import send_html_mail
 from books.base_url_book import BaseUrlBook
 from lib.pocket import Pocket
 from lib.urlopener import UrlOpener
-from config import SHARE_FUCK_GFW_SRV, POCKET_CONSUMER_KEY
+from config import POCKET_CONSUMER_KEY
 
 bpShare = Blueprint('bpShare', __name__)
 
@@ -27,11 +27,13 @@ def Share():
     action = args.get('act')
     userName = args.get('u')
     url = args.get('url')
-    if not all((action, userName, url)):
+    title = args.get('t')
+    key = args.get('k')
+    if not all((action, userName, url, key)):
         return "Some parameter is missing or wrong!<br />"
     
     user = KeUser.get_one(KeUser.name == userName)
-    if not user or not user.kindle_email:
+    if not user or not user.kindle_email or not user.share_key != key:
         return "User not exist!<br />"
     
     url = unquote_plus(url)
@@ -40,22 +42,26 @@ def Share():
     #debug_mail(content)
     
     if action in ('evernote', 'wiz'): #保存至evernote/wiz
-        return SaveToEvernoteWiz(user, action, url)    
+        return SaveToEvernoteWiz(user, action, url, title)
     elif action == 'pocket': #保存到pocket
-        return SaveToPocket(user, action, url)
+        return SaveToPocket(user, action, url, title)
     elif action == 'instapaper':
-        return SaveToInstapaper(user, action, url)
+        return SaveToInstapaper(user, action, url, title)
     else:
         return "Unknown action type : {}".format(action)
     
 def SaveToEvernoteWiz(user, action, orgUrl):
     global default_log
-    if action == 'evernote' and (not user.evernote or not user.evernote_mail):
-        default_log.warning('No have evernote mail yet.')
-        return "No have evernote mail yet."
-    elif action == 'wiz' and (not user.wiz or not user.wiz_mail):
-        default_log.warning('No have wiz mail yet.')
-        return "No have wiz mail yet."
+    evernote = user.share_links.get('evernote', {})
+    wiz = user.share_links.get('wiz', {})
+    evernoteMail = evernote.get('email')
+    wizMail = wiz.get('email')
+    if action == 'evernote' and not evernoteMail:
+        default_log.warning('There is no evernote mail yet.')
+        return "There is no evernote mail yet."
+    elif action == 'wiz' and wizMail:
+        default_log.warning('There is no wiz mail yet.')
+        return "There is no wiz mail yet."
         
     book = BaseUrlBook(user=user)
     rssBook = user.my_rss_book
@@ -97,7 +103,7 @@ def SaveToEvernoteWiz(user, action, orgUrl):
             
             html = str(soup)
             
-    to = user.wiz_mail if action == 'wiz' else user.evernote_mail
+    to = wizMail if action == 'wiz' else evernoteMail
     if (';' in to) or (',' in to):
         to = to.replace(',', ';').replace(' ', '').split(';')
     
@@ -113,19 +119,15 @@ def SaveToEvernoteWiz(user, action, orgUrl):
         default_log.info("[Share] Fetch url failed.")
         return "[Share] Fetch url failed."
 
-def SaveToPocket(user, action, orgUrl):
-    if not user.pocket_access_token:
+def SaveToPocket(user, action, orgUrl, title):
+    pocket = user.share_links.get('pocket' , {})
+    accessToken = pocket.get('access_token')
+    if not accessToken:
         info = SHARE_INFO_TPL.format(title='Pocket unauthorized', info='Unauthorized Pocket!<br/>Please authorize your KindleEar application firstly.')
         return info
         
-    title = request.query.t
-    tkHash = request.query.h
-    if hashlib.md5(user.pocket_acc_token_hash.encode()).hexdigest() != tkHash:
-        info = SHARE_INFO_TPL.format(title='Action rejected', info='Hash not match!<br/>KindleEar refuse to execute your command.')
-        return info
-        
     pocket = Pocket(POCKET_CONSUMER_KEY)
-    pocket.set_access_token(user.pocket_access_token)
+    pocket.set_access_token(accessToken)
     try:
         item = pocket.add(url=orgUrl, title=title, tags='KindleEar')
     except Exception as e:
@@ -139,20 +141,18 @@ def SaveToPocket(user, action, orgUrl):
     
     return info
     
-def SaveToInstapaper(user, action, orgUrl):
+def SaveToInstapaper(user, action, orgUrl, title):
     INSTAPAPER_API_ADD_URL = 'https://www.instapaper.com/api/add'
     
-    if not user.instapaper_username or not user.instapaper_password:
+    instapaper = user.share_links.get('instapaper', {})
+    userName = instapaper.get('username')
+    password = instapaper.get('password')
+    if not userName or not password:
         return SHARE_INFO_TPL.format(title='No authorize info', info='Instapaper username and password have to provided fistly!<br/>Please fill them in your KindleEar application.')
     
-    title = request.query.t
-    name = request.query.n
-    if user.instapaper_username != name:
-        return SHARE_INFO_TPL.format(title='Action rejected', info='Username not match!<br/>KindleEar refuse to execute your command.')
-        
     opener = UrlOpener()
-    password = ke_decrypt(user.instapaper_password, user.secret_key or '')
-    apiParameters = {'username': user.instapaper_username, 'password':password, 'title':title.encode('utf-8'), 
+    password = ke_decrypt(password, user.secret_key or '')
+    apiParameters = {'username': userName, 'password':password, 'title':title.encode('utf-8'), 
                     'selection':'KindleEar', 'url':orgUrl}
     ret = opener.open(INSTAPAPER_API_ADD_URL, data=apiParameters)
     if ret.status_code in (200, 201):

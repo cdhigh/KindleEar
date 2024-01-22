@@ -5,14 +5,12 @@
 import datetime
 from operator import attrgetter
 from urllib.parse import urljoin
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, send_file
 from flask_babel import gettext as _
 from apps.base_handler import *
 from apps.back_end.db_models import *
 from lib.urlopener import UrlOpener
 from books import BookClasses, BookClass
-from books.base_comic_book import BaseComicBook
-from books.comic import ComicBaseClasses
 from config import *
 from apps.view.library import KINDLEEAR_SITE, SHARED_LIBRARY_MGR_KINDLEEAR, SHARED_LIB_MGR_CMD_SUBSFROMSHARED
 
@@ -32,7 +30,7 @@ def MySubscription(tips=None):
     books.sort(key=attrgetter("title"))
 
     return render_template("my.html", tab="my", user=user, books=books,
-        myfeeds=myfeeds, comic_base_classes=ComicBaseClasses, tips=tips,
+        myfeeds=myfeeds, tips=tips,
         subscribe_url=url_for("bpSubscribe.MySubscription"), title_to_add=titleToAdd,
         url_to_add=urlToAdd)
 
@@ -108,6 +106,13 @@ def FeedsAjaxPost(actType):
     else:
         return {'status': 'Unknown command: {}'.format(actType)}
 
+#获取保存有所有内置recipe的xml文件
+@bpSubscribe.route("/builtin_recipes.xml", endpoint='BuiltInRecipesXml')
+@login_required(forAjax=True)
+def BuiltInRecipesXml():
+    return send_file(os.path.join(appDir, 'books/builtin_recipes.xml'), mimetype="text/xml", as_attachment=False)
+
+
 #通知共享服务器，有一个新的订阅
 def SendNewSubscription(title, url):
     opener = UrlOpener()
@@ -147,10 +152,6 @@ def BooksAjaxPost(actType):
         if not bkcls:
             return {'status': 'The book ({}) not exist!'.format(id_)}
 
-        #如果是漫画类，则不管是否选择了“单独推送”，都自动变成“单独推送”
-        if issubclass(bkcls, BaseComicBook):
-            separate = 'true'
-
         if user.name not in bk.users:
             bk.users.append(user.name)
             bk.separate = bool(separate.lower() in ('true', '1'))
@@ -176,12 +177,6 @@ def Subscribe(id_):
     bkcls = BookClass(bk.title)
     if not bkcls:
         return 'The book ({}) not exist!'.format(id_)
-
-    #如果是漫画类，则不管是否选择了“单独推送”，都自动变成“单独推送”
-    if issubclass(bkcls, BaseComicBook):
-        separate = 'true'
-    else:
-        separate = request.query.get('separate', 'true')
 
     userName = session.get('userName')
     if userName and userName not in bk.users:

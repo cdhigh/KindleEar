@@ -47,7 +47,7 @@ def CloseDatabase():
         dbInstance.close()
 
 #自定义字段，在本应用用来保存列表
-class ListField(TextField):
+class JSONField(TextField):
     def db_value(self, value):
         return json.dumps(value)
 
@@ -55,8 +55,12 @@ class ListField(TextField):
         if value is not None:
             return json.loads(value)
 
-def listfield_default():
-    return []
+    @classmethod
+    def list_default(cls):
+        return []
+    @classmethod
+    def dict_default(cls):
+        return {}
 
 #数据表的共同基类
 class MyBaseModel(Model):
@@ -96,7 +100,7 @@ class MyBaseModel(Model):
 class Book(MyBaseModel):
     title = CharField(unique=True)
     description = CharField()
-    users = ListField(default=listfield_default) #有哪些账号订阅了这本书
+    users = JSONField(default=JSONField.list_default) #有哪些账号订阅了这本书
     builtin = BooleanField()
     needs_subscription = BooleanField() #是否需要登陆网页
     separate = BooleanField() #是否单独推送
@@ -117,7 +121,7 @@ class KeUser(MyBaseModel): # kindleEar User
     secret_key = CharField(default='')
     kindle_email = CharField(default='')
     enable_send = BooleanField(default=False)
-    send_days = ListField(default=listfield_default)
+    send_days = JSONField(default=JSONField.list_default)
     send_time = IntegerField(default=0)
     timezone = IntegerField(default=0)
     book_type = CharField(default='epub') #mobi,epub
@@ -131,28 +135,15 @@ class KeUser(MyBaseModel): # kindleEar User
     merge_books = BooleanField(default=True) #是否合并书籍成一本
     remove_hyperlinks = CharField(default='') #去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
     
+    share_key = CharField(default='')
+    share_links = JSONField(default=JSONField.dict_default) #evernote/wiz/pocket/instapaper包含子字典，微博/facebook/twitter等仅包含0/1
     share_fuckgfw = BooleanField(default=False) #归档和分享时是否需要翻墙
-    evernote = BooleanField(default=False) #是否分享至evernote
-    evernote_mail = CharField(default='') #evernote邮件地址
-    wiz = BooleanField(default=False) #为知笔记
-    wiz_mail = CharField(default='')
-    pocket = BooleanField(default=False) #send to add@getpocket.com
-    pocket_access_token = CharField(default='')
-    pocket_acc_token_hash = CharField(default='')
-    instapaper = BooleanField(default=False)
-    instapaper_username = CharField(default='')
-    instapaper_password = CharField(default='')
-    xweibo = BooleanField(default=False)
-    tweibo = BooleanField(default=False)
-    facebook = BooleanField(default=False) #分享链接到facebook
-    twitter = BooleanField(default=False)
-    tumblr = BooleanField(default=False)
-    browser = BooleanField(default=False)
-    qrcode = BooleanField(default=False) #是否在文章末尾添加文章网址的QRCODE
+
     cover = BlobField(null=True) #保存各用户的自定义封面图片二进制内容
     css_content = TextField(default='') #保存用户上传的css样式表
     sg_enable = BooleanField(default=False)
     sg_apikey = CharField(default='')
+    custom = JSONField(default=JSONField.dict_default) #留着扩展，避免后续一些小特性还需要升级数据表结构
     
     #white_list, url_filter, subscr_infos 都是反向引用
     
@@ -284,6 +275,7 @@ def CreateDatabaseTable(force=False):
     AppInfo.create_table()
     
     AppInfo(name='dbTableVersion', value=__DB_VERSION__).save()
+    print('Create database table finished')
 
 
 if __name__ == '__main__':

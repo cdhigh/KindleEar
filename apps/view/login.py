@@ -7,7 +7,6 @@ from flask import Blueprint, url_for, render_template, redirect, session
 from flask_babel import gettext as _
 from apps.base_handler import *
 from apps.back_end.db_models import *
-from books import BookClasses, BookClass
 from apps.utils import new_secret_key
 from config import *
 
@@ -62,35 +61,8 @@ def LoginPost():
             u.expires = datetime.datetime.utcnow() + datetime.timedelta(days=days)
             u.save()
         
-        #同步书籍数据库
-        bksToDelete = []
-        for bk in Book.get_all(Book.builtin == True):
-            found = False
-            for book in BookClasses():
-                if book.title == bk.title:
-                    if bk.description != book.description:
-                        bk.description = book.description
-                        bk.save()
-                    if bk.needs_subscription != book.needs_subscription:
-                        bk.needs_subscription = book.needs_subscription
-                        bk.save()
-                    found = True
-                    break
-            
-            #如果删除了内置书籍py文件，则在数据库中也清除相关信息
-            if not found:
-                subs = u.subscription_info(bk.title)
-                if subs:
-                    subs.delete()
-                for fd in list(bk.feeds):
-                    fd.delete()
-                bksToDelete.append(bk)
-
-        #从数据库中删除书籍
-        for bk in bksToDelete:
-            bk.delete()
-        
-        return redirect(url_for("bpSubscribe.MySubscription") if u.kindle_email else url_for("bpSetting.Setting"))
+        #return redirect(url_for("bpSubscribe.MySubscription") if u.kindle_email else url_for("bpSetting.Setting"))
+        return redirect(url_for("bpSetting.Setting"))
     else:  #账号或密码错
         time.sleep(5) #防止暴力破解
         tips = _("The username not exist or password is wrong!")
@@ -116,10 +88,11 @@ def InitialAdminAccount():
             keep_image=True, oldest_article=7, needs_subscription=False, separate=False)
     myFeeds.save()
     secretKey = new_secret_key()
+    shareKey = new_secret_key()
     password = hashlib.md5((ADMIN_NAME + secretKey).encode()).hexdigest()
     au = KeUser(name=ADMIN_NAME, passwd=password, kindle_email='', enable_send=False, send_time=8, 
         timezone=TIMEZONE, book_type="epub", device='kindle', expires=None, merge_books=False, 
-        own_feeds=myFeeds.reference_key_or_id, secret_key=secretKey, expiration_days=0)
+        own_feeds=myFeeds.reference_key_or_id, secret_key=secretKey, expiration_days=0, share_key=shareKey)
     au.save()
     return False
 

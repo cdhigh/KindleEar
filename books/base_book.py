@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 """
-KindleEar电子书基类，每本投递到kindle的书籍抽象为这里的一个类。
-可以继承BaseFeedBook类而实现自己的定制书籍。
+KindleEar电子书基类，BasicNewsRecipe 会同时继承此类扩展一些方法
 cdhigh <https://github.com/cdhigh>
 """
 import os, re, imghdr, datetime, hashlib, io
@@ -27,21 +26,6 @@ xHtmlFrameTemplate = u"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transition
 <title>{title}</title>
 <style type="text/css">p{text-indent:2em;} h1{font-weight:bold;}</style></head>
 <body>{bodyTitle}<p>{content}</p></body></html>"""
-
-#分析RSS的XML返回的每一项的结构
-ItemRssTuple = namedtuple("ItemRssTuple", "section title url desc")
-
-#Items()返回的数据结构
-#soup: BeautifulSoup实例
-#thumbnailUrl: 文章中第一个图片文件的url
-ItemHtmlTuple = namedtuple("ItemHtmlTuple", "section url title soup brief thumbnailUrl")
-
-#每个图片
-#图片的isThumbnail仅当其为article的第一个img为True
-ItemImageTuple = namedtuple("ItemImageTuple", "mime url fileName content isThumbnail")
-
-#每个CSS，其mime固定为 "text/css"
-ItemCssTuple = namedtuple("ItemCssTuple", "url fileName content")
 
 # base class of Book
 class BaseFeedBook:
@@ -759,14 +743,20 @@ class BaseFeedBook:
         FirstLink = True
         qrImg = None
         qrImgName = ''
+        shareLinks = user.share_links
         bodyTag = soup.find("body")
-        if user.evernote and user.evernote_mail:
+        evernote = shareLinks.get('evernote', {})
+        wiz = shareLinks.get('wiz', {})
+        pocket = shareLinks.get('pocket', {})
+        instapaper = shareLinks.get('instapaper', {})
+
+        if evernote.get('enable') and evernote.get('email'):
             href = self.MakeShareLink('evernote', user, url, soup)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SAVE_TO_EVERNOTE
             bodyTag.append(ashare)
             FirstLink = False
-        if user.wiz and user.wiz_mail:
+        if wiz.get('enable') and wiz.get('email'):
             if not FirstLink:
                 self.AppendSeperator(soup)
             href = self.MakeShareLink('wiz', user, url, soup)
@@ -774,7 +764,7 @@ class BaseFeedBook:
             ashare.string = SAVE_TO_WIZ
             bodyTag.append(ashare)
             FirstLink = False
-        if user.pocket:
+        if pocket.get('enable'):
             if not FirstLink:
                 self.AppendSeperator(soup)
             href = self.MakeShareLink('pocket', user, url, soup)
@@ -782,7 +772,7 @@ class BaseFeedBook:
             ashare.string = SAVE_TO_POCKET
             bodyTag.append(ashare)
             FirstLink = False
-        if user.instapaper:
+        if instapaper.get('enable'):
             if not FirstLink:
                 self.AppendSeperator(soup)
             href = self.MakeShareLink('instapaper', user, url, soup)
@@ -790,7 +780,7 @@ class BaseFeedBook:
             ashare.string = SAVE_TO_INSTAPAPER
             bodyTag.append(ashare)
             FirstLink = False
-        if user.xweibo:
+        if shareLinks.get('xweibo'):
             if not FirstLink:
                 self.AppendSeperator(soup)
             href = self.MakeShareLink('xweibo', user, url, soup)
@@ -798,7 +788,7 @@ class BaseFeedBook:
             ashare.string = SHARE_ON_XWEIBO
             bodyTag.append(ashare)
             FirstLink = False
-        if user.tweibo:
+        if shareLinks.get('tweibo'):
             if not FirstLink:
                 self.AppendSeperator(soup)
             href = self.MakeShareLink('tweibo', user, url, soup)
@@ -806,7 +796,7 @@ class BaseFeedBook:
             ashare.string = SHARE_ON_TWEIBO
             bodyTag.append(ashare)
             FirstLink = False
-        if user.facebook:
+        if shareLinks.get('facebook'):
             if not FirstLink:
                 self.AppendSeperator(soup)
             href = self.MakeShareLink('facebook', user, url, soup)
@@ -814,15 +804,15 @@ class BaseFeedBook:
             ashare.string = SHARE_ON_FACEBOOK
             bodyTag.append(ashare)
             FirstLink = False
-        if user.twitter:
+        if shareLinks.get('x'):
             if not FirstLink:
                 self.AppendSeperator(soup)
-            href = self.MakeShareLink('twitter', user, url, soup)
+            href = self.MakeShareLink('x', user, url, soup)
             ashare = soup.new_tag('a', href=href)
             ashare.string = SHARE_ON_TWITTER
             bodyTag.append(ashare)
             FirstLink = False
-        if user.tumblr:
+        if shareLinks.get('tumblr'):
             if not FirstLink:
                 self.AppendSeperator(soup)
             href = self.MakeShareLink('tumblr', user, url, soup)
@@ -830,13 +820,13 @@ class BaseFeedBook:
             ashare.string = SHARE_ON_TUMBLR
             bodyTag.append(ashare)
             FirstLink = False
-        if user.browser:
+        if shareLinks.get('browser'):
             if not FirstLink:
                 self.AppendSeperator(soup)
             ashare = soup.new_tag('a', href=url)
             ashare.string = OPEN_IN_BROWSER
             bodyTag.append(ashare)
-        if user.qrcode:
+        if shareLinks.get('qrcode'):
             import qrcode as qr_code
             if not FirstLink:
                 self.AppendSeperator(soup)
@@ -852,29 +842,27 @@ class BaseFeedBook:
     
     #生成保存内容或分享文章链接的KindleEar调用链接
     def MakeShareLink(self, sharetype, user, url, soup):
+        titleTag = soup.find('title')
+        title = titleTag.string if titleTag else 'Untitled'
         if sharetype in ('evernote', 'wiz'):
-            href = "{}/share?act={}&u={}&url=".format(KE_DOMAIN, sharetype, user.name)
+            href = f"{KE_DOMAIN}/share?act={sharetype}&u={user.name}&t={title}&k={user.share_key}&url={quote_plus(url)}"
         elif sharetype == 'pocket':
-            href = '{}/share?act=pocket&u={}&h={}&t={}&url='.format(KE_DOMAIN, user.name, (hashlib.md5(user.pocket_acc_token_hash or '').hexdigest()), 
-                                                        soup.html.head.title.string)
+            href = f'{KE_DOMAIN}/share?act=pocket&u={user.name}&t={title}&k={user.share_key}&url={quote_plus(url)}'
         elif sharetype == 'instapaper':
-            href = '{}/share?act=instapaper&u={}&n={}&t={}&url='.format(KE_DOMAIN, user.name, user.instapaper_username or '', soup.html.head.title.string)
+            href = f'{KE_DOMAIN}/share?act=instapaper&u={user.name}&t={title}&k={user.share_key}&url={quote_plus(url)}'
         elif sharetype == 'xweibo':
-            href = 'http://v.t.sina.com.cn/share/share.php?url='
+            href = f'http://v.t.sina.com.cn/share/share.php?url={quote_plus(url)}'
         elif sharetype == 'tweibo':
-            href = 'http://v.t.qq.com/share/share.php?url='
+            href = f'http://v.t.qq.com/share/share.php?url={quote_plus(url)}'
         elif sharetype == 'facebook':
-            href = 'http://www.facebook.com/share.php?u='
-        elif sharetype == 'twitter':
-            href = 'http://twitter.com/home?status='
+            href = f'http://www.facebook.com/share.php?u={quote_plus(url)}'
+        elif sharetype == 'x':
+            href = f'http://twitter.com/home?status={quote_plus(url)}'
         elif sharetype == 'tumblr':
-            href = 'http://www.tumblr.com/share/link?url='
+            href = f'http://www.tumblr.com/share/link?url={quote_plus(url)}'
         else:
             href = ''
-        if user.share_fuckgfw and sharetype in ('evernote', 'wiz', 'facebook', 'twitter', 'pocket', 'instapaper'):
-            href = SHARE_FUCK_GFW_SRV.format(quote_plus(href + url))
-        else:
-            href += quote_plus(url)
+
         return href
 
     #在文章末尾添加'|'分隔符

@@ -22,9 +22,9 @@ builtins.__dict__['default_log'] = log
 builtins.__dict__['IsRunInLocal'] = IsRunInLocal
 builtins.__dict__['_'] = gettext
 appDir = os.path.dirname(os.path.abspath(__file__))
+builtins.__dict__['appDir'] = appDir
 sys.path.insert(0, 'lib') #for calibre
 
-from books import RegisterBuiltinBooks
 from apps.view.login import bpLogin  #Blueprints
 from apps.view.admin import bpAdmin
 from apps.view.adv import bpAdv
@@ -52,11 +52,9 @@ def SetOsEnvByConfigPy():
 
 SetOsEnvByConfigPy()
 
-RegisterBuiltinBooks() #添加内置书籍到数据库
-
 #多语种支持
 def GetLocale():
-    #手动设置过要显示的语种有限
+    #如果手动设置过要显示的语种有限
     langCode = session.get('langCode')
     if langCode:
         return langCode
@@ -118,4 +116,4 @@ app.register_blueprint(bpUrl2Book)
 
 #调试目的
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=False)
+    app.run(host='0.0.0.0', debug=True)
