@@ -99,7 +99,7 @@ def WorkerImpl(userName: str, bookIdList: list, rssIdList: list=None):
         if bk.builtin:
             cBook = BookClass(bk.title)
             if not cBook:
-                bk.delete() #删除数据库内容
+                bk.delete_instance() #删除数据库内容
                 log.warning("Book '{}' does not exist".format(bk.title))
                 continue
             book = cBook(imgIndex=imgIndex, opts=opts, user=user)

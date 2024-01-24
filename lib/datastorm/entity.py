@@ -39,6 +39,7 @@ class BaseEntity:
         self.__set_defaults()
 
         [self.set(name, value) for name, value in kwargs.items()]
+        self.set('id', self.key.to_legacy_urlsafe().decode())
 
     #增加和peewee相同的接口 create()
     @classmethod
@@ -85,8 +86,8 @@ class BaseEntity:
             if field_name not in buffer or buffer[field_name] != updated_instance[field_name]:
                 self.set(field_name, datastore_value)
 
-    #从datastore删除本实例
-    def delete(self):
+    #从datastore删除本实例，和peewee接口一致，注意不是 delete()，delete()是peewee里面的DELETE query
+    def delete_instance(self):
         """Delete the object from Datastore."""
         self._datastore_client.delete(self.key)
 
@@ -102,12 +103,30 @@ class BaseEntity:
     #生成Datastore的Entity
     def get_datastore_entity(self):
         entity = datastore.Entity(key=self.key)
+        data = self.to_python_dict()
+        data.pop('key', None)
+        entity.update(entity_dict) #这里update只是内存数据，还没有提交
+        return entity
+
+    #生成一个字典
+    #可以传入 only=[Book.title, ...]，或 exclude=[]
+    def to_python_dict(self, **kwargs):
+        only = [x.field_name for x in kwargs.get('only', [])]
+        exclude = [x.field_name for x in kwargs.get('exclude', [])]
+        should_skip = lambda n: (n in exclude) or (only and (n not in only))
+
+        data = {}
+        #if not should_skip('key'):
+        #    data['key'] = self.key.to_legacy_urlsafe().decode();
+        
         for field_name in self._datastorm_mapper.fields:
             field = self._datastorm_mapper.get_field(field_name)
+            if should_skip(field_name):
+                continue
+            #如果定义Field时没有指定field_name，则field.field_name == field_name
+            data[field.field_name or field_name] = field.dumps(getattr(self, field_name))
 
-            entity_dict = {field.field_name or field_name: field.dumps(getattr(self, field_name))}
-            entity.update(entity_dict) #这里update只是内存数据，还没有提交
-        return entity
+        return data
 
     def __resolve_mappings(self) -> FieldMapper:
         field_mapper = FieldMapper()

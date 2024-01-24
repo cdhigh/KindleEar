@@ -58,7 +58,7 @@ def AdminPost():
         specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}', ',', ';', '|']
         if user.name != ADMIN_NAME: #只有管理员能添加账号
             return redirect('/')
-        elif any([char in name for char in specialChars]):
+        elif any([char in user.name for char in specialChars]):
             tips = _("The username includes unsafe chars!")
         elif password1 != password2:
             tips = _("The two new passwords are dismatch!")
@@ -71,13 +71,10 @@ def AdminPost():
             except:
                 tips = _("The password includes non-ascii chars!")
             else:
-                myfeeds = Book(title="KindleEar", description="RSS from KindleEar",
-                    builtin=False, keep_image=True, oldest_article=7, 
-                    needs_subscription=False, separate=False)
-                myfeeds.save()
                 au = KeUser(name=userName, passwd=pwd, kindle_email='', enable_send=False,
-                    send_time=7, timezone=TIMEZONE, book_type="epub", own_feeds=myfeeds.reference_key_or_id, 
-                    merge_books=False, secret_key=secret_key, expiration_days=expiration, share_key=new_secret_key())
+                    send_time=7, timezone=TIMEZONE, book_type="epub", merge_books=False, 
+                    secret_key=secret_key, expiration_days=expiration, share_key=new_secret_key(),
+                    book_title='KindleEar', book_language='en')
                 if expiration:
                     au.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
 
@@ -157,7 +154,7 @@ def DelAccountPost(name):
             tips = _("The username '{}' not exist!").format(name)
         else:
             u.erase_traces() #删除自己订阅的书，白名单，过滤器等，就是完全的清理
-            u.delete()
+            u.delete_instance()
             return redirect(url_for("bpLogin.Logout") if session.get('userName') == name else url_for("bpAdmin.Admin"))
     else:
         tips = _("The username is empty or you dont have right to delete it!")

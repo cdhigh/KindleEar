@@ -277,7 +277,8 @@ button {
 }
 
 .box-list .book .titleRow img {
-    vertical-align: -3px;
+    vertical-align: 3px;
+    margin-left: 10px;
 }
 
 .box-list .book .titleRow span {
@@ -466,36 +467,37 @@ table.pure-table thead {
 */
 
 .select-editable {
-     position:relative;
-     background-color:white;
-     border:solid gray 1px;
-     width:250px;
-     height:34px;
+    display: inline-block;    
+    position:relative;
+    background-color:white;
+    border:solid gray 1px;
+    width:250px;
+    height:34px;
  }
 
  .select-editable select {
-     position:absolute;
-     top:0px;
-     left:0px;
-     font-size:14px;
-     border:none;
-     width:250px;
-     margin:0;
+    position:absolute;
+    top:0px;
+    left:0px;
+    font-size:14px;
+    border:none;
+    width:250px;
+    margin:0;
  }
 
  .select-editable input {
-     position:absolute;
-     top:0px;
-     left:0px;
-     width:230px;
-     height:34px;
-     padding:1px;
-     font-size:12px;
-     border:solid gray 1px;
+    position:absolute;
+    top:0px;
+    left:0px;
+    width:230px;
+    height:34px;
+    padding:1px;
+    font-size:12px;
+    border:solid gray 1px;
  }
 
  .select-editable select:focus, .select-editable input:focus {
-     outline:none;
+    outline:none;
  }
 
 /*
@@ -649,11 +651,17 @@ table.pure-table thead {
   font-size: 20px;
   font-style: normal;
   color: white;
-  vertical-align: 5px;
+  vertical-align: 4px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-as-tag {
+  font-size: 14px;
+  font-style: normal;
+  color: #FE7374;
+  margin-right: 10px;
+}
 .icon-add:before {
   content: "\e609";
 }
@@ -684,4 +692,12 @@ table.pure-table thead {
 
 .icon-upload:before {
   content: "\e7e0";
+}
+
+.icon-unsubscribe:before {
+  content: "\e61b";
+}
+
+.icon-key:before {
+  content: "\e62e";
 }

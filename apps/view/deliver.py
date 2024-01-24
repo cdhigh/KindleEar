@@ -17,14 +17,14 @@ bpDeliver = Blueprint('bpDeliver', __name__)
 #queueToPush: 一个defaultdict(list)实例
 #user: KeUser实例
 #bookId: 书籍数据库实例ID
-#separate: 是否单独推送
+#separated: 是否单独推送
 #feedIds: 自定义RSS的数据库实例ID，多个ID使用逗号分隔
-def queueOneBook(queueToPush: defaultdict, user: KeUser, bookId: str, separate: bool, feedIds: str=None):
+def queueOneBook(queueToPush: defaultdict, user: KeUser, bookId: str, separated: bool, feedIds: str=None):
     param = {"u": user.name, "id_": bookId}
     if feedIds:
         param['feedIds'] = feedIds
     
-    if user.merge_books and not separate and not feedIds:
+    if user.merge_books and not separated and not feedIds:
         queueToPush[user.name].append(str(bookId)) #合并推送
     else:
         create_http_task("/worker", param)
@@ -93,7 +93,7 @@ def MultiUserDeliver():
                 continue
             
             #到了这里才是需要推送的
-            queueOneBook(queueToPush, user, book.key_or_id_string, book.separate)
+            queueOneBook(queueToPush, user, book.key_or_id_string, book.separated)
             sentCnt += 1
     flushQueueToPush(queueToPush)
     return "Put {} books to queue!".format(sentCnt)
@@ -115,7 +115,7 @@ def SingleUserDeliver(userName: str, bookIds: str=None, feedIds: str=None):
     
     bkQueue = {user.name: []}
     for book in booksToPush:
-        queueOneBook(bkQueue, user, book.key_or_id_string, book.separate, feedIds)
+        queueOneBook(bkQueue, user, book.key_or_id_string, book.separated, feedIds)
         sent.append(book.title)
     self.flushQueueToPush(bkQueue)
 

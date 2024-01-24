@@ -3,7 +3,9 @@
 #关系数据库行结构定义，使用peewee ORM
 #根据以前的经验，经常出现有网友部署时没有成功建立数据库索引，所以现在排序在应用内处理，数据量不大
 #Author: cdhigh <https://github.com/cdhigh>
-import os, sys, json
+import os, sys, json, datetime
+from operator import attrgetter
+
 if __name__ == '__main__': #调试使用，调试时为了单独执行此文件
     thisDir = os.path.dirname(os.path.abspath(__file__))
     appDir = os.path.normpath(os.path.join(thisDir, "..", ".."))
@@ -12,6 +14,7 @@ if __name__ == '__main__': #调试使用，调试时为了单独执行此文件
 from apps.utils import ke_encrypt, ke_decrypt
 from peewee import *
 from playhouse.db_url import connect
+from playhouse.shortcuts import model_to_dict
 from config import DATABASE_ENGINE, DATABASE_HOST, DATABASE_PORT, DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_NAME
 
 #用于在数据库结构升级后的兼容设计，数据库结构和前一版本不兼容则需要升级此版本号
@@ -96,21 +99,31 @@ class MyBaseModel(Model):
     def reference_key_or_id(self):
         return self
 
+    #将当前行数据转换为一个字典结构，由子类使用，将外键转换为ID，日期转换为字符串
+    #可以传入 only=[Book.title, ...]，或 exclude=[]
+    def to_dict(self, **kwargs):
+        ret = model_to_dict(self, **kwargs)
+        for key in ret:
+            data = ret[key]
+            if isinstance(data, datetime.datetime):
+                ret[key] = data.strftime('%Y-%m-%d %H:%M:%S')
+        return ret
+
 #--------------db models----------------
-class Book(MyBaseModel):
-    title = CharField(unique=True)
-    description = CharField()
-    users = JSONField(default=JSONField.list_default) #有哪些账号订阅了这本书
-    builtin = BooleanField()
-    needs_subscription = BooleanField() #是否需要登陆网页
-    separate = BooleanField() #是否单独推送
+#class Book(MyBaseModel):
+#    title = CharField(unique=True)
+#    description = CharField()
+#    users = JSONField(default=JSONField.list_default) #有哪些账号订阅了这本书
+#    builtin = BooleanField()
+#    needs_subscription = BooleanField() #是否需要登陆网页
+#    separated = BooleanField() #是否单独推送
     
     #====自定义书籍
-    language = CharField(default='')
-    masthead_file = CharField(default='') # GIF 600*60
-    cover_file = CharField(default='')
-    keep_image = BooleanField(default=True)
-    oldest_article = IntegerField(default=7)
+#    language = CharField(default='')
+#    masthead_file = CharField(default='') # GIF 600*60
+#    cover_file = CharField(default='')
+#    keep_image = BooleanField(default=True)
+#    oldest_article = IntegerField(default=7)
 
     #feeds, owner 属性为KeUser自动添加的
     
@@ -127,14 +140,19 @@ class KeUser(MyBaseModel): # kindleEar User
     book_type = CharField(default='epub') #mobi,epub
     device = CharField(default='')
     expires = DateTimeField(null=True) #超过了此日期后账号自动停止推送
-    own_feeds = ForeignKeyField(Book, backref='owner') # 每个用户都有自己的自定义RSS，也给Book增加一个owner,my_rss_book
+
+    book_title = CharField()
     use_title_in_feed = BooleanField(default=True) # 文章标题优先选择订阅源中的还是网页中的
     title_fmt = CharField(default='') #在元数据标题中添加日期的格式
     author_format = CharField(default='') #修正Kindle 5.9.x固件的bug【将作者显示为日期】
     book_mode = CharField(default='') #书籍模式，'periodical'|'comic'，漫画模式可以直接全屏
     merge_books = BooleanField(default=True) #是否合并书籍成一本
     remove_hyperlinks = CharField(default='') #去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
-    
+    keep_image = BooleanField(default=True)
+    oldest_article = IntegerField(default=7)
+    book_language = CharField() #自定义RSS的语言
+    enable_custom_rss = BooleanField(default=True)
+
     share_key = CharField(default='')
     share_links = JSONField(default=JSONField.dict_default) #evernote/wiz/pocket/instapaper包含子字典，微博/facebook/twitter等仅包含0/1
     share_fuckgfw = BooleanField(default=False) #归档和分享时是否需要翻墙
@@ -145,42 +163,73 @@ class KeUser(MyBaseModel): # kindleEar User
     sg_apikey = CharField(default='')
     custom = JSONField(default=JSONField.dict_default) #留着扩展，避免后续一些小特性还需要升级数据表结构
     
-    #white_list, url_filter, subscr_infos 都是反向引用
-    
-    #自己所属的RSS集合代表的书
-    @property
-    def my_rss_book(self):
-        return self.own_feeds
-
-    #自己直接所属的RSS列表，返回[Feed]
-    @property
+    #自己直接所属的自定义RSS列表，返回[Recipe,]
     def all_custom_rss(self):
-        return self.own_feeds.feeds
+        return sorted(Recipe.select().where(Recipe.user == self.name).where(Recipe.type_ == 'custom'), 
+            key=attrgetter('time'), reverse=True)
 
-    #删除自己订阅的书，白名单，过滤器等，就是完全的清理
+    #自己直接所属的上传Recipe列表，返回[Recipe,]
+    def all_uploaded_recipe(self):
+        return sorted(Recipe.select().where(Recipe.user == self.name).where(Recipe.type_ == 'uploaded'), 
+            key=attrgetter('time'), reverse=True)
+
+    #自己订阅的Recipe，如果传入recipe_id，则使用id筛选，返回一个，否则返回一个列表
+    def get_booked_recipe(self, recipe_id=None):
+        if recipe_id:
+            return BookedRecipe.select().where(BookedRecipe.user == self.name).where(BookedRecipe.recipe_id == recipe_id).first()
+        else:
+            return sorted(BookedRecipe.get_all(BookedRecipe.user == self.name), key=attrgetter('time'), reverse=True)
+
+    #本用户所有的白名单
+    def white_lists(self):
+        return WhiteList.get_all(WhiteList.user == self.name)
+    def url_filters(self):
+        return UrlFilter.get_all(UrlFilter.user == self.name)
+
+    #删除自己订阅的书，白名单，过滤器等，就是完全的清理，预备用于删除此账号
     def erase_traces(self):
-        if self.own_feeds:
-            map(lambda x: x.delete(), list(self.own_feeds.feeds))
-            self.own_feeds.delete()
-        map(lambda x: x.delete(), list(u.white_lists))
-        map(lambda x: x.delete(), list(u.url_filters))
-        map(lambda x: x.delete(), list(u.subscr_infos))
+        BookedRecipe.delete().where(BookedRecipe.user == self.name).execute()
+        Recipe.delete().where(Recipe.user == self.name).execute()
+        WhiteList.delete().where(WhiteList.user == self.name).execute()
+        UrlFilter.delete().where(UrlFilter.user == self.name).execute()
         DeliverLog.delete().where(DeliverLog.username == self.name).execute() #推送记录
         LastDelivered.delete().where(LastDelivered.username == self.name).execute()
-        for book in Book.get_all(): #订阅记录
-            subscrUsers = book.users
-            if self.name in subscrUsers:
-                subscrUsers.remove(name)
-                book.users = subscrUsers
-                book.save()
             
-#自定义RSS订阅源
-class Feed(MyBaseModel):
+#RSS订阅源，包括自定义RSS，上传的recipe，内置在zip里面的builtin_recipe不包括在内
+#每个Recipe的字符串表示为：custom:id, uploaded:id
+class Recipe(MyBaseModel):
     title = CharField()
-    url = CharField()
-    isfulltext = BooleanField()
+    url = CharField(default='')
+    description = CharField(default='')
+    isfulltext = BooleanField(default=False)
+    type_ = CharField() #'custom','uploaded'
+    needs_subscription = BooleanField(default=False) #是否需要登陆网页，只有上传的recipe才有意义
+    content = BlobField(null=True) #保存上传的recipe的utf-8编码后的二进制内容
     time = DateTimeField() #源被加入的时间，用于排序
-    book = ForeignKeyField(Book, backref='feeds') #属于哪本书，同时给book增加了一个feeds属性
+    user = CharField() #哪个账号创建的，和nosql一致，保存用户名
+    language = CharField(default='')
+
+#已经被订阅的Recipe信息，包括自定义RSS/上传的recipe/内置builtin_recipe
+class BookedRecipe(MyBaseModel):
+    recipe_id = CharField()
+    separated = BooleanField() #是否单独推送
+    user = CharField()
+    title = CharField()
+    description = CharField()
+    needs_subscription = BooleanField(default=False)
+    account = CharField(default='') #如果网站需要登录才能看
+    encrypted_pwd = CharField(default='')
+    time = DateTimeField() #源被订阅的时间，用于排序
+
+    @property
+    def password(self):
+        userInst = KeUser.get_one(KeUser.name == self.user)
+        return ke_decrypt(self.encrypted_pwd, userInst.secret_key if userInst else '')
+        
+    @password.setter
+    def password(self, pwd):
+        userInst = KeUser.get_one(KeUser.name == self.user)
+        self.encrypted_pwd = ke_encrypt(pwd, userInst.secret_key if userInst else '')
 
 #书籍的推送历史记录
 class DeliverLog(MyBaseModel):
@@ -202,32 +251,18 @@ class LastDelivered(MyBaseModel):
     
 class WhiteList(MyBaseModel):
     mail = CharField()
-    user = ForeignKeyField(KeUser, backref='white_lists')
+    user = CharField()
 
 class UrlFilter(MyBaseModel):
     url = CharField()
-    user = ForeignKeyField(KeUser, backref='url_filters')
-
-#某些网站需要会员才能阅读
-class SubscriptionInfo(MyBaseModel):
-    title = CharField()   #书籍的标题
-    account = CharField()
-    encrypted_pwd = CharField()
-    user = ForeignKeyField(KeUser, backref='subscr_infos')
-    
-    @property
-    def password(self):
-        return ke_decrypt(self.encrypted_pwd, self.user.secret_key)
-        
-    @password.setter
-    def password(self, pwd):
-        self.encrypted_pwd = ke_encrypt(pwd, self.user.secret_key)
+    user = CharField()
 
 #Shared RSS links from other users [for kindleear.appspot.com only]
 class SharedRss(MyBaseModel):
     title = CharField()
     url = CharField()
     isfulltext = BooleanField()
+    language = CharField()
     category = CharField()
     creator = CharField()
     created_time = DateTimeField()
@@ -262,14 +297,13 @@ def CreateDatabaseTable(force=False):
         except:
             pass
 
-    Book.create_table()
     KeUser.create_table()
-    Feed.create_table()
+    Recipe.create_table()
+    BookedRecipe.create_table()
     DeliverLog.create_table()
     LastDelivered.create_table()
     WhiteList.create_table()
     UrlFilter.create_table()
-    SubscriptionInfo.create_table()
     SharedRss.create_table()
     SharedRssCategory.create_table()
     AppInfo.create_table()

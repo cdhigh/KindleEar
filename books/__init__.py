@@ -48,5 +48,5 @@ def RegisterBuiltinBooks():
         b = Book.get_one(Book.title == book.title)
         if not b:
             b = Book(title=book.title, description=book.description, builtin=True, 
-                needs_subscription=book.needs_subscription, separate=False)
+                needs_subscription=book.needs_subscription, separated=False)
             b.save()

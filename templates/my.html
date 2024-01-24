@@ -2,631 +2,134 @@
 {% block titleTag -%}
 <title>{{ _("Feeds") }} - KindleEar</title>
 {% endblock -%}
+
 {% block bodytag -%}
 <body class="my-rss">
 {% endblock -%}
 
 {% block content -%}
 <div class="main">
-    <legend><h3>{{_("Custom Rss")}}</legend>
-    <div id="ownfeeds" class="box-list">
-        <div class="book box pure-form pure-form-aligned" id="divAddFeedCmdPanel">
-            <div class="pure-control-group titleRow pure-g">
-                <div class="pure-u-3-5 pure-u-sm-3-4 pure-u-md-5-6">
-                    <input type="text" name="rss_title" id="title_to_add" class="pure-u-23-24 pure-input-rounded" placeholder="{{ _('Title')}}"
-                    {% if title_to_add %}value="{{title_to_add}}"{% endif %}/>
-                </div>
-                <div class="pure-u-2-5 pure-u-sm-1-4 pure-u-md-1-6">
-                    <div style="padding:.5em;">
-                        <input type="checkbox" name="fulltext" id="fulltext" />
-                        <img alt="{{ _('Fulltext') }}" src="static/fulltext.gif" border="0" onclick="toggleFulltext();"/>
-                    </div>
-                </div>
-            </div>
-            <div class="summaryRow">
-                <input type="text" name="url" id="url_to_add" class="pure-input-1 pure-input-rounded" placeholder="URL"
-                {% if url_to_add %}value="{{url_to_add}}"{% endif %}/>
-            </div>
-            <div class="cornerControls">
-                <a href="javascript:;" onclick="AddCustomRss();return false;" class="actionButton add">{{_("Add")}}</a>
-            </div>
-            {% if tips -%}
-                <div class="notice-box">{{tips|safe}}</div>
-            {% endif -%}
+  <legend><h3>{{_("Custom Rss")}}</legend>
+  <div class="box-list">
+    <div class="book box pure-form pure-form-aligned">
+      <div class="pure-control-group titleRow pure-g">
+        <div class="pure-u-3-5 pure-u-sm-3-4 pure-u-md-5-6">
+          <input type="text" name="rss_title" id="title_to_add" class="pure-u-23-24 pure-input-rounded" placeholder="{{ _('Title')}}"
+            {% if title_to_add %}value="{{title_to_add}}"{% endif %}/>
         </div>
-
-        {% for feed in myfeeds -%}
-        <div class="book box">
-            <div class="titleRow">
-                {{ feed.title }}
-                {% if feed.isfulltext %} <img alt="{{_('Fulltext')}}" src="static/fulltext.gif" border="0" />{% endif %}
-                {% for ComicBaseClass in comic_base_classes -%}
-                    {% if feed.url.startswith(ComicBaseClass.accept_domains) %}
-                    <img alt="{{_(ComicBaseClass.__name__.rstrip('BaseBook'))}}" src="static/comic.gif" border="0" />
-                    {% endif %}
-                {% endfor -%}
-            </div>
-            <div class="summaryRow">
-                <a href="{{feed.url}}" target="_blank">
-                    {% if feed.url|length>80 -%}
-                        {{feed.url[:80]}}...
-                    {% else -%}
-                        {{feed.url}}
-                    {% endif -%}
-                </a>
-            </div>
-            <div class="cornerControls">
-                <a href="javascript:;" onclick="startShareRss('{{feed.title}}', '{{feed.url}}', {% if feed.isfulltext %}'true'{% else %}'false'{% endif %});return false;" class="actionButton">{{_("Share")}}</a>
-                <a href="javascript:;" onclick="delFeed(this, {{feed.key_or_id_string}});return false;" class="actionButton">{{ _("Delete") }}</a>
-            </div>
+        <div class="pure-u-2-5 pure-u-sm-1-4 pure-u-md-1-6">
+          <div style="padding:.5em;">
+            <input type="checkbox" name="fulltext" id="isfulltext" />
+            <img alt="{{ _('Fulltext') }}" src="static/fulltext.gif" border="0" />
+          </div>
         </div>
-        {% endfor -%}
-    </div>
-    
-    <legend><h3>{{ _("Subscribed") }}</h3></legend>
-    <div id="mybooks" class="box-list">
-        <div id="nosub" class="book box" style="display:none">{{_("There are no subscribed books")}}</div>
-        {% for book in books if session.get('userName') in book.users -%}
-        <div class="book box">
-            <div class="titleRow">
-                {{ book.title }}
-                {% if book.separate -%}
-                  <img alt="{{_('Separate')}}" src="static/separate.gif" border="0" />
-                {% endif -%}
-            </div>
-            <div class="summaryRow">
-                {% if book.description|length>80 -%}
-                    {{book.description[:80]}}...
-                {% else -%}
-                    {{book.description}}
-                {% endif -%}
-            </div>
-            <div class="cornerControls">
-                {% if book.needs_subscription -%}
-                    <a href="/booklogininfo/{{book.key_or_id_string}}" class="actionButton" {% if not user.subscription_info(book.title) -%} style="color:red;" {%- endif %}
-                >{{_("Login Info")}}</a>
-                {% endif -%}
-                <a href="javascript:;" onclick="doUnsubscribe(this,{{book.key_or_id_string}});return false;" class="actionButton">{{ _("Unsubscribe") }}</a>
-            </div>
-        </div>
-        {% else -%}
-        <script type="text/javascript">
-        document.getElementById('nosub').style.display = "block";
-        </script>
-        {% endfor -%}
+      </div>
+      <div class="summaryRow">
+        <input type="text" name="url" id="url_to_add" class="pure-input-1 pure-input-rounded" placeholder="URL"
+        {% if url_to_add %}value="{{url_to_add}}"{% endif %}/>
+      </div>
+      <div class="cornerControls">
+        <button onclick="AddCustomRss();return false;" class="actionButton add">{{_("Add")}}</button>
+      </div>
+      {% if tips -%}
+        <div class="notice-box">{{tips|safe}}</div>
+      {% endif -%}
     </div>
 
-    <legend><h3>{{ _("Library") }} </h3></legend>
-    <div class="pure-g box-list noborder">
-        <div class="pure-u-1-3 width1_3 pure-form"><select class="pure-input-rounded width100" id="language_pick">
-        </select></div>
-        <div class="pure-u-1-6"><div class="upload-recipe"><button class="upload-recipe-btn" title="{{_('Upload your custom recipe')}}"onclick="alert(\'上传\')"><i class="iconfont icon-upload"></i></button></div></div>
-        <div class="pure-u-3-6"><div class="pure-form"><input type="text" name="search" id="search_recipe" class="pure-input-rounded" placeholder="{{ _('Search')}}" /></div></div>
+    <div id="divMyCustomRss">
+      <!-- 由脚本在这里填充数据 -->
     </div>
-    <div id="all_recipes" class="box-list">
-        <div id="nounsub" class="book box" style="display:none">{{ _("There are No recipes unsubscribed") }}</div>
+  </div>
+  
+  <legend><h3>{{ _("Subscribed") }}</h3></legend>
+  <div id="mysubscribed" class="box-list">
+    <!-- 由脚本在这里填充数据 -->
+  </div>
+
+  <legend><h3>{{ _("Library") }} </h3></legend>
+  <div class="pure-g box-list noborder">
+    <div class="pure-u-1-3 width1_3 pure-form"><select class="pure-input-rounded width100" id="language_pick">
+    </select></div>
+    <div class="pure-u-1-6">
+      <div class="upload-recipe">
+        <button class="upload-recipe-btn" title="{{_('Upload your custom recipe')}}"onclick="OpenUploadRecipeDialog()"><i class="iconfont icon-upload"></i></button>
+      </div>
+    </div>
+    <div class="pure-u-3-6">
+      <div class="pure-form">
+        <input type="text" name="search" id="search_recipe" class="pure-input-rounded" placeholder="{{ _('Search')}}" />
+      </div>
+    </div>
+  </div>
+  <div id="all_recipes" class="box-list">
+    <!-- 由脚本在这里填充数据 -->
+  </div>
+
+  <legend><h3>{{ _("Bookmarklet") }}</h3></legend>
+  <div id="bookmarklet" class="box-list">
+    <div class="book box" id="bookmarklet_content">
+      <a class="actionButton" target="_blank" href="javascript:location.href='{{subscribe_url}}?title_to_add='+encodeURIComponent(document.title)+'&url_to_add='+encodeURIComponent(window.location.href);" onclick="return false;">
+        {{_("Add to KindleEar")}}
+      </a>
+      <div style="padding-top:10px;text-align:center;">
+        <small>- {{_("Drag and drop this link to your bookmarks")}} -</small>
+      </div>
     </div>
 
-    <legend><h3>{{ _("Bookmarklet") }}</h3></legend>
-    <div id="bookmarklet" class="box-list">
-        <div class="book box" id="bookmarklet_content">
-            <a class="actionButton" target="_blank" href="javascript:location.href='{{subscribe_url}}?title_to_add='+encodeURIComponent(document.title)+'&url_to_add='+encodeURIComponent(window.location.href);" onclick="return false;">
-                {{_("Add to KindleEar")}}
-            </a>
-            <div style="padding-top:10px;text-align:center;">
-                <small>- {{_("Drag and drop this link to your bookmarks")}} -</small>
-            </div>
-        </div>
-
-    </div>
+  </div>
 </div>
 {% endblock -%}
 
 {% block js -%}
 <script type="text/javascript">
-//连接服务器获取内置recipe列表，并按照语言建立一个字典，字典键为语言，值为信息字典列表
-var all_builtin_recipes = {};
-var show_menu_box;
-$(document).ready(function(){
-  $.get('/builtin_recipes.xml?x=1',function(xml) {
-    var user_lang = BrowserLanguage();
-    $(xml).find("recipe").each(function() {
-      var title=$(this).attr("title");
-      var language=$(this).attr("language").toLowerCase();
-      var needs_subscription=$(this).attr("needs_subscription");
-      var description=$(this).attr("description");
-      var id_=$(this).attr("id");
-
-      //忽略各国语言方言，仅取'_'前的部分
-      var dashIndex = language.indexOf('_');
-      if (dashIndex != -1) {
-        language = language.substring(0, dashIndex);
-      }
-      const languageNames = new Intl.DisplayNames([user_lang], {type: 'language'}); //将语种代码翻译为各国语言词汇
-
-      if (!all_builtin_recipes[language]) {
-        all_builtin_recipes[language] = [];
-        var new_language=$('<option value="' + language +'">' + languageNames.of(language) + '</option>');
-        $("#language_pick").append(new_language);
-      }
-      all_builtin_recipes[language].push({ title: title, description: description, needs_subscription: needs_subscription, id_: id_ });
-    });
-    //自动触发和用户浏览器同样语种的选项
-    $("#language_pick").find("option[value='" + user_lang + "']").attr("selected", true);
-    $("#language_pick").val(user_lang).trigger('change');
-  });
-
-  // 点击页面任意位置自动隐藏弹出来的ABC圆形按钮
-  $(document).click(function (e) {
-    if (!$(e.target).closest('.hamburger-btn, .additional-btns').length) {
-      $('.additional-btns').stop(true).hide();
-    }
-  });
-});
-
-//选择了一项语种，将对应语种的recipe显示出来
-$("#language_pick").on("change", function(){
-  PopulateRecipes();
-});
-
-//在指定语言里面搜索标题或描述
-$("#search_recipe").on("keyup", function() {
-  PopulateRecipes($(this).val());
-});
-
-//使用符合条件的recipe动态填充网页显示列表
-//参数 txt: 如果提供，则标题或描述里面有这个子字符串的才显示，用于搜索
-function PopulateRecipes(txt) {
-  $("#all_recipes").empty();
-  var lang_selected=$("#language_pick").val();
-  recipes = all_builtin_recipes[lang_selected];
-  if (!recipes) {
-    return;
-  }
-  //console.log(txt);
-  for (var idx = 0; idx < recipes.length; idx++) {
-    var recipe = recipes[idx];
-    var title = recipe["title"];
-    var desc = recipe["description"];
-    var id_ = recipe["id_"].replace(":", "__"); //冒号替换为双下划线，方便通过url传送
-    if (!txt || (title.indexOf(txt) != -1) || (desc.indexOf(txt) != -1)) {
-      var row_str = ['<div class="book box"><div class="titleRow">'];
-      row_str.push(title);
-      row_str.push('</div><div class="summaryRow">');
-      row_str.push(desc);
-      row_str.push('</div>');
-
-      hamb_arg = [];
-      if (id_.startsWith("b")) { //增加汉堡按钮弹出菜单代码
-        hamb_arg.push({btn_class: 'btn-A', btn_title: '{{_("Delete")}}', btn_icon: 'icon-delete', btn_act: "alert('删除')"});
-        hamb_arg.push({btn_class: 'btn-B', btn_title: '{{_("View Source Code")}}', btn_icon: 'icon-sourcecode', btn_act: "alert('源码')"});
-      }
-      hamb_arg.push({btn_class: 'btn-C', btn_title: '{{_("Subscribe Separately")}}', btn_icon: 'icon-push', btn_act: "alert('单独订阅')"});
-      hamb_arg.push({btn_class: 'btn-D', btn_title: '{{_("Merged Subscription")}}', btn_icon: 'icon-subscribe', btn_act: "alert('合并订阅')"});
-      
-      row_str.push(AddHamburgerButton(hamb_arg));
-      row_str.push('</div>');
-      var new_item = $(row_str.join(''));
-      $("#all_recipes").append(new_item);
-    }
-  }
-}
-
-//添加汉堡弹出菜单按钮，arg为一个列表，里面的元素为要弹出的菜单项，如果里面有引号的话，需要使用单引号
-function AddHamburgerButton(arg) {
-  var btn_str = [];
-  btn_str.push('<button class="hamburger-btn" onclick="ToggleAdditionalBtns(this)">☰</button>');
-  btn_str.push('<div class="additional-btns">');
-  for (var idx = 0; idx < arg.length; idx++) {
-    var item = arg[idx];
-    var btn_class = item['btn_class'];
-    var btn_title = item['btn_title'];
-    var btn_icon = item['btn_icon'];
-    var btn_act = item['btn_act'];
-    btn_str.push('<button class="additional-btn ');
-    btn_str.push(btn_class);
-    btn_str.push('" title="');
-    btn_str.push(btn_title);
-    btn_str.push('" onclick="');
-    btn_str.push(btn_act);
-    btn_str.push('"><i class="iconfont ');
-    btn_str.push(btn_icon);
-    btn_str.push('"></i></button>');
-  }
-  return btn_str.join('');
-}
-
-var additionalBtns;
-function ToggleAdditionalBtns(button) {
-    if (typeof additionalBtns != 'undefined') {
-        additionalBtns.stop(true).hide();
-    }
-    additionalBtns = $(button).next('.additional-btns');
-    additionalBtns.toggle(200);
-}
-
-//检测浏览器语言
-function BrowserLanguage() {
-    var lang = "";
-  if (navigator.userLanguage) {
-    lang = navigator.userLanguage.toLowerCase();  
-  } else {
-    lang = navigator.language.toLowerCase();  
-  }
-  if (lang.indexOf('-') != -1) {
-    return lang.substring(0, lang.indexOf('-'));
-  } else {
-    return lang.substring(0, 2);
-  }
-}
-
-function toggleFulltext() {
-  var btnft = $("#fulltext");
-  btnft.val(!btnft.val());
-}
-function toggleSeparate(id_) {
-  var btnft = $("#separate_" + id_);
-  btnft.val(!btnft.val());
-}
-
-//点击了订阅内置Recipe
-function doSubscribe(obj, id_) {
-    var separate = $("#separate_" + id_).checked;
-
-    ajax({url:"/books/subscribe", type: "POST",
-        data: {id_: id_, separate: separate},
-        success: function (resp, xml) {
-            if (resp.status == "ok") {
-                appendSubscribedBook(id_, resp.title, resp.desc, resp.separate, resp.needs_subscription, resp.subscription_info);
-                var thisDiv = obj.parentNode.parentNode;
-                thisDiv.parentNode.removeChild(thisDiv);
-                var books_count = document.getElementById("mybooks").getElementsByClassName("book").length - 1;
-                if (books_count <= 0) {
-                    document.getElementById("nosub").style.display = 'block';
-                }
-                var books_count2 = document.getElementById("books").getElementsByClassName("book").length - 1;
-                if (books_count2 <= 0) {
-                    document.getElementById("nounsub").style.display = 'block';
-                }
-            } else {
-                alert("{{_('Cannot subscribe this book, Error:')}}" + resp.status);
-            }
-        },
-        fail: function (status) {
-            alert("{{_('Error when try to subscribe this book. Status:')}}" + status);
-        }
-    });
-}
-
-//点击了退订内置书籍
-function doUnsubscribe(obj, id_) {
-    ajax({url:"/books/unsubscribe", type: "POST",
-        data: {id_: id_},
-        success: function (resp, xml) {
-            if (resp.status == "ok") {
-                appendBookToBooks(id_, resp.title, resp.desc);
-                var thisDiv = obj.parentNode.parentNode;
-                thisDiv.parentNode.removeChild(thisDiv);
-                var books_count = document.getElementById("mybooks").getElementsByClassName("book").length - 1;
-                if (books_count <= 0) {
-                    document.getElementById("nosub").style.display = 'block';
-                }
-                var books_count2 = document.getElementById("books").getElementsByClassName("book").length - 1;
-                if (books_count2 <= 0) {
-                    document.getElementById("nounsub").style.display = 'block';
-                } else {
-                    document.getElementById("nounsub").style.display = 'none';
-                }
-            } else {
-                alert("{{_('Cannot unsubscribe this book, Error:')}}" + resp.status);
-            }
-        },
-        fail: function (status) {
-            alert("{{_('Error when try to unsubscribe this book. Status:')}}" + status);
-        }
-    });
-}
-
-//用户点击了删除自定义RSS按钮
-function delFeed(obj, feedid) {
-    ajax({url:"/feeds/delete", type: "POST",
-        data: {feedid: feedid},
-        success: function (resp, xml) {
-            if (resp.status == "ok") {
-                var thisDiv = obj.parentNode.parentNode;
-                thisDiv.parentNode.removeChild(thisDiv);
-            }
-            else {
-                alert("{{_('Cannot delete this feed, Error:')}}" + resp.status);
-            }
-        },
-        fail: function (status) {
-            alert("{{_('Error when try to delete this feed. Status:')}}" + status);
-        }
-    });
-}
-
-//用户点击了添加自定义RSS按钮
-function AddCustomRss() {
-    var title_to_add = $('#title_to_add');
-    var isfulltext = $('#fulltext');
-    var url_to_add = $('#url_to_add');
-    $.post("feeds/add", {title: title_to_add.val(), fulltext: isfulltext.val(), url: url_to_add.val()},
-        function (data) {
-            if (data.status == "ok") {
-                AppendCustomRssDiv(data.title, data.isfulltext, data.url, data.feedid);
-                title_to_add.val("");
-                url_to_add.val("");
-            } else {
-                alert("{{_('Cannot add this feed, Error:')}}" + data.status);
-            }
-        },
-    );
-}
-
-//新建一个自定义RSS书籍，添加到订阅列表
-function AppendCustomRssDiv(title, isfulltext, url, feedid) {
-    var row_str = ['<div class="book box"><div class="titleRow">'];
-    row_str.push(title);
-    if (isfulltext) {
-        row_str.push('<img alt="{{_("Fulltext")}}" src="static/fulltext.gif" border="0" />');
-    }
-    row_str.push('</div><div class="summaryRow"');
-    
-    var sumRowDiv = document.createElement("div");
-    sumRowDiv.className = "summaryRow";
-    var aa =   document.createElement("a");
-    aa.setAttribute("href", url);
-    aa.setAttribute("target", "_blank");
-    aa.style.textDecoration = "none";
-    aa.style.color = "grey";
-    if (url.length > 80) {
-        aa.appendChild(document.createTextNode(url.substr(0, 80)));
-    } else {
-        aa.appendChild(document.createTextNode(url));
-    }
-    sumRowDiv.appendChild(aa);
-    newFeedDiv.appendChild(sumRowDiv);
-
-    var newCornerDiv = document.createElement("div");
-    newCornerDiv.className = "cornerControls";
-
-    var atoShare = document.createElement("a");
-    atoShare.className = "actionButton";
-    atoShare.setAttribute("href", "#");
-    var sShare = "startShareRss('" + title + "', '" + url + "', ";
-    if (isfulltext){
-        sShare += "'true');return false;";
-    }else{
-        sShare += "'false');return false;";
-    }
-
-    atoShare.setAttribute("onclick", sShare);
-    atoShare.appendChild(document.createTextNode("{{_('Share')}}"));
-    newCornerDiv.appendChild(atoShare);
-
-    var atoDel = document.createElement("a");
-    atoDel.className = "actionButton";
-    atoDel.setAttribute("href", "#");
-    atoDel.setAttribute("onclick", "delFeed(this, " + feedid + ");return false;");
-    atoDel.appendChild(document.createTextNode("{{_('Delete')}}"));
-    newCornerDiv.appendChild(atoDel);
-    newFeedDiv.appendChild(newCornerDiv);
-
-    var cmdPanel = document.getElementById("divAddFeedCmdPanel");
-    cmdPanel.parentNode.appendChild(newFeedDiv, cmdPanel);
-}
-
-//添加一个内置书籍订阅
-function appendSubscribedBook(id_, title, desc, separate, needs_subscription, subscription_info) {
-    var sBookDiv = document.createElement("div");
-    sBookDiv.className = "book box";
-
-    var titleDiv = document.createElement("div");
-    titleDiv.className = "titleRow";
-    titleDiv.appendChild(document.createTextNode(title));
-    if (separate) {
-        titleDiv.appendChild(document.createTextNode(' '));
-        var img = document.createElement("img");
-        img.setAttribute("alt", "{{_('Separate')}}");
-        img.setAttribute("src", "static/separate.gif");
-        img.setAttribute("border", "0");
-        titleDiv.appendChild(img);
-    }
-    sBookDiv.appendChild(titleDiv);
-
-    var sumDiv = document.createElement("div");
-    sumDiv.className = "summaryRow";
-    if (desc.length > 80) {
-        sumDiv.appendChild(document.createTextNode(desc.substr(0, 80) + '...'));
-    } else {
-        sumDiv.appendChild(document.createTextNode(desc));
-    }
-    sBookDiv.appendChild(sumDiv);
-
-    var cornDiv = document.createElement("div");
-    cornDiv.className = "cornerControls";
-    if (needs_subscription) {
-        var a = document.createElement("a");
-        a.setAttribute("href", "/booklogininfo/" + id_);
-        a.className = "actionButton";
-        a.appendChild(document.createTextNode("{{_('Login Info')}}"));
-        if (!subscription_info) {
-            a.style.color = "red";
-        }
-        cornDiv.appendChild(a);
-    }
-    var aa = document.createElement("a");
-    aa.className = "actionButton";
-    aa.setAttribute("href", "#");
-    aa.setAttribute("onclick", "doUnsubscribe(this," + id_ + ");return false;");
-    aa.appendChild(document.createTextNode("{{_('Unsubscribe')}}"));
-    cornDiv.appendChild(aa);
-    sBookDiv.appendChild(cornDiv);
-
-    document.getElementById("nosub").style.display = 'none';
-    document.getElementById("mybooks").appendChild(sBookDiv);
-}
-
-function appendBookToBooks(id_, title, desc) {
-    var bookDiv = document.createElement("div");
-    bookDiv.className = "book box";
-
-    var titleDiv = document.createElement("div");
-    titleDiv.className = "titleRow";
-    titleDiv.appendChild(document.createTextNode(title + ' '));
-    var objIn = document.createElement("input");
-    objIn.setAttribute("type", "checkbox");
-    objIn.setAttribute("id", "separate_" + id_);
-    titleDiv.appendChild(objIn);
-    titleDiv.appendChild(document.createTextNode(' '));
-    var img = document.createElement("img");
-    img.setAttribute("alt", "{{_('Separate')}}");
-    img.setAttribute("src", "static/separate.gif");
-    img.setAttribute("border", "0");
-    img.setAttribute("onclick", "toggleSeparate(" + id_ + ");");
-    titleDiv.appendChild(img);
-    bookDiv.appendChild(titleDiv);
-
-    var sumDiv =  document.createElement("div");
-    sumDiv.className = "summaryRow";
-    if (desc.length > 80) {
-        sumDiv.appendChild(document.createTextNode(desc.substr(0, 80) + "..."));
-    } else {
-        sumDiv.appendChild(document.createTextNode(desc));
-    }
-    bookDiv.appendChild(sumDiv);
-
-    var cornDiv = document.createElement("div");
-    cornDiv.className = "cornerControls";
-    var a = document.createElement("a");
-    a.className = "actionButton";
-    a.setAttribute("href", "#");
-    a.setAttribute("onclick", "doSubscribe(this," + id_ + ");return false;");
-    a.appendChild(document.createTextNode("{{_('Subscribe')}}"));
-    cornDiv.appendChild(a);
-    bookDiv.appendChild(cornDiv);
-
-    document.getElementById("books").appendChild(bookDiv);
-};
-
-//Global variable
-var g_rss_categories = false;
-
-// user submit a rss to shared database
-function shareRssToServer(category, title, feedUrl, isfulltext) {
-    ajax({url:"/library", type: "POST",
-        data: {category: category, title: title, url: feedUrl, isfulltext: isfulltext, creator: window.location.hostname},
-        success: function (resp, xml) {
-            if (resp.status == "ok") {
-                var idx = g_rss_categories.indexOf(category);
-                if (g_rss_categories && (category != "")){
-                    if (idx > 0){
-                        g_rss_categories.splice(idx, 1);
-                    }
-                    if (idx != 0) {
-                        g_rss_categories.unshift(category);
-                    }
-                }
-                var modal = new tingle.modal({footer: true});
-                modal.setContent("{{_('<h1>Thanks</h1><p>Thank you for sharing, good luck will always with you.</p>')}}");
-                modal.addFooterBtn("{{_('Close')}}", 'actionButton', function() {
-                    modal.close();
-                });
-                modal.open();
-            } else {
-                alert("{{ _('Error:') }}" + resp.status);
-            }
-        },
-        fail: function (status) {
-            alert("{{ _('Error when try to fetch content of the category. Status:') }}" + status);
-        }
-    });
-}
-
-// show modal dialog
-function showShareDialog(title, feedUrl, isfulltext){
-    console.log(title);
-    var modal = new tingle.modal({footer:true});
-    var strContent = "{{_('<h1>Share links, share happiness</h1>')}}";
-    strContent += "{{_('<p>Category for [{0}]:</p>', title=title)|safe}}".format(title);
-    strContent += '<div class="select-editable"><select onchange="this.nextElementSibling.value=this.value"><option value=""></option>';
-    for (var idx in g_rss_categories){
-        strContent += '<option value="' + g_rss_categories[idx] + '">' + g_rss_categories[idx] + '</option>';
-    }
-    strContent += '</select><input type="text" name="category" value="" id="txt_share_rss_category" /></div>';
-    strContent += "{{_('<p>Please write a category in text field if the one you wish is not in the list.</p>')}}";
-
-    modal.setContent(strContent);
-    modal.addFooterBtn("{{_('Cancel')}}", 'actionButton', function() {
-        modal.close();
-    });
-    modal.addFooterBtn("{{_('Share')}}", 'actionButton act', function() {
-        var category = document.getElementById("txt_share_rss_category").value;
-        shareRssToServer(category, title, feedUrl, isfulltext);
-        modal.close();
-    });
-    modal.open();
-}
-
-// start display a dialog to share a link
-function startShareRss(title, feedUrl, isfulltext) {
-    // fetch categories from server
-    if (!g_rss_categories){
-        ajax({url: "/library/category", type: "GET",
-            success: function (resp, xml) {
-                if (resp.status == "ok") {
-                    g_rss_categories = resp.categories;
-                    showShareDialog(title, feedUrl, isfulltext);
-                } else {
-                    alert("{{_('Cannot add this feed, Error:')}}" + resp.status);
-                }
-            },
-            fail: function (status) {
-                alert("{{_('Error when try to add this feed. Status:')}}" + status);
-            }
-        });
-    }else{
-        showShareDialog(title, feedUrl, isfulltext);
-    }
-}
+var my_custom_rss_list = {{my_custom_rss|safe}};
+var my_uploaded_recipes = {{my_uploaded_recipes|safe}};
+var my_booked_recipes = {{my_booked_recipes|safe}};
 
 // return a appspotmail url for bookmarklet
 function appspotmailUrl(){
-    var parser = document.createElement('a');
-    parser.href = "{{subscribe_url}}";
+  var parser = document.createElement('a');
+  parser.href = "{{subscribe_url}}";
 
-    var host = parser.hostname;
-    var length = host.length;
-    if ((length > 12) && host.substr(length - 12, 12) == '.appspot.com'){
-        {% if user.name == "admin" -%}
-        var addr = "read@";
-        {% else -%}
-        var addr = "{{user.name}}__read@";
-        {% endif -%}
-        return addr + host.substr(0, length - 12) + '.appspotmail.com';
-    }else{
-        return "";
-    }
+  var host = parser.hostname;
+  var length = host.length;
+  if ((length > 12) && host.substr(length - 12, 12) == '.appspot.com'){
+    {% if session.get('role') == 'admin' -%}
+    var addr = "read@";
+    {% else -%}
+    var addr = "{{user.name}}__read@";
+    {% endif -%}
+    return addr + host.substr(0, length - 12) + '.appspotmail.com';
+  }else{
+    return "";
+  }
 }
-
 function insertBookmarkletGmailThis(){
-    var mailUrl = appspotmailUrl();
-    if (mailUrl == ""){
-        return;
-    }
+  var mailUrl = appspotmailUrl();
+  if (mailUrl == ""){
+    return;
+  }
 
-    var parent = document.getElementById('bookmarklet_content');
-    var theFirstChild = parent.firstChild;
-    var newElement = document.createElement("a");
-    newElement.className = "actionButton";
-    var href = "javascript:(function(){popw='';Q='';d=document;w=window;if(d.selection){Q=d.selection.createRange().text;}else if(w.getSelection){Q=w.getSelection();}else if(d.getSelection){Q=d.getSelection();}popw=w.open('http://mail.google.com/mail/s?view=cm&fs=1&tf=1&to=" + mailUrl +
-        "&su='+encodeURIComponent(d.title)+'&body='+encodeURIComponent(Q)+escape('%5Cn%5Cn')+encodeURIComponent(d.location)+'&zx=RANDOMCRAP&shva=1&disablechatbrowsercheck=1&ui=1','gmailForm','scrollbars=yes,width=550,height=400,top=100,left=75,status=no,resizable=yes');if(!d.all)setTimeout(function(){popw.focus();},50);})();";
-    newElement.setAttribute("href", href);
-    newElement.setAttribute("onclick", "return false;");
-    newElement.textContent = "{{_('Read with Kindle')}}";
-    parent.insertBefore(newElement, theFirstChild);
+  var parent = document.getElementById('bookmarklet_content');
+  var theFirstChild = parent.firstChild;
+  var newElement = document.createElement("a");
+  newElement.className = "actionButton";
+  var href = "javascript:(function(){popw='';Q='';d=document;w=window;if(d.selection){Q=d.selection.createRange().text;}else if(w.getSelection){Q=w.getSelection();}else if(d.getSelection){Q=d.getSelection();}popw=w.open('http://mail.google.com/mail/s?view=cm&fs=1&tf=1&to=" + mailUrl +
+      "&su='+encodeURIComponent(d.title)+'&body='+encodeURIComponent(Q)+escape('%5Cn%5Cn')+encodeURIComponent(d.location)+'&zx=RANDOMCRAP&shva=1&disablechatbrowsercheck=1&ui=1','gmailForm','scrollbars=yes,width=550,height=400,top=100,left=75,status=no,resizable=yes');if(!d.all)setTimeout(function(){popw.focus();},50);})();";
+  newElement.setAttribute("href", href);
+  newElement.setAttribute("onclick", "return false;");
+  newElement.textContent = "{{_('Read with Kindle')}}";
+  parent.insertBefore(newElement, theFirstChild);
 }
-insertBookmarkletGmailThis();
+</script>
+<script type="text/javascript" src="/static/base.js"></script>
+<script type="text/javascript">
+  $(document).ready(function(){
+  FetchBuiltinRecipesXml();
+  PopulateMyCustomRss(); //填充订阅区段
+  PopulateMySubscribed();
+  RegisterHideHambClick();
+  insertBookmarkletGmailThis();
+});
 </script>
 {% endblock -%}

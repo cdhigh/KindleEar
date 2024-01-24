@@ -4,9 +4,10 @@
 import datetime, json
 from operator import attrgetter
 from urllib.parse import urljoin, urlparse
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, current_app
 from flask_babel import gettext as _
 from apps.base_handler import *
+from apps.utils import str_to_bool
 from apps.back_end.db_models import *
 from lib.urlopener import UrlOpener
 
@@ -21,7 +22,7 @@ KINDLEEAR_SITE_KEY = "kindleear.lucky!"
 
 bpLibrary = Blueprint('bpLibrary', __name__)
 
-#网友共享的订阅源数据
+#给网友提供共享的订阅源数据
 @bpLibrary.route("/library", endpoint='SharedLibrary')
 @login_required()
 def SharedLibrary():
@@ -40,7 +41,7 @@ def SharedLibrary():
 
     return render_template('sharedlibrary.html', tab='shared', user=user, shared_data=sharedData, tips=tips)
 
-#分享了一个订阅源
+#用户分享了一个订阅源
 @bpLibrary.post("/library", endpoint='SharedLibraryPost')
 @login_required(forAjax=True)
 def SharedLibraryPost():
@@ -49,19 +50,23 @@ def SharedLibraryPost():
     category = form.get('category')
     title = form.get('title')
     feedUrl = form.get('url')
-    isfulltext = bool(form.get('isfulltext', '').lower() == 'true')
+    lang = form.get('lang', '').lower()
+    isfulltext = str_to_bool(form.get('isfulltext', ''))
     creator = form.get('creator')
 
     if not title or not feedUrl:
         return {'status': _("Title or Url is empty!")}
 
     opener = UrlOpener()
-    url = urljoin(KINDLEEAR_SITE, SHARED_LIBRARY_KINDLEEAR)
-    data = {'category': category, 'title': title, 'url': feedUrl, 'creator': creator,
+    if current_app.debug:
+        url = urljoin('http://localhost:5000/', SHARED_LIBRARY_KINDLEEAR)
+    else:
+        url = urljoin(KINDLEEAR_SITE, SHARED_LIBRARY_KINDLEEAR)
+    data = {'category': category, 'title': title, 'url': feedUrl, 'lang': lang, 'creator': creator,
         'isfulltext': 'true' if isfulltext else 'false', 'key': KINDLEEAR_SITE_KEY}
     result = opener.open(url, data)
     if result.status_code == 200:
-        return result.text
+        return json.loads(result.text)
     else:
         return {'status': 'Cannot submit data to {}, status: {}'.format(
             KINDLEEAR_SITE, UrlOpener.CodeMap(result.status_code))}
@@ -76,7 +81,10 @@ def SharedLibraryMgrPost(mgrType):
 
         opener = UrlOpener()
         path = SHARED_LIBRARY_MGR_KINDLEEAR + mgrType
-        url = urljoin(KINDLEEAR_SITE, path)
+        if current_app.debug:
+            url = urljoin('http://localhost:5000/', path)
+        else:
+            url = urljoin(KINDLEEAR_SITE, path)
         data = {'title': title, 'url': feedUrl, 'key': KINDLEEAR_SITE_KEY}
         result = opener.open(url, data)
         if result.status_code == 200:
@@ -96,7 +104,10 @@ def SharedLibraryCategory():
     respDict = {'status': 'ok', 'categories': []}
 
     opener = UrlOpener()
-    url = urljoin(KINDLEEAR_SITE, SHARED_LIBRARY_CAT_KINDLEEAR)
+    if current_app.debug:
+        url = urljoin('http://localhost:5000/', SHARED_LIBRARY_CAT_KINDLEEAR)
+    else:
+        url = urljoin(KINDLEEAR_SITE, SHARED_LIBRARY_CAT_KINDLEEAR)
     result = opener.open('{}?key={}'.format(url, KINDLEEAR_SITE_KEY))
 
     if result.status_code == 200:
@@ -121,9 +132,9 @@ def SharedLibrarykindleearAppspotCom():
     #本来想在服务器端分页的，但是好像CPU/数据库存取资源比带宽资源更紧张，所以干脆一次性提供给客户端，由客户端分页和分类
     #如果后续发现这样不理想，也可以考虑修改为服务器端分页
     timeOrg = datetime.datetime(1970, 1, 1)
-    sharedData = [{'t': d.title, 'u': d.url, 'f': d.isfulltext, 'c': d.category, 's': d.subscribed,
+    sharedData = [{'t': d.title, 'u': d.url, 'f': d.isfulltext, 'l': d.language, 'c': d.category, 's': d.subscribed,
             'd': int((d.created_time - timeOrg).total_seconds()),} 
-            for d in SharedRss.select().limit(1000).execute() ]
+            for d in SharedRss.select().limit(2000).execute()]
     
     return sharedData
 
@@ -139,10 +150,11 @@ def SharedLibrarykindleearAppspotComPost():
     category = form.get('category')
     title = form.get('title')
     url = form.get('url')
-    isfulltext = bool(form.get('isfulltext', '').lower() == 'true')
+    lang = form.get('lang', '').lower()
+    isfulltext = str_to_bool(form.get('isfulltext', ''))
     creator = form.get('creator')
 
-    respDict = {'status':'ok', 'category':category, 'title':title, 'url':url, 'isfulltext':isfulltext, 'creator':creator}
+    respDict = {'status':'ok', 'category':category, 'title':title, 'url':url, 'lang':lang, 'isfulltext':isfulltext, 'creator':creator}
 
     if not title or not url:
         respDict['status'] = _("Title or Url is empty!")
@@ -158,12 +170,13 @@ def SharedLibrarykindleearAppspotComPost():
     if dbItem:
         dbItem.title = title
         dbItem.isfulltext = isfulltext
+        dbItem.language = lang
         dbItem.invalid_report_days = 0
         if category:
             prevCategory = dbItem.category
             dbItem.category = category
     else:
-        dbItem = SharedRss(title=title, url=url, category=category, isfulltext=isfulltext, creator=creator,
+        dbItem = SharedRss(title=title, url=url, category=category, language=lang, isfulltext=isfulltext, creator=creator,
             subscribed=1, created_time=now, invalid_report_days=0, last_invalid_report_time=now)
     dbItem.save()
 
@@ -181,7 +194,7 @@ def SharedLibrarykindleearAppspotComPost():
         if not catItem: #没有其他订阅源使用此分类了
             sItem = SharedRssCategory.get_one(SharedRssCategory.name == prevCategory)
             if sItem:
-                sItem.delete()
+                sItem.delete_instance()
 
     return respDict
 
@@ -219,13 +232,13 @@ def SharedLibraryMgrkindleearAppspotComPost(mgrType):
 
         if dbItem.invalid_report_days > 5: #相当于半年内有5次源失效报告则自动删除
             category = dbItem.category
-            dbItem.delete()
+            dbItem.delete_instance()
 
             #如果删除的源是它所在的分类下面最后一个，则其分类信息也一并删除
             if SharedRss.get_one(SharedRss.category == category) is None:
                 cItem = SharedRssCategory.get_one(SharedRssCategory.name == category)
                 if cItem:
-                    cItem.delete()
+                    cItem.delete_instance()
         else:
             dbItem.last_invalid_report_time = now
             dbItem.save()

@@ -16,7 +16,7 @@
         </small></p>
         <div class="box-list">
             {% if user.white_lists -%}
-                {%- for lst in user.white_lists -%}
+                {%- for lst in user.white_lists() -%}
                     <div class="box">
                         {{ lst.mail }}
                         <div class="cornerControls">

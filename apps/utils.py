@@ -4,7 +4,6 @@
 
 import os, sys, hashlib, base64, random, datetime
 from urllib.parse import urlparse
-from config import *
 
 #当异常出现时，使用此函数返回真实引发异常的文件名，函数名和行号
 def get_exc_location():
@@ -27,7 +26,11 @@ def str_to_int(txt, default=0):
     except:
         return default
 
-def local_time(fmt="%Y-%m-%d %H:%M", tz=TIMEZONE):
+#字符串转bool(txt)
+def str_to_bool(txt):
+    return (txt or '').lower().strip() in ('yes', 'true', 'on', '1')
+
+def local_time(fmt="%Y-%m-%d %H:%M", tz=0):
     return (datetime.datetime.utcnow() + datetime.timedelta(hours=tz)).strftime(fmt)
 
 #隐藏真实email地址，使用星号代替部分字符
@@ -78,33 +81,33 @@ def new_secret_key(length=8):
     allchars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXZY0123456789'
     return ''.join([random.choice(allchars) for i in range(length)])
     
-def ke_encrypt(s, key):
-    return auth_code(s, key, 'ENCODE')
+def ke_encrypt(txt: str, key: str):
+    return _ke_auth_code(txt, key, 'ENCODE')
     
-def ke_decrypt(s, key):
-    return auth_code(s, key, 'DECODE')
+def ke_decrypt(txt: str, key: str):
+    return _ke_auth_code(txt, key, 'DECODE')
 
-def auth_code(string, key, operation='DECODE'):
-    import hashlib,base64
-    key = str(key) if key else ''
-    string = str(string)
-    key = hashlib.md5(key).hexdigest()
-    keya = hashlib.md5(key[:16]).hexdigest()
-    keyb = hashlib.md5(key[16:]).hexdigest()
-    cryptkey = keya + hashlib.md5(keya).hexdigest()
-    key_length = len(cryptkey)
+def _ke_auth_code(txt: str, key: str, operation: str='DECODE'):
+    if not txt:
+        return ''
+
+    key = hashlib.md5(key.encode('utf-8')).hexdigest()
+    keyA = hashlib.md5(key[:16].encode('utf-8')).hexdigest()
+    keyB = hashlib.md5(key[16:].encode('utf-8')).hexdigest()
+    cryptKey = keyA + hashlib.md5(keyA.encode('utf-8')).hexdigest()
+    keyLength = len(cryptKey)
     
     if operation == 'DECODE':
-        string = base64.urlsafe_b64decode(string)
+        txt = base64.urlsafe_b64decode(txt).decode('utf-8')
     else:
-        string = hashlib.md5(string + keyb).hexdigest()[:16] + string
-    string_length = len(string)
+        txt = hashlib.md5((txt + keyB).encode('utf-8')).hexdigest()[:16] + txt
+    stringLength = len(txt)
     
     result = ''
-    box = range(256)
+    box = list(range(256))
     rndkey = {}
     for i in range(256):
-        rndkey[i] = ord(cryptkey[i % key_length])
+        rndkey[i] = ord(cryptKey[i % keyLength])
     
     j = 0
     for i in range(256):
@@ -113,17 +116,18 @@ def auth_code(string, key, operation='DECODE'):
         box[i] = box[j]
         box[j] = tmp
     a = j = 0
-    for i in range(string_length):
+    for i in range(stringLength):
         a = (a + 1) % 256
         j = (j + box[a]) % 256
         tmp = box[a]
         box[a] = box[j]
         box[j] = tmp
-        result += chr(ord(string[i]) ^ (box[(box[a] + box[j]) % 256]))
+        result += chr(ord(txt[i]) ^ (box[(box[a] + box[j]) % 256]))
+
     if operation == 'DECODE':
-        if result[:16] == hashlib.md5(result[16:] + keyb).hexdigest()[:16]:
+        if result[:16] == hashlib.md5((result[16:] + keyB).encode('utf-8')).hexdigest()[:16]:
             return result[16:]
         else:
             return ''
     else:
-        return base64.urlsafe_b64encode(result.encode('utf-8'))
+        return base64.urlsafe_b64encode(result.encode('utf-8')).decode('utf-8')

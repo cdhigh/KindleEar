@@ -10,7 +10,7 @@ from config import *
 
 bpSetting = Blueprint('bpSetting', __name__)
 
-supported_languages = ['zh_cn', 'tr_tr', 'en']
+supported_languages = ['zh', 'tr_tr', 'en']
 
 #各种语言的语种代码和文字描述的对应关系
 def LangMap(): 
@@ -66,25 +66,37 @@ def SettingPost():
         user.book_type = form.get('book_type', 'epub')
         user.device = form.get('device_type', 'kindle')
         user.use_title_in_feed = bool(form.get('title_from') == 'feed')
-        user.title_fmt = form.get('title_fmt')
+        user.title_fmt = form.get('title_fmt', '')
         alldays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         user.send_days = [day for day in alldays if form.get(day)]
         user.merge_books = bool(form.get('merge_books'))
-        user.book_mode = form.get('bookmode')
-        user.remove_hyperlinks = form.get('removehyperlinks')
-        user.author_format = form.get('author_format')
+        user.book_mode = form.get('book_mode', '')
+        user.remove_hyperlinks = form.get('removehyperlinks', '')
+        user.author_format = form.get('author_format', '')
+        user.book_title = myTitle
+        user.book_language = form.get("book_language", "en")
+        user.keep_image = bool(form.get("keep_image"))
+        user.oldest_article = int(form.get('oldest', 7))
+        enable_custom_rss = bool(form.get('enable_rss'))
+        user.enable_custom_rss = enable_custom_rss
         user.save()
-
-        myFeedBook = user.my_rss_book
-        if myFeedBook:
-            myFeedBook.language = form.get("book_language", "en-us")
-            myFeedBook.title = myTitle
-            myFeedBook.keep_image = bool(form.get("keep_image"))
-            myFeedBook.oldest_article = int(form.get('oldest', 7))
-            myFeedBook.users = [user.name] if form.get('enable_rss') else []
-            myFeedBook.save()
         tips = _("Settings Saved!")
 
+        #根据自定义RSS的使能设置，将自定义RSS添加进订阅列表或从订阅列表移除
+        userName = user.name
+        if enable_custom_rss:
+            for rss in user.all_custom_rss()[::-1]:
+                recipe_id = f'custom:{rss.key_or_id_string}'
+                if not BookedRecipe.get_one(BookedRecipe.recipe_id == recipe_id):
+                    BookedRecipe(recipe_id=recipe_id, separated=False, user=userName, title=rss.title, description=rss.description,
+                        time=datetime.datetime.utcnow()).save()
+        else:
+            for rss in user.all_custom_rss():
+                recipe_id = f'custom:{rss.key_or_id_string}'
+                dbInst = BookedRecipe.get_one(BookedRecipe.recipe_id == recipe_id)
+                if dbInst:
+                    dbInst.delete_instance()
+    
     return render_template('setting.html', tab='set', user=user, tips=tips, mailSender=SRC_EMAIL, langMap=LangMap())
 
 #设置国际化语种

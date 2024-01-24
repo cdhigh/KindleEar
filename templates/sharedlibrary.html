@@ -302,7 +302,7 @@
     doSearch();
 
     function addFeed(title, feedurl, isfulltext) {
-        ajax({url: "/feeds/add", type: "POST",
+        ajax({url: "/customrss/add", type: "POST",
             data: {title: title, fulltext: isfulltext, url: feedurl, fromsharedlibrary: 'true'},
             success: function (resp, xml) {
                 if (resp.status == "ok") {

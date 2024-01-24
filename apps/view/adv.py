@@ -9,7 +9,7 @@ from flask_babel import gettext as _
 from PIL import Image
 from apps.base_handler import *
 from apps.back_end.db_models import *
-from apps.utils import local_time, ke_encrypt, ke_decrypt
+from apps.utils import local_time, ke_encrypt, ke_decrypt, str_to_bool
 from lib.pocket import Pocket
 from lib.urlopener import UrlOpener
 from config import *
@@ -26,9 +26,15 @@ def AdvSettings():
 @login_required()
 def AdvDeliverNow():
     user = get_login_user()
-    books = [item for item in Book.get_all() if user.name in item.users]
+    #如果使能了自定义RSS推送，则booked_recipe[]里面已经有自定义RSS的信息了，
+    #否则需要手动添加进去，因为“现在推送”更多的是临时性的，调试性的
+    if user.enable_custom_rss:
+        recipes = user.get_booked_recipe()
+    else:
+        recipes = user.all_custom_rss() + user.get_booked_recipe()
+
     return render_template('advdelivernow.html', tab='advset', user=user, 
-        advCurr='delivernow', books=books, booksnum=len(books))
+        advCurr='delivernow', recipes=recipes)
 
 #设置邮件白名单
 @bpAdv.route("/advwhitelist", endpoint='AdvWhiteList')
@@ -155,12 +161,12 @@ def AdvDel():
     if urlId:
         flt = UrlFilter.get_by_id_or_none(urlId)
         if flt:
-            flt.delete()
+            flt.delete_instance()
         return redirect(url_for("bpAdv.AdvUrlFilter"))
     if wList:
         wlist = WhiteList.get_by_id_or_none(wList)
         if wlist:
-            wlist.delete()
+            wlist.delete_instance()
         return redirect(url_for("bpAdv.AdvWhiteList"))
     return redirect(url_for("bpAdmin.Admin"))
 
@@ -175,32 +181,31 @@ def AdvImport(tips=None):
 @login_required()
 def AdvImportPost():
     import opml
+    user = get_login_user()
     upload = request.files.get('import_file')
     defaultIsFullText = bool(request.form.get('default_is_fulltext')) #默认是否按全文RSS导入
     if upload:
-        user = get_login_user()
         try:
-            rssList = opml.from_string(upload.file.read())
+            rssList = opml.from_string(upload.read())
         except Exception as e:
             return render_template('advimport.html', tab='advset', user=user, advCurr='import', tips=str(e))
         
         for o in walkOpmlOutline(rssList):
             title, url, isfulltext = o.text, urllib.unquote_plus(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
-            if isfulltext.lower() in ('true', '1'):
-                isfulltext = True
-            elif isfulltext.lower() in ('false', '0'):
-                isfulltext = False
+            if isfulltext:
+                isfulltext = str_to_bool(isfulltext)
             else:
                 isfulltext = defaultIsFullText
                 
             if title and url: #查询是否有重复的
-                rss = [item for item in user.all_custom_rss if item.url == url]
+                rss = [item for item in user.all_custom_rss() if item.url == url]
                 if rss:
+                    rss = rss[0]
                     rss.title = title
                     rss.isfulltext = isfulltext
                     rss.save()
                 else:
-                    Feed(title=title, url=url, book=user.my_rss_book.reference_key_or_id, isfulltext=isfulltext,
+                    Recipe(title=title, url=url, user=user.name, isfulltext=isfulltext, type_='custom',
                         time=datetime.datetime.utcnow()).save()
                         
         return redirect(url_for("bpSubscribe.MySubscription"))

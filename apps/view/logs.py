@@ -64,10 +64,10 @@ def RemoveLogs():
     cnt = 0
     for item in DeliverLog.get_all(DeliverLog.datetime < (datetime.datetime.utcnow() - datetime.timedelta(days=30))):
         cnt += 1
-        item.delete()
+        item.delete_instance()
     for item in LastDelivered.get_all(LastDelivered.datetime < (datetime.datetime.utcnow() - datetime.timedelta(days=90))):
         cnt += 1
-        item.delete()
+        item.delete_instance()
 
     return "{} lines delivery log removed.<br />".format(cnt)
 
@@ -82,7 +82,7 @@ def LastDeliveredAjaxPost(mgrType):
         id_ = request.form.get('id_')
         dbItem = LastDelivered.get_by_id_or_none(id_)
         if dbItem:
-            dbItem.delete()
+            dbItem.delete_instance()
             return {'status': 'ok'}
         else:
             return {'status': _('The LastDelivered item ({}) not exist!').format(id_)}

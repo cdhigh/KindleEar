@@ -10,7 +10,7 @@ from email.utils import parseaddr, collapse_rfc2231_value
 from bs4 import BeautifulSoup
 from flask import Blueprint, request
 from apps.back_end.task_queue_adpt import create_http_task
-from apps.back_end.db_models import KeUser, Book, WhiteList
+from apps.back_end.db_models import KeUser, WhiteList
 from apps.base_handler import *
 from apps.utils import local_time
 from apps.back_end.send_mail_adpt import send_to_kindle

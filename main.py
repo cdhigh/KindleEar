@@ -85,6 +85,9 @@ def Home():
 @app.route('/images/<path:image_file>')
 def ImageFileRoute(image_file):
     return send_from_directory('images', image_file)
+@app.route('/favicon.ico')
+def FaviconIcon():
+    return send_from_directory('static', 'favicon.ico')
 
 @app.before_request
 def BeforeRequest():

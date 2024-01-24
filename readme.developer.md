@@ -44,6 +44,10 @@
 # KindleEar额外自带的Python库，这些库不用pip安装，不在requirements.txt里面
 * readability-lxml: 修改了其htmls.py|shorten_title()
 
+# 关于翻译的注意事项
+* javascript的翻译没有采用其他复杂或引入其他依赖的方案，而是简单粗暴的在base.html里面将要翻译的字段预先翻译，
+然后保存到一个全局字典
+
 # Python托管平台的一些了解
 * [appengine](https://cloud.google.com)：必须绑定信用卡，但有免费额度，有收发邮件服务，任务队列，后台进程
 * [Heroku](https://www.heroku.com): 没有免费额度，入门套餐也需要付费

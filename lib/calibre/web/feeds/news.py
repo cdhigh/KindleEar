@@ -175,7 +175,7 @@ class BasicNewsRecipe(Recipe):
     #: the algorithms from the readability project. Setting this to True, means
     #: that you do not have to worry about cleaning up the downloaded HTML
     #: manually (though manual cleanup will always be superior).
-    auto_cleanup = True
+    auto_cleanup = False
 
     #: Specify elements that the auto cleanup algorithm should never remove.
     #: The syntax is a XPath expression. For example::

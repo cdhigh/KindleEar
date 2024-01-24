@@ -84,15 +84,13 @@ def InitialAdminAccount():
     if u:
         return True
 
-    myFeeds = Book(title="KindleEar", description="RSS from KindleEar", builtin=False, 
-            keep_image=True, oldest_article=7, needs_subscription=False, separate=False)
-    myFeeds.save()
     secretKey = new_secret_key()
     shareKey = new_secret_key()
     password = hashlib.md5((ADMIN_NAME + secretKey).encode()).hexdigest()
     au = KeUser(name=ADMIN_NAME, passwd=password, kindle_email='', enable_send=False, send_time=8, 
         timezone=TIMEZONE, book_type="epub", device='kindle', expires=None, merge_books=False, 
-        own_feeds=myFeeds.reference_key_or_id, secret_key=secretKey, expiration_days=0, share_key=shareKey)
+        secret_key=secretKey, expiration_days=0, share_key=shareKey, book_title='KindleEar', 
+        book_language='en')
     au.save()
     return False
 

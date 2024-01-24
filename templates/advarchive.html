@@ -4,6 +4,10 @@
 {% endblock -%}
 
 {% block advcontent -%}
+{% set evernote = shareLinks.get('evernote', {}) %}
+{% set wiz = shareLinks.get('wiz', {}) %}
+{% set instapaper = shareLinks.get('instapaper', {}) %}
+{% set pocket = shareLinks.get('pocket', {}) %}
 <form class="pure-form" action="" method="POST">
   <fieldset>
     <legend><h3>{{_("Archive")}}</h3></legend>

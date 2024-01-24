@@ -4,109 +4,34 @@
 {% endblock -%}
 {% block advcontent -%}
 <div class="pure-form pure-form-aligned">
-    <fieldset>
-        <legend><h3>{{ _("Deliver now") }}</h3></legend>
-        <p><small>{{ _("Deliver selected books now.") }}</small></p>
-        <div class="box-list">
-            {% if (booksnum == 0 and not books) or (booksnum == 1 and books[0].builtin == False and books[0].feeds.count() == 0) %}
-                <div class="box">{{ _("No books are subscribed.") }}</div>
-            {% endif %}
-            {% if booksnum == 1 and books[0].builtin == False -%}
-                {% for item in books[0].feeds %}
-                <label for="{{ item.key_or_id_string }}" class="pure-checkbox box">
-                    <input id="{{ item.key_or_id_string }}" bookid="{{ books[0].key_or_id_string }}" type="checkbox" checked="1" onclick="UpdateDeliverFeedLink();" />
-                    <span>{{item.title}}</span>
-                </label>
-                {% endfor %}
-                {% if books[0].feeds.count() > 0 %}
-                <div class="cornerControls" style="padding:.5em 0;text-align:center;">
-                    <a href="#" class="actionButton" onclick="SelectAll();UpdateDeliverFeedLink();return false;">{{ _("Select all") }}</a>
-                    <a href="#" class="actionButton" onclick="SelectNone();UpdateDeliverFeedLink();return false;">{{ _("Select none") }}</a>
-                </div>
-                {% endif %}
-            {%- elif booksnum > 0 -%}
-                {% for item in books %}
-                <label for="{{ item.key_or_id_string }}" class="pure-checkbox box">
-                    <input id="{{ item.key_or_id_string }}" type="checkbox" checked="1" onclick="UpdateDeliverLink();" />
-                    <span>{{ item.title }}</span>
-                </label>
-                {% endfor %}
-                <div class="cornerControls" style="padding:.5em 0;text-align:center;">
-                    <a href="#" class="actionButton" onclick="SelectAll();UpdateDeliverLink();return false;">{{ _("Select all") }}</a>
-                    <a href="#" class="actionButton" onclick="SelectNone();UpdateDeliverLink();return false;">{{ _("Select none") }}</a>
-                </div>
-            {%- endif %}
-        </div>
-        {% if booksnum > 0 and ((books[0].builtin == True and books) or ((books[0].builtin == False and books[0].feeds.count() >= 1) or booksnum >= 2)) %}
-        <div style="text-align:center;">
-            <a href="/deliver?u={{session.get('userName', '')}}" value="{{ _('Deliver') }}" id="deliverButton" class="pure-button pure-button-primary pure-input-rounded">{{ _('Deliver') }}</a>
-        </div>
-        {% endif %}
-    </fieldset>
+  <fieldset>
+    <legend><h3>{{ _("Deliver now") }}</h3></legend>
+    <p><small>{{ _("Deliver selected recipes now") }}</small></p>
+    <div class="box-list">
+      {% if recipes|length == 0 -%}
+        <div class="box">{{ _("There are no books subscribed") }}</div>
+      {% endif -%}
+      {% for item in recipes -%}
+      {% if item|attr('recipe_id') -%}
+        {% set recipe_id = item.recipe_id -%}
+      {% else -%}
+        {% set recipe_id = 'custom:' + item.key_or_id_string -%}
+      {% endif -%}
+      <label for="{{recipe_id}}" class="pure-checkbox box">
+        <input id="{{recipe_id}}" type="checkbox" checked="1" onclick="UpdateDeliverRecipeLink();" />
+        <span>{{item.title}}</span>
+      </label>
+      {% endfor -%}
+      {% if recipes|length > 0 -%}
+      <div class="cornerControls" style="padding:.5em 0;text-align:center;">
+        <a href="#" class="actionButton" onclick="SelectDeliverAll();UpdateDeliverRecipeLink();return false;">{{ _("Select all") }}</a>
+        <a href="#" class="actionButton" onclick="SelectDeliverNone();UpdateDeliverRecipeLink();return false;">{{ _("Select none") }}</a>
+      </div>
+      {% endif -%}
+    </div>
+    <div style="text-align:center;">
+        <a href="/deliver?u={{session.get('userName', '')}}" value="{{ _('Deliver') }}" id="deliverButton" class="pure-button pure-button-primary pure-input-rounded">{{ _('Deliver') }}</a>
+    </div>
+  </fieldset>
 </div>
 {% endblock -%}
-
-{% block javascriptinhead %}
-<script type="text/javascript">
-    //Update link of deliver button for feeds (custom rss)
-    function UpdateDeliverFeedLink() {
-        var feedIds = [];
-        var inputs = document.getElementsByTagName("input");
-        var bookId = "";
-        var deliverButton = document.getElementById("deliverButton");
-        var inputsNum = inputs.length;
-        for (var i = 0; i < inputsNum; i++) {
-            if (bookId == "") {
-                bookId = inputs[i].attributes["bookid"].value;
-            }
-            if ((inputs[i].type == "checkbox") && inputs[i].checked) {
-                feedIds.push(inputs[i].attributes["id"].value);
-            }
-        }
-        var feedsNum = feedIds.length;
-        if ((feedsNum > 0) && (feedsNum != inputsNum)) {
-            deliverButton.href = "/deliver?u={{session.get('userName', '')}}&id_=" + bookId + "&feedIds=" + feedIds.join(",");
-        } else {
-            deliverButton.href = "/deliver?u={{session.get('userName', '')}}&id_=" + bookId;
-        }
-    }
-
-    //Update link of deliver button for books
-    function UpdateDeliverLink() {
-        var booksId = [];
-        var inputs = document.getElementsByTagName("input");
-        var deliverButton = document.getElementById("deliverButton");
-        var inputsNum = inputs.length;
-        for (var i = 0; i < inputsNum; i++) {
-            if ((inputs[i].type == "checkbox") && inputs[i].checked) {
-                booksId.push(inputs[i].attributes["id"].value);
-            }
-        }
-        var booksNum = booksId.length;
-        if ((booksNum > 0) && (booksNum != inputsNum)) {
-            deliverButton.href = "/deliver?u={{session.get('userName', '')}}&id_=" + booksId.join(",");
-        } else {
-            deliverButton.href = "/deliver?u={{session.get('userName', '')}}";
-        }
-    };
-
-    function SelectAll() {
-        var inputs = document.getElementsByTagName("input");
-        for (var i = 0; i < inputs.length; i++) {
-            if (inputs[i].type == "checkbox") {
-                inputs[i].checked = true;
-            }
-        }
-    };
-
-    function SelectNone() {
-        var inputs = document.getElementsByTagName("input");
-        var deliverButton = document.getElementById("deliverButton");
-        for (var i = 0; i < inputs.length; i++) {
-            if (inputs[i].type == "checkbox") {
-                inputs[i].checked = false;
-            }
-        }
-    };
-</script>
-{% endblock %}
