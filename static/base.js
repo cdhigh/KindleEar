@@ -1,7 +1,13 @@
+//Add a method 'format' to string
+//usage: "{0}, {1}".format('tx', 'txt')
+String.prototype.format = function() {
+  var args = arguments;
+  return this.replace(/{(\d+)}/g, function(match, number) {
+    return typeof args[number] != 'undefined' ? args[number] : match;
+  });
+};
 
-///[start] my.html使用的js部分
-//连接服务器获取内置recipe列表，并按照语言建立一个字典，字典键为语言，值为信息字典列表
-var all_builtin_recipes = {};
+///[start] my.html
 var show_menu_box = false;
 
 //注册页面点击事件，任意位置点击隐藏弹出来的ABC圆形按钮
@@ -13,10 +19,10 @@ function RegisterHideHambClick() {
   });
 }
 
-//连接服务器获取内置的Recipe列表
+//连接服务器获取内置recipe列表，并按照语言建立一个字典all_builtin_recipes，字典键为语言，值为信息字典列表
 function FetchBuiltinRecipesXml() {
   $.get('/builtin_recipes.xml?x=1',function(xml) {
-    var user_lang = BrowserLanguage();
+    var userLang = BrowserLanguage();
     $(xml).find("recipe").each(function() {
       var title=$(this).attr("title");
       var language=$(this).attr("language").toLowerCase();
@@ -30,18 +36,18 @@ function FetchBuiltinRecipesXml() {
       if (dashIndex != -1) {
         language = language.substring(0, dashIndex);
       }
-      const languageNames = new Intl.DisplayNames([user_lang], {type: 'language'}); //将语种代码翻译为各国语言词汇
+      const languageNames = new Intl.DisplayNames([userLang], {type: 'language'}); //将语种代码翻译为各国语言词汇
 
       if (!all_builtin_recipes[language]) {
         all_builtin_recipes[language] = [];
-        var $new_language = $('<option value="' + language +'">' + languageNames.of(language) + '</option>');
-        $("#language_pick").append($new_language);
+        var $newLangOpt = $('<option value="' + language +'">' + languageNames.of(language) + '</option>');
+        $("#language_pick").append($newLangOpt);
       }
       all_builtin_recipes[language].push({title: title, description: description, needs_subscription: needs_subscription, id: id});
     });
     //自动触发和用户浏览器同样语种的选项
-    $("#language_pick").find("option[value='" + user_lang + "']").attr("selected", true);
-    $("#language_pick").val(user_lang).trigger('change');
+    $("#language_pick").find("option[value='" + userLang + "']").attr("selected", true);
+    $("#language_pick").val(userLang).trigger('change');
   });
   PopulateLibrary('');
 }
@@ -101,7 +107,7 @@ function AppendRecipeToLibrary(div, id) {
   }
   var title = recipe.title;
   var row_str = ['<div class="book box"><div class="titleRow">'];
-  if (id.startsWith("uploaded:")) {
+  if (id.startsWith("upload:")) {
     row_str.push('<i class="iconfont icon-upload icon-as-tag"></i>' + title);
   } else {
     row_str.push(title);
@@ -111,12 +117,12 @@ function AppendRecipeToLibrary(div, id) {
   row_str.push('</div>');
 
   hamb_arg = [];
-  if (id.startsWith("uploaded:")) { //增加汉堡按钮弹出菜单代码
+  if (id.startsWith("upload:")) { //增加汉堡按钮弹出菜单代码
     hamb_arg.push({klass: 'btn-A', title: i18n.delete, icon: 'icon-delete', act: "DeleteUploadRecipe('" + id + "','" + title + "')"});
   }
-  hamb_arg.push({klass: 'btn-B', title: i18n.viewSrc, icon: 'icon-sourcecode', act: "/viewsrc/" + id.replace(':', '__')});
+  hamb_arg.push({klass: 'btn-B', title: i18n.viewSrc, icon: 'icon-source', act: "/viewsrc/" + id.replace(':', '__')});
   hamb_arg.push({klass: 'btn-C', title: i18n.subscriSep, icon: 'icon-push', act: "SubscribeRecipe('" + id + "',1)"});
-  hamb_arg.push({klass: 'btn-D', title: i18n.subscri, icon: 'icon-subscribe', act: "SubscribeRecipe('" + id + "',0)"});
+  hamb_arg.push({klass: 'btn-D', title: i18n.subscribe, icon: 'icon-subscribe', act: "SubscribeRecipe('" + id + "',0)"});
   
   row_str.push(AddHamburgerButton(hamb_arg));
   row_str.push('</div>');
@@ -141,7 +147,7 @@ function AddHamburgerButton(arg) {
     btn_str.push('" title="');
     btn_str.push(title + '"');
     if (act.startsWith('/') || act.startsWith('http')) { //嵌套一个超链接，打开新窗口
-      btn_str.push('><a href="' + act + '" target="_blank"><i class="iconfont ');
+      btn_str.push('><a href="' + act + '" target="_blank" style="text-decoration:none;"><i class="iconfont ');
       btn_str.push(icon + '"></i></a>');
     } else {
       btn_str.push(' onclick="');
@@ -150,6 +156,7 @@ function AddHamburgerButton(arg) {
     }
     btn_str.push('</button>');
   }
+  btn_str.push('</div>')
   return btn_str.join('');
 }
 
@@ -176,7 +183,8 @@ function PopulateMyCustomRss() {
     var row_str = ['<div class="book box"><div class="titleRow">'];
     row_str.push(title);
     if (isfulltext) {
-      row_str.push('<img alt="' + i18n.fulltext + '" src="static/fulltext.gif" border="0" />');
+      row_str.push('<sup>Emb</sup>');
+      //row_str.push('<img alt="' + i18n.fulltext + '" src="static/fulltext.gif" border="0" />');
     }
     row_str.push('</div><div class="summaryRow">');
     if (url.length > 100) {
@@ -188,8 +196,9 @@ function PopulateMyCustomRss() {
 
     hamb_arg = [];
     //汉堡按钮弹出菜单代码
-    hamb_arg.push({klass: 'btn-A', title: i18n.delete, icon: 'icon-delete', act: "DeleteCustomRss('" + id + "','" + title + "')"});
-    hamb_arg.push({klass: 'btn-B', title: i18n.share, icon: 'icon-share', act: "StartShareRss('" + title + "', '" + url + "', " + isfulltext + ")"});
+    var id_title_str = id + "','" + title + "')\"";
+    hamb_arg.push({klass: 'btn-A', title: i18n.delete, icon: 'icon-delete', act: "DeleteCustomRss('" + id_title_str});
+    hamb_arg.push({klass: 'btn-B', title: i18n.share, icon: 'icon-share', act: "StartShareRss('" + id_title_str});
     row_str.push(AddHamburgerButton(hamb_arg));
     row_str.push('</div>');
     //console.log(row_str.join(''));
@@ -211,13 +220,14 @@ function PopulateMySubscribed() {
     var separated = recipe.separated;
     var recipe_id = recipe.recipe_id;
     var row_str = ['<div class="book box"><div class="titleRow">'];
-    if (recipe_id.startsWith("uploaded:")) {
+    if (recipe_id.startsWith("upload:")) {
       row_str.push('<i class="iconfont icon-upload icon-as-tag"></i>' + title);
     } else {
       row_str.push(title);
     }
     if (separated) {
-      row_str.push('<img alt="' + i18n.separated + '" src="static/separate.gif" border="0" />');
+      //row_str.push('<img alt="' + i18n.separated + '" src="static/separate.gif" border="0" />');
+      row_str.push('<sup>Sep</sup>');
     }
     row_str.push('</div><div class="summaryRow">');
     if (desc.length > 100) {
@@ -399,8 +409,8 @@ function AddCustomRss() {
 var g_rss_categories = false;
 
 //将一个自定义RSS分享到服务器
-function ShareRssToServer(category, title, feedUrl, isfulltext, lang) {
-  $.post("/library", {category: category, title: title, url: feedUrl, isfulltext: isfulltext, lang: lang, creator: window.location.hostname}, function (data) {
+function ShareRssToServer(id, title, category, lang) {
+  $.post("/library", {id: id, category: category, title: title, lang: lang, creator: window.location.hostname}, function (data) {
     if (data.status == "ok") {
       var idx = g_rss_categories.indexOf(category);
       if (g_rss_categories && (category != "")) { //将刚才使用到的分类移动到开头
@@ -424,11 +434,12 @@ function ShareRssToServer(category, title, feedUrl, isfulltext, lang) {
 }
 
 //显示一个分享自定义RSS的对话框
-function ShowShareDialog(title, feedUrl, isfulltext){
+function ShowShareDialog(id, title){
   var all_languages = ['aa','ab','af','ak','sq','am','ar','an','hy','as','av','ae','ay','az','ba','bm','eu','be','bn','bh','bi','bo','bs','br','bg','my','ca','cs','ch','ce','zh','cu','cv','kw','co','cr','cy','cs','da','de','dv','nl','dz','el','en','eo','et','eu','ee','fo','fa','fj','fi','fr','fy','ff','ga','de','gd','ga','gl','gv','el','gn','gu','ht','ha','he','hz','hi','ho','hr','hu','hy','ig','is','io','ii','iu','ie','ia','id','ik','is','it','jv','ja','kl','kn','ks','ka','kr','kk','km','ki','rw','ky','kv','kg','ko','kj','ku','lo','la','lv','li','ln','lt','lb','lu','lg','mk','mh','ml','mi','mr','ms','mi','mk','mg','mt','mn','mi','ms','my','na','nv','nr','nd','ng','ne','nl','nn','nb','no','oc','oj','or','om','os','pa','fa','pi','pl','pt','ps','qu','rm','ro','ro','rn','ru','sg','sa','si','sk','sk','sl','se','sm','sn','sd','so','st','es','sq','sc','sr','ss','su','sw','sv','ty','ta','tt','te','tg','tl','th','bo','ti','to','tn','ts','tk','tr','tw','ug','uk','ur','uz','ve','vi','vo','cy','wa','wo','xh','yi','yo','za','zh','zu'];
   var languages = ['en','fr','zh','es','pt','de','it','ja','ru','tr','ko','ar','cs','nl','el','hi','ms','bn','fa','ur','sw','vi','pa','jv','tl','ha'];
-  var modal = new tingle.modal({footer:true});
+  var modal = new tingle.modal({footer: true});
   var ostr = ['<h2>' + i18n.shareLinksHappiness + '</h2>'];
+  //自定义RSS，需要选择分类和语言
   ostr.push('<div class="pure-g">');
   ostr.push('<div class="pure-u-1-2"><p>' + i18n.category + '</p></div>');
   ostr.push('<div class="pure-u-1-2"><p>' + i18n.language + '</p></div>');
@@ -446,7 +457,7 @@ function ShowShareDialog(title, feedUrl, isfulltext){
   ostr.push('</select><input type="text" name="category" value="' + BrowserLanguage() + '" id="txt_share_rss_lang" /></div></div>');
   ostr.push('</div>');
   ostr.push('<p>' + i18n.shareCatTips + '</p>');
-
+  
   modal.setContent(ostr.join(''));
   modal.addFooterBtn(i18n.cancel, 'actionButton', function() {
     modal.close();
@@ -455,7 +466,7 @@ function ShowShareDialog(title, feedUrl, isfulltext){
     var category = $("#txt_share_rss_category").val();
     var lang = $("#txt_share_rss_lang").val().toLowerCase();
     if (all_languages.indexOf(lang) != -1) {
-      ShareRssToServer(category, title, feedUrl, isfulltext, lang);
+      ShareRssToServer(id, title, category, lang);
       modal.close();
     } else {
       alert(i18n.langInvalid);
@@ -465,19 +476,19 @@ function ShowShareDialog(title, feedUrl, isfulltext){
 }
 
 //点击分享自定义RSS
-function StartShareRss(title, feedUrl, isfulltext) {
+function StartShareRss(id, title) {
   //从服务器获取分类信息
   if (!g_rss_categories){
     $.get("/library/category", function(data) {
       if (data.status == "ok") {
         g_rss_categories = data.categories;
-        ShowShareDialog(title, feedUrl, isfulltext);
+        ShowShareDialog(id, title);
       } else {
         alert(i18n.cannotAddRss + data.status);
       }
     });
-  }else{
-    ShowShareDialog(title, feedUrl, isfulltext);
+  } else {
+    ShowShareDialog(id, title);
   }
 }
 
@@ -560,6 +571,32 @@ function DeleteUploadRecipe(id, title) {
   });
 }
 
+//在页面下发插入bookmarklet
+function insertBookmarkletGmailThis(subscribeUrl, mailPrefix) {
+  var parser = $('<a>', {
+    href: subscribeUrl
+  });
+  var host = parser.prop('hostname');
+  var length = host.length;
+  var addr = '';
+  if ((length > 12) && host.substr(length - 12, 12) == '.appspot.com') {
+    addr = mailPrefix + 'read@' + host.substr(0, length - 12) + '.appspotmail.com';
+  } else {
+    return;
+  }
+  
+  var parent = $('#bookmarklet_content');
+  var newElement = $('<a>', {
+    class: 'actionButton',
+    href: "javascript:(function(){popw='';Q='';d=document;w=window;if(d.selection){Q=d.selection.createRange().text;}else if(w.getSelection){Q=w.getSelection();}else if(d.getSelection){Q=d.getSelection();}popw=w.open('http://mail.google.com/mail/s?view=cm&fs=1&tf=1&to=" + mailUrl +
+        "&su='+encodeURIComponent(d.title)+'&body='+encodeURIComponent(Q)+escape('%5Cn%5Cn')+encodeURIComponent(d.location)+'&zx=RANDOMCRAP&shva=1&disablechatbrowsercheck=1&ui=1','gmailForm','scrollbars=yes,width=550,height=400,top=100,left=75,status=no,resizable=yes');if(!d.all)setTimeout(function(){popw.focus();},50);})();",
+    click: function() {
+      return false;
+    },
+    text: i18n.readWithKindle
+  });
+  parent.prepend(newElement);
+}
 ///[end] my.html使用的js部分
 
 ///[start] advdelivernow.html使用的部分
@@ -585,4 +622,210 @@ function SelectDeliverNone() {
     $(this).prop('checked', false);
   });
 };
-///[end] advdelivernow.html使用的部分
+///[end] advdelivernow.html
+
+///[start] advarchive.html
+function verifyInstapaper() {
+  var notifyInstapaperVerify = function () {
+    $("#averInstapaper").html(i18n.verify);
+  };
+  var instauser = $("#instapaper_username").val();
+  var instapass = $("#instapaper_password").val();
+
+  notifyInstapaperVerify();
+
+  $.ajax({
+    url: "/verifyajax/instapaper",
+    type: "POST",
+    data: { username: instauser, password: instapass },
+    success: function (data, textStatus, jqXHR) {
+      if (data.status != "ok") {
+        alert("Error:" + data.status);
+        notifyInstapaperVerify();
+      } else if (data.correct == 1) {
+        alert(i18n.congratulations);
+        $("#averInstapaper").html(i18n.verified);
+      } else {
+        alert(i18n.passwordWrong);
+        notifyInstapaperVerify();
+      }
+    },
+    error: function (status) {
+      alert(status);
+      notifyInstapaperVerify();
+    }
+  });
+}
+///[end] advarchive.html
+///[start] advcoverimage.html & advuploadcss
+var AjaxFileUpload = {
+  mimeType: '',
+  form: '',
+  fileInput: '',
+  upButton: '',
+  deleteButton: '',
+  uploadImage: '',
+  url: '',
+
+  filter: function(file) {
+    var ret = null;
+    if (file) {
+      if (file.type.indexOf(this.mimeType) != -1) {
+        ret = file;
+      } else {
+        this.fileInput.val(null);
+        alert(i18n.fileIsNotInMime);
+      }
+    }
+    return ret;
+  },
+
+  onSelect: function(file) {
+    var self = this;
+    var html = '';
+    if (file) {
+      var reader = new FileReader();
+      if (self.mimeType.startsWith('image')) {
+        reader.onloadend = function() {
+          self.preview.attr("src", reader.result);
+        }
+        reader.readAsDataURL(file);
+      } else {
+        reader.onloadend = function() {
+          self.preview.val(reader.result);
+        }
+        reader.readAsText(file);
+      }
+    } else if (self.mimeType.startsWith('image')) {
+      self.preview.attr("src", '');
+    } else {
+      self.preview.val('');
+    }
+  },
+
+  onProgress: function(loaded, total) {
+    var percent = ((loaded / total) * 100).toFixed(0) + '%';
+    this.progress.html(percent).css("display", "inline");
+  },
+
+  onSuccess: function(response) {
+    if (response == "ok") {
+      if (this.progress) {
+        this.progress.html("").css("display", "none");
+      }
+      var modal = new tingle.modal({footer: true});
+      modal.setContent('<h2>' + i18n.congratulations + '</h2><p>' + i18n.fileUploaded + '</p>');
+      modal.addFooterBtn(i18n.close, 'actionButton', function() {
+        modal.close();
+      });
+      modal.open();
+    } else {
+      alert(response);
+    }
+  },
+
+  onFailure: function(status, response) {
+    alert(response);
+  },
+
+  //获取选择文件，file控件或拖放
+  funGetFiles: function(e) {
+    var files = e.target.files || e.dataTransfer.files;
+    var file = files[0];
+    this.file = this.filter(file);
+    this.onSelect(this.file);
+    return this;
+  },
+
+  funUploadFile: function() {
+    var self = this;
+    var doUpload = function(file) {
+      if (file) {
+        $.ajax({
+          url: self.url,
+          type: "POST",
+          data: new FormData(self.form[0]),
+          processData: false,
+          contentType: false,
+          xhr: function () {
+            var xhr = new window.XMLHttpRequest();
+            if (self.progress) {
+              xhr.upload.addEventListener("progress", function (e) {
+                self.onProgress(e.loaded, e.total);
+              }, false);
+            }
+            return xhr;
+          },
+          success: function (data, textStatus, xhr) {
+            self.onSuccess(xhr.responseText);
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            self.onFailure(xhr.status, xhr.responseText);
+          }
+        });
+      }
+    };
+    doUpload(self.file);
+    return false;
+  },
+
+  funDeleteFile: function() {
+    var self = this;
+    $.ajax({
+      url: self.deleteButton.attr('deletehref'),
+      type: "POST",
+      data: {'action': 'delete'},
+      success: function(resp, status, xhr) {
+        if (resp.status == "ok") {
+          self.fileInput.val(null);
+          if (self.mimeType.startsWith('image')) {
+            self.preview.attr("src", '');
+          } else {
+            self.preview.val('');
+          }
+        } else {
+          alert(resp.status);
+        }
+      },
+      error: function(xhr, status, error) {
+        alert(status);
+      }
+    });
+  },
+
+  //要实现文件上传功能，外部调用此函数初始化即可
+  //mimeType: 接受的文件类型，前缀即可
+  //formId: 包含文件选择器和几个功能按钮的form 选择器
+  //fileInputId: 文件选择器 选择器
+  //upBtnId: 上传确认按钮 选择器
+  //delBtnId: 删除按钮 选择器
+  //previewTagId: 预览标签 选择器，可以是img或textarea
+  //progressId: 可选，一个span，用来显示上传进度
+  init: function(mimeType, formId, fileInputId, upBtnId, delBtnId, previewTagId, progressId) {
+    var self = this;
+    self.mimeType = mimeType;
+    self.form = $(formId);
+    self.fileInput = $(fileInputId);
+    self.upButton = $(upBtnId);
+    self.deleteButton = $(delBtnId);
+    self.preview = $(previewTagId);
+    if (typeof progressId == 'undefined') {
+      self.progress = false;
+    } else {
+      self.progress = $(progressId);
+    }
+    self.url = self.form.attr('action');
+    
+    self.fileInput.on("change", function(e) {
+      self.funGetFiles(e);
+    });
+    self.upButton.on("click", function(e) {
+      self.funUploadFile(e);
+    });
+    self.deleteButton.on("click", function(e) {
+      self.funDeleteFile(e);
+    });
+  }
+};
+///[end] advcoverimage.html && advuploadcss.html
+///

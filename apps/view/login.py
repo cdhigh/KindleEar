@@ -34,11 +34,11 @@ def LoginPost():
     specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}', ',', ';', '|']
     tips = ''
     if not name:
-        tips = _("Username is empty!")
+        tips = _("Username is empty.")
     elif len(name) > 25:
-        tips = _("The len of username reached the limit of 25 chars!")
+        tips = _("The len of username reached the limit of 25 chars.")
     elif any([char in name for char in specialChars]):
-        tips = _("The username includes unsafe chars!")
+        tips = _("The username includes unsafe chars.")
 
     if tips:
         return render_template('login.html', tips=tips)
@@ -65,7 +65,7 @@ def LoginPost():
         return redirect(url_for("bpSetting.Setting"))
     else:  #账号或密码错
         time.sleep(5) #防止暴力破解
-        tips = _("The username not exist or password is wrong!")
+        tips = _("The username does not exist or password is wrong.")
         lang = session.get('langCode', '')
         if lang.startswith('zh'):
             tips += '<br/><a href="/static/faq.html#forgotpwd" target="_blank">' + _('Forgot password?') + '</a>'

@@ -275,7 +275,7 @@ def AdvUploadCoverImageAjaxPost():
     try:
         upload = request.files.get('cover_file')
         #将图像转换为JPEG格式，同时限制分辨率不超过1024
-        imgInst = Image.open(upload.file)
+        imgInst = Image.open(upload)
         width, height = imgInst.size
         fmt = imgInst.format
         if (width > MAX_IMAGE_PIXEL) or (height > MAX_IMAGE_PIXEL):
@@ -285,6 +285,7 @@ def AdvUploadCoverImageAjaxPost():
         imgInst.save(data, 'JPEG')
         user.cover = data.getvalue()
         user.save()
+        upload.close()
     except Exception as e:
         ret = str(e)
         
@@ -316,15 +317,15 @@ def AdvUploadCss(tips=None):
 def AdvUploadCssAjaxPost():
     ret = 'ok'
     user = get_login_user()
-    if 'css_file' in request.files:
-        #werkzeug.datastructures.FileStorage对象
-        upload = request.files['css_file'] #有filename属性，有read()/close()
-        if upload:
-            #这里应该要验证样式表的有效性，但是现在先忽略了
-            user.css_content = upload.read().decode('utf-8')
-            user.save()
-            upload.close()
-    
+    try:
+        upload = request.files.get('css_file')
+        #这里应该要验证样式表的有效性，但是现在先忽略了
+        user.css_content = upload.read().decode('utf-8')
+        user.save()
+        upload.close()
+    except Exception as e:
+        ret = str(e)
+
     return ret
 
 #删除上传的CSS
@@ -350,7 +351,7 @@ def DbImage(id_):
     if user.cover:
         return send_file(io.BytesIO(user.cover), mimetype='image/jpeg')
     else:
-        return "no cover"
+        return ''
 
 #集成各种网络服务OAuth2认证的相关处理
 @bpAdv.route("/oauth2/<authType>", endpoint='AdvOAuth2')

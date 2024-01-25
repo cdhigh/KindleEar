@@ -18,9 +18,10 @@
             {% if title_to_add %}value="{{title_to_add}}"{% endif %}/>
         </div>
         <div class="pure-u-2-5 pure-u-sm-1-4 pure-u-md-1-6">
-          <div style="padding:.5em;">
-            <input type="checkbox" name="fulltext" id="isfulltext" />
-            <img alt="{{ _('Fulltext') }}" src="static/fulltext.gif" border="0" />
+          <div>
+            <label><input type="checkbox" name="fulltext" id="isfulltext" />
+            Embedded</label>
+            <!--<img alt="{{ _('Fulltext') }}" src="static/fulltext.gif" border="0" />-->
           </div>
         </div>
       </div>
@@ -48,8 +49,10 @@
 
   <legend><h3>{{ _("Library") }} </h3></legend>
   <div class="pure-g box-list noborder">
-    <div class="pure-u-1-3 width1_3 pure-form"><select class="pure-input-rounded width100" id="language_pick">
-    </select></div>
+    <div class="pure-u-1-3 width1_3 pure-form">
+      <select class="pure-input-rounded width100" id="language_pick">
+      </select>
+    </div>
     <div class="pure-u-1-6">
       <div class="upload-recipe">
         <button class="upload-recipe-btn" title="{{_('Upload your custom recipe')}}"onclick="OpenUploadRecipeDialog()"><i class="iconfont icon-upload"></i></button>
@@ -80,56 +83,28 @@
 </div>
 {% endblock -%}
 
-{% block js -%}
+{% block javascript_inhead -%}
 <script type="text/javascript">
 var my_custom_rss_list = {{my_custom_rss|safe}};
 var my_uploaded_recipes = {{my_uploaded_recipes|safe}};
 var my_booked_recipes = {{my_booked_recipes|safe}};
-
-// return a appspotmail url for bookmarklet
-function appspotmailUrl(){
-  var parser = document.createElement('a');
-  parser.href = "{{subscribe_url}}";
-
-  var host = parser.hostname;
-  var length = host.length;
-  if ((length > 12) && host.substr(length - 12, 12) == '.appspot.com'){
-    {% if session.get('role') == 'admin' -%}
-    var addr = "read@";
-    {% else -%}
-    var addr = "{{user.name}}__read@";
-    {% endif -%}
-    return addr + host.substr(0, length - 12) + '.appspotmail.com';
-  }else{
-    return "";
-  }
-}
-function insertBookmarkletGmailThis(){
-  var mailUrl = appspotmailUrl();
-  if (mailUrl == ""){
-    return;
-  }
-
-  var parent = document.getElementById('bookmarklet_content');
-  var theFirstChild = parent.firstChild;
-  var newElement = document.createElement("a");
-  newElement.className = "actionButton";
-  var href = "javascript:(function(){popw='';Q='';d=document;w=window;if(d.selection){Q=d.selection.createRange().text;}else if(w.getSelection){Q=w.getSelection();}else if(d.getSelection){Q=d.getSelection();}popw=w.open('http://mail.google.com/mail/s?view=cm&fs=1&tf=1&to=" + mailUrl +
-      "&su='+encodeURIComponent(d.title)+'&body='+encodeURIComponent(Q)+escape('%5Cn%5Cn')+encodeURIComponent(d.location)+'&zx=RANDOMCRAP&shva=1&disablechatbrowsercheck=1&ui=1','gmailForm','scrollbars=yes,width=550,height=400,top=100,left=75,status=no,resizable=yes');if(!d.all)setTimeout(function(){popw.focus();},50);})();";
-  newElement.setAttribute("href", href);
-  newElement.setAttribute("onclick", "return false;");
-  newElement.textContent = "{{_('Read with Kindle')}}";
-  parent.insertBefore(newElement, theFirstChild);
-}
+var all_builtin_recipes = {};
 </script>
-<script type="text/javascript" src="/static/base.js"></script>
+{% endblock -%}
+
+{% block js -%}
 <script type="text/javascript">
-  $(document).ready(function(){
+$(document).ready(function() {
   FetchBuiltinRecipesXml();
   PopulateMyCustomRss(); //填充订阅区段
   PopulateMySubscribed();
   RegisterHideHambClick();
-  insertBookmarkletGmailThis();
+
+  var mailPrefix = '';
+  {% if session.get('role') == 'admin' -%}
+  mailPrefix = "{{user.name}}__";
+  {% endif -%}
+  insertBookmarkletGmailThis("{{subscribe_url}}", mailPrefix);
 });
 </script>
 {% endblock -%}

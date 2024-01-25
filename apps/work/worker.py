@@ -51,7 +51,7 @@ def WorkerImpl(userName: str, bookIdList: list, rssIdList: list=None):
 
     user = KeUser.get_one(KeUser.name == userName)
     if not user:
-        return "User not exist"
+        return "The user does not exist."
     
     to = user.kindle_email
     if (';' in to) or (',' in to):

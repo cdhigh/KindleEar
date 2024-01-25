@@ -1,9 +1,9 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no" />
-    <meta name="description" content="KindleEar is a service for Amazon Kindle owners that aggregates feeds and deliver them to your Kindle." />
+    <meta name="description" content="KindleEar is a open source web app for e-reader owners that aggregates feeds and deliver them to your devices." />
     {% block titleTag -%}
     <title>{{ _(title) }} - KindleEar</title>
     {% endblock -%}
@@ -15,18 +15,15 @@
     <link rel="stylesheet" href="/static/grids-responsive-min.css" type="text/css" charset="utf-8"/>
     <link rel="stylesheet" href="/static/base.css" type="text/css" charset="utf-8"/>
     <link rel="stylesheet" href="/static/tingle.min.css" type="text/css" charset="utf-8"/>
-    <!--<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    <script>window.jQuery || document.write('<script src="/static/jquery-3.7.1.min.js"></script>');</script>-->
-    <script src="/static/jquery-3.7.1.min.js"></script>
-    <script type="text/javascript" src="/static/tingle.min.js"></script>
+
     {% autoescape off %}
     <script type="text/javascript">
       //在所有脚本里面用到的字符串翻译都放在这里让pybabel可以简单提取，脚本里面使用键名引用
       var i18n = {
         delete: '{{_("Delete")|safe}}',
         viewSrc: '{{_("View Source Code")|safe}}',
-        subscriSep: '{{_("Subscribe (Push Separately)")|safe}}',
-        subscri: '{{_("Subscribe")|safe}}',
+        subscriSep: '{{_("Subscribe (Deliver Separately)")|safe}}',
+        subscribe: '{{_("Subscribe")|safe}}',
         cannotAddRss: '{{_("Cannot add this custom rss, Error:")|safe}}',
         cannotDelRss: '{{_("Cannot delete this feed, Error:")|safe}}',
         fulltext: '{{_("Fulltext")|safe}}',
@@ -39,104 +36,45 @@
         cancel: '{{_("Cancel")|safe}}',
         share: '{{_("Share")|safe}}',
         langInvalid: '{{_("Language code invalid")|safe}}',
-        thankForShare: '{{_("Thank you for sharing")|safe}}',
+        thankForShare: '{{_("Thank you for sharing.")|safe}}',
         close: '{{_("Close")|safe}}',
         separated: '{{_("Separated")|safe}}',
         unsubscribe: '{{_("Unsubscribe")|safe}}',
         cannotSubsRecipe: '{{_("Cannot subscribe this recipe, Error:")|safe}}',
         areYouSureUnsubscribe: '{{_("Are you sure to Unsubscribe ({0})?")|safe}}',
         cannotUnsubsRecipe: '{{_("Cannot unsubscribe this recipe, Error:")|safe}}',
-        alreadySubscribed: '{{_("The recipe is already subscribed")|safe}}',
+        alreadySubscribed: '{{_("The recipe is already subscribed.")|safe}}',
         subscriptionInfo: '{{_("Subscription info")|safe}}',
         account: '{{_("Account")|safe}}',
         password: '{{_("Password")|safe}}',
         submit: '{{_("Submit")|safe}}',
-        recipeLoginTips: '{{_("If any field is left blank, the server will clear the saved login information")|safe}}',
+        recipeLoginTips: '{{_("If any field is left blank, the server will clear the saved login information.")|safe}}',
         cannotSetSubsInfo: '{{_("Cannot set the subscription infomation, Error:")|safe}}',
         chooseRecipeFile: '{{_("Choose a recipe file for upload")|safe}}',
         congratulations: '{{_("Congratulations")|safe}}',
+        thanks: '{{_("Thanks")|safe}}',
         recipeUploadedTips: '{{_("Your recipe has been uploaded, and it can be found in the Library section. If you dont see it, please make sure to switch to the correct language. The language of your recipe file is :")|safe}}',
-        recipeDeleted: '{{_("Your recipe have been deleted")|safe}}',
+        recipeDeleted: '{{_("Your recipe have been deleted.")|safe}}',
+        readWithKindle: '{{_("Read with Kindle")|safe}}',
+        verify: '{{_("Verify")|safe}}',
+        verified: '{{_("Verified")|safe}}',
+        passwordWrong: '{{_("The username does not exist or password is wrong.")|safe}}',
+        fileIsNotInMime: '{{_("The file you chosen is not an acceptable type.")|safe}}',
+        fileUploaded: '{{_("The file have been uploaded successfully.")|safe}}',
+        feedSubscribed: '{{_("This feed has been successfully subscribed.")|safe}}',
+        thank4RssFeedback: '{{_("Thank you for your feedback, this feed will be reviewed soon.")|safe}}',
+        confirmShareRecipe: '{{_("Are you confirming to share the recipe ({0})?")|safe}}',
+        catAll: '{{_("[All]")|safe}}',
+        catByTime: '{{_("[By Time]")|safe}}',
+        uncategoried: '{{_("[Uncategoried]")|safe}}',
+        noLinksInLang: '{{_("No links found in the chosen language.")|safe}}',
+        invalidReport: '{{_("Invalid report")|safe}}',
+        confirmInvalidReport: '{{_("Are you confirming that this link is invalid or off the cloud?")|safe}}',
         /*d: '{{_("")|safe}}',
-        d: '{{_("")|safe}}',
         */
       };
-      
-        function displayElement(id_) {
-            document.getElementById(id_).style.display = "";
-        }
-        function hideElement(id_) {
-            document.getElementById(id_).style.display = "none";
-        }
-        function formatParams(data) {
-            var arr = [];
-            for (var name in data) {
-                arr.push(encodeURIComponent(name) + "=" + encodeURIComponent(data[name]));
-            }
-            arr.push(("v_=" + Math.random()).replace(".", ""));
-            return arr.join("&");
-        }
-        //Usage:
-        //ajax({
-        //    url: "./TestXHR.aspx",
-        //    type: "POST",
-        //    data: { name: "super", age: 20 },
-        //    dataType: "json",          //optional,'json'/'text'/'xml'
-        //    success: function (response, xml) {
-        //        // obj.innerHTML = response or response.name
-        //    },
-        //    fail: function (status) {       //optional
-        //        // some codes
-        //    }
-        //});
-        function ajax(options) {
-            options = options || {};
-            options.type = (options.type || "GET").toUpperCase();
-            options.dataType = options.dataType || "json";
-            var params = formatParams(options.data || []);
-
-            if (window.XMLHttpRequest) {
-                var xhr = new XMLHttpRequest();
-            } else {
-                var xhr = new ActiveXObject('Microsoft.XMLHTTP');
-            }
-
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4) {
-                    var status = xhr.status;
-                    if (status >= 200 && status < 300) {
-                        if (options.dataType == "json" || options.dataType == "JSON") {
-                            var respData = JSON.parse(xhr.responseText);
-                            //options.success && options.success(eval("(" + xhr.responseText + ")"), xhr.responseXML);
-                            options.success && options.success(respData, xhr.responseXML);
-                        } else {
-                            options.success && options.success(xhr.responseText, xhr.responseXML);
-                        }
-                    } else {
-                        options.fail && options.fail(status);
-                    }
-                }
-            }
-
-            if (options.type == "GET") {
-                xhr.open("GET", options.url + "?" + params, true);
-                xhr.send(null);
-            } else if (options.type == "POST") {
-                xhr.open("POST", options.url, true);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                xhr.send(params);
-            }
-        }
-        //Add a method 'format' to string
-        //usage: "{0}, {1}".format('tx', 'txt')
-        String.prototype.format = function() {
-        var args = arguments;
-        return this.replace(/{(\d+)}/g, function(match, number) {
-          return typeof args[number] != 'undefined' ? args[number] : match;
-        });
-      };
     </script>
-    {% block javascriptinhead %}
+    {% block javascript_inhead %}
     {% endblock -%}
     {% endautoescape %}
     {% block cssfiles %}{% endblock -%}
@@ -146,86 +84,91 @@
 {% block bodytag -%}
 <body>
 {% endblock -%}
-    <div id="content">
-        <!-- Header Navigation -->
-        <div class="header pure-menu pure-menu-horizontal">
-        {% block header -%}
-            <a href="/" class="pure-menu-heading pure-menu-link logo">KindleEar</a>
-            {% block header_loginfo -%}
-            <ul class="pure-menu-list home-menu">
-                {% if session.get('userName') -%}
-                    <li class="pure-menu-item"><a href="/admin" class="pure-menu-link">{{session.get('userName')}}</a></li>
-                    <li class="pure-menu-item"><a href="/logout" class="pure-menu-link">{{_("Logout")}}</a></li>
-                {% else -%}
-                    <li class="pure-menu-item"><a href="/login" class="pure-menu-link">{{_("Login")}}</a></li>
-                {% endif -%}
-                <li class="pure-menu-item">
-                    <a href="/setlocale/en"><img src="/static/us.gif" alt="EN" /></a>
-                    <a href="/setlocale/zh"><img src="/static/cn.gif" alt="CN" /></a>
-                    <a href="/setlocale/tr_tr"><img src="/static/tr.gif" alt="TR" /></a>
-                </li>
-            </ul>
-            {% endblock -%}
-        {% endblock -%}
-        </div>
-
-        {% block menubar -%}
-            {% if session.get('userName') -%}
-            <div class="pure-menu pure-menu-horizontal pure-menu-scrollable app-menu">
-                <ul class="pure-menu-list">
-                    {% if tab == "my" -%}
-                    <li class="pure-menu-item pure-menu-selected"><span>{{_("Feeds")}}</span></li>
-                    {% else -%}
-                    <li class="pure-menu-item"><a href="/my" class="pure-menu-link">{{_("Feeds")}}</a></li>
-                    {% endif -%}
-                    {% if tab == "set" -%}
-                    <li class="pure-menu-item pure-menu-selected"><span>{{_("Settings")}}</span></li>
-                    {% else -%}
-                    <li class="pure-menu-item"><a href="/setting" class="pure-menu-link">{{_("Settings")}}</a></li>
-                    {% endif -%}
-                    {% if tab == "logs" -%}
-                    <li class="pure-menu-item pure-menu-selected"><span>{{_("Logs")}}</span></li>
-                    {% else -%}
-                    <li class="pure-menu-item"><a href="/logs" class="pure-menu-link">{{_("Logs")}}</a></li>
-                    {% endif -%}
-                    {% if tab == "admin" -%}
-                    <li class="pure-menu-item pure-menu-selected"><span>{{_("Admin")}}</span></li>
-                    {% else -%}
-                    <li class="pure-menu-item"><a href="/admin" class="pure-menu-link">{{_("Admin")}}</a></li>
-                    {% endif -%}
-                    {% if tab == "advset" -%}
-                    <li class="pure-menu-item pure-menu-selected"><span>{{_("Advanced")}}</span></li>
-                    {% else -%}
-                    <li class="pure-menu-item"><a href="/adv" class="pure-menu-link">{{_("Advanced")}}</a></li>
-                    {% endif -%}
-                    {% if tab == "shared" -%}
-                    <li class="pure-menu-item pure-menu-selected"><span>{{_("Shared")}}</span></li>
-                    {% else -%}
-                    <li class="pure-menu-item"><a href="/library" class="pure-menu-link">{{_("Shared")}}</a></li>
-                    {% endif -%}
-                </ul>
-            </div>
-            {% endif -%}
-        {% endblock -%}
-
-        {% block content -%}
-        {% endblock -%}
-        <div class="footer-sticker"></div>
+  <div id="content">
+    <!-- Header Navigation -->
+    <div class="header pure-menu pure-menu-horizontal">
+    {% block header -%}
+      <a href="/" class="pure-menu-heading pure-menu-link logo">KindleEar</a>
+      {% block header_loginfo -%}
+      <ul class="pure-menu-list home-menu">
+        {% if session.get('userName') -%}
+          <li class="pure-menu-item"><a href="/admin" class="pure-menu-link">{{session.get('userName')}}</a></li>
+          <li class="pure-menu-item"><a href="/logout" class="pure-menu-link">{{_("Logout")}}</a></li>
+        {% else -%}
+          <li class="pure-menu-item"><a href="/login" class="pure-menu-link">{{_("Login")}}</a></li>
+        {% endif -%}
+        <li class="pure-menu-item">
+          <a href="/setlocale/en"><img src="/static/us.gif" alt="EN" /></a>
+          <a href="/setlocale/zh"><img src="/static/cn.gif" alt="CN" /></a>
+          <a href="/setlocale/tr_tr"><img src="/static/tr.gif" alt="TR" /></a>
+        </li>
+      </ul>
+      {% endblock -%}
+    {% endblock -%}
     </div>
 
-    <div class="footer l-box">
-        {% block footer -%}
-        <p>
-            <small>
-            2013-2024 &copy; KindleEar&nbsp;@{{g.version}} ｜
-            <a href="/static/faq{%if not session.get('lang', '').startswith('zh')%}_en{%endif%}.html" target="_blank">FAQ</a> ｜
-            <a href="https://github.com/cdhigh/kindleear" target="_blank">Github page</a> ｜
-            <a href="https://console.cloud.google.com/appengine" target="_blank">App Engine</a>
-            </small>
-        </p>
-        {% endblock -%}
-    </div>
+    {% block menubar -%}
+      {% if session.get('userName') -%}
+      <div class="pure-menu pure-menu-horizontal pure-menu-scrollable app-menu">
+        <ul class="pure-menu-list">
+          {% if tab == "my" -%}
+          <li class="pure-menu-item pure-menu-selected"><span>{{_("Feeds")}}</span></li>
+          {% else -%}
+          <li class="pure-menu-item"><a href="/my" class="pure-menu-link">{{_("Feeds")}}</a></li>
+          {% endif -%}
+          {% if tab == "set" -%}
+          <li class="pure-menu-item pure-menu-selected"><span>{{_("Settings")}}</span></li>
+          {% else -%}
+          <li class="pure-menu-item"><a href="/setting" class="pure-menu-link">{{_("Settings")}}</a></li>
+          {% endif -%}
+          {% if tab == "logs" -%}
+          <li class="pure-menu-item pure-menu-selected"><span>{{_("Logs")}}</span></li>
+          {% else -%}
+          <li class="pure-menu-item"><a href="/logs" class="pure-menu-link">{{_("Logs")}}</a></li>
+          {% endif -%}
+          {% if tab == "admin" -%}
+          <li class="pure-menu-item pure-menu-selected"><span>{{_("Admin")}}</span></li>
+          {% else -%}
+          <li class="pure-menu-item"><a href="/admin" class="pure-menu-link">{{_("Admin")}}</a></li>
+          {% endif -%}
+          {% if tab == "advset" -%}
+          <li class="pure-menu-item pure-menu-selected"><span>{{_("Advanced")}}</span></li>
+          {% else -%}
+          <li class="pure-menu-item"><a href="/adv" class="pure-menu-link">{{_("Advanced")}}</a></li>
+          {% endif -%}
+          {% if tab == "shared" -%}
+          <li class="pure-menu-item pure-menu-selected"><span>{{_("Shared")}}</span></li>
+          {% else -%}
+          <li class="pure-menu-item"><a href="/library" class="pure-menu-link">{{_("Shared")}}</a></li>
+          {% endif -%}
+        </ul>
+      </div>
+      {% endif -%}
+    {% endblock -%}
 
+    {% block content -%}
+    {% endblock -%}
+    <div class="footer-sticker"></div>
+  </div>
+
+  <div class="footer l-box">
+    {% block footer -%}
+    <p>
+      <small>
+      2013-2024 &copy; KindleEar&nbsp;@{{g.version}} ｜
+      <a href="/static/faq{%if not session.get('lang', '').startswith('zh')%}_en{%endif%}.html" target="_blank">FAQ</a> ｜
+      <a href="https://github.com/cdhigh/kindleear" target="_blank">Github page</a> ｜
+      <a href="https://console.cloud.google.com/appengine" target="_blank">App Engine</a>
+      </small>
+    </p>
+    {% endblock -%}
+  </div>
+
+<!--<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="/static/jquery-3.7.1.min.js"></script>');</script>-->
+<script type="text/javascript" src="/static/jquery-3.7.1.min.js"></script>
+<script type="text/javascript" src="/static/tingle.min.js"></script>
+<script type="text/javascript" src="/static/base.js" charset="utf-8"></script>
 {% block jsfiles %}{% endblock -%}
 {% block js %}{% endblock -%}
 </body>

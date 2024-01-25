@@ -134,7 +134,7 @@ class FsDictStub(object):
             if self.fs_dict.exists(path):
                 return self.fs_dict[path]
             else:
-                self.log.warning("file '{}' not exist".format(path))
+                self.log.warning("The file '{}' does not exist".format(path))
                 return b''
         else:
             with open(path, mode) as f:

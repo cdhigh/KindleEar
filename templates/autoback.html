@@ -5,13 +5,12 @@
 
 {% block js -%}
 <script type="text/javascript">
-function gobackafter(secs){
- if(--secs > 0){
-    setTimeout("gobackafter(" + secs + ");", 1000);
- }
- else{
+function gobackafter(secs) {
+  if(--secs > 0) {
+   setTimeout("gobackafter(" + secs + ");", 1000);
+  } else {
     history.go(-1);
- }
+  }
 }
 gobackafter(5);
 </script>
@@ -22,12 +21,12 @@ gobackafter(5);
 
 {% block content -%}
 <div class="main">
-    {% if tips -%}
-        <div class="notice-box">
-            {{tips}}
-            {{_("Auto back to previous page after 5 seconds")}}...
-            <a href="javascript:history.go(-1);">{{_("Click to back")}}</a>
-        </div>
-    {% endif -%}
+  {% if tips -%}
+  <div class="notice-box">
+    {{tips}}
+    {{_("Auto back to previous page after 5 seconds")}}...
+    <a href="javascript:history.go(-1);">{{_("Click to back")}}</a>
+  </div>
+  {% endif -%}
 </div>
 {% endblock -%}

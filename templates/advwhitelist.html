@@ -9,29 +9,27 @@
 
 {% block advcontent -%}
 <form class="pure-form pure-form-aligned" action="" method="POST">
-    <fieldset>
-        <legend><h3>{{_("White List")}}</h3></legend>
-        <p> <small>
-        {{_("Emails sent to %(name)sxxx@appid.appspotmail.com will be transferred to your email.", name='' if (user.name == adminName) else user.name + '__')}}
-        </small></p>
-        <div class="box-list">
-            {% if user.white_lists -%}
-                {%- for lst in user.white_lists() -%}
-                    <div class="box">
-                        {{ lst.mail }}
-                        <div class="cornerControls">
-                            <a href="/advdel?delwlist={{ lst.key_or_id_string }}" class="actionButton">{{ _("Delete") }}</a>
-                        </div>
-                    </div>
-                {%- endfor -%}
-            {%- endif %}
-            <div class="box">
-                <input type="text" name="wlist" placeholder="{{ _('Please input mail address') }}" class="pure-input-1" />
-                <div class="cornerControls">
-                    <input type="submit" value="{{ _('Add') }}" class="actionButton add" />
-                </div>
-            </div>
+  <fieldset>
+    <legend><h3>{{_("White List")}}</h3></legend>
+    <p> <small>
+    {{_("Emails sent to %(name)sxxx@appid.appspotmail.com will be transferred to your email.", name='' if (user.name == adminName) else user.name + '__')}}
+    </small></p>
+    <div class="box-list">
+      {%- for lst in user.white_lists() -%}
+      <div class="box">
+        {{ lst.mail }}
+        <div class="cornerControls">
+          <a href="/advdel?delwlist={{ lst.key_or_id_string }}" class="actionButton">{{ _("Delete") }}</a>
         </div>
-    </fieldset>    
+      </div>
+      {%- endfor -%}
+      <div class="box">
+        <input type="text" name="wlist" placeholder="{{ _('Please input mail address') }}" class="pure-input-1" />
+        <div class="cornerControls">
+          <input type="submit" value="{{ _('Add') }}" class="actionButton add" />
+        </div>
+      </div>
+    </div>
+  </fieldset>
 </form>
 {% endblock -%}

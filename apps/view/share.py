@@ -30,11 +30,11 @@ def Share():
     title = args.get('t')
     key = args.get('k')
     if not all((action, userName, url, key)):
-        return "Some parameter is missing or wrong!<br />"
+        return "Some parameter is missing or wrong."
     
     user = KeUser.get_one(KeUser.name == userName)
     if not user or not user.kindle_email or not user.share_key != key:
-        return "User not exist!<br />"
+        return "The user does not exist."
     
     url = unquote_plus(url)
     

@@ -43,14 +43,14 @@ def AdminPost():
             pwd = hashlib.md5((oldPassword + secret_key).encode()).hexdigest()
             newPwd = hashlib.md5((newP1 + secret_key).encode()).hexdigest()
         except:
-            tips = _("The password includes non-ascii chars!")
+            tips = _("The password includes non-ascii chars.")
         else:
             if user.passwd != pwd:
-                tips = _("Old password is wrong!")
+                tips = _("Old password is wrong.")
             elif newP1 != newP2:
-                tips = _("The two new passwords are dismatch!")
+                tips = _("The two new passwords are dismatch.")
             else:
-                tips = _("Change password success!")
+                tips = _("Change password success.")
                 user.passwd = newPwd
                 user.save()
         return render_template('admin.html', tab='admin', user=user, users=users, chpwdtips=tips)
@@ -59,17 +59,17 @@ def AdminPost():
         if user.name != ADMIN_NAME: #只有管理员能添加账号
             return redirect('/')
         elif any([char in user.name for char in specialChars]):
-            tips = _("The username includes unsafe chars!")
+            tips = _("The username includes unsafe chars.")
         elif password1 != password2:
-            tips = _("The two new passwords are dismatch!")
+            tips = _("The two new passwords are dismatch.")
         elif KeUser.get_one(KeUser.name == userName):
-            tips = _("Already exist the username!")
+            tips = _("Already exist the username.")
         else:
             secret_key = new_secret_key()
             try:
                 pwd = hashlib.md5((password1 + secret_key).encode()).hexdigest()
             except:
-                tips = _("The password includes non-ascii chars!")
+                tips = _("The password includes non-ascii chars.")
             else:
                 au = KeUser(name=userName, passwd=pwd, kindle_email='', enable_send=False,
                     send_time=7, timezone=TIMEZONE, book_type="epub", merge_books=False, 
@@ -80,7 +80,7 @@ def AdminPost():
 
                 au.save()
                 users = KeUser.get_all() if user.name == ADMIN_NAME else None
-                tips = _("Add a account success!")
+                tips = _("Add a account success.")
         return render_template('admin.html', tab='admin', user=user, users=users, actips=tips)
     else:
         return Admin()
@@ -92,9 +92,9 @@ def AdminManagePassword(name):
     u = KeUser.get_one(KeUser.name == name)
     expiration = 0
     if not u:
-        tips = _("The username '{}' not exist!").format(name)
+        tips = _("The username '{}' does not exist.").format(name)
     else:
-        tips = _("Please input new password to confirm!")
+        tips = _("Please input new password to confirm.")
         expiration = u.expiration_days
 
     return render_template('adminmgrpwd.html', tips=tips, userName=name, expiration=expiration)
@@ -107,20 +107,20 @@ def AdminManagePasswordPost(name):
     p1 = form.get('p1')
     p2 = form.get('p2')
     expiration = str_to_int(form.get('ep', '0'))
-    tips = _("Username is empty!")
+    tips = _("Username is empty.")
 
     if name:
         u = KeUser.get_one(KeUser.name == name)
         if not u:
-            tips = _("The username '{}' not exist!").format(name)
+            tips = _("The username '{}' does not exist.").format(name)
         elif p1 != p2:
-            tips = _("The two new passwords are dismatch!")
+            tips = _("The two new passwords are dismatch.")
         else:
             secret_key = u.secret_key or ''
             try:
                 pwd = hashlib.md5((p1 + secret_key).encode()).hexdigest()
             except:
-                tips = _("The password includes non-ascii chars!")
+                tips = _("The password includes non-ascii chars.")
             else:
                 u.passwd = pwd
                 u.expiration_days = expiration
@@ -130,7 +130,7 @@ def AdminManagePasswordPost(name):
                     u.expires = None
                 u.save()
                 strBackPage = '&nbsp;&nbsp;&nbsp;&nbsp;<a href="/admin">Click here to go back</a>'
-                tips = _("Change password success!") + strBackPage
+                tips = _("Change password success.") + strBackPage
     
     return render_template('adminmgrpwd.html', tips=tips, userName=name)
     
@@ -139,7 +139,7 @@ def AdminManagePasswordPost(name):
 @login_required()
 def DelAccount(name):
     if (name != ADMIN_NAME) and (session.get('userName') in (ADMIN_NAME, name)):
-        tips = _("Please confirm to delete the account!")
+        tips = _("Please confirm to delete the account.")
         return render_template('delaccount.html', tips=tips, userName=name)
     else:
         return redirect('/')
@@ -151,11 +151,11 @@ def DelAccountPost(name):
     if (name != ADMIN_NAME) and (session.get('userName') in (ADMIN_NAME, name)):
         u = KeUser.get_one(KeUser.name == name)
         if not u:
-            tips = _("The username '{}' not exist!").format(name)
+            tips = _("The username '{}' does not exist.").format(name)
         else:
             u.erase_traces() #删除自己订阅的书，白名单，过滤器等，就是完全的清理
             u.delete_instance()
             return redirect(url_for("bpLogin.Logout") if session.get('userName') == name else url_for("bpAdmin.Admin"))
     else:
-        tips = _("The username is empty or you dont have right to delete it!")
+        tips = _("The username is empty or you dont have right to delete it.")
     return render_template('delaccount.html', tips=tips, userName=name)

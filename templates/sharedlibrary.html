@@ -5,382 +5,65 @@
 {% block css -%}
 <style type="text/css">
 .submenu-box {
-    padding: .5em 0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    overflow: hidden;
+  padding: .5em 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .submenu-box .pure-menu-selected {
-    font-weight: bold;
-    color: #0078e7;
+  font-weight: bold;
+  color: #0078e7;
 }
 
 .submenu-box span {
-    display: block;
-    padding: .5em 1em;
-    cursor: default;
+  display: block;
+  padding: .5em 1em;
+  cursor: default;
 }
 
 @media (min-width: 768px) {
-    .submenu-box {
-        margin-right: 20px;
-    }
+  .submenu-box {
+    margin-right: 20px;
+  }
 }
 </style>
 {% endblock -%}
 
 {% block content -%}
 <div class="main">
-    <div class="pure-g">
-        <div class="pure-u-1 pure-u-md-7-24">
-            <div class="pure-form">
-                <input type="text" id="search_text" onkeyup="doSearch()" class="pure-input-rounded" style="width:90%" placeholder="Search" />
-                <p></p>
-            </div>
-            <div class="pure-menu">
-                <ul class="pure-menu-list submenu-box" id="ul-category-menu">
-                </ul>
-            </div>
-        </div>
-        <div class="pure-u-1 pure-u-md-17-24" id="librarycontent">
-            {% if tips -%}
-            <p>{{tips}}</p>
-            {% elif not shared_data -%}
-            <p>{{_('Database has no data yet, you can share your subscription now.')}}</p>
-            {% endif -%}
-        </div>
+  {% if tips -%}
+  <div class="notice-box">{{tips|safe}}</div>
+  {% endif -%}
+  <div class="pure-g">
+    <div class="pure-u-1 pure-u-md-12-24">
+      <div class="pure-form pure-form-aligned">
+        <select class="pure-input-rounded width60" id="shared_rss_lang_pick">
+          <!-- 由脚本填充 -->
+        </select>
+      </div>
     </div>
+    <div class="pure-u-1 pure-u-md-12-24">
+      <div class="pure-form pure-form-aligned">
+        <input type="text" id="search_text" onkeyup="DoSearchInShared()" class="pure-input-rounded pure-input-rounded width100" placeholder="Search" />
+        <p></p>
+      </div>
+    </div>
+  </div>
+  <div class="pure-g">
+    <div class="pure-u-1 pure-u-md-7-24">
+      <div class="pure-menu">
+        <ul class="pure-menu-list submenu-box" id="ul-category-menu">
+        </ul>
+      </div>
+    </div>
+    <div class="pure-u-1 pure-u-md-17-24" id="librarycontent">
+      <!-- 由脚本填充 -->
+    </div>
+  </div>
 </div>
 {% endblock -%}
 
-{% block js %}
-<script type="text/javascript">
-    // all data stored in database
-    var all_rss_data = [{% for item in shared_data %}{t:"{{item['t']}}",u:"{{item['u']}}",c:"{{item['c']}}",s:{{item['s']}},d:{{item['d']}},f:{% if item['f'] %}"true"{% else %}"false"{% endif %}},{% endfor %}];
-    
-    // sort rss data
-    function sortRssDataArray(){
-        all_rss_data.sort(function(a, b){
-            var ret = b.s - a.s;
-            if (ret == 0){
-                ret = b.d - a.d;
-            }
-            return ret;
-        });
-        
-        //sticky recent items
-        var now_total_seconds = Math.floor(new Date().getTime() / 1000);
-        var recent = new Array();
-        for (var i = all_rss_data.length - 1; i >= 0; i--){
-            if (Math.abs(now_total_seconds - all_rss_data[i].d) < 60 * 60 * 24){
-                recent.unshift(all_rss_data.splice(i, 1)[0]);
-            }
-        }
-        for (var i = recent.length - 1; i >= 0; i--){
-            all_rss_data.unshift(recent[i]);
-        }
-    }
-    sortRssDataArray();
-    
-    // build Array sorted by time
-    var all_rss_data_by_time = all_rss_data.slice().sort(function(a, b){
-        return b.d - a.d;
-        });
-    
-    //generated in function buildRssByCategory
-    var all_rss_data_by_category;
-
-    // build another Array using category
-    function buildRssByCategory(sch_txt) {
-        var title, url;
-        var all_rss_data_by_text;
-        var all_rss_data_by_text_by_time;
-        all_rss_data_by_category = new Array();
-        if (sch_txt) {
-            all_rss_data_by_text = new Array();
-            all_rss_data_by_text_by_time = new Array();
-            sch_txt = sch_txt.toUpperCase();
-            for (var i = 0; i < all_rss_data.length; i++) {
-                title = all_rss_data[i].t.toUpperCase();
-                url = all_rss_data[i].u.toUpperCase();
-                if ((title.indexOf(sch_txt) > -1) || (url.indexOf(sch_txt) > -1)) {
-                    all_rss_data_by_text.push(all_rss_data[i])
-                }
-            }
-            for (var i = 0; i < all_rss_data_by_time.length; i++) {
-                title = all_rss_data_by_time[i].t.toUpperCase();
-                url = all_rss_data_by_time[i].u.toUpperCase();
-                if ((title.indexOf(sch_txt) > -1) || (url.indexOf(sch_txt) > -1)) {
-                    all_rss_data_by_text_by_time.push(all_rss_data_by_time[i])
-                }
-            }
-        } else {
-            all_rss_data_by_text = all_rss_data;
-            all_rss_data_by_text_by_time = all_rss_data_by_time;
-        }
-
-        all_rss_data_by_category["{{_('[All]')}}"] = all_rss_data_by_text;
-        all_rss_data_by_category["{{_('[by Time]')}}"] = all_rss_data_by_text_by_time;
-        all_rss_data_by_category["{{_('[Uncategoried]')}}"] = new Array();
-        for (var idx in all_rss_data_by_text) {
-            var item = all_rss_data_by_text[idx];
-            var category = item.c;
-            if (category == ""){
-                category = "{{_('[Uncategoried]')}}";
-            }
-            if (!all_rss_data_by_category.hasOwnProperty(category)){
-                all_rss_data_by_category[category] = new Array();
-            }
-            all_rss_data_by_category[category].push(item);
-        }
-        if (all_rss_data_by_category["{{_('[Uncategoried]')}}"].length == 0){
-            delete all_rss_data_by_category["{{_('[Uncategoried]')}}"];
-        }
-    };
-
-    //fill category menu on left side
-    function createCategoryMenu() {
-        var ulNode = document.getElementById("ul-category-menu");
-        var menuStr = "";
-        for (var cat in all_rss_data_by_category) {
-            var itemStr = '<li class="pure-menu-item"><a href="javascript:;" onclick="selectCategory(this,\'' +
-                    cat +'\');return false;" class="pure-menu-link category-menu">' + cat + ' ('+ all_rss_data_by_category[cat].length + ')</a></li>';
-            menuStr += itemStr;
-        }
-        ulNode.innerHTML = menuStr;
-    };
-    
-    function hightlightCategory(nodeLi) {
-        var parentNode = nodeLi.parentNode;
-        var childrenNodes = parentNode.children;
-        for (var i = 0; i < childrenNodes.length; i++) {
-            childrenNodes[i].classList.remove('pure-menu-selected');
-        }
-        nodeLi.classList.add('pure-menu-selected');
-    };
-
-    // paginated data by category, return {data:[xx,...], currentPage:1, maxPage:5}
-    function paginated(category, currentPage, pageSize){
-        var pageSize = pageSize || 30; // for best compatibility
-        var ret = {data: [], currentPage:1, maxPage:1};
-        if (!all_rss_data_by_category.hasOwnProperty(category)){
-            return ret;
-        }
-
-        var rssInThisCat = all_rss_data_by_category[category];
-        var maxPage = Math.ceil(rssInThisCat.length / pageSize);
-        if (currentPage <= 0){
-            currentPage = 1;
-        } else if (currentPage > maxPage){
-            currentPage = maxPage;
-        }
-
-        if (maxPage <= 1){
-            ret.data = rssInThisCat;
-        }else{
-            var begin = ((currentPage - 1) * pageSize);
-            var end = begin + pageSize;
-            ret.data = rssInThisCat.slice(begin, end);
-            ret.currentPage = currentPage;
-            ret.maxPage = maxPage;
-        }
-        return ret;
-    };
-
-    //Create page html content of category
-    function createPageContent(category, page){
-        pageData = paginated(category, page);
-        if (page <= 0){
-            page = 1;
-        } else if (page > pageData.maxPage){
-            page = pageData.maxPage;
-        }
-
-        if (pageData.data.length == 0){
-            return "Do not has any link";
-        }
-
-        var rssStr = '<div class="box-list">';
-        var data = pageData.data;
-        var aStr = "";
-        var now_total_seconds = Math.floor(new Date().getTime() / 1000);
-        
-        for (idx in data){
-            var item = data[idx];
-            var supText = "";
-            if (Math.abs(now_total_seconds - item.d) < 60 * 60 * 24){
-                supText = "<sup> New</sup>";
-            }
-            aStr = '<div class="book box">' +
-                '<div class="titleRow">' + item.t + supText + '</div>' +
-                '<div class="summaryRow"><a target="_blank" href="' + item.u + '">' + item.u + '</div>' +
-                '<div class="cornerControls">' +
-                '<a href="javascript:;" onclick="reportInvalid(\'' + item.t + '\', \'' + item.u + '\');return false;" class="actionButton">{{_("Invalid")}}</a>' +
-                '<a href="javascript:;" onclick="addFeed(\'' + item.t + '\', \'' + item.u + '\',' + item.f + ');return false;" class="actionButton">{{_("Subscribe")}}</a>' +
-                '</div></div>';
-            rssStr += aStr;
-        }
-        rssStr += '</div>';
-
-        // need pagination?
-        if (pageData.maxPage > 1){
-            rssStr += generatePaginationButtons(category, page, pageData.maxPage);
-        }
-        return rssStr;
-    };
-
-    //Click to a page
-    function toPage(category, page){
-        var contentDiv = document.getElementById("librarycontent");
-        contentDiv.innerHTML = createPageContent(category, page);
-    };
-
-    //Generated html snippet for pagination buttons
-    function generatePaginationButtons(category, currentPage, maxPage){
-        var previousPage = currentPage - 1;
-        var nextPage = currentPage + 1;
-        var strFirst = "";
-        var strPrev = "";
-        var strNext = "";
-        var strLast = "";
-        if (previousPage <= 0){
-            previousPage = 1;
-        }
-        if (nextPage > maxPage){
-            nextPage = maxPage;
-        }
-        if (currentPage <= 1){
-            clsFirst = 'class="pgdisabled"';
-            clsPrev = 'class="pgdisabled"';
-            strNext = 'onclick="toPage(\'' + category + '\',' + nextPage + ')"';
-            strLast = 'onclick="toPage(\'' + category + '\',' + maxPage + ')"';
-        }else if (currentPage >= maxPage){
-            clsFirst = 'onclick="toPage(\'' + category + '\',1)"';
-            clsPrev = 'onclick="toPage(\'' + category + '\',' + previousPage + ')"';
-            strNext = 'class="pgdisabled"';
-            strLast = 'class="pgdisabled"';
-        }else{
-            clsFirst = 'onclick="toPage(\'' + category + '\',1)"';
-            clsPrev = 'onclick="toPage(\'' + category + '\',' + previousPage + ')"';
-            strNext = 'onclick="toPage(\'' + category + '\',' + nextPage + ')"';
-            strLast = 'onclick="toPage(\'' + category + '\',' + maxPage + ')"';
-        }
-        return '<ul class="paging">' +
-            '<li ' + clsFirst + '><<</li>' +
-            '<li ' + clsPrev + '>＜</li>' +
-            '<li ' + strNext + '>＞</li>' +
-            '<li ' + strLast + '>>></li>' +
-            '<li class="pageinfo">' + currentPage + '/' + maxPage + '</li></ul>';
-    };
-
-    //Click a category and then populate the content of links on right side
-    function selectCategory(obj, category) {
-        if (obj) {
-            var thisLi = obj.parentNode;
-            hightlightCategory(thisLi);
-            toPage(category, 1);
-        }
-    };
-
-    function doSearch() {
-        var input, sch_txt;
-        input = document.getElementById('search_text');
-        sch_txt = input.value;
-        if (sch_txt == "#download") {
-            downAllRssToFile();
-            input.value = "";
-            sch_txt = "";
-        }
-
-        buildRssByCategory(sch_txt);
-        createCategoryMenu();
-        // select first category by default
-        selectCategory(document.querySelector(".category-menu"), "{{_('[All]')}}");
-    }
-
-    doSearch();
-
-    function addFeed(title, feedurl, isfulltext) {
-        ajax({url: "/customrss/add", type: "POST",
-            data: {title: title, fulltext: isfulltext, url: feedurl, fromsharedlibrary: 'true'},
-            success: function (resp, xml) {
-                if (resp.status == "ok") {
-                    var modal = new tingle.modal({footer: true});
-                    modal.setContent("{{_('<h1>Successfully</h1><p>This feed has been successfully subscribed.</p>')}}");
-                    modal.addFooterBtn("{{_('Close')}}", 'actionButton', function() {
-                        modal.close();
-                    });
-                    modal.open();
-                } else {
-                    alert("{{ _('Cannot add this feed, Error:') }}" + resp.status);
-                }
-            },
-            fail: function (status) {
-                alert("{{ _('Error when try to add this feed. Status:') }}" + status);
-            }
-        });
-    };
-
-    // report some link is invalid
-    function reportInvalid(title, feedurl){
-        ajax({url: "/library/mgr/reportinvalid", type: "POST",
-            data: {title: title, url: feedurl},
-            success: function (resp, xml) {
-                if (resp.status == "ok") {
-                    var modal = new tingle.modal({footer: true});
-                    modal.setContent("{{_('<h1>Thanks</h1><p>Thank you for your feedback, this feed will be reviewed soon.</p>')}}");
-                    modal.addFooterBtn("{{_('Close')}}", 'actionButton', function() {
-                        modal.close();
-                    });
-                    modal.open();
-                } else {
-                    alert(resp.status);
-                }
-            },
-            fail: function (status) {
-                alert(status);
-            }
-        });
-    }
-
-    function downAllRssToFile() {
-        var title, url, ftext, cat, rssd, fmtdate, nowdate;
-        var elementA = document.createElement('a');
-        var aTxt = new Array();
-        aTxt.push("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
-        aTxt.push("<opml version=\"2.0\">");
-        aTxt.push("<head>");
-        aTxt.push("    <title>KindleEar.opml</title>");
-        aTxt.push("    <dateCreated>" + new Date() + "</dateCreated>");
-        aTxt.push("    <dateModified>" + new Date() + "</dateModified>");
-        aTxt.push("    <ownerName>KindleEar</ownerName>");
-        aTxt.push("</head>");
-        aTxt.push("<body>");
-        for (var i = 0; i < all_rss_data.length; i++) {
-            title = all_rss_data[i].t;
-            url = all_rss_data[i].u;
-            title = title.replace(/<[^<>]+?>/g,'');
-            cat = all_rss_data[i].c;
-            if (all_rss_data[i].f == "false") {
-                ftext = "0";
-            } else {
-                ftext = "1";
-            }
-            aTxt.push("    <outline type=\"rss\" text=\"" + title + "\" xmlUrl=\"" + url + "\" isFulltext=\"" + ftext + "\" category=\"" + cat + "\" />");
-        }
-        aTxt.push("</body>");
-        aTxt.push("</opml>");
-
-        nowdate = new Date();
-        fmtdate = "KindleEar_library_" + nowdate.getFullYear() + "_" + ((nowdate.getMonth() + 1)) + "_" + nowdate.getDate() + ".xml";
-
-        elementA.setAttribute("href", "data:text/plain;charset=utf-8," + aTxt.join("\n"));
-        elementA.setAttribute("download", fmtdate);
-        elementA.style.display = 'none';
-        document.body.appendChild(elementA);
-        elementA.click();
-        document.body.removeChild(elementA);
-    }
-</script>
+{% block jsfiles %}
+<script type="text/javascript" src="/static/library.js" charset="utf-8"></script>
 {% endblock %}

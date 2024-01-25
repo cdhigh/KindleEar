@@ -170,7 +170,7 @@ class KeUser(MyBaseModel): # kindleEar User
 
     #自己直接所属的上传Recipe列表，返回[Recipe,]
     def all_uploaded_recipe(self):
-        return sorted(Recipe.select().where(Recipe.user == self.name).where(Recipe.type_ == 'uploaded'), 
+        return sorted(Recipe.select().where(Recipe.user == self.name).where(Recipe.type_ == 'upload'), 
             key=attrgetter('time'), reverse=True)
 
     #自己订阅的Recipe，如果传入recipe_id，则使用id筛选，返回一个，否则返回一个列表
@@ -193,21 +193,36 @@ class KeUser(MyBaseModel): # kindleEar User
         WhiteList.delete().where(WhiteList.user == self.name).execute()
         UrlFilter.delete().where(UrlFilter.user == self.name).execute()
         DeliverLog.delete().where(DeliverLog.username == self.name).execute() #推送记录
-        LastDelivered.delete().where(LastDelivered.username == self.name).execute()
             
 #RSS订阅源，包括自定义RSS，上传的recipe，内置在zip里面的builtin_recipe不包括在内
-#每个Recipe的字符串表示为：custom:id, uploaded:id
+#每个Recipe的字符串表示为：custom:id, upload:id
 class Recipe(MyBaseModel):
     title = CharField()
     url = CharField(default='')
     description = CharField(default='')
     isfulltext = BooleanField(default=False)
-    type_ = CharField() #'custom','uploaded'
+    type_ = CharField() #'custom','upload'
     needs_subscription = BooleanField(default=False) #是否需要登陆网页，只有上传的recipe才有意义
-    content = BlobField(null=True) #保存上传的recipe的utf-8编码后的二进制内容
+    content = TextField(default='') #保存上传的recipe的unicode字符串表示，已经解码
     time = DateTimeField() #源被加入的时间，用于排序
     user = CharField() #哪个账号创建的，和nosql一致，保存用户名
     language = CharField(default='')
+
+    #在程序内其他地方使用的id，在数据库内则使用 self.id
+    @property
+    def recipe_id(self):
+        return '{}:{}'.format(self.type_, self.id)
+
+    #将各种表示的recipe id转换回数据库id，返回 (type, id)
+    @classmethod
+    def type_and_id(cls, id_):
+        id_ = str(id_)
+        if ':' in id_:
+            return id_.split(':', 1)
+        elif id_.startswith(('custom__', 'upload__', 'builtin__')):
+            return id_.split('__', 1)
+        else:
+            return '', id_
 
 #已经被订阅的Recipe信息，包括自定义RSS/上传的recipe/内置builtin_recipe
 class BookedRecipe(MyBaseModel):
@@ -240,14 +255,6 @@ class DeliverLog(MyBaseModel):
     datetime = DateTimeField()
     book = CharField()
     status = CharField()
-
-#added 2017-09-01 记录已经推送的期数/章节等信息，可用来处理连载的漫画/小说等
-class LastDelivered(MyBaseModel):
-    username = CharField()
-    bookname = CharField()
-    num = IntegerField(default=0) #num和record可以任选其一用来记录，或使用两个配合都可以
-    record = CharField(default='') #record同时也用做在web上显示
-    datetime = DateTimeField()
     
 class WhiteList(MyBaseModel):
     mail = CharField()
@@ -260,16 +267,17 @@ class UrlFilter(MyBaseModel):
 #Shared RSS links from other users [for kindleear.appspot.com only]
 class SharedRss(MyBaseModel):
     title = CharField()
-    url = CharField()
-    isfulltext = BooleanField()
-    language = CharField()
-    category = CharField()
-    creator = CharField()
-    created_time = DateTimeField()
+    url = CharField(default='')
+    isfulltext = BooleanField(default=False)
+    language = CharField(default='')
+    category = CharField(default='')
+    content = TextField(default='') #保存分享的recipe的unicode字符串表示，已经解码
+    creator = CharField(default='') #保存贡献者的md5
+    created_time = DateTimeField(default=datetime.datetime.utcnow)
     subscribed = IntegerField(default=0) #for sort
     last_subscribed_time = DateTimeField(null=True)
     invalid_report_days = IntegerField(default=0) #some one reported it is a invalid link
-    last_invalid_report_time = DateTimeField(null=True) #a rss will be deleted after some days of reported_invalid
+    last_invalid_report_time = DateTimeField(default=datetime.datetime.utcnow) #a rss will be deleted after some days of reported_invalid
 
     #返回数据库中所有的分类
     @classmethod
@@ -281,13 +289,17 @@ class SharedRssCategory(MyBaseModel):
     name = CharField()
     last_updated = DateTimeField() #for sort
 
-#当前仅使用 name='dbTableVersion' 行保存数据库格式版本
+#当前使用:
+#name='dbTableVersion'.int_value 行保存数据库格式版本
+#name='lastSharedRssTime'.time_value 保存共享库的最新更新日期
 class AppInfo(MyBaseModel):
     name = CharField()
-    value = IntegerField()
-    description = CharField(null=True)
-    comment = CharField(null=True)
-
+    int_value = IntegerField(default=0)
+    str_value = CharField(default='')
+    time_value = DateTimeField(default=datetime.datetime.utcnow)
+    description = CharField(default='')
+    comment = CharField(default='')
+    
 #创建数据库表格，一个数据库只需要创建一次
 #如果是sql数据库，可以使用force=True删掉之前的数据库文件
 def CreateDatabaseTable(force=False):
@@ -301,14 +313,13 @@ def CreateDatabaseTable(force=False):
     Recipe.create_table()
     BookedRecipe.create_table()
     DeliverLog.create_table()
-    LastDelivered.create_table()
     WhiteList.create_table()
     UrlFilter.create_table()
     SharedRss.create_table()
     SharedRssCategory.create_table()
     AppInfo.create_table()
     
-    AppInfo(name='dbTableVersion', value=__DB_VERSION__).save()
+    AppInfo(name='dbTableVersion', int_value=__DB_VERSION__).save()
     print('Create database table finished')
 
 

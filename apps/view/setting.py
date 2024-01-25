@@ -86,14 +86,13 @@ def SettingPost():
         userName = user.name
         if enable_custom_rss:
             for rss in user.all_custom_rss()[::-1]:
-                recipe_id = f'custom:{rss.key_or_id_string}'
+                recipe_id = rss.recipe_id
                 if not BookedRecipe.get_one(BookedRecipe.recipe_id == recipe_id):
                     BookedRecipe(recipe_id=recipe_id, separated=False, user=userName, title=rss.title, description=rss.description,
                         time=datetime.datetime.utcnow()).save()
         else:
             for rss in user.all_custom_rss():
-                recipe_id = f'custom:{rss.key_or_id_string}'
-                dbInst = BookedRecipe.get_one(BookedRecipe.recipe_id == recipe_id)
+                dbInst = BookedRecipe.get_one(BookedRecipe.recipe_id == rss.recipe_id)
                 if dbInst:
                     dbInst.delete_instance()
     

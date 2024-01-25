@@ -1,3 +1,5 @@
+@charset "utf-8"
+
 /*
  * -- BASE STYLES --
  */
@@ -276,6 +278,13 @@ button {
     margin-left: 10px;
 }
 
+.box-list .book .titleRow label {
+    font-size: 0.6em;
+    color: red;
+    font-weight: normal;
+    font-style: italic;
+}
+
 .box-list .book .titleRow img {
     vertical-align: 3px;
     margin-left: 10px;
@@ -320,6 +329,13 @@ button {
     color: #fff;
     border: 2px solid #fff;
     border-radius: 2em;
+}
+
+textarea {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 #bookmarklet .box .actionButton {
@@ -561,10 +577,17 @@ table.pure-table thead {
   width: 100%;
 }
 
+.width60 {
+  width: 60%;
+}
+
 .noborder {
     border: none;
     background: white;
     overflow: hidden;
+}
+select[id="shared_rss_lang_pick"] {
+    font-weight: bold;
 }
 
 /* Feed列表的汉堡菜单按钮及其弹出子按钮*/
@@ -611,10 +634,22 @@ table.pure-table thead {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-.btn-A { background-color: #F70187; /* A按钮为红色背景 */ }
-.btn-B { background-color: #9b59b6; /* B为紫色背景 */ }
-.btn-C { background-color: #6DC66E; /* C为浅绿色背景 */ }
-.btn-D { background-color: #3498db; /* D为浅蓝色背景 */ }
+.btn-A { /* A按钮为红色背景 */
+    background-color: #F70187;
+    background: linear-gradient(to bottom, #DB77AD 50%, #F70187 50%);
+}
+.btn-B { /* B为紫色背景 */
+    background-color: #9b59b6;
+    background: linear-gradient(to bottom, #B99FC3 50%, #9b59b6 50%);
+}
+.btn-C { /* C为浅绿色背景 */
+    background-color: #6DC66E;
+    background: linear-gradient(to bottom, #A7CDA7 50%, #6DC66E 50%);
+}
+.btn-D { /* D为浅蓝色背景 */
+    background-color: #3498db;
+    background: linear-gradient(to bottom, #85B4D3 50%, #3498db 50%);
+}
 
 .upload-recipe {
     display: inline-block;
@@ -651,7 +686,7 @@ table.pure-table thead {
   font-size: 20px;
   font-style: normal;
   color: white;
-  vertical-align: 4px;
+  vertical-align: 5px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -665,39 +700,33 @@ table.pure-table thead {
 .icon-add:before {
   content: "\e609";
 }
-
 .icon-push:before {
   content: "\e62a";
 }
-
 .icon-subscribe:before {
   content: "\e600";
 }
-
 .icon-share:before {
   content: "\e739";
 }
-
-.icon-sourcecode:before {
-  content: "\e604";
+.icon-source:before {
+  content: "\e644";
 }
-
 .icon-offcloud:before {
   content: "\e694";
 }
-
 .icon-delete:before {
   content: "\e645";
 }
-
 .icon-upload:before {
   content: "\e7e0";
 }
-
 .icon-unsubscribe:before {
   content: "\e61b";
 }
-
 .icon-key:before {
   content: "\e62e";
+}
+.icon-invalid:before {
+  content: "\e8c0";
 }

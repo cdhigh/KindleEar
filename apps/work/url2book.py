@@ -66,7 +66,7 @@ def Url2Book():
         
     user = KeUser.get_one(KeUser.name == userName)
     if not user or not user.kindle_email:
-        return "User not exist!"
+        return "The user does not exist."
     
     opts = GetOpts(user.device)
     

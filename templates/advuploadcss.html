@@ -6,11 +6,11 @@
 {% block css -%}
 <style type="text/css">
 #csspreview {
-    text-align: left;
-    background-color: #eee;
-    width: 100%;
-    border-radius: 0;
-    border: none;
+  text-align: left;
+  background-color: #eee;
+  width: 100%;
+  border-radius: 0;
+  border: none;
 }
 </style>
 {{super()}}
@@ -18,140 +18,26 @@
 
 {% block advcontent -%}
 <form class="pure-form" id="uploadForm" action="{{formaction}}" method="POST" enctype="multipart/form-data">
-    <fieldset>
-        <legend><h3>{{_("Upload stylesheet")}}</h3></legend>
-        <p><small>{{_("Upload a stylesheet from local (accept utf-8 only).")}}</small></p>
-        <div class="box-list">
-            <input type="file" name="css_file" id="cssfile" class="pure-input-1 box" accept="text/css" />
-            <textarea id="csspreview" rows="10" cols="50" readonly="true">{% if user and user.css_content -%}{{user.css_content}}{% endif -%}
-            </textarea>
-        </div>
-        <div style="text-align:center;">
-            <input type="button" value="{{_('Upload')}}" id="fileSubmit" class="pure-button pure-button-primary pure-input-rounded" />
-            <a href="javascript:;" datahref="{{deletecsshref}}" id="deletecss" class="pure-button pure-input-rounded">{{_("Delete")}}</a>
-        </div>
-    </fieldset>
+  <fieldset>
+    <legend><h3>{{_("Upload stylesheet")}}</h3></legend>
+    <p><small>{{_("Upload a stylesheet from local (accept utf-8 only).")}}</small></p>
+    <div class="box-list">
+      <input type="file" name="css_file" id="css_file" class="pure-input-1 box" accept="text/css" />
+      <textarea id="cssPreview" rows="10" cols="50" readonly="true">{% if user and user.css_content -%}{{user.css_content}}{% endif -%}
+      </textarea>
+    </div>
+    <div style="text-align:center;">
+      <input type="button" value="{{_('Upload')}}" id="fileSubmit" class="pure-button pure-button-primary pure-input-rounded" />
+      <a href="javascript:;" deletehref="{{deletecsshref}}" id="deletecss" class="pure-button pure-input-rounded">{{_("Delete")}}</a>
+    </div>
+  </fieldset>
 </form>
 {% endblock -%}
 {% block js -%}
 <script type="text/javascript">
-var AJAXFILE = {
-    form: document.getElementById("uploadForm"),
-    fileInput: document.getElementById("cssfile"),
-    upButton: document.getElementById("fileSubmit"),
-    deleteButton: document.getElementById("deletecss"),
-    url: document.getElementById("uploadForm").action,
-
-    filter: function(file) {
-        var ret = null;
-        if (file){
-            if (file.type.indexOf("text/css") == 0) {
-                ret = file;
-            } else {
-                document.getElementById("cssfile").value = null;
-                document.getElementById("csspreview").textContent = "";
-                alert('{{_("The file you chosen is not a stylesheet file.")}}');
-            }
-        }
-        return ret;
-    },
-    onSelect: function(file) {
-        var html = '';
-        if (file){
-            var reader = new FileReader();
-            reader.onloadend = function() {
-                document.getElementById("csspreview").textContent = reader.result;
-            }
-            reader.readAsText(file);
-        } else {
-            document.getElementById("csspreview").textContent = "";
-        }
-    },
-    onSuccess: function(response) {
-        if (response == "ok"){
-            var modal = new tingle.modal({footer: true});
-            modal.setContent("{{_('<h1>Successfully</h1><p>The stylesheet file have been uploaded successfully.</p>')}}");
-            modal.addFooterBtn("{{_('Close')}}", 'actionButton', function() {
-                modal.close();
-            });
-            modal.open();
-        }else{
-            alert("{{_('Failed to upload the stylesheet file. Error:')}}" + response);
-        }
-    },
-    onFailure: function(status, response) {
-        alert("{{_('Failed to upload the stylesheet file. Error:')}}" + response);
-    },
-
-    //获取选择文件，file控件或拖放
-    funGetFiles: function(e) {
-        var files = e.target.files || e.dataTransfer.files;
-        var file = files[0]
-        this.file = this.filter(file);
-        this.onSelect(this.file);
-        return this;
-    },
-
-    //upload file
-    funUploadFile: function() {
-        var self = this;
-        var doUpload = function(file) {
-            if (file) {
-                var xhr = new XMLHttpRequest();
-                if (xhr.upload) {
-                    xhr.onreadystatechange = function(e) {
-                        if (xhr.readyState == 4) {
-                            var status = xhr.status;
-                            if (status >= 200 && status < 300) {
-                                self.onSuccess(xhr.responseText);
-                            } else {
-                                self.onFailure(status, xhr.responseText);
-                            }
-                        }
-                    };
-
-                    // Start upload
-                    xhr.open("POST", self.url, true);
-                    var fd = new FormData(self.form);
-                    xhr.send(fd);
-                }
-            }
-        };
-        doUpload(self.file);
-        return false;
-    },
-
-    //Delete css, use default stylesheet
-    funDeleteFile: function(){
-        ajax({url:this.deleteButton.getAttribute('datahref'), type: "POST",
-            data: {'action': 'delete'},
-            success: function (resp, xml) {
-                if (resp.status == "ok") {
-                    document.getElementById("cssfile").value = null;
-                    document.getElementById("csspreview").textContent = "";
-                } else {
-                    alert("{{_('Failed to delete the stylesheet. Error:')}}" + resp.status);
-                }
-            },
-            fail: function (status) {
-                alert("{{_('Failed to delete the stylesheet. Error:')}}" + status);
-            }
-        });
-    },
-
-    init: function() {
-        var self = this;
-        if (this.fileInput) {
-            this.fileInput.addEventListener("change", function(e) { self.funGetFiles(e); }, false);
-        }
-        if (this.upButton) {
-            this.upButton.addEventListener("click", function(e) { self.funUploadFile(e); }, false);
-        }
-        if (this.deleteButton) {
-            this.deleteButton.addEventListener("click", function(e) { self.funDeleteFile(e); }, false);
-        }
-    }
-};
-AJAXFILE.init();
+$(document).ready(function(){
+  //mimeType, formId, fileInputId, upBtnId, delBtnId, previewTagId, progressId
+  AjaxFileUpload.init('text', '#uploadForm', '#css_file', '#fileSubmit', '#deletecss', '#cssPreview');
+});
 </script>
-{% endblock %}
+{% endblock -%}

@@ -111,7 +111,7 @@ class KeUser(MyBaseModel): # kindleEar User
 
     #自己直接所属的上传Recipe列表，返回[Recipe,]
     def all_uploaded_recipe(self):
-        return sorted(Recipe.select().where(Recipe.user == self.name).where(Recipe.type_ == 'uploaded'), 
+        return sorted(Recipe.select().where(Recipe.user == self.name).where(Recipe.type_ == 'upload'), 
             key=attrgetter('time'), reverse=True)
 
     #自己订阅的Recipe，如果传入recipe_id，则使用id筛选，返回一个，否则返回一个列表
@@ -138,22 +138,38 @@ class KeUser(MyBaseModel): # kindleEar User
         map(lambda x: x.delete_instance(), list(LastDelivered.get_all(LastDelivered.username == self.name)))
         
 #RSS订阅源，包括自定义RSS，上传的recipe，内置在zip里面的builtin_recipe不包括在内
-#每个Recipe的字符串表示为：custom:id, uploaded:id
+#每个Recipe的字符串表示为：custom:id, upload:id
 class Recipe(MyBaseModel):
     __kind__ = "Recipe"
     title = fields.StringField()
     url = fields.StringField(default='')
     description = fields.StringField(default='')
     isfulltext = fields.BooleanField(default=False)
-    type_ = fields.StringField() #'custom','uploaded'
+    type_ = fields.StringField() #'custom','upload'
     needs_subscription = fields.BooleanField(default=False) #是否需要登陆网页，只有上传的recipe才有意义
-    content = fields.AnyField() #保存上传的recipe的utf-8编码后的二进制内容
+    content = fields.StringField() #保存上传的recipe的unicode字符串表示，已经解码
     time = fields.DateTimeField() #源被加入的时间，用于排序
     user = fields.StringField(default='') #哪个账号创建的
 
+    #在程序内其他地方使用的id，在数据库内则使用 self.id
+    @property
+    def recipe_id(self):
+        return '{}:{}'.format(self.type_, self.id)
+
+    #将各种表示的recipe id转换回数据库id，返回 (type, id)
+    @classmethod
+    def type_and_id(cls, id_):
+        id_ = str(id_)
+        if ':' in id_:
+            return id_.split(':', 1)
+        elif id_.startswith(('custom__', 'upload__', 'builtin__')):
+            return id_.split('__', 1)
+        else:
+            return '', id_
+
 #已经被订阅的Recipe信息
 class BookedRecipe(MyBaseModel):
-    recipe_id = fields.CharField() #这个ID不是Recipe数据库ID，而是 builtin:xxx, uploaded:xxx, custom:xxx
+    recipe_id = fields.CharField() #这个ID不是Recipe数据库ID，而是 builtin:xxx, upload:xxx, custom:xxx
     separated = fields.BooleanField() #是否单独推送
     user = fields.CharField()
     title = fields.StringField()
@@ -207,15 +223,16 @@ class UrlFilter(MyBaseModel):
 class SharedRss(MyBaseModel):
     __kind__ = "SharedRss"
     title = fields.StringField()
-    url = fields.StringField()
-    isfulltext = fields.BooleanField()
-    language = fields.StringField()
-    category = fields.StringField()
-    creator = fields.StringField()
-    created_time = fields.DateTimeField()
-    subscribed = fields.IntField() #for sort
-    invalid_report_days = fields.IntField() #some one reported it is a invalid link
-    last_invalid_report_time = fields.DateTimeField() #a rss will be deleted after some days of reported_invalid
+    url = fields.StringField(default='')
+    isfulltext = fields.BooleanField(default=False)
+    language = fields.StringField(default='')
+    category = fields.StringField(default='')
+    content = fields.StringField(default='') #保存分享的recipe的unicode字符串表示，已经解码
+    creator = fields.StringField(default='')
+    created_time = fields.DateTimeField(default=datetime.datetime.utcnow)
+    subscribed = fields.IntField(default=0) #for sort
+    invalid_report_days = fields.IntField(default='') #some one reported it is a invalid link
+    last_invalid_report_time = fields.DateTimeField(default=datetime.datetime.utcnow) #a rss will be deleted after some days of reported_invalid
     
     #return all categories in database
     @classmethod
@@ -227,3 +244,15 @@ class SharedRssCategory(MyBaseModel):
     __kind__ = "SharedRssCategory"
     name = fields.StringField()
     last_updated = fields.DateTimeField() #for sort
+
+#当前使用:
+#name='dbTableVersion' 行保存数据库格式版本
+#name='lastSharedRssTime' 保存共享库的最新更新日期
+class AppInfo(MyBaseModel):
+    name = fields.StringField()
+    int_value = fields.IntField(default=0)
+    str_value = fields.StringField(default='')
+    time_value = fields.DateTimeField(default=datetime.datetime.utcnow)
+    description = fields.StringField(default='')
+    comment = fields.StringField(default='')
+    

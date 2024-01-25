@@ -25,17 +25,22 @@ def MySubscription(tips=None):
     user = get_login_user()
     titleToAdd = request.args.get('title_to_add')
     urlToAdd = request.args.get('url_to_add')
-    myCustomRss = user.all_custom_rss()
-    myCustomRss = json.dumps([item.to_dict(only=[Recipe.id, Recipe.title, Recipe.url, Recipe.isfulltext]) for item in myCustomRss])
-    myUploadedRecipes = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.description, Recipe.needs_subscription, Recipe.language]) for item in user.all_uploaded_recipe()]
+    myCustomRss = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.url, Recipe.isfulltext]) 
+        for item in user.all_custom_rss()]
+    myUploadedRecipes = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.description, Recipe.needs_subscription, Recipe.language]) 
+        for item in user.all_uploaded_recipe()]
+    #使用不同的id前缀区分不同的rss类型
+    for item in myCustomRss:
+        item['id'] = 'custom:{}'.format(item['id'])
     for item in myUploadedRecipes:
-        item['id'] = 'uploaded:{}'.format(item['id'])
+        item['id'] = 'upload:{}'.format(item['id'])
         item['language'] = item['language'].lower().replace('-', '_').split('_')[0]
 
     myBookedRecipes = json.dumps([item.to_dict(only=[BookedRecipe.recipe_id, BookedRecipe.separated, BookedRecipe.title,
-        BookedRecipe.description, BookedRecipe.needs_subscription, BookedRecipe.account]) for item in user.get_booked_recipe()])
+        BookedRecipe.description, BookedRecipe.needs_subscription, BookedRecipe.account])
+        for item in user.get_booked_recipe()], separators=(',', ':'))
 
-    return render_template("my.html", tab="my", user=user, my_custom_rss=myCustomRss, tips=tips, 
+    return render_template("my.html", tab="my", user=user, my_custom_rss=json.dumps(myCustomRss), tips=tips, 
         my_uploaded_recipes=json.dumps(myUploadedRecipes), my_booked_recipes=myBookedRecipes, 
         subscribe_url=url_for("bpSubscribe.MySubscription"), title_to_add=titleToAdd, url_to_add=urlToAdd)
 
@@ -77,7 +82,7 @@ def FeedsAjaxPost(actType):
             rss.delete_instance()
             return {'status': 'ok'}
         else:
-            return {'status': _('The Rss ({}) not exist!').format(rssId)}
+            return {'status': _('The Rss does not exist.')}
     elif actType == 'add':
         title = form.get('title')
         url = form.get('url')
@@ -135,40 +140,41 @@ def RecipeAjaxPost(actType):
 
     if actType == 'upload': #上传Recipe
         return SaveUploadedRecipe(user)
-        
-    id_ = form.get('id', '')
-    if id_.startswith('uploaded:'):
-        recipe = Recipe.get_by_id_or_none(id_[9:])
-    else: #builtin:xxx
-        recipe = GetBuiltinRecipe(id_)
+    
+    recipeId = form.get('id', '')
+    recipeType, dbId = Recipe.type_and_id(recipeId)
+    if recipeType == 'builtin':
+        recipe = GetBuiltinRecipe(recipeId)
+    else:
+        recipe = Recipe.get_by_id_or_none(dbId)
 
     if not recipe:
-        return {'status': _('The recipe ({}) not exist!').format(id_)}
+        return {'status': _('The recipe does not exist.')}
 
-    if id_.startswith('uploaded:'):
-        title = recipe.title
-        desc = recipe.description
-        needSubscription = recipe.needs_subscription
-    else:
+    if recipeType == 'builtin':
         title = recipe.get('title', '')
         desc = recipe.get('description', '')
         needSubscription = recipe.get('needs_subscription', False)
+    else:
+        title = recipe.title
+        desc = recipe.description
+        needSubscription = recipe.needs_subscription
 
     if actType == 'unsubscribe': #退订
-        dbInst = user.get_booked_recipe(id_)
+        dbInst = user.get_booked_recipe(recipeId)
         if dbInst:
             dbInst.delete_instance()
-        return {'status':'ok', 'id': id_, 'title': title, 'desc': desc}
+        return {'status':'ok', 'id': recipeId, 'title': title, 'desc': desc}
     elif actType == 'subscribe': #订阅
         separated = str_to_bool(form.get('separated', ''))
         respDict = {'status': 'ok'}
         
-        dbInst = user.get_booked_recipe(id_)
+        dbInst = user.get_booked_recipe(recipeId)
         if dbInst: #可以更新separated属性
             dbInst.separated = separated
             dbInst.save()
         else:
-            BookedRecipe(recipe_id=id_, separated=separated, user=user.name, title=title, 
+            BookedRecipe(recipe_id=recipeId, separated=separated, user=user.name, title=title, 
                 description=desc, needs_subscription=needSubscription,
                 time=datetime.datetime.utcnow()).save()
 
@@ -178,18 +184,18 @@ def RecipeAjaxPost(actType):
         respDict['separated'] = separated
         return respDict
     elif actType == 'delete': #删除已经上传的recipe
-        if not id_.startswith('uploaded:'):
+        if recipeType == 'builtin':
             return {'status': _('You can only delete the uploaded recipe')}
 
-        dbInst = BookedRecipe.get_one(BookedRecipe.recipe_id == id_)
+        dbInst = BookedRecipe.get_one(BookedRecipe.recipe_id == recipeId)
         if dbInst:
             dbInst.delete_instance()
         recipe.delete_instance()
-        return {'status': 'ok', 'id': id_}
+        return {'status': 'ok', 'id': recipeId}
     else:
         return {'status': 'Unknown command: {}'.format(actType)}
 
-#将上传的Recipe保存到数据库，返回一个结果字典
+#将上传的Recipe保存到数据库，返回一个结果字典，里面是一些recipe的元数据
 def SaveUploadedRecipe(user):
     from calibre.web.feeds.recipes import compile_recipe
     tips = ''
@@ -202,22 +208,30 @@ def SaveUploadedRecipe(user):
     if not data:
         return {'status': _("Can not read uploaded file, Error:") + '\n' + tips}
 
+    #尝试解码
+    match = re.search(br'coding[:=]\s*([-\w.]+)', data[:200])
+    enc = match.group(1).decode('utf-8') if match else 'utf-8'
     try:
-        recipe = compile_recipe(data)
+        src = data.decode(enc)
+    except:
+        return {'status': _("Failed to decode the recipe. Please ensure that your recipe is saved in utf-8 encoding.")}
+
+    try:
+        recipe = compile_recipe(src)
     except Exception as e:
         recipe = None
         tips = str(e)
 
     if not recipe:
-        return {'status': _("Failed to compile recipe: ") + tips}
+        return {'status': _("Failed to compile the recipe. Error:") + tips}
     
     #判断是否重复
     oldRecipe = Recipe.get_one(Recipe.title == recipe.title)
     if oldRecipe:
         return {'status': _('The recipe you uploaded is already in the library, and its language is :') + oldRecipe.language}
 
-    params = {"title": recipe.title, "description": recipe.description, "type_": 'uploaded', 
-        "needs_subscription": recipe.needs_subscription, "content": data, "time": datetime.datetime.utcnow(),
+    params = {"title": recipe.title, "description": recipe.description, "type_": 'upload', 
+        "needs_subscription": recipe.needs_subscription, "content": src, "time": datetime.datetime.utcnow(),
         "user": user.name, "language": recipe.language}
     dbInst = Recipe(**params)
     dbInst.save()
@@ -225,7 +239,7 @@ def SaveUploadedRecipe(user):
     params.pop('time')
     params.pop('type_')
     params['status'] = 'ok'
-    params['id'] = 'uploaded:{}'.format(dbInst.key_or_id_string)
+    params['id'] = dbInst.recipe_id
     params['language'] = params['language'].lower().replace('-', '_').split('_')[0]
     return params
 
@@ -234,12 +248,12 @@ def SaveUploadedRecipe(user):
 @login_required()
 def RecipeLoginInfoPostAjax():
     user = get_login_user()
-    id_ = request.form.get('id')
+    id_ = request.form.get('id', '')
     account = request.form.get('account')
     password = request.form.get('password')
     recipe = BookedRecipe.get_one(BookedRecipe.recipe_id == id_)
     if not recipe:
-        return {'status': _('The recipe not exist!')}
+        return {'status': _('The recipe does not exist.')}
 
     #任何一个留空则删除登陆信息
     ret = {'status': 'ok'}
@@ -260,26 +274,19 @@ def RecipeLoginInfoPostAjax():
 def ViewRecipeSourceCode(id_):
     from lib.python_highlighter import make_html
     htmlTpl = """<!DOCTYPE html>\n<html><head><meta charset="utf-8"><title>{title}</title></head><body>{body}</body></html>"""
-    id_ = id_.replace('__', ':')
-    if id_.startswith('uploaded:'):
-        recipe = Recipe.get_by_id_or_none(id_[9:])
+    recipeId = id_.replace('__', ':')
+    recipeType, dbId = Recipe.type_and_id(recipeId)
+    if recipeType == 'upload':
+        recipe = Recipe.get_by_id_or_none(dbId)
         if not recipe or not recipe.content:
-            return htmlTpl.format(title="Error", body=_('The recipe not exist!'))
+            return htmlTpl.format(title="Error", body=_('The recipe does not exist.'))
 
-        src = recipe.content
-        try:
-            match = re.search(br'coding[:=]\s*([-\w.]+)', src[:200])
-            enc = match.group(1).decode('utf-8') if match else 'utf-8'
-            src = src.decode(enc)
-        except:
-            return htmlTpl.format(title="Error", body=_('Fail to decode the recipe content'))
-
-        return make_html(io.StringIO(src), recipe.title)
-    else:
-        recipe = GetBuiltinRecipe(id_)
-        src = GetBuiltinRecipeContent(id_)
+        return make_html(io.StringIO(recipe.content), recipe.title)
+    else: #内置recipe
+        recipe = GetBuiltinRecipe(recipeId)
+        src = GetBuiltinRecipeContent(recipeId)
         if not recipe or not src:
-            return htmlTpl.format(title="Error", body=_('The recipe not exist!'))
+            return htmlTpl.format(title="Error", body=_('The recipe does not exist.'))
 
         return make_html(io.StringIO(src), recipe.get('title'))
 
@@ -304,9 +311,10 @@ def GetBuiltinRecipe(id_: str):
 
 #返回特定ID的内置数据源码字符串
 def GetBuiltinRecipeContent(id_: str):
-    if not id_.startswith('builtin:'):
+    if not id_:
         return None
 
+    id_ = id_ if id_.startswith('builtin:') else f'builtin:{id_}'
     filename = '{}.recipe'.format(id_[8:])
     try:
         with zipfile.ZipFile(os.path.join(appDir, 'books', 'builtin_recipes.zip'), 'r') as zf:

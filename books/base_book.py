@@ -12,7 +12,6 @@ import feedparser
 from urllib.parse import urljoin, urlparse, urlunparse, urlencode, parse_qs, unquote_plus, quote_plus
 from lib import readability #修改了其htmls.py|shorten_title()
 from lib.urlopener import UrlOpener
-from apps.back_end.db_models import LastDelivered
 from lib.image_tools import split_image_by_height, compress_image
 from config import *
 
@@ -170,7 +169,6 @@ class BaseFeedBook:
         self.img_index = imgIndex
         self.opts = opts
         self.user = user
-        self.last_delivered_volume = '' #如果需要在推送书籍的标题中提供当前期号之类的信息，可以使用此属性
         
     @property
     def timeout(self):
@@ -198,11 +196,6 @@ class BaseFeedBook:
     def UserName(self):
         return self.user.name if self.user else ADMIN_NAME
 
-    # 返回最近推送的章节标题
-    @property
-    def LastDeliveredVolume(self):
-        return self.last_delivered_volume
-    
     #将HTML片段嵌入完整的XHTML框架中
     #encoding:网页编码
     #addTitleInBody: 除了HTML的head段，是否在正文body里面也添加Title

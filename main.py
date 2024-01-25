@@ -30,6 +30,7 @@ from apps.view.admin import bpAdmin
 from apps.view.adv import bpAdv
 from apps.view.deliver import bpDeliver
 from apps.view.library import bpLibrary
+from apps.view.library_offical import bpLibraryOffical, KINDLEEAR_SITE
 from apps.view.logs import bpLogs
 from apps.view.setting import bpSetting, supported_languages
 from apps.view.share import bpShare
@@ -116,6 +117,8 @@ app.register_blueprint(bpShare)
 app.register_blueprint(bpSubscribe)
 app.register_blueprint(bpWorker)
 app.register_blueprint(bpUrl2Book)
+if KINDLEEAR_SITE == KE_DOMAIN:
+    app.register_blueprint(bpLibraryOffical)
 
 #调试目的
 if __name__ == "__main__":

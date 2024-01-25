@@ -9,197 +9,106 @@
 {% block css -%}
 <style type="text/css">
 .logs .status {
-    display: inline-block;
-    border-radius: 20px;
-    background-color: grey;
-    color: #fff;
-    text-align: center;
-    padding: 3px 15px;
-    white-space: nowrap;
+  display: inline-block;
+  border-radius: 20px;
+  background-color: grey;
+  color: #fff;
+  text-align: center;
+  padding: 3px 15px;
+  white-space: nowrap;
 }
 
 .logs .status.success {
-    background-color: green;
+  background-color: green;
 }
 
 .logs .status.error {
-    background-color: darkorange;
+  background-color: darkorange;
 }
 </style>
 {% endblock -%}
 
 {% block content -%}
 <div class="main">
-    {% if mylogs -%}
-    <legend><h3>{{ _("Only display last 10 logs") }}</h3></legend>
-    <table class="pure-table pure-table-horizontal logs_list" width="100%">
-        <colgroup>
-            <col width="30%">
-            <col width="40%">
-            <col width="15%">
-            <col width="10%">
-            <col width="5%">
-        </colgroup>
-        <thead>
-            <tr>
-                <th>{{ _("Time") }}</th>
-                <th>{{ _("Title") }}</th>
-                <th>{{ _("Size") }}</th>
-                <th>{{ _("To") }}</th>
-                <th>{{ _("Status") }}</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for log in mylogs -%}
-        <tr>
-            <td>{{log.time}}</td>
-            <td>{{log.book}}</td>
-            <td>{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>
-            <td>{{log.to}}</td>
-            <td>
-                <span class="status {% if 'ok' in log.status -%} success {%- else -%} error {%- endif %}">
-                    {{ log.status }}
-                </span>
-            </td>
-        </tr>
-        {% endfor -%}
-        </tbody>
-    </table>
-    {% else -%}
-    <div class="notice-box">{{_('There is no log')}}</div>
-    {% endif -%}
+  {% if mylogs -%}
+  <legend><h3>{{ _("Only display last 10 logs") }}</h3></legend>
+  <table class="pure-table pure-table-horizontal logs_list" width="100%">
+    <colgroup>
+    <col width="30%">
+    <col width="40%">
+    <col width="15%">
+    <col width="10%">
+    <col width="5%">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>{{ _("Time") }}</th>
+        <th>{{ _("Title") }}</th>
+        <th>{{ _("Size") }}</th>
+        <th>{{ _("To") }}</th>
+        <th>{{ _("Status") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for log in mylogs -%}
+      <tr>
+        <td>{{log.time}}</td>
+        <td>{{log.book}}</td>
+        <td>{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>
+        <td>{{log.to}}</td>
+        <td>
+          <span class="status {% if 'ok' in log.status -%} success {%- else -%} error {%- endif %}">
+          {{ log.status }}
+          </span>
+        </td>
+      </tr>
+    {% endfor -%}
+    </tbody>
+  </table>
+  {% else -%}
+  <div class="notice-box">{{_('There is no log')}}</div>
+  {% endif -%}
 
-    {% if logs -%}
-    <legend><h3>{{ _("Logs of other users") }}</h3></legend>
-    <table class="pure-table pure-table-horizontal logs_list" width="100%">
-        <colgroup>
-            <col width="10%" />
-            <col width="25%" />
-            <col width="25%" />
-            <col width="15%" />
-            <col width="20%" />
-            <col width="5%" />
-        </colgroup>
-        <thead>
-            <tr>
-                <th>{{ _("Username") }}</th>
-                <th>{{ _("Time") }}</th>
-                <th>{{ _("Title") }}</th>
-                <th>{{ _("Size") }}</th>
-                <th>{{ _("To") }}</th>
-                <th>{{ _("Status") }}</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for u in logs -%}
-        {% for log in logs[u] -%}
-        <tr>
-            <td>{{u}}</td>
-            <td>{{log.time}}</td>
-            <td>{{log.book}}</td>
-            <td>{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>
-            <td>{{log.to}}</td>
-            <td>
-                <span class="status {% if 'ok' in log.status -%} success {%- else -%} error {%- endif %}">
-                    {{ log.status }}
-                </span>
-            </td>
-        </tr>
-        {% endfor -%}
-        {% endfor -%}
-        </tbody>
-    </table>
-    {% endif -%} {# endif of if logs -#}
-
-    {% if lastDelivered -%}
-    <legend><h3>{{ _("Last delivered") }}</h3></legend>
-    <table class="pure-table pure-table-horizontal logs_list" width="100%">
-        <colgroup>
-            <col width="10%">
-            <col width="23%">
-            <col width="20%">
-            <col width="5%">
-            <col width="20%">
-            <col width="22%">
-        </colgroup>
-        <thead>
-            <tr>
-                <th>{{ _("Username") }}</th>
-                <th>{{ _("Time") }}</th>
-                <th>{{ _("Title") }}</th>
-                <th>{{ _("Num") }}</th>
-                <th>{{ _("Record") }}</th>
-                <th>{{ _("Operation") }}</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for log in lastDelivered -%}
-        <tr id="lastDelivered_{{ log.key_or_id_string }}">
-            <td>{{ log.username }}</td>
-            <td>{{ log.datetime.strftime('%Y-%m-%d %H:%M') }}</td>
-            <td>{{ log.bookname }}</td>
-            <td id="lastDelivered_num_{{ log.key_or_id_string }}">{%if log.num %} {{ log.num }} {% else %} - {% endif %}</td>
-            <td id="lastDelivered_rec_{{ log.key_or_id_string }}">{%if log.record %} {{ log.record }} {% else %} - {% endif %}</td>
-            {% if log.num -%}
-            <td>
-                <a href="#" onclick="ChangeLastDelivered({{ log.key_or_id_string }});return false;" class="actionButton">{{_("Change")}}</a>
-            {% else -%}
-            {% endif -%}
-                <a href="#" onclick="DeleteLastDelivered({{ log.key_or_id_string }});return false;" class="actionButton">{{_("Delete")}}</a>
-            </td>
-        </tr>
-        {% endfor -%}
-        </tbody>
-    </table>
-    {% endif -%} {# endif of if lastDelivered -#}
+  {% if logs -%}
+  <legend><h3>{{ _("Logs of other users") }}</h3></legend>
+  <table class="pure-table pure-table-horizontal logs_list" width="100%">
+    <colgroup>
+      <col width="10%" />
+      <col width="25%" />
+      <col width="25%" />
+      <col width="15%" />
+      <col width="20%" />
+      <col width="5%" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th>{{ _("Username") }}</th>
+        <th>{{ _("Time") }}</th>
+        <th>{{ _("Title") }}</th>
+        <th>{{ _("Size") }}</th>
+        <th>{{ _("To") }}</th>
+        <th>{{ _("Status") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for u in logs -%}
+    {% for log in logs[u] -%}
+      <tr>
+        <td>{{u}}</td>
+        <td>{{log.time}}</td>
+        <td>{{log.book}}</td>
+        <td>{%if log.size %} {{ log.size|filesizeformat }} {% else %} 0 {% endif %}</td>
+        <td>{{log.to}}</td>
+        <td>
+          <span class="status {% if 'ok' in log.status -%} success {%- else -%} error {%- endif %}">
+          {{ log.status }}
+          </span>
+        </td>
+      </tr>
+    {% endfor -%}
+    {% endfor -%}
+    </tbody>
+  </table>
+  {% endif -%} {# endif of if logs -#}
 </div>
-{% endblock -%}
-
-{% block js -%}
-<script type="text/javascript">
-//用户点击了修改已推送期号按钮
-function ChangeLastDelivered(id_) {
-    var numObj = $('lastDelivered_num_' + id_);
-    var recObj = $('lastDelivered_rec_' + id_);
-    var sStr = prompt("{{_('Please input a new number')}}", numObj.textContent);
-    if (sStr != null && sStr != "") {
-        if (isNaN(parseInt(sStr))) {
-            alert("{{_('The number is invalid')}}");
-        } else {
-            ajax({url:"/lastdelivered/change", type: "POST", 
-            data: {id_: id_, num: sStr},
-            success: function (resp, xml) {
-                if (resp.status == "ok") {
-                    numObj.innerHTML = resp.num;
-                    recObj.innerHTML = '-';
-                } else {
-                    alert("{{_('Cannot change this record, Error:')}}" + resp.status);
-                }
-            },
-            fail: function (status) {
-                alert("{{_('Error when try to change this record. Status:')}}" + status);
-            }
-        });
-        }
-    }
-}
-
-//用户点击了删除已推送期号按钮
-function DeleteLastDelivered(id_) {
-    ajax({url:"/lastdelivered/delete", type: "POST", 
-        data: {id_: id_},
-        success: function (resp, xml) {
-            if (resp.status == "ok") {
-                var thisRow = $('lastDelivered_' + id_);
-                thisRow.parentNode.removeChild(thisRow);
-            } else {
-                alert("{{_('Cannot delete this record, Error:')}}" + resp.status);
-            }
-        },
-        fail: function (status) {
-            alert("{{_('Error when try to delete this record. Status:')}}" + status);
-        }
-    });
-}
-</script>
 {% endblock -%}

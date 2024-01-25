@@ -39,7 +39,7 @@ class BaseEntity:
         self.__set_defaults()
 
         [self.set(name, value) for name, value in kwargs.items()]
-        self.set('id', self.key.to_legacy_urlsafe().decode())
+        self.set('id', self.key.to_legacy_urlsafe().decode()) #兼容peewee的一个属性
 
     #增加和peewee相同的接口 create()
     @classmethod

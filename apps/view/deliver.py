@@ -96,7 +96,7 @@ def MultiUserDeliver():
             queueOneBook(queueToPush, user, book.key_or_id_string, book.separated)
             sentCnt += 1
     flushQueueToPush(queueToPush)
-    return "Put {} books to queue!".format(sentCnt)
+    return "Put {} books into queue.".format(sentCnt)
 
 #判断指定用户的书籍和订阅哪些需要推送
 #userName: 账号名
@@ -105,7 +105,7 @@ def MultiUserDeliver():
 def SingleUserDeliver(userName: str, bookIds: str=None, feedIds: str=None):
     user = KeUser.get_one(KeUser.name == userName)
     if not user or not user.kindle_email:
-        return render_template('autoback.html', tips=_('The username not exist or the email of kindle is empty.'))
+        return render_template('autoback.html', tips=_('The username does not exist or the email of kindle is empty.'))
 
     sent = []
     if bookIds: #推送特定账号指定的书籍，这里不判断特定账号是否已经订阅了指定的书籍，只要提供就推送
@@ -120,8 +120,8 @@ def SingleUserDeliver(userName: str, bookIds: str=None, feedIds: str=None):
     self.flushQueueToPush(bkQueue)
 
     if len(sent):
-        tips = _("Book(s) ({}) put to queue!").format(', '.join(sent))
+        tips = _("Put {} book(s) into the queue.").format(', '.join(sent))
     else:
-        tips = _("No book to deliver!")
+        tips = _("There are no books to deliver.")
 
     return render_template('autoback.html', tips=tips)

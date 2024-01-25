@@ -1,0 +1,454 @@
+
+//所有的分享RSS数据
+var g_SharedRss = false;
+//创建一个新数组，全部按照添加时间倒序
+var g_rssByTime = [];
+//分语言种类
+var g_rssByLang = {};
+//由BuildSharedRssByCategory()根据搜索词动态更新此数组
+var g_rssByCat = [];
+
+//返回当前时间戳，单位为秒
+function getNowSeconds() {
+  return Math.floor(new Date().getTime() / 1000);
+}
+
+//排序网友分享库的RSS，先按流行程度（订阅数）倒序，订阅数相同的按时间倒序
+function SortSharedRssDataArray() {
+  if (!g_SharedRss) {
+    return;
+  }
+
+  g_SharedRss.sort(function(a, b) {
+    var ret = b.s - a.s; //s:subscribed
+    if (ret == 0) {
+      ret = b.d - a.d; //d:datetime
+    }
+    return ret;
+  });
+  
+  //最近添加的共享RSS留着置顶位置3天
+  var now = getNowSeconds();
+  var recent = new Array();
+  for (var i = g_SharedRss.length - 1; i >= 0; i--) {
+    if (Math.abs(now - g_SharedRss[i].d) < 60 * 60 * 24 * 3) {
+      recent.unshift(g_SharedRss.splice(i, 1)[0]);
+    }
+  }
+  for (var i = recent.length - 1; i >= 0; i--) {
+    g_SharedRss.unshift(recent[i]);
+  }
+}
+
+//创建一个按照语言种类分类的字典，字典键为两位语言代码，值为列表
+function BuildSharedRssByLang() {
+  var userLang = BrowserLanguage();
+  for (var idx = 0; idx < g_SharedRss.length; idx++) {
+    var item = g_SharedRss[idx];
+    lang = item.l ? item.l : 'und'; //l=language
+
+    //忽略各国语言方言，仅取'_'前的部分
+    lang = lang.replace('-', '_');
+    var dashIndex = lang.indexOf('_');
+    if (dashIndex != -1) {
+      lang = lang.substring(0, dashIndex);
+    }
+    const languageNames = new Intl.DisplayNames([userLang], {type: 'language'}); //将语种代码翻译为各国语言词汇
+
+    if (!g_rssByLang[lang]) {
+      g_rssByLang[lang] = [];
+      var $newLangOpt = $('<option value="' + lang +'">' + languageNames.of(lang) + '</option>');
+      $("#shared_rss_lang_pick").append($newLangOpt);
+    }
+    g_rssByLang[lang].push(item);
+  }
+  //自动触发和用户浏览器同样语种的选项
+  $("#shared_rss_lang_pick").find("option[value='" + userLang + "']").attr("selected", true);
+  $("#shared_rss_lang_pick").val(userLang).trigger('change');
+}
+
+//在界面上选择了一项Recipe语种，将对应语种的recipe显示出来
+$("#shared_rss_lang_pick").on("change", function(){
+  DoSearchInShared();
+});
+
+//返回特定关键词搜索的综合排序的列表
+function GetRssListByText(lang, txt) {
+  rss = g_rssByLang[lang];
+  if (!rss) {
+    return [];
+  }
+
+  txt = txt ? txt.toUpperCase() : '';
+  var byText = [];
+  var title, url;
+  for (var i = 0; i < rss.length; i++) {
+    title = rss[i].t.toUpperCase();
+    url = rss[i].u.toUpperCase();
+    if ((title.indexOf(txt) > -1) || (url.indexOf(txt) > -1)) {
+      byText.push(rss[i])
+    }
+  }
+  return byText;
+}
+
+//返回特定关键词搜索的仅按时间排序的列表
+function GetRssListByTime(lang, txt) {
+  var byTextTime = GetRssListByText(lang, txt);
+  byTextTime.sort(function(a, b) {
+    return b.d - a.d;
+  });
+  return byTextTime;
+}
+
+//根据搜索词动态更新此数组 g_rssByCat[]
+//lang: 用户选择的语言代码，两位字母
+//txt: 搜索词，可以为空
+function BuildSharedRssByCategory(lang, txt) {
+  var bySearchText = GetRssListByText(lang, txt);
+  var byTextTime = GetRssListByTime(lang, txt);
+
+  g_rssByCat = [];
+  g_rssByCat[i18n.catAll] = bySearchText;
+  g_rssByCat[i18n.catByTime] = byTextTime;
+  for (var idx = 0; idx < bySearchText.length; idx++) {
+    var item = bySearchText[idx];
+    var category = item.c; //c:category
+    if (category == "") {
+      category = i18n.uncategoried;
+    }
+    g_rssByCat[category] = g_rssByCat[category] || [];
+    g_rssByCat[category].push(item);
+  }
+}
+
+//生成左边的分类菜单
+function CreateCategoryMenu() {
+  var ulNode = $("#ul-category-menu");
+  var menuStr = [];
+  
+  for (var cat in g_rssByCat) {
+    menuStr.push('<li class="pure-menu-item"><a href="javascript:;" onclick="SelectCategory(this,\'');
+    menuStr.push(cat);
+    menuStr.push('\');return false;" class="pure-menu-link category-menu">');
+    menuStr.push(cat);
+    menuStr.push(' (' + g_rssByCat[cat].length + ')</a></li>');
+  }
+  
+  ulNode.html(menuStr.join(''));
+}
+
+//将选中的分类高亮显示
+function HightlightCategory(nodeLi) {
+  var parentNode = nodeLi.parent();
+  var childrenNodes = parentNode.children();
+  childrenNodes.removeClass('pure-menu-selected');
+  nodeLi.first().addClass('pure-menu-selected');
+};
+
+//根据指定条件分页，返回字典 {data:[xx,...], currentPage:1, maxPage:5}
+function paginated(category, currentPage, pageSize) {
+  var pageSize = pageSize || 30; // for best compatibility
+  var ret = {data: [], currentPage: 1, maxPage: 1};
+  if (!(category in g_rssByCat)) {
+    return ret;
+  }
+
+  var rssInThisCat = g_rssByCat[category];
+  var maxPage = Math.ceil(rssInThisCat.length / pageSize);
+  if (currentPage <= 0) {
+    currentPage = 1;
+  } else if (currentPage > maxPage){
+    currentPage = maxPage;
+  }
+
+  if (maxPage <= 1) {
+    ret.data = rssInThisCat;
+  } else {
+    var begin = ((currentPage - 1) * pageSize);
+    var end = begin + pageSize;
+    ret.data = rssInThisCat.slice(begin, end);
+    ret.currentPage = currentPage;
+    ret.maxPage = maxPage;
+  }
+  return ret;
+}
+
+//根据选定的页数和分类，创建显示列表，返回html内容
+function CreatePageContent(category, page) {
+  pageData = paginated(category, page); //返回{data:[], currentPage:, maxPage:}
+  if (page <= 0){
+    page = 1;
+  } else if (page > pageData.maxPage) {
+    page = pageData.maxPage;
+  }
+
+  if (pageData.data.length == 0) {
+    return '<p style="text-align:center;">' + i18n.noLinksInLang + '</p>';
+  }
+
+  var rssStr = ['<div class="box-list">'];
+  var data = pageData.data;
+  var aStr = "";
+  var now = getNowSeconds();
+    
+  for (idx in data){
+    var item = data[idx];
+    var supText = "";
+    if (Math.abs(now - item.d) < 60 * 60 * 24 * 3) { //3天内分享的rss标识为New
+        supText = "<sup> New</sup>";
+    }
+    rssStr.push('<div class="book box">');
+    rssStr.push('<div class="titleRow">' + item.t + supText + '</div>');
+    rssStr.push('<div class="summaryRow"><a target="_blank" href="' + item.u + '">' + item.u + '</a></div>');
+
+    hamb_arg = [];
+    //汉堡按钮弹出菜单代码
+    var id_title_str = item.t + "','" + item.u + "')\"";
+    hamb_arg.push({klass: 'btn-A', title: i18n.invalidReport, icon: 'icon-offcloud', act: "ReportInvalid('" + id_title_str});
+    hamb_arg.push({klass: 'btn-B', title: i18n.subscribe, icon: 'icon-subscribe', act: "SubscribeSharedFeed('" + id_title_str});
+    rssStr.push(AddHamburgerButton(hamb_arg)); //AddHamburgerButton()在base.js里
+    rssStr.push('</div>');
+  }
+  rssStr.push('</div>');
+
+  // need pagination?
+  if (pageData.maxPage > 1) {
+    rssStr.push(GeneratePaginationButtons(category, page, pageData.maxPage));
+  }
+  return rssStr.join('');
+};
+
+//转到某一页
+function ToPage(category, page) {
+  var contentDiv = $("#librarycontent");
+  contentDiv.html(CreatePageContent(category, page));
+};
+
+//创建屏幕下部的分页按钮
+function GeneratePaginationButtons(category, currentPage, maxPage) {
+  var previousPage = currentPage - 1;
+  var nextPage = currentPage + 1;
+  var strFirst = "";
+  var strPrev = "";
+  var strNext = "";
+  var strLast = "";
+  if (previousPage <= 0) {
+    previousPage = 1;
+  }
+  if (nextPage > maxPage) {
+    nextPage = maxPage;
+  }
+
+  if (currentPage <= 1) {
+    clsFirst = 'class="pgdisabled"';
+    clsPrev = 'class="pgdisabled"';
+    strNext = 'onclick="ToPage(\'' + category + '\',' + nextPage + ')"';
+    strLast = 'onclick="ToPage(\'' + category + '\',' + maxPage + ')"';
+  } else if (currentPage >= maxPage) {
+    clsFirst = 'onclick="ToPage(\'' + category + '\',1)"';
+    clsPrev = 'onclick="ToPage(\'' + category + '\',' + previousPage + ')"';
+    strNext = 'class="pgdisabled"';
+    strLast = 'class="pgdisabled"';
+  } else {
+    clsFirst = 'onclick="ToPage(\'' + category + '\',1)"';
+    clsPrev = 'onclick="ToPage(\'' + category + '\',' + previousPage + ')"';
+    strNext = 'onclick="ToPage(\'' + category + '\',' + nextPage + ')"';
+    strLast = 'onclick="ToPage(\'' + category + '\',' + maxPage + ')"';
+  }
+  return '<ul class="paging">' +
+    '<li ' + clsFirst + '><<</li>' +
+    '<li ' + clsPrev + '>＜</li>' +
+    '<li ' + strNext + '>＞</li>' +
+    '<li ' + strLast + '>>></li>' +
+    '<li class="pageinfo">' + currentPage + '/' + maxPage + '</li></ul>';
+};
+
+//选择了某一个分类，根据分类填充内容列表
+function SelectCategory(obj, category) {
+  HightlightCategory($(obj).parent());
+  ToPage(category, 1);
+};
+
+//网友分享库的搜索按钮事件
+function DoSearchInShared() {
+  var input = $('#search_text');
+  var txt = input.val();
+  if (txt == "#download") { //下载所有的共享RSS
+    DownAllRssToFile();
+    input.val("");
+    return;
+  }
+
+  var $div = $("#all_recipes");
+  $div.empty();
+  var lang = $("#shared_rss_lang_pick").val();
+  if (!lang) {
+    return;
+  }
+
+  BuildSharedRssByCategory(lang, txt);
+  CreateCategoryMenu();
+  SelectCategory(".category-menu", i18n.catAll); //自动选择第一项
+}
+
+//订阅一个共享自定义RSS或Recipe
+function SubscribeSharedFeed(title, feedurl, isfulltext) {
+  $.ajax({
+    url: "/customrss/add",
+    type: "POST",
+    data: {title: title, fulltext: isfulltext, url: feedurl, fromsharedlibrary: 'true'},
+    success: function (resp, textStatus, xhr) {
+      if (resp.status == "ok") {
+        var modal = new tingle.modal({footer: true});
+        modal.setContent('<h2>' + i18n.congratulations + '</h2><p>' + i18n.feedSubscribed + '</p>');
+        modal.addFooterBtn(i18n.close, 'actionButton', function () {
+          modal.close();
+        });
+        modal.open();
+      } else {
+        alert(resp.status);
+      }
+    },
+    error: function (xhr, textStatus, errorThrown) {
+      alert(textStatus);
+    }
+  });
+}
+
+//用户报告一个共享的自定义RSS源已经失效
+function ReportInvalid(title, feedurl) {
+  if (!confirm(i18n.confirmInvalidReport)) {
+    return;
+  }
+
+  $.ajax({
+    url: "/library/mgr/reportinvalid",
+    type: "POST",
+    data: {title: title, url: feedurl},
+    success: function (resp, textStatus, xhr) {
+      if (resp.status == "ok") {
+        var modal = new tingle.modal({footer: true});
+        modal.setContent('<h2>' + i18n.thanks + '</h2><p>' + i18n.thank4RssFeedback + '</p>');
+        modal.addFooterBtn(i18n.close, 'actionButton', function () {
+          modal.close();
+        });
+        modal.open();
+      } else {
+        alert(resp.status);
+      }
+    },
+    error: function (xhr, textStatus, errorThrown) {
+      alert(textStatus);
+    }
+  });
+}
+
+//将内容全部下载到本地一个xml文件内
+function DownAllRssToFile() {
+  var title, url, ftext, cat, rssd, fmtdate, nowdate;
+  var elementA = document.createElement('a');
+  var aTxt = new Array();
+  aTxt.push("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
+  aTxt.push("<opml version=\"2.0\">");
+  aTxt.push("<head>");
+  aTxt.push("  <title>KindleEar.opml</title>");
+  aTxt.push("  <dateCreated>" + new Date() + "</dateCreated>");
+  aTxt.push("  <dateModified>" + new Date() + "</dateModified>");
+  aTxt.push("  <ownerName>KindleEar</ownerName>");
+  aTxt.push("</head>");
+  aTxt.push("<body>");
+  for (var i = 0; i < g_SharedRss.length; i++) {
+    title = g_SharedRss[i].t;
+    url = g_SharedRss[i].u;
+    title = title.replace(/<[^<>]+?>/g,'');
+    cat = g_SharedRss[i].c;
+    if (g_SharedRss[i].f == "false") {
+      ftext = "0";
+    } else {
+      ftext = "1";
+    }
+    aTxt.push("  <outline type=\"rss\" text=\"" + title + "\" xmlUrl=\"" + url + "\" isFulltext=\"" + ftext + "\" category=\"" + cat + "\" />");
+  }
+  aTxt.push("</body>");
+  aTxt.push("</opml>");
+
+  nowdate = new Date();
+  fmtdate = "KindleEar_library_" + nowdate.getFullYear() + "_" + ((nowdate.getMonth() + 1)) + "_" + nowdate.getDate() + ".xml";
+
+  elementA.setAttribute("href", "data:text/plain;charset=utf-8," + aTxt.join("\n"));
+  elementA.setAttribute("download", fmtdate);
+  elementA.style.display = 'none';
+  document.body.appendChild(elementA);
+  elementA.click();
+  document.body.removeChild(elementA);
+}
+
+//初始化分享库的几个变量和数组，lastRssTime是服务器最新的
+function InitSharedRssData(lastRssTime) {
+  var data, needLatestTime = false, needData = false;
+  if (window.localStorage) { //尝试从本地存储获取数据
+    now = getNowSeconds();
+    latestTime = parseInt(window.localStorage.getItem('rss_latest_time'));
+    fetchTime = parseInt(window.localStorage.getItem('rss_fetch_time'));
+    sharedData = window.localStorage.getItem('shared_rss');
+
+    //一天内最多只从服务器获取一次分享的RSS列表
+    if (!fetchTime || !sharedData || !latestTime) {
+      needLatestTime = true;
+      needData = true;
+    } else if ((fetchTime - now) > 60 * 60 * 24) {
+      needLatestTime = true;
+    }
+
+    if (needLatestTime) { //向服务器发起请求，要求新的数据
+      $.ajax({url: "/library/mgr/latesttime",
+        type: "post",
+        async: false, //阻塞式ajax
+        success: function (resp) {
+          if (resp.status == "ok") {
+            if (resp.data > latestTime) { //自从上次获取数据以来服务器有数据更新
+              needData = true;
+            }
+            window.localStorage.setItem('rss_latest_time', resp.data);
+            window.localStorage.setItem('rss_fetch_time', now);
+          }
+        }
+      });
+    }
+    if (needData) {
+      $.ajax({url: "/library/mgr/getrss", 
+        type: "post",
+        async: false, //阻塞式ajax
+        success: function (resp) {
+          if (resp.status == "ok") {
+            g_SharedRss = resp.data;
+            window.localStorage.setItem('shared_rss', JSON.stringify(g_SharedRss));
+            window.localStorage.setItem('rss_fetch_time', now);
+          }
+        }
+      });
+    } else { //使用本机保存的
+      g_SharedRss = JSON.parse(sharedData);
+    }
+  } else { //浏览器不支持本地存储
+    $.ajax({url: "/library/mgr/getrss", 
+      type: "post",
+      async: false, //阻塞式ajax
+      success: function (resp) {
+        if (resp.status == "ok") {
+          g_SharedRss = resp.data;
+        }
+      }
+    });
+  }
+
+  SortSharedRssDataArray();
+  BuildSharedRssByLang();
+  DoSearchInShared();
+}
+
+$(document).ready(function(){
+  InitSharedRssData();
+  RegisterHideHambClick();
+});
