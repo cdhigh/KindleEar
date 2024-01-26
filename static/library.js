@@ -8,11 +8,6 @@ var g_rssByLang = {};
 //由BuildSharedRssByCategory()根据搜索词动态更新此数组
 var g_rssByCat = [];
 
-//返回当前时间戳，单位为秒
-function getNowSeconds() {
-  return Math.floor(new Date().getTime() / 1000);
-}
-
 //排序网友分享库的RSS，先按流行程度（订阅数）倒序，订阅数相同的按时间倒序
 function SortSharedRssDataArray() {
   if (!g_SharedRss) {
@@ -177,7 +172,7 @@ function paginated(category, currentPage, pageSize) {
 //根据选定的页数和分类，创建显示列表，返回html内容
 function CreatePageContent(category, page) {
   pageData = paginated(category, page); //返回{data:[], currentPage:, maxPage:}
-  if (page <= 0){
+  if (page <= 0) {
     page = 1;
   } else if (page > pageData.maxPage) {
     page = pageData.maxPage;
@@ -200,13 +195,23 @@ function CreatePageContent(category, page) {
     }
     rssStr.push('<div class="book box">');
     rssStr.push('<div class="titleRow">' + item.t + supText + '</div>');
-    rssStr.push('<div class="summaryRow"><a target="_blank" href="' + item.u + '">' + item.u + '</a></div>');
+    if (item.u) { //url存在说明是自定义rss，否则为上传的recipe
+      rssStr.push('<div class="summaryRow"><a target="_blank" href="' + item.u + '">' + item.u + '</a></div>');
+    } else {
+      rssStr.push('<div class="summaryRow">' + item.e + '</div>'); //e:description
+    }
 
     hamb_arg = [];
     //汉堡按钮弹出菜单代码
-    var id_title_str = item.t + "','" + item.u + "')\"";
-    hamb_arg.push({klass: 'btn-A', title: i18n.invalidReport, icon: 'icon-offcloud', act: "ReportInvalid('" + id_title_str});
-    hamb_arg.push({klass: 'btn-B', title: i18n.subscribe, icon: 'icon-subscribe', act: "SubscribeSharedFeed('" + id_title_str});
+    var dbId = '';
+    if ((typeof item.r != 'undefined') && item.r) { //item.r 用来保存服务器上的数据库ID
+      dbId = ",'" + item.r + "'";
+    }
+    var repAct = "ReportInvalid('" + item.t + "','" + item.u + "'" + dbId +  ")";
+    var subsAct = "SubscribeSharedFeed('" + item.t + "','" + item.u + "','" + item.f + "'" + dbId +  ")";
+    hamb_arg.push({klass: 'btn-A', title: i18n.invalidReport, icon: 'icon-offcloud', act: repAct});
+    hamb_arg.push({klass: 'btn-D', title: i18n.subscribe, icon: 'icon-subscribe', act: subsAct});
+    
     rssStr.push(AddHamburgerButton(hamb_arg)); //AddHamburgerButton()在base.js里
     rssStr.push('</div>');
   }
@@ -293,11 +298,15 @@ function DoSearchInShared() {
 }
 
 //订阅一个共享自定义RSS或Recipe
-function SubscribeSharedFeed(title, feedurl, isfulltext) {
+function SubscribeSharedFeed(title, feedurl, isfulltext, dbId) {
+  if ((typeof dbId == 'undefined') || !dbId) {
+    dbId = '';
+  }
+  
   $.ajax({
     url: "/customrss/add",
     type: "POST",
-    data: {title: title, fulltext: isfulltext, url: feedurl, fromsharedlibrary: 'true'},
+    data: {title: title, fulltext: isfulltext, url: feedurl, fromsharedlibrary: 'true', 'recipeId': dbId},
     success: function (resp, textStatus, xhr) {
       if (resp.status == "ok") {
         var modal = new tingle.modal({footer: true});
@@ -317,15 +326,19 @@ function SubscribeSharedFeed(title, feedurl, isfulltext) {
 }
 
 //用户报告一个共享的自定义RSS源已经失效
-function ReportInvalid(title, feedurl) {
+function ReportInvalid(title, feedurl, dbId) {
   if (!confirm(i18n.confirmInvalidReport)) {
     return;
+  }
+
+  if ((typeof dbId == 'undefined') || !dbId) {
+    dbId = '';
   }
 
   $.ajax({
     url: "/library/mgr/reportinvalid",
     type: "POST",
-    data: {title: title, url: feedurl},
+    data: {title: title, url: feedurl, recipeId: dbId},
     success: function (resp, textStatus, xhr) {
       if (resp.status == "ok") {
         var modal = new tingle.modal({footer: true});
@@ -386,12 +399,12 @@ function DownAllRssToFile() {
 
 //初始化分享库的几个变量和数组，lastRssTime是服务器最新的
 function InitSharedRssData(lastRssTime) {
-  var data, needLatestTime = false, needData = false;
   if (window.localStorage) { //尝试从本地存储获取数据
-    now = getNowSeconds();
-    latestTime = parseInt(window.localStorage.getItem('rss_latest_time'));
-    fetchTime = parseInt(window.localStorage.getItem('rss_fetch_time'));
-    sharedData = window.localStorage.getItem('shared_rss');
+    var needLatestTime = false, needData = false;
+    var now = getNowSeconds();
+    var latestTime = parseInt(window.localStorage.getItem('rss_latest_time'));
+    var fetchTime = parseInt(window.localStorage.getItem('rss_fetch_time'));
+    var sharedData = window.localStorage.getItem('shared_rss');
 
     //一天内最多只从服务器获取一次分享的RSS列表
     if (!fetchTime || !sharedData || !latestTime) {

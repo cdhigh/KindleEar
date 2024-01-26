@@ -7,6 +7,11 @@ String.prototype.format = function() {
   });
 };
 
+//返回当前时间戳，单位为秒
+function getNowSeconds() {
+  return Math.floor(new Date().getTime() / 1000);
+}
+
 ///[start] my.html
 var show_menu_box = false;
 
@@ -118,7 +123,9 @@ function AppendRecipeToLibrary(div, id) {
 
   hamb_arg = [];
   if (id.startsWith("upload:")) { //增加汉堡按钮弹出菜单代码
+    var id_title = id + "','" + title + "')\"";
     hamb_arg.push({klass: 'btn-A', title: i18n.delete, icon: 'icon-delete', act: "DeleteUploadRecipe('" + id + "','" + title + "')"});
+    hamb_arg.push({klass: 'btn-E', title: i18n.share, icon: 'icon-share', act: "StartShareRss('" + id_title});
   }
   hamb_arg.push({klass: 'btn-B', title: i18n.viewSrc, icon: 'icon-source', act: "/viewsrc/" + id.replace(':', '__')});
   hamb_arg.push({klass: 'btn-C', title: i18n.subscriSep, icon: 'icon-push', act: "SubscribeRecipe('" + id + "',1)"});
@@ -147,7 +154,7 @@ function AddHamburgerButton(arg) {
     btn_str.push('" title="');
     btn_str.push(title + '"');
     if (act.startsWith('/') || act.startsWith('http')) { //嵌套一个超链接，打开新窗口
-      btn_str.push('><a href="' + act + '" target="_blank" style="text-decoration:none;"><i class="iconfont ');
+      btn_str.push('><a href="' + act + '" target="_blank"><i class="iconfont ');
       btn_str.push(icon + '"></i></a>');
     } else {
       btn_str.push(' onclick="');
@@ -183,7 +190,7 @@ function PopulateMyCustomRss() {
     var row_str = ['<div class="book box"><div class="titleRow">'];
     row_str.push(title);
     if (isfulltext) {
-      row_str.push('<sup>Emb</sup>');
+      row_str.push('<sup> Emb</sup>');
       //row_str.push('<img alt="' + i18n.fulltext + '" src="static/fulltext.gif" border="0" />');
     }
     row_str.push('</div><div class="summaryRow">');
@@ -227,7 +234,7 @@ function PopulateMySubscribed() {
     }
     if (separated) {
       //row_str.push('<img alt="' + i18n.separated + '" src="static/separate.gif" border="0" />');
-      row_str.push('<sup>Sep</sup>');
+      row_str.push('<sup> Sep</sup>');
     }
     row_str.push('</div><div class="summaryRow">');
     if (desc.length > 100) {
@@ -238,11 +245,15 @@ function PopulateMySubscribed() {
     row_str.push('</div>');
 
     hamb_arg = [];
+    var id_title = recipe_id + "','" + title + "')\"";
     //汉堡按钮弹出菜单代码
     //if (need_subs && need_subs != 'no' && need_subs != 'false' && need_subs != 0) {
-        hamb_arg.push({klass: 'btn-B', title: i18n.subscriptionInfo, icon: 'icon-key', act: "AskForSubscriptionInfo('" + recipe_id + "', '" + recipe.account + "')"});
+        hamb_arg.push({klass: 'btn-C', title: i18n.subscriptionInfo, icon: 'icon-key', act: "AskForSubscriptionInfo('" + recipe_id + "', '" + recipe.account + "')"});
     //}
-    hamb_arg.push({klass: 'btn-A', title: i18n.unsubscribe, icon: 'icon-unsubscribe', act: "UnsubscribeRecipe('" + recipe_id + "','" + title + "')"});
+    if (recipe_id.startsWith("upload:")) { //只有自己上传的recipe才能分享，内置的不用分享
+      hamb_arg.push({klass: 'btn-B', title: i18n.share, icon: 'icon-share', act: "StartShareRss('" + id_title});
+    }
+    hamb_arg.push({klass: 'btn-A', title: i18n.unsubscribe, icon: 'icon-unsubscribe', act: "UnsubscribeRecipe('" + id_title});
     row_str.push(AddHamburgerButton(hamb_arg));
     row_str.push('</div>');
     //console.log(row_str.join(''));
@@ -371,7 +382,7 @@ function DeleteCustomRss(rssid, title) {
     return;
   }
   
-  $.post("/customrss/delete", {rssid: rssid}, function (data) {
+  $.post("/customrss/delete", {id: rssid}, function (data) {
     if (data.status == "ok") {
       for (var idx = 0; idx < my_custom_rss_list.length; idx++) {
         if (my_custom_rss_list[idx].id == rssid) {
@@ -394,7 +405,7 @@ function AddCustomRss() {
   $.post("/customrss/add", {title: title_to_add.val(), fulltext: isfulltext.prop('checked'), url: url_to_add.val()},
     function (data) {
       if (data.status == "ok") {
-        my_custom_rss_list.unshift({title: data.title, url: data.url, 'id': data.rssid, isfulltext: data.isfulltext});
+        my_custom_rss_list.unshift({title: data.title, url: data.url, 'id': data.id, isfulltext: data.isfulltext});
         PopulateMyCustomRss();
         title_to_add.val("");
         url_to_add.val("");
@@ -406,7 +417,7 @@ function AddCustomRss() {
 }
 
 //Global variable
-var g_rss_categories = false;
+var g_rss_categories = [];
 
 //将一个自定义RSS分享到服务器
 function ShareRssToServer(id, title, category, lang) {
@@ -421,6 +432,8 @@ function ShareRssToServer(id, title, category, lang) {
           g_rss_categories.unshift(category);
         }
       }
+      window.localStorage.setItem('rss_category', JSON.stringify(g_rss_categories));
+      window.localStorage.setItem('shared_rss', ''); //让分享库页面从服务器取新数据
       var modal = new tingle.modal({footer: true});
       modal.setContent('<p>' + i18n.thankForShare + '</p>');
       modal.addFooterBtn(i18n.close, 'actionButton', function() {
@@ -477,16 +490,32 @@ function ShowShareDialog(id, title){
 
 //点击分享自定义RSS
 function StartShareRss(id, title) {
-  //从服务器获取分类信息
-  if (!g_rss_categories){
-    $.get("/library/category", function(data) {
-      if (data.status == "ok") {
-        g_rss_categories = data.categories;
-        ShowShareDialog(id, title);
-      } else {
-        alert(i18n.cannotAddRss + data.status);
-      }
-    });
+  //从本地存储或服务器获取分类信息
+  if (!g_rss_categories) {
+    var now = getNowSeconds();
+    var needCat = false;
+    var fetchTime = parseInt(window.localStorage.getItem('cat_fetch_time'));
+    var catData = window.localStorage.getItem('rss_category');
+
+    //一天内最多只从服务器获取一次分享的RSS列表
+    if (!fetchTime || !catData || ((fetchTime - now) > 60 * 60 * 24)) {
+      needCat = true;
+    }
+    if (needCat) {
+      $.get("/library/category", function(data) {
+        if (data.status == "ok") {
+          g_rss_categories = data.categories;
+          window.localStorage.setItem('rss_category', JSON.stringify(g_rss_categories));
+          window.localStorage.setItem('cat_fetch_time', now);
+          ShowShareDialog(id, title);
+        } else {
+          alert(i18n.cannotAddRss + data.status);
+        }
+      });
+    } else {
+      g_rss_categories = JSON.parse(catData);
+      ShowShareDialog(id, title);
+    }
   } else {
     ShowShareDialog(id, title);
   }

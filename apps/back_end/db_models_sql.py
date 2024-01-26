@@ -271,7 +271,9 @@ class SharedRss(MyBaseModel):
     isfulltext = BooleanField(default=False)
     language = CharField(default='')
     category = CharField(default='')
+    recipe_url = CharField(default='') #客户端优先使用此字段获取recipe，为什么不用上面的url是要和以前的版本兼容
     content = TextField(default='') #保存分享的recipe的unicode字符串表示，已经解码
+    description = CharField(default='')
     creator = CharField(default='') #保存贡献者的md5
     created_time = DateTimeField(default=datetime.datetime.utcnow)
     subscribed = IntegerField(default=0) #for sort

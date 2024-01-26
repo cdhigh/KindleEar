@@ -590,7 +590,7 @@ select[id="shared_rss_lang_pick"] {
     font-weight: bold;
 }
 
-/* Feed列表的汉堡菜单按钮及其弹出子按钮*/
+/* Feed列表的汉堡菜单按钮及其弹出子按钮 */
 .hamburger-btn {
     position: absolute;
     top: 50%;
@@ -634,6 +634,10 @@ select[id="shared_rss_lang_pick"] {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
+.additional-btn a {
+    text-decoration: none;
+}
+
 .btn-A { /* A按钮为红色背景 */
     background-color: #F70187;
     background: linear-gradient(to bottom, #DB77AD 50%, #F70187 50%);
@@ -649,6 +653,10 @@ select[id="shared_rss_lang_pick"] {
 .btn-D { /* D为浅蓝色背景 */
     background-color: #3498db;
     background: linear-gradient(to bottom, #85B4D3 50%, #3498db 50%);
+}
+.btn-E { /* E为橙色背景 */
+    background-color: #F0680B;
+    background: linear-gradient(to bottom, #DF8F57 50%, #F0680B 50%);
 }
 
 .upload-recipe {
@@ -674,7 +682,7 @@ select[id="shared_rss_lang_pick"] {
     background-color: #0765bb;
 }
 
-/* iconfont 相关*/
+/* iconfont */
 @font-face {
   font-family: "iconfont";
   src: url('/static/iconfont.woff') format('woff'),

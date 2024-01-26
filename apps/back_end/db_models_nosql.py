@@ -227,7 +227,9 @@ class SharedRss(MyBaseModel):
     isfulltext = fields.BooleanField(default=False)
     language = fields.StringField(default='')
     category = fields.StringField(default='')
+    recipe_url = fields.StringField(default='') #客户端优先使用此字段获取recipe，为什么不用上面的url是要和以前的版本兼容
     content = fields.StringField(default='') #保存分享的recipe的unicode字符串表示，已经解码
+    description = fields.StringField(default='')
     creator = fields.StringField(default='')
     created_time = fields.DateTimeField(default=datetime.datetime.utcnow)
     subscribed = fields.IntField(default=0) #for sort

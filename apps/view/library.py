@@ -21,14 +21,14 @@ GITHUB_SHARED_RSS = 'https://github.com/cdhigh/KindleEar/tree/master/books/share
 def SharedLibrary():
     user = get_login_user()
     tips = ''
-    return render_template('sharedlibrary.html', tab='shared', user=user, tips=tips)
+    return render_template('library.html', tab='shared', user=user, tips=tips)
 
 def buildKeUrl(path, url=KINDLEEAR_SITE):
     return urljoin('http://localhost:5000/', path) if current_app.debug else urljoin(url, path)
 def srvErrStr(status_code, url=KINDLEEAR_SITE):
     return _('Cannot fetch data from {}, status: {}').format(url, UrlOpener.CodeMap(status_code))
 
-#用户分享了一个订阅源
+#用户分享了一个订阅源，可能为自定义RSS或上传的recipe
 @bpLibrary.post("/library", endpoint='SharedLibraryPost')
 @login_required(forAjax=True)
 def SharedLibraryPost():
@@ -46,9 +46,9 @@ def SharedLibraryPost():
         return {'status': _('The recipe does not exist.')}
 
     opener = UrlOpener()
-    url = buildKeUrl(SHARED_LIBRARY_KINDLEEAR)
-    data = {'category': category, 'title': recipe.title, 'url': recipe.url, 'lang': lang, 'creator': creator,
-        'isfulltext': recipe.isfulltext, 'content': recipe.content, 'key': KINDLEEAR_SITE_KEY}
+    url = buildKeUrl(LIBRARY_KINDLEEAR)
+    data = {'category': category, 'title': recipe.title, 'url': recipe.url, 'lang': lang, 'isfulltext': recipe.isfulltext,
+         'content': recipe.content, 'description':recipe.description, 'key': KINDLEEAR_SITE_KEY, 'creator': creator}
     
     resp = opener.open(url, data)
     if resp.status_code == 200:
@@ -61,21 +61,21 @@ def SharedLibraryPost():
 @login_required(forAjax=True)
 def SharedLibraryMgrPost(mgrType):
     user = get_login_user()
-    
+    form = request.form
     opener = UrlOpener()
-    if mgrType == SHARED_LIB_GETLASTTIME: #获取分享库的最近更新时间
-        url = buildKeUrl(SHARED_LIBRARY_KINDLEEAR)
-        resp = opener.open(f'{url}?key={KINDLEEAR_SITE_KEY}&data_type={SHARED_LIB_GETLASTTIME}')
+    if mgrType == LIBRARY_GETLASTTIME: #获取分享库的最近更新时间
+        url = buildKeUrl(LIBRARY_KINDLEEAR)
+        resp = opener.open(f'{url}?key={KINDLEEAR_SITE_KEY}&data_type={LIBRARY_GETLASTTIME}')
         if resp.status_code == 200:
             return resp.json()
         else:
             return {'status': srvErrStr(resp.status_code)}
-    elif mgrType == SHARED_LIB_GETRSS: #获取分享库的RSS列表
+    elif mgrType == LIBRARY_GETRSS: #获取分享库的RSS列表
         #一个来源是"官方"KindleEar库
         rssList = []
         ret = {'status': 'ok'}
-        url = buildKeUrl(SHARED_LIBRARY_KINDLEEAR)
-        resp = opener.open(f'{url}?key={KINDLEEAR_SITE_KEY}&data_type={SHARED_LIB_GETRSS}')
+        url = buildKeUrl(LIBRARY_KINDLEEAR)
+        resp = opener.open(f'{url}?key={KINDLEEAR_SITE_KEY}&data_type={LIBRARY_GETRSS}')
         keRss = []
         if resp.status_code == 200:
             keRss = resp.json()
@@ -95,11 +95,12 @@ def SharedLibraryMgrPost(mgrType):
         #    ret['status'] = srvErrStr(resp.status_code, 'github')
         ret['data'] = keRss
         return ret
-    elif mgrType == SHARED_LIB_MGR_CMD_REPORTINVALID: #报告一个源失效了
-        url = buildKeUrl(SHARED_LIBRARY_MGR_KINDLEEAR + mgrType)
-        title = request.form.get('title')
-        feedUrl = request.form.get('url')
-        data = {'title': title, 'url': feedUrl, 'key': KINDLEEAR_SITE_KEY}
+    elif mgrType == LIBRARY_REPORT_INVALID: #报告一个源失效了
+        url = buildKeUrl(LIBRARY_MGR + mgrType)
+        title = form.get('title', '')
+        feedUrl = form.get('url', '')
+        recipeId = form.get('recipeId', '') #当前仅用于数据库ID
+        data = {'title': title, 'url': feedUrl, 'recipeId': recipeId, 'key': KINDLEEAR_SITE_KEY}
         resp = opener.open(url, data)
         if resp.status_code == 200:
             return resp.json()
@@ -118,7 +119,7 @@ def SharedLibraryCategory():
     respDict = {'status': 'ok', 'categories': []}
 
     opener = UrlOpener()
-    url = buildKeUrl(SHARED_LIBRARY_CAT_KINDLEEAR)
+    url = buildKeUrl(LIBRARY_CATEGORY)
     resp = opener.open(f'{url}?key={KINDLEEAR_SITE_KEY}')
 
     if resp.status_code == 200:

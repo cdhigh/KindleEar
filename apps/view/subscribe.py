@@ -14,7 +14,7 @@ from apps.utils import str_to_bool
 from lib.urlopener import UrlOpener
 from books import BookClasses, BookClass
 from config import *
-from apps.view.library import KINDLEEAR_SITE, SHARED_LIBRARY_MGR_KINDLEEAR, SHARED_LIB_MGR_CMD_SUBSFROMSHARED
+from apps.view.library import KINDLEEAR_SITE, LIBRARY_MGR, SUBSCRIBED_FROM_LIBRARY, LIBRARY_GETSRC, buildKeUrl
 
 bpSubscribe = Blueprint('bpSubscribe', __name__)
 
@@ -76,7 +76,8 @@ def FeedsAjaxPost(actType):
     actType = actType.lower()
 
     if actType == 'delete':
-        rssId = form.get('rssid')
+        rssId = form.get('id', '')
+        recipeType, rssId = Recipe.type_and_id(rssId)
         rss = Recipe.get_by_id_or_none(rssId)
         if rss:
             rss.delete_instance()
@@ -84,34 +85,62 @@ def FeedsAjaxPost(actType):
         else:
             return {'status': _('The Rss does not exist.')}
     elif actType == 'add':
-        title = form.get('title')
-        url = form.get('url')
+        title = form.get('title', '')
+        url = form.get('url', '')
         isfulltext = str_to_bool(form.get('fulltext', ''))
         fromSharedLibrary = str_to_bool(form.get('fromsharedlibrary', ''))
+        recipeId = form.get('recipeId', '')
 
-        respDict = {'status':'ok', 'title':title, 'url':url, 'isfulltext':isfulltext}
+        respDict = {'status':'ok', 'title':title, 'url':url, 'isfulltext':isfulltext, 'recipeId': recipeId}
 
-        if not title or not url:
-            respDict['status'] = _("Title or Url is empty!")
+        if not title or not (url or recipeId):
+            respDict['status'] = _("The Title or Url is empty.")
             return respDict
 
-        if not url.lower().startswith('http'):
-            url = 'https://' + url
-            respDict['url'] = url
+        #如果url不存在，则可能是分享的recipe，需要连接服务器获取recipe代码
+        if not url:
+            opener = UrlOpener()
+            if recipeId.startswith('http'):
+                resp = opener.open(recipeId)
+            else:
+                path = LIBRARY_MGR + LIBRARY_GETSRC
+                resp = opener.open(buildKeUrl(path), {'recipeId': recipeId})
 
-        #判断是否重复
-        if url.lower() in [item.url.lower() for item in user.all_custom_rss()]:
-            respDict['status'] = _("Duplicated subscription!")
-            return respDict
+            if resp.status_code != 200:
+                respDict['status'] = _("Failed to fetch the recipe.")
+                return respDict
 
-        rss = Recipe(title=title, url=url, isfulltext=isfulltext, type_='custom', user=user.name,
-            time=datetime.datetime.utcnow())
-        rss.save()
-        respDict['rssid'] = rss.key_or_id_string
+            if recipeId.startswith('http'):
+                content = resp.text
+            else:
+                data = resp.json()
+                if data.get('status') != 'ok':
+                    respDict['status'] = data.get('status', '')
+                    return respDict
+                content = data.get('content', '')
+                try:
+                    params = SaveRecipeIfCorrect(user, content)
+                except Exception as e:
+                    return {'status': _("Failed to save the recipe. Error:") + str(e)}
+                respDict.update(params)
+        else: #自定义RSS
+            if not url.lower().startswith('http'):
+                url = 'https://' + url
+                respDict['url'] = url
+
+            #判断是否重复
+            if url.lower() in [item.url.lower() for item in user.all_custom_rss()]:
+                respDict['status'] = _("Duplicated subscription!")
+                return respDict
+
+            rss = Recipe(title=title, url=url, isfulltext=isfulltext, type_='custom', user=user.name,
+                time=datetime.datetime.utcnow())
+            rss.save()
+            respDict['id'] = rss.recipe_id
         
         #如果是从共享库中订阅的，则通知共享服务器，提供订阅数量信息，以便排序
         if fromSharedLibrary:
-            SendNewSubscription(title, url)
+            SendNewSubscription(title, url, recipeId)
 
         return respDict
     else:
@@ -124,12 +153,11 @@ def BuiltInRecipesXml():
     return send_file(os.path.join(appDir, 'books/builtin_recipes.xml'), mimetype="text/xml", as_attachment=False)
 
 #通知共享服务器，有一个新的订阅
-def SendNewSubscription(title, url):
+def SendNewSubscription(title, url, recipeId):
     opener = UrlOpener()
-    path = SHARED_LIBRARY_MGR_KINDLEEAR + SHARED_LIB_MGR_CMD_SUBSFROMSHARED
-    srvUrl = urljoin(KINDLEEAR_SITE, path)
-    data = {'title': title, 'url': url}
-    opener.open(srvUrl, data) #只管杀不管埋，不用管能否成功了
+    path = LIBRARY_MGR + SUBSCRIBED_FROM_LIBRARY
+    #只管杀不管埋，不用管能否成功了
+    opener.open(buildKeUrl(path), {'title': title, 'url': url, 'recipeId': recipeId})
 
 #订阅/退订内置或上传Recipe的AJAX处理函数
 @bpSubscribe.post("/recipe/<actType>", endpoint='RecipeAjaxPost')
@@ -197,7 +225,6 @@ def RecipeAjaxPost(actType):
 
 #将上传的Recipe保存到数据库，返回一个结果字典，里面是一些recipe的元数据
 def SaveUploadedRecipe(user):
-    from calibre.web.feeds.recipes import compile_recipe
     tips = ''
     try:
         data = request.files.get('recipe_file').read()
@@ -217,18 +244,24 @@ def SaveUploadedRecipe(user):
         return {'status': _("Failed to decode the recipe. Please ensure that your recipe is saved in utf-8 encoding.")}
 
     try:
-        recipe = compile_recipe(src)
+        params = SaveRecipeIfCorrect(user, src)
     except Exception as e:
-        recipe = None
-        tips = str(e)
+        return {'status': _("Failed to save the recipe. Error:") + str(e)}
 
-    if not recipe:
-        return {'status': _("Failed to compile the recipe. Error:") + tips}
+    params['status'] = 'ok'
+    return params
+
+#尝试编译recipe代码，如果成功并且数据库中不存在，则保存到数据库
+#如果失败则抛出异常，否则返回一个元数据字典
+def SaveRecipeIfCorrect(user: KeUser, src: str):
+    from calibre.web.feeds.recipes import compile_recipe
+
+    recipe = compile_recipe(src)
     
     #判断是否重复
     oldRecipe = Recipe.get_one(Recipe.title == recipe.title)
     if oldRecipe:
-        return {'status': _('The recipe you uploaded is already in the library, and its language is :') + oldRecipe.language}
+        raise Exception(_('The recipe is already in the library'))
 
     params = {"title": recipe.title, "description": recipe.description, "type_": 'upload', 
         "needs_subscription": recipe.needs_subscription, "content": src, "time": datetime.datetime.utcnow(),
@@ -238,7 +271,6 @@ def SaveUploadedRecipe(user):
     params.pop('content')
     params.pop('time')
     params.pop('type_')
-    params['status'] = 'ok'
     params['id'] = dbInst.recipe_id
     params['language'] = params['language'].lower().replace('-', '_').split('_')[0]
     return params

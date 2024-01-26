@@ -11,13 +11,14 @@ from apps.back_end.db_models import *
 
 #几个"官方"服务的地址
 KINDLEEAR_SITE = "https://kindleear.appspot.com"
-SHARED_LIBRARY_KINDLEEAR = "/kindleearappspotlibrary"
-SHARED_LIB_GETRSS = "getrss"
-SHARED_LIB_GETLASTTIME = "latesttime"
-SHARED_LIBRARY_MGR_KINDLEEAR = "/kindleearappspotlibrary/mgr/"
-SHARED_LIB_MGR_CMD_REPORTINVALID = "reportinvalid"
-SHARED_LIB_MGR_CMD_SUBSFROMSHARED = "subscribedfromshared"
-SHARED_LIBRARY_CAT_KINDLEEAR = "/kindleearappspotlibrarycategory"
+LIBRARY_KINDLEEAR = "/kindleearappspotlibrary"
+LIBRARY_GETRSS = "getrss"
+LIBRARY_GETLASTTIME = "latesttime"
+LIBRARY_MGR = "/kindleearappspotlibrary/mgr/"
+LIBRARY_GETSRC = "getsrc"
+LIBRARY_REPORT_INVALID = "reportinvalid"
+SUBSCRIBED_FROM_LIBRARY = "subscribedfromshared"
+LIBRARY_CATEGORY = "/kindleearappspotlibrarycategory"
 KINDLEEAR_SITE_KEY = "kindleear.lucky!"
 
 #===========================================================================================================
@@ -26,7 +27,7 @@ KINDLEEAR_SITE_KEY = "kindleear.lucky!"
 bpLibraryOffical = Blueprint('bpLibraryOffical', __name__)
 
 #提供共享库订阅源数据(仅用于kindleear.appspot.com"官方"共享服务器)
-@bpLibraryOffical.route(SHARED_LIBRARY_KINDLEEAR)
+@bpLibraryOffical.route(LIBRARY_KINDLEEAR)
 def SharedLibraryAppspot():
     args = request.args
     key = args.get('key') #避免爬虫消耗资源
@@ -34,7 +35,7 @@ def SharedLibraryAppspot():
         return []
 
     dataType = args.get('data_type')
-    if dataType == SHARED_LIB_GETLASTTIME: #获取分享库的最近更新
+    if dataType == LIBRARY_GETLASTTIME: #获取分享库的最近更新
         dbItem = AppInfo.get_one(AppInfo.name == 'lastSharedRssTime')
         #转换为时间戳，秒数
         lastSharedRssTime = int(dbItem.time_value.timestamp()) if dbItem else 0
@@ -42,21 +43,25 @@ def SharedLibraryAppspot():
     else:
         #本来想在服务器端分页的，但是好像CPU/数据库存取资源比带宽资源更紧张，所以干脆一次性提供给客户端，由客户端分页和分类
         #如果后续发现这样不理想，也可以考虑修改为服务器端分页
+        #'r':以后可以扩展为github上的连接，现在先提供本地数据库id
         sharedData = [{'t': d.title, 'u': d.url, 'f': d.isfulltext, 'l': d.language, 'c': d.category, 's': d.subscribed,
-                'd': int(d.created_time.timestamp())}
+                'd': int(d.created_time.timestamp()), 'r': f'db:{d.id}', 'e': d.description}
                 for d in SharedRss.select().limit(3000).execute()]
         #使用更紧凑的输出格式
         #return sharedData
+
         return Response(json.dumps(sharedData, separators=(',', ':')), mimetype='application/json')
         
 #网友分享了一个订阅链接或recipe(仅用于kindleear.appspot.com"官方"共享服务器)
-@bpLibraryOffical.post(SHARED_LIBRARY_KINDLEEAR)
+@bpLibraryOffical.post(LIBRARY_KINDLEEAR)
 def SharedLibraryAppspotAjax():
     form = request.form
     key = form.get('key')
     if key != KINDLEEAR_SITE_KEY: #避免爬虫消耗资源
         return {}
 
+    #如果是自定义RSS，则category/title/url/isfulltext/lang有效
+    #对于上传的recipe，category/title/content/desciption有效
     category = form.get('category', '')
     title = form.get('title')
     url = form.get('url', '')
@@ -64,6 +69,7 @@ def SharedLibraryAppspotAjax():
     isfulltext = str_to_bool(form.get('isfulltext', ''))
     creator = form.get('creator', '')
     content = form.get('content', '')
+    description = form.get('description', '')
 
     respDict = {'status':'ok', 'category':category, 'title':title, 'url':url, 'lang':lang, 'isfulltext':isfulltext, 'creator':creator}
 
@@ -83,11 +89,13 @@ def SharedLibraryAppspotAjax():
     else: #上传的recipe，以title为准
         dbItem = SharedRss.get_one(SharedRss.title == title)
     
+    #其实这里应该判断是否为同一个作者，但是想想其他人发现错误也可以修改
     prevCategory = ''
     if dbItem:
         dbItem.title = title
         dbItem.url = url
         dbItem.content = content
+        dbItem.description = description
         dbItem.isfulltext = isfulltext
         dbItem.language = lang
         dbItem.invalid_report_days = 0
@@ -96,8 +104,9 @@ def SharedLibraryAppspotAjax():
             prevCategory = dbItem.category
             dbItem.category = category
     else:
-        dbItem = SharedRss(title=title, url=url, content=content, category=category, language=lang, isfulltext=isfulltext, 
-            creator=creator, subscribed=1, created_time=now, invalid_report_days=0, last_invalid_report_time=now)
+        dbItem = SharedRss(title=title, url=url, content=content, description=description, category=category, 
+            language=lang, isfulltext=isfulltext, creator=creator, subscribed=1, created_time=now, 
+            invalid_report_days=0, last_invalid_report_time=now)
     dbItem.save()
     UpdateLastSharedRssTime()
 
@@ -129,13 +138,24 @@ def UpdateLastSharedRssTime():
         AppInfo(name='lastSharedRssTime', time_value=datetime.datetime.utcnow()).save()
 
 #共享库的订阅源信息管理(仅用于kindleear.appspot.com"官方"共享服务器)
-@bpLibraryOffical.post(SHARED_LIBRARY_MGR_KINDLEEAR + "<mgrType>")
+@bpLibraryOffical.post(LIBRARY_MGR + "<mgrType>")
 def SharedLibraryMgrAppspotPost(mgrType):
     now = datetime.datetime.utcnow()
-    if mgrType == SHARED_LIB_MGR_CMD_REPORTINVALID: #报告一个源失效了
-        title = request.form.get('title')
-        url = request.form.get('url')
-        respDict = {'status': 'ok', 'title': title, 'url': url}
+    form = request.form
+    #print(mgrType, LIBRARY_GETSRC)
+    if mgrType == LIBRARY_GETSRC: #获取一个共享recipe的源代码
+        dbId = form.get('recipeId', '')
+        if dbId.startswith('db:'):
+            dbId = dbId[3:]
+            recipe = Recipe.get_by_id_or_none(dbId)
+            if recipe and recipe.content:
+                return {'status': 'ok', 'content': recipe.content}
+        return {'status': 'The recipe does not exist.'}
+    elif mgrType == LIBRARY_REPORT_INVALID: #报告一个源失效了
+        title = form.get('title', '')
+        url = form.get('url', '')
+        recipeId = form.get('recipeId', '') #当前仅用于数据库ID
+        respDict = {'status': 'ok', 'title': title, 'url': url, 'recipeId': recipeId}
 
         if not url:
             respDict['status'] = "Url is empty!"
@@ -146,9 +166,13 @@ def SharedLibraryMgrAppspotPost(mgrType):
             respDict['url'] = url
 
         #判断是否存在
-        dbItem = SharedRss.get_one(SharedRss.url == url)
+        if url:
+            dbItem = SharedRss.get_one(SharedRss.url == url)
+        elif recipeId.startswith('db:'):
+            dbItem = SharedRss.get_by_id_or_none(recipeId[3:])
+
         if not dbItem:
-            respDict['status'] = "URL not found in database!"
+            respDict['status'] = "The rss is not found in the database"
             return respDict
 
         #希望能做到“免维护”，在一定数量的失效报告之后，自动删除对应的源，假定前提是人性本善
@@ -175,7 +199,7 @@ def SharedLibraryMgrAppspotPost(mgrType):
             dbItem.save()
 
         return respDict
-    elif mgrType == SHARED_LIB_MGR_CMD_SUBSFROMSHARED: #有用户订阅了一个共享库里面的链接
+    elif mgrType == SUBSCRIBED_FROM_LIBRARY: #有用户订阅了一个共享库里面的链接
         title = request.form.get('title')
         url = request.form.get('url')
         respDict = {'status': 'ok', 'title': title, 'url': url}
@@ -199,12 +223,11 @@ def SharedLibraryMgrAppspotPost(mgrType):
             respDict['status'] = "URL not found in database!"
 
         return respDict
-
     else:
-        return {'status': 'Unknown command: {}'.format(mgrType)}
+        return {'status': '[KE] Unknown command: {}'.format(mgrType)}
 
 #共享库的订阅源数据分类信息(仅用于kindleear.appspot.com"官方"共享服务器)
-@bpLibraryOffical.route(SHARED_LIBRARY_CAT_KINDLEEAR)
+@bpLibraryOffical.route(LIBRARY_CATEGORY)
 def SharedLibraryCategoryAppspot():
     key = request.args.get('key') #避免爬虫消耗IO资源
     if key != KINDLEEAR_SITE_KEY:
