@@ -44,9 +44,10 @@ def SharedLibraryAppspot():
         #本来想在服务器端分页的，但是好像CPU/数据库存取资源比带宽资源更紧张，所以干脆一次性提供给客户端，由客户端分页和分类
         #如果后续发现这样不理想，也可以考虑修改为服务器端分页
         #'r':以后可以扩展为github上的连接，现在先提供本地数据库id
+        #唯一一个需要数据库索引的地方，因为这个只有自己部署的服务需要，所以没问题
         sharedData = [{'t': d.title, 'u': d.url, 'f': d.isfulltext, 'l': d.language, 'c': d.category, 's': d.subscribed,
-                'd': int(d.created_time.timestamp()), 'r': f'db:{d.id}', 'e': d.description}
-                for d in SharedRss.select().limit(3000).execute()]
+                'd': int(d.last_subscribed_time.timestamp()), 'r': f'db:{d.id}', 'e': d.description}
+                for d in SharedRss.select().order_by(SharedRss.last_subscribed_time.desc()).limit(2000).execute()]
         #使用更紧凑的输出格式
         #return sharedData
 
@@ -61,20 +62,20 @@ def SharedLibraryAppspotAjax():
         return {}
 
     #如果是自定义RSS，则category/title/url/isfulltext/lang有效
-    #对于上传的recipe，category/title/content/desciption有效
+    #对于上传的recipe，category/title/src/desciption有效
     category = form.get('category', '')
     title = form.get('title')
     url = form.get('url', '')
     lang = form.get('lang', '').lower()
     isfulltext = str_to_bool(form.get('isfulltext', ''))
     creator = form.get('creator', '')
-    content = form.get('content', '')
+    src = form.get('src', '')
     description = form.get('description', '')
 
     respDict = {'status':'ok', 'category':category, 'title':title, 'url':url, 'lang':lang, 'isfulltext':isfulltext, 'creator':creator}
 
-    if not title or not (url or content): #url 和 content 至少要有一个
-        respDict['status'] = "The title or url or content is empty!"
+    if not title or not (url or src): #url 和 src 至少要有一个
+        respDict['status'] = "The title or url or src is empty!"
         return respDict
 
     #将贡献者的网址加密
@@ -94,7 +95,7 @@ def SharedLibraryAppspotAjax():
     if dbItem:
         dbItem.title = title
         dbItem.url = url
-        dbItem.content = content
+        dbItem.src = src
         dbItem.description = description
         dbItem.isfulltext = isfulltext
         dbItem.language = lang
@@ -104,9 +105,9 @@ def SharedLibraryAppspotAjax():
             prevCategory = dbItem.category
             dbItem.category = category
     else:
-        dbItem = SharedRss(title=title, url=url, content=content, description=description, category=category, 
+        dbItem = SharedRss(title=title, url=url, src=src, description=description, category=category, 
             language=lang, isfulltext=isfulltext, creator=creator, subscribed=1, created_time=now, 
-            invalid_report_days=0, last_invalid_report_time=now)
+            invalid_report_days=0, last_invalid_report_time=now, last_subscribed_time=now)
     dbItem.save()
     UpdateLastSharedRssTime()
 
@@ -148,8 +149,8 @@ def SharedLibraryMgrAppspotPost(mgrType):
         if dbId.startswith('db:'):
             dbId = dbId[3:]
             recipe = Recipe.get_by_id_or_none(dbId)
-            if recipe and recipe.content:
-                return {'status': 'ok', 'content': recipe.content}
+            if recipe and recipe.src:
+                return {'status': 'ok', 'src': recipe.src}
         return {'status': 'The recipe does not exist.'}
     elif mgrType == LIBRARY_REPORT_INVALID: #报告一个源失效了
         title = form.get('title', '')

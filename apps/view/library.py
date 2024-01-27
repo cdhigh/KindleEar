@@ -48,7 +48,7 @@ def SharedLibraryPost():
     opener = UrlOpener()
     url = buildKeUrl(LIBRARY_KINDLEEAR)
     data = {'category': category, 'title': recipe.title, 'url': recipe.url, 'lang': lang, 'isfulltext': recipe.isfulltext,
-         'content': recipe.content, 'description':recipe.description, 'key': KINDLEEAR_SITE_KEY, 'creator': creator}
+         'src': recipe.src, 'description':recipe.description, 'key': KINDLEEAR_SITE_KEY, 'creator': creator}
     
     resp = opener.open(url, data)
     if resp.status_code == 200:

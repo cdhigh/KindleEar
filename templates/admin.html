@@ -9,99 +9,104 @@
 
 {% block content -%}
 <div class="main">
-    <form class="pure-form pure-form-aligned" action="" method="POST">
-        <fieldset>
-            <legend><h3>{{_("Change Password")}}</h3></legend>
-            {% if chpwdtips -%}
-            <div class="notice-box">{{chpwdtips|safe}}</div>
-            {% endif -%}
-            <div class="pure-control-group">
-                <label for="orgpwd">{{_("Old password")}}</label>
-                <input type="password" name="op" id="orgpwd" class="pure-u-1 pure-u-sm-1-2" />
-            </div>
-            <div class="pure-control-group">
-                <label for="newpwd1">{{_("New password")}}</label>
-                <input type="password" name="p1" id="newpwd1" class="pure-u-1 pure-u-sm-1-2" />
-            </div>
-            <div class="pure-control-group">
-                <label for="newpwd2">{{_("Confirm password")}}</label>
-                <input type="password" name="p2" id="newpwd2" class="pure-u-1 pure-u-sm-1-2" />
-            </div>
-            <div style="text-align:center;">
-                <button type="submit" class="pure-button pure-button-primary pure-input-rounded">{{_("Confirm Change")}}</button>
-            </div>
-        </fieldset>
-    </form>
+  <form class="pure-form pure-form-aligned" action="/admin/change" method="POST" onsubmit="return false;">
+    <fieldset>
+      <legend><h3>{{_("Change Password")}}</h3></legend>
+      {% if chpwdtips -%}
+      <div class="notice-box">{{chpwdtips|safe}}</div>
+      {% endif -%}
+      <div class="pure-control-group">
+        <label for="orgpwd">{{_("Old password")}}</label>
+        <input type="password" name="op" id="orgpwd" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group">
+        <label for="newpwd1">{{_("New password")}}</label>
+        <input type="password" name="p1" id="newpwd1" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group">
+        <label for="newpwd2">{{_("Confirm password")}}</label>
+        <input type="password" name="p2" id="newpwd2" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div style="text-align:center;">
+        <button onclick="ChangeAccountPassword('{{user.name}}')" class="pure-button pure-button-primary pure-input-rounded">{{_("Confirm Change")}}</button>
+      </div>
+    </fieldset>
+  </form>
 
-    {% if session.get('role') == 'admin' -%}
-    <form class="pure-form pure-form-aligned" action="" method="POST" style="margin-top:10px;">
-        <fieldset>
-            <legend><h3>{{_("Add Account")}}</h3></legend>
-            {% if actips -%}
-            <div class="notice-box">{{actips|safe}}</div>
-            {% endif -%}
-            <div class="pure-control-group">
-                <label for="username">{{_("Username")}}</label>
-                <input type="text" name="u" id="username" class="pure-u-1 pure-u-sm-1-2" />
-            </div>
-            <div class="pure-control-group">
-                <label for="password1">{{_("Password")}}</label>
-                <input type="text" name="up1" id="password1" class="pure-u-1 pure-u-sm-1-2" />
-            </div>
-            <div class="pure-control-group">
-                <label for="password2">{{_("Confirm password")}}</label>
-                <input type="text" name="up2" id="password2" class="pure-u-1 pure-u-sm-1-2" />
-            </div>
-            <div class="pure-control-group">
-                <label for="expiration">{{_("Expiration")}}</label>
-                <select class="pure-u-1 pure-u-sm-1-2 bool" name="expiration">
-                    <option value="0" selected="selected">{{_("Never expire")}}</option>
-                    <option value="7">{{_("7 Days")}}</option>
-                    <option value="30">{{_("1 Month")}}</option>
-                    <option value="90">{{_("3 Months")}}</option>
-                    <option value="180">{{_("6 Months")}}</option>
-                    <option value="365">{{_("1 Year")}}</option>
-                    <option value="730">{{_("2 Years")}}</option>
-                </select>
-            </div>
-            <div style="text-align:center;">
-                <button type="submit" class="pure-button pure-button-primary pure-input-rounded">{{_("Add")}}</button>
-            </div>
-        </fieldset>
-    </form>
+  {% if session.get('role') == 'admin' -%}
+  <form class="pure-form pure-form-aligned" action="/admin/add" method="POST" style="margin-top:10px;">
+      <fieldset>
+          <legend><h3>{{_("Add Account")}}</h3></legend>
+          {% if actips -%}
+          <div class="notice-box">{{actips|safe}}</div>
+          {% endif -%}
+          <div class="pure-control-group">
+              <label for="username">{{_("Username")}}</label>
+              <input type="text" name="u" id="username" class="pure-u-1 pure-u-sm-1-2" />
+          </div>
+          <div class="pure-control-group">
+              <label for="password1">{{_("Password")}}</label>
+              <input type="text" name="up1" id="password1" class="pure-u-1 pure-u-sm-1-2" />
+          </div>
+          <div class="pure-control-group">
+              <label for="password2">{{_("Confirm password")}}</label>
+              <input type="text" name="up2" id="password2" class="pure-u-1 pure-u-sm-1-2" />
+          </div>
+          <div class="pure-control-group">
+              <label for="expiration">{{_("Expiration")}}</label>
+              <select class="pure-u-1 pure-u-sm-1-2 bool" name="expiration">
+                  <option value="0" selected="selected">{{_("Never expire")}}</option>
+                  <option value="7">{{_("7 Days")}}</option>
+                  <option value="30">{{_("1 Month")}}</option>
+                  <option value="90">{{_("3 Months")}}</option>
+                  <option value="180">{{_("6 Months")}}</option>
+                  <option value="365">{{_("1 Year")}}</option>
+                  <option value="730">{{_("2 Years")}}</option>
+              </select>
+          </div>
+          <div style="text-align:center;">
+              <button type="submit" class="pure-button pure-button-primary pure-input-rounded">{{_("Add")}}</button>
+          </div>
+      </fieldset>
+  </form>
 
-    <div class="pure-form">
-        <legend><h3>{{_("Accounts")}}</h3></legend>
-        <table class="pure-table pure-table-horizontal usrtb" width="100%">
-            <colgroup>
-                <col width="10%">
-                <col width="35%">
-                <col width="35%">
-                <col width="20%">
-            </colgroup>
-            <thead>
-                <tr>
-                    <th>{{_("No.")}}</th>
-                    <th>{{_("Username")}}</th>
-                    <th>{{_("Enable")}}</th>
-                    <th>{{_("Operation")}}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for u in users -%}
-                <tr>
-                    <td>{{loop.index}}</td>
-                    <td>{{u.name}}</td>
-                    <td>{{u.enable_send}}</td>
-                    <td>
-                        <a href="/mgrpwd/{{u.name}}" class="actionButton">{{_("Change")}}</a>
-                        <a href="/delaccount/{{u.name}}" class="actionButton">{{_("Delete")}}</a>
-                    </td>
-                </tr>
-                {% endfor -%}
-            </tbody>
-        </table>
-    </div>
-    {% endif -%}
+  <div class="pure-form">
+    <legend><h3>{{_("Accounts")}}</h3></legend>
+    <table class="pure-table pure-table-horizontal usrtb" width="100%">
+      <colgroup>
+        <col width="10%">
+        <col width="35%">
+        <col width="35%">
+        <col width="20%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>{{_("No.")}}</th>
+          <th>{{_("Username")}}</th>
+          <th>{{_("Enable")}}</th>
+          <th>{{_("Operation")}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users -%}
+        <tr>
+          <td>{{loop.index}}</td>
+          <td>{{u.name}}</td>
+          <td>{{_("Yes") if u.enable_send else _("No")}}</td>
+          <td>
+            {% if u.name == admin_name %}
+            <a href="#" class="actionButton act" style="pointer-events:none">{{_("Change")}}</a>
+            <a href="#" class="actionButton" style="pointer-events:none">{{_("Delete")}}</a>
+            {% else %}
+            <a href="/mgrpwd/{{u.name}}" class="actionButton act">{{_("Change")}}</a>
+            <a href="javascript:;" class="actionButton" onclick="DeleteAccount('{{u.name}}')">{{_("Delete")}}</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor -%}
+      </tbody>
+    </table>
+  </div>
+  {% endif -%}
 </div>
 {% endblock -%}

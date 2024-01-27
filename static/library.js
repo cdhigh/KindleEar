@@ -22,7 +22,7 @@ function SortSharedRssDataArray() {
     return ret;
   });
   
-  //最近添加的共享RSS留着置顶位置3天
+  //最近被订阅的共享RSS留着置顶位置3天
   var now = getNowSeconds();
   var recent = new Array();
   for (var i = g_SharedRss.length - 1; i >= 0; i--) {
@@ -38,6 +38,8 @@ function SortSharedRssDataArray() {
 //创建一个按照语言种类分类的字典，字典键为两位语言代码，值为列表
 function BuildSharedRssByLang() {
   var userLang = BrowserLanguage();
+  var hasUserLangRss = false;
+  var hasEnRss = false;
   for (var idx = 0; idx < g_SharedRss.length; idx++) {
     var item = g_SharedRss[idx];
     lang = item.l ? item.l : 'und'; //l=language
@@ -48,18 +50,32 @@ function BuildSharedRssByLang() {
     if (dashIndex != -1) {
       lang = lang.substring(0, dashIndex);
     }
-    const languageNames = new Intl.DisplayNames([userLang], {type: 'language'}); //将语种代码翻译为各国语言词汇
-
+    if (lang == userLang) {
+      hasUserLangRss = true;
+    }
+    if (lang == 'en') {
+      hasEnRss = true;
+    }
+    
     if (!g_rssByLang[lang]) {
       g_rssByLang[lang] = [];
-      var $newLangOpt = $('<option value="' + lang +'">' + languageNames.of(lang) + '</option>');
+      var $newLangOpt = $('<option value="' + lang +'">' + g_languageNames.of(lang) + '</option>');
       $("#shared_rss_lang_pick").append($newLangOpt);
     }
     g_rssByLang[lang].push(item);
   }
   //自动触发和用户浏览器同样语种的选项
-  $("#shared_rss_lang_pick").find("option[value='" + userLang + "']").attr("selected", true);
-  $("#shared_rss_lang_pick").val(userLang).trigger('change');
+  if (hasUserLangRss) {
+    $("#shared_rss_lang_pick").find("option[value='" + userLang + "']").attr("selected", true);
+    $("#shared_rss_lang_pick").val(userLang).trigger('change');
+  } else if (hasEnRss) { //如果有英语则选择英语源
+    $("#shared_rss_lang_pick").find("option[value='en']").attr("selected", true);
+    $("#shared_rss_lang_pick").val('en').trigger('change');
+  } else { //最后只能选择第一个语言
+    var firstChild = $("#shared_rss_lang_pick").children().first();
+    firstChild.attr("selected", true);
+    firstChild.trigger('change');
+  }
 }
 
 //在界面上选择了一项Recipe语种，将对应语种的recipe显示出来
@@ -190,9 +206,9 @@ function CreatePageContent(category, page) {
   for (idx in data){
     var item = data[idx];
     var supText = "";
-    if (Math.abs(now - item.d) < 60 * 60 * 24 * 3) { //3天内分享的rss标识为New
-        supText = "<sup> New</sup>";
-    }
+    //if (Math.abs(now - item.d) < 60 * 60 * 24 * 3) { //3天内分享的rss标识为New
+    //    supText = "<sup> New</sup>";
+    //}
     rssStr.push('<div class="book box">');
     rssStr.push('<div class="titleRow">' + item.t + supText + '</div>');
     if (item.u) { //url存在说明是自定义rss，否则为上传的recipe

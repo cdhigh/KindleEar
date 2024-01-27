@@ -10,24 +10,23 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-- kind: Book
+- kind: SharedRss
   properties:
-  - name: builtin
-  - name: users
+  - name: last_subscribed_time
+    direction: desc
 
 - kind: DeliverLog
   properties:
-  - name: username
-  - name: time
-    direction: desc
-
-- kind: Feed
-  properties:
-  - name: book
-  - name: time
-
-- kind: LastDelivered
-  properties:
-  - name: username
   - name: datetime
     direction: desc
+
+- kind: BookedRecipe
+  properties:
+  - name: time
+    direction: desc
+
+- kind: Recipe
+  properties:
+  - name: time
+    direction: desc
+    

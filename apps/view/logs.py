@@ -42,13 +42,10 @@ def RemoveLogs():
             user.enable_send = False
             user.save()
 
-    #清理3之前的推送记录
+    #清理30天之前的推送记录
     cnt = 0
     for item in DeliverLog.get_all(DeliverLog.datetime < (datetime.datetime.utcnow() - datetime.timedelta(days=30))):
         cnt += 1
         item.delete_instance()
-    for item in LastDelivered.get_all(LastDelivered.datetime < (datetime.datetime.utcnow() - datetime.timedelta(days=90))):
-        cnt += 1
-        item.delete_instance()
-
+    
     return "{} lines delivery log removed.<br />".format(cnt)

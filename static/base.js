@@ -12,6 +12,23 @@ function getNowSeconds() {
   return Math.floor(new Date().getTime() / 1000);
 }
 
+//检测浏览器语言
+function BrowserLanguage() {
+  var lang = "";
+  if (navigator.userLanguage) {
+    lang = navigator.userLanguage.toLowerCase();  
+  } else {
+    lang = navigator.language.toLowerCase();  
+  }
+  if (lang.indexOf('-') != -1) {
+    return lang.substring(0, lang.indexOf('-'));
+  } else {
+    return lang.substring(0, 2);
+  }
+}
+//将语种代码翻译为各国语言词汇，使用方法：g_languageNames.of(langCode)
+const g_languageNames = new Intl.DisplayNames([BrowserLanguage()], {type: 'language'});
+
 ///[start] my.html
 var show_menu_box = false;
 
@@ -41,11 +58,10 @@ function FetchBuiltinRecipesXml() {
       if (dashIndex != -1) {
         language = language.substring(0, dashIndex);
       }
-      const languageNames = new Intl.DisplayNames([userLang], {type: 'language'}); //将语种代码翻译为各国语言词汇
 
       if (!all_builtin_recipes[language]) {
         all_builtin_recipes[language] = [];
-        var $newLangOpt = $('<option value="' + language +'">' + languageNames.of(language) + '</option>');
+        var $newLangOpt = $('<option value="' + language +'">' + g_languageNames.of(language) + '</option>');
         $("#language_pick").append($newLangOpt);
       }
       all_builtin_recipes[language].push({title: title, description: description, needs_subscription: needs_subscription, id: id});
@@ -253,27 +269,13 @@ function PopulateMySubscribed() {
     if (recipe_id.startsWith("upload:")) { //只有自己上传的recipe才能分享，内置的不用分享
       hamb_arg.push({klass: 'btn-B', title: i18n.share, icon: 'icon-share', act: "StartShareRss('" + id_title});
     }
+    hamb_arg.push({klass: 'btn-E', title: i18n.customizeDelivTime, icon: 'icon-schedule', act: "ScheduleRecipe('" + id_title});
     hamb_arg.push({klass: 'btn-A', title: i18n.unsubscribe, icon: 'icon-unsubscribe', act: "UnsubscribeRecipe('" + id_title});
     row_str.push(AddHamburgerButton(hamb_arg));
     row_str.push('</div>');
     //console.log(row_str.join(''));
     var $new_item = $(row_str.join(''));
     $div.append($new_item);
-  }
-}
-
-//检测浏览器语言
-function BrowserLanguage() {
-  var lang = "";
-  if (navigator.userLanguage) {
-    lang = navigator.userLanguage.toLowerCase();  
-  } else {
-    lang = navigator.language.toLowerCase();  
-  }
-  if (lang.indexOf('-') != -1) {
-    return lang.substring(0, lang.indexOf('-'));
-  } else {
-    return lang.substring(0, 2);
   }
 }
 
@@ -322,6 +324,77 @@ function UnsubscribeRecipe(id, title) {
       alert(i18n.cannotUnsubsRecipe + data.status);
     }
   });
+}
+
+//根据ID找到已订阅recipe的字典
+function GetBookedRecipeItem(id) {
+  for (var idx = 0; idx < my_booked_recipes.length; idx++) {
+    if (my_booked_recipes[idx].recipe_id == id) {
+      return my_booked_recipes[idx];
+    }
+  }
+  return '';
+}
+
+//设置订阅的Recipe的自定义推送时间
+function ScheduleRecipe(id, title) {
+  var item = GetBookedRecipeItem(id);
+  if (!item) {
+    return;
+  }
+  var days = item.send_days || [];
+  var times = item.send_times || [];
+  var modal = new tingle.modal({footer: true});
+  var ostr = ['<h2>' + i18n.customizeDelivTime + '</h2>'];
+  ostr.push('<form class="pure-form" action="" method="POST" id="custom_schedule">');
+  ostr.push('<input type="text" name="id" value="' + id + '" hidden />');
+  ostr.push('<div class="pure-control-group">');
+  ostr.push('<p>' + i18n.delivDays + '</p>');
+  ostr.push('<div class="schedule_daytimes">')
+  ostr.push('<label><input type="checkbox" name="Monday" ' + (days.indexOf('Monday') > -1 ? 'checked' : '')  + '/>' + i18n.Mon + '</label>');
+  ostr.push('<label><input type="checkbox" name="Tuesday" ' + (days.indexOf('Tuesday') > -1 ? 'checked' : '')  + '/>' + i18n.Tue + '</label>');
+  ostr.push('<label><input type="checkbox" name="Wednesday" ' + (days.indexOf('Wednesday') > -1 ? 'checked' : '')  + '/>' + i18n.Wed + '</label>');
+  ostr.push('<label><input type="checkbox" name="Thursday" ' + (days.indexOf('Thursday') > -1 ? 'checked' : '')  + '/>' + i18n.Thu + '</label>');
+  ostr.push('<label><input type="checkbox" name="Friday" ' + (days.indexOf('Friday') > -1 ? 'checked' : '')  + '/>' + i18n.Fri + '</label>');
+  ostr.push('<label><input type="checkbox" name="Saturday" ' + (days.indexOf('Saturday') > -1 ? 'checked' : '')  + '/>' + i18n.Sat + '</label>');
+  ostr.push('<label><input type="checkbox" name="Sunday" ' + (days.indexOf('Sunday') > -1 ? 'checked' : '')  + '/>' + i18n.Sun + '</label>');
+  ostr.push('</div></div><div class="pure-control-group">');
+  ostr.push('<p>' + i18n.delivTimes + '</p>');
+  ostr.push('<div class="schedule_daytimes">')
+  for (var t = 0; t < 24; t++) {
+    ostr.push('<label><input type="checkbox" name="' + t + '" ' + (times.indexOf(t) > -1 ? 'checked' : '') + '/>' + t.toString().padStart(2, '0') + '</label>');
+    if ((t == 7) || (t == 15)) {
+      ostr.push('<br/>');
+    }
+  }
+  ostr.push('</div></div></form>');
+  modal.setContent(ostr.join(''));
+  modal.addFooterBtn(i18n.cancel, 'actionButton', function() {
+    modal.close();
+  });
+  modal.addFooterBtn(i18n.submit, 'actionButton act', function() {
+    var formData = $("#custom_schedule").serialize();
+    $.ajax({
+      url: "/recipe/schedule",
+      type: "POST",
+      data: formData,
+      success: function (resp) {
+        if (resp.status == 'ok') {
+          item.send_days = resp.send_days;
+          item.send_times = resp.send_times;
+          ShowSimpleModalDialog('<p>' + i18n.customDelivTimesaved + '</p>');
+        } else {
+          alert(resp.status);
+        }
+        modal.close();
+      },
+      error: function (error) {
+        alert(error);
+        modal.close();
+      }
+    });
+  });
+  modal.open();
 }
 
 //根据id获取对应recipe的信息，返回一个字典
@@ -434,41 +507,46 @@ function ShareRssToServer(id, title, category, lang) {
       }
       window.localStorage.setItem('rss_category', JSON.stringify(g_rss_categories));
       window.localStorage.setItem('shared_rss', ''); //让分享库页面从服务器取新数据
-      var modal = new tingle.modal({footer: true});
-      modal.setContent('<p>' + i18n.thankForShare + '</p>');
-      modal.addFooterBtn(i18n.close, 'actionButton', function() {
-        modal.close();
-      });
-      modal.open();
+      ShowSimpleModalDialog('<p>' + i18n.thankForShare + '</p>');
     } else {
       alert(data.status);
     }
   });
 }
 
+//显示一个简单的modal对话框，只有一个关闭按钮
+function ShowSimpleModalDialog(content) {
+  var modal = new tingle.modal({footer: true});
+  modal.setContent(content);
+  modal.addFooterBtn(i18n.close, 'actionButton', function() {
+    modal.close();
+  });
+  modal.open();
+}
+
 //显示一个分享自定义RSS的对话框
 function ShowShareDialog(id, title){
   var all_languages = ['aa','ab','af','ak','sq','am','ar','an','hy','as','av','ae','ay','az','ba','bm','eu','be','bn','bh','bi','bo','bs','br','bg','my','ca','cs','ch','ce','zh','cu','cv','kw','co','cr','cy','cs','da','de','dv','nl','dz','el','en','eo','et','eu','ee','fo','fa','fj','fi','fr','fy','ff','ga','de','gd','ga','gl','gv','el','gn','gu','ht','ha','he','hz','hi','ho','hr','hu','hy','ig','is','io','ii','iu','ie','ia','id','ik','is','it','jv','ja','kl','kn','ks','ka','kr','kk','km','ki','rw','ky','kv','kg','ko','kj','ku','lo','la','lv','li','ln','lt','lb','lu','lg','mk','mh','ml','mi','mr','ms','mi','mk','mg','mt','mn','mi','ms','my','na','nv','nr','nd','ng','ne','nl','nn','nb','no','oc','oj','or','om','os','pa','fa','pi','pl','pt','ps','qu','rm','ro','ro','rn','ru','sg','sa','si','sk','sk','sl','se','sm','sn','sd','so','st','es','sq','sc','sr','ss','su','sw','sv','ty','ta','tt','te','tg','tl','th','bo','ti','to','tn','ts','tk','tr','tw','ug','uk','ur','uz','ve','vi','vo','cy','wa','wo','xh','yi','yo','za','zh','zu'];
   var languages = ['en','fr','zh','es','pt','de','it','ja','ru','tr','ko','ar','cs','nl','el','hi','ms','bn','fa','ur','sw','vi','pa','jv','tl','ha'];
+  var userLang = BrowserLanguage();
   var modal = new tingle.modal({footer: true});
   var ostr = ['<h2>' + i18n.shareLinksHappiness + '</h2>'];
-  //自定义RSS，需要选择分类和语言
   ostr.push('<div class="pure-g">');
-  ostr.push('<div class="pure-u-1-2"><p>' + i18n.category + '</p></div>');
-  ostr.push('<div class="pure-u-1-2"><p>' + i18n.language + '</p></div>');
-  ostr.push('</div>');
-  ostr.push('<div class="pure-g">');
-  ostr.push('<div class="pure-u-1-2"><div class="select-editable"><select onchange="this.nextElementSibling.value=this.value"><option value=""></option>');
+  ostr.push('<div class="pure-u-1 pure-u-md-1-2">');
+  ostr.push('<p>' + i18n.category + '</p>');
+  ostr.push('<div class="select-editable"><select onchange="this.nextElementSibling.value=this.value;DisplayShareRssLang()"><option value=""></option>');
   for (var idx in g_rss_categories){
     ostr.push('<option value="' + g_rss_categories[idx] + '">' + g_rss_categories[idx] + '</option>');
   }
   ostr.push('</select><input type="text" name="category" value="" id="txt_share_rss_category" /></div></div>');
-  ostr.push('<div class="pure-u-1-2"><div class="select-editable"><select onchange="this.nextElementSibling.value=this.value"><option value=""></option>');
+  ostr.push('<div class="pure-u-1 pure-u-md-1-2">');
+  ostr.push('<p id="sh_rss_lang_disp">' + i18n.language + ' (' + g_languageNames.of(userLang) + ')</p>');
+  ostr.push('<div class="select-editable"><select onchange="this.nextElementSibling.value=this.value;DisplayShareRssLang()"><option value=""></option>');
   for (var idx in languages){
     ostr.push('<option value="' + languages[idx] + '">' + languages[idx] + '</option>');
   }
-  ostr.push('</select><input type="text" name="category" value="' + BrowserLanguage() + '" id="txt_share_rss_lang" /></div></div>');
-  ostr.push('</div>');
+  ostr.push('</select><input type="text" name="category" oninput="DisplayShareRssLang()" value="' + userLang + '" id="txt_share_rss_lang" /></div></div>');
+  ostr.push('</div></div>');
   ostr.push('<p>' + i18n.shareCatTips + '</p>');
   
   modal.setContent(ostr.join(''));
@@ -486,6 +564,15 @@ function ShowShareDialog(id, title){
     }
   });
   modal.open();
+}
+
+//在ShowShareDialog()里面的语言文本框有输入语言代码时自动在上面显示可读的语言名称
+function DisplayShareRssLang() {
+  try {
+    $('#sh_rss_lang_disp').text(i18n.language + ' (' + g_languageNames.of($('#txt_share_rss_lang').val()) + ')');
+  } catch(err) {
+    $('#sh_rss_lang_disp').text(i18n.language);
+  }
 }
 
 //点击分享自定义RSS
@@ -556,13 +643,7 @@ function OpenUploadRecipeDialog() {
           delete data.status;
           my_uploaded_recipes.unshift(data);
           PopulateLibrary();
-
-          modal = new tingle.modal({footer: true});
-          modal.setContent('<h2>' + i18n.congratulations + '</h2><p>' + i18n.recipeUploadedTips + '</p>');
-          modal.addFooterBtn(i18n.close, 'actionButton', function() {
-            modal.close();
-          });
-          modal.open();
+          ShowSimpleModalDialog('<h2>' + i18n.congratulations + '</h2><p>' + i18n.recipeUploadedTips + '</p>');
         } else {
           alert(data.status);
         }
@@ -632,22 +713,23 @@ function insertBookmarkletGmailThis(subscribeUrl, mailPrefix) {
 //根据选择推送的订阅信息，更新接下来要访问服务器的链接参数，使用get而不使用post是因为gae的cron支持get访问
 function UpdateDeliverRecipeLink() {
   var recipeIds = [];
-  $("input[type='checkbox']").each(function() {
+  $("input[class='deliver_now_rss_id']").each(function() {
     if ($(this).is(":checked")) {
       recipeIds.push($(this).prop('id').replace(':', "__"));
     }
-    deliverButton.href = "/deliver?u={{session.get('userName', '')}}&id=" + recipeIds.join(',');
+    var newLink = "/deliver?u={{session.get('userName', '')}}&id=" + recipeIds.join(',');
+    $("#deliverNowButton").attr("href", newLink);
   });
 }
 
 function SelectDeliverAll() {
-  $("input[type='checkbox']").each(function() {
+  $("input[class='deliver_now_rss_id']").each(function() {
     $(this).prop('checked', true);
   });
 };
 
 function SelectDeliverNone() {
-  $("input[type='checkbox']").each(function() {
+  $("input[class='deliver_now_rss_id']").each(function() {
     $(this).prop('checked', false);
   });
 };
@@ -742,12 +824,7 @@ var AjaxFileUpload = {
       if (this.progress) {
         this.progress.html("").css("display", "none");
       }
-      var modal = new tingle.modal({footer: true});
-      modal.setContent('<h2>' + i18n.congratulations + '</h2><p>' + i18n.fileUploaded + '</p>');
-      modal.addFooterBtn(i18n.close, 'actionButton', function() {
-        modal.close();
-      });
-      modal.open();
+      ShowSimpleModalDialog('<h2>' + i18n.congratulations + '</h2><p>' + i18n.fileUploaded + '</p>');
     } else {
       alert(response);
     }
@@ -857,4 +934,46 @@ var AjaxFileUpload = {
   }
 };
 ///[end] advcoverimage.html && advuploadcss.html
-///
+
+///[start] admin.html
+//修改账号的密码
+function ChangeAccountPassword(name) {
+  var oldPwd = $('#orgpwd').val();
+  var newPwd1 = $('#newpwd1').val();
+  var newPwd2 = $('#newpwd2').val();
+  if (!oldPwd || !newPwd1 || !newPwd2) {
+    alert(i18n.namePwdEmpty);
+    return;
+  } else if (newPwd1 != newPwd2) {
+    alert(i18n.pwdDismatch);
+    return;
+  }
+
+  $.post("/admin/change", {name: name, op: oldPwd, p1: newPwd1, p2: newPwd2}, function (data) {
+    if (data.status == "ok") {
+      $('#orgpwd').val('');
+      $('#newpwd1').val('');
+      $('#newpwd2').val('');
+      ShowSimpleModalDialog('<p>' + i18n.chPwdSuccess + '</p>');
+    } else {
+      alert(data.status);
+    }
+  });
+}
+
+//删除一个账号
+function DeleteAccount(name) {
+  if (!confirm(i18n.areYouSureDelete.format(name))) {
+    return;
+  }
+
+  $.post("/admin/delete", {name: name}, function (data) {
+    if (data.status == "ok") {
+      ShowSimpleModalDialog('<p>' + i18n.accountDeleted + '</p>');
+      window.location.href = '/admin';
+    } else {
+      alert(data.status);
+    }
+  });
+}
+///[end] admin.html

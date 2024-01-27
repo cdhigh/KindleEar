@@ -399,6 +399,7 @@ textarea {
 
 .settings .pure-form-aligned .pure-control-group label,
 .admin .pure-form-aligned .pure-control-group label {
+    display: inline-block;
     width: auto;
     font-weight: bold;
 }
@@ -498,6 +499,7 @@ table.pure-table thead {
     font-size:14px;
     border:none;
     width:250px;
+    height:34px;
     margin:0;
  }
 
@@ -508,7 +510,8 @@ table.pure-table thead {
     width:230px;
     height:34px;
     padding:1px;
-    font-size:12px;
+    font-size:14px;
+    font-weight: bold;
     border:solid gray 1px;
  }
 
@@ -586,6 +589,7 @@ table.pure-table thead {
     background: white;
     overflow: hidden;
 }
+
 select[id="shared_rss_lang_pick"] {
     font-weight: bold;
 }
@@ -682,6 +686,19 @@ select[id="shared_rss_lang_pick"] {
     background-color: #0765bb;
 }
 
+div[class="schedule_daytimes"] {
+    text-align: center;
+}
+div[class="schedule_daytimes"] label {
+    margin-right: 15px;
+    display: inline-block;
+}
+div[class="schedule_daytimes"] input {
+    margin-right: 5px;
+    display: inline-block;
+}
+
+
 /* iconfont */
 @font-face {
   font-family: "iconfont";
@@ -737,4 +754,7 @@ select[id="shared_rss_lang_pick"] {
 }
 .icon-invalid:before {
   content: "\e8c0";
+}
+.icon-schedule:before {
+  content: "\ea5f";
 }

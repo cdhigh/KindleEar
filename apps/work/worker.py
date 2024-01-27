@@ -9,19 +9,11 @@ from apps.base_handler import *
 from apps.back_end.send_mail_adpt import send_to_kindle
 from apps.back_end.db_models import *
 from apps.utils import local_time
-from lib.makeoeb import *
-from calibre.ebooks.conversion.plugins.mobi_output import MOBIOutput, AZW3Output
-from calibre.ebooks.conversion.plugins.epub_output import EPUBOutput
-from books import BookClasses, BookClass
-from books.base_book import BaseFeedBook
-from books.base_comic_book import BaseComicBook
-
-try:
-    from books.comic import ComicBaseClasses, comic_domains
-except ImportError:
-    default_log.warning('Failed to import comic base classes.')
-    ComicBaseClasses = []
-    comic_domains = tuple()
+#from lib.makeoeb import *
+#from calibre.ebooks.conversion.plugins.mobi_output import MOBIOutput, AZW3Output
+#from calibre.ebooks.conversion.plugins.epub_output import EPUBOutput
+#from books.base_book import BaseFeedBook
+from lib.recipe_helper import *
 
 bpWorker = Blueprint('bpWorker', __name__)
 
@@ -29,108 +21,86 @@ bpWorker = Blueprint('bpWorker', __name__)
 #如果是Task触发的，则环境变量会包含以下一些变量
 #X-AppEngine-QueueName/X-AppEngine-TaskName/X-AppEngine-TaskRetryCount/X-AppEngine-TaskExecutionCount/X-AppEngine-TaskETA
 
+#在已订阅的Recipe或自定义RSS列表创建Recipe源码列表，最重要的作用是合并自定义RSS
+#返回一个字典，键名为title，元素为 [BookedRecipe, recipe, src]
+def GetAllRecipeSrc(user, idList):
+    srcDict = {}
+    rssList = []
+    ftRssList = []
+    for bked in filter(bool, [BookedRecipe.get_one(BookedRecipe.recipe_id == id_) for id_ in idList]):
+        recipeId = bked.recipe_id
+        recipeType, dbId = Recipe.type_and_id(recipeId)
+        if recipeType == 'builtin':
+            bnInfo = GetBuiltinRecipeInfo(recipeId)
+            src = GetBuiltinRecipeSource(recipeId)
+            if bnInfo and src:
+                srcDict[bnInfo.get('title', '')] = [bked, bnInfo, src]
+            continue
+        
+        recipe = Recipe.get_by_id_or_none(dbId)
+        if recipe:
+            if recipeType == 'upload': #上传的Recipe
+                srcDict[recipe.title] = [bked, recipe, recipe.src]
+            elif recipe.isfulltext: #自定义RSS
+                ftRssList.append((bked, recipe))
+            else:
+                rssList.append((bked, recipe))
+
+    #全文和概要rss各建一个源码
+    title = user.book_title
+    if ftRssList:
+        feeds = [(item.title, item.url) for bked, item in ftRssList]
+        srcDict[title + '_f'] = [*ftRssList[0],  GenerateRecipeSource(title, feeds, user.oldest_article, isfulltext=True)]
+
+    if rssList:
+        feeds = [(item.title, item.url) for bked, item in rssList]
+        srcDict[title] = [*rssList[0], GenerateRecipeSource(title, feeds, user.oldest_article, isfulltext=False)]
+    return srcDict
+
 # 实际下载文章和生成电子书并且发送邮件
 @bpWorker.route("/worker")
 def Worker():
     global default_log
     args = request.args
-    userName = args.get('u', '')
-    bookId = args.get('id_', '')  #如果有多本书，使用','分隔
-    feedIds = args.get('feedIds', '')
-
-    return WorkerImpl(userName, bookId.split(','), feedIds.split(','))
+    userName = args.get('userName', '')
+    recipeId = args.get('recipeId', '')  #如果有多个Recipe，使用','分隔
+    
+    return WorkerImpl(userName, recipeId.split(','))
 
 #执行实际抓取网页生成电子书任务
 #userName: 需要执行任务的账号名
-#bookIdList: 需要投递的书籍ID列表
-#rssIdList: 自定义RSS的ID列表，如果为空则推送指定账号的所有自定义RSS
+#idList: 需要投递的Recipe ID列表
 #返回执行结果字符串
-def WorkerImpl(userName: str, bookIdList: list, rssIdList: list=None):
-    if not userName or not bookIdList:
+def WorkerImpl(userName: str, idList: list):
+    if not userName or not idList:
         return "Parameters invalid."
 
     user = KeUser.get_one(KeUser.name == userName)
     if not user:
         return "The user does not exist."
     
-    to = user.kindle_email
-    if (';' in to) or (',' in to):
-        to = to.replace(',', ';').replace(' ', '').split(';')
-
-    bkInstList = list(filter(bool, map(Book.get_by_id_or_none, bookIdList)))
-    if not bkInstList:
-        return "There are no books to push."
+    to = user.kindle_email.replace(';', ',').split(',')
     
-    #仅推送对应书籍内的部分自定义RSS
-    feedList = list(filter(bool, map(Feed.get_by_id_or_none, (rssIdList or []))))
+    srcDict = GetAllRecipeSrc(user, bkInstList)
+    for title, (bked, recipe, src) in srcDict.items():
+        ConvertToEbook()
 
-    bookForMeta = None
-    mhFile = DEFAULT_MASTHEAD
-    cvFile = DEFAULT_COVER
-
-    #仅一本书
-    if len(bkInstList) == 1:
-        singleBook = bkInstList[0]
-        if singleBook.builtin:
-            bookForMeta = BookClass(singleBook.title)
-            mhFile = bookForMeta.masthead_file
-            cvFile = bookForMeta.cover_file
-        else: #单独的推送自定义RSS
-            bookForMeta = singleBook
-    else: #多本书合并推送时使用“自定义RSS”的元属性
-        bookForMeta = user.my_rss_book
-        cvFile = DEFAULT_COVER_BV if user.merge_books else DEFAULT_COVER
-    
-    if not bookForMeta:
-        return "There are no books to push."
-
-    #创建 OEBBook，并设置一些基本属性
-    oeb = CreateOeb(user, bookForMeta.title, bookForMeta.language)
-
-    AddMastheadCoverToOeb(user, oeb, mhFile, cvFile, bookForMeta) #将报头和封面添加到电子书
-        
-    itemCnt = 0
-    imgIndex = 0
-    sections = defaultdict(list)
-    tocThumbnails = {} #map img-url -> manifest-href
-    log = default_log
-
-    for bk in bkInstList:
-        if bk.builtin:
-            cBook = BookClass(bk.title)
-            if not cBook:
-                bk.delete_instance() #删除数据库内容
-                log.warning("Book '{}' does not exist".format(bk.title))
-                continue
-            book = cBook(imgIndex=imgIndex, opts=opts, user=user)
-            book.url_filters = [flt.url for flt in user.url_filters]
-            if bk.needs_subscription: #需要登录
-                subsInfo = user.subscription_info(bk.title)
-                if subsInfo:
-                    book.account = subsInfo.account
-                    book.password = subsInfo.password
-            if issubclass(cBook, BaseComicBook):
-                PushComicBook(username, user, book)
-                continue
-        else:  # 自定义RSS
-            if bk.feedsCount == 0:
-                continue
                 
-            book = BaseFeedBook(imgIndex=imgIndex, opts=opts, user=user)
-            book.title = bk.title
-            book.description = bk.description
-            book.language = bk.language
-            book.keep_image = bk.keep_image
-            book.oldest_article = bk.oldest_article
-            book.fulltext_by_readability = True
-            feeds = feedList if feedList else bk.feeds
-            book.feeds = []
-            for feed in feeds:
-                if feed.url.startswith(comic_domains):
-                    ProcessComicRSS(username, user, feed)
-                else:
-                    book.feeds.append((feed.title, feed.url, feed.isfulltext))
-            book.url_filters = [flt.url for flt in user.url_filters]
+        book = BaseFeedBook(imgIndex=imgIndex, opts=opts, user=user)
+        book.title = bk.title
+        book.description = bk.description
+        book.language = bk.language
+        book.keep_image = bk.keep_image
+        book.oldest_article = bk.oldest_article
+        book.fulltext_by_readability = True
+        feeds = feedList if feedList else bk.feeds
+        book.feeds = []
+        for feed in feeds:
+            if feed.url.startswith(comic_domains):
+                ProcessComicRSS(username, user, feed)
+            else:
+                book.feeds.append((feed.title, feed.url, feed.isfulltext))
+        book.url_filters = [flt.url for flt in user.url_filters]
         
         #书的质量可能不一，一本书的异常不能影响其他书籍的推送
         try:
@@ -333,7 +303,6 @@ def PushComicBook(userName, user, book, opts=None):
                     time.sleep(5)
 
             send_to_kindle(userName, user.kindle_email, title, user.book_type, oIO.getvalue(), user.timezone)
-            book.UpdateLastDelivered(bookname, chapter_title, next_chapter_index)
             rs = "{}({}).{} Sent!" % (title, local_time(tz=user.timezone), user.book_type)
             #log.info(rs)
         except:

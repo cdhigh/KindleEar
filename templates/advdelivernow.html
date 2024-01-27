@@ -12,13 +12,8 @@
         <div class="box">{{ _("There are no books subscribed") }}</div>
       {% endif -%}
       {% for item in recipes -%}
-      {% if item|attr('recipe_id') -%}
-        {% set recipe_id = item.recipe_id -%}
-      {% else -%}
-        {% set recipe_id = 'custom:' + item.key_or_id_string -%}
-      {% endif -%}
-      <label for="{{recipe_id}}" class="pure-checkbox box">
-        <input id="{{recipe_id}}" type="checkbox" checked="1" onclick="UpdateDeliverRecipeLink();" />
+      <label for="{{item.recipe_id}}" class="pure-checkbox box">
+        <input id="{{item.recipe_id}}" type="checkbox" class="deliver_now_rss_id" checked="1" onclick="UpdateDeliverRecipeLink();" />
         <span>{{item.title}}</span>
       </label>
       {% endfor -%}
@@ -30,7 +25,7 @@
       {% endif -%}
     </div>
     <div style="text-align:center;">
-        <a href="/deliver?u={{session.get('userName', '')}}" value="{{ _('Deliver') }}" id="deliverButton" class="pure-button pure-button-primary pure-input-rounded">{{ _('Deliver') }}</a>
+        <a href="/deliver?u={{session.get('userName', '')}}" value="{{ _('Deliver') }}" id="deliverNowButton" class="pure-button pure-button-primary pure-input-rounded">{{ _('Deliver') }}</a>
     </div>
   </fieldset>
 </div>

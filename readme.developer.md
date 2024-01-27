@@ -26,6 +26,9 @@
   6. 这个项目 [DSAdmin](https://github.com/remko/dsadmin) 可以本机管理模拟器数据库
      `./dsadmin --project=my-datastore-project --datastore-emulator-host=localhost:8081`
 
+gcloud app deploy cron.yaml
+gcloud app deploy queue.yaml
+
 # Windows 安装配置 MongoDB
 * 下载安装后创建一个目录保存数据库文件，比如 c:\mongodb\db
 * 安装启动服务
@@ -58,5 +61,6 @@
 
 # 常用链接
 [App Engine 文档](https://cloud.google.com/appengine/docs)
+[yaml配置文档](https://cloud.google.com/appengine/docs/standard/reference/app-yaml?tab=python)
 [Cloud Tasks]https://cloud.google.com/tasks/docs
 [Adding your favorite news website](https://manual.calibre-ebook.com/news.html)

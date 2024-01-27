@@ -28,7 +28,7 @@ def str_to_int(txt, default=0):
 
 #字符串转bool(txt)
 def str_to_bool(txt):
-    return (txt or '').lower().strip() in ('yes', 'true', 'on', '1')
+    return (txt or '').lower().strip() in ('yes', 'true', 'on', 'enable', 'enabled', '1', 'checked')
 
 def local_time(fmt="%Y-%m-%d %H:%M", tz=0):
     return (datetime.datetime.utcnow() + datetime.timedelta(hours=tz)).strftime(fmt)

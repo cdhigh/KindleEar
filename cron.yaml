@@ -1,5 +1,5 @@
 cron:
-- description: add deliver task to queue
+- description: add delivery task to queue
   url: /deliver
   schedule: every 1 hours
 

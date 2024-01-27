@@ -34,6 +34,8 @@ def get_login_user():
 #记录投递记录到数据库
 def deliver_log(name, to, book, size, status='ok', tz=TIMEZONE):
     global default_log
+    to = '; '.join(to) if isinstance(to, (list, tuple)) else to
+    
     try:
         dl = DeliverLog(username=name, to=to, size=size,
            time=local_time(tz=tz), datetime=datetime.datetime.utcnow(),

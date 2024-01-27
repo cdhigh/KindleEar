@@ -15,7 +15,8 @@ from apps.utils import ke_encrypt, ke_decrypt
 from peewee import *
 from playhouse.db_url import connect
 from playhouse.shortcuts import model_to_dict
-from config import DATABASE_ENGINE, DATABASE_HOST, DATABASE_PORT, DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_NAME
+from config import (DATABASE_ENGINE, DATABASE_HOST, DATABASE_PORT, DATABASE_USERNAME, 
+                DATABASE_PASSWORD, DATABASE_NAME)
 
 #用于在数据库结构升级后的兼容设计，数据库结构和前一版本不兼容则需要升级此版本号
 __DB_VERSION__ = 1
@@ -135,7 +136,7 @@ class KeUser(MyBaseModel): # kindleEar User
     kindle_email = CharField(default='')
     enable_send = BooleanField(default=False)
     send_days = JSONField(default=JSONField.list_default)
-    send_time = IntegerField(default=0)
+    send_time = IntegerField()
     timezone = IntegerField(default=0)
     book_type = CharField(default='epub') #mobi,epub
     device = CharField(default='')
@@ -203,7 +204,7 @@ class Recipe(MyBaseModel):
     isfulltext = BooleanField(default=False)
     type_ = CharField() #'custom','upload'
     needs_subscription = BooleanField(default=False) #是否需要登陆网页，只有上传的recipe才有意义
-    content = TextField(default='') #保存上传的recipe的unicode字符串表示，已经解码
+    src = TextField(default='') #保存上传的recipe的unicode字符串表示，已经解码
     time = DateTimeField() #源被加入的时间，用于排序
     user = CharField() #哪个账号创建的，和nosql一致，保存用户名
     language = CharField(default='')
@@ -234,6 +235,8 @@ class BookedRecipe(MyBaseModel):
     needs_subscription = BooleanField(default=False)
     account = CharField(default='') #如果网站需要登录才能看
     encrypted_pwd = CharField(default='')
+    send_days = JSONField(default=JSONField.list_default)
+    send_times = JSONField(default=JSONField.list_default)
     time = DateTimeField() #源被订阅的时间，用于排序
 
     @property
@@ -250,10 +253,10 @@ class BookedRecipe(MyBaseModel):
 class DeliverLog(MyBaseModel):
     username = CharField()
     to = CharField()
-    size = IntegerField()
-    time = CharField()
-    datetime = DateTimeField()
-    book = CharField()
+    size = IntegerField(default=0)
+    time_str = CharField() #每个用户的时区可能不同，为显示方便，创建时就生成字符串
+    datetime = DateTimeField(index=True)
+    book = CharField(default='')
     status = CharField()
     
 class WhiteList(MyBaseModel):
@@ -272,12 +275,12 @@ class SharedRss(MyBaseModel):
     language = CharField(default='')
     category = CharField(default='')
     recipe_url = CharField(default='') #客户端优先使用此字段获取recipe，为什么不用上面的url是要和以前的版本兼容
-    content = TextField(default='') #保存分享的recipe的unicode字符串表示，已经解码
+    src = TextField(default='') #保存分享的recipe的unicode字符串表示，已经解码
     description = CharField(default='')
     creator = CharField(default='') #保存贡献者的md5
     created_time = DateTimeField(default=datetime.datetime.utcnow)
     subscribed = IntegerField(default=0) #for sort
-    last_subscribed_time = DateTimeField(null=True)
+    last_subscribed_time = DateTimeField(default=datetime.datetime.utcnow, index=True)
     invalid_report_days = IntegerField(default=0) #some one reported it is a invalid link
     last_invalid_report_time = DateTimeField(default=datetime.datetime.utcnow) #a rss will be deleted after some days of reported_invalid
 
@@ -289,7 +292,7 @@ class SharedRss(MyBaseModel):
 #Buffer for category of shared rss [for kindleear.appspot.com only]
 class SharedRssCategory(MyBaseModel):
     name = CharField()
-    last_updated = DateTimeField() #for sort
+    last_updated = DateTimeField(index=True) #for sort
 
 #当前使用:
 #name='dbTableVersion'.int_value 行保存数据库格式版本
@@ -305,11 +308,15 @@ class AppInfo(MyBaseModel):
 #创建数据库表格，一个数据库只需要创建一次
 #如果是sql数据库，可以使用force=True删掉之前的数据库文件
 def CreateDatabaseTable(force=False):
-    if force and DATABASE_ENGINE == "sqlite":
-        try:
-            os.remove(dbName)
-        except:
-            pass
+    if DATABASE_ENGINE == "sqlite":
+        if not force and os.path.exists(dbName):
+            print(f'[Error] Database "{dbName}" already exists')
+            return
+        elif os.path.exists(dbName):
+            try:
+                os.remove(dbName)
+            except:
+                pass
 
     KeUser.create_table()
     Recipe.create_table()
@@ -322,7 +329,7 @@ def CreateDatabaseTable(force=False):
     AppInfo.create_table()
     
     AppInfo(name='dbTableVersion', int_value=__DB_VERSION__).save()
-    print('Create database table finished')
+    print(f'Create database "{dbName}" finished')
 
 
 if __name__ == '__main__':

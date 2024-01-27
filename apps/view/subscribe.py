@@ -5,13 +5,13 @@
 import datetime, json, io, re, zipfile
 from operator import attrgetter
 from urllib.parse import urljoin
-import xml.etree.ElementTree as ET
 from flask import Blueprint, render_template, request, redirect, url_for, send_file
 from flask_babel import gettext as _
 from apps.base_handler import *
 from apps.back_end.db_models import *
 from apps.utils import str_to_bool
 from lib.urlopener import UrlOpener
+from lib.recipe_helper import GetBuiltinRecipeInfo, GetBuiltinRecipeSource
 from books import BookClasses, BookClass
 from config import *
 from apps.view.library import KINDLEEAR_SITE, LIBRARY_MGR, SUBSCRIBED_FROM_LIBRARY, LIBRARY_GETSRC, buildKeUrl
@@ -36,9 +36,8 @@ def MySubscription(tips=None):
         item['id'] = 'upload:{}'.format(item['id'])
         item['language'] = item['language'].lower().replace('-', '_').split('_')[0]
 
-    myBookedRecipes = json.dumps([item.to_dict(only=[BookedRecipe.recipe_id, BookedRecipe.separated, BookedRecipe.title,
-        BookedRecipe.description, BookedRecipe.needs_subscription, BookedRecipe.account])
-        for item in user.get_booked_recipe()], separators=(',', ':'))
+    myBookedRecipes = json.dumps([item.to_dict(exclude=[BookedRecipe.encrypted_pwd])
+        for item in user.get_booked_recipe() if not item.recipe_id.startswith('custom:')], separators=(',', ':'))
 
     return render_template("my.html", tab="my", user=user, my_custom_rss=json.dumps(myCustomRss), tips=tips, 
         my_uploaded_recipes=json.dumps(myUploadedRecipes), my_booked_recipes=myBookedRecipes, 
@@ -81,6 +80,7 @@ def FeedsAjaxPost(actType):
         rss = Recipe.get_by_id_or_none(rssId)
         if rss:
             rss.delete_instance()
+            UpdateBookedCustomRss(user)
             return {'status': 'ok'}
         else:
             return {'status': _('The Rss does not exist.')}
@@ -111,15 +111,15 @@ def FeedsAjaxPost(actType):
                 return respDict
 
             if recipeId.startswith('http'):
-                content = resp.text
+                src = resp.text
             else:
                 data = resp.json()
                 if data.get('status') != 'ok':
                     respDict['status'] = data.get('status', '')
                     return respDict
-                content = data.get('content', '')
+                src = data.get('src', '')
                 try:
-                    params = SaveRecipeIfCorrect(user, content)
+                    params = SaveRecipeIfCorrect(user, src)
                 except Exception as e:
                     return {'status': _("Failed to save the recipe. Error:") + str(e)}
                 respDict.update(params)
@@ -137,6 +137,7 @@ def FeedsAjaxPost(actType):
                 time=datetime.datetime.utcnow())
             rss.save()
             respDict['id'] = rss.recipe_id
+            UpdateBookedCustomRss(user)
         
         #如果是从共享库中订阅的，则通知共享服务器，提供订阅数量信息，以便排序
         if fromSharedLibrary:
@@ -145,6 +146,28 @@ def FeedsAjaxPost(actType):
         return respDict
     else:
         return {'status': 'Unknown command: {}'.format(actType)}
+
+
+#根据特定用户的自定义RSS推送使能设置，更新已订阅列表
+def UpdateBookedCustomRss(user: KeUser):
+    userName = user.name
+    #删除孤立的BookedRecipe
+    for dbInst in list(BookedRecipe.get_all()):
+        recipeType, recipeId = Recipe.type_and_id(dbInst.recipe_id)
+        if not Recipe.get_by_id_or_none(recipeId):
+            dbInst.delete_instance()
+            
+    if user.enable_custom_rss: #添加订阅
+        for rss in user.all_custom_rss()[::-1]:
+            recipe_id = rss.recipe_id
+            if not BookedRecipe.get_one(BookedRecipe.recipe_id == recipe_id):
+                BookedRecipe(recipe_id=recipe_id, separated=False, user=userName, title=rss.title, description=rss.description,
+                    time=datetime.datetime.utcnow()).save()
+    else: #删除订阅
+        for rss in user.all_custom_rss():
+            dbInst = BookedRecipe.get_one(BookedRecipe.recipe_id == rss.recipe_id)
+            if dbInst:
+                dbInst.delete_instance()
 
 #获取保存有所有内置recipe的xml文件
 @bpSubscribe.route("/builtin_recipes.xml", endpoint='BuiltInRecipesXml')
@@ -172,21 +195,16 @@ def RecipeAjaxPost(actType):
     recipeId = form.get('id', '')
     recipeType, dbId = Recipe.type_and_id(recipeId)
     if recipeType == 'builtin':
-        recipe = GetBuiltinRecipe(recipeId)
+        recipe = GetBuiltinRecipeInfo(recipeId)
     else:
         recipe = Recipe.get_by_id_or_none(dbId)
 
     if not recipe:
         return {'status': _('The recipe does not exist.')}
 
-    if recipeType == 'builtin':
-        title = recipe.get('title', '')
-        desc = recipe.get('description', '')
-        needSubscription = recipe.get('needs_subscription', False)
-    else:
-        title = recipe.title
-        desc = recipe.description
-        needSubscription = recipe.needs_subscription
+    title = recipe.title
+    desc = recipe.description
+    needSubscription = recipe.needs_subscription or False
 
     if actType == 'unsubscribe': #退订
         dbInst = user.get_booked_recipe(recipeId)
@@ -220,8 +238,18 @@ def RecipeAjaxPost(actType):
             dbInst.delete_instance()
         recipe.delete_instance()
         return {'status': 'ok', 'id': recipeId}
+    elif actType == 'schedule': #设置某个recipe的自定义推送时间
+        dbInst = BookedRecipe.get_one(BookedRecipe.recipe_id == recipeId)
+        if dbInst:
+            allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            dbInst.send_days = [day for day in allDays if str_to_bool(form.get(day, ''))]
+            dbInst.send_times = [tm for tm in range(24) if str_to_bool(form.get(str(tm), ''))]
+            dbInst.save()
+            return {'status': 'ok', 'id': recipeId, 'send_days': dbInst.send_days, 'send_times': dbInst.send_times}
+        else:
+            return {'status': _('This recipe has not been subscribed to yet.')}
     else:
-        return {'status': 'Unknown command: {}'.format(actType)}
+        return {'status': _('Unknown command: {}').format(actType)}
 
 #将上传的Recipe保存到数据库，返回一个结果字典，里面是一些recipe的元数据
 def SaveUploadedRecipe(user):
@@ -264,11 +292,11 @@ def SaveRecipeIfCorrect(user: KeUser, src: str):
         raise Exception(_('The recipe is already in the library'))
 
     params = {"title": recipe.title, "description": recipe.description, "type_": 'upload', 
-        "needs_subscription": recipe.needs_subscription, "content": src, "time": datetime.datetime.utcnow(),
+        "needs_subscription": recipe.needs_subscription, "src": src, "time": datetime.datetime.utcnow(),
         "user": user.name, "language": recipe.language}
     dbInst = Recipe(**params)
     dbInst.save()
-    params.pop('content')
+    params.pop('src')
     params.pop('time')
     params.pop('type_')
     params['id'] = dbInst.recipe_id
@@ -310,47 +338,15 @@ def ViewRecipeSourceCode(id_):
     recipeType, dbId = Recipe.type_and_id(recipeId)
     if recipeType == 'upload':
         recipe = Recipe.get_by_id_or_none(dbId)
-        if not recipe or not recipe.content:
+        if not recipe or not recipe.src:
             return htmlTpl.format(title="Error", body=_('The recipe does not exist.'))
 
-        return make_html(io.StringIO(recipe.content), recipe.title)
+        return make_html(io.StringIO(recipe.src), recipe.title)
     else: #内置recipe
-        recipe = GetBuiltinRecipe(recipeId)
-        src = GetBuiltinRecipeContent(recipeId)
+        recipe = GetBuiltinRecipeInfo(recipeId)
+        src = GetBuiltinRecipeSource(recipeId)
         if not recipe or not src:
             return htmlTpl.format(title="Error", body=_('The recipe does not exist.'))
 
         return make_html(io.StringIO(src), recipe.get('title'))
 
-#根据ID查询内置Recipe基本信息，返回一个字典
-#{title:, author:, language:, needs_subscription:, description:, id:}
-def GetBuiltinRecipe(id_: str):
-    if not id_:
-        return None
-
-    try:
-        tree = ET.parse(os.path.join(appDir, 'books/builtin_recipes.xml'))
-        root = tree.getroot()
-    except:
-        return None
-
-    id_ = id_ if id_.startswith('builtin:') else f'builtin:{id_}'
-    for child in root:
-        attrs = child.attrib
-        if attrs.get('id', '') == id_:
-            return attrs
-    return None
-
-#返回特定ID的内置数据源码字符串
-def GetBuiltinRecipeContent(id_: str):
-    if not id_:
-        return None
-
-    id_ = id_ if id_.startswith('builtin:') else f'builtin:{id_}'
-    filename = '{}.recipe'.format(id_[8:])
-    try:
-        with zipfile.ZipFile(os.path.join(appDir, 'books', 'builtin_recipes.zip'), 'r') as zf:
-            return zf.read(filename).decode('utf-8')
-    except Exception as e:
-        default_log.warning('Read {} failed: {}'.format(filename, str(e)))
-        return None

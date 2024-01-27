@@ -70,13 +70,6 @@ class DownloadDenied(ValueError):
 
 
 class BasicNewsRecipe(Recipe):
-    '''
-    Base class that contains logic needed in all recipes. By overriding
-    progressively more of the functionality in this class, you can make
-    progressively more customized/powerful recipes. For a tutorial introduction
-    to creating recipes, see :doc:`news`.
-    '''
-
     #: The title to use for the e-book
     title                  = 'Unknown News Source'
 

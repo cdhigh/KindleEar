@@ -23,8 +23,9 @@ gobackafter(5);
 <div class="main">
   {% if tips -%}
   <div class="notice-box">
-    {{tips}}
-    {{_("Auto back to previous page after 5 seconds")}}...
+    <p>{{tips|safe}}</p>
+    <hr/>
+    <p>{{_("Auto back to previous page after 5 seconds")}}...</p>
     <a href="javascript:history.go(-1);">{{_("Click to back")}}</a>
   </div>
   {% endif -%}

@@ -119,7 +119,7 @@ class KeUser(MyBaseModel): # kindleEar User
         if recipe_id:
             return BookedRecipe.select().where(BookedRecipe.user == self.name).where(BookedRecipe.recipe_id == recipe_id).first()
         else:
-            return BookedRecipe.get_all(BookedRecipe.user == self.name)
+            return sorted(BookedRecipe.get_all(BookedRecipe.user == self.name), key=attrgetter('time'), reverse=True)
 
     #本用户所有的白名单
     def white_lists(self):
@@ -135,7 +135,6 @@ class KeUser(MyBaseModel): # kindleEar User
         map(lambda x: x.delete_instance(), list(self.white_lists()))
         map(lambda x: x.delete_instance(), list(self.url_filters()))
         map(lambda x: x.delete_instance(), list(DeliverLog.get_all(DeliverLog.username == self.name)))
-        map(lambda x: x.delete_instance(), list(LastDelivered.get_all(LastDelivered.username == self.name)))
         
 #RSS订阅源，包括自定义RSS，上传的recipe，内置在zip里面的builtin_recipe不包括在内
 #每个Recipe的字符串表示为：custom:id, upload:id
@@ -147,10 +146,11 @@ class Recipe(MyBaseModel):
     isfulltext = fields.BooleanField(default=False)
     type_ = fields.StringField() #'custom','upload'
     needs_subscription = fields.BooleanField(default=False) #是否需要登陆网页，只有上传的recipe才有意义
-    content = fields.StringField() #保存上传的recipe的unicode字符串表示，已经解码
+    src = fields.StringField() #保存上传的recipe的unicode字符串表示，已经解码
     time = fields.DateTimeField() #源被加入的时间，用于排序
     user = fields.StringField(default='') #哪个账号创建的
-
+    language = fields.StringField(default='')
+    
     #在程序内其他地方使用的id，在数据库内则使用 self.id
     @property
     def recipe_id(self):
@@ -177,6 +177,8 @@ class BookedRecipe(MyBaseModel):
     needs_subscription = fields.BooleanField(default=False)
     account = fields.StringField(default='') #如果网站需要登录才能看
     encrypted_pwd = fields.StringField(default='')
+    send_days = fields.ListField()
+    send_times = fields.ListField()
     time = fields.DateTimeField() #源被订阅的时间，用于排序
 
     @property
@@ -200,15 +202,6 @@ class DeliverLog(MyBaseModel):
     book = fields.StringField()
     status = fields.StringField()
 
-#记录已经推送的期数/章节等信息，可用来处理连载的漫画/小说等
-class LastDelivered(MyBaseModel):
-    __kind__ = "LastDelivered"
-    username = fields.StringField()
-    bookname = fields.StringField()
-    num = fields.IntField() #num和record可以任选其一用来记录，或使用两个配合都可以
-    record = fields.StringField() #record同时也用做在web上显示
-    datetime = fields.DateTimeField()
-
 class WhiteList(MyBaseModel):
     __kind__ = "WhiteList"
     mail = fields.StringField()
@@ -228,11 +221,12 @@ class SharedRss(MyBaseModel):
     language = fields.StringField(default='')
     category = fields.StringField(default='')
     recipe_url = fields.StringField(default='') #客户端优先使用此字段获取recipe，为什么不用上面的url是要和以前的版本兼容
-    content = fields.StringField(default='') #保存分享的recipe的unicode字符串表示，已经解码
+    src = fields.StringField(default='') #保存分享的recipe的unicode字符串表示，已经解码
     description = fields.StringField(default='')
     creator = fields.StringField(default='')
     created_time = fields.DateTimeField(default=datetime.datetime.utcnow)
     subscribed = fields.IntField(default=0) #for sort
+    last_subscribed_time = DateTimeField(default=datetime.datetime.utcnow)
     invalid_report_days = fields.IntField(default='') #some one reported it is a invalid link
     last_invalid_report_time = fields.DateTimeField(default=datetime.datetime.utcnow) #a rss will be deleted after some days of reported_invalid
     

@@ -102,7 +102,7 @@ class Plumber:
         self.original_input_arg = input
         self.for_regex_wizard = for_regex_wizard
         assert(isinstance(input, InputFormatPlugin) or os.path.isabs(input))
-        assert(isinstance(output, io.BytesIO) or os.path.isabs(output))
+        assert(isinstance(output, io.StringIO) or os.path.isabs(output))
         self.input = input
         self.output = output
         self.log = log
@@ -128,7 +128,7 @@ class Plumber:
             input_fmt = 'recipe'
         self.archive_input_tdir = None
         self.changed_options = set()
-        if not isinstance(output, io.BytesIO):
+        if not isinstance(output, io.StringIO):
             if os.path.exists(self.output) and os.path.isdir(self.output):
                 output_fmt = 'oeb'
             else:

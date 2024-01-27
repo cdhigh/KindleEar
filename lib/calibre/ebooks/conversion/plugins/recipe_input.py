@@ -56,25 +56,28 @@ class RecipeInput(InputFormatPlugin):
         }
 
     #执行转换完成后返回生成的 opf 文件路径，只是路径，不包含文件名
-    #recipe_or_file: 可以为文件名或BytesIO()
+    #recipe_or_file: 可以为文件名, BytesIO, BasicNewsRecipe
     #output_dir: 输出目录
     #fs: plumber生成的FsDictStub实例
     #返回 opf文件的全路径名或传入的fs实例
     def convert(self, recipe_or_file, opts, file_ext, log, accelerators, output_dir, fs):
         from calibre.web.feeds.recipes import compile_recipe
+        from calibre.web.feeds.news import BasicNewsRecipe
         opts.output_profile.flow_size = 0
         orig_no_inline_navbars = opts.no_inline_navbars
-        if isinstance(recipe_or_file, io.BytesIO):
-            self.recipe_source = recipe_source.getvalue()
+        if not isinstance(recipe_or_file, BasicNewsRecipe):
+            if isinstance(recipe_or_file, io.BytesIO):
+                self.recipe_source = recipe_source.getvalue()
+            else:
+                with open(recipe_or_file, 'rb') as f:
+                    self.recipe_source = f.read()
+            try:
+                recipe = compile_recipe(self.recipe_source)
+            except Exception as e:
+                raise ValueError('Failed to compile recipe "{}": {}'.format(recipe_or_file, e))
         else:
-            with open(recipe_or_file, 'rb') as f:
-                self.recipe_source = f.read()
-        
-        try:
-            recipe = compile_recipe(self.recipe_source)
-        except Exception as e:
-            raise ValueError('Failed to compile recipe "{}": {}'.format(recipe_or_file, e))
-
+            recipe = recipe_or_file
+            
         #try:
         #生成 BasicNewsRecipe 对象并执行下载任务
         ro = recipe(opts, log, report_progress, output_dir, fs)
@@ -103,6 +106,7 @@ class RecipeInput(InputFormatPlugin):
                     div.getparent().remove(div)
 
     def save_download(self, zf):
+        return
         raw = self.recipe_source
         if isinstance(raw, str):
             raw = raw.encode('utf-8')

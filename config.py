@@ -34,7 +34,7 @@ SEND_MAIL_SERVICE = "gae"
 #SMTP_USE_TLS = True
 
 #If you need to use google appengine email receiving service, please set it to True
-USE_GAE_INBOUND_EMAIL = True
+USE_GAE_INBOUND_EMAIL = False
 
 #Select the type of task queue, "gae", "celery", "cron"
 TASK_QUEUE_TYPE = "gae"

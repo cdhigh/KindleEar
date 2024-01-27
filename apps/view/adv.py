@@ -17,32 +17,26 @@ from config import *
 bpAdv = Blueprint('bpAdv', __name__)
 
 #高级设置的主入口
-@bpAdv.route("/adv")
-def AdvSettings():
-    return redirect(url_for("bpAdv.AdvDeliverNow"))
+#def AdvSettings():
+#    return redirect(url_for("bpAdv.AdvDeliverNow"))
 
 #现在推送
+@bpAdv.route("/adv", endpoint='AdvSettings')
 @bpAdv.route("/advdelivernow", endpoint='AdvDeliverNow')
 @login_required()
 def AdvDeliverNow():
     user = get_login_user()
-    #如果使能了自定义RSS推送，则booked_recipe[]里面已经有自定义RSS的信息了，
-    #否则需要手动添加进去，因为“现在推送”更多的是临时性的，调试性的
-    if user.enable_custom_rss:
-        recipes = user.get_booked_recipe()
-    else:
-        recipes = user.all_custom_rss() + user.get_booked_recipe()
-
+    recipes = user.get_booked_recipe()
     return render_template('advdelivernow.html', tab='advset', user=user, 
-        advCurr='delivernow', recipes=recipes)
+        advCurr='delivernow', recipes=recipes, gae_in_email=USE_GAE_INBOUND_EMAIL)
 
 #设置邮件白名单
 @bpAdv.route("/advwhitelist", endpoint='AdvWhiteList')
 @login_required()
 def AdvWhiteList():
     user = get_login_user()
-    return render_template('advwhitelist.html', tab='advset',
-        user=user, advCurr='whitelist', adminName=ADMIN_NAME)
+    return render_template('advwhitelist.html', tab='advset',user=user, 
+        advCurr='whitelist', adminName=ADMIN_NAME, gae_in_email=USE_GAE_INBOUND_EMAIL)
 
 @bpAdv.post("/advwhitelist", endpoint='AdvWhiteListPost')
 @login_required()
@@ -83,7 +77,7 @@ def AdvArchive():
 
     
     return render_template('advarchive.html', tab='advset', user=user, advCurr='archive', appendStrs=appendStrs,
-        shareLinks=shareLinks)
+        shareLinks=shareLinks, gae_in_email=USE_GAE_INBOUND_EMAIL)
 
 @bpAdv.post("/advarchive", endpoint='AdvArchivePost')
 @login_required()
@@ -140,7 +134,8 @@ def AdvArchivePost():
 @login_required()
 def AdvUrlFilter():
     user = get_login_user()
-    return render_template('advurlfilter.html', tab='advset', user=user, advCurr='urlfilter')
+    return render_template('advurlfilter.html', tab='advset', user=user, advCurr='urlfilter', 
+        gae_in_email=USE_GAE_INBOUND_EMAIL)
 
 @bpAdv.post("/advurlfilter", endpoint='AdvUrlFilterPost')
 @login_required()
@@ -175,7 +170,8 @@ def AdvDel():
 @login_required()
 def AdvImport(tips=None):
     user = get_login_user()
-    return render_template('advimport.html', tab='advset', user=user, advCurr='import', tips=tips)
+    return render_template('advimport.html', tab='advset', user=user, advCurr='import', tips=tips,
+        gae_in_email=USE_GAE_INBOUND_EMAIL)
 
 @bpAdv.post("/advimport", endpoint='AdvImportPost')
 @login_required()
@@ -188,7 +184,8 @@ def AdvImportPost():
         try:
             rssList = opml.from_string(upload.read())
         except Exception as e:
-            return render_template('advimport.html', tab='advset', user=user, advCurr='import', tips=str(e))
+            return render_template('advimport.html', tab='advset', user=user, advCurr='import', tips=str(e),
+                gae_in_email=USE_GAE_INBOUND_EMAIL)
         
         for o in walkOpmlOutline(rssList):
             title, url, isfulltext = o.text, urllib.unquote_plus(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
@@ -263,7 +260,8 @@ def AdvUploadCoverImage(tips=None):
     user = get_login_user()
     return render_template('advcoverimage.html', tab='advset',
         user=user, advCurr='uploadcoverimage', formaction=url_for("bpAdv.AdvUploadCoverImageAjaxPost"), 
-        deletecoverhref=url_for("bpAdv.AdvDeleteCoverImageAjaxPost"), tips=tips)
+        deletecoverhref=url_for("bpAdv.AdvDeleteCoverImageAjaxPost"), tips=tips,
+        gae_in_email=USE_GAE_INBOUND_EMAIL)
 
 #AJAX接口的上传封面图片处理函数
 @bpAdv.post("/advuploadcoverimageajax", endpoint='AdvUploadCoverImageAjaxPost')
@@ -309,7 +307,8 @@ def AdvUploadCss(tips=None):
     user = get_login_user()
     return render_template('advuploadcss.html', tab='advset',
         user=user, advCurr='uploadcss', formaction=url_for("bpAdv.AdvUploadCssAjaxPost"), 
-        deletecsshref=url_for("bpAdv.AdvDeleteCssAjaxPost"), tips=tips)
+        deletecsshref=url_for("bpAdv.AdvDeleteCssAjaxPost"), tips=tips, 
+        gae_in_email=USE_GAE_INBOUND_EMAIL)
 
 #AJAX接口的上传CSS处理函数
 @bpAdv.post("/advuploadcssajax", endpoint='AdvUploadCssAjaxPost')
