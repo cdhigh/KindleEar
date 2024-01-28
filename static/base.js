@@ -43,7 +43,10 @@ function RegisterHideHambClick() {
 
 //连接服务器获取内置recipe列表，并按照语言建立一个字典all_builtin_recipes，字典键为语言，值为信息字典列表
 function FetchBuiltinRecipesXml() {
-  $.get('/builtin_recipes.xml?x=1',function(xml) {
+  var hasUserLangRss = false;
+  var hasEnRss = false;
+  //这个是静态文件，flask和浏览器会通过etag来自动使用本地缓存
+  $.get('/builtin_recipes.xml', function(xml) {
     var userLang = BrowserLanguage();
     $(xml).find("recipe").each(function() {
       var title=$(this).attr("title");
@@ -58,6 +61,12 @@ function FetchBuiltinRecipesXml() {
       if (dashIndex != -1) {
         language = language.substring(0, dashIndex);
       }
+      if (lang == userLang) {
+        hasUserLangRss = true;
+      }
+      if (lang == 'en') {
+        hasEnRss = true;
+      }
 
       if (!all_builtin_recipes[language]) {
         all_builtin_recipes[language] = [];
@@ -67,8 +76,17 @@ function FetchBuiltinRecipesXml() {
       all_builtin_recipes[language].push({title: title, description: description, needs_subscription: needs_subscription, id: id});
     });
     //自动触发和用户浏览器同样语种的选项
-    $("#language_pick").find("option[value='" + userLang + "']").attr("selected", true);
-    $("#language_pick").val(userLang).trigger('change');
+    if (hasUserLangRss) {
+      $("#language_pick").find("option[value='" + userLang + "']").attr("selected", true);
+      $("#language_pick").val(userLang).trigger('change');
+    } else if (hasEnRss) { //如果有英语则选择英语源
+      $("#language_pick").find("option[value='en']").attr("selected", true);
+      $("#language_pick").val('en').trigger('change');
+    } else { //最后只能选择第一个语言
+      var firstChild = $("#language_pick").children().first();
+      firstChild.attr("selected", true);
+      firstChild.trigger('change');
+    }
   });
   PopulateLibrary('');
 }
@@ -936,6 +954,34 @@ var AjaxFileUpload = {
 ///[end] advcoverimage.html && advuploadcss.html
 
 ///[start] admin.html
+//添加一个账号
+function AddAccount(name) {
+  var newName = $('#new_username').val();
+  var newPwd1 = $('#new_u_pwd1').val();
+  var newPwd2 = $('#new_u_pwd2').val();
+  var expiration = $('#new_u_expiration').val();
+  if (!newName || !newPwd1 || !newPwd2) {
+    alert(i18n.namePwdEmpty);
+    return;
+  } else if (newPwd1 != newPwd2) {
+    alert(i18n.pwdDismatch);
+    return;
+  }
+
+  $.post("/admin", {actType: 'add', new_username: newName, new_u_pwd1: newPwd1, new_u_pwd2: newPwd2, 
+    new_u_expiration: expiration}, function (data) {
+    if (data.status == "ok") {
+      $('#new_username').val('');
+      $('#new_u_pwd1').val('');
+      $('#new_u_pwd2').val('');
+      ShowSimpleModalDialog('<p>' + i18n.addAccountOk + '</p>');
+      window.location.reload(true);
+    } else {
+      alert(data.status);
+    }
+  });
+}
+
 //修改账号的密码
 function ChangeAccountPassword(name) {
   var oldPwd = $('#orgpwd').val();
@@ -949,7 +995,7 @@ function ChangeAccountPassword(name) {
     return;
   }
 
-  $.post("/admin/change", {name: name, op: oldPwd, p1: newPwd1, p2: newPwd2}, function (data) {
+  $.post("/admin", {actType: 'change', name: name, op: oldPwd, p1: newPwd1, p2: newPwd2}, function (data) {
     if (data.status == "ok") {
       $('#orgpwd').val('');
       $('#newpwd1').val('');
@@ -967,10 +1013,10 @@ function DeleteAccount(name) {
     return;
   }
 
-  $.post("/admin/delete", {name: name}, function (data) {
+  $.post("/admin", {actType: 'delete', name: name}, function (data) {
     if (data.status == "ok") {
       ShowSimpleModalDialog('<p>' + i18n.accountDeleted + '</p>');
-      window.location.href = '/admin';
+      window.location.reload(true);
     } else {
       alert(data.status);
     }

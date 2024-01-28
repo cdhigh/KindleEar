@@ -22,13 +22,14 @@ def Admin():
     users = KeUser.get_all() if user.name == ADMIN_NAME else None
     return render_template('admin.html', title='Admin', tab='admin', user=user, users=users, admin_name=ADMIN_NAME)
 
-@bpAdmin.post("/admin/<actType>", endpoint='AdminPost')
+@bpAdmin.post("/admin", endpoint='AdminPost')
 @login_required()
-def AdminPost(actType):
+def AdminPost():
     form = request.form
     user = get_login_user()
     users = KeUser.get_all() if user.name == ADMIN_NAME else None
-    
+    actType = form.get('actType')
+
     if actType == 'change': #修改当前登陆账号的密码
         oldPassword = form.get('op')
         newP1 = form.get('p1')
@@ -52,14 +53,14 @@ def AdminPost(actType):
                 user.save()
         return {'status': tips}
     elif actType == 'add': #添加账户
-        userName = form.get('u')
-        password1 = form.get('up1')
-        password2 = form.get('up2')
-        expiration = str_to_int(form.get('expiration', '0'))
+        userName = form.get('new_username')
+        password1 = form.get('new_u_pwd1')
+        password2 = form.get('new_u_pwd2')
+        expiration = str_to_int(form.get('new_u_expiration', '0'))
 
         specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}', ',', ';', '|']
         if user.name != ADMIN_NAME: #只有管理员能添加账号
-            return redirect('/')
+            tips = _("You do not have sufficient privileges.")
         elif not all((userName, password1, password2)):
             tips = _("The username or password is empty.")
         elif any([char in user.name for char in specialChars]):
@@ -84,8 +85,8 @@ def AdminPost(actType):
 
                 au.save()
                 users = KeUser.get_all() if user.name == ADMIN_NAME else None
-                tips = _("Add a account success.")
-        return render_template('admin.html', tab='admin', user=user, users=users, actips=tips)
+                tips = 'ok'
+        return {'status': tips}
     elif actType == 'delete': #删除账号，使用ajax请求的，返回一个字典
         name = form.get('name')
         if name and (name != ADMIN_NAME) and (session.get('userName') in (ADMIN_NAME, name)):
@@ -149,18 +150,3 @@ def AdminManagePasswordPost(name):
                 tips = _("Change password success.") + strBackPage
     
     return render_template('adminmgrpwd.html', tips=tips, userName=name)
-
-#实际删除一个账号
-def DelAccountPost(name):
-    name = request.form.get('u')
-    if (name != ADMIN_NAME) and (session.get('userName') in (ADMIN_NAME, name)):
-        u = KeUser.get_one(KeUser.name == name)
-        if not u:
-            tips = _("The username '{}' does not exist.").format(name)
-        else:
-            u.erase_traces() #删除自己订阅的书，白名单，过滤器等，就是完全的清理
-            u.delete_instance()
-            return redirect(url_for("bpLogin.Logout") if session.get('userName') == name else url_for("bpAdmin.Admin"))
-    else:
-        tips = _("The username is empty or you dont have right to delete it.")
-    return render_template('delaccount.html', tips=tips, userName=name)

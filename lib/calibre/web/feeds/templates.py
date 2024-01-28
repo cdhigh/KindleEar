@@ -31,8 +31,9 @@ class Template:
 
     IS_HTML = True
 
-    def __init__(self, lang=None):
+    def __init__(self, lang=None, feed_index_start=0):
         self.html_lang = lang
+        self.feed_index_start = feed_index_start
 
     def generate(self, *args, **kwargs):
         if 'style' not in kwargs:
@@ -101,7 +102,7 @@ class IndexTemplate(Template):
         if extra_css:
             head.append(STYLE(extra_css, type='text/css'))
         ul = UL(attrs('calibre_feed_list'))
-        for i, feed in enumerate(feeds):
+        for i, feed in enumerate(feeds, self.feed_index_start):
             if len(feed):
                 li = LI(A(feed.title, attrs('feed', rescale=120,
                     href='feed_%d/index.html'%i)), id='feed_%d'%i)
@@ -129,7 +130,7 @@ class FeedTemplate(Template):
             navbar.text = None
             hr.tail = '| '
 
-        if f+1 < len(feeds):
+        if f + 1 < len(feeds) + self.feed_index_start:
             link = A(_('Next section'), href='../feed_%d/index.html'%(f+1))
             link.tail = ' | '
             navbar.append(link)
@@ -264,7 +265,7 @@ class TouchscreenIndexTemplate(Template):
             head.append(STYLE(extra_css, type='text/css'))
 
         toc = TABLE(attrs('toc'),width="100%",border="0",cellpadding="3px")
-        for i, feed in enumerate(feeds):
+        for i, feed in enumerate(feeds, self.feed_index_start):
             if len(feed):
                 tr = TR()
                 tr.append(TD(attrs(rescale=120), A(feed.title, href='feed_%d/index.html'%i)))
@@ -303,7 +304,7 @@ class TouchscreenFeedTemplate(Template):
             return title
 
         self.IS_HTML = False
-        feed = feeds[f]
+        feed = feeds[f - self.feed_index_start]
 
         # Construct the navbar
         navbar_t = TABLE(attrs('touchscreen_navbar'))
@@ -311,9 +312,9 @@ class TouchscreenFeedTemplate(Template):
 
         # Previous Section
         link = ''
-        if f > 0:
+        if f - self.feed_index_start > 0:
             link = A(attrs('feed_link'),
-                     trim_title(feeds[f-1].title),
+                     trim_title(feeds[f - self.feed_index_start - 1].title),
                      href='../feed_%d/index.html' % int(f-1))
         navbar_tr.append(TD(attrs('feed_prev'),link))
 
@@ -323,9 +324,9 @@ class TouchscreenFeedTemplate(Template):
 
         # Next Section
         link = ''
-        if f < len(feeds)-1:
+        if f - self.feed_index_start < len(feeds) - 1:
             link = A(attrs('feed_link'),
-                     trim_title(feeds[f+1].title),
+                     trim_title(feeds[f - self.feed_index_start + 1].title),
                      href='../feed_%d/index.html' % int(f+1))
         navbar_tr.append(TD(attrs('feed_next'),link))
         navbar_t.append(navbar_tr)

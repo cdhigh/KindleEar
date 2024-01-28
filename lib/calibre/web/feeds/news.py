@@ -38,7 +38,8 @@ from polyglot.builtins import string_or_bytes
 from lxml.html import document_fromstring, fragment_fromstring, tostring
 from lib import readability
 from urlopener import UrlOpener
-from urlopener_browser import UrlOpenerBrowser
+from mechanicalsoup import StatefulBrowser
+from requests_file import LocalFileAdapter
 from filesystem_dict import FsDictStub
 from default_cv_mh import get_default_cover_data, get_default_masthead_data
 
@@ -512,7 +513,7 @@ class BasicNewsRecipe(Recipe):
                     br.select_form(name='login')
                     br['USERID']   = self.username
                     br['PASSWORD'] = self.password
-                    br.submit()
+                    br.submit_selected()
                 return br
 
         '''
@@ -521,11 +522,9 @@ class BasicNewsRecipe(Recipe):
         #    ua = getattr(self, 'last_used_user_agent', None) or self.calibre_most_common_ua or random_user_agent(allow_ie=False)
         #    kwargs['user_agent'] = self.last_used_user_agent = ua
         #self.log('Using user agent:', kwargs['user_agent'])
-        br = UrlOpenerBrowser(*args, **kwargs)
-        br.addheaders += [('Accept', '*/*')]
-        if self.handle_gzip:
-            br.set_handle_gzip(True)
-        return br
+        kwargs.setdefault('user_agent', "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)")
+        kwargs.setdefault('requests_adapters', {'file://': LocalFileAdapter()})
+        return StatefulBrowser(*args, **kwargs)
 
     def clone_browser(self, br):
         '''
@@ -538,11 +537,12 @@ class BasicNewsRecipe(Recipe):
         Cloned browser instances use the same, thread-safe CookieJar by
         default, unless you have customized cookie handling.
         '''
-        if callable(getattr(br, 'clone_browser', None)):
-            return br.clone_browser()
+        #if callable(getattr(br, 'clone_browser', None)):
+        #    return br.clone_browser()
 
         # Uh-oh recipe using something exotic, call get_browser
-        return self.get_browser()
+        #return self.get_browser()
+        return br #现在mechanicalsoup是线程安全的
 
     @property
     def cloned_browser(self):
@@ -693,8 +693,7 @@ class BasicNewsRecipe(Recipe):
             # as it may or may not actually clone the browser, depending on if
             # the recipe implements get_browser() or not
             br = self.clone_browser(self.browser)
-            open_func = getattr(br, 'open_novisit', br.open)
-            with closing(open_func(url_or_raw, timeout=self.timeout)) as f:
+            with closing(br.open(url_or_raw, timeout=self.timeout)) as f:
                 _raw = f.read()
             if not _raw:
                 raise RuntimeError('Could not fetch index from %s'%url_or_raw)
@@ -885,7 +884,7 @@ class BasicNewsRecipe(Recipe):
         '''
         pass
 
-    def __init__(self, options, log, progress_reporter, output_dir, fs):
+    def __init__(self, options, log, progress_reporter, output_dir, fs, feed_index_start=0):
         '''
         Initialize the recipe.
         :param options: Parsed commandline options
@@ -893,6 +892,7 @@ class BasicNewsRecipe(Recipe):
         :param progress_reporter: A Callable that takes two arguments: progress (a number between 0 and 1) and a string message. The message should be optional.
         :param output_dir: output_dir name
         :param fs: FsDictStub object
+        :parm feed_index_start: For multiple BasicNewsRecipe into one book
         '''
         if not os.path.isabs(str(output_dir)):
             raise Exception('output_dir have to be a abs path')
@@ -903,6 +903,7 @@ class BasicNewsRecipe(Recipe):
         self.debug = options.verbose > 1
         self.output_dir = output_dir
         self.fs = fs
+        self.feed_index_start = feed_index_start
         self.verbose = options.verbose
         self.test = options.test
         if self.test and not isinstance(self.test, tuple):
@@ -973,8 +974,10 @@ class BasicNewsRecipe(Recipe):
         if self.delay > 0:
             self.simultaneous_downloads = 1
 
-        self.navbar = templates.TouchscreenNavBarTemplate() if self.touchscreen else \
-                      templates.NavBarTemplate()
+        if self.touchscreen:
+            self.navbar = templates.TouchscreenNavBarTemplate(feed_index_start=self.feed_index_start)
+        else:
+            self.navbar = templates.NavBarTemplate(feed_index_start=self.feed_index_start)
         self.failed_downloads = []
         self.partial_failures = []
         self.aborted_articles = []
@@ -998,17 +1001,17 @@ class BasicNewsRecipe(Recipe):
         if first_fetch and job_info:
             url, f, a, feed_len = job_info
             body = soup.find('body')
-            #if body is not None:
-                #templ = self.navbar.generate(False, f, a, feed_len,
-                #                             not self.has_single_feed,
-                #                             url, __appname__,
-                #                             center=self.center_navbar,
-                #                             extra_css=self.get_extra_css() or '')
-                #elem = BeautifulSoup(templ.render(doctype='xhtml').decode('utf-8')).find('div')
-                #body.insert(0, elem)
+            if body is not None:
+                templ = self.navbar.generate(False, f, a, feed_len,
+                                             not self.has_single_feed,
+                                             url, __appname__,
+                                             center=self.center_navbar,
+                                             extra_css=self.get_extra_css() or '')
+                elem = BeautifulSoup(templ.render(doctype='xhtml').decode('utf-8')).find('div')
+                body.insert(0, elem)
                 # This is needed because otherwise inserting elements into
                 # the soup breaks find()
-                #soup = BeautifulSoup(soup.decode_contents())
+                soup = BeautifulSoup(soup.decode_contents())
         if self.remove_javascript:
             for script in list(soup.findAll('script')):
                 script.extract()
@@ -1040,7 +1043,7 @@ class BasicNewsRecipe(Recipe):
         if job_info:
             url, f, a, feed_len = job_info
             try:
-                article = self.feed_objects[f].articles[a]
+                article = self.feed_objects[f - self.feed_index_start].articles[a]
             except:
                 self.log.exception('Failed to get article object for postprocessing')
                 pass
@@ -1049,7 +1052,8 @@ class BasicNewsRecipe(Recipe):
         return ans
 
     #外部调用此函数实际下载
-    def download(self):
+    #need_top_index: 是否生成最上层的index.html，如果不生成，则由recipe_input生成
+    def download(self, need_top_index=True):
         '''
         Download and pre-process all articles from the feeds in this recipe.
         This method should be called only once on a particular Recipe instance.
@@ -1057,7 +1061,7 @@ class BasicNewsRecipe(Recipe):
         :return: Path to index.html
         '''
         if 1:
-            res = self.build_index()
+            res = self.build_index(need_top_index)
             self.report_progress(1, _('Download finished'))
             if self.failed_downloads:
                 self.log.warning(_('Failed to download the following articles:'))
@@ -1089,14 +1093,19 @@ class BasicNewsRecipe(Recipe):
         return lang
 
     #从Feed实例列表生成最顶层的index.html内容
+    #<img src=Masthead></img>
+    #<ul>
+    #  <li id="feed_0"><a href="feed_0/index.html">Feed1 Title</a></li>
+    #  <li id="feed_1"><a href="feed_1/index.html">Feed2 Title</a></li>
+    #  ...
+    #</ul>
     def feeds2index(self, feeds):
         templ = (templates.TouchscreenIndexTemplate if self.touchscreen else
                 templates.IndexTemplate)
-        templ = templ(lang=self.lang_for_html)
+        templ = templ(lang=self.lang_for_html, feed_index_start=self.feed_index_start)
         css = self.template_css + '\n\n' +(self.get_extra_css() or '')
         timefmt = self.timefmt
-        return templ.generate(self.title, "mastheadImage.gif", timefmt, feeds,
-                              extra_css=css).render(doctype='xhtml')
+        return templ.generate(self.title, "mastheadImage.gif", timefmt, feeds, extra_css=css).render(doctype='xhtml')
 
     @classmethod
     def description_limiter(cls, src):
@@ -1122,6 +1131,7 @@ class BasicNewsRecipe(Recipe):
             ans = clean_xml_chars(ans) + '\u2026'
         return ans
 
+    #生成Feed对应的html内容，一个Feed就是根据一个Rss xml生成的html，里面会有多篇文章
     def feed2index(self, f, feeds):
         feed = feeds[f]
         if feed.image_url is not None:  # Download feed image
@@ -1149,11 +1159,10 @@ class BasicNewsRecipe(Recipe):
 
         templ = (templates.TouchscreenFeedTemplate if self.touchscreen else
                     templates.FeedTemplate)
-        templ = templ(lang=self.lang_for_html)
+        templ = templ(lang=self.lang_for_html, feed_index_start=self.feed_index_start)
         css = self.template_css + '\n\n' +(self.get_extra_css() or '')
 
-        return templ.generate(f, feeds, self.description_limiter,
-                              extra_css=css).render(doctype='xhtml')
+        return templ.generate(f, feeds, self.description_limiter, extra_css=css).render(doctype='xhtml')
 
     #下载一个url指定的网页和其内部的所有链接
     #url: 要下载的url
@@ -1163,7 +1172,7 @@ class BasicNewsRecipe(Recipe):
     #num_of_feeds: Feed总数
     #返回：(file, downloads[], failures[]): 
     #       file: url网页内容保存的文件名
-    #       downloads[]: 网页内的链接所对应的文件保存的文件名
+    #       downloads[]: 网页内的链接所对应的图像文件保存的文件名
     #       failures[]: 下载失败的url列表
     def _fetch_article(self, url, dir_, f, a, num_of_feeds, preloaded=None):
         br = self.browser
@@ -1186,6 +1195,7 @@ class BasicNewsRecipe(Recipe):
         if preloaded is not None:
             fetcher.preloaded_urls[url] = preloaded
         
+        #res为对应url的一个html文件名
         res, path, failures = fetcher.start_fetch(url), fetcher.downloaded_paths, fetcher.failed_links
         if not res or not self.fs.exists(res):
             msg = _('Could not fetch article.') + ' ' + url + ' '
@@ -1218,12 +1228,13 @@ class BasicNewsRecipe(Recipe):
     #f: Feed索引号
     #a: 文章索引号
     #num_of_feeds: Feed总数
+    #这里为什么不将生成的html直接保存到目标位置是因为接下来要使用RecursiveFetcher下载里面的图像文件
     def fetch_embedded_article(self, article, dir_, f, a, num_of_feeds):
         templ = templates.EmbeddedContent()
         raw = templ.generate(article).render('html') #raw是utf-8编码的二进制内容
         with self.fs.make_tempfile(suffix='_feeds2disk.html', dir=self.output_dir) as pt:
             pt.write(raw)
-            url = ('file:'+pt.name) if iswindows else ('file://'+pt.name)
+            url = 'file://' + pt.name
         return self._fetch_article(url, dir_, f, a, num_of_feeds)
 
     def remove_duplicate_articles(self, feeds):
@@ -1249,8 +1260,15 @@ class BasicNewsRecipe(Recipe):
             feeds = [f for f in feeds if len(f) > 0]
         return feeds
 
+    #如果有多个Recipe一起生成一本电子书，每个的index.html名字不一样
+    #index.html, index.10.html, ...
+    def get_root_index_html_name(self):
+        suffix = '.html' if self.feed_index_start == 0 else f'.{self.feed_index_start}.html'
+        return f'index{suffix}'
+
     #实际下载feeds并创建index.html
-    def build_index(self):
+    #need_top_index: 是否生成最上层的index.html，如果不生成，则由recipe_input生成
+    def build_index(self, need_top_index=True):
         self.report_progress(0, _('Fetching feeds...'))
         feeds = None
         try:
@@ -1271,16 +1289,17 @@ class BasicNewsRecipe(Recipe):
             feeds = self.remove_duplicate_articles(feeds)
 
         self.report_progress(0, _('Trying to download cover...'))
-        self.download_cover()
+        self.download_cover() #如果cover_url设置的话
         self.report_progress(0, _('Generating masthead...'))
-        self.resolve_masthead()
+        self.resolve_masthead() #这里固定使用默认的报头
 
         if self.test:
             feeds = feeds[:self.test[0]]
-        self.has_single_feed = len(feeds) == 1
-
+        self.has_single_feed = (len(feeds) == 1)
+        
         html = self.feeds2index(feeds)
-        index = os.path.join(self.output_dir, 'index.html')
+        #如果是多个BasicNewsRecipe一起生成电子书的话，第一个为index.html，之后的index.num.html
+        index = os.path.join(self.output_dir, self.get_root_index_html_name())
         self.fs.write(index, html, 'wb')
 
         self.jobs = []
@@ -1291,7 +1310,7 @@ class BasicNewsRecipe(Recipe):
                     feed.reverse()
 
         self.feed_objects = feeds
-        for f, feed in enumerate(feeds):
+        for f, feed in enumerate(feeds, self.feed_index_start):
             feed_dir = os.path.join(self.output_dir, f'feed_{f}')
             self.fs.makedirs(feed_dir)
 
@@ -1314,11 +1333,11 @@ class BasicNewsRecipe(Recipe):
 
                 #设置多线程爬取网页的回调函数
                 if self.use_embedded_content or (self.use_embedded_content is None and feed.has_embedded_content()):
-                    func, arg = self.fetch_embedded_article, article
+                    func, arg = self.fetch_embedded_article, article #全文RSS
                 elif self.articles_are_obfuscated:
-                    func, arg = self.fetch_obfuscated_article, url
+                    func, arg = self.fetch_obfuscated_article, url #需要解密的文章
                 else:
-                    func, arg = self.fetch_article, url
+                    func, arg = self.fetch_article, url #普通RSS
 
                 #param: callable, args, kwds, requestID, callback, exc_callback):
                 req = WorkRequest(func, (arg, art_dir, f, a, len(feed)),
@@ -1353,12 +1372,13 @@ class BasicNewsRecipe(Recipe):
                     req.exception = True
                     req.exc_callback(req, traceback.format_exc())
 
-        for f, feed in enumerate(feeds):
-            html = self.feed2index(f,feeds)
+        for f, feed in enumerate(feeds, self.feed_index_start):
+            html = self.feed2index(f, feeds) #生成每个feed对应的html，都叫index.html
             feed_dir = os.path.join(self.output_dir, f'feed_{f}', 'index.html')
             self.fs.write(feed_dir, html, 'wb')
-            
-        self.create_opf(feeds)
+        
+        #在recipe_input.py里面调用，可以一次性将多个Recipe的下载合并转换为一本电子书
+        #self.create_opf(feeds)
         self.report_progress(1, _('Feeds downloaded to %s')%index)
 
         return index
@@ -1382,12 +1402,13 @@ class BasicNewsRecipe(Recipe):
             else: #要求使用网络图像做为封面
                 self.report_progress(1, _('Downloading cover from %s')%cu)
                 with closing(self.browser.open(cu, timeout=self.timeout)) as r:
-                    cdata = r.read()
+                    cdata = r.content
             if not cdata:
                 return
             self.cover_path = os.path.join(self.output_dir, 'cover.jpg')
             self.fs.write(self.cover_path, cdata, 'wb')
-            
+    
+    #如果设置了cover_url，则从网络下载封面图片
     def download_cover(self):
         self.cover_path = None
         try:
@@ -1504,12 +1525,12 @@ class BasicNewsRecipe(Recipe):
             ref.title = 'Masthead Image'
             opf.guide.append(ref)
 
-        manifest = [os.path.join(dir_, 'feed_%d'%i) for i in range(len(feeds))]
+        manifest = [os.path.join(dir_, 'feed_%d'% (i + self.feed_index_start)) for i in range(len(feeds))]
         manifest.append(os.path.join(dir_, 'index.html'))
         
         # Get cover
         cpath = getattr(self, 'cover_path', None)
-        if cpath is None:
+        if cpath is None and self.feed_index_start == 0: #只要第一个News生成封面
             cover_data = get_default_cover_data()
             cpath = os.path.join(dir_, 'cover.jpg')
             self.cover_path = cpath
@@ -1605,7 +1626,7 @@ class BasicNewsRecipe(Recipe):
             raise Exception('All feeds are empty, aborting.')
 
         if len(feeds) > 1:
-            for i, f in enumerate(feeds):
+            for i, f in enumerate(feeds, self.feed_index_start):
                 entries.append('feed_%d/index.html'%i)
                 po = self.play_order_map.get(entries[-1], None)
                 if po is None:
@@ -1621,8 +1642,8 @@ class BasicNewsRecipe(Recipe):
                     f.title, play_order=po, description=desc, author=auth))
 
         else:
-            entries.append('feed_%d/index.html'%0)
-            feed_index(0, toc)
+            entries.append('feed_%d/index.html' % self.feed_index_start)
+            feed_index(self.feed_index_start, toc)
 
         for i, p in enumerate(entries):
             entries[i] = os.path.join(dir_, p.replace('/', os.sep))
@@ -1678,8 +1699,8 @@ class BasicNewsRecipe(Recipe):
                     _('Article download failed: %s')%force_unicode(request.article.title))
             self.failed_downloads.append((request.feed, request.article, traceback))
 
-    #Feed类定义在 calibre\web\feeds\__init__.py
     #从recipe里面定义的feed列表返回一个Feed实例列表
+    #Feed类定义在 calibre\web\feeds\__init__.py
     def parse_feeds(self):
         '''
         Create a list of articles from the list of feeds returned by :meth:`BasicNewsRecipe.get_feeds`.
@@ -1701,16 +1722,16 @@ class BasicNewsRecipe(Recipe):
                 url = 'http'+url[4:]
             self.report_progress(0, _('Fetching feed')+' %s...'%(title if title else url))
             try:
-                purl = urlparse(url, allow_fragments=False)
-                if purl.username or purl.password:
-                    hostname = purl.hostname
-                    if purl.port:
-                        hostname += f':{purl.port}'
-                    url = purl._replace(netloc=hostname).geturl()
-                    if purl.username and purl.password:
-                        br.add_password(url, purl.username, purl.password)
+                #purl = urlparse(url, allow_fragments=False)
+                #if purl.username or purl.password:
+                #    hostname = purl.hostname
+                #    if purl.port:
+                #        hostname += f':{purl.port}'
+                #    url = purl._replace(netloc=hostname).geturl()
+                #    if purl.username and purl.password:
+                #        br.add_password(url, purl.username, purl.password)
                 with closing(br.open(url, timeout=self.timeout)) as f:
-                    raw = f.read()
+                    raw = f.content
                 parsed_feeds.append(feed_from_xml(raw, title=title, log=self.log, oldest_article=self.oldest_article,
                     max_articles_per_feed=self.max_articles_per_feed, get_article_url=self.get_article_url))
             except Exception as err:
@@ -1869,7 +1890,7 @@ class CalibrePeriodical(BasicNewsRecipe):
         br.select_form(name='login')
         br['username'] = self.username
         br['password'] = self.password
-        raw = br.submit().read()
+        raw = br.submit_selected().content
         if 'href="/my-account"' not in raw:
             raise LoginFailed(
                     _('Failed to log in, check your username and password for'

@@ -196,8 +196,9 @@ class InputFormatPlugin(Plugin):
         '''
         raise NotImplementedError()
 
-    #增加参数fs: FsDictStub 对象，由它根据情况使用内存缓存或使用磁盘缓存
-    def convert(self, stream, options, file_ext, log, accelerators, output_dir, fs):
+    #fs: FsDictStub 对象，由它根据情况使用内存缓存或使用磁盘缓存
+    #user: 数据库 KeUser 实例
+    def convert(self, stream, options, file_ext, log, accelerators, output_dir, fs, user):
         '''
         This method must be implemented in sub-classes. It must return
         the path to the created OPF file or an :class:`OEBBook` instance.
@@ -227,11 +228,12 @@ class InputFormatPlugin(Plugin):
         '''
         raise NotImplementedError()
 
-    #增加参数fs: FsDictStub 对象，由它根据情况使用内存缓存或使用磁盘缓存
-    def __call__(self, stream, options, file_ext, log, accelerators, output_dir, fs):
+    #fs: FsDictStub 对象，由它根据情况使用内存缓存或使用磁盘缓存
+    #user: 数据库 KeUser 实例
+    def __call__(self, stream, options, file_ext, log, accelerators, output_dir, fs, user):
         with fs.current_dir(output_dir):
             fs.clear_dir(output_dir)
-            ret = self.convert(stream, options, file_ext, log, accelerators, output_dir, fs)
+            ret = self.convert(stream, options, file_ext, log, accelerators, output_dir, fs, user)
 
         return ret
 

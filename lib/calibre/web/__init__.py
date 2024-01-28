@@ -10,7 +10,7 @@ def get_download_filename_from_response(response):
     from polyglot.urllib import unquote, urlparse
     filename = last_part_name = ''
     try:
-        purl = urlparse(response.geturl())
+        purl = urlparse(response.url)
         last_part_name = unquote(purl.path.split('/')[-1])
         disposition = response.info().get('Content-disposition', '')
         if isinstance(disposition, bytes):

@@ -87,7 +87,8 @@ class Plumber:
 
     #input: 输入目录绝对路径名，里面包含了opf文件，或InputFormatPlugin实例
     #output: 输出文件绝对路径名，也可能是一个BytesIO，如果是BytesIO，则传递另一个参数output_fmt说明输出格式
-    def __init__(self, input, output, log, report_progress=DummyReporter(),
+    #user: KeUser 实例
+    def __init__(self, input, output, log, user, report_progress=DummyReporter(),
             dummy=False, merge_plugin_recs=True, abort_after_input_dump=False,
             override_input_metadata=False, for_regex_wizard=False, view_kepub=False, 
             input_fmt=None, output_fmt=None):
@@ -102,10 +103,11 @@ class Plumber:
         self.original_input_arg = input
         self.for_regex_wizard = for_regex_wizard
         assert(isinstance(input, InputFormatPlugin) or os.path.isabs(input))
-        assert(isinstance(output, io.StringIO) or os.path.isabs(output))
+        assert(isinstance(output, io.BytesIO) or os.path.isabs(output))
         self.input = input
         self.output = output
         self.log = log
+        self.user = user
         self.ui_reporter = report_progress
         self.abort_after_input_dump = abort_after_input_dump
         self.override_input_metadata = override_input_metadata
@@ -128,7 +130,7 @@ class Plumber:
             input_fmt = 'recipe'
         self.archive_input_tdir = None
         self.changed_options = set()
-        if not isinstance(output, io.StringIO):
+        if not isinstance(output, io.BytesIO):
             if os.path.exists(self.output) and os.path.isdir(self.output):
                 output_fmt = 'oeb'
             else:

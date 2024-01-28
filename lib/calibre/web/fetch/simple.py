@@ -17,7 +17,7 @@ import socket
 import sys
 import time
 import traceback
-
+from urllib.request import urlopen as datauriopen #用来进行base64 data url解码
 from calibre import browser, relpath, unicode_path
 from calibre.constants import filesystem_encoding, iswindows
 from calibre.ebooks.BeautifulSoup import BeautifulSoup
@@ -134,8 +134,8 @@ class RecursiveFetcher:
     CSS_IMPORT_PATTERN = re.compile(r'\@import\s+url\((.*?)\)', re.IGNORECASE)
     default_timeout = socket.getdefaulttimeout()  # Needed here as it is used in __del__
     #options: 下载选项
-    #fs: BasicNewsRecipe的构造函数里面创建的文件桩 FsDictStub
-    def __init__(self, options, fs, log, image_map={}, css_map={}, job_info=None):
+    #fs: FsDictStub 实例
+    def __init__(self, options, fs, log, image_map=None, css_map=None, job_info=None):
         bd = options.dir #下载的内容将要保存到哪个目录
         if not isinstance(bd, str):
             bd = bd.decode(filesystem_encoding)
@@ -155,11 +155,11 @@ class RecursiveFetcher:
         self.delay = options.delay
         self.last_fetch_at = 0.
         self.filemap = {}
-        self.imagemap = image_map
-        self.imagemap_lock = fs.creatRLock()
-        self.stylemap = css_map
+        self.imagemap = image_map or {}
+        self.imagemap_lock = fs.createRLock()
+        self.stylemap = css_map or {}
         self.image_url_processor = None
-        self.stylemap_lock = fs.creatRLock()
+        self.stylemap_lock = fs.createRLock()
         self.downloaded_paths = []
         self.current_dir = self.base_dir
         self.files = 0
@@ -269,7 +269,7 @@ class RecursiveFetcher:
             if iswindows and url.startswith('/'):
                 url = url[1:]
             data = response(self.fs.read(url, 'rb'))
-            data.newurl = 'file:'+url  # This is what mechanize does for local URLs
+            data.newurl = 'file://' + url
             self.log.debug(f'Fetched {url} in {time.monotonic() - st:.1f} seconds')
             return data
         #开始是网络文件
@@ -281,8 +281,8 @@ class RecursiveFetcher:
         
         try:
             with closing(self.browser.open(url, timeout=self.timeout)) as f:
-                data = response(f.read())
-                data.newurl = f.geturl()
+                data = response(f.content)
+                data.newurl = f.url
         except URLError as err:
             if hasattr(err, 'code') and err.code in responses:
                 raise FetchError(responses[err.code])
@@ -296,8 +296,8 @@ class RecursiveFetcher:
                 self.log.debug('Temporary error, retrying in 1 second')
                 time.sleep(1)
                 with closing(self.browser.open(url, timeout=self.timeout)) as f:
-                    data = response(f.read())
-                    data.newurl = f.geturl()
+                    data = response(f.content)
+                    data.newurl = f.url
             else:
                 raise err
         finally:
@@ -406,7 +406,8 @@ class RecursiveFetcher:
             iurl = tag['src']
             if iurl.startswith('data:'):
                 try:
-                    data = self.browser.open(iurl).read()
+                    #data = self.browser.open(iurl).content
+                    data = datauriopen(iurl).read()
                 except Exception:
                     self.log.exception('Failed to decode embedded image')
                     continue
@@ -523,7 +524,7 @@ class RecursiveFetcher:
                 if not iurl:
                     continue
                 nurl = self.normurl(iurl)
-                if nurl in self.filemap:
+                if nurl in self.filemap: #把soup里面的href修改为正确的磁盘文件路径
                     self.localize_link(tag, 'href', self.filemap[nurl])
                     continue
                 if self.files > self.max_files:

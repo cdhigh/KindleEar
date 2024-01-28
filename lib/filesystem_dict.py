@@ -210,7 +210,7 @@ class FsDictStub(object):
             return names
 
     #创建一个文件读写锁
-    def creatRLock(self):
+    def createRLock(self):
         import threading
         return fakeRLock() if self.fs_dict else threading.RLock()
 
@@ -301,15 +301,18 @@ class fakeRLock:
 #一个假的临时文件类
 class StubTemporaryFile:
     #fs: FileSystemDict 实例
-    def __init__(self, suffix="", prefix="", dir_=None, mode='w+b'):
+    def __init__(self, suffix="", prefix="", dir=None, mode='w+b'):
         self.fs = None
-        self.filename = FileSystemDict.make_tempfile(self, suffix=suffix, prefix=prefix, dir_=dir_, mode=mode)
+        self.filename = FileSystemDict.make_tempfile(self, suffix=suffix, prefix=prefix, dir_=dir, mode=mode)
     def __enter__(self):
         return self
     def __exit__(self, type=None, value=None, traceback=None):
         return
     def write(self, data, mode='wb'):
         self.fs.write(self.filename, data, mode)
+    @property
+    def name(self):
+        return os.path.join(self.fs.path, self.filename)
 
 #一个假的切换当前目录类，可以使用with
 class fakeCurrentDir:

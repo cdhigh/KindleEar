@@ -80,11 +80,12 @@
         Sat: '{{_("Sat")|safe}}',
         Sun: '{{_("Sun")|safe}}',
         delivTimes: '{{_("Delivery times")|safe}}',
-        customDelivTimesaved: '{{_("Your customized delivery time for the recipe has been successfully saved.")|safe}}',
+        customDelivTimesaved: '{{_("The customized delivery time for the recipe has been successfully saved.")|safe}}',
         accountDeleted: '{{_("The account have been deleted.")|safe}}',
         namePwdEmpty: '{{_("The username or password is empty.")|safe}}',
         pwdDismatch: '{{_("The two new passwords are dismatch.")|safe}}',
-        chPwdSuccess: '{{_("Change password success.")|safe}}',
+        chPwdSuccess: '{{_("Password changed successfully.")|safe}}',
+        addAccountOk: '{{_("Account added successfully.")|safe}}',
         /*
         d: '{{_("")|safe}}',
         */
@@ -114,9 +115,12 @@
           <li class="pure-menu-item"><a href="/login" class="pure-menu-link">{{_("Login")}}</a></li>
         {% endif -%}
         <li class="pure-menu-item">
-          <a href="/setlocale/en"><img src="/static/us.gif" alt="EN" /></a>
+          <a href="/setlocale/en"><img src="data:image/gif;base64,R0lGODlhEAALAPcAAAAAAIAAAACAAICAAAAAgIAAgACAgICAgMDAwP8AAAD/AP//AAAA//8A/wD//////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMwAAZgAAmQAAzAAA/wAzAAAzMwAzZgAzmQAzzAAz/wBmAABmMwBmZgBmmQBmzABm/wCZAACZMwCZZgCZmQCZzACZ/wDMAADMMwDMZgDMmQDMzADM/wD/AAD/MwD/ZgD/mQD/zAD//zMAADMAMzMAZjMAmTMAzDMA/zMzADMzMzMzZjMzmTMzzDMz/zNmADNmMzNmZjNmmTNmzDNm/zOZADOZMzOZZjOZmTOZzDOZ/zPMADPMMzPMZjPMmTPMzDPM/zP/ADP/MzP/ZjP/mTP/zDP//2YAAGYAM2YAZmYAmWYAzGYA/2YzAGYzM2YzZmYzmWYzzGYz/2ZmAGZmM2ZmZmZmmWZmzGZm/2aZAGaZM2aZZmaZmWaZzGaZ/2bMAGbMM2bMZmbMmWbMzGbM/2b/AGb/M2b/Zmb/mWb/zGb//5kAAJkAM5kAZpkAmZkAzJkA/5kzAJkzM5kzZpkzmZkzzJkz/5lmAJlmM5lmZplmmZlmzJlm/5mZAJmZM5mZZpmZmZmZzJmZ/5nMAJnMM5nMZpnMmZnMzJnM/5n/AJn/M5n/Zpn/mZn/zJn//8wAAMwAM8wAZswAmcwAzMwA/8wzAMwzM8wzZswzmcwzzMwz/8xmAMxmM8xmZsxmmcxmzMxm/8yZAMyZM8yZZsyZmcyZzMyZ/8zMAMzMM8zMZszMmczMzMzM/8z/AMz/M8z/Zsz/mcz/zMz///8AAP8AM/8AZv8Amf8AzP8A//8zAP8zM/8zZv8zmf8zzP8z//9mAP9mM/9mZv9mmf9mzP9m//+ZAP+ZM/+ZZv+Zmf+ZzP+Z///MAP/MM//MZv/Mmf/MzP/M////AP//M///Zv//mf//zP///yH5BAEAABAALAAAAAAQAAsAAAhoAAFtESiQyxZ8CBMirLKFocMtv4BFnAhsy0CLFxH+w5cP38aHDv/kkgisEsmCFwVuXOkRX4wtMaq8jEmRokKEHXEm3GjsmLF1PX8G9UlUHTBjwNYdTWoMqVKk1PBFnSq1KlWSNbFiDQgAOw==" alt="EN" /></a>
+          <a href="/setlocale/zh"><img src="data:image/gif;base64,R0lGODlhEAALAPcAAAAAAIAAAACAAICAAAAAgIAAgACAgICAgMDAwP8AAAD/AP//AAAA//8A/wD//////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMwAAZgAAmQAAzAAA/wAzAAAzMwAzZgAzmQAzzAAz/wBmAABmMwBmZgBmmQBmzABm/wCZAACZMwCZZgCZmQCZzACZ/wDMAADMMwDMZgDMmQDMzADM/wD/AAD/MwD/ZgD/mQD/zAD//zMAADMAMzMAZjMAmTMAzDMA/zMzADMzMzMzZjMzmTMzzDMz/zNmADNmMzNmZjNmmTNmzDNm/zOZADOZMzOZZjOZmTOZzDOZ/zPMADPMMzPMZjPMmTPMzDPM/zP/ADP/MzP/ZjP/mTP/zDP//2YAAGYAM2YAZmYAmWYAzGYA/2YzAGYzM2YzZmYzmWYzzGYz/2ZmAGZmM2ZmZmZmmWZmzGZm/2aZAGaZM2aZZmaZmWaZzGaZ/2bMAGbMM2bMZmbMmWbMzGbM/2b/AGb/M2b/Zmb/mWb/zGb//5kAAJkAM5kAZpkAmZkAzJkA/5kzAJkzM5kzZpkzmZkzzJkz/5lmAJlmM5lmZplmmZlmzJlm/5mZAJmZM5mZZpmZmZmZzJmZ/5nMAJnMM5nMZpnMmZnMzJnM/5n/AJn/M5n/Zpn/mZn/zJn//8wAAMwAM8wAZswAmcwAzMwA/8wzAMwzM8wzZswzmcwzzMwz/8xmAMxmM8xmZsxmmcxmzMxm/8yZAMyZM8yZZsyZmcyZzMyZ/8zMAMzMM8zMZszMmczMzMzM/8z/AMz/M8z/Zsz/mcz/zMz///8AAP8AM/8AZv8Amf8AzP8A//8zAP8zM/8zZv8zmf8zzP8z//9mAP9mM/9mZv9mmf9mzP9m//+ZAP+ZM/+ZZv+Zmf+ZzP+Z///MAP/MM//MZv/Mmf/MzP/M////AP//M///Zv//mf//zP///yH5BAEAABAALAAAAAAQAAsAAAhUAMcJ7CZwHMGDBg3mGvdr3MKGC3E5HCeRIb93DtMJXEiQo8Rl6XB1aygx4sSCCwcm5OjQpEuKEyuynLnSoMSbMWGWLJiwY0GEuV7uHLqxpk+fuQICADs=" alt="CN" /></a>
+          <a href="/setlocale/tr_tr"><img src="data:image/gif;base64,R0lGODlhEAALAMQAAOQKFPSOlOxCTOwyPPzW1OQaJPzu7OQSHOw6RPSipOxydOQOHOxaZPza3OQiLPz+/Ow+ROQKHPSSlOxKVOw2PPzW3OQeLPz29OQWJPSqtOw+TAAAAAAAAAAAAAAAAAAAACwAAAAAEAALAAAFPyAgilEEmOdorulIniW6DNiKtiJSGQHD2qnHZKVgkFAlwMORrFxwLiGpmAJGEASDxPi6sQaHqksFhJlvXfEqBAA7" alt="TR" /></a>
+          <!--<a href="/setlocale/en"><img src="/static/us.gif" alt="EN" /></a>
           <a href="/setlocale/zh"><img src="/static/cn.gif" alt="CN" /></a>
-          <a href="/setlocale/tr_tr"><img src="/static/tr.gif" alt="TR" /></a>
+          <a href="/setlocale/tr_tr"><img src="/static/tr.gif" alt="TR" /></a>-->
         </li>
       </ul>
       {% endblock -%}
