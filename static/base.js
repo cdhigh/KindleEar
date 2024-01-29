@@ -61,10 +61,10 @@ function FetchBuiltinRecipesXml() {
       if (dashIndex != -1) {
         language = language.substring(0, dashIndex);
       }
-      if (lang == userLang) {
+      if (language == userLang) {
         hasUserLangRss = true;
       }
-      if (lang == 'en') {
+      if (language == 'en') {
         hasEnRss = true;
       }
 
@@ -90,16 +90,6 @@ function FetchBuiltinRecipesXml() {
   });
   PopulateLibrary('');
 }
-
-//在界面上选择了一项Recipe语种，将对应语种的recipe显示出来
-$("#language_pick").on("change", function(){
-  PopulateLibrary('');
-});
-
-//在指定语言里面搜索标题或描述
-$("#search_recipe").on("keyup", function() {
-  PopulateLibrary($(this).val());
-});
 
 //使用符合条件的recipe动态填充网页显示列表
 //参数 txt: 如果提供，则标题或描述里面有这个子字符串的才显示，用于搜索

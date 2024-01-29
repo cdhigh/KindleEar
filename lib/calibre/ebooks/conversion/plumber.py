@@ -6,7 +6,7 @@ __docformat__ = 'restructuredtext en'
 
 import os, re, sys, shutil, pprint, json, io
 from functools import partial
-
+from calibre.utils.logging import Log
 from calibre.customize.conversion import OptionRecommendation, DummyReporter, InputFormatPlugin
 from calibre.customize.ui import input_profiles, output_profiles, \
         plugin_for_input_format, plugin_for_output_format, \
@@ -85,28 +85,23 @@ class Plumber:
         'tags', 'book_producer', 'language', 'pubdate', 'timestamp'
         ]
 
-    #input: 输入目录绝对路径名，里面包含了opf文件，或InputFormatPlugin实例
+    #input: 输入绝对路径名，或StringIO，或一个列表
     #output: 输出文件绝对路径名，也可能是一个BytesIO，如果是BytesIO，则传递另一个参数output_fmt说明输出格式
     #user: KeUser 实例
-    def __init__(self, input, output, log, user, report_progress=DummyReporter(),
-            dummy=False, merge_plugin_recs=True, abort_after_input_dump=False,
-            override_input_metadata=False, for_regex_wizard=False, view_kepub=False, 
+    def __init__(self, input_, output, user, report_progress=DummyReporter(),
+            dummy=False, abort_after_input_dump=False, override_input_metadata=False, view_kepub=False, 
             input_fmt=None, output_fmt=None):
         '''
-        :param input: Path to input file.
+        :param input_: Path to input_ file.
         :param output: Path to output file/folder
         '''
-        if isbytestring(input):
-            input = input.decode(filesystem_encoding)
-        if isbytestring(output):
-            output = output.decode(filesystem_encoding)
-        self.original_input_arg = input
-        self.for_regex_wizard = for_regex_wizard
-        assert(isinstance(input, InputFormatPlugin) or os.path.isabs(input))
-        assert(isinstance(output, io.BytesIO) or os.path.isabs(output))
-        self.input = input
+        self.original_input_arg = input_
+        self.input = input_
         self.output = output
-        self.log = log
+        #calibre里面使用的log和python标准库使用的logging不兼容，所以不要外面传递了
+        #calibre.Log可以直接调用如log()，而标准库必须使用log.info()
+        #calibre.Log可以输出多个参数，标准库必须使用字符串格式化组合为一个字符串
+        self.log = Log()
         self.user = user
         self.ui_reporter = report_progress
         self.abort_after_input_dump = abort_after_input_dump
@@ -119,8 +114,8 @@ class Plumber:
         self.pipeline_options = _pipeline_options
         # }}}
 
-        if not isinstance(input, InputFormatPlugin):
-            input_fmt = os.path.splitext(input)[1]
+        if isinstance(input_, str):
+            input_fmt = os.path.splitext(input_)[1]
             if not input_fmt:
                 raise ValueError('Input file must have an extension')
             input_fmt = input_fmt[1:].lower().replace('original_', '')
@@ -139,7 +134,7 @@ class Plumber:
                     output_fmt = '.oeb'
                 output_fmt = output_fmt[1:].lower()
 
-        self.input_plugin  = input if isinstance(input, InputFormatPlugin) else plugin_for_input_format(input_fmt)
+        self.input_plugin  = input_ if isinstance(input_, InputFormatPlugin) else plugin_for_input_format(input_fmt)
         self.output_plugin = plugin_for_output_format(output_fmt)
 
         if self.input_plugin is None:
@@ -431,8 +426,6 @@ class Plumber:
         self.setup_options()
         if self.opts.verbose:
             self.log.filter_level = self.log.DEBUG
-        if self.for_regex_wizard and hasattr(self.opts, 'no_process'):
-            self.opts.no_process = True
         self.flush()
         import css_parser, logging
         css_parser.log.setLevel(logging.WARN)
@@ -466,8 +459,6 @@ class Plumber:
         self.ui_reporter(0.01, _('Converting input to HTML...'))
         ir = CompositeProgressReporter(0.01, 0.34, self.ui_reporter)
         self.input_plugin.report_progress = ir
-        if self.for_regex_wizard:
-            self.input_plugin.for_viewer = True
         self.output_plugin.specialize_options(self.log, self.opts, self.input_fmt)
         #根据需要，创建临时目录或创建内存缓存
         system_temp_dir = os.environ.get('TEMP_DIR')
@@ -481,7 +472,7 @@ class Plumber:
         with self.input_plugin:
             #调用calibre.customize.conversion.InputFormatPlugin.__call__()，然后调用输入插件的convert()在目标目录生成一大堆文件，包含opf
             #__call__()返回传入的 fs 实例，其属性 opfname 保存了opf文件的路径名
-            self.oeb = self.input_plugin(stream, self.opts, self.input_fmt, self.log, accelerators, tdir, fs)
+            self.oeb = self.input_plugin(stream, self.opts, self.input_fmt, self.log, accelerators, tdir, fs, self.user)
 
             #如果只是要制作epub的话，到目前为止，工作已经完成大半
             #将self.oeb指向的目录拷贝到OEBPS目录，加一个mimetype和一个META-INF/container.xml文件，这两个文件内容是固定的
@@ -498,9 +489,8 @@ class Plumber:
                 self.opts_to_mi(self.user_metadata)
             if not hasattr(self.oeb, 'manifest'): #从一堆文件里面创建OEBBook实例
                 self.oeb = create_oebbook(self.log, self.oeb, self.opts, encoding=self.input_plugin.output_encoding,
-                    for_regex_wizard=self.for_regex_wizard, removed_items=getattr(self.input_plugin, 'removed_items_to_ignore', ()))
-            if self.for_regex_wizard:
-                return
+                    removed_items=getattr(self.input_plugin, 'removed_items_to_ignore', ()))
+            
             self.input_plugin.postprocess_book(self.oeb, self.opts, self.log)
             self.opts.is_image_collection = self.input_plugin.is_image_collection
             pr = CompositeProgressReporter(0.34, 0.67, self.ui_reporter)
@@ -658,7 +648,6 @@ class Plumber:
         our(0., _('Running %s plugin')%self.output_plugin.name)
 
         #创建输出临时文件缓存
-        fs.clear()
         if system_temp_dir:
             prefix = self.output_plugin.commit_name or 'output_'
             tmpdir = PersistentTemporaryDirectory(prefix=prefix, dir=system_temp_dir)
@@ -686,7 +675,7 @@ def set_regex_wizard_callback(f):
 #从一堆文件里面创建OEBBook实例
 #fs: FsDictStub对象，其opfname属性为opf文件的路径全名
 def create_oebbook(log, fs, opts, reader=None,
-        encoding='utf-8', populate=True, for_regex_wizard=False, specialize=None, removed_items=()):
+        encoding='utf-8', populate=True, specialize=None, removed_items=()):
     '''
     Create an OEBBook.
     '''

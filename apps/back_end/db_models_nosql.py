@@ -36,7 +36,7 @@ class MyBaseModel(dbInstance.DSEntity):
 
     @classmethod
     def get_one(cls, *query):
-        return cls.select().where(*query).execute()
+        return cls.select().where(*query).first()
 
     #和peewee一致
     @classmethod
@@ -74,6 +74,7 @@ class KeUser(MyBaseModel): # kindleEar User
     expiration_days = fields.IntField() #账号超期设置值，0为永久有效
     secret_key = fields.StringField()
     kindle_email = fields.StringField()
+    email = fields.StringField() #可能以后用于重置密码之类的操作
     enable_send = fields.BooleanField()
     send_days = fields.ListField()
     send_time = fields.IntField()

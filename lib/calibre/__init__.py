@@ -380,12 +380,6 @@ def human_readable(size, sep=' '):
     return size + sep + suffix
 
 def browser(honor_time=True, max_time=2, user_agent=None, verify_ssl_certificates=True, handle_refresh=True, **kw):
-    from mechanicalsoup import StatefulBrowser
-    from requests_file import LocalFileAdapter
-    if user_agent:
-        kw.setdefault('user_agent', user_agent)
-    else:
-        kw.setdefault('user_agent', "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)")
-    kw.setdefault('requests_adapters', {'file://': LocalFileAdapter()})
-    return StatefulBrowser(**kw)
+    from urlopener import UrlOpener
+    return UrlOpener(**kw)
     

@@ -17,7 +17,6 @@ import socket
 import sys
 import time
 import traceback
-from urllib.request import urlopen as datauriopen #用来进行base64 data url解码
 from calibre import browser, relpath, unicode_path
 from calibre.constants import filesystem_encoding, iswindows
 from calibre.ebooks.BeautifulSoup import BeautifulSoup
@@ -29,9 +28,9 @@ from calibre.utils.localization import _
 from calibre.utils.logging import Log
 from calibre.web.fetch.utils import rescale_image
 from polyglot.http_client import responses
-from polyglot.urllib import (
+from polyglot.urllib import (HTTPError,
     URLError, quote, url2pathname, urljoin, urlparse, urlsplit, urlunparse,
-    urlunsplit
+    urlunsplit, urlopen
 )
 
 class AbortArticle(Exception):
@@ -280,26 +279,29 @@ class RecursiveFetcher:
         url = canonicalize_url(url)
         
         try:
-            with closing(self.browser.open(url, timeout=self.timeout)) as f:
-                data = response(f.content)
-                data.newurl = f.url
+            resp = self.browser.open(url, timeout=self.timeout)
+            if resp.status_code == 200:
+                data = response(resp.content)
+                data.newurl = resp.url
+            else:
+                raise HTTPError(url, resp.status_code)
         except URLError as err:
             if hasattr(err, 'code') and err.code in responses:
                 raise FetchError(responses[err.code])
-            is_temp = False
-            reason = getattr(err, 'reason', None)
-            if isinstance(reason, socket.gaierror):
-                # see man gai_strerror() for details
-                if getattr(reason, 'errno', None) in (socket.EAI_AGAIN, socket.EAI_NONAME):
-                    is_temp = True
-            if is_temp:  # Connection reset by peer or Name or service not known
-                self.log.debug('Temporary error, retrying in 1 second')
-                time.sleep(1)
-                with closing(self.browser.open(url, timeout=self.timeout)) as f:
-                    data = response(f.content)
-                    data.newurl = f.url
-            else:
-                raise err
+            #is_temp = False
+            #reason = getattr(err, 'reason', None)
+            #if isinstance(reason, socket.gaierror):
+            #    # see man gai_strerror() for details
+            #    if getattr(reason, 'errno', None) in (socket.EAI_AGAIN, socket.EAI_NONAME):
+            #        is_temp = True
+            #if is_temp:  # Connection reset by peer or Name or service not known
+            #    self.log.debug('Temporary error, retrying in 1 second')
+            #    time.sleep(1)
+            #    resp = self.browser.open(url, timeout=self.timeout)
+            #    data = response(resp.content)
+            #    data.newurl = resp.url
+            #else:
+            raise err
         finally:
             self.last_fetch_at = time.monotonic()
         self.log.debug(f'Fetched {url} in {time.monotonic() - st:f} seconds')
@@ -406,8 +408,7 @@ class RecursiveFetcher:
             iurl = tag['src']
             if iurl.startswith('data:'):
                 try:
-                    #data = self.browser.open(iurl).content
-                    data = datauriopen(iurl).read()
+                    data = urlopen(iurl).read()
                 except Exception:
                     self.log.exception('Failed to decode embedded image')
                     continue

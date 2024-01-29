@@ -18,7 +18,7 @@ class QueryBuilder:
         self._order = order or []
         self._limit = 0
 
-    #修改为和peewee接口一致，原来为 filter()，改成 where()
+    #修改为和peewee接口一致
     def where(self, *filters: Filter):
         self._filters += filters
         return self
@@ -118,6 +118,8 @@ class QueryBuilder:
                                                                     self._order or "No order")  # pragma: no cover
 
 
+#投影查询允许您仅查询某个实体上您确实需要的那些特定属性，延迟和成本都比检索整个实体更低。
+#投影查询要求将指定的属性编入索引。
 class ProjectedQueryBuilder(QueryBuilder):
     def __init__(self, entity_class, filters=None, order=None, projection=None):
         super(ProjectedQueryBuilder, self).__init__(entity_class, filters=filters, order=order)

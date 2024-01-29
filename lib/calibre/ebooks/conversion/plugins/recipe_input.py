@@ -9,19 +9,17 @@ import os, io
 from collections import defaultdict
 from calibre.customize.conversion import InputFormatPlugin, OptionRecommendation
 from calibre.constants import numeric_version
-from calibre import walk, relpath, unicode_path, strftime
+from calibre import walk, relpath, unicode_path, strftime, force_unicode
 from calibre.web.feeds.recipes import compile_recipe
 from calibre.web.feeds.news import BasicNewsRecipe
 from calibre.utils.date import now as nowf
+from calibre.utils.localization import canonicalize_lang
 from calibre.ebooks.metadata import MetaInformation
 from calibre.ebooks.metadata.opf2 import OPFCreator
 from calibre.ebooks.metadata.toc import TOC
 from default_cv_mh import get_default_cover_data, get_default_masthead_data
 
 class RecipeDisabled(Exception):
-    pass
-
-def report_progress(progress, message=None):
     pass
 
 TOP_INDEX_TMPL = """<?xml version='1.0' encoding='utf-8'?><html lang="{lang}"><head><title>{title}</title>
@@ -115,7 +113,7 @@ class RecipeInput(InputFormatPlugin):
         self.failed_downloads = []
         for recipe in recipes:
             if 1:
-                ro = recipe(opts, log, report_progress, output_dir, fs, feed_index_start=feed_index_start)
+                ro = recipe(opts, log, output_dir, fs, user=user, feed_index_start=feed_index_start)
                 ro.download()
             #except Exception as e: #这个地方最好只做记录
             #    raise ValueError('Failed to execute recipe "{}": {}'.format(ro.title, e))
@@ -126,8 +124,12 @@ class RecipeInput(InputFormatPlugin):
             self.index_htmls.append((ro.title, ro.get_root_index_html_name()))
             self.recipe_objects.append(ro)
 
-        self.build_top_index(output_dir, fs)
+        if not self.feeds: #让上层处理
+            raise Exception('All feeds are empty, aborting.')
+
+        self.build_top_index(self.recipe_objects[0], output_dir, fs)
         self.create_opf(output_dir, fs, user)
+
         #for key, val in ro.conversion_options.items():
         #    setattr(opts, key, val)
         opts.no_inline_navbars = orig_no_inline_navbars
@@ -175,7 +177,7 @@ class RecipeInput(InputFormatPlugin):
         if not onlyRecipe:
             manifest.append(os.path.join(dir_, self.top_index_file))
         
-        cPath, mPath = self.get_cover_masthead(recipe1, user, fs)
+        cPath, mPath = self.get_cover_masthead(dir_, recipe1, user, fs)
         opf.cover = cPath
         manifest.append(cPath)
         manifest.append(mPath)
@@ -191,112 +193,104 @@ class RecipeInput(InputFormatPlugin):
             if mani.path.endswith('mastheadImage.gif'):
                 mani.id = 'masthead-image'
 
-        #这个entries用于创建TOC，里面的文件是有顺序之分的
+        self.create_toc_spine(opf, dir_)
+
+        opf_file = io.BytesIO()
+        ncx_file = io.BytesIO()
+        opf.render(opf_file, ncx_file)
+        fs.write(os.path.join(dir_, 'index.opf'), opf_file.getvalue(), 'wb')
+        fs.write(os.path.join(dir_, 'index.ncx'), ncx_file.getvalue(), 'wb')
+    
+    #创建多级TOC和书脊
+    def create_toc_spine(self, opf, dir_):
+        #创建顶层toc
+        onlyRecipe = True if len(self.recipe_objects) == 1 else False
         entries = [self.top_index_file]
-        if not onlyRecipe:
-            entries.extend([indexFile for (title, indexFile) in self.index_htmls])
         toc = TOC(base_path=dir_)
-        self.play_order_counter = 0
-        self.play_order_map = {}
-
-        self.article_url_map = aumap = defaultdict(set)
-
-        def feed_index(num, parent):
-            f = feeds[num]
-            for j, a in enumerate(f):
-                if getattr(a, 'downloaded', False):
-                    adir = 'feed_%d/article_%d/'%(num, j)
-                    auth = a.author
-                    if not auth:
-                        auth = None
-                    desc = a.text_summary
-                    if not desc:
-                        desc = None
-                    else:
-                        desc = self.description_limiter(desc)
-                    tt = a.toc_thumbnail if a.toc_thumbnail else None
-                    entries.append('%sindex.html'%adir)
-                    po = self.play_order_map.get(entries[-1], None)
-                    if po is None:
-                        self.play_order_counter += 1
-                        po = self.play_order_counter
-                    arelpath = '%sindex.html'%adir
-                    for curl in self.canonicalize_internal_url(a.orig_url, is_link=False):
-                        aumap[curl].add(arelpath)
-                    article_toc_entry = parent.add_item(arelpath, None,
-                            a.title if a.title else _('Untitled article'),
-                            play_order=po, author=auth,
-                            description=desc, toc_thumbnail=tt)
-                    for entry in a.internal_toc_entries:
-                        anchor = entry.get('anchor')
-                        if anchor:
-                            self.play_order_counter += 1
-                            po += 1
-                            article_toc_entry.add_item(
-                                arelpath, entry['anchor'], entry['title'] or _('Unknown section'),
-                                play_order=po
-                            )
-                    #这段注释后的代码是添加navbar的
-                    #last = os.path.join(adir, 'index.html')
-                    #src = None
-                    #last = os.path.join(self.output_dir, last)
-                    #for sp in a.sub_pages:
-                    #    prefix = os.path.commonprefix([opf_path, sp])
-                    #    relp = sp[len(prefix):]
-                    #    entries.append(relp.replace(os.sep, '/'))
-                    #    last = sp
-                    #if os.path.exists(last):
-                    #    with open(last, 'rb') as fi:
-                    #        src = fi.read().decode('utf-8')
-                    #if src:
-                        #soup = BeautifulSoup(src)
-                        #body = soup.find('body')
-                        #if body is not None:
-                            #prefix = '/'.join('..'for i in range(2*len(re.findall(r'link\d+', last))))
-                            #templ = self.navbar.generate(True, num, j, len(f),
-                            #                not self.has_single_feed,
-                            #                a.orig_url, __appname__, prefix=prefix,
-                            #                center=self.center_navbar)
-                            #elem = BeautifulSoup(templ.render(doctype='xhtml').decode('utf-8')).find('div')
-                            #body.insert(len(body.contents), elem)
-                        #    with open(last, 'wb') as fi:
-                        #        fi.write(str(soup).encode('utf-8'))
-        if len(self.feeds) == 0:
-            raise Exception('All feeds are empty, aborting.')
-
-        if len(self.feeds) > 1:
-            for i, f in enumerate(self.feeds):
-                entries.append(f'feed_{i}/index.html')
-                po = self.play_order_map.get(entries[-1], None)
-                if po is None:
-                    self.play_order_counter += 1
-                    po = self.play_order_counter
-                auth = getattr(f, 'author', None)
-                if not auth:
-                    auth = None
-                desc = getattr(f, 'description', None)
-                if not desc:
-                    desc = None
-                feed_index(i, toc.add_item('feed_%d/index.html'%i, None,
-                    f.title, play_order=po, description=desc, author=auth))
-
-        else: #只有一个Feed时，直接将Feed做为顶层目录
+        self.top_toc = []
+        self.play_order = 0
+        if not onlyRecipe:
+            for title, indexFile in self.index_htmls:
+                ro = self.recipe_objects[po]
+                self.play_order += 1
+                self.top_toc.append(toc.add_item(indexFile, None, title, play_order=self.play_order, description=ro.desc, author=ro.__author__))
+                entries.append(indexFile)
+        else:
+            self.top_toc.append(toc)
+        
+        if len(self.feeds) == 1: #只有一个Feed时，直接将Article做为顶层目录
             entries.append('feed_0/index.html')
-            feed_index(0, toc)
+            self.add_article_toc(toc, entries, feedIdx=0)
+        else:
+            feedIdx = 0
+            for recipeIdx, recipe in enumerate(self.recipe_objects):
+                for feed in recipe.feed_objects:
+                    feedIndexFile = f'feed_{feedIdx}/index.html'
+                    entries.append(feedIndexFile)
+                    author = getattr(feed, 'author', None) or None
+                    desc = getattr(feed, 'description', None) or None
+                    self.play_order += 1
+                    item = self.top_toc[recipeIdx].add_item(feedIndexFile, None, feed.title, play_order=self.play_order, description=desc, author=author)
+                    self.add_article_toc(item, entries, feedIdx=feedIdx)
+                    feedIdx += 1
 
         for i, p in enumerate(entries):
             entries[i] = os.path.join(dir_, p.replace('/', os.sep))
         opf.create_spine(entries)
         opf.set_toc(toc)
 
-        opf_file = io.BytesIO()
-        ncx_file = io.BytesIO()
-        opf.render(opf_file, ncx_file)
-        opf_path = os.path.join(dir_, 'index.opf')
-        ncx_path = os.path.join(dir_, 'index.ncx')
-        self.fs.write(opf_path, opf_file.getvalue(), 'wb')
-        self.fs.write(ncx_path, ncx_file.getvalue(), 'wb')
-    
+    #创建下级toc，包括文章toc或可能的文章内toc
+    def add_article_toc(self, parent, entries, feedIdx):
+        recipe1 = self.recipe_objects[0]
+        feed = self.feeds[feedIdx]
+        for idx, arti in enumerate(feed):
+            if not getattr(arti, 'downloaded', False):
+                continue
+
+            aDir = f'feed_{feedIdx}/article_{idx}/'
+            author = arti.author or None
+            desc = arti.text_summary
+            if desc:
+                desc = BasicNewsRecipe.description_limiter(desc)
+            else:
+                desc = None
+            tt = arti.toc_thumbnail or None
+            artiFile = f'{aDir}index.html'
+            entries.append(artiFile)
+            artiTitle = arti.title or _('Untitled article')
+            self.play_order += 1
+            artiTocEntry = parent.add_item(artiFile, None, artiTitle, play_order=self.play_order, author=author, description=desc, toc_thumbnail=tt)
+            for entry in arti.internal_toc_entries: #如果文章(html)内还有子目录
+                if entry.get('anchor'):
+                    self.play_order += 1
+                    artiTocEntry.add_item(artiFile, entry['anchor'], entry['title'] or _('Unknown section'), play_order=self.play_order)
+
+            #这段注释后的代码是添加navbar的
+            #last = os.path.join(aDir, 'index.html')
+            #src = None
+            #last = os.path.join(self.output_dir, last)
+            #for sp in arti.sub_pages:
+            #    prefix = os.path.commonprefix([opf_path, sp])
+            #    relp = sp[len(prefix):]
+            #    entries.append(relp.replace(os.sep, '/'))
+            #    last = sp
+            #if os.path.exists(last):
+            #    with open(last, 'rb') as fi:
+            #        src = fi.read().decode('utf-8')
+            #if src:
+                #soup = BeautifulSoup(src)
+                #body = soup.find('body')
+                #if body is not None:
+                    #prefix = '/'.join('..'for i in range(2*len(re.findall(r'link\d+', last))))
+                    #templ = self.navbar.generate(True, num, idx, len(f),
+                    #                not self.has_single_feed,
+                    #                arti.orig_url, __appname__, prefix=prefix,
+                    #                center=self.center_navbar)
+                    #elem = BeautifulSoup(templ.render(doctype='xhtml').decode('utf-8')).find('div')
+                    #body.insert(len(body.contents), elem)
+                #    with open(last, 'wb') as fi:
+                #        fi.write(str(soup).encode('utf-8'))
+
     #通过Feed列表和一些选项构建Meta信息
     #recipe1: 第一个BasicNewsRecipe实例
     #onlyRecipe: 如果一本书仅包含一个BasicNewRecipe，则为True
@@ -335,7 +329,7 @@ class RecipeInput(InputFormatPlugin):
         return mi
 
     #获取封面路径，如果没有，生成一个
-    def get_cover_masthead(self, recipe1, user, fs):
+    def get_cover_masthead(self, dir_, recipe1, user, fs):
         cPath = getattr(recipe1, 'cover_path', None)
         if cPath is None:
             cover_data = user.cover if user.cover else get_default_cover_data()

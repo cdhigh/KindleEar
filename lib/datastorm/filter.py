@@ -9,4 +9,4 @@ class Filter:
         self.value = value
 
     def __repr__(self):
-        return "< Filter: {} {} {} >".format(self.item, self.op, self.value)  # pragma: no cover
+        return "< Filter: {} {} {} >".format(self.item, self.op, self.value)  # pragma: no cover

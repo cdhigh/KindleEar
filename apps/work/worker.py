@@ -50,7 +50,7 @@ def GetAllRecipeSrc(user, idList):
     title = user.book_title
     if ftRssList:
         feeds = [(item.title, item.url) for bked, item in ftRssList]
-        srcDict[title + '_f'] = [*ftRssList[0],  GenerateRecipeSource(title, feeds, user.oldest_article, isfulltext=True)]
+        srcDict[title + '_f'] = [*ftRssList[0], GenerateRecipeSource(title, feeds, user.oldest_article, isfulltext=True)]
 
     if rssList:
         feeds = [(item.title, item.url) for bked, item in rssList]

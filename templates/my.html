@@ -99,10 +99,20 @@ $(document).ready(function() {
   PopulateMyCustomRss(); //填充订阅区段
   PopulateMySubscribed();
   RegisterHideHambClick();
+  //在界面上选择了一项Recipe语种，将对应语种的recipe显示出来
+  $("#language_pick").on("change", function(){
+    PopulateLibrary('');
+  });
 
+  //在指定语言里面搜索标题或描述
+  $("#search_recipe").on("input", function() {
+    PopulateLibrary($(this).val());
+  });
+
+  {% if session.get('role') != 'admin' -%}
+  var mailPrefix = "{{user.name}}__";
+  {% else -%}
   var mailPrefix = '';
-  {% if session.get('role') == 'admin' -%}
-  mailPrefix = "{{user.name}}__";
   {% endif -%}
   insertBookmarkletGmailThis("{{subscribe_url}}", mailPrefix);
 });

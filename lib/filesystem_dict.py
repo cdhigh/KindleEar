@@ -61,7 +61,6 @@ class FileSystemDict(dict):
     def clear(self):
         self.dirs = None
         for key in list(self.keys()):
-            self[key] = None
             del self[key]
 
     #将字典的文件缓存保存到一个磁盘目录

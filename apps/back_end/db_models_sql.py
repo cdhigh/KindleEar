@@ -134,6 +134,7 @@ class KeUser(MyBaseModel): # kindleEar User
     expiration_days = IntegerField(default=0) #账号超期设置值，0为永久有效
     secret_key = CharField(default='')
     kindle_email = CharField(default='')
+    email = CharField(default='') #可能以后用于重置密码之类的操作
     enable_send = BooleanField(default=False)
     send_days = JSONField(default=JSONField.list_default)
     send_time = IntegerField()

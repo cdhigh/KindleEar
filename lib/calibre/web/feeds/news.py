@@ -15,9 +15,8 @@ import sys
 import time
 import traceback
 from collections import defaultdict
-from contextlib import closing
 from urllib.parse import urlparse, urlsplit
-
+from urllib.error import HTTPError
 from calibre import __appname__, as_unicode, force_unicode, iswindows, preferred_encoding, strftime
 from calibre.ebooks.BeautifulSoup import BeautifulSoup, CData, NavigableString, Tag
 from calibre.ebooks.metadata import MetaInformation
@@ -25,7 +24,7 @@ from calibre.ebooks.metadata.opf2 import OPFCreator
 from calibre.ebooks.metadata.toc import TOC
 from calibre.ptempfile import PersistentTemporaryFile
 from calibre.utils.date import now as nowf
-from calibre.utils.localization import _, canonicalize_lang, ngettext
+from calibre.utils.localization import canonicalize_lang, ngettext
 from calibre.utils.logging import ThreadSafeWrapper
 from calibre.utils.threadpool import NoResultsPending, ThreadPool, WorkRequest
 from calibre.web import Recipe
@@ -38,7 +37,6 @@ from polyglot.builtins import string_or_bytes
 from lxml.html import document_fromstring, fragment_fromstring, tostring
 from lib import readability
 from urlopener import UrlOpener
-from mechanicalsoup import StatefulBrowser
 from requests_file import LocalFileAdapter
 from filesystem_dict import FsDictStub
 from default_cv_mh import get_default_cover_data, get_default_masthead_data
@@ -418,7 +416,10 @@ class BasicNewsRecipe(Recipe):
         By default returns `self.extra_css`. Override if you want to programmatically generate the
         extra_css.
         '''
-        return self.extra_css
+        if self.user.css_content:
+            return (self.extra_css or '') + '\n' + self.user.css_content
+        else:
+            return self.extra_css
 
     def get_cover_url(self):
         '''
@@ -522,9 +523,8 @@ class BasicNewsRecipe(Recipe):
         #    ua = getattr(self, 'last_used_user_agent', None) or self.calibre_most_common_ua or random_user_agent(allow_ie=False)
         #    kwargs['user_agent'] = self.last_used_user_agent = ua
         #self.log('Using user agent:', kwargs['user_agent'])
-        kwargs.setdefault('user_agent', "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)")
-        kwargs.setdefault('requests_adapters', {'file://': LocalFileAdapter()})
-        return StatefulBrowser(*args, **kwargs)
+        kwargs.setdefault('file_stub', self.fs)
+        return UrlOpener(**kwargs)
 
     def clone_browser(self, br):
         '''
@@ -542,17 +542,17 @@ class BasicNewsRecipe(Recipe):
 
         # Uh-oh recipe using something exotic, call get_browser
         #return self.get_browser()
-        return br #现在mechanicalsoup是线程安全的
+        return br #requests是线程安全的
 
     @property
     def cloned_browser(self):
-        if hasattr(self.get_browser, 'is_base_class_implementation'):
+        #if hasattr(self.get_browser, 'is_base_class_implementation'):
             # We are using the default get_browser, which means no need to
             # clone
-            br = BasicNewsRecipe.get_browser(self)
-        else:
-            br = self.clone_browser(self.browser)
-        return br
+        #    br = BasicNewsRecipe.get_browser(self)
+        #else:
+        #    br = self.clone_browser(self.browser)
+        return self.browser
 
     def get_article_url(self, article):
         '''
@@ -692,9 +692,10 @@ class BasicNewsRecipe(Recipe):
             # clone the browser to be safe. We cannot use self.cloned_browser
             # as it may or may not actually clone the browser, depending on if
             # the recipe implements get_browser() or not
-            br = self.clone_browser(self.browser)
-            with closing(br.open(url_or_raw, timeout=self.timeout)) as f:
-                _raw = f.read()
+            _raw = None
+            resp = self.browser.open(url_or_raw, timeout=self.timeout)
+            if resp.status_code == 200:
+                _raw = resp.content
             if not _raw:
                 raise RuntimeError('Could not fetch index from %s'%url_or_raw)
         else:
@@ -884,12 +885,11 @@ class BasicNewsRecipe(Recipe):
         '''
         pass
 
-    def __init__(self, options, log, progress_reporter, output_dir, fs, feed_index_start=0):
+    def __init__(self, options, log, output_dir, fs, user, feed_index_start=0):
         '''
         Initialize the recipe.
         :param options: Parsed commandline options
         :param log:  Logging object
-        :param progress_reporter: A Callable that takes two arguments: progress (a number between 0 and 1) and a string message. The message should be optional.
         :param output_dir: output_dir name
         :param fs: FsDictStub object
         :parm feed_index_start: For multiple BasicNewsRecipe into one book
@@ -903,6 +903,7 @@ class BasicNewsRecipe(Recipe):
         self.debug = options.verbose > 1
         self.output_dir = output_dir
         self.fs = fs
+        self.user = user
         self.feed_index_start = feed_index_start
         self.verbose = options.verbose
         self.test = options.test
@@ -922,8 +923,7 @@ class BasicNewsRecipe(Recipe):
 
         if self.debug:
             self.verbose = True
-        self.report_progress = progress_reporter
-
+        
         if self.needs_subscription and (
                 self.username is None or self.password is None or (
                     not self.username and not self.password)):
@@ -974,13 +974,14 @@ class BasicNewsRecipe(Recipe):
         if self.delay > 0:
             self.simultaneous_downloads = 1
 
-        if self.touchscreen:
-            self.navbar = templates.TouchscreenNavBarTemplate(feed_index_start=self.feed_index_start)
-        else:
-            self.navbar = templates.NavBarTemplate(feed_index_start=self.feed_index_start)
+        #if self.touchscreen:
+        #    self.navbar = templates.TouchscreenNavBarTemplate(feed_index_start=self.feed_index_start)
+        #else:
+        #    self.navbar = templates.NavBarTemplate(feed_index_start=self.feed_index_start)
         self.failed_downloads = []
         self.partial_failures = []
         self.aborted_articles = []
+        self.article_url_map = defaultdict(set)
 
     def _postprocess_html(self, soup, first_fetch, job_info):
         if self.no_stylesheets:
@@ -998,7 +999,7 @@ class BasicNewsRecipe(Recipe):
         style = soup.new_tag('style', type='text/css', title='override_css')
         style.append(css)
         head.append(style)
-        if first_fetch and job_info:
+        if 0 and first_fetch and job_info:
             url, f, a, feed_len = job_info
             body = soup.find('body')
             if body is not None:
@@ -1061,8 +1062,7 @@ class BasicNewsRecipe(Recipe):
         :return: Path to index.html
         '''
         if 1:
-            res = self.build_index(need_top_index)
-            self.report_progress(1, _('Download finished'))
+            res = self.build_index(need_top_index)        
             if self.failed_downloads:
                 self.log.warning(_('Failed to download the following articles:'))
                 for feed, article, debug in self.failed_downloads:
@@ -1147,11 +1147,12 @@ class BasicNewsRecipe(Recipe):
                     if bn:
                         img = os.path.join(imgdir, 'feed_image_%d%s'%(self.image_counter, os.path.splitext(bn)[-1]))
                         try:
-                            with closing(self.browser.open(feed.image_url, timeout=self.timeout)) as r:
-                                self.fs.write(img, r.read(), 'wb')
-                            self.image_counter += 1
-                            feed.image_url = img
-                            self.image_map[feed.image_url] = img
+                            resp = self.browser.open(feed.image_url, timeout=self.timeout)
+                            if resp.status_code == 200:
+                                self.fs.write(img, resp.content, 'wb')
+                                self.image_counter += 1
+                                feed.image_url = img
+                                self.image_map[feed.image_url] = img
                         except:
                             pass
             if isinstance(feed.image_url, bytes):
@@ -1176,17 +1177,10 @@ class BasicNewsRecipe(Recipe):
     #       failures[]: 下载失败的url列表
     def _fetch_article(self, url, dir_, f, a, num_of_feeds, preloaded=None):
         br = self.browser
-        if hasattr(self.get_browser, 'is_base_class_implementation'):
-            # We are using the default get_browser, which means no need to
-            # clone
-            br = BasicNewsRecipe.get_browser(self)
-        else:
-            br = self.clone_browser(self.browser)
         self.web2disk_options.browser = br
         self.web2disk_options.dir = dir_
         fetcher = RecursiveFetcher(self.web2disk_options, self.fs, self.log,
-                self.image_map, self.css_map,
-                (url, f, a, num_of_feeds))
+                self.image_map, self.css_map, (url, f, a, num_of_feeds))
         fetcher.browser = br
         fetcher.base_dir = dir_
         fetcher.current_dir = dir_
@@ -1269,13 +1263,11 @@ class BasicNewsRecipe(Recipe):
     #实际下载feeds并创建index.html
     #need_top_index: 是否生成最上层的index.html，如果不生成，则由recipe_input生成
     def build_index(self, need_top_index=True):
-        self.report_progress(0, _('Fetching feeds...'))
         feeds = None
         try:
             feeds = feeds_from_index(self.parse_index(), oldest_article=self.oldest_article,
                                      max_articles_per_feed=self.max_articles_per_feed,
                                      log=self.log)
-            self.report_progress(0, _('Got feeds from index page'))
         except NotImplementedError:
             pass
 
@@ -1288,9 +1280,7 @@ class BasicNewsRecipe(Recipe):
         if self.ignore_duplicate_articles is not None:
             feeds = self.remove_duplicate_articles(feeds)
 
-        self.report_progress(0, _('Trying to download cover...'))
         self.download_cover() #如果cover_url设置的话
-        self.report_progress(0, _('Generating masthead...'))
         self.resolve_masthead() #这里固定使用默认的报头
 
         if self.test:
@@ -1354,9 +1344,6 @@ class BasicNewsRecipe(Recipe):
             for req in self.jobs:
                 tp.putRequest(req, block=True, timeout=0)
 
-            self.report_progress(0, ngettext(
-                'Starting download in a single thread...',
-                'Starting download [{} threads]...', thread_num).format(thread_num))
             while True:
                 try:
                     tp.poll()
@@ -1379,7 +1366,6 @@ class BasicNewsRecipe(Recipe):
         
         #在recipe_input.py里面调用，可以一次性将多个Recipe的下载合并转换为一本电子书
         #self.create_opf(feeds)
-        self.report_progress(1, _('Feeds downloaded to %s')%index)
 
         return index
 
@@ -1400,9 +1386,9 @@ class BasicNewsRecipe(Recipe):
             elif os.access(cu, os.R_OK): #recipe里面设置了本地封面图像文件
                 cdata = self.fs.read(cu, 'rb')
             else: #要求使用网络图像做为封面
-                self.report_progress(1, _('Downloading cover from %s')%cu)
-                with closing(self.browser.open(cu, timeout=self.timeout)) as r:
-                    cdata = r.content
+                resp = self.browser.open(cu, timeout=self.timeout)
+                if resp.status_code == 200:
+                    cdata = resp.content
             if not cdata:
                 return
             self.cover_path = os.path.join(self.output_dir, 'cover.jpg')
@@ -1433,9 +1419,9 @@ class BasicNewsRecipe(Recipe):
         elif os.access(mu, os.R_OK):
             self.fs.write(mpath, open(mu, 'rb').read(), 'wb')
         else:
-            with closing(self.browser.open(mu, timeout=self.timeout)) as r:
-                self.fs.write(mpath, r.read(), 'wb')
-            self.report_progress(1, _('Masthead image downloaded'))
+            resp = self.browser.open(mu, timeout=self.timeout)
+            if resp.status_code == 200:
+                self.fs.write(mpath, resp.content, 'wb')
         self.prepare_masthead_image(mpath, outfile)
         self.masthead_path = outfile
         self.fs.delete(mpath)
@@ -1560,7 +1546,7 @@ class BasicNewsRecipe(Recipe):
         self.play_order_counter = 0
         self.play_order_map = {}
 
-        self.article_url_map = aumap = defaultdict(set)
+        aumap = self.article_url_map
 
         def feed_index(num, parent):
             f = feeds[num]
@@ -1679,8 +1665,6 @@ class BasicNewsRecipe(Recipe):
         article.downloaded = True
         article.sub_pages  = downloads[1:]
         self.jobs_done += 1
-        self.report_progress(float(self.jobs_done)/len(self.jobs),
-            _('Article downloaded: %s')%force_unicode(article.title))
         if failures:
             self.partial_failures.append((request.feed.title, article.title, article.url, failures))
 
@@ -1688,15 +1672,11 @@ class BasicNewsRecipe(Recipe):
         self.jobs_done += 1
         if traceback and re.search('^AbortArticle:', traceback, flags=re.M) is not None:
             self.log.warn('Aborted download of article: {} from {}'.format(request.article.title, request.article.url))
-            self.report_progress(float(self.jobs_done)/len(self.jobs),
-                _('Article download aborted: %s')%force_unicode(request.article.title))
             self.aborted_articles.append((request.feed, request.article))
         else:
             self.log.error('Failed to download article:{} from {}'.format(request.article.title, request.article.url))
             self.log.debug(traceback)
             self.log.debug('\n')
-            self.report_progress(float(self.jobs_done)/len(self.jobs),
-                    _('Article download failed: %s')%force_unicode(request.article.title))
             self.failed_downloads.append((request.feed, request.article, traceback))
 
     #从recipe里面定义的feed列表返回一个Feed实例列表
@@ -1720,7 +1700,6 @@ class BasicNewsRecipe(Recipe):
                 url = url.decode('utf-8')
             if url.startswith('feed://'):
                 url = 'http'+url[4:]
-            self.report_progress(0, _('Fetching feed')+' %s...'%(title if title else url))
             try:
                 #purl = urlparse(url, allow_fragments=False)
                 #if purl.username or purl.password:
@@ -1730,10 +1709,13 @@ class BasicNewsRecipe(Recipe):
                 #    url = purl._replace(netloc=hostname).geturl()
                 #    if purl.username and purl.password:
                 #        br.add_password(url, purl.username, purl.password)
-                with closing(br.open(url, timeout=self.timeout)) as f:
-                    raw = f.content
-                parsed_feeds.append(feed_from_xml(raw, title=title, log=self.log, oldest_article=self.oldest_article,
-                    max_articles_per_feed=self.max_articles_per_feed, get_article_url=self.get_article_url))
+                resp = br.open(url, timeout=self.timeout)
+                if resp.status_code == 200:
+                    raw = resp.content
+                    parsed_feeds.append(feed_from_xml(raw, title=title, log=self.log, oldest_article=self.oldest_article,
+                        max_articles_per_feed=self.max_articles_per_feed, get_article_url=self.get_article_url))
+                else:
+                    raise URLError('Cannot fetch {url}')
             except Exception as err:
                 feed = Feed() #创建一个空的Feed返回
                 msg = 'Failed feed: %s'%(title if title else url)

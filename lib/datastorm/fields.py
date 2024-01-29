@@ -52,6 +52,15 @@ class BaseField(FieldABC):
     def __ge__(self, other: Any) -> Filter:
         return self._generate_filter(">=", other)
 
+    def in_(self, other: Any) -> Filter:
+        assert(isinstance(other, list))
+        return self._generate_filter("IN", other)
+
+    def not_in(self, other: Any) -> Filter:
+        assert(isinstance(other, list))
+        return self._generate_filter("NOT_IN", other)
+        
+
     #用来排序的，如果是升序，asc()可以省略
     @classmethod
     def asc(self):
