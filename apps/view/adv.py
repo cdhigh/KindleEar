@@ -70,12 +70,11 @@ def AdvArchive():
     appendStrs["tumblr"] = _("Append hyperlink '{}' to article").format(SHARE_ON_TUMBLR)
     appendStrs["browser"] = _("Append hyperlink '{}' to article").format(OPEN_IN_BROWSER)
     shareLinks = user.share_links
-    evernote = shareLinks.get('evernote', {})
-    wiz = shareLinks.get('wiz', {})
-    pocket = shareLinks.get('pocket', {})
-    instapaper = shareLinks.get('instapaper', {})
+    #evernote = shareLinks.get('evernote', {})
+    #wiz = shareLinks.get('wiz', {})
+    #pocket = shareLinks.get('pocket', {})
+    #instapaper = shareLinks.get('instapaper', {})
 
-    
     return render_template('advarchive.html', tab='advset', user=user, advCurr='archive', appendStrs=appendStrs,
         shareLinks=shareLinks, gae_in_email=USE_GAE_INBOUND_EMAIL)
 
@@ -281,7 +280,13 @@ def AdvUploadCoverImageAjaxPost():
             imgInst = imgInst.resize((int(width * ratio), int(height * ratio)))
         data = io.BytesIO()
         imgInst.save(data, 'JPEG')
-        user.cover = data.getvalue()
+        dbCover = UserBlob.get_one(UserBlob.name == 'cover')
+        if dbCover:
+            dbCover.data = data.getvalue()
+        else:
+            dbCover = UserBlob(name='cover', data=data.getvalue(), time=datetime.datetime.utcnow())
+        dbCover.save()
+        user.cover = ['db://' + dbCover.key_or_id_string]
         user.save()
         upload.close()
     except Exception as e:
@@ -295,6 +300,7 @@ def AdvUploadCoverImageAjaxPost():
 def AdvDeleteCoverImageAjaxPost():
     user = get_login_user()
     if request.form.get('action') == 'delete':
+        [item.delete_instance() for item in UserBlob.get_all(UserBlob.name == 'cover')]
         user.cover = None
         user.save()
     

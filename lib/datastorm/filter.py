@@ -10,3 +10,8 @@ class Filter:
 
     def __repr__(self):
         return "< Filter: {} {} {} >".format(self.item, self.op, self.value)  # pragma: no cover
+    
+    def __and__(self, rhs):
+        assert(isinstance(rhs, Filter))
+        return [self, rhs]
+        

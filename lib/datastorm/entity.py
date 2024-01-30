@@ -10,14 +10,16 @@ from google.cloud.datastore import Key
 from .fields import BaseField
 from .filter import Filter
 from .mapper import FieldMapper
-from .query import QueryBuilder
-
+from .query import QueryBuilder, DeleteQueryBuilder
 
 class AbstractDSEntity(type):
-    #原模块为@property query()，为了和peewee接口一致，修改为select()
     @classmethod
     def select(cls, *args):
-        return QueryBuilder(cls)
+        return QueryBuilder(cls, *args)
+
+    @classmethod
+    def delete(cls, *args):
+        return DeleteQueryBuilder(cls, *args)
 
     def __getattribute__(self, key):
         #if key in ['create', 'get', 'get_or_none', 'get_by_id']
@@ -27,13 +29,13 @@ class AbstractDSEntity(type):
         return attr
 
 class BaseEntity:
-    __kind__: str = None  # type: ignore #kind类似SQL里面的表名
+    #__kind__: str = None  # type: ignore #kind类似SQL里面的表名，改为直接使用类名做为Kind
     __base_filters__: List[Filter] = []
 
     _datastore_client = None
 
-    #这里为了简单，key可以为空
-    def __init__(self, key: Union[Key, str] = "", **kwargs):
+    #key=None时datastore后台会自动给分配一个id
+    def __init__(self, key: Union[Key, str] = None, **kwargs):
         self.key = key if isinstance(key, Key) else self.generate_key(key)
         self._datastorm_mapper = self.__resolve_mappings()
         self.__set_defaults()
@@ -47,6 +49,12 @@ class BaseEntity:
         inst = cls(**kwargs)
         inst.save()
         return inst
+
+    @classmethod
+    def insert_many(cls, data_dict):
+        if data_dict:
+            entities = [cls(**data).get_datastore_entity() for data in data_dict]
+            self._datastore_client.put_multi(entities)
 
     #增加和peewee相同的接口 get()，不同的是这里获取不到数据也不抛出异常
     @classmethod
@@ -96,16 +104,17 @@ class BaseEntity:
     @classmethod
     def generate_key(cls, identifier: str = None, parent_key: Optional[Key] = None):
         if identifier:
-            return cls._datastore_client.key(cls.__kind__, identifier, parent=parent_key)  # type: ignore
+            return cls._datastore_client.key(cls.__name__, identifier, parent=parent_key)  # type: ignore
         else:
-            return cls._datastore_client.key(cls.__kind__, parent=parent_key)  # type: ignore
+            return cls._datastore_client.key(cls.__name__, parent=parent_key)  # type: ignore
 
     #生成Datastore的Entity
     def get_datastore_entity(self):
         entity = datastore.Entity(key=self.key)
         data = self.to_python_dict()
         data.pop('key', None)
-        entity.update(entity_dict) #这里update只是内存数据，还没有提交
+        data.pop('id', None)
+        entity.update(data) #这里update只是内存数据，还没有提交
         return entity
 
     #生成一个字典
@@ -143,4 +152,4 @@ class BaseEntity:
             self.set(field_name, self._datastorm_mapper.default(field_name))
 
     def __repr__(self):
-        return "< {name} >".format(name=self.__kind__)  # pragma: no cover
+        return "< {name} >".format(name=self.__class__.__name__)  # pragma: no cover

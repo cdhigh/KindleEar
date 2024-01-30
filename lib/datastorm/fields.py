@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-import json
+import json, datetime
 from typing import Union, Any, Optional, Callable
 from .filter import Filter
 from .base import FieldABC
 
 class BaseField(FieldABC):
     def __init__(self, field_name: Optional[str] = None, enforce_type: bool = False,
-                 default: Optional[Union[Any, Callable]] = None):
+                 default: Optional[Union[Any, Callable]] = None, **kwargs):
         self.field_name = field_name
         self.enforce_type = enforce_type
         self._default = default if callable(default) else lambda: default
@@ -59,7 +59,12 @@ class BaseField(FieldABC):
     def not_in(self, other: Any) -> Filter:
         assert(isinstance(other, list))
         return self._generate_filter("NOT_IN", other)
-        
+
+    def between(self, other1: Any, other2: Any) -> list:
+        if other1 <= other2:
+            return [self._generate_filter(">", other1), self._generate_filter("<", other2)]
+        else:
+            return [self._generate_filter("<", other1), self._generate_filter(">", other2)]
 
     #用来排序的，如果是升序，asc()可以省略
     @classmethod
@@ -78,6 +83,8 @@ class AnyField(BaseField):
     def check_type(self, value) -> bool:
         return True
 
+BlobField = AnyField
+
 class BooleanField(BaseField):
     def check_type(self, value):
         return isinstance(value, bool)
@@ -90,7 +97,7 @@ class BooleanField(BaseField):
     def default(self):
         return super().default or bool()
 
-class IntField(BaseField):
+class IntegerField(BaseField):
     def check_type(self, value):
         return isinstance(value, int) and not isinstance(value, bool)
 
@@ -126,6 +133,19 @@ class StringField(BaseField):
     def default(self):
         return super().default or str()
 
+CharField = StringField #An alias
+TextField = StringField
+
+class DateTimeField(BaseField):
+    def check_type(self, value):
+        return isinstance(value, datetime.datetime)
+    #datetime can be used in datastore directly
+    #@classmethod
+    #def _dumps(cls, value) -> str:
+    #    return value.strftime('%Y-%m-%d %H:%M:%S.%f')
+    #def loads(self, serialized_value: str) -> datetime.datetime:
+    #    return datetime.datetime.strptime(serialized_value, '%Y-%m-%d %H:%M:%S.%f')
+
 class JSONField(BaseField):
     def check_type(self, value):
         json_types = [bool, int, float, str, list, dict]
@@ -142,6 +162,12 @@ class JSONField(BaseField):
     def default(self):
         return super().default or dict()
 
+     @classmethod
+    def list_default(cls):
+        return []
+    @classmethod
+    def dict_default(cls):
+        return {}
 
 class DictField(JSONField):
     def check_type(self, value):

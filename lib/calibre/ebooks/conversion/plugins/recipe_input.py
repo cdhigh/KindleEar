@@ -332,7 +332,7 @@ class RecipeInput(InputFormatPlugin):
     def get_cover_masthead(self, dir_, recipe1, user, fs):
         cPath = getattr(recipe1, 'cover_path', None)
         if cPath is None:
-            cover_data = user.cover if user.cover else get_default_cover_data()
+            cover_data = user.get_cover_data() or get_default_cover_data()
             cPath = os.path.join(dir_, 'cover.jpg')
             self.cover_path = cPath
             fs.write(cPath, cover_data, 'wb')

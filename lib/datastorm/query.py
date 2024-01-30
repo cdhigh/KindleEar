@@ -9,18 +9,23 @@ from .fields import BaseField
 from .filter import Filter
 
 class QueryBuilder:
-    def __init__(self, entity_class, filters=None, order=None):
+    def __init__(self, entity_class, *args):
         self._entity_class = entity_class
-        self._kind = entity_class.__kind__
+        self._kind = entity_class.__name__
         self._client = entity_class._datastore_client
-        filters = filters or []
-        self._filters = filters + entity_class.__base_filters__
-        self._order = order or []
+        self._filters = entity_class.__base_filters__
+        self._projection = [(field.field_name if isinstance(field, BaseField) else field) for field in args]
+        self._order = []
+        self._distinct = []
         self._limit = 0
 
     #修改为和peewee接口一致
     def where(self, *filters: Filter):
-        self._filters += filters
+        for flt in filters:
+            if isinstance(flt, list):
+                self._filters.extent(flt)
+            else:
+                self._filters.append(flt)
         return self
 
     #增加此接口使用Key查询
@@ -31,26 +36,23 @@ class QueryBuilder:
         self._filters.append(Filter("__key__", "=", key))
         return self.first()
 
-    #修改为用法和peewee一样，order_by(Model.Field.desc())/order_by(Model.Field)
-    def order_by(self, field: Union[BaseField, str]):
-        order_field = field.field_name if isinstance(field, BaseField) else field
-        self._order.append(order_field)
+    #修改为用法和peewee一样，order_by(Model.Field.desc())/order_by(Model.field1, Model.field2)
+    #如果where()使用了不等式查询，则order_by()的第一项必须是第一个不等式查询的field
+    def order_by(self, *fields):
+        order_fields = [(field.field_name if isinstance(field, BaseField) else field) for field in fields]
+        self._order.extend(order_fields)
         return self
 
     def limit(self, limit: int):
         self._limit = limit
 
+    def distinct_on(self, field: Union[BaseField, str]):
+        distinct_field = field.field_name if isinstance(field, BaseField) else field
+        self._distinct.append(distinct_field)
+
     #这个修饰函数是类似SQL的select函数里面的参数，只获取部分字段，可以考虑将这部分功能移到select函数
     def only(self, *args: List[str]):
         return ProjectedQueryBuilder(self._entity_class, filters=self._filters, order=self._order, projection=args)
-
-    #修改此函数和peewee一致，返回一个元素: get(self, key: Union[Key, str]) -> def get(self)
-    #def get(self, key: Union[Key, str]):
-    #    if not isinstance(key, Key):
-    #        key = self._client.key(self._kind, key)
-    #    raw_entity = self._client.get(key)
-    #    return None if raw_entity is None else self._make_entity_instance(raw_entity.key, raw_entity)
-    get = first
 
     #select()之后需要调用此函数才提供数据
     def execute(self, page_size: int = 500, parent_key: Key = None):
@@ -77,9 +79,19 @@ class QueryBuilder:
         [query.add_filter(ft.item, ft.op, ft.value) for ft in self._filters]
         return query
 
+    def _modify_projection(self, query):
+        if self._projection:
+            query.projection = self._projection
+        return query
+
     def _modify_order(self, query):
         if self._order:
             query.order = self._order
+        return query
+
+    def _modify_distinct(self, query):
+        if self._distinct:
+            query.distinct_on = self._distinct
         return query
 
     def _get_query(self, parent_key: Key):
@@ -88,7 +100,9 @@ class QueryBuilder:
 
     def _build_query(self, query):
         query = self._modify_filters(query)
+        query = self._modify_projection(query)
         query = self._modify_order(query)
+        query = self._modify_distinct(query)
         return query
 
     def first(self):
@@ -101,6 +115,8 @@ class QueryBuilder:
             pass
 
         return result
+
+    get = first
 
     def __iter__(self):
         return iter(self.execute())
@@ -117,29 +133,12 @@ class QueryBuilder:
         return "< QueryBuilder filters: {}, ordered by: {}>".format(self._filters or "No filters",
                                                                     self._order or "No order")  # pragma: no cover
 
+class DeleteQueryBuilder(QueryBuilder):
+    #select()之后需要调用此函数才开始删除数据
+    def execute(self):
+        keys = [e.key for e in super().execute()]
+        if keys:
+            self._client.delete_multi(keys)
 
-#投影查询允许您仅查询某个实体上您确实需要的那些特定属性，延迟和成本都比检索整个实体更低。
-#投影查询要求将指定的属性编入索引。
-class ProjectedQueryBuilder(QueryBuilder):
-    def __init__(self, entity_class, filters=None, order=None, projection=None):
-        super(ProjectedQueryBuilder, self).__init__(entity_class, filters=filters, order=order)
-        self._projection = projection or []
-
-    def only(self, *args: List[str]):
-        self._projection += args
-        return self
-
-    def _make_entity_instance(self, key: Key, attr_data: dict):
-        entity = datastore.Entity(key=key)
-        entity.update(attr_data)
-        return entity
-
-    def _modify_projection(self, query):
-        if self._projection:
-            query.projection = self._projection
-        return query
-
-    def _build_query(self, query):
-        query = super()._build_query(query)
-        query = self._modify_projection(query)
-        return query
+    def __repr__(self):
+        return "< DeleteQueryBuilder filters: {} >".format(self._filters or "No filters")  # pragma: no cover

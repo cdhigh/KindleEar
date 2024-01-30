@@ -30,7 +30,8 @@ class DataStorm:
     #表示一个实体类，客户端每个实体继承这个类
     @property
     def DSEntity(self):
-        return AbstractDSEntity("DSEntity", (BaseEntity,), {'__kind__': None, '_datastore_client': self.client})
+        #return AbstractDSEntity("DSEntity", (BaseEntity,), {'__kind__': None, '_datastore_client': self.client})
+        return AbstractDSEntity("DSEntity", (BaseEntity,), {'_datastore_client': self.client})
 
     #保存多个实体到datastore
     def save_multi(self, entities: List[BaseEntity], batch_size: int = MAX_DATASTORE_BATCH_SIZE):
@@ -54,3 +55,8 @@ class DataStorm:
     #将一个列表分成batch_size的若干个小列表
     def split_batches(self, entities: List[T], batch_size: int) -> List[List[T]]:
         return [entities[i:i + batch_size] for i in range(0, len(entities), batch_size)]
+
+    #事务支持
+    def atomic(self, **kwargs):
+        return self.client.transaction(**kwargs)
+

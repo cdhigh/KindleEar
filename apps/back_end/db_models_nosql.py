@@ -9,11 +9,11 @@
 #根据以前的经验，经常出现有网友部署时没有成功建立数据库索引，所以现在排序在应用内处理，数据量不大
 #Author: cdhigh <https://github.com/cdhigh/KindleEar>
 import datetime
-from apps.utils import ke_encrypt, ke_decrypt
 from config import DATABASE_ENGINE, DATABASE_HOST, DATABASE_PORT, DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_NAME
 
 if DATABASE_ENGINE == "datastore":
-    from datastorm import DataStorm, fields
+    from datastorm import DataStorm
+    from datastorm.fields import *
     from google.cloud.datastore import Key as DataStoreKey
     dbInstance = DataStorm(project=APP_ID)
 else:
@@ -29,7 +29,7 @@ def CloseDatabase():
 
 #数据表的共同基类
 class MyBaseModel(dbInstance.DSEntity):
-    id = fields.StringField()
+    id = CharField()
     @classmethod
     def get_all(cls, *query):
         return cls.select().where(*query).execute()
@@ -65,191 +65,5 @@ class MyBaseModel(dbInstance.DSEntity):
                 ret[key] = data.strftime('%Y-%m-%d %H:%M:%S')
         return ret
 
-#--------------db models----------------
-
-class KeUser(MyBaseModel): # kindleEar User
-    __kind__ = "KeUser"
-    name = fields.StringField()
-    passwd = fields.StringField()
-    expiration_days = fields.IntField() #账号超期设置值，0为永久有效
-    secret_key = fields.StringField()
-    kindle_email = fields.StringField()
-    email = fields.StringField() #可能以后用于重置密码之类的操作
-    enable_send = fields.BooleanField()
-    send_days = fields.ListField()
-    send_time = fields.IntField()
-    timezone = fields.IntField()
-    book_type = fields.StringField() #mobi,epub
-    device = fields.StringField()
-    expires = fields.DateTimeField() #超过了此日期后账号自动停止推送
-
-    book_title = fields.StringField()
-    use_title_in_feed = fields.BooleanField() #文章标题优先选择订阅源中的还是网页中的
-    title_fmt = fields.StringField() #在元数据标题中添加日期的格式
-    author_format = fields.StringField() #修正Kindle 5.9.x固件的bug【将作者显示为日期】
-    book_mode = fields.StringField() #书籍模式，'periodical'|'comic'，漫画模式可以直接全屏
-    merge_books = fields.BooleanField() #是否合并书籍成一本
-    remove_hyperlinks = fields.StringField() #去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
-    keep_image = fields.BooleanField(default=True)
-    oldest_article = fields.IntField(default=7)
-    book_language = fields.StringField() #自定义RSS的语言
-    enable_custom_rss = fields.BooleanField(default=True)
-    
-    share_key = fields.StringField(default='')
-    share_links = fields.DictField() #evernote/wiz/pocket/instapaper包含子字典，微博/facebook/twitter等仅包含0/1
-    share_fuckgfw = fields.BooleanField() #归档和分享时是否需要翻墙
-
-    cover = fields.AnyField() #保存各用户的自定义封面图片二进制内容
-    css_content = fields.StringField() #added 2019-09-12 保存用户上传的css样式表
-    sg_enable = fields.BooleanField(default=False)
-    sg_apikey = fields.StringField(default='')
-    custom = fields.DictField() #留着扩展，避免后续一些小特性还需要升级数据表结构
-
-    #自己直接所属的自定义RSS列表，返回[Recipe,]
-    def all_custom_rss(self):
-        return sorted(Recipe.select().where(Recipe.user == self.name).where(Recipe.type_ == 'custom'), 
-            key=attrgetter('time'), reverse=True)
-
-    #自己直接所属的上传Recipe列表，返回[Recipe,]
-    def all_uploaded_recipe(self):
-        return sorted(Recipe.select().where(Recipe.user == self.name).where(Recipe.type_ == 'upload'), 
-            key=attrgetter('time'), reverse=True)
-
-    #自己订阅的Recipe，如果传入recipe_id，则使用id筛选，返回一个，否则返回一个列表
-    def get_booked_recipe(self, recipe_id=None):
-        if recipe_id:
-            return BookedRecipe.select().where(BookedRecipe.user == self.name).where(BookedRecipe.recipe_id == recipe_id).first()
-        else:
-            return sorted(BookedRecipe.get_all(BookedRecipe.user == self.name), key=attrgetter('time'), reverse=True)
-
-    #本用户所有的白名单
-    def white_lists(self):
-        return WhiteList.get_all(WhiteList.user == self.name)
-    
-    def url_filters(self):
-        return UrlFilter.get_all(UrlFilter.user == self.name)
-
-    #删除自己订阅的书，白名单，过滤器等，就是完全的清理
-    def erase_traces(self):
-        map(lambda x: x.delete_instance(), list(Recipe.get_all(Recipe.user == self.name)))
-        map(lambda x: x.delete_instance(), list(self.get_booked_recipe()))
-        map(lambda x: x.delete_instance(), list(self.white_lists()))
-        map(lambda x: x.delete_instance(), list(self.url_filters()))
-        map(lambda x: x.delete_instance(), list(DeliverLog.get_all(DeliverLog.username == self.name)))
-        
-#RSS订阅源，包括自定义RSS，上传的recipe，内置在zip里面的builtin_recipe不包括在内
-#每个Recipe的字符串表示为：custom:id, upload:id
-class Recipe(MyBaseModel):
-    __kind__ = "Recipe"
-    title = fields.StringField()
-    url = fields.StringField(default='')
-    description = fields.StringField(default='')
-    isfulltext = fields.BooleanField(default=False)
-    type_ = fields.StringField() #'custom','upload'
-    needs_subscription = fields.BooleanField(default=False) #是否需要登陆网页，只有上传的recipe才有意义
-    src = fields.StringField() #保存上传的recipe的unicode字符串表示，已经解码
-    time = fields.DateTimeField() #源被加入的时间，用于排序
-    user = fields.StringField(default='') #哪个账号创建的
-    language = fields.StringField(default='')
-    
-    #在程序内其他地方使用的id，在数据库内则使用 self.id
-    @property
-    def recipe_id(self):
-        return '{}:{}'.format(self.type_, self.id)
-
-    #将各种表示的recipe id转换回数据库id，返回 (type, id)
-    @classmethod
-    def type_and_id(cls, id_):
-        id_ = str(id_)
-        if ':' in id_:
-            return id_.split(':', 1)
-        elif id_.startswith(('custom__', 'upload__', 'builtin__')):
-            return id_.split('__', 1)
-        else:
-            return '', id_
-
-#已经被订阅的Recipe信息
-class BookedRecipe(MyBaseModel):
-    recipe_id = fields.CharField() #这个ID不是Recipe数据库ID，而是 builtin:xxx, upload:xxx, custom:xxx
-    separated = fields.BooleanField() #是否单独推送
-    user = fields.CharField()
-    title = fields.StringField()
-    description = fields.StringField()
-    needs_subscription = fields.BooleanField(default=False)
-    account = fields.StringField(default='') #如果网站需要登录才能看
-    encrypted_pwd = fields.StringField(default='')
-    send_days = fields.ListField()
-    send_times = fields.ListField()
-    time = fields.DateTimeField() #源被订阅的时间，用于排序
-
-    @property
-    def password(self):
-        userInst = KeUser.get_one(KeUser.name == self.user)
-        return ke_decrypt(self.encrypted_pwd, userInst.secret_key if userInst else '')
-        
-    @password.setter
-    def password(self, pwd):
-        userInst = KeUser.get_one(KeUser.name == self.user)
-        self.encrypted_pwd = ke_encrypt(pwd, userInst.secret_key if userInst else '')
-
-#书籍的推送历史记录
-class DeliverLog(MyBaseModel):
-    __kind__ = "DeliverLog"
-    username = fields.StringField()
-    to = fields.StringField()
-    size = fields.IntField()
-    time = fields.StringField()
-    datetime = fields.DateTimeField()
-    book = fields.StringField()
-    status = fields.StringField()
-
-class WhiteList(MyBaseModel):
-    __kind__ = "WhiteList"
-    mail = fields.StringField()
-    user = fields.StringField() #保存账号名
-
-class UrlFilter(MyBaseModel):
-    __kind__ = "UrlFilter"
-    url = fields.StringField()
-    user = fields.StringField()  #保存账号名
-
-#Shared RSS links from other users [for kindleear.appspot.com only]
-class SharedRss(MyBaseModel):
-    __kind__ = "SharedRss"
-    title = fields.StringField()
-    url = fields.StringField(default='')
-    isfulltext = fields.BooleanField(default=False)
-    language = fields.StringField(default='')
-    category = fields.StringField(default='')
-    recipe_url = fields.StringField(default='') #客户端优先使用此字段获取recipe，为什么不用上面的url是要和以前的版本兼容
-    src = fields.StringField(default='') #保存分享的recipe的unicode字符串表示，已经解码
-    description = fields.StringField(default='')
-    creator = fields.StringField(default='')
-    created_time = fields.DateTimeField(default=datetime.datetime.utcnow)
-    subscribed = fields.IntField(default=0) #for sort
-    last_subscribed_time = DateTimeField(default=datetime.datetime.utcnow)
-    invalid_report_days = fields.IntField(default='') #some one reported it is a invalid link
-    last_invalid_report_time = fields.DateTimeField(default=datetime.datetime.utcnow) #a rss will be deleted after some days of reported_invalid
-    
-    #return all categories in database
-    @classmethod
-    def categories(self):
-        return set([item.category for item in SharedRss.get_all()])
-    
-#Buffer for category of shared rss [for kindleear.appspot.com only]
-class SharedRssCategory(MyBaseModel):
-    __kind__ = "SharedRssCategory"
-    name = fields.StringField()
-    last_updated = fields.DateTimeField() #for sort
-
-#当前使用:
-#name='dbTableVersion' 行保存数据库格式版本
-#name='lastSharedRssTime' 保存共享库的最新更新日期
-class AppInfo(MyBaseModel):
-    name = fields.StringField()
-    int_value = fields.IntField(default=0)
-    str_value = fields.StringField(default='')
-    time_value = fields.DateTimeField(default=datetime.datetime.utcnow)
-    description = fields.StringField(default='')
-    comment = fields.StringField(default='')
-    
+def CreateDatabaseTable(force=False):
+    pass
