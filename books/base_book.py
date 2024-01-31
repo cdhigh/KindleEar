@@ -51,8 +51,6 @@ class BaseFeedBook:
     #回调函数要求为独立的函数，不能为类方法或实例方法。
     #如果回调函数返回的不是图片或为None，则还是直接使用DEFAULT_COVER
     cover_file = DEFAULT_COVER
-    
-    keep_image = True #生成的MOBI是否需要图片
 
     #是否按星期投递，留空则每天投递，否则是一个星期字符串列表
     #一旦设置此属性，则网页上设置的“星期推送”对此书无效
@@ -527,11 +525,6 @@ class BaseFeedBook:
     #soup: BeautifulSoup 实例
     #url: 文章的URL
     def PrepareImageManifest(self, soup, url):
-        if not self.keep_image: #不保留图像文件
-            for imgTag in soup.find_all('img'):
-                imgTag.decompose()
-            return
-
         self.ProcessBeforeImage(soup)
         self.RectifyImageSrcInSoup(soup, url)
         opener = UrlOpener(self.host, timeout=self.timeout, headers=self.extra_header)

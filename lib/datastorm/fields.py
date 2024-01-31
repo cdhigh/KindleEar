@@ -156,15 +156,19 @@ class JSONField(BaseField):
         return json.dumps(value)
 
     def loads(self, serialized_value: str) -> dict:
-        return json.loads(serialized_value)
+        if isinstance(serialized_value, str):
+            return json.loads(serialized_value)
+        else:
+            return serialized_value
 
     @property
     def default(self):
         return super().default or dict()
 
-     @classmethod
+    @classmethod
     def list_default(cls):
         return []
+        
     @classmethod
     def dict_default(cls):
         return {}

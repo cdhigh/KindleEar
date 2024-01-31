@@ -67,9 +67,7 @@ def SaveToEvernoteWiz(user, action, orgUrl):
     rssBook = user.my_rss_book
     book.title = book.description = action
     book.language = rssBook.language
-    book.keep_image = rssBook.keep_image
     book.feeds = [(action, orgUrl)]
-    book.url_filters = [flt.url for flt in user.url_filters]
     
     attachments = [] #(filename, attachment),]
     html = ''
@@ -115,7 +113,7 @@ def SaveToEvernoteWiz(user, action, orgUrl):
         info = SHARE_INFO_TPL.format(title=title, info=info)
         return info
     else:
-        deliver_log(user.name, str(to), title, 0, status='fetch failed', tz=user.timezone)
+        save_delivery_log(user.name, to, title, 0, status='fetch failed', tz=user.timezone)
         default_log.info("[Share] Fetch url failed.")
         return "[Share] Fetch url failed."
 

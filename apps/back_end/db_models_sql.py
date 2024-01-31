@@ -3,15 +3,7 @@
 #关系数据库行结构定义，使用peewee ORM
 #根据以前的经验，经常出现有网友部署时没有成功建立数据库索引，所以现在排序在应用内处理，数据量不大
 #Author: cdhigh <https://github.com/cdhigh>
-import os, sys, json, datetime
-from operator import attrgetter
-
-if __name__ == '__main__': #调试使用，调试时为了单独执行此文件
-    thisDir = os.path.dirname(os.path.abspath(__file__))
-    appDir = os.path.normpath(os.path.join(thisDir, "..", ".."))
-    sys.path.insert(0, appDir)
-    sys.path.insert(0, os.path.join(appDir, 'lib'))
-from apps.utils import ke_encrypt, ke_decrypt
+import os, json, datetime
 from peewee import *
 from playhouse.db_url import connect
 from playhouse.shortcuts import model_to_dict
@@ -19,7 +11,7 @@ from config import (DATABASE_ENGINE, DATABASE_HOST, DATABASE_PORT, DATABASE_USER
                 DATABASE_PASSWORD, DATABASE_NAME)
 
 #用于在数据库结构升级后的兼容设计，数据库结构和前一版本不兼容则需要升级此版本号
-__DB_VERSION__ = 1
+DB_VERSION = 1
 
 if '://' in DATABASE_NAME:
     dbInstance = connect(DATABASE_NAME)
@@ -109,36 +101,3 @@ class MyBaseModel(Model):
             if isinstance(data, datetime.datetime):
                 ret[key] = data.strftime('%Y-%m-%d %H:%M:%S')
         return ret
-
-    
-#创建数据库表格，一个数据库只需要创建一次
-#如果是sql数据库，可以使用force=True删掉之前的数据库文件
-def CreateDatabaseTable(force=False):
-    if DATABASE_ENGINE == "sqlite":
-        if not force and os.path.exists(dbName):
-            print(f'[Error] Database "{dbName}" already exists')
-            return
-        elif os.path.exists(dbName):
-            try:
-                os.remove(dbName)
-            except:
-                pass
-
-    KeUser.create_table()
-    UserBlob.create_table()
-    Recipe.create_table()
-    BookedRecipe.create_table()
-    DeliverLog.create_table()
-    WhiteList.create_table()
-    UrlFilter.create_table()
-    SharedRss.create_table()
-    SharedRssCategory.create_table()
-    AppInfo.create_table()
-    
-    AppInfo(name='dbTableVersion', int_value=__DB_VERSION__).save()
-    print(f'Create database "{dbName}" finished')
-
-
-if __name__ == '__main__':
-    if DATABASE_ENGINE == 'sqlite':
-        CreateDatabaseTable()

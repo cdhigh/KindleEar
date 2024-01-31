@@ -147,7 +147,7 @@ class RecursiveFetcher:
         self.timeout = options.timeout
         self.encoding = options.encoding
         self.browser = options.browser if hasattr(options, 'browser') else browser()
-        self.max_recursions = options.max_recursions
+        self.max_recursions = options.recursions
         self.match_regexps  = [re.compile(i, re.IGNORECASE) for i in options.match_regexps]
         self.filter_regexps = [re.compile(i, re.IGNORECASE) for i in options.filter_regexps]
         self.max_files = options.max_files
@@ -181,6 +181,7 @@ class RecursiveFetcher:
         self.scale_news_images = getattr(options, 'scale_news_images', None)
         self.get_delay = getattr(options, 'get_delay', lambda url: self.delay)
         self.download_stylesheets = not options.no_stylesheets
+        self.remove_hyperlinks = options.remove_hyperlinks
         self.show_progress = True
         self.failed_links = []
         self.job_info = job_info
@@ -241,6 +242,19 @@ class RecursiveFetcher:
         for kwds in self.remove_tags:
             for tag in soup.find_all(**kwds):
                 tag.extract()
+
+        #如果需要，去掉正文中的超链接(使用斜体下划线标识)，以避免误触
+        if self.remove_hyperlinks in ('text', 'all'):
+            for a_ in soup.find_all('a'):
+                a_.name = 'i'
+                a_.attrs.clear()
+
+        #去掉图像上面的链接，以免误触后打开浏览器
+        if self.remove_hyperlinks in ('image', 'all'):
+            for tag in soup.find_all('img'):
+                if tag.parent and tag.parent.parent and tag.parent.name == 'a':
+                    tag.parent.replace_with(tag)
+
         return self.preprocess_html_ext(soup)
 
     #返回一个增加了newurl属性的bytes对象 response
@@ -402,6 +416,8 @@ class RecursiveFetcher:
     def process_images(self, soup, baseurl):
         diskpath = unicode_path(os.path.join(self.current_dir, 'images'))
         self.fs.mkdir(diskpath)
+
+        self.rectify_image_src(soup, baseurl)
         
         c = 0
         for tag in soup.find_all('img', src=True):
@@ -471,6 +487,37 @@ class RecursiveFetcher:
                     #except Exception:
                     #traceback.print_exc()
                     #continue
+
+    #如果需要，纠正或规则化soup里面的图片地址，比如延迟加载等
+    def rectify_image_src(self, soup, baseurl=None):
+        for tag in soup.find_all('img'):
+            #现在使用延迟加载图片技术的网站越来越多了，这里处理一下
+            #注意：如果data-src|data-original|file之类的属性保存的不是真实url就没辙了
+            imgUrl = tag['src'] if 'src' in tag.attrs else ''
+            if not imgUrl or imgUrl.endswith('/none.gif'):
+                for attr in tag.attrs:
+                    if attr != 'src' and (('src' in attr) or (attr == 'data-original')): #很多网站使用data-src|data-original
+                        imgUrl = tag[attr]
+                        break
+                if not imgUrl:
+                    for attr in tag.attrs:
+                        if attr != 'src' and (('data' in attr) or ('file' in attr)): #如果上面的搜索找不到，再大胆一点猜测url
+                            imgUrl = tag[attr]
+                            break
+            
+            if not imgUrl:
+                tag.decompose()
+                continue
+                
+            if baseurl and not imgUrl.startswith(('data:', 'http', 'www', 'file:')):
+                imgUrl = urljoin(baseurl, imgUrl)
+                
+            if not self.is_link_wanted(imgUrl, tag):
+                self.log.warning('Image filtered:{}'.format(imgUrl))
+                tag.decompose()
+                continue
+            
+            tag['src'] = imgUrl #将更正的地址写回保存
 
     def absurl(self, baseurl, tag, key, filter=True):
         iurl = tag[key]

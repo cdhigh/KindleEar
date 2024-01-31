@@ -7,12 +7,12 @@ __copyright__ = '2009, Kovid Goyal <kovid@kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
 import os, shutil, re, io
-from calibre.utils.zipfile import ZipFile, ZIP_STORED, ZIP_DEFLATED
 from calibre.customize.conversion import (OutputFormatPlugin,
         OptionRecommendation)
 from calibre.ptempfile import TemporaryDirectory
 from calibre import CurrentDir
 from polyglot.builtins import as_bytes
+from calibre.ebooks.epub import initialize_container
 
 block_level_tags = (
       'address',
@@ -291,9 +291,8 @@ class EPUBOutput(OutputFormatPlugin):
         if self.opts.epub_version == '3':
             encryption = self.upgrade_to_epub3(tdir, opf, encryption)
 
-        from calibre.ebooks.epub import initialize_container
         with initialize_container(output_path, os.path.basename(opf), extra_entries=extra_entries) as epub:
-            for f in fs.walk():
+            for f in fs.walk(relpath=True):
                 epub.writestr(f.lstrip('/'), fs.read(f, 'rb'))
             
             if encryption is not None:

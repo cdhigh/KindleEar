@@ -32,7 +32,7 @@ def get_login_user():
     return KeUser.get_one(KeUser.name == session.get('userName', ''))
     
 #记录投递记录到数据库
-def deliver_log(name, to, book, size, status='ok', tz=TIMEZONE):
+def save_delivery_log(name, to, book, size, status='ok', tz=TIMEZONE):
     global default_log
     to = '; '.join(to) if isinstance(to, (list, tuple)) else to
     

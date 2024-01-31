@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #基于<https://github.com/JavierLuna/datastorm>修改为和peewee接口尽量一致
-import inspect, re
+import inspect, datetime
 from typing import Optional, Union, Any, List, Type
 
 from google.cloud import datastore
@@ -13,11 +13,40 @@ from .mapper import FieldMapper
 from .query import QueryBuilder, DeleteQueryBuilder
 
 class AbstractDSEntity(type):
-    @classmethod
+    def get_all(cls, *query):
+        return cls.select().where(*query).execute()
+
+    def get_one(cls, *query):
+        return cls.select().where(*query).first()
+
+    def get_by_id_or_none(cls, id_):
+        if isinstance(id_, (str, int)):
+            id_ = Key.from_legacy_urlsafe(str(id_))
+        return cls.get_by_key(id_)
+
+    #返回Key/Id的字符串表达
+    @property
+    def key_or_id_string(self):
+        return self.key.to_legacy_urlsafe().decode()
+
+    #做外键使用的字符串或ID
+    @property
+    def reference_key_or_id(self):
+        return self.key.to_legacy_urlsafe().decode()
+
+    #将当前行数据转换为一个字典结构，由子类使用，将外键转换为ID，日期转换为字符串
+    #可以传入 only=[Book.title, ...]，或 exclude=[]
+    def to_dict(self, **kwargs):
+        ret = self.to_python_dict(**kwargs)
+        for key in ret:
+            data = ret[key]
+            if isinstance(data, datetime.datetime):
+                ret[key] = data.strftime('%Y-%m-%d %H:%M:%S')
+        return ret
+
     def select(cls, *args):
         return QueryBuilder(cls, *args)
-
-    @classmethod
+        
     def delete(cls, *args):
         return DeleteQueryBuilder(cls, *args)
 

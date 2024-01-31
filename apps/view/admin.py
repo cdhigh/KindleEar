@@ -77,8 +77,8 @@ def AdminPost():
                 tips = _("The password includes non-ascii chars.")
             else:
                 au = KeUser(name=userName, passwd=pwd, kindle_email='', enable_send=False,
-                    send_time=7, timezone=TIMEZONE, book_type="epub", merge_books=False, 
-                    secret_key=secret_key, expiration_days=expiration, share_key=new_secret_key(),
+                    send_time=7, timezone=TIMEZONE, book_type="epub", secret_key=secret_key, 
+                    expiration_days=expiration, share_key=new_secret_key(),
                     book_title='KindleEar', book_language='en')
                 if expiration:
                     au.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)

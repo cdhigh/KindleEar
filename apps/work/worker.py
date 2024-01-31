@@ -9,11 +9,9 @@ from apps.base_handler import *
 from apps.back_end.send_mail_adpt import send_to_kindle
 from apps.back_end.db_models import *
 from apps.utils import local_time
-#from lib.makeoeb import *
-#from calibre.ebooks.conversion.plugins.mobi_output import MOBIOutput, AZW3Output
-#from calibre.ebooks.conversion.plugins.epub_output import EPUBOutput
-#from books.base_book import BaseFeedBook
+from calibre.web.feeds.recipes import compile_recipe
 from lib.recipe_helper import *
+from lib.build_ebook import ConvertRecipeToEbook
 
 bpWorker = Blueprint('bpWorker', __name__)
 
@@ -41,37 +39,38 @@ def GetAllRecipeSrc(user, idList):
         if recipe:
             if recipeType == 'upload': #上传的Recipe
                 srcDict[recipe.title] = [bked, recipe, recipe.src]
-            elif recipe.isfulltext: #自定义RSS
+            elif recipe.isfulltext: #全文自定义RSS
                 ftRssList.append((bked, recipe))
-            else:
+            else: #摘要自定义RSS
                 rssList.append((bked, recipe))
 
     #全文和概要rss各建一个源码
     title = user.book_title
     if ftRssList:
         feeds = [(item.title, item.url) for bked, item in ftRssList]
-        srcDict[title + '_f'] = [*ftRssList[0], GenerateRecipeSource(title, feeds, user.oldest_article, isfulltext=True)]
+        srcDict[title + '_f'] = [*ftRssList[0], GenerateRecipeSource(title, feeds, user, isfulltext=True)]
 
     if rssList:
         feeds = [(item.title, item.url) for bked, item in rssList]
-        srcDict[title] = [*rssList[0], GenerateRecipeSource(title, feeds, user.oldest_article, isfulltext=False)]
+        srcDict[title] = [*rssList[0], GenerateRecipeSource(title, feeds, user, isfulltext=False)]
     return srcDict
 
 # 实际下载文章和生成电子书并且发送邮件
 @bpWorker.route("/worker")
 def Worker():
     global default_log
+    log = default_log
     args = request.args
     userName = args.get('userName', '')
     recipeId = args.get('recipeId', '')  #如果有多个Recipe，使用','分隔
     
-    return WorkerImpl(userName, recipeId.split(','))
+    return WorkerImpl(userName, recipeId.split(','), log)
 
 #执行实际抓取网页生成电子书任务
 #userName: 需要执行任务的账号名
 #idList: 需要投递的Recipe ID列表
 #返回执行结果字符串
-def WorkerImpl(userName: str, idList: list):
+def WorkerImpl(userName: str, idList: list, log):
     if not userName or not idList:
         return "Parameters invalid."
 
@@ -80,68 +79,56 @@ def WorkerImpl(userName: str, idList: list):
         return "The user does not exist."
     
     to = user.kindle_email.replace(';', ',').split(',')
+    tz = user.timezone
     
+    #编译recipe
     srcDict = GetAllRecipeSrc(user, bkInstList)
-    for title, (bked, recipe, src) in srcDict.items():
-        ConvertToEbook()
-
-                
-        book = BaseFeedBook(imgIndex=imgIndex, opts=opts, user=user)
-        book.title = bk.title
-        book.description = bk.description
-        book.language = bk.language
-        book.keep_image = bk.keep_image
-        book.oldest_article = bk.oldest_article
-        book.fulltext_by_readability = True
-        feeds = feedList if feedList else bk.feeds
-        book.feeds = []
-        for feed in feeds:
-            if feed.url.startswith(comic_domains):
-                ProcessComicRSS(username, user, feed)
-            else:
-                book.feeds.append((feed.title, feed.url, feed.isfulltext))
-        book.url_filters = [flt.url for flt in user.url_filters]
-        
-        #书的质量可能不一，一本书的异常不能影响其他书籍的推送
+    recipes = defaultdict(list) #编译好的recipe代码对象
+    for title, (bked, recipeDb, src) in srcDict.items():
         try:
-            #可能为 ItemHtmlTuple, ItemImageTuple, ItemCssTuple
-            for item in book.Items():
-                if isinstance(item, ItemImageTuple): #图像文件
-                    id_, href = oeb.manifest.generate(id='img', href=item.fileName)
-                    oeb.manifest.add(id_, href, item.mime, data=item.content)
-                    if item.isThumbnail:
-                        tocThumbnails[item.url] = href
-                    imgIndex += 1  #保证多本书集中推送时图像文件的唯一性
-                elif isinstance(item, ItemCssTuple): #CSS
-                    if item.url not in oeb.manifest.hrefs: #Only one css needed
-                        oeb.manifest.add('css', item.url, "text/css", data=item.content)
-                else: #网页文件
-                    sections[item.section].append(item)
-                    itemCnt += 1
+            ro = compile_recipe(src)
+            assert(ro.title)
         except Exception as e:
-            log.warning("Failed to push <{}>: {}".format(book.title, e))
-            continue
+            log.warning('Failed to compile recipe {}: {}'.format(title, e))
+
+        if not ro.language or ro.language == 'und':
+            ro.language = user.book_language
+
+        #合并自定义css
+        if user.css_content:
+            ro.extra_css = ro.extra_css + '\n\n' + user.css_content if ro.extra_css else user.css_content
+
+        #如果需要登录网站
+        if ro.needs_subscription:
+            ro.username = bked.account
+            ro.password = bked.password
+
+        if bked.separated:
+            recipes[ro.title].append(ro)
+        else:
+            recipes[user.book_title].append(ro)
     
-    bookType = user.book_type #mobi,epub
-    if itemCnt > 0:
-        #插入单独的目录页
-        InsertToc(oeb, sections, tocThumbnails)
-        oIO = io.BytesIO()
-        o = EPUBOutput() if bookType == "epub" else MOBIOutput()
-        o.convert(oeb, oIO, opts, log)
-        ultimaLog = sorted(DeliverLog.get_all(), key=attrgetter('datetime'), reverse=True)
-        ultimaLog = ultimaLog[0] if ultimaLog else None
-        if ultimaLog:
-            diff = datetime.datetime.utcnow() - ultimaLog.datetime
-            if diff.days * 86400 + diff.seconds < 10:
-                time.sleep(5)
-        send_to_kindle(username, to, bookForMeta.title, bookType, oIO.getvalue(), tz)
-        rs = "{}.{} Sent".format(bookTitle, bookType)
-        return rs
-    else:
-        deliver_log(username, str(to), bookForMeta.title, 0, status='nonews', tz=tz)
-        rs = "No new feeds available."
-        return rs
+    #逐个生成电子书推送
+    lastSendTime = 0
+    bookType = user.book_type
+    ret = []
+    for title, ro in recipes.items():
+        output = io.BytesIO()
+        ConvertRecipeToEbook(ro, output, user)
+        book = output.getvalue()
+        if book:
+            #避免触发垃圾邮件机制，最短10s发送一次
+            now = time.time() #单位为s
+            if lastSendTime and (now - lastSendTime < 10):
+                time.sleep(10)
+
+            send_to_kindle(userName, to, title, bookType, book, tz)
+            lastSendTime = time.time()
+            ret.append(f"Sent {title}.{bookType}")
+        else:
+            save_delivery_log(userName, to, title, 0, status='nonews', tz=tz)
+
+    return '\n'.join(ret) if ret else "There are no new feeds available."
 
 #创建OEB并设置一些基础信息
 #user: 用户账号实例
@@ -206,110 +193,3 @@ def AddMastheadCoverToOeb(user, oeb, mhFile, cvFile, bookForMeta):
             oeb.manifest.add(id_, href, ImageMimeFromName(cvFile))
         oeb.guide.add('cover', 'Cover', href)
         oeb.metadata.add('cover', id_)
-
-#单独处理漫画RSS
-def ProcessComicRSS(userName, user, feed):
-    opts = GetOpts(user.device, "comic")
-    for comicClass in ComicBaseClasses:
-        if feed.url.startswith(comicClass.accept_domains):
-            book = comicClass(opts=opts, user=user)
-            break
-    else:
-        log.warning("There is No base class for {}".format(feed.title))
-        return
-
-    book.title = feed.title
-    book.description = feed.title
-    book.language = "zh-cn"
-    book.keep_image = True
-    book.oldest_article = 7
-    book.fulltext_by_readability = True
-    book.feeds = [(feed.title, feed.url)]
-    book.url_filters = [flt.url for flt in user.url_filters]
-
-    return PushComicBook(userName, user, book, opts)
-
-#单独推送漫画
-def PushComicBook(userName, user, book, opts=None):
-    global default_log
-    log = default_log
-    if not opts:
-        opts = GetOpts(user.device, "comic")
-    oeb = CreateEmptyOeb(log, opts)
-    pubType = 'book:book:KindleEar'
-    language = 'zh-cn'
-
-    setMetaData(oeb, book.title, language, local_time("%Y-%m-%d", user.timezone), pubType=pubType)
-    
-    #guide
-    id_, href = oeb.manifest.generate('masthead', DEFAULT_MASTHEAD) # size:600*60
-    oeb.manifest.add(id_, href, ImageMimeFromName(DEFAULT_MASTHEAD))
-    oeb.guide.add('masthead', 'Masthead Image', href)
-
-    id_, href = oeb.manifest.generate('cover', DEFAULT_COVER)
-    item = oeb.manifest.add(id_, href, ImageMimeFromName(DEFAULT_COVER))
-
-    oeb.guide.add('cover', 'Cover', href)
-    oeb.metadata.add('cover', id_)
-
-    itemCnt = 0
-    imgIndex = 0
-    sections = {}
-    tocThumbnails = {} #map img-url -> manifest-href
-
-    chapters = book.ParseFeedUrls()
-    if not chapters:
-        deliver_log(userName, str(user.kindle_email), book.title, 0, status="nonews", tz=user.timezone)
-        return
-
-    rs = 'ok'
-    for (bookname, chapter_title, img_list, chapter_url, next_chapter_index) in chapters:
-        try:
-            image_count = 0
-            for (mime_or_section, url, filename, content, brief, thumbnail) in book.GenImageItems(img_list, chapter_url):
-                if not mime_or_section or not filename or not content:
-                    continue
-
-                if mime_or_section.startswith("image/"):
-                    id_, href = oeb.manifest.generate(id="img", href=filename)
-                    item = oeb.manifest.add(id_, href, mime_or_section, data=content)
-                    if thumbnail:
-                        tocThumbnails[url] = href
-                else:
-                    sections.setdefault(mime_or_section, [])
-                    sections[mime_or_section].append((filename, brief, thumbnail, content))
-                    image_count += 1
-
-            title = book.title + " " + chapter_title
-            if not image_count:
-                deliverlog(userName, str(user.kindle_email), title, 0, status="can't download image", tz=user.timezone)
-                rs = "No new feeds."
-                log.info(rs)
-                continue
-            insertHtmlToc = False
-            insertThumbnail = False
-            oeb.metadata.clear("title")
-            oeb.metadata.add("title", title)
-
-            InsertToc(oeb, sections, tocThumbnails, insertHtmlToc, insertThumbnail)
-            oIO = io.BytesIO()
-            o = EPUBOutput() if user.book_type == "epub" else MOBIOutput()
-            o.convert(oeb, oIO, opts, log)
-            ultima_log = sorted(DeliverLog.get_all(), key=attrgetter("datetime"), reverse=True)
-            ultima_log = ultima_log[0] if ultima_log else None
-            if ultima_log:
-                diff = datetime.datetime.utcnow() - ultima_log.datetime
-                if diff.days * 86400 + diff.seconds < 10:
-                    time.sleep(5)
-
-            send_to_kindle(userName, user.kindle_email, title, user.book_type, oIO.getvalue(), user.timezone)
-            rs = "{}({}).{} Sent!" % (title, local_time(tz=user.timezone), user.book_type)
-            #log.info(rs)
-        except:
-            rs = "Failed to push {} {}".format(bookname, chapter_title)
-            #log.exception("Failed to push {} {}".format(bookname, chapter_title))
-
-    return rs
-
-
-

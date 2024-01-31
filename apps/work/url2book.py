@@ -25,7 +25,6 @@ def Url2Book():
     subject = args.get('subj')
     to = args.get('to')
     language = args.get('lng')
-    keepImage = bool(args.get('kimg') == '1')
     bookType = args.get("type", "epub")
     tz = int(args.get("tz", TIMEZONE))
     if not all((userName, urls, subject, to, language, bookType, tz)):
@@ -49,7 +48,7 @@ def Url2Book():
             if result.content:
                 send_to_kindle(userName, to, fileName, '', result.content, tz)
             else:
-                deliver_log(userName, str(to), fileName, 0, status=result.status, tz=tz)
+                save_delivery_log(userName, to, fileName, 0, status=result.status, tz=tz)
             log.info("{} Sent!".format(fileName))
         return "{} Sent!".format(fileName)
     elif bookType == 'Debug': #调试目的，将链接直接下载，发送到管理员邮箱
@@ -74,9 +73,7 @@ def Url2Book():
     book.title = subject
     book.description = subject
     book.language = language
-    book.keep_image = keepImage
     book.feeds = [(subject, url) for url in urls.split('|')]
-    book.url_filters = [flt.url for flt in user.url_filters]
     
     # 创建 OEB
     oeb = CreateEmptyOeb(opts, log)
@@ -125,7 +122,7 @@ def Url2Book():
         send_to_kindle(userName, to, book.title, bookType, oIO.getvalue(), tz)
         rs = "{}({}).{} Sent!".format(book.title, local_time(tz=tz), bookType)
     else:
-        deliver_log(userName, str(to), book.title, 0, status='fetch failed', tz=tz)
+        save_delivery_log(userName, to, book.title, 0, status='fetch failed', tz=tz)
         rs = "[Url2Book]Fetch url failed."
 
     return rs

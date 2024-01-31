@@ -6,7 +6,7 @@
 
 __Author__ = "cdhigh"
 
-import os, sys, logging, builtins
+import os, sys, logging, builtins, datetime
 from flask import Flask, render_template, session, request, g, send_from_directory
 from flask_babel import Babel, gettext
 #from jinja2 import Environment, FileSystemLoader
@@ -93,6 +93,7 @@ def FaviconIcon():
 @app.before_request
 def BeforeRequest():
     g.version = __Version__
+    g.now = datetime.datetime.utcnow
     ConnectToDatabase()
 
 @app.teardown_request

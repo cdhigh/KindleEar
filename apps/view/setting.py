@@ -82,14 +82,13 @@ def SettingPost():
         user.title_fmt = form.get('title_fmt', '')
         allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         user.send_days = [day for day in allDays if str_to_bool(form.get(day, ''))]
-        #user.merge_books = bool(form.get('merge_books'))
         user.book_mode = form.get('book_mode', '')
         user.remove_hyperlinks = form.get('removehyperlinks', '')
         user.author_format = form.get('author_format', '')
         user.book_title = myTitle
         user.book_language = form.get("book_language", "en")
-        #user.keep_image = str_to_bool(form.get("keep_image"))
         user.oldest_article = int(form.get('oldest', 7))
+        user.time_fmt = form.get('time_fmt', '')
         user.save()
         tips = _("Settings Saved!")
 

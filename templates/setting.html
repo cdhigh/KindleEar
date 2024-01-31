@@ -7,202 +7,189 @@
 {% endblock -%}
 
 {% block content -%}
-    <div class="main">
-    {% if user and user.expires -%}
-    <div class="grey">
-        {{_("Your account will pause after")}} <strong id="expires">{{ user.expires.strftime("%Y-%m-%d") }}</strong> {{_(", Please login before expire.")}}
-        <a href="/delaccount/{{user.name}}">{{_("Delete Account")}}</a>
-    </div>
+{% set now = g.now() %}
+<div class="main">
+  {% if user.expires -%}
+  <div class="grey">
+    {{_("Your account will pause after")}} <strong id="expires">{{ user.expires.strftime("%Y-%m-%d") }}</strong> {{_(", Please login before expire.")}}
+    <a href="/delaccount/{{user.name}}">{{_("Delete Account")}}</a>
+  </div>
+  {% endif -%}
+  <form class="pure-form pure-form-aligned" action="" method="POST">
+    {% if tips -%}
+    <div class="notice-box error">{{tips}}</div>
     {% endif -%}
-    <form class="pure-form pure-form-aligned" action="" method="POST">
-        {% if tips -%}
-        <div class="notice-box error">{{tips}}</div>
+
+    <fieldset>
+      <legend><h3>{{_("Base Setting")}}</h3></legend>
+      <div class="pure-control-group">
+        <label>{{_("Auto Delivery")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="enable_send">
+          <option value="all" {% if user.enable_send %}selected="selected"{% endif %}>{{_("Enable all")}}</option>
+          <option value="recipes" {% if not user.enable_send %}selected="selected"{% endif %}>{{_("Enable recipes only")}}</option>
+          <option value="none" {% if not user.enable_send %}selected="selected"{% endif %}>{{_("Disable all")}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label for="aligned-name"><em class="required">*</em> {{_("Kindle E-mail")}}</label>
+        <input type="email" name="kindle_email" value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" placeholder="{{_('Seperated by comma')}}" class="pure-u-1 pure-u-sm-1-2" required multiple= />
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Time zone")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="timezone">
+          {% for i in range(-12, 0) -%}
+          <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT%d:00" % i }}</option>
+          {% endfor -%}
+          <option value="0" {% if user.timezone|int==0 %}selected="selected"{% endif %}>GMT</option>
+          {% for i in range(1, 14) -%}
+          <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT+%d:00" % i }}</option>
+          {% endfor -%}
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Delivery days")}}</label>
+        <input type="checkbox" id="mon" name="Monday" {% if not user.send_days or "Monday" in user.send_days %}checked="1"{% endif %} />
+        <span class="font90" style="cursor:default;" onclick="toggleweekbtn('mon');">{{_("Mon")}} &nbsp;</span>
+        <input type="checkbox" id="tue" name="Tuesday" {% if not user.send_days or "Tuesday" in user.send_days %}checked="1"{% endif %} />
+        <span class="font90" style="cursor:default;" onclick="toggleweekbtn('tue');">{{_("Tue")}} &nbsp;</span>
+        <input type="checkbox" id="wed" name="Wednesday" {% if not user.send_days or "Wednesday" in user.send_days %}checked="1"{% endif %} />
+        <span class="font90" style="cursor:default;" onclick="toggleweekbtn('wed');">{{_("Wed")}} &nbsp;</span>
+        <input type="checkbox" id="thu" name="Thursday" {% if not user.send_days or "Thursday" in user.send_days %}checked="1"{% endif %} />
+        <span class="font90" style="cursor:default;" onclick="toggleweekbtn('thu');">{{_("Thu")}} &nbsp;</span>
+        <input type="checkbox" id="fri" name="Friday" {% if not user.send_days or "Friday" in user.send_days %}checked="1"{% endif %} />
+        <span class="font90" style="cursor:default;" onclick="toggleweekbtn('fri');">{{_("Fri")}} &nbsp;</span>
+        <input type="checkbox" id="sat" name="Saturday" {% if not user.send_days or "Saturday" in user.send_days %}checked="1"{% endif %} />
+        <span class="font90" style="cursor:default;" onclick="toggleweekbtn('sat');">{{_("Sat")}} &nbsp;</span>
+        <input type="checkbox" id="sun" name="Sunday" {% if not user.send_days or "Sunday" in user.send_days %}checked="1"{% endif %} />
+        <span class="font90" style="cursor:default;" onclick="toggleweekbtn('sun');">{{_("Sun")}} &nbsp;</span>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Delivery time")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="send_time">
+          {% for i in range(0, 24) -%}
+          <option value="{{ i }}" {% if user.send_time|int == i %}selected="selected"{% endif %}>{{ "%02d:00" % i }}</option>
+          {% endfor -%}
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Book type")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="book_type">
+          <option value="epub" {% if user.book_type == 'epub' %}selected="selected"{% endif %}>epub</option>
+          <option value="mobi" {% if user.book_type != 'epub' %}selected="selected"{% endif %}>mobi</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Device type")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="device_type">
+          <option value="kindle" {% if user.device == 'kindle' %}selected="selected"{% endif %}>Kindle</option>
+          <option value="kindle_dx" {% if user.device == 'kindle_dx' %}selected="selected"{% endif %}>Kindle DX</option>
+          <option value="kindle_pw" {% if user.device == 'kindle_pw' %}selected="selected"{% endif %}>Kindle PaperWhite</option>
+          <option value="kindle_fire" {% if user.device == 'kindle_fire' %}selected="selected"{% endif %}>Kindle Fire</option>
+          <option value="kindle_voyage" {% if user.device == 'kindle_voyage' %}selected="selected"{% endif %}>Kindle Voyage</option>
+          <option value="kindle_pw3" {% if user.device == 'kindle_pw3' %}selected="selected"{% endif %}>Kindle PaperWhite 3</option>
+          <option value="kindle_oasis" {% if user.device == 'kindle_oasis' %}selected="selected"{% endif %}>Kindle Oasis</option>
+          <option value="kindle_scribe" {% if user.device == 'kindle_scribe' %}selected="selected"{% endif %}>Kindle Scribe</option>
+          <option value="others" {% if user.device == 'others' %}selected="selected"{% endif %}>{{_("Others")}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Title from")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="title_from">
+          <option value="" {% if not user.use_title_in_feed %}selected="selected"{% endif %}>{{_("Webpage")}}</option>
+          <option value="feed" {% if user.use_title_in_feed %}selected="selected"{% endif %}>{{_("Feed")}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Title format")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="title_fmt">
+          <option value="" {% if not user.title_fmt %}selected="selected"{% endif %}>{{_("Title Only")}}</option>
+          <option value="%Y-%m-%d" {% if user.title_fmt=='%Y-%m-%d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%Y-%m-%d")}}</option>
+          <option value="%m-%d" {% if user.title_fmt=='%m-%d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%m-%d")}}</option>
+          <option value="%b %d" {% if user.title_fmt=='%b %d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%b %d")}}</option>
+          <option value="%a, %b %d" {% if user.title_fmt=='%a, %b %d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%a, %b %d")}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Book mode")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="book_mode">
+          <option value="periodical" {% if not user.book_mode or user.book_mode=='periodical' %}selected="selected"{% endif %}>{{_("Periodical")}}</option>
+          <option value="comic" {% if user.book_mode=='comic' %}selected="selected"{% endif %}>{{_("Comic")}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Remove hyperlinks")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="remove_hyperlinks">
+          <option value="" {% if not user.remove_hyperlinks %}selected="selected"{% endif %}>{{_("Do not remove hyperlinks")}}</option>
+          <option value="image" {% if user.remove_hyperlinks=='image' %}selected="selected"{% endif %}>{{_("Remove image links")}}</option>
+          <option value="text" {% if user.remove_hyperlinks=='text' %}selected="selected"{% endif %}>{{_("Remove text links")}}</option>
+          <option value="all" {% if user.remove_hyperlinks=='all' %}selected="selected"{% endif %}>{{_("Remove all hyperlinks")}}</option>
+        </select>
+      </div>
+    </fieldset>
+
+    <fieldset id="adv_fieldset">
+      <legend><h3>{{_("Custom Rss Setting")}}</h3></legend>
+      <div class="pure-control-group">
+        <label><em class="required">*</em> {{_("Title")}}</label>
+        <input type="text" name="rss_title" value="{{ user.book_title }}" required class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Language")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="book_language">
+        {% for langCode in langMap -%}
+        {% if user.book_language == langCode -%}
+        <option value="{{langCode}}" selected="selected">{{langMap[langCode]}}</option>
+        {% else -%}
+        <option value="{{langCode}}">{{langMap[langCode]}}</option>
         {% endif -%}
-
-        <fieldset>
-            <legend><h3>{{_("Base Setting")}}</h3></legend>
-            <div class="pure-control-group">
-                <label>{{_("Auto Delivery")}}</label>
-                <select class="pure-u-1 pure-u-sm-1-2" name="enable_send">
-                    <option value="all" {% if user.enable_send %}selected="selected"{% endif %}>{{_("Enable all")}}</option>
-                    <option value="recipes" {% if not user.enable_send %}selected="selected"{% endif %}>{{_("Enable recipes only")}}</option>
-                    <option value="none" {% if not user.enable_send %}selected="selected"{% endif %}>{{_("Disable all")}}</option>
-                </select>
-            </div>
-            <div class="pure-control-group">
-                <label for="aligned-name"><em class="required">*</em> {{_("Kindle E-mail")}}</label>
-                <input type="email" name="kindle_email" value="{% if user and user.kindle_email %}{{ user.kindle_email }}{% endif %}" placeholder="{{_('Seperated by comma')}}" class="pure-u-1 pure-u-sm-1-2" required multiple= />
-            </div>
-            <div class="pure-control-group">
-                <label>{{_("Time zone")}}</label>
-                <select class="pure-u-1 pure-u-sm-1-2" name="timezone">
-                    {% for i in range(-12, 0) -%}
-                    <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT%d:00" % i }}</option>
-                    {% endfor -%}
-                    <option value="0" {% if user.timezone|int==0 %}selected="selected"{% endif %}>GMT</option>
-                    {% for i in range(1, 14) -%}
-                    <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT+%d:00" % i }}</option>
-                    {% endfor -%}
-                </select>
-            </div>
-            <div class="pure-control-group">
-                <label>{{_("Delivery days")}}</label>
-                <input type="checkbox" id="mon" name="Monday" {% if not user.send_days or "Monday" in user.send_days %}checked="1"{% endif %} />
-                <span class="font90" style="cursor:default;" onclick="toggleweekbtn('mon');">{{_("Mon")}} &nbsp;</span>
-                <input type="checkbox" id="tue" name="Tuesday" {% if not user.send_days or "Tuesday" in user.send_days %}checked="1"{% endif %} />
-                <span class="font90" style="cursor:default;" onclick="toggleweekbtn('tue');">{{_("Tue")}} &nbsp;</span>
-                <input type="checkbox" id="wed" name="Wednesday" {% if not user.send_days or "Wednesday" in user.send_days %}checked="1"{% endif %} />
-                <span class="font90" style="cursor:default;" onclick="toggleweekbtn('wed');">{{_("Wed")}} &nbsp;</span>
-                <input type="checkbox" id="thu" name="Thursday" {% if not user.send_days or "Thursday" in user.send_days %}checked="1"{% endif %} />
-                <span class="font90" style="cursor:default;" onclick="toggleweekbtn('thu');">{{_("Thu")}} &nbsp;</span>
-                <input type="checkbox" id="fri" name="Friday" {% if not user.send_days or "Friday" in user.send_days %}checked="1"{% endif %} />
-                <span class="font90" style="cursor:default;" onclick="toggleweekbtn('fri');">{{_("Fri")}} &nbsp;</span>
-                <input type="checkbox" id="sat" name="Saturday" {% if not user.send_days or "Saturday" in user.send_days %}checked="1"{% endif %} />
-                <span class="font90" style="cursor:default;" onclick="toggleweekbtn('sat');">{{_("Sat")}} &nbsp;</span>
-                <input type="checkbox" id="sun" name="Sunday" {% if not user.send_days or "Sunday" in user.send_days %}checked="1"{% endif %} />
-                <span class="font90" style="cursor:default;" onclick="toggleweekbtn('sun');">{{_("Sun")}} &nbsp;</span>
-            </div>
-            <div class="pure-control-group">
-                <label>{{_("Delivery time")}}</label>
-                <select class="pure-u-1 pure-u-sm-1-2" name="send_time">
-                    {% for i in range(0, 24) -%}
-                    <option value="{{ i }}" {% if user.send_time|int == i %}selected="selected"{% endif %}>{{ "%02d:00" % i }}</option>
-                    {% endfor -%}
-                </select>
-            </div>
-            <div class="pure-control-group">
-                <label>{{_("Book type")}}</label>
-                <select class="pure-u-1 pure-u-sm-1-2" name="book_type">
-                    <option value="epub" {% if user.book_type == 'epub' %}selected="selected"{% endif %}>epub</option>
-                    <option value="mobi" {% if user.book_type != 'epub' %}selected="selected"{% endif %}>mobi</option>
-                </select>
-            </div>
-            <div class="pure-control-group">
-                <label>{{_("Device type")}}</label>
-                <select class="pure-u-1 pure-u-sm-1-2" name="device_type">
-                    <option value="kindle" {% if user.device == 'kindle' %}selected="selected"{% endif %}>Kindle</option>
-                    <option value="kindle_dx" {% if user.device == 'kindle_dx' %}selected="selected"{% endif %}>Kindle DX</option>
-                    <option value="kindle_pw" {% if user.device == 'kindle_pw' %}selected="selected"{% endif %}>Kindle PaperWhite</option>
-                    <option value="kindle_fire" {% if user.device == 'kindle_fire' %}selected="selected"{% endif %}>Kindle Fire</option>
-                    <option value="kindle_voyage" {% if user.device == 'kindle_voyage' %}selected="selected"{% endif %}>Kindle Voyage</option>
-                    <option value="kindle_pw3" {% if user.device == 'kindle_pw3' %}selected="selected"{% endif %}>Kindle PaperWhite 3</option>
-                    <option value="kindle_oasis" {% if user.device == 'kindle_oasis' %}selected="selected"{% endif %}>Kindle Oasis</option>
-                    <option value="kindle_scribe" {% if user.device == 'kindle_scribe' %}selected="selected"{% endif %}>Kindle Scribe</option>
-                    <option value="others" {% if user.device == 'others' %}selected="selected"{% endif %}>{{_("Others")}}</option>
-                </select>
-            </div>
-            <div class="pure-control-group">
-                <label>{{_("Title from")}}</label>
-                <select class="pure-u-1 pure-u-sm-1-2" name="title_from">
-                  <option value="" {% if not user.use_title_in_feed %}selected="selected"{% endif %}>{{_("Webpage")}}</option>
-                  <option value="feed" {% if user.use_title_in_feed %}selected="selected"{% endif %}>{{_("Feed")}}</option>
-                </select>
-            </div>
-            <div class="pure-control-group">
-                <label>{{_("Title format")}}</label>
-                <select class="pure-u-1 pure-u-sm-1-2" name="title_fmt">
-                    <option value="" {% if not user.title_fmt %}selected="selected"{% endif %}>{{_("Title Only")}}</option>
-                    <option value="%Y-%m-%d" {% if user.title_fmt=='%Y-%m-%d' %}selected="selected"{% endif %}>{{_("Title YYYY-MM-DD")}}</option>
-                    <option value="%m-%d" {% if user.title_fmt=='%m-%d' %}selected="selected"{% endif %}>{{_("Title MM-DD")}}</option>
-                    {#<option value="%m/%d" {% if user.title_fmt=='%m/%d' %}selected="selected"{% endif %}>{{_("Title MM/DD")}}</option>-#}
-                    {#<option value="%d/%m" {% if user.title_fmt=='%d/%m' %}selected="selected"{% endif %}>{{_("Title DD/MM")}}</option>-#}
-                    <option value="%b %d" {% if user.title_fmt=='%b %d' %}selected="selected"{% endif %}>{{_("Title MMM DD")}}</option>
-                    <option value="%a, %b %d" {% if user.title_fmt=='%a, %b %d' %}selected="selected"{% endif %}>{{_("Title Day, MMM DD")}}</option>
-                </select>
-            </div>
-            <div class="pure-control-group">
-                <label>{{_("Book mode")}}</label>
-                <select class="pure-u-1 pure-u-sm-1-2" name="book_mode">
-                    <option value="periodical" {% if not user.book_mode or user.book_mode=='periodical' %}selected="selected"{% endif %}>{{_("Periodical")}}</option>
-                    <option value="comic" {% if user.book_mode=='comic' %}selected="selected"{% endif %}>{{_("Comic")}}</option>
-                </select>
-            </div>
-            <div class="pure-control-group">
-                <label>{{_("Remove hyperlinks")}}</label>
-                <select class="pure-u-1 pure-u-sm-1-2" name="remove_hyperlinks">
-                    <option value="" {% if not user.remove_hyperlinks %}selected="selected"{% endif %}>{{_("Do not remove hyperlinks")}}</option>
-                    <option value="image" {% if user.remove_hyperlinks=='image' %}selected="selected"{% endif %}>{{_("Remove image links")}}</option>
-                    <option value="text" {% if user.remove_hyperlinks=='text' %}selected="selected"{% endif %}>{{_("Remove text links")}}</option>
-                    <option value="all" {% if user.remove_hyperlinks=='all' %}selected="selected"{% endif %}>{{_("Remove all hyperlinks")}}</option>
-                </select>
-            </div>
-            <div class="pure-control-group">
-                <label>{{_("Author format")}}</label>
-                <select class="pure-u-1 pure-u-sm-1-2" name="author_format">
-                    <option value="" {% if not user.author_format %}selected="selected"{% endif %}>KindleEar</option>
-                    <option value="%Y-%m-%d" {% if user.author_format=='%Y-%m-%d' %}selected="selected"{% endif %}>{{_("YYYY-MM-DD")}}</option>
-                    <option value="%m-%d" {% if user.author_format=='%m-%d' %}selected="selected"{% endif %}>{{_("MM-DD")}}</option>
-                    <option value="%m/%d" {% if user.author_format=='%m/%d' %}selected="selected"{% endif %}>{{_("MM/DD")}}</option>
-                    <option value="%d/%m" {% if user.author_format=='%d/%m' %}selected="selected"{% endif %}>{{_("DD/MM")}}</option>
-                    <option value="%b %d" {% if user.author_format=='%b %d' %}selected="selected"{% endif %}>{{_("MMM DD")}}</option>
-                    <option value="%a, %b %d" {% if user.author_format=='%a, %b %d' %}selected="selected"{% endif %}>{{_("Day, MMM DD")}}</option>
-                </select>
-            </div>
-            <!--<div class="pure-control-group">
-                <input type="checkbox" id="mb" name="merge_books" {% if user and user.merge_books %}checked="1"{% endif %} />
-                <span style="cursor:default;" onclick="toggleweekbtn('mb');">{{_("Merge books into one")}}</span>
-            </div>-->
-            {#<p>
-                <a id="testlink" href="/deliver?u={{session.get('userName', '')}}">{{_("Deliver now")}}</a>
-                <strong id="testmsg" class="error"></strong> {{_("Note: task deliver will be executed after some minutes.")}}
-            </p>#}
-        </fieldset>
-
-        <fieldset id="adv_fieldset">
-            <legend><h3>{{_("Custom Rss Setting")}}</h3></legend>
-            <div class="pure-control-group">
-                <label><em class="required">*</em> {{_("Title")}}</label>
-                <input type="text" name="rss_title" value="{{ user.book_title }}" required class="pure-u-1 pure-u-sm-1-2" />
-            </div>
-            <div class="pure-control-group">
-                <label>{{_("Language")}}</label>
-                <select class="pure-u-1 pure-u-sm-1-2" name="book_language">
-                {% for langCode in langMap -%}
-                    {% if user.book_language == langCode -%}
-                    <option value="{{langCode}}" selected="selected">{{langMap[langCode]}}</option>
-                    {% else -%}
-                    <option value="{{langCode}}">{{langMap[langCode]}}</option>
-                    {% endif -%}
-                {% endfor -%}
-                </select>
-            </div>
-            <div class="pure-control-group">
-                <label>{{_("Oldest article")}}</label>
-                <select class="pure-u-1 pure-u-sm-1-2" name="oldest">
-                    <option value="0" {% if not user.oldest_article %}selected="selected"{% endif %}>{{_("No limit")}}</option>
-                    <option value="1" {% if user.oldest_article==1 %}selected="selected"{% endif %}>{{_("1 Day")}}</option>
-                    <option value="2" {% if user.oldest_article==2 %}selected="selected"{% endif %}>{{_("2 Days")}}</option>
-                    <option value="3" {% if user.oldest_article==3 %}selected="selected"{% endif %}>{{_("3 Days")}}</option>
-                    <option value="4" {% if user.oldest_article==4 %}selected="selected"{% endif %}>{{_("4 Days")}}</option>
-                    <option value="5" {% if user.oldest_article==5 %}selected="selected"{% endif %}>{{_("5 Days")}}</option>
-                    <option value="6" {% if user.oldest_article==6 %}selected="selected"{% endif %}>{{_("6 Days")}}</option>
-                    <option value="7" {% if user.oldest_article>=7 %}selected="selected"{% endif %}>{{_("7 Days")}}</option>
-                </select>
-            </div>
-            <!--<div class="pure-control-group">
-                <label>{{_("Keep images")}}</label>
-                <select class="pure-u-1 pure-u-sm-1-2" name="keep_image">
-                    <option value="1" {% if user.keep_image %}selected="selected"{% endif %}>{{_("Yes")}}</option>
-                    <option value="0" {% if not user.keep_image %}selected="selected"{% endif %}>{{_("No")}}</option>
-                </select>
-            </div>
-            <div class="pure-control-group">
-                <input type="checkbox" id="ki" name="keep_image" {% if user and user.keep_image %}checked="1"{% endif %} />
-                <span style="cursor:default;" onclick="toggleweekbtn('ki');">{{_("Keep images")}}</span>
-            </div>
-            <div class="pure-control-group">
-                <input type="checkbox" id="er" name="enable_rss" {% if user.enable_custom_rss %}checked="1"{% endif %} />
-                <span style="cursor:default;" onclick="toggleweekbtn('er');">{{_("Enable deliver custom rss")}}</span><br />
-                <small style="padding-left:1.7em;">{{_("This switch only effective when 'Enable deliver' is enabled.")}}</small>
-            </div>-->
-        </fieldset>
-        <p>
-        {{_("Important: Please activate your kindle firstly, and goto")}}“<a href="https://www.amazon.com/hz/mycd/myx#/home/settings/payment" rel="external" target="_blank">{{_("Personal Document Settings")}}</a>”{{_("Page and add")}} <strong>{{ mailSender }}</strong> {{_("to 'Approved Personal Document E-mail List'.")}}
-        </p>
-        <p style="text-align:center;">
-            <input type="submit" class="pure-button pure-button-primary pure-input-rounded" value="{{_("Save settings")}}" />
-        </p>
-    </form>
+        {% endfor -%}
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Oldest article")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="oldest">
+          <option value="0" {% if not user.oldest_article %}selected="selected"{% endif %}>{{_("No limit")}}</option>
+          <option value="1" {% if user.oldest_article==1 %}selected="selected"{% endif %}>{{_("1 Day")}}</option>
+          <option value="2" {% if user.oldest_article==2 %}selected="selected"{% endif %}>{{_("2 Days")}}</option>
+          <option value="3" {% if user.oldest_article==3 %}selected="selected"{% endif %}>{{_("3 Days")}}</option>
+          <option value="4" {% if user.oldest_article==4 %}selected="selected"{% endif %}>{{_("4 Days")}}</option>
+          <option value="5" {% if user.oldest_article==5 %}selected="selected"{% endif %}>{{_("5 Days")}}</option>
+          <option value="6" {% if user.oldest_article==6 %}selected="selected"{% endif %}>{{_("6 Days")}}</option>
+          <option value="7" {% if user.oldest_article>=7 %}selected="selected"{% endif %}>{{_("7 Days")}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Time format")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="time_fmt">
+          <option value="%Y-%m-%d" {% if user.time_fmt=="%Y-%m-%d" %}selected="selected"{% endif %}>{{now.strftime("%Y-%m-%d")}}</option>
+          <option value="%a, %d %b %Y" {% if user.time_fmt=="%a, %d %b %Y" %}selected="selected"{% endif %}>{{now.strftime("%a, %d %b %Y")}}</option>
+          <option value="%a, %b %d" {% if user.time_fmt=="%a, %b %d" %}selected="selected"{% endif %}>{{now.strftime("%a, %b %d")}}</option>
+          <option value="%b %d" {% if user.time_fmt=="%b %d" %}selected="selected"{% endif %}>{{now.strftime("%b %d")}}</option>
+          <option value="%m-%d" {% if user.time_fmt=="%m-%d" %}selected="selected"{% endif %}>{{now.strftime("%m-%d")}}</option>
+          <option value="%m/%d" {% if user.time_fmt=="%m/%d" %}selected="selected"{% endif %}>{{now.strftime("%m/%d")}}</option>
+          <option value="%d/%m" {% if user.time_fmt=="%d/%m" %}selected="selected"{% endif %}>{{now.strftime("%d/%m")}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Author format")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="author_format">
+          <option value="" {% if not user.author_format %}selected="selected"{% endif %}>KindleEar</option>
+          <option value="%Y-%m-%d" {% if user.author_format=='%Y-%m-%d' %}selected="selected"{% endif %}>{{now.strftime("%Y-%m-%d")}}</option>
+          <option value="%m-%d" {% if user.author_format=='%m-%d' %}selected="selected"{% endif %}>{{now.strftime("%m-%d")}}</option>
+          <option value="%m/%d" {% if user.author_format=='%m/%d' %}selected="selected"{% endif %}>{{now.strftime("%m/%d")}}</option>
+          <option value="%d/%m" {% if user.author_format=='%d/%m' %}selected="selected"{% endif %}>{{now.strftime("%d/%m")}}</option>
+          <option value="%b %d" {% if user.author_format=='%b %d' %}selected="selected"{% endif %}>{{now.strftime("%b %d")}}</option>
+          <option value="%a, %b %d" {% if user.author_format=='%a, %b %d' %}selected="selected"{% endif %}>{{now.strftime("%a, %b %d")}}</option>
+        </select>
+      </div>
+    </fieldset>
+    <p>
+    {{_("Important: Please activate your kindle firstly, and goto")}}“<a href="https://www.amazon.com/hz/mycd/myx#/home/settings/payment" rel="external" target="_blank">{{_("Personal Document Settings")}}</a>”{{_("Page and add")}} <strong>{{ mailSender }}</strong> {{_("to 'Approved Personal Document E-mail List'.")}}
+    </p>
+    <p style="text-align:center;">
+      <input type="submit" class="pure-button pure-button-primary pure-input-rounded" value="{{_('Save settings')}}" />
+    </p>
+  </form>
 </div>
 {% endblock -%}
 

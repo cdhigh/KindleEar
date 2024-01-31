@@ -67,6 +67,8 @@ class LoginFailed(ValueError):
 class DownloadDenied(ValueError):
     pass
 
+class Web2diskOptions:
+    pass
 
 class BasicNewsRecipe(Recipe):
     #: The title to use for the e-book
@@ -416,10 +418,7 @@ class BasicNewsRecipe(Recipe):
         By default returns `self.extra_css`. Override if you want to programmatically generate the
         extra_css.
         '''
-        if self.user.css_content:
-            return (self.extra_css or '') + '\n' + self.user.css_content
-        else:
-            return self.extra_css
+        return self.extra_css
 
     def get_cover_url(self):
         '''
@@ -885,7 +884,7 @@ class BasicNewsRecipe(Recipe):
         '''
         pass
 
-    def __init__(self, options, log, output_dir, fs, user, feed_index_start=0):
+    def __init__(self, options, log, output_dir, fs, feed_index_start=0):
         '''
         Initialize the recipe.
         :param options: Parsed commandline options
@@ -903,7 +902,6 @@ class BasicNewsRecipe(Recipe):
         self.debug = options.verbose > 1
         self.output_dir = output_dir
         self.fs = fs
-        self.user = user
         self.feed_index_start = feed_index_start
         self.verbose = options.verbose
         self.test = options.test
@@ -924,9 +922,8 @@ class BasicNewsRecipe(Recipe):
         if self.debug:
             self.verbose = True
         
-        if self.needs_subscription and (
-                self.username is None or self.password is None or (
-                    not self.username and not self.password)):
+        if self.needs_subscription and (self.username is None or self.password is None or 
+            (not self.username and not self.password)):
             if self.needs_subscription != 'optional':
                 raise ValueError(_('The "%s" recipe needs a username and password.')%self.title)
 
@@ -934,42 +931,24 @@ class BasicNewsRecipe(Recipe):
         self.image_map, self.image_counter = {}, 1
         self.css_map = {}
 
-        web2disk_cmdline = ['web2disk',
-            '--timeout', str(self.timeout),
-            '--max-recursions', str(self.recursions),
-            '--delay', str(self.delay),
-            ]
-
-        if self.verbose:
-            web2disk_cmdline.append('--verbose')
-
-        if self.no_stylesheets:
-            web2disk_cmdline.append('--dont-download-stylesheets')
-
-        for reg in self.match_regexps:
-            web2disk_cmdline.extend(['--match-regexp', reg])
-
-        for reg in self.filter_regexps:
-            web2disk_cmdline.extend(['--filter-regexp', reg])
-
         if options.output_profile.short_name in ('default', 'tablet'):
             self.scale_news_images_to_device = False
         elif self.scale_news_images_to_device:
             self.scale_news_images = options.output_profile.screen_size
 
-        self.web2disk_options = web2disk_option_parser().parse_args(web2disk_cmdline)[0]
-        for extra in ('keep_only_tags', 'remove_tags', 'preprocess_regexps',
-                      'skip_ad_pages', 'preprocess_html', 'remove_tags_after',
-                      'remove_tags_before', 'is_link_wanted',
-                      'compress_news_images', 'compress_news_images_max_size',
-                      'compress_news_images_auto_size', 'scale_news_images'):
-            setattr(self.web2disk_options, extra, getattr(self, extra))
+        self.w2d_opts = wOpts = Web2diskOptions()
+        for extra in ('keep_only_tags', 'remove_tags', 'preprocess_regexps', 'skip_ad_pages', 'preprocess_html', 
+            'remove_tags_after', 'remove_tags_before', 'is_link_wanted', 'compress_news_images', 
+            'compress_news_images_max_size', 'compress_news_images_auto_size', 'scale_news_images', 'filter_regexps',
+            'match_regexps', 'no_stylesheets', 'verbose', 'delay', 'timeout', 'recursions', 'encoding'):
+            setattr(self.w2d_opts, extra, getattr(self, extra))
 
-        self.web2disk_options.postprocess_html = self._postprocess_html
-        self.web2disk_options.preprocess_image = self.preprocess_image
-        self.web2disk_options.encoding = self.encoding
-        self.web2disk_options.preprocess_raw_html = self.preprocess_raw_html_
-        self.web2disk_options.get_delay = self.get_url_specific_delay
+        wOpts.remove_hyperlinks = options.remove_hyperlinks
+        wOpts.postprocess_html = self._postprocess_html
+        wOpts.preprocess_image = self.preprocess_image
+        wOpts.preprocess_raw_html = self.preprocess_raw_html_
+        wOpts.get_delay = self.get_url_specific_delay
+        wOpts.max_files = 0x7fffffff
 
         if self.delay > 0:
             self.simultaneous_downloads = 1
@@ -1177,9 +1156,9 @@ class BasicNewsRecipe(Recipe):
     #       failures[]: 下载失败的url列表
     def _fetch_article(self, url, dir_, f, a, num_of_feeds, preloaded=None):
         br = self.browser
-        self.web2disk_options.browser = br
-        self.web2disk_options.dir = dir_
-        fetcher = RecursiveFetcher(self.web2disk_options, self.fs, self.log,
+        self.w2d_opts.browser = br
+        self.w2d_opts.dir = dir_
+        fetcher = RecursiveFetcher(self.w2d_opts, self.fs, self.log,
                 self.image_map, self.css_map, (url, f, a, num_of_feeds))
         fetcher.browser = br
         fetcher.base_dir = dir_
@@ -1463,6 +1442,7 @@ class BasicNewsRecipe(Recipe):
         '''
         return nowf()
 
+    #现在这个函数已经不用，使用recipe_input.py里面的create_opf()
     #通过Feed对象列表构建一个opf文件
     #feeds: Feed对象列表
     #dir_: 将opf保存到哪个目录
@@ -1842,8 +1822,8 @@ class CustomIndexRecipe(BasicNewsRecipe):
     def download(self):
         index = self.custom_index()
         url = 'file:'+index if iswindows else 'file://'+index
-        self.web2disk_options.browser = self.clone_browser(self.browser)
-        fetcher = RecursiveFetcher(self.web2disk_options, self.fs, self.log)
+        self.w2d_opts.browser = self.clone_browser(self.browser)
+        fetcher = RecursiveFetcher(self.w2d_opts, self.fs, self.log)
         fetcher.base_dir = self.output_dir
         fetcher.current_dir = self.output_dir
         fetcher.show_progress = False

@@ -12,19 +12,22 @@ def py3_repr(x):
     return ans
 
 
-def GenerateRecipeSource(title, feeds, oldest_article=7, max_articles=30, isfulltext=False):
+def GenerateRecipeSource(title, feeds, user, max_articles=30, isfulltext=False):
     classname = 'BasicUserRecipe%d' % int(time.time())
     title = str(title).strip() or classname
     indent = ' ' * 8
+    feedTitles = []
+    feedsStr = []
     if feeds:
-        if len(feeds[0]) == 1:
-            feeds = '\n'.join(f'{indent}{py3_repr(url)},' for url in feeds)
+        if len(feeds[0]) > 1:
+            for title, url in feeds:
+                feedsStr.append(f'{indent}({py3_repr(title)}, {py3_repr(url)}),')
+                feedTitles.append(title)
         else:
-            feeds = '\n'.join(f'{indent}({py3_repr(title)}, {py3_repr(url)}),' for title, url in feeds)
-    else:
-        feeds = ''
-    if feeds:
-        feeds = 'feeds          = [\n%s\n    ]' % feeds
+            feedsStr = [f'{indent}{py3_repr(url)},' for url in feeds]
+    
+    feeds = 'feeds          = [\n{}\n    ]'.format('\n'.join(feedsStr)) if feedsStr else ''
+    desc = 'News from {}'.format(', '.join(feedTitles)) if feedTitles else 'Deliver from KindleEar'
         
     isfulltext = 'True' if isfulltext else 'None'
     src = textwrap.dedent('''\
@@ -33,14 +36,17 @@ def GenerateRecipeSource(title, feeds, oldest_article=7, max_articles=30, isfull
     from calibre.web.feeds.news import {base}
     class {classname}({base}):
         title          = {title}
+        description    = '{desc}'
+        language       = '{language}'
         oldest_article = {oldest_article}
         max_articles_per_feed = {max_articles_per_feed}
         use_embedded_content  = {isfulltext}
+        timefmt               = '{timefmt}'
         auto_cleanup   = True
         {feeds}''').format(
-            classname=classname, title=py3_repr(title), oldest_article=oldest_article, feeds=feeds,
+            classname=classname, title=py3_repr(title), desc=desc, oldest_article=user.oldest_article, feeds=feeds,
             max_articles_per_feed=max_articles_per_feed, base='AutomaticNewsRecipe',
-            isfulltext=isfulltext)
+            isfulltext=isfulltext, language=user.book_language, timefmt=user.time_fmt)
     return src
 
 #能使用点号访问的字典

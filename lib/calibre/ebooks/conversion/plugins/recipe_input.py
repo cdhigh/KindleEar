@@ -5,7 +5,7 @@ __license__   = 'GPL v3'
 __copyright__ = '2009, Kovid Goyal <kovid@kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
-import os, io
+import os, io, uuid, datetime
 from collections import defaultdict
 from calibre.customize.conversion import InputFormatPlugin, OptionRecommendation
 from calibre.constants import numeric_version
@@ -72,37 +72,26 @@ class RecipeInput(InputFormatPlugin):
             help=_('Do not download latest version of builtin recipes from the calibre server')),
         OptionRecommendation(name='lrf', recommended_value=False,
             help='Optimize fetching for subsequent conversion to LRF.'),
+        OptionRecommendation(name='remove_hyperlinks', recommended_value=None,
+            help='remove hyperlinks of image or text.'),
         }
 
     #执行转换完成后返回生成的 opf 文件路径，只是路径，不包含文件名
-    #recipe_or_file: 可以为文件名, StringIO, 或一个列表
+    #recipes: 可以为文件名, StringIO, 或一个列表
     #output_dir: 输出目录
     #fs: plumber生成的FsDictStub实例
     #user: 数据库 KeUser 实例
     #返回 opf文件的全路径名或传入的fs实例
-    def convert(self, recipe_or_file, opts, file_ext, log, accelerators, output_dir, fs, user):
+    def convert(self, recipes, opts, file_ext, log, output_dir, fs, user):
         self.user = user
         opts.output_profile.flow_size = 0
         orig_no_inline_navbars = opts.no_inline_navbars
-        if not isinstance(recipe_or_file, list):
-            recipe_or_file = [recipe_or_file]
+        if not isinstance(recipes, list):
+            recipes = [recipes]
 
-        recipes = []
-        for idx in range(len(recipe_or_file)):
-            item = recipe_or_file[idx]
-            if isinstance(item, io.StringIO):
-                source = item.getvalue()
-            else:
-                try:
-                    with open(item, 'rb') as f:
-                        source = f.read()
-                except:
-                    continue
-
-            try:
-                recipes.append(compile_recipe(source))
-            except Exception as e:
-                log.warning('Failed to compile recipe: {}'.format(e))
+        for idx in range(len(recipes)):
+            item = recipes[idx]
+            print(type(item))
             
         #生成 BasicNewsRecipe 对象并执行下载任务
         feed_index_start = 0
@@ -113,9 +102,9 @@ class RecipeInput(InputFormatPlugin):
         self.failed_downloads = []
         for recipe in recipes:
             if 1:
-                ro = recipe(opts, log, output_dir, fs, user=user, feed_index_start=feed_index_start)
+                ro = recipe(opts, log, output_dir, fs, feed_index_start=feed_index_start)
                 ro.download()
-            #except Exception as e: #这个地方最好只做记录
+            #except Exception as e: #这个地方最好只做记录，不退出
             #    raise ValueError('Failed to execute recipe "{}": {}'.format(ro.title, e))
             feed_index_start += len(ro.feed_objects)
             self.feeds.extend(ro.feed_objects)
@@ -301,9 +290,20 @@ class RecipeInput(InputFormatPlugin):
             title += strftime(recipe1.timefmt, pdate)
         mi = MetaInformation(title, ['KindleEar'])
         mi.publisher = 'KindleEar'
-        mi.author_sort = 'KindleEar'
-        if recipe1.publication_type:
-            mi.publication_type = f'periodical:{recipe1.publication_type}:{recipe1.short_title()}'
+        #修正Kindle固件5.9.x将作者显示为日期的BUG
+        authorFmt = self.user.author_format
+        if authorFmt:
+            now = datetime.datetime.utcnow() + datetime.timedelta(hours=self.user.timezone)
+            now = now.strftime(authorFmt)
+            mi.author_sort = now
+            mi.authors = [now]
+        else:
+            mi.author_sort = 'KindleEar'
+            mi.authors = ['KindleEar']
+        if recipe1.publication_type == 'magazine':
+            mi.publication_type = f'periodical:magazine:{recipe1.short_title()}'
+        elif recipe1.publication_type:
+            mi.publication_type = f'book:{recipe1.publication_type}:{recipe1.short_title()}'
         mi.timestamp = nowf()
         article_titles = []
         aseen = set()
@@ -326,6 +326,7 @@ class RecipeInput(InputFormatPlugin):
         if language is not None:
             mi.language = language
         mi.pubdate = pdate
+        mi.identifier = str(uuid.uuid4())
         return mi
 
     #获取封面路径，如果没有，生成一个

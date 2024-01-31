@@ -228,8 +228,7 @@ def ReceiveMail(path):
                  'to': user.kindle_email,
                  'tz': user.timezone,
                  'subj': subject[:SUBJECT_WORDCNT_FOR_APMAIL],
-                 'lng': user.my_rss_book.language,
-                 'kimg': '1' if user.my_rss_book.keep_image else '0'}
+                 'lng': user.my_rss_book.language}
         create_http_task('/url2book', params)
     else: #直接转发邮件正文
         from lib.makeoeb import ImageMimeFromName

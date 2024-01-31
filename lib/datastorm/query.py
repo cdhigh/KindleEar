@@ -23,7 +23,7 @@ class QueryBuilder:
     def where(self, *filters: Filter):
         for flt in filters:
             if isinstance(flt, list):
-                self._filters.extent(flt)
+                self._filters.extend(flt)
             else:
                 self._filters.append(flt)
         return self

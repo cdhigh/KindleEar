@@ -128,35 +128,12 @@ def AdvArchivePost():
     user.save()
     return redirect(url_for("bpAdv.AdvArchive"))
 
-#设置URL过滤器
-@bpAdv.route("/advurlfilter", endpoint='AdvUrlFilter')
-@login_required()
-def AdvUrlFilter():
-    user = get_login_user()
-    return render_template('advurlfilter.html', tab='advset', user=user, advCurr='urlfilter', 
-        gae_in_email=USE_GAE_INBOUND_EMAIL)
-
-@bpAdv.post("/advurlfilter", endpoint='AdvUrlFilterPost')
-@login_required()
-def AdvUrlFilterPost():
-    user = get_login_user()
-    url = request.form.get('url')
-    if url:
-        UrlFilter(url=url, user=user.reference_key_or_id).save()
-    return redirect(url_for("bpAdv.AdvUrlFilter"))
-
-#删除白名单或URL过滤器项目
+#删除白名单项目
 @bpAdv.route("/advdel", endpoint='AdvDel')
 @login_required()
 def AdvDel():
     user = get_login_user()
-    urlId = request.form.get('delurlid')
     wList = request.form.get('delwlist')
-    if urlId:
-        flt = UrlFilter.get_by_id_or_none(urlId)
-        if flt:
-            flt.delete_instance()
-        return redirect(url_for("bpAdv.AdvUrlFilter"))
     if wList:
         wlist = WhiteList.get_by_id_or_none(wList)
         if wlist:

@@ -14,7 +14,7 @@ html5lib==1.1
 gunicorn
 Flask==3.0.0
 flask-babel==4.0.0
-six=1.16.0
+six==1.16.0
 feedparser==6.0.11
 peewee==3.17.0
 #psycopg2

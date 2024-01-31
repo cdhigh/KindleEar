@@ -37,7 +37,7 @@ def send_to_kindle(userName, to, title, bookType, attachment, tz=TIMEZONE, fileW
     except Exception as e:
         record_sendmail_Error(userName, to, title, len(attachment), tz, e)
     else:
-        deliver_log(userName, str(to), title, len(attachment), tz=tz, status='ok')
+        save_delivery_log(userName, to, title, len(attachment), tz=tz, status='ok')
 
 #发送一个HTML邮件
 #userName: 用户名
@@ -66,7 +66,7 @@ def send_html_mail(userName, to, title, html, attachments, tz=TIMEZONE, textCont
         record_sendmail_Error(userName, to, title, len(attachment), tz, e)
     else:
         size = len(html or textContent) + sum([len(c) for f, c in (attachments or [])])
-        deliver_log(userName, str(to), title, size, tz=tz)
+        save_delivery_log(userName, to, title, size, tz=tz)
 
 if SEND_MAIL_SERVICE == "gae":
     #记录GAE发送邮件的异常
@@ -91,7 +91,7 @@ if SEND_MAIL_SERVICE == "gae":
             info = 'sendmail to {} failed: {}'.format(to, str(e))
             status = "failed"
         default_log.warning(info)
-        deliver_log(userName, str(to), title, bookSize, tz=tz, status=status)
+        save_delivery_log(userName, to, title, bookSize, tz=tz, status=status)
 elif SEND_MAIL_SERVICE == "sendgrid":
     #SendGrid发送邮件
     #src:: 发送者地址
@@ -126,4 +126,4 @@ elif SEND_MAIL_SERVICE == "sendgrid":
     def record_sendmail_Error(userName, to, title, bookSize, tz, e):
         global default_log
         default_log.warning('Sendgrid failed, error: {}'.format(e))
-        deliver_log(userName, str(to), title, bookSize, tz=tz, status="failed")
+        save_delivery_log(userName, to, title, bookSize, tz=tz, status="failed")

@@ -4,7 +4,14 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #Author:
 # cdhigh <https://github.com/cdhigh>
-import random
+import os, sys, random
+from operator import attrgetter
+if __name__ == '__main__': #调试使用，调试时为了单独执行此文件
+    thisDir = os.path.dirname(os.path.abspath(__file__))
+    appDir = os.path.normpath(os.path.join(thisDir, "..", ".."))
+    sys.path.insert(0, appDir)
+    sys.path.insert(0, os.path.join(appDir, 'lib'))
+
 from config import DATABASE_ENGINE
 from apps.utils import ke_encrypt, ke_decrypt
 
@@ -33,9 +40,8 @@ class KeUser(MyBaseModel): # kindleEar User
     title_fmt = CharField(default='') #在元数据标题中添加日期的格式
     author_format = CharField(default='') #修正Kindle 5.9.x固件的bug【将作者显示为日期】
     book_mode = CharField(default='') #书籍模式，'periodical'|'comic'，漫画模式可以直接全屏
-    merge_books = BooleanField(default=True) #是否合并书籍成一本
     remove_hyperlinks = CharField(default='') #去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
-    keep_image = BooleanField(default=True)
+    time_fmt = CharField(default='%Y-%m-%d')
     oldest_article = IntegerField(default=7)
     book_language = CharField() #自定义RSS的语言
     enable_custom_rss = BooleanField(default=True)
@@ -70,15 +76,12 @@ class KeUser(MyBaseModel): # kindleEar User
     #本用户所有的白名单
     def white_lists(self):
         return WhiteList.get_all(WhiteList.user == self.name)
-    def url_filters(self):
-        return UrlFilter.get_all(UrlFilter.user == self.name)
-
+    
     #删除自己订阅的书，白名单，过滤器等，就是完全的清理，预备用于删除此账号
     def erase_traces(self):
         BookedRecipe.delete().where(BookedRecipe.user == self.name).execute()
         Recipe.delete().where(Recipe.user == self.name).execute()
         WhiteList.delete().where(WhiteList.user == self.name).execute()
-        UrlFilter.delete().where(UrlFilter.user == self.name).execute()
         DeliverLog.delete().where(DeliverLog.username == self.name).execute() #推送记录
 
     #获取封面二进制数据
@@ -115,7 +118,7 @@ class Recipe(MyBaseModel):
     title = CharField()
     url = CharField(default='')
     description = CharField(default='')
-    isfulltext = BooleanField(default=False)
+    isfulltext = BooleanField(default=False) #只有自定义RSS才有意义
     type_ = CharField() #'custom','upload'
     needs_subscription = BooleanField(default=False) #是否需要登陆网页，只有上传的recipe才有意义
     src = TextField(default='') #保存上传的recipe的unicode字符串表示，已经解码
@@ -177,10 +180,6 @@ class WhiteList(MyBaseModel):
     mail = CharField()
     user = CharField()
 
-class UrlFilter(MyBaseModel):
-    url = CharField()
-    user = CharField()
-
 #Shared RSS links from other users [for kindleear.appspot.com only]
 class SharedRss(MyBaseModel):
     title = CharField()
@@ -218,3 +217,34 @@ class AppInfo(MyBaseModel):
     time_value = DateTimeField(default=datetime.datetime.utcnow)
     description = CharField(default='')
     comment = CharField(default='')
+
+
+#创建数据库表格，一个数据库只需要创建一次
+#如果是sql数据库，可以使用force=True删掉之前的数据库文件
+def CreateDatabaseTable(force=False):
+    if DATABASE_ENGINE == "sqlite":
+        if not force and os.path.exists(dbName):
+            print(f'[Error] Database "{dbName}" already exists')
+            return
+        elif os.path.exists(dbName):
+            try:
+                os.remove(dbName)
+            except:
+                pass
+
+    KeUser.create_table()
+    UserBlob.create_table()
+    Recipe.create_table()
+    BookedRecipe.create_table()
+    DeliverLog.create_table()
+    WhiteList.create_table()
+    SharedRss.create_table()
+    SharedRssCategory.create_table()
+    AppInfo.create_table()
+    
+    AppInfo(name='dbTableVersion', int_value=DB_VERSION).save()
+    print(f'Create database "{dbName}" finished')
+
+if __name__ == '__main__':
+    if DATABASE_ENGINE == 'sqlite':
+        CreateDatabaseTable()

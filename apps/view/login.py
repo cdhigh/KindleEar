@@ -80,7 +80,7 @@ def LoginPost():
 #判断管理员账号是否存在
 #如果管理员账号不存在，创建一个，并返回False，否则返回True
 def InitialAdminAccount():
-    u = KeUser.get_all(KeUser.name == ADMIN_NAME)
+    u = KeUser.get_one(KeUser.name == ADMIN_NAME)
     if u:
         return True
 
@@ -88,9 +88,8 @@ def InitialAdminAccount():
     shareKey = new_secret_key()
     password = hashlib.md5((ADMIN_NAME + secretKey).encode()).hexdigest()
     au = KeUser(name=ADMIN_NAME, passwd=password, kindle_email='', enable_send=False, send_time=8, 
-        timezone=TIMEZONE, book_type="epub", device='kindle', expires=None, merge_books=False, 
-        secret_key=secretKey, expiration_days=0, share_key=shareKey, book_title='KindleEar', 
-        book_language='en')
+        timezone=TIMEZONE, book_type="epub", device='kindle', expires=None, secret_key=secretKey, 
+        expiration_days=0, share_key=shareKey, book_title='KindleEar', book_language='en')
     au.save()
     return False
 

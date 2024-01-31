@@ -236,28 +236,30 @@ class FsDictStub(object):
         else:
             return os.listdir(dir_)
 
-    #遍历指定目录及其子目录，逐一返回文件名，dir_为空则遍历内部指定的根目录
-    def walk(self, dir_=None):
+    #遍历指定目录及其子目录，逐一返回文件名
+    #dir_=None: 遍历内部指定的根目录
+    #relpath=True: 返回相对于fs根目录的相对目录
+    def walk(self, dir_=None, relpath=False):
         dir_ = dir_ if dir_ else self.path
         if self.fs_dict:
             if self.fs_dict.isfile(dir_):
-                yield dir_
+                yield os.path.relpath(dir_, self.path) if relpath else dir_
             else:
                 dir_ = dir_.replace('\\', '/')
                 dir_ = dir_ if dir_.endswith('/') else dir_ + '/'
                 for key in self.fs_dict.keys():
                     if key.startswith(dir_):
-                        yield key
+                        yield os.path.relpath(key, self.path) if relpath else key
         else:
             if os.path.isfile(dir_):
-                yield dir_
+                yield os.path.relpath(dir_, self.path) if relpath else dir_
             else:
                 for spec in os.walk(dir_):
                     root, files = spec[0], spec[-1] #root, dirs, files
                     for name in files:
                         path = os.path.join(root, name)
                         if os.path.isfile(path):
-                            yield path
+                            yield os.path.relpath(path, self.path) if relpath else path
 
     #切换当前目录的上下文函数
     def current_dir(self, path):

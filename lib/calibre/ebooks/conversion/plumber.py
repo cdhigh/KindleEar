@@ -4,7 +4,8 @@ __license__ = 'GPL 3'
 __copyright__ = '2009, Kovid Goyal <kovid@kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
-import os, re, sys, shutil, pprint, json, io
+import os, re, sys, shutil, pprint, json, io, css_parser, logging
+from itertools import chain
 from functools import partial
 from calibre.utils.logging import Log
 from calibre.customize.conversion import OptionRecommendation, DummyReporter, InputFormatPlugin
@@ -12,6 +13,7 @@ from calibre.customize.ui import input_profiles, output_profiles, \
         plugin_for_input_format, plugin_for_output_format, \
         available_input_formats, available_output_formats, \
         run_plugins_on_preprocess, run_plugins_on_postprocess
+from calibre.ebooks.conversion.plugins.recipe_input import RecipeInput
 from calibre.ebooks.conversion.preprocess import HTMLPreProcessor
 from calibre.ptempfile import PersistentTemporaryDirectory
 from calibre.utils.date import parse_date
@@ -85,47 +87,19 @@ class Plumber:
         'tags', 'book_producer', 'language', 'pubdate', 'timestamp'
         ]
 
-    #input: 输入绝对路径名，或StringIO，或一个列表
-    #output: 输出文件绝对路径名，也可能是一个BytesIO，如果是BytesIO，则传递另一个参数output_fmt说明输出格式
+    #recipes: 编译好的recipes列表
+    #output: 输出文件绝对路径名，也可能是一个BytesIO
     #user: KeUser 实例
-    def __init__(self, input_, output, user, report_progress=DummyReporter(),
-            dummy=False, abort_after_input_dump=False, override_input_metadata=False, view_kepub=False, 
-            input_fmt=None, output_fmt=None):
-        '''
-        :param input_: Path to input_ file.
-        :param output: Path to output file/folder
-        '''
-        self.original_input_arg = input_
-        self.input = input_
+    def __init__(self, recipes, output, user, output_fmt=None, abort_after_input_dump=False, override_input_metadata=False, view_kepub=False):
+        self.recipes = recipes
         self.output = output
-        #calibre里面使用的log和python标准库使用的logging不兼容，所以不要外面传递了
-        #calibre.Log可以直接调用如log()，而标准库必须使用log.info()
-        #calibre.Log可以输出多个参数，标准库必须使用字符串格式化组合为一个字符串
-        self.log = Log()
+        self.log = Log() #calibre里面使用的log和python标准库使用的logging不兼容，所以不要外面传递了
         self.user = user
-        self.ui_reporter = report_progress
         self.abort_after_input_dump = abort_after_input_dump
         self.override_input_metadata = override_input_metadata
-        
-        # Pipeline options {{{
-        # Initialize the conversion options that are independent of input and
-        # output formats. The input and output plugins can still disable these
-        # options via recommendations.
         self.pipeline_options = _pipeline_options
-        # }}}
-
-        if isinstance(input_, str):
-            input_fmt = os.path.splitext(input_)[1]
-            if not input_fmt:
-                raise ValueError('Input file must have an extension')
-            input_fmt = input_fmt[1:].lower().replace('original_', '')
-            if view_kepub and input_fmt.lower() == 'kepub':
-                input_fmt = 'epub'
-        else:
-            input_fmt = 'recipe'
-        self.archive_input_tdir = None
-        self.changed_options = set()
-        if not isinstance(output, io.BytesIO):
+        
+        if not isinstance(output, io.BytesIO) and not output_fmt:
             if os.path.exists(self.output) and os.path.isdir(self.output):
                 output_fmt = 'oeb'
             else:
@@ -134,38 +108,15 @@ class Plumber:
                     output_fmt = '.oeb'
                 output_fmt = output_fmt[1:].lower()
 
-        self.input_plugin  = input_ if isinstance(input_, InputFormatPlugin) else plugin_for_input_format(input_fmt)
+        self.input_plugin = RecipeInput()
         self.output_plugin = plugin_for_output_format(output_fmt)
-
-        if self.input_plugin is None:
-            raise ValueError('No plugin to handle input format: '+input_fmt)
-
         if self.output_plugin is None:
-            raise ValueError('No plugin to handle output format: '+output_fmt)
+            raise ValueError(f'No plugin to handle output format: {output_fmt}')
 
-        self.input_fmt = input_fmt
         self.output_fmt = output_fmt
-
-        self.all_format_options = set()
-        self.input_options = set()
-        self.output_options = set()
-        # Build set of all possible options. Two options are equal if their
-        # names are the same.
-        if not dummy:
-            self.input_options  = self.input_plugin.options.union(self.input_plugin.common_options)
-            self.output_options = self.output_plugin.options.union(self.output_plugin.common_options)
-        else:
-            for fmt in available_input_formats():
-                input_plugin = plugin_for_input_format(fmt)
-                if input_plugin:
-                    self.all_format_options = self.all_format_options.union(
-                        input_plugin.options.union(input_plugin.common_options))
-            for fmt in available_output_formats():
-                output_plugin = plugin_for_output_format(fmt)
-                if output_plugin:
-                    self.all_format_options = self.all_format_options.union(
-                        output_plugin.options.union(output_plugin.common_options))
-
+        self.input_options  = self.input_plugin.options.union(self.input_plugin.common_options)
+        self.output_options = self.output_plugin.options.union(self.output_plugin.common_options)
+        
     @classmethod
     def unarchive(self, path, tdir):
         extract(path, tdir)
@@ -206,18 +157,14 @@ class Plumber:
 
     def get_all_options(self):
         ans = {}
-        for group in (self.input_options, self.pipeline_options,
-                      self.output_options, self.all_format_options):
-            for rec in group:
-                ans[rec.option] = rec.recommended_value
+        for rec in chain(self.input_options, self.pipeline_options, self.output_options):
+            ans[rec.option] = rec.recommended_value
         return ans
 
     def get_option_by_name(self, name):
-        for group in (self.input_options, self.pipeline_options,
-                      self.output_options, self.all_format_options):
-            for rec in group:
-                if rec.option == name:
-                    return rec
+        for rec in chain(self.input_options, self.pipeline_options, self.output_options):
+            if rec.option == name:
+                return rec
 
     def get_option_help(self, name):
         rec = self.get_option_by_name(name)
@@ -227,12 +174,10 @@ class Plumber:
 
     def get_all_help(self):
         ans = {}
-        for group in (self.input_options, self.pipeline_options,
-                      self.output_options, self.all_format_options):
-            for rec in group:
-                help = getattr(rec, 'help', None)
-                if help is not None:
-                    ans[rec.option.name] = help
+        for rec in chain(self.input_options, self.pipeline_options, self.output_options):
+            help = getattr(rec, 'help', None)
+            if help is not None:
+                ans[rec.option.name] = help
         return ans
 
     def merge_plugin_recs(self, plugin):
@@ -264,15 +209,11 @@ class Plumber:
                     b = None
             return a == b
         
-        for name in (recommendations or {}):
-            val = recommendations[name]
+        for name, val in (recommendations or {}).items():
             rec = self.get_option_by_name(name)
             if rec is not None:
-                changed = not eq(name, rec.recommended_value, val)
                 rec.recommended_value = val
-                if changed:
-                    self.changed_options.add(rec)
-
+                
     def opts_to_mi(self, mi):
         from calibre.ebooks.metadata import string_to_authors
         for x in self.metadata_option_names:
@@ -343,8 +284,7 @@ class Plumber:
         Setup the `self.opts` object.
         '''
         self.opts = OptionValues()
-        for group in (self.input_options, self.pipeline_options,
-                  self.output_options, self.all_format_options):
+        for group in (self.input_options, self.pipeline_options, self.output_options):
             for rec in group:
                 setattr(self.opts, rec.option.name, rec.recommended_value)
 
@@ -371,11 +311,6 @@ class Plumber:
                 and self.output_fmt == 'mobi'
         if self.opts.verbose:
             self.log.filter_level = self.log.DEBUG
-        if self.changed_options:
-            self.log.info('Conversion options changed from defaults:')
-            for rec in self.changed_options:
-                if rec.option.name not in ('username', 'password'):
-                    self.log.info(' {}:{}'.format(rec.option.name,rec.recommended_value))
         if self.opts.verbose > 1:
             self.log.debug('Resolved conversion options')
             try:
@@ -426,10 +361,9 @@ class Plumber:
         self.setup_options()
         if self.opts.verbose:
             self.log.filter_level = self.log.DEBUG
-        self.flush()
-        import css_parser, logging
+        
         css_parser.log.setLevel(logging.WARN)
-        get_types_map()  # Ensure the mimetypes module is initialized
+        #get_types_map()  # Ensure the mimetypes module is initialized
 
         if self.opts.debug_pipeline is not None:
             self.opts.verbose = max(self.opts.verbose, 4)
@@ -442,24 +376,8 @@ class Plumber:
                 x = os.path.join(self.opts.debug_pipeline, x)
                 if os.path.exists(x):
                     shutil.rmtree(x)
-
-        # Create an OEBBook from the input file. The input plugin does all the
-        # heavy lifting.
-        accelerators = {}
-
-        if (self.input_fmt == 'recipe'):
-            stream = self.input
-            self.opts.original_recipe_input_arg = self.original_input_arg
-        else:
-            stream = open(self.input, 'rb')
-
-        if hasattr(self.opts, 'lrf') and self.output_plugin.file_type == 'lrf':
-            self.opts.lrf = True
-        
-        self.ui_reporter(0.01, _('Converting input to HTML...'))
-        ir = CompositeProgressReporter(0.01, 0.34, self.ui_reporter)
-        self.input_plugin.report_progress = ir
-        self.output_plugin.specialize_options(self.log, self.opts, self.input_fmt)
+                    
+        self.output_plugin.specialize_options(self.log, self.opts, 'recipe')
         #根据需要，创建临时目录或创建内存缓存
         system_temp_dir = os.environ.get('TEMP_DIR')
         if system_temp_dir:
@@ -469,40 +387,35 @@ class Plumber:
             tdir = '/'
             fs = FsDictStub(None)
         
-        with self.input_plugin:
-            #调用calibre.customize.conversion.InputFormatPlugin.__call__()，然后调用输入插件的convert()在目标目录生成一大堆文件，包含opf
-            #__call__()返回传入的 fs 实例，其属性 opfname 保存了opf文件的路径名
-            self.oeb = self.input_plugin(stream, self.opts, self.input_fmt, self.log, accelerators, tdir, fs, self.user)
+        #调用calibre.customize.conversion.InputFormatPlugin.__call__()，然后调用输入插件的convert()在目标目录生成一大堆文件，包含opf
+        #__call__()返回传入的 fs 实例，其属性 opfname 保存了opf文件的路径名
+        self.oeb = self.input_plugin(self.recipes, self.opts, 'recipe', self.log, tdir, fs, self.user)
 
-            #如果只是要制作epub的话，到目前为止，工作已经完成大半
-            #将self.oeb指向的目录拷贝到OEBPS目录，加一个mimetype和一个META-INF/container.xml文件，这两个文件内容是固定的
-            #再将这些文件和文件夹一起打包为zip格式，就是完整的epub电子书了
-            #if self.opts.debug_pipeline is not None:
-            #   fs.dump(self.opts.debug_pipeline)
-            #   if self.abort_after_input_dump:
-            #       return
-            #if self.opts.debug_pipeline is not None:
-            #    self.dump_input(self.oeb, tdir)
-            #    if self.abort_after_input_dump:
-            #        return
-            if self.input_fmt in ('recipe', 'downloaded_recipe'):
-                self.opts_to_mi(self.user_metadata)
-            if not hasattr(self.oeb, 'manifest'): #从一堆文件里面创建OEBBook实例
-                self.oeb = create_oebbook(self.log, self.oeb, self.opts, encoding=self.input_plugin.output_encoding,
-                    removed_items=getattr(self.input_plugin, 'removed_items_to_ignore', ()))
-            
-            self.input_plugin.postprocess_book(self.oeb, self.opts, self.log)
-            self.opts.is_image_collection = self.input_plugin.is_image_collection
-            pr = CompositeProgressReporter(0.34, 0.67, self.ui_reporter)
-            self.flush()
-            if self.opts.debug_pipeline is not None:
-                out_dir = os.path.join(self.opts.debug_pipeline, 'parsed')
-                self.dump_oeb(self.oeb, out_dir)
-                self.log.info('Parsed HTML written to:{}'.format(out_dir))
-            self.input_plugin.specialize(self.oeb, self.opts, self.log,
-                    self.output_fmt)
-
-        pr(0., _('Running transforms on e-book...'))
+        #如果只是要制作epub的话，到目前为止，工作已经完成大半
+        #将self.oeb指向的目录拷贝到OEBPS目录，加一个mimetype和一个META-INF/container.xml文件，这两个文件内容是固定的
+        #再将这些文件和文件夹一起打包为zip格式，就是完整的epub电子书了
+        #if self.opts.debug_pipeline is not None:
+        #   fs.dump(self.opts.debug_pipeline)
+        #   if self.abort_after_input_dump:
+        #       return
+        #if self.opts.debug_pipeline is not None:
+        #    self.dump_input(self.oeb, tdir)
+        #    if self.abort_after_input_dump:
+        #        return
+        self.opts_to_mi(self.user_metadata)
+        if not hasattr(self.oeb, 'manifest'): #从一堆文件里面创建OEBBook实例
+            self.oeb = create_oebbook(self.log, self.oeb, self.opts, encoding=self.input_plugin.output_encoding,
+                removed_items=getattr(self.input_plugin, 'removed_items_to_ignore', ()))
+        
+        self.input_plugin.postprocess_book(self.oeb, self.opts, self.log)
+        self.opts.is_image_collection = self.input_plugin.is_image_collection
+        self.flush()
+        if self.opts.debug_pipeline is not None:
+            out_dir = os.path.join(self.opts.debug_pipeline, 'parsed')
+            self.dump_oeb(self.oeb, out_dir)
+            self.log.info('Parsed HTML written to:{}'.format(out_dir))
+        self.input_plugin.specialize(self.oeb, self.opts, self.log,
+                self.output_fmt)
 
         self.oeb.plumber_output_format = self.output_fmt or ''
 
@@ -517,8 +430,6 @@ class Plumber:
         DataURL()(self.oeb, self.opts)
         from calibre.ebooks.oeb.transforms.guide import Clean
         Clean()(self.oeb, self.opts)
-        pr(0.1)
-        self.flush()
 
         self.opts.source = self.opts.input_profile
         self.opts.dest = self.opts.output_profile
@@ -528,14 +439,10 @@ class Plumber:
         from calibre.ebooks.oeb.transforms.metadata import MergeMetadata
         MergeMetadata()(self.oeb, self.user_metadata, self.opts,
                 override_input_metadata=self.override_input_metadata)
-        pr(0.2)
-        self.flush()
 
         from calibre.ebooks.oeb.transforms.structure import DetectStructure
         DetectStructure()(self.oeb, self.opts)
-        pr(0.35)
-        self.flush()
-
+        
         if self.output_plugin.file_type not in ('epub', 'kepub'):
             # Remove the toc reference to the html cover, if any, except for
             # epub, as the epub output plugin will do the right thing with it.
@@ -559,9 +466,7 @@ class Plumber:
 
         from calibre.ebooks.oeb.transforms.jacket import Jacket
         Jacket()(self.oeb, self.opts, self.user_metadata)
-        pr(0.4)
-        self.flush()
-
+        
         if self.opts.debug_pipeline is not None:
             out_dir = os.path.join(self.opts.debug_pipeline, 'structure')
             self.dump_oeb(self.oeb, out_dir)
@@ -624,9 +529,6 @@ class Plumber:
             from calibre.ebooks.oeb.transforms.subset import SubsetFonts
             SubsetFonts()(self.oeb, self.log, self.opts)
 
-        pr(0.9)
-        self.flush()
-
         from calibre.ebooks.oeb.transforms.trimmanifest import ManifestTrimmer
 
         self.log.info('Cleaning up manifest...')
@@ -634,19 +536,14 @@ class Plumber:
         trimmer(self.oeb, self.opts)
 
         self.oeb.toc.rationalize_play_orders()
-        pr(1.)
-        self.flush()
-
+        
         if self.opts.debug_pipeline is not None:
             out_dir = os.path.join(self.opts.debug_pipeline, 'processed')
             self.dump_oeb(self.oeb, out_dir)
             self.log.info('Processed HTML written to:{}'.format(out_dir))
 
         self.log.info('Creating %s...'%self.output_plugin.name)
-        our = CompositeProgressReporter(0.67, 1., self.ui_reporter)
-        self.output_plugin.report_progress = our
-        our(0., _('Running %s plugin')%self.output_plugin.name)
-
+        
         #创建输出临时文件缓存
         if system_temp_dir:
             prefix = self.output_plugin.commit_name or 'output_'
@@ -659,12 +556,8 @@ class Plumber:
         with self.output_plugin:
             self.output_plugin.convert(self.oeb, self.output, self.input_plugin, self.opts, self.log, fs)
         self.oeb.clean_temp_files()
-        self.ui_reporter(1.)
         if not isinstance(self.output, io.BytesIO):
             run_plugins_on_postprocess(self.output, self.output_fmt)
-
-        #self.log.info(self.output_fmt.upper(), 'output written to', self.output)
-        self.flush()
 
 regex_wizard_callback = None
 def set_regex_wizard_callback(f):
