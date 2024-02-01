@@ -108,3 +108,7 @@ def SetLang(langCode):
     session['langCode'] = langCode
     return redirect('/')
 
+#Babel选择显示哪种语言的回调函数
+def get_locale():
+    langCode = session.get('langCode')
+    return langCode if langCode else request.accept_languages.best_match(supported_languages)

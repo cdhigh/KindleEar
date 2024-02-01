@@ -220,7 +220,7 @@ class AppInfo(MyBaseModel):
 
 
 #创建数据库表格，一个数据库只需要创建一次
-#如果是sql数据库，可以使用force=True删掉之前的数据库文件
+#如果是sql数据库，可以使用force=True删掉之前的数据库文件(小心)
 def CreateDatabaseTable(force=False):
     if DATABASE_ENGINE == "sqlite":
         if not force and os.path.exists(dbName):
@@ -232,19 +232,10 @@ def CreateDatabaseTable(force=False):
             except:
                 pass
 
-    KeUser.create_table()
-    UserBlob.create_table()
-    Recipe.create_table()
-    BookedRecipe.create_table()
-    DeliverLog.create_table()
-    WhiteList.create_table()
-    SharedRss.create_table()
-    SharedRssCategory.create_table()
-    AppInfo.create_table()
+    if DATABASE_ENGINE != "datastore":
+        with dbInstance.connection_context():
+            dbInstance.create_tables([KeUser, UserBlob, Recipe, BookedRecipe, DeliverLog, WhiteList,
+                SharedRss, SharedRssCategory, AppInfo], safe=True)
     
-    AppInfo(name='dbTableVersion', int_value=DB_VERSION).save()
-    print(f'Create database "{dbName}" finished')
-
-if __name__ == '__main__':
-    if DATABASE_ENGINE == 'sqlite':
-        CreateDatabaseTable()
+    #AppInfo(name='dbTableVersion', int_value=DB_VERSION).save()
+    #print(f'Create database "{dbName}" finished')
