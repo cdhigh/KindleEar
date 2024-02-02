@@ -1,0 +1,59 @@
+{% extends "advbase.html" %}
+{% block titleTag -%}
+<title>{{ _("Cover image") }} - KindleEar</title>
+{% endblock -%}
+
+{% block css -%}
+<style type="text/css">
+#preview {
+  text-align: center;
+  background-color: #eee;
+}
+
+#preview:hover {
+  background-color: #ddd;
+}
+
+#preview img{
+  width:90%;
+  max-width:500px;
+  height:auto;
+  margin: 1.5em auto;
+  vertical-align: bottom;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+</style>
+{{super()}}
+{% endblock -%}
+
+{% block advcontent -%}
+<form class="pure-form" id="uploadForm" action="{{formaction}}" method="POST" enctype="multipart/form-data">
+  <fieldset>
+    <legend><h3>{{_("Upload cover image")}}</h3></legend>
+    <p><small>{{_("Upload a cover image from local.")}}</small></p>
+    <div class="box-list">
+      <input type="file" name="cover_file" id="cover_file" class="pure-input-1 box" accept=".jpg, .png, .jpeg, .gif" />
+      <div id="preview" class="box upload_preview">
+        {% if user.covers -%}
+          <img id="imgPreview" src="/dbimage/cover" class="out_shadow" />
+        {% else -%}
+          <img id="imgPreview" src="/images/cv_default.jpg" class="out_shadow" />
+        {% endif -%}
+          <span id="uploadProgress" class="upload_progress"></span>
+      </div>
+    </div>
+    <div style="text-align:center;">
+      <input type="button" value="{{ _('Upload') }}" id="fileSubmit" class="pure-button pure-button-primary pure-input-rounded" />
+      <a href="javascript:;" deletehref="{{ deletecoverhref }}" id="deletecover" class="pure-button pure-input-rounded">{{_("Delete")}}</a>
+    </div>
+  </fieldset>
+</form>
+{% endblock -%}
+{% block js -%}
+<script type="text/javascript">
+$(document).ready(function(){
+  //mimeType, formId, fileInputId, upBtnId, delBtnId, previewTagId, progressId
+  AjaxFileUpload.init('image', '#uploadForm', '#cover_file', '#fileSubmit', '#deletecover', '#imgPreview', '#uploadProgress');
+});
+</script>
+{% endblock -%}

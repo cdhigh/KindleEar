@@ -13,7 +13,7 @@ APP_ID = "kindleear"
 SERVER_LOCATION = "us-central1"
 
 #Choose the database engine, you can also set Database URL to DATABASE_NAME
-DATABASE_ENGINE = "sqlite"  #"datastore", "mysql", "sqlite", "postgresql", "cockroachdb"
+DATABASE_ENGINE = "datastore"  #"datastore", "mysql", "sqlite", "postgresql", "cockroachdb"
 DATABASE_NAME = "test.db"
 DATABASE_HOST = "localhost"
 DATABASE_PORT = 0
@@ -28,8 +28,8 @@ SEND_MAIL_SERVICE = "gae"
 
 #If SEND_MAIL_SERVICE is configured as smtp, these properties need to be set correctly
 #SMTP_HOST = "smtp.gmail.com"
-#SMTP_HOST_USER = "your_name@gmail.com"
-#SMTP_HOST_PASSWORD = "password"
+#SMTP_USER = "your_name@gmail.com"
+#SMTP_PASSWORD = "password"
 #SMTP_PORT = 587
 #SMTP_USE_TLS = True
 

@@ -1,0 +1,1237 @@
+# Translations template for PROJECT.
+# Copyright (C) 2024 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2024-01-22 08:34-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.14.0\n"
+
+#: apps/view/admin.py:46 apps/view/admin.py:72 apps/view/admin.py:126
+msgid "The password includes non-ascii chars!"
+msgstr ""
+
+#: apps/view/admin.py:49
+msgid "Old password is wrong!"
+msgstr ""
+
+#: apps/view/admin.py:51 apps/view/admin.py:64 apps/view/admin.py:120
+msgid "The two new passwords are dismatch!"
+msgstr ""
+
+#: apps/view/admin.py:53 apps/view/admin.py:136
+msgid "Change password success!"
+msgstr ""
+
+#: apps/view/admin.py:62 apps/view/login.py:41
+msgid "The username includes unsafe chars!"
+msgstr ""
+
+#: apps/view/admin.py:66
+msgid "Already exist the username!"
+msgstr ""
+
+#: apps/view/admin.py:86
+msgid "Add a account success!"
+msgstr ""
+
+#: apps/view/admin.py:98 apps/view/admin.py:118 apps/view/admin.py:157
+msgid "The username '{}' not exist!"
+msgstr ""
+
+#: apps/view/admin.py:100
+msgid "Please input new password to confirm!"
+msgstr ""
+
+#: apps/view/admin.py:113 apps/view/login.py:37
+msgid "Username is empty!"
+msgstr ""
+
+#: apps/view/admin.py:145
+msgid "Please confirm to delete the account!"
+msgstr ""
+
+#: apps/view/admin.py:163
+msgid "The username is empty or you dont have right to delete it!"
+msgstr ""
+
+#: apps/view/adv.py:62 apps/view/adv.py:63 apps/view/adv.py:64
+#: apps/view/adv.py:65 apps/view/adv.py:66 apps/view/adv.py:67
+#: apps/view/adv.py:68 apps/view/adv.py:69 apps/view/adv.py:70
+#: apps/view/adv.py:71
+msgid "Append hyperlink '{}' to article"
+msgstr ""
+
+#: apps/view/adv.py:364
+msgid "Authorization Error!<br/>{}"
+msgstr ""
+
+#: apps/view/adv.py:387
+msgid "Success authorized by Pocket!"
+msgstr ""
+
+#: apps/view/adv.py:393
+msgid ""
+"Failed to request authorization of Pocket!<hr/>See details "
+"below:<br/><br/>{}"
+msgstr ""
+
+#: apps/view/adv.py:403
+msgid "Request type [{}] unsupported"
+msgstr ""
+
+#: apps/view/adv.py:418
+msgid "The Instapaper service encountered an error. Please try again later."
+msgstr ""
+
+#: apps/view/deliver.py:108
+msgid "The username not exist or the email of kindle is empty."
+msgstr ""
+
+#: apps/view/deliver.py:123
+msgid "Book(s) ({}) put to queue!"
+msgstr ""
+
+#: apps/view/deliver.py:125
+msgid "No book to deliver!"
+msgstr ""
+
+#: apps/view/library.py:39 apps/view/library.py:85 apps/view/library.py:105
+msgid "Cannot fetch data from {}, status: {}"
+msgstr ""
+
+#: apps/view/library.py:56 apps/view/library.py:148 apps/view/subscribe.py:84
+msgid "Title or Url is empty!"
+msgstr ""
+
+#: apps/view/library.py:198 apps/view/library.py:240
+msgid "Url is empty!"
+msgstr ""
+
+#: apps/view/library.py:208 apps/view/library.py:254
+msgid "URL not found in database!"
+msgstr ""
+
+#: apps/view/login.py:21
+msgid "Please input username and password."
+msgstr ""
+
+#: apps/view/login.py:23
+msgid "Please use {}/{} to login at first time."
+msgstr ""
+
+#: apps/view/login.py:39
+msgid "The len of username reached the limit of 25 chars!"
+msgstr ""
+
+#: apps/view/login.py:68
+msgid "The username not exist or password is wrong!"
+msgstr ""
+
+#: apps/view/login.py:71 apps/view/login.py:73
+msgid "Forgot password?"
+msgstr ""
+
+#: apps/view/login.py:109
+msgid "login required"
+msgstr ""
+
+#: apps/view/logs.py:88 apps/view/logs.py:104
+msgid "The LastDelivered item ({}) not exist!"
+msgstr ""
+
+#: apps/view/logs.py:95
+msgid "The id or num is invalid!"
+msgstr ""
+
+#: apps/view/setting.py:17
+msgid "Chinese"
+msgstr ""
+
+#: apps/view/setting.py:18
+msgid "English"
+msgstr ""
+
+#: apps/view/setting.py:19
+msgid "French"
+msgstr ""
+
+#: apps/view/setting.py:20
+msgid "Spanish"
+msgstr ""
+
+#: apps/view/setting.py:21
+msgid "Portuguese"
+msgstr ""
+
+#: apps/view/setting.py:22
+msgid "German"
+msgstr ""
+
+#: apps/view/setting.py:23
+msgid "Italian"
+msgstr ""
+
+#: apps/view/setting.py:24
+msgid "Japanese"
+msgstr ""
+
+#: apps/view/setting.py:25
+msgid "Russian"
+msgstr ""
+
+#: apps/view/setting.py:26
+msgid "Turkish"
+msgstr ""
+
+#: apps/view/setting.py:27
+msgid "Korean"
+msgstr ""
+
+#: apps/view/setting.py:28
+msgid "Arabic"
+msgstr ""
+
+#: apps/view/setting.py:29
+msgid "Czech"
+msgstr ""
+
+#: apps/view/setting.py:30
+msgid "Dutch"
+msgstr ""
+
+#: apps/view/setting.py:31
+msgid "Greek"
+msgstr ""
+
+#: apps/view/setting.py:32
+msgid "Hindi"
+msgstr ""
+
+#: apps/view/setting.py:33
+msgid "Malaysian"
+msgstr ""
+
+#: apps/view/setting.py:34
+msgid "Bengali"
+msgstr ""
+
+#: apps/view/setting.py:35
+msgid "Persian"
+msgstr ""
+
+#: apps/view/setting.py:36
+msgid "Urdu"
+msgstr ""
+
+#: apps/view/setting.py:37
+msgid "Swahili"
+msgstr ""
+
+#: apps/view/setting.py:38
+msgid "Vietnamese"
+msgstr ""
+
+#: apps/view/setting.py:39
+msgid "Punjabi"
+msgstr ""
+
+#: apps/view/setting.py:40
+msgid "Javanese"
+msgstr ""
+
+#: apps/view/setting.py:41
+msgid "Tagalog"
+msgstr ""
+
+#: apps/view/setting.py:42
+msgid "Hausa"
+msgstr ""
+
+#: apps/view/setting.py:58
+msgid "Kindle E-mail is requied!"
+msgstr ""
+
+#: apps/view/setting.py:60
+msgid "Title is requied!"
+msgstr ""
+
+#: apps/view/setting.py:86
+msgid "Settings Saved!"
+msgstr ""
+
+#: apps/view/share.py:112
+msgid "'{title}'<br/><br/>Saved to {act} [{email}] success."
+msgstr ""
+
+#: apps/view/share.py:134
+msgid "Failed save to Pocket.<br/>"
+msgstr ""
+
+#: apps/view/share.py:136
+msgid "'{}'<br/><br/>Saved to your Pocket account."
+msgstr ""
+
+#: apps/view/share.py:139
+msgid "See details below:<br/><br/>{}"
+msgstr ""
+
+#: apps/view/share.py:159
+msgid "'{}'<br/><br/>Saved to your Instapaper account."
+msgstr ""
+
+#: apps/view/share.py:163
+msgid ""
+"Failed save to Instapaper<br/>'{}'<br/><br/>Reason : Invalid username or "
+"password."
+msgstr ""
+
+#: apps/view/share.py:167
+msgid "Failed save to Instapaper<br/>'{}'<br/><br/>Reason : Unknown({})."
+msgstr ""
+
+#: apps/view/subscribe.py:46
+msgid "Title or url is empty!"
+msgstr ""
+
+#: apps/view/subscribe.py:53 apps/view/subscribe.py:93
+msgid "Duplicated subscription!"
+msgstr ""
+
+#: apps/view/subscribe.py:74
+msgid "The feed ({}) not exist!"
+msgstr ""
+
+#: apps/view/subscribe.py:133
+msgid "The book ({}) not exist!"
+msgstr ""
+
+#: books/serialize_builtin_recipes.py:27
+msgid "You"
+msgstr ""
+
+#: books/serialize_builtin_recipes.py:27 books/serialize_builtin_recipes.py:36
+msgid "Unknown"
+msgstr ""
+
+#: templates/admin.html:3 templates/base.html:150 templates/base.html:152
+msgid "Admin"
+msgstr ""
+
+#: templates/admin.html:14
+msgid "Change Password"
+msgstr ""
+
+#: templates/admin.html:19
+msgid "Old password"
+msgstr ""
+
+#: templates/admin.html:23 templates/adminmgrpwd.html:19
+#: templates/adminmgrpwd.html:20
+msgid "New password"
+msgstr ""
+
+#: templates/admin.html:27 templates/admin.html:52
+#: templates/adminmgrpwd.html:23 templates/adminmgrpwd.html:24
+msgid "Confirm password"
+msgstr ""
+
+#: templates/admin.html:31 templates/adminmgrpwd.html:39
+msgid "Confirm Change"
+msgstr ""
+
+#: templates/admin.html:39
+msgid "Add Account"
+msgstr ""
+
+#: templates/admin.html:44 templates/admin.html:85
+#: templates/adminmgrpwd.html:15 templates/adminmgrpwd.html:16
+#: templates/delaccount.html:16 templates/home.html:18 templates/login.html:29
+#: templates/login.html:30 templates/logs.html:85 templates/logs.html:127
+msgid "Username"
+msgstr ""
+
+#: templates/admin.html:48 templates/advarchive.html:51 templates/home.html:19
+#: templates/login.html:33 templates/login.html:34
+msgid "Password"
+msgstr ""
+
+#: templates/admin.html:56 templates/adminmgrpwd.html:27
+msgid "Expiration"
+msgstr ""
+
+#: templates/admin.html:58 templates/adminmgrpwd.html:29
+msgid "Never expire"
+msgstr ""
+
+#: templates/admin.html:59 templates/adminmgrpwd.html:30
+#: templates/setting.html:176
+msgid "7 Days"
+msgstr ""
+
+#: templates/admin.html:60 templates/adminmgrpwd.html:31
+msgid "1 Month"
+msgstr ""
+
+#: templates/admin.html:61 templates/adminmgrpwd.html:32
+msgid "3 Months"
+msgstr ""
+
+#: templates/admin.html:62 templates/adminmgrpwd.html:33
+msgid "6 Months"
+msgstr ""
+
+#: templates/admin.html:63 templates/adminmgrpwd.html:34
+msgid "1 Year"
+msgstr ""
+
+#: templates/admin.html:64 templates/adminmgrpwd.html:35
+msgid "2 Years"
+msgstr ""
+
+#: templates/admin.html:68 templates/advurlfilter.html:32
+#: templates/advwhitelist.html:31 templates/my.html:31
+msgid "Add"
+msgstr ""
+
+#: templates/admin.html:74
+msgid "Accounts"
+msgstr ""
+
+#: templates/admin.html:84
+msgid "No."
+msgstr ""
+
+#: templates/admin.html:86
+msgid "Enable"
+msgstr ""
+
+#: templates/admin.html:87 templates/logs.html:132
+msgid "Operation"
+msgstr ""
+
+#: templates/admin.html:97 templates/logs.html:145
+msgid "Change"
+msgstr ""
+
+#: templates/admin.html:98 templates/advcoverimage.html:47
+#: templates/advuploadcss.html:31 templates/advurlfilter.html:24
+#: templates/advwhitelist.html:23 templates/delaccount.html:20
+#: templates/logs.html:148 templates/my.html:60 templates/my.html:201
+#: templates/my.html:412
+msgid "Delete"
+msgstr ""
+
+#: templates/adminmgrpwd.html:3
+msgid "Change password"
+msgstr ""
+
+#: templates/advarchive.html:3 templates/advarchive.html:9
+#: templates/advbase.html:57 templates/advbase.html:61
+msgid "Archive"
+msgstr ""
+
+#: templates/advarchive.html:10
+msgid "Append hyperlinks for archiving or sharing."
+msgstr ""
+
+#: templates/advarchive.html:35
+msgid "Authorized"
+msgstr ""
+
+#: templates/advarchive.html:37
+msgid "Authorize"
+msgstr ""
+
+#: templates/advarchive.html:48
+msgid "Email or Username"
+msgstr ""
+
+#: templates/advarchive.html:54 templates/advarchive.html:102
+#: templates/advarchive.html:113 templates/advarchive.html:120
+#: templates/advarchive.html:126
+msgid "Verify"
+msgstr ""
+
+#: templates/advarchive.html:87
+msgid "Append QR code of url to article"
+msgstr ""
+
+#: templates/advarchive.html:93 templates/setting.html:193
+msgid "Save settings"
+msgstr ""
+
+#: templates/advarchive.html:105
+msgid "Verifying"
+msgstr ""
+
+#: templates/advarchive.html:116
+msgid "Congratulation : the username and password are correct."
+msgstr ""
+
+#: templates/advarchive.html:117
+msgid "Verified"
+msgstr ""
+
+#: templates/advarchive.html:119
+msgid "The username or password is incorrect!"
+msgstr ""
+
+#: templates/advarchive.html:125
+msgid "Error when verify the username and password for Instapaper. Status:"
+msgstr ""
+
+#: templates/advbase.html:39 templates/advbase.html:43
+#: templates/advdelivernow.html:3 templates/advdelivernow.html:8
+msgid "Deliver now"
+msgstr ""
+
+#: templates/advbase.html:48 templates/advbase.html:52
+#: templates/advwhitelist.html:13
+msgid "White List"
+msgstr ""
+
+#: templates/advbase.html:66 templates/advbase.html:70
+#: templates/advurlfilter.html:12
+msgid "Url Filter"
+msgstr ""
+
+#: templates/advbase.html:75 templates/advbase.html:79
+#: templates/advimport.html:8
+msgid "Import Feeds"
+msgstr ""
+
+#: templates/advbase.html:84 templates/advbase.html:88
+msgid "Cover Image"
+msgstr ""
+
+#: templates/advbase.html:93 templates/advbase.html:97
+#: templates/advuploadcss.html:3
+msgid "Stylesheet"
+msgstr ""
+
+#: templates/advcoverimage.html:3
+msgid "Cover image"
+msgstr ""
+
+#: templates/advcoverimage.html:32
+msgid "Upload cover image"
+msgstr ""
+
+#: templates/advcoverimage.html:33
+msgid "Upload a cover image from local."
+msgstr ""
+
+#: templates/advcoverimage.html:46 templates/advuploadcss.html:30
+msgid "Upload"
+msgstr ""
+
+#: templates/advcoverimage.html:66
+msgid "Size of image file must be smaller than 500KB."
+msgstr ""
+
+#: templates/advcoverimage.html:72
+msgid "The file you chosen is not an image."
+msgstr ""
+
+#: templates/advcoverimage.html:100
+msgid ""
+"<h1>Successfully</h1><p>The cover image have been uploaded "
+"successfully.</p>"
+msgstr ""
+
+#: templates/advcoverimage.html:101 templates/advuploadcss.html:74
+#: templates/my.html:533 templates/sharedlibrary.html:311
+#: templates/sharedlibrary.html:333
+msgid "Close"
+msgstr ""
+
+#: templates/advcoverimage.html:107
+msgid "Failed to upload the cover image. Error:"
+msgstr ""
+
+#: templates/advcoverimage.html:163
+msgid "Failed to delete the cover image. Error:"
+msgstr ""
+
+#: templates/advcoverimage.html:167
+msgid "Failed to delete the cover image. Status:"
+msgstr ""
+
+#: templates/advdelivernow.html:9
+msgid "Deliver selected books now."
+msgstr ""
+
+#: templates/advdelivernow.html:12
+msgid "No books are subscribed."
+msgstr ""
+
+#: templates/advdelivernow.html:23 templates/advdelivernow.html:35
+msgid "Select all"
+msgstr ""
+
+#: templates/advdelivernow.html:24 templates/advdelivernow.html:36
+msgid "Select none"
+msgstr ""
+
+#: templates/advdelivernow.html:42
+msgid "Deliver"
+msgstr ""
+
+#: templates/advimport.html:3 templates/advimport.html:18
+msgid "Import"
+msgstr ""
+
+#: templates/advimport.html:9
+msgid "Import custom rss from a OPML file."
+msgstr ""
+
+#: templates/advimport.html:15
+msgid "Import as fulltext RSS by default"
+msgstr ""
+
+#: templates/advimport.html:19
+msgid "Download"
+msgstr ""
+
+#: templates/advuploadcss.html:22
+msgid "Upload stylesheet"
+msgstr ""
+
+#: templates/advuploadcss.html:23
+msgid "Upload a stylesheet from local (accept utf-8 only)."
+msgstr ""
+
+#: templates/advuploadcss.html:53
+msgid "The file you chosen is not a stylesheet file."
+msgstr ""
+
+#: templates/advuploadcss.html:73
+msgid ""
+"<h1>Successfully</h1><p>The stylesheet file have been uploaded "
+"successfully.</p>"
+msgstr ""
+
+#: templates/advuploadcss.html:79 templates/advuploadcss.html:83
+msgid "Failed to upload the stylesheet file. Error:"
+msgstr ""
+
+#: templates/advuploadcss.html:133 templates/advuploadcss.html:137
+msgid "Failed to delete the stylesheet. Error:"
+msgstr ""
+
+#: templates/advurlfilter.html:3
+msgid "Url filter"
+msgstr ""
+
+#: templates/advurlfilter.html:13
+msgid "Urls in list would not be downloaded."
+msgstr ""
+
+#: templates/advurlfilter.html:30
+msgid "Please input regular expression"
+msgstr ""
+
+#: templates/advwhitelist.html:3
+msgid "White list"
+msgstr ""
+
+#: templates/advwhitelist.html:15
+#, python-format
+msgid ""
+"Emails sent to %(name)sxxx@appid.appspotmail.com will be transferred to "
+"your email."
+msgstr ""
+
+#: templates/advwhitelist.html:29
+msgid "Please input mail address"
+msgstr ""
+
+#: templates/autoback.html:3 templates/tipsandback.html:3
+msgid "Auto back"
+msgstr ""
+
+#: templates/autoback.html:28 templates/tipsandback.html:13
+msgid "Auto back to previous page after 5 seconds"
+msgstr ""
+
+#: templates/autoback.html:29 templates/tipsandback.html:14
+#: templates/tipsback.html:15
+msgid "Click to back"
+msgstr ""
+
+#: templates/base.html:116 templates/home.html:15
+msgid "Logout"
+msgstr ""
+
+#: templates/base.html:118 templates/home.html:20 templates/login.html:3
+#: templates/login.html:37
+msgid "Login"
+msgstr ""
+
+#: templates/base.html:135 templates/base.html:137 templates/home.html:14
+#: templates/my.html:3
+msgid "Feeds"
+msgstr ""
+
+#: templates/base.html:140 templates/base.html:142 templates/setting.html:3
+msgid "Settings"
+msgstr ""
+
+#: templates/base.html:145 templates/base.html:147 templates/logs.html:3
+msgid "Logs"
+msgstr ""
+
+#: templates/base.html:155 templates/base.html:157
+msgid "Advanced"
+msgstr ""
+
+#: templates/base.html:160 templates/base.html:162
+#: templates/sharedlibrary.html:3
+msgid "Shared"
+msgstr ""
+
+#: templates/delaccount.html:3
+msgid "Delete account"
+msgstr ""
+
+#: templates/home.html:3
+msgid "Home"
+msgstr ""
+
+#: templates/home.html:12
+msgid "Sharing Joyful News Every Step of the Way"
+msgstr ""
+
+#: templates/home.html:30
+msgid "Inherited From Calibre"
+msgstr ""
+
+#: templates/home.html:32
+#, python-format
+msgid ""
+"With the powerful %(calibre)s, you can now effortlessly generate epub and"
+" mobi books within a Python-hosted environment and seamlessly transfer "
+"them to your eReader or other reading devices."
+msgstr ""
+
+#: templates/home.html:39
+msgid "Share Your Ideas"
+msgstr ""
+
+#: templates/home.html:41
+#, python-format
+msgid ""
+"With my open source %(app_name)s application, You can deploy your own "
+"server to push news feeds to your kindle dialy or share the service with "
+"your friends."
+msgstr ""
+
+#: templates/login.html:40
+msgid ""
+"The website doesn't allow registration. You can ask the owner for an "
+"account."
+msgstr ""
+
+#: templates/logs.html:34
+msgid "Only display last 10 logs"
+msgstr ""
+
+#: templates/logs.html:45 templates/logs.html:86 templates/logs.html:128
+msgid "Time"
+msgstr ""
+
+#: templates/logs.html:46 templates/logs.html:87 templates/logs.html:129
+#: templates/my.html:16 templates/setting.html:151
+msgid "Title"
+msgstr ""
+
+#: templates/logs.html:47 templates/logs.html:88
+msgid "Size"
+msgstr ""
+
+#: templates/logs.html:48 templates/logs.html:89
+msgid "To"
+msgstr ""
+
+#: templates/logs.html:49 templates/logs.html:90
+msgid "Status"
+msgstr ""
+
+#: templates/logs.html:69
+msgid "There is no log"
+msgstr ""
+
+#: templates/logs.html:73
+msgid "Logs of other users"
+msgstr ""
+
+#: templates/logs.html:115
+msgid "Last delivered"
+msgstr ""
+
+#: templates/logs.html:130
+msgid "Num"
+msgstr ""
+
+#: templates/logs.html:131
+msgid "Record"
+msgstr ""
+
+#: templates/logs.html:164
+msgid "Please input a new number"
+msgstr ""
+
+#: templates/logs.html:167
+msgid "The number is invalid"
+msgstr ""
+
+#: templates/logs.html:176
+msgid "Cannot change this record, Error:"
+msgstr ""
+
+#: templates/logs.html:180
+msgid "Error when try to change this record. Status:"
+msgstr ""
+
+#: templates/logs.html:196
+msgid "Cannot delete this record, Error:"
+msgstr ""
+
+#: templates/logs.html:200
+msgid "Error when try to delete this record. Status:"
+msgstr ""
+
+#: templates/my.html:11
+msgid "Custom Rss"
+msgstr ""
+
+#: templates/my.html:22 templates/my.html:42 templates/my.html:372
+msgid "Fulltext"
+msgstr ""
+
+#: templates/my.html:59 templates/my.html:405 templates/my.html:564
+msgid "Share"
+msgstr ""
+
+#: templates/my.html:66
+msgid "Subscribed"
+msgstr ""
+
+#: templates/my.html:68
+msgid "There are no subscribed books"
+msgstr ""
+
+#: templates/my.html:74 templates/my.html:431 templates/my.html:484
+msgid "Separate"
+msgstr ""
+
+#: templates/my.html:87 templates/my.html:453
+msgid "Login Info"
+msgstr ""
+
+#: templates/my.html:89 templates/my.html:463
+msgid "Unsubscribe"
+msgstr ""
+
+#: templates/my.html:99
+msgid "Library"
+msgstr ""
+
+#: templates/my.html:103
+msgid "Upload your custom recipe"
+msgstr ""
+
+#: templates/my.html:104
+msgid "Search"
+msgstr ""
+
+#: templates/my.html:107
+msgid "There are No recipes unsubscribed"
+msgstr ""
+
+#: templates/my.html:110
+msgid "Bookmarklet"
+msgstr ""
+
+#: templates/my.html:114
+msgid "Add to KindleEar"
+msgstr ""
+
+#: templates/my.html:117
+msgid "Drag and drop this link to your bookmarks"
+msgstr ""
+
+#: templates/my.html:202
+msgid "View Source Code"
+msgstr ""
+
+#: templates/my.html:204
+msgid "Subscribe Separately"
+msgstr ""
+
+#: templates/my.html:205
+msgid "Merged Subscription"
+msgstr ""
+
+#: templates/my.html:292
+msgid "Cannot subscribe this book, Error:"
+msgstr ""
+
+#: templates/my.html:296
+msgid "Error when try to subscribe this book. Status:"
+msgstr ""
+
+#: templates/my.html:321
+msgid "Cannot unsubscribe this book, Error:"
+msgstr ""
+
+#: templates/my.html:325
+msgid "Error when try to unsubscribe this book. Status:"
+msgstr ""
+
+#: templates/my.html:340
+msgid "Cannot delete this feed, Error:"
+msgstr ""
+
+#: templates/my.html:344
+msgid "Error when try to delete this feed. Status:"
+msgstr ""
+
+#: templates/my.html:361 templates/my.html:582 templates/sharedlibrary.html:316
+msgid "Cannot add this feed, Error:"
+msgstr ""
+
+#: templates/my.html:506 templates/sharedlibrary.html:220
+msgid "Subscribe"
+msgstr ""
+
+#: templates/my.html:532
+msgid ""
+"<h1>Thanks</h1><p>Thank you for sharing, good luck will always with "
+"you.</p>"
+msgstr ""
+
+#: templates/my.html:538
+msgid "Error:"
+msgstr ""
+
+#: templates/my.html:542
+msgid "Error when try to fetch content of the category. Status:"
+msgstr ""
+
+#: templates/my.html:551
+msgid "<h1>Share links, share happiness</h1>"
+msgstr ""
+
+#: templates/my.html:552
+msgid "<p>Category for [{0}]:</p>"
+msgstr ""
+
+#: templates/my.html:558
+msgid ""
+"<p>Please write a category in text field if the one you wish is not in "
+"the list.</p>"
+msgstr ""
+
+#: templates/my.html:561
+msgid "Cancel"
+msgstr ""
+
+#: templates/my.html:586 templates/sharedlibrary.html:320
+msgid "Error when try to add this feed. Status:"
+msgstr ""
+
+#: templates/my.html:627
+msgid "Read with Kindle"
+msgstr ""
+
+#: templates/setting.html:14
+msgid "Your account will pause after"
+msgstr ""
+
+#: templates/setting.html:14
+msgid ", Please login before expire."
+msgstr ""
+
+#: templates/setting.html:15
+msgid "Delete Account"
+msgstr ""
+
+#: templates/setting.html:24
+msgid "Base Setting"
+msgstr ""
+
+#: templates/setting.html:26
+msgid "Kindle E-mail"
+msgstr ""
+
+#: templates/setting.html:27
+msgid "Seperated by semicolon"
+msgstr ""
+
+#: templates/setting.html:30
+msgid "Time zone"
+msgstr ""
+
+#: templates/setting.html:42
+msgid "Deliver days"
+msgstr ""
+
+#: templates/setting.html:44
+msgid "Mon"
+msgstr ""
+
+#: templates/setting.html:46
+msgid "Tue"
+msgstr ""
+
+#: templates/setting.html:48
+msgid "Wed"
+msgstr ""
+
+#: templates/setting.html:50
+msgid "Thu"
+msgstr ""
+
+#: templates/setting.html:52
+msgid "Fri"
+msgstr ""
+
+#: templates/setting.html:54
+msgid "Sat"
+msgstr ""
+
+#: templates/setting.html:56
+msgid "Sun"
+msgstr ""
+
+#: templates/setting.html:59
+msgid "Deliver time"
+msgstr ""
+
+#: templates/setting.html:67
+msgid "Book type"
+msgstr ""
+
+#: templates/setting.html:74
+msgid "Device type"
+msgstr ""
+
+#: templates/setting.html:84
+msgid "Others"
+msgstr ""
+
+#: templates/setting.html:88
+msgid "Title from"
+msgstr ""
+
+#: templates/setting.html:90
+msgid "Webpage"
+msgstr ""
+
+#: templates/setting.html:91
+msgid "Feed"
+msgstr ""
+
+#: templates/setting.html:95
+msgid "Title format"
+msgstr ""
+
+#: templates/setting.html:97
+msgid "Title Only"
+msgstr ""
+
+#: templates/setting.html:98
+msgid "Title YYYY-MM-DD"
+msgstr ""
+
+#: templates/setting.html:99
+msgid "Title MM-DD"
+msgstr ""
+
+#: templates/setting.html:102
+msgid "Title MMM DD"
+msgstr ""
+
+#: templates/setting.html:103
+msgid "Title Day, MMM DD"
+msgstr ""
+
+#: templates/setting.html:107
+msgid "Book mode"
+msgstr ""
+
+#: templates/setting.html:109
+msgid "Periodical"
+msgstr ""
+
+#: templates/setting.html:110
+msgid "Comic"
+msgstr ""
+
+#: templates/setting.html:114
+msgid "Remove hyperlinks"
+msgstr ""
+
+#: templates/setting.html:116
+msgid "Do not remove hyperlinks"
+msgstr ""
+
+#: templates/setting.html:117
+msgid "Remove image links"
+msgstr ""
+
+#: templates/setting.html:118
+msgid "Remove text links"
+msgstr ""
+
+#: templates/setting.html:119
+msgid "Remove all hyperlinks"
+msgstr ""
+
+#: templates/setting.html:123
+msgid "Author format"
+msgstr ""
+
+#: templates/setting.html:126
+msgid "YYYY-MM-DD"
+msgstr ""
+
+#: templates/setting.html:127
+msgid "MM-DD"
+msgstr ""
+
+#: templates/setting.html:128
+msgid "MM/DD"
+msgstr ""
+
+#: templates/setting.html:129
+msgid "DD/MM"
+msgstr ""
+
+#: templates/setting.html:130
+msgid "MMM DD"
+msgstr ""
+
+#: templates/setting.html:131
+msgid "Day, MMM DD"
+msgstr ""
+
+#: templates/setting.html:136
+msgid "Merge books into one"
+msgstr ""
+
+#: templates/setting.html:140
+msgid "Enable deliver"
+msgstr ""
+
+#: templates/setting.html:149
+msgid "Custom Rss Setting"
+msgstr ""
+
+#: templates/setting.html:155
+msgid "Language"
+msgstr ""
+
+#: templates/setting.html:167
+msgid "Oldest article"
+msgstr ""
+
+#: templates/setting.html:169
+msgid "No limit"
+msgstr ""
+
+#: templates/setting.html:170
+msgid "1 Day"
+msgstr ""
+
+#: templates/setting.html:171
+msgid "2 Days"
+msgstr ""
+
+#: templates/setting.html:172
+msgid "3 Days"
+msgstr ""
+
+#: templates/setting.html:173
+msgid "4 Days"
+msgstr ""
+
+#: templates/setting.html:174
+msgid "5 Days"
+msgstr ""
+
+#: templates/setting.html:175
+msgid "6 Days"
+msgstr ""
+
+#: templates/setting.html:181
+msgid "Keep images"
+msgstr ""
+
+#: templates/setting.html:185
+msgid "Enable deliver custom rss"
+msgstr ""
+
+#: templates/setting.html:186
+msgid "This switch only effective when 'Enable deliver' is enabled."
+msgstr ""
+
+#: templates/setting.html:190
+msgid "Important: Please activate your kindle firstly, and goto"
+msgstr ""
+
+#: templates/setting.html:190
+msgid "Personal Document Settings"
+msgstr ""
+
+#: templates/setting.html:190
+msgid "Page and add"
+msgstr ""
+
+#: templates/setting.html:190
+msgid "to 'Approved Personal Document E-mail List'."
+msgstr ""
+
+#: templates/sharedlibrary.html:50
+msgid "Database has no data yet, you can share your subscription now."
+msgstr ""
+
+#: templates/sharedlibrary.html:123 templates/sharedlibrary.html:299
+msgid "[All]"
+msgstr ""
+
+#: templates/sharedlibrary.html:124
+msgid "[by Time]"
+msgstr ""
+
+#: templates/sharedlibrary.html:125 templates/sharedlibrary.html:130
+#: templates/sharedlibrary.html:137 templates/sharedlibrary.html:138
+msgid "[Uncategoried]"
+msgstr ""
+
+#: templates/sharedlibrary.html:219
+msgid "Invalid"
+msgstr ""
+
+#: templates/sharedlibrary.html:310
+msgid "<h1>Successfully</h1><p>This feed has been successfully subscribed.</p>"
+msgstr ""
+
+#: templates/sharedlibrary.html:332
+msgid ""
+"<h1>Thanks</h1><p>Thank you for your feedback, this feed will be reviewed"
+" soon.</p>"
+msgstr ""
+
