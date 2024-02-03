@@ -89,10 +89,6 @@ class RecipeInput(InputFormatPlugin):
         if not isinstance(recipes, list):
             recipes = [recipes]
 
-        for idx in range(len(recipes)):
-            item = recipes[idx]
-            print(type(item))
-            
         #生成 BasicNewsRecipe 对象并执行下载任务
         feed_index_start = 0
         self.recipe_objects = []
@@ -101,11 +97,14 @@ class RecipeInput(InputFormatPlugin):
         self.aborted_articles = []
         self.failed_downloads = []
         for recipe in recipes:
-            if 1:
+            try:
                 ro = recipe(opts, log, output_dir, fs, feed_index_start=feed_index_start)
                 ro.download()
-            #except Exception as e: #这个地方最好只做记录，不退出
-            #    raise ValueError('Failed to execute recipe "{}": {}'.format(ro.title, e))
+            except Exception as e:
+                #raise ValueError('Failed to execute recipe "{}": {}'.format(ro.title, e))
+                log.warning('Failed to execute recipe "{}": {}'.format(ro.title, e))
+                continue
+
             feed_index_start += len(ro.feed_objects)
             self.feeds.extend(ro.feed_objects)
             self.aborted_articles.extend(ro.aborted_articles)
@@ -128,19 +127,21 @@ class RecipeInput(InputFormatPlugin):
 
     #创建顶层的toc.html
     def build_top_index(self, recipe1, output_dir, fs):
-        if len(self.index_htmls) > 1: #如果只有一个Recipe，则直接使用index.html
+        if len(self.index_htmls) > 1:
             recipe1 = self.recipe_objects[0]
             toc = []
-            for idx, (title, indexName) in self.index_htmls:
-                fileName = unicode_path(relpath(indexName, output_dir).replace(os.sep, '/'))
+            for idx, (title, indexName) in enumerate(self.index_htmls):
+                #构建相对路径，os.path.relpath在这里兼容性不好
+                indexName = indexName.lstrip(output_dir).lstrip('/\\').replace(os.sep, '/')
+                fileName = unicode_path(indexName)
                 toc.append(f'<li id="recipe_{idx}"><a href="{fileName}" data-calibre-rescale="120" class="feed">{title}</a></li>')
 
-            html = TOP_INDEX_TMPL.format(lang=recipe1.lang_for_html, title=self.user.book_title, date=strftime(recipe1.datefmt),
+            html = TOP_INDEX_TMPL.format(lang=recipe1.lang_for_html, title=self.user.book_title, date=strftime(recipe1.timefmt),
                 masthead=os.path.basename(recipe1.masthead_path), toc='\n'.join(toc)).encode('utf-8')
-            index = os.path.join(self.output_dir, 'toc.html')
+            index = os.path.join(output_dir, 'toc.html')
             fs.write(index, html, 'wb')
             self.top_index_file = 'toc.html'
-        else:
+        else: #如果只有一个Recipe，则直接使用index.html
             self.top_index_file = 'index.html'
 
     #通过Feed对象列表构建一个opf文件，将这个函数从 BasicNewsRecipe 里面移出来，方便一次处理多个Recipe
@@ -199,10 +200,11 @@ class RecipeInput(InputFormatPlugin):
         self.top_toc = []
         self.play_order = 0
         if not onlyRecipe:
-            for title, indexFile in self.index_htmls:
-                ro = self.recipe_objects[po]
+            for idx, (title, indexFile) in enumerate(self.index_htmls):
+                ro = self.recipe_objects[idx]
                 self.play_order += 1
-                self.top_toc.append(toc.add_item(indexFile, None, title, play_order=self.play_order, description=ro.desc, author=ro.__author__))
+                self.top_toc.append(toc.add_item(indexFile, None, title, play_order=self.play_order, 
+                    description=ro.description, author=ro.__author__))
                 entries.append(indexFile)
         else:
             self.top_toc.append(toc)
@@ -322,7 +324,7 @@ class RecipeInput(InputFormatPlugin):
             desc = desc.decode('utf-8', 'replace')
         mi.comments = (_('Articles in this issue:') + '\n\n' + '\n\n'.join(article_titles)) + '\n\n' + desc
 
-        language = canonicalize_lang(recipe1.language if onlyRecipe else user.book_language)
+        language = canonicalize_lang(recipe1.language if onlyRecipe else self.user.book_language)
         if language is not None:
             mi.language = language
         mi.pubdate = pdate

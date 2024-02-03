@@ -5,18 +5,16 @@
 # Author: cdhigh <https://github.com/cdhigh>
 import os, sys, builtins, logging
 
-__Version__ = '3.0.0'
-
 appDir = os.path.dirname(os.path.abspath(__file__))
 log = logging.getLogger()
 log.setLevel(logging.WARN) #logging.DEBUG
 builtins.__dict__['default_log'] = log
 builtins.__dict__['appDir'] = appDir
-builtins.__dict__['appVersion'] = __Version__
 sys.path.insert(0, os.path.join(appDir, 'application/lib'))
 
 from application import init_app
-app = init_app(debug=False)
+app = init_app(__name__, debug=False)
+celery_app = app.extensions["celery"]
 
 #调试目的
 if __name__ == "__main__":

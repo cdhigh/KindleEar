@@ -4,11 +4,14 @@
 
 import json, datetime, os, random, pickle
 thisDir = os.path.dirname(os.path.abspath(__file__))
-dbName = os.path.normpath(os.path.join(thisDir, '..', '..', 'fake_datastore.pkl'))
+dbName = os.path.normpath(os.path.join(thisDir, '..', '..', 'tests', 'fake_datastore.pkl'))
+jsonDbName = os.path.normpath(os.path.join(thisDir, '..', '..', 'tests', 'fake_datastore.json'))
 
 def SaveDbJson():
     with open(dbName, 'wb') as f:
         f.write(pickle.dumps(dbJson))
+    with open(jsonDbName, 'w', encoding='utf-8') as f:
+        f.write(json.dumps(dbJson, indent=2, default=str))
 
 if os.path.exists(dbName):
     with open(dbName, 'rb') as f:
@@ -116,9 +119,14 @@ class DBQuery:
             if n != self.kind: #key第一段是kind
                 continue
             for item, op, value in self.filters:
-                expr = f'data.get("{item}") {op} {value}'
-                if item in data and not eval(expr):
-                    break
+                if item == '__key__':
+                    expr = f'key {op} "{value}"'
+                    if not eval(expr):
+                        break
+                else:
+                    expr = f'data.get("{item}") {op} {value}'
+                    if item in data and not eval(expr):
+                        break
             else:
                 results.append((Key.from_legacy_urlsafe(key), data))
         if self.order:

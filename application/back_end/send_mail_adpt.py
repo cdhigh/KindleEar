@@ -5,8 +5,10 @@
 #gae mail api
 #https://cloud.google.com/appengine/docs/standard/python3/reference/services/bundled/google/appengine/api/mail
 #https://cloud.google.com/appengine/docs/standard/python3/services/mail
-
+import os
 from config import *
+from ..utils import local_time
+from ..base_handler import save_delivery_log
 
 if SEND_MAIL_SERVICE == "gae":
     from google.appengine.api.mail import send_mail
@@ -17,6 +19,10 @@ elif SEND_MAIL_SERVICE == "sendgrid":
     from sendgrid.helpers.mail import Email, Content, Mail, Attachment
 elif SEND_MAIL_SERVICE == "smtp":
     from smtp_mail import send_smtp_mail
+elif SEND_MAIL_SERVICE == "savetolocal":
+    pass
+else:
+    raise Exception("send mail service '{}' not supported yet".format(SEND_MAIL_SERVICE))
 
 #发送邮件
 #userName: 用户名
@@ -139,4 +145,24 @@ elif SEND_MAIL_SERVICE == "smtp":
     def record_sendmail_Error(userName, to, title, bookSize, tz, e):
         global default_log
         default_log.warning('Send mail by smtp failed, error: {}'.format(e))
+        save_delivery_log(userName, to, title, bookSize, tz=tz, status="failed")
+elif SEND_MAIL_SERVICE == "savetolocal":
+    import datetime, zipfile
+    def send_mail(sender, to, subject, body, html=None, attachments=None):
+        mailDir = os.path.join(os.path.dirname(__file__), '..', '..', 'tests', 'debug_mail')
+        if not os.path.exists(mailDir):
+            os.makedirs(mailDir)
+
+        subject = subject.replace(':', '_').replace('/', '_').replace('\\', '_').replace('?', '_').replace('*', '_')
+        now = str(datetime.datetime.now().replace(microsecond=0)).replace(':', '_')
+        mailFilename = os.path.join(mailDir, f'{subject}_{now}.zip')
+        mailFile = zipfile.ZipFile(mailFilename, 'w')
+        mailFile.writestr('textbody.txt', body)
+        for fn, content in attachments:
+            mailFile.writestr(fn, content)
+    
+    #记录SMTP发送邮件的异常
+    def record_sendmail_Error(userName, to, title, bookSize, tz, e):
+        global default_log
+        default_log.warning('Save mail to local failed, error: {}'.format(e))
         save_delivery_log(userName, to, title, bookSize, tz=tz, status="failed")

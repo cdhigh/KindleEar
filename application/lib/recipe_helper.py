@@ -33,21 +33,19 @@ def GenerateRecipeSource(title, feeds, user, max_articles=30, isfulltext=False, 
     language = language or user.book_language
     src = textwrap.dedent('''\
     #!/usr/bin/env python3
-    # vim:fileencoding=utf-8
+    # -*- coding:utf-8 -*-
     from calibre.web.feeds.news import {base}
     class {classname}({base}):
         title          = {title}
         description    = '{desc}'
         language       = '{language}'
         oldest_article = {oldest_article}
-        max_articles_per_feed = {max_articles_per_feed}
         use_embedded_content  = {isfulltext}
         timefmt               = '{timefmt}'
         auto_cleanup   = True
         {feeds}''').format(
-            classname=classname, title=py3_repr(title), desc=desc, oldest_article=user.oldest_article, feeds=feeds,
-            max_articles_per_feed=max_articles_per_feed, base='AutomaticNewsRecipe',
-            isfulltext=isfulltext, language=language, timefmt=user.time_fmt)
+            classname=classname, title=py3_repr(title), desc=desc, oldest_article=user.oldest_article,
+            feeds=feeds, base='AutomaticNewsRecipe', isfulltext=isfulltext, language=language, timefmt=user.time_fmt)
     return src
 
 #能使用点号访问的字典

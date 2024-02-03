@@ -87,11 +87,6 @@ class MyBaseModel(Model):
     def key_or_id_string(self):
         return str(self.id)
 
-    #做外键使用的字符串或ID
-    @property
-    def reference_key_or_id(self):
-        return self
-
     #将当前行数据转换为一个字典结构，由子类使用，将外键转换为ID，日期转换为字符串
     #可以传入 only=[Book.title, ...]，或 exclude=[]
     def to_dict(self, **kwargs):

@@ -48,7 +48,7 @@ def AdvWhiteListPost():
         if wlist.startswith('*@'): #输入*@xx.xx则修改为@xx.xx
             wlist = wlist[2:]
         if wlist:
-            WhiteList(mail=wlist, user=user.reference_key_or_id).save()
+            WhiteList(mail=wlist, user=user.name).save()
     return redirect(url_for('bpAdv.AdvWhiteList'))
 
 #设置归档和分享配置项

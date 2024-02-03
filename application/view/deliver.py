@@ -21,7 +21,7 @@ def Deliver():
     
     if userName: #现在投递【测试使用】，不需要判断时间和星期
         id_ = request.args.get('id', '')
-        idList = id_.split(',') if id_ else []
+        idList = id_.replace('__', ':').split(',') if id_ else []
         return SingleUserDelivery(userName, idList)
     else: #如果不指定userName，说明是定时cron调用
         return MultiUserDelivery()
@@ -80,8 +80,8 @@ def SingleUserDelivery(userName: str, idList: list):
     flushQueueToPush(bkQueue)
     
     if sent:
-        tips = (_("The following recipe has been added to the push queue.") 
-            + '<br/><p>' + '<br/>'.join(sent)) + '</p>'
+        tips = (_("The following recipe has been added to the push queue.") + '<br/>&nbsp;&nbsp;&nbsp;&nbsp;' 
+            + '<br/>&nbsp;&nbsp;&nbsp;&nbsp;'.join(sent))
     else:
         tips = _("There are no books to deliver.")
 

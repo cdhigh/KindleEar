@@ -147,14 +147,14 @@ class FeedTemplate(Template):
 
     def _generate(self, f, feeds, cutoff, extra_css=None, style=None):
         from calibre.utils.cleantext import clean_xml_chars
-        feed = feeds[f]
+        feed = feeds[f - self.feed_index_start]
         head = HEAD(TITLE(feed.title))
         if style:
             head.append(STYLE(style, type='text/css'))
         if extra_css:
             head.append(STYLE(extra_css, type='text/css'))
         body = BODY()
-        body.append(self.get_navbar(f, feeds))
+        #body.append(self.get_navbar(f, feeds))
 
         div = DIV(
                 H2(feed.title,
@@ -188,7 +188,7 @@ class FeedTemplate(Template):
                     attrs('article_description', rescale=70)))
             ul.append(li)
         div.append(ul)
-        div.append(self.get_navbar(f, feeds, top=False))
+        #div.append(self.get_navbar(f, feeds, top=False))
         self.root = HTML(head, body)
         if self.html_lang:
             self.root.set('lang', self.html_lang)

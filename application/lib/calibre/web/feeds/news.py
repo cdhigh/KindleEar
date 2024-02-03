@@ -269,7 +269,7 @@ class BasicNewsRecipe(Recipe):
     #: the sub class. It is meant only for recipes that return a list
     #: of feeds using `feeds` or :meth:`get_feeds`. It is also used if you use
     #: the ignore_duplicate_articles option.
-    remove_empty_feeds = False
+    remove_empty_feeds = True
 
     #: List of regular expressions that determines which links to follow.
     #: If empty, it is ignored. Used only if is_link_wanted is
@@ -517,9 +517,9 @@ class BasicNewsRecipe(Recipe):
         needs to do some processing to figure out the list of feeds to download. If
         so, override in your subclass.
         '''
-        if not self.feeds:
-            raise NotImplementedError()
-        if self.test:
+        #if not self.feeds:
+        #    raise NotImplementedError()
+        if self.test and self.feeds:
             return self.feeds[:self.test[0]]
         return self.feeds
 
@@ -1101,8 +1101,7 @@ class BasicNewsRecipe(Recipe):
         return ans
 
     #外部调用此函数实际下载
-    #need_top_index: 是否生成最上层的index.html，如果不生成，则由recipe_input生成
-    def download(self, need_top_index=True):
+    def download(self):
         '''
         Download and pre-process all articles from the feeds in this recipe.
         This method should be called only once on a particular Recipe instance.
@@ -1110,7 +1109,7 @@ class BasicNewsRecipe(Recipe):
         :return: Path to index.html
         '''
         if 1:
-            res = self.build_index(need_top_index)        
+            res = self.build_index()
             if self.failed_downloads:
                 self.log.warning(_('Failed to download the following articles:'))
                 for feed, article, debug in self.failed_downloads:
@@ -1181,7 +1180,7 @@ class BasicNewsRecipe(Recipe):
 
     #生成Feed对应的html内容，一个Feed就是根据一个Rss xml生成的html，里面会有多篇文章
     def feed2index(self, f, feeds):
-        feed = feeds[f]
+        feed = feeds[f - self.feed_index_start]
         if feed.image_url is not None:  # Download feed image
             imgdir = os.path.join(self.output_dir, 'images')
             self.fs.makedirs(imgdir)
@@ -1309,16 +1308,21 @@ class BasicNewsRecipe(Recipe):
         return f'index{suffix}'
 
     #实际下载feeds并创建index.html
-    #need_top_index: 是否生成最上层的index.html，如果不生成，则由recipe_input生成
-    def build_index(self, need_top_index=True):
+    def build_index(self):
         feeds = None
+        index = None
         try:
-            feeds = feeds_from_index(self.parse_index(), oldest_article=self.oldest_article,
-                                     max_articles_per_feed=self.max_articles_per_feed,
-                                     log=self.log)
+            index = self.parse_index()
         except NotImplementedError:
             pass
+        except Exception as e:
+            self.log.warning('parse_index() failed: {}'.format(e))
 
+        if index:
+            feeds = feeds_from_index(index, oldest_article=self.oldest_article,
+                                     max_articles_per_feed=self.max_articles_per_feed,
+                                     log=self.log)
+        
         if feeds is None:
             feeds = self.parse_feeds()
 
@@ -1736,6 +1740,10 @@ class BasicNewsRecipe(Recipe):
         Return a list of :class:`Feed` objects.
         '''
         feeds = self.get_feeds()
+        if not feeds:
+            self.log.warning(f'There are no feeds in "{self.title}"')
+            return []
+            
         parsed_feeds = []
         br = self.browser
         for obj in feeds:
@@ -1761,8 +1769,9 @@ class BasicNewsRecipe(Recipe):
                 resp = br.open(url, timeout=self.timeout)
                 if resp.status_code == 200:
                     raw = resp.content
-                    parsed_feeds.append(feed_from_xml(raw, title=title, log=self.log, oldest_article=self.oldest_article,
-                        max_articles_per_feed=self.max_articles_per_feed, get_article_url=self.get_article_url))
+                    feed = feed_from_xml(raw, title=title, log=self.log, oldest_article=self.oldest_article,
+                        max_articles_per_feed=self.max_articles_per_feed, get_article_url=self.get_article_url)
+                    parsed_feeds.append(feed)
                 else:
                     raise URLError('Cannot fetch {url}')
             except Exception as err:

@@ -110,5 +110,8 @@ def SetLang(langCode):
 
 #Babel选择显示哪种语言的回调函数
 def get_locale():
-    langCode = session.get('langCode')
+    try:
+        langCode = session.get('langCode')
+    except: #Working outside of request context
+        langCode = 'en'
     return langCode if langCode else request.accept_languages.best_match(supported_languages)

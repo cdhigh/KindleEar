@@ -13,7 +13,10 @@ from config import APP_ID, DATABASE_ENGINE, DATABASE_HOST, DATABASE_PORT, DATABA
 
 if DATABASE_ENGINE == "datastore":
     from petwee import *
-    dbInstance = DatastoreDatabase(project=APP_ID)
+    dbInstance = DatastoreClient(project=APP_ID)
+elif DATABASE_ENGINE == "mongodb":
+    from petwee import *
+    dbInstance = MongoDbClient(APP_ID, "mongodb://localhost:27017/")
 else:
     raise Exception("database engine '{}' not supported yet".format(DATABASE_ENGINE))
 
@@ -28,7 +31,7 @@ def CloseDatabase():
 #数据表的共同基类
 class MyBaseModel(Model):
     class Meta:
-        database = dbInstance
+        client = dbInstance
         useIDInsteadOfKey = True
     
     @classmethod
@@ -55,13 +58,13 @@ class MyBaseModel(Model):
     def key_or_id_string(self):
         return self.key.to_legacy_urlsafe().decode()
 
-    #做外键使用的字符串或ID
-    @property
-    def reference_key_or_id(self):
-        return self.key.to_legacy_urlsafe().decode()
-
     #将当前行数据转换为一个字典结构，由子类使用，将外键转换为ID，日期转换为字符串
     #可以传入 only=[Book.title, ...]，或 exclude=[]
     def to_dict(self, **kwargs):
-        return self.to_python_dict(**kwargs)
+        ret = self.to_python_dict(**kwargs)
+        for key in ret:
+            data = ret[key]
+            if isinstance(data, datetime.datetime):
+                ret[key] = data.strftime('%Y-%m-%d %H:%M:%S')
+        return ret
         

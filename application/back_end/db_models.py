@@ -4,7 +4,7 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #Author:
 # cdhigh <https://github.com/cdhigh>
-import os, sys, random
+import os, sys, random, re
 from operator import attrgetter
 if __name__ == '__main__': #调试使用，调试时为了单独执行此文件
     thisDir = os.path.dirname(os.path.abspath(__file__))
@@ -15,7 +15,7 @@ if __name__ == '__main__': #调试使用，调试时为了单独执行此文件
 from config import DATABASE_ENGINE
 from ..utils import ke_encrypt, ke_decrypt
 
-if DATABASE_ENGINE == "datastore":
+if DATABASE_ENGINE in ("datastore", "mongodb"):
     from .db_models_nosql import *
 else:
     from .db_models_sql import *
@@ -232,7 +232,7 @@ def CreateDatabaseTable(force=False):
             except:
                 pass
 
-    if DATABASE_ENGINE != "datastore":
+    if DATABASE_ENGINE not in ("datastore", "mongodb"):
         with dbInstance.connection_context():
             dbInstance.create_tables([KeUser, UserBlob, Recipe, BookedRecipe, DeliverLog, WhiteList,
                 SharedRss, SharedRssCategory, AppInfo], safe=True)

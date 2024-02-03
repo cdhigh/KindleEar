@@ -21,6 +21,7 @@ bpHome = Blueprint('bpHome', __name__)
 
 @bpHome.route('/')
 def Home():
+    #worker.WorkerImpl('admin', ['builtin:adventuregamers', 'custom:Recipe:2447:KEY', 'custom:Recipe:4964:KEY'])
     return render_template('home.html')
 
 @bpHome.route('/env')

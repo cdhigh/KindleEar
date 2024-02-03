@@ -3,7 +3,7 @@
 #后台实际的推送任务，由任务队列触发
 
 from collections import defaultdict
-import datetime, time, imghdr, io
+import datetime, time, imghdr, io, logging
 from flask import Blueprint, request
 from ..base_handler import *
 from ..back_end.send_mail_adpt import send_to_kindle
@@ -64,25 +64,38 @@ def Worker():
     userName = args.get('userName', '')
     recipeId = args.get('recipeId', '')  #如果有多个Recipe，使用','分隔
     
-    return WorkerImpl(userName, recipeId.split(','), log)
+    return WorkerImpl(userName, recipeId, log)
 
 #执行实际抓取网页生成电子书任务
 #userName: 需要执行任务的账号名
 #idList: 需要投递的Recipe ID列表
 #返回执行结果字符串
-def WorkerImpl(userName: str, idList: list, log):
-    if not userName or not idList:
+def WorkerImpl(userName: str, idList: list, log=None):
+    if not userName:
         return "Parameters invalid."
 
     user = KeUser.get_one(KeUser.name == userName)
     if not user:
         return "The user does not exist."
+
+    if not log:
+        log = logging.getLogger('WorkerImpl')
+        log.setLevel(logging.WARN)
     
     to = user.kindle_email.replace(';', ',').split(',')
     tz = user.timezone
+
+    if not idList:
+        idList = [item.recipe_id for item in user.get_booked_recipe()]
+    elif not isinstance(idList, list):
+        idList = idList.replace('__', ':').split(',')
     
+    if not idList:
+        log.warning('There are nothing to push.')
+        return 'There are nothing to push.'
+
     #编译recipe
-    srcDict = GetAllRecipeSrc(user, bkInstList)
+    srcDict = GetAllRecipeSrc(user, idList)
     recipes = defaultdict(list) #编译好的recipe代码对象
     for title, (bked, recipeDb, src) in srcDict.items():
         try:
@@ -130,66 +143,3 @@ def WorkerImpl(userName: str, idList: list, log):
 
     return '\n'.join(ret) if ret else "There are no new feeds available."
 
-#创建OEB并设置一些基础信息
-#user: 用户账号实例
-#title: 书籍标题
-#language: 书籍语种，kindle用来查词时使用，调用不同的词典
-#返回一个OEBBook实例
-def CreateOeb(user: KeUser, title: str, language: str):
-    bookMode = user.book_mode or 'periodical' #periodical,comic
-    titleFmt = user.title_fmt
-    tz = user.timezone
-    authorFmt = user.author_format
-
-    opts = GetOpts(user.device, bookMode)
-    oeb = CreateEmptyOeb(opts)
-    
-    bookTitle = "{} {}".format(title, local_time(titleFmt, tz)) if titleFmt else title
-    pubType = 'book:book:KindleEar' if bookMode == 'comic' else 'periodical:magazine:KindleEar'
-    author = local_time(authorFmt, tz) if authorFmt else 'KindleEar' #修正Kindle固件5.9.x将作者显示为日期的BUG    
-    setMetaData(oeb, bookTitle, language, local_time("%Y-%m-%d", tz), pubType=pubType, creator=author)
-    return oeb
-
-#将报头和封面添加到电子书
-#user: 账号数据库行实例
-#oeb: OEBBook实例
-#mhFile: masthead文件路径
-#cvFile: cover文件路径
-#bookForMeta: 提供一些基本信息的书本实例
-def AddMastheadCoverToOeb(user, oeb, mhFile, cvFile, bookForMeta):
-    if mhFile: #设置报头
-        id_, href = oeb.manifest.generate('masthead', mhFile) # size:600*60
-        oeb.manifest.add(id_, href, ImageMimeFromName(mhFile))
-        oeb.guide.add('masthead', 'Masthead Image', href)
-    
-    #设置封面
-    if cvFile:
-        imgData = None
-        imgMime = ''
-        #使用保存在数据库的用户上传的封面
-        if cvFile == DEFAULT_COVER and user.cover:
-            imgData = user.cover
-            imgMime = 'image/jpeg' #保存在数据库中的只可能是jpeg格式
-        elif callable(cvFile): #如果封面需要回调的话
-            try:
-                imgData = bookForMeta().cvFile()
-            except:
-                default_log.warning("Failed to fetch cover for book [{}]".format(bookForMeta.title))
-                cvFile = DEFAULT_COVER
-
-            if imgData:
-                imgType = imghdr.what(None, imgData)
-                if imgType: #如果是合法图片
-                    imgMime = "image/{}".format(imgType)
-                else:
-                    default_log.warning('Content of cover is invalid : {}'.format(bookForMeta.title))
-                    imgData = None
-        
-        if imgData and imgMime:
-            id_, href = oeb.manifest.generate('cover', 'cover.jpg')
-            oeb.manifest.add(id_, href, imgMime, data=imgData)
-        else:
-            id_, href = oeb.manifest.generate('cover', cvFile)
-            oeb.manifest.add(id_, href, ImageMimeFromName(cvFile))
-        oeb.guide.add('cover', 'Cover', href)
-        oeb.metadata.add('cover', id_)

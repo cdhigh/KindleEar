@@ -23,7 +23,7 @@ def Admin():
     return render_template('admin.html', title='Admin', tab='admin', user=user, users=users, admin_name=ADMIN_NAME)
 
 @bpAdmin.post("/admin", endpoint='AdminPost')
-@login_required()
+@login_required(forAjax=True)
 def AdminPost():
     form = request.form
     user = get_login_user()

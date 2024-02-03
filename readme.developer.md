@@ -29,10 +29,17 @@
 gcloud app deploy cron.yaml
 gcloud app deploy queue.yaml
 
+# Windows 安装celery
+* 安装并启动redis服务，(Windows只能安装redis3 <https://github.com/MicrosoftArchive/redis/releases>)
+* 安装celery，如果是Windows，还需要安装 eventlet
+   > `pip install celery, redis, eventlet`
+* 切换到KindleEar主目录，启动celery服务，main是入口文件的名字: main.py，只有Windows需要参数 '-P eventlet'
+   > `celery -A main.celery_app worker --loglevel=info --concurrency=2 -P eventlet`
+
 # Windows 安装配置 MongoDB
-* 下载安装后创建一个目录保存数据库文件，比如 c:\mongodb\db
+* 下载安装(注意安装时要取消mongodb compass)，创建一个目录保存数据库文件，比如 c:\mongodb\db和c:\mongodb\log
 * 安装启动服务
-  >`"C:\Program Files\MongoDB\Server\3.6\bin\mongod.exe" --dbpath "c:\mongodb\db" --logpath "c:\mongodb\log\MongoDB.log" --install --serviceName "MongoDB"  --journal`
+  >` "C:\Program Files\MongoDB\Server\3.6\bin\mongod.exe" --dbpath "c:\mongodb\db" --logpath "c:\mongodb\log\MongoDB.log" --install --serviceName "MongoDB"  --journal`
   > `net start MongoDB`
   > `"C:\Program Files\MongoDB\Server\3.6\bin\mongo.exe"`
   > `db.Book.insert({"name":"1001 nights"})`

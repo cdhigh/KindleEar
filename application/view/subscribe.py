@@ -37,10 +37,10 @@ def MySubscription(tips=None):
 
     myBookedRecipes = json.dumps([item.to_dict(exclude=[BookedRecipe.encrypted_pwd])
         for item in user.get_booked_recipe() if not item.recipe_id.startswith('custom:')], 
-        separators=(',', ':'), default=str)
+        separators=(',', ':'))
 
-    return render_template("my.html", tab="my", user=user, my_custom_rss=json.dumps(myCustomRss, default=str), tips=tips, 
-        my_uploaded_recipes=json.dumps(myUploadedRecipes, default=str), my_booked_recipes=myBookedRecipes, 
+    return render_template("my.html", tab="my", user=user, my_custom_rss=json.dumps(myCustomRss), tips=tips, 
+        my_uploaded_recipes=json.dumps(myUploadedRecipes), my_booked_recipes=myBookedRecipes, 
         subscribe_url=url_for("bpSubscribe.MySubscription"), title_to_add=titleToAdd, url_to_add=urlToAdd)
 
 #添加自定义RSS
