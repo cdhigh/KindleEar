@@ -61,7 +61,9 @@ class MyBaseModel(Model):
     #将当前行数据转换为一个字典结构，由子类使用，将外键转换为ID，日期转换为字符串
     #可以传入 only=[Book.title, ...]，或 exclude=[]
     def to_dict(self, **kwargs):
-        ret = self.to_python_dict(**kwargs)
+        ret = self.dicts(**kwargs)
+        ret.pop('key', None)
+        ret.pop('_id', None)
         for key in ret:
             data = ret[key]
             if isinstance(data, datetime.datetime):

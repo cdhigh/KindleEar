@@ -91,6 +91,8 @@ class MyBaseModel(Model):
     #可以传入 only=[Book.title, ...]，或 exclude=[]
     def to_dict(self, **kwargs):
         ret = model_to_dict(self, **kwargs)
+        ret.pop('key', None)
+        ret.pop('_id', None)
         for key in ret:
             data = ret[key]
             if isinstance(data, datetime.datetime):

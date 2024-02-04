@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-#Petwee is an ORM/ODM module for Google Datastore/MongoDB, featuring a compatible interface with Peewee.
+#Petwee is an ORM/ODM module for Google Cloud Datastore/MongoDB, featuring a compatible interface with Peewee.
 #Author: cdhigh <http://github.com/cdhigh>
+#Repository: <https://github.com/cdhigh/petwee>
 #==================================================
 import copy, datetime
 
 try:
     from google.cloud import datastore
     from google.cloud.datastore import Key
+    from google.cloud.datastore.query import PropertyFilter
 except ImportError:
-    datastore = None    
+    datastore = None
 
 try:
     import pymongo
@@ -17,9 +19,9 @@ try:
 except ImportError:
     pymongo = None
 
-from fake_datastore import *
+#from tests.fake_datastore import *
 
-__version__ = '0.0.1'
+__version__ = '0.1.0'
 
 class DoesNotExist(Exception):
     pass
@@ -28,13 +30,19 @@ class NosqlClient(object):
     def bind(self, models):
         for model in models:
             model.bind(self)
+    def drop_tables(self, models, **kwargs):
+        for model in models:
+            self.drop_table(model)
+    def create_tables(self, models):
+        return True
+    def is_closed(self):
+        return False
+    def connect(self, **kwargs):
+        return True
     @classmethod
     def op_map(cls, op):
         return op
-    def ensure_key(self, key, kind=None):
-        return key
-
-
+    
 class DatastoreClient(NosqlClient):
     def __init__(self, project=None, namespace=None, credentials=None, _http=None):
         self.project = project or os.getenv("GOOGLE_CLOUD_PROJECT", None)
@@ -47,24 +55,30 @@ class DatastoreClient(NosqlClient):
     def primary_key_str(cls):
         return "__key__"
 
-    @classmethod
-    def make_safe_id(cls, key, attr_data):
-        return key.to_legacy_urlsafe().decode()
+    def insert_one(self, model_class, data: dict):
+        entity = self.create_entity(data, kind=model_class._meta.name)
+        self._client.put(entity)
+        id_ = entity.key.to_legacy_urlsafe().decode()
+        setattr(model, model._meta.primary_key, id_)
+        return id_
 
-    @classmethod
-    def make_orig_id(cls, key, attr_data):
-        return key.id
+    def insert_many(self, model_class, datas: list):
+        ids = []
+        kind = model_class._meta.name
+        for batch in self.split_batches(datas, 500):
+            entities = [self.create_entity(data, kind=kind) for data in batch]
+            self._client.put_multi(entities)
+            ids.extend([e.key.to_legacy_urlsafe().decode() for e in entities])
+        return ids
+
+    def update_one(self, model):
+        data = model.dicts(remove_id=True, db_value=True)
+        entity = self.create_entity(data, kind=model._meta.name, key=model.key)
+        self._client.put(entity)
+        id_ = entity.key.to_legacy_urlsafe().decode()
+        setattr(model, model._meta.primary_key, id_)
+        return model
         
-    def insert_one(self, model):
-        self._client.put(self.create_entity(model))
-
-    def insert_many(self, models):
-        for batch in self.split_batches(models, 500):
-            self._client.put_multi([self.create_entity(data) for data in batch])
-
-    update_one = insert_one
-    update_many = insert_many
-    
     def delete_one(self, model):
         if model.key:
             self._client.delete(model.key)
@@ -80,16 +94,40 @@ class DatastoreClient(NosqlClient):
         query = self.get_query(kind, parent_key)
         self.apply_query_condition(queryObj, query)
 
-        cursor = None
         limit = queryObj._limit
         batch_size = min(page_size, limit) if limit else page_size
+        yield from self.query_fetch(query, batch_size, limit, model_class)
+
+    #count aggregation query
+    def count(self, queryObj, parent_key=None):
+        count_query = self.get_aggregation_query(queryObj, parent_key).count()
+        with count_query.fetch() as query_result:
+            return next(query_result).value if query_result else 0
+
+    #sum aggregation query
+    def sum(self, queryObj, field, parent_key=None):
+        field = field.name if isinstance(field, Field) else field
+        sum_query = self.get_aggregation_query(queryObj, parent_key).sum(field)
+        with sum_query.fetch() as query_result:
+            return next(query_result).value if query_result else 0
+
+    #avg aggregation query
+    def avg(self, queryObj, field, parent_key=None):
+        field = field.name if isinstance(field, Field) else field
+        sum_query = self.get_aggregation_query(queryObj, parent_key).avg(field)
+        with sum_query.fetch() as query_result:
+            return next(query_result).value if query_result else 0
+
+    #generate model instance(model_class!=None) or entity(model_class=None)
+    def query_fetch(self, query, batch_size, limit, model_class=None):
+        cursor = None
         count = 0
         while True:
             last_entity = None
             result = query.fetch(start_cursor=cursor, limit=batch_size)
 
-            for raw in result:
-                last_entity = self.make_instance(model_class, raw)
+            for entity in result:
+                last_entity = self.make_instance(model_class, entity) if model_class else entity
                 yield last_entity
                 count += 1
             cursor = result.next_page_token
@@ -106,18 +144,23 @@ class DatastoreClient(NosqlClient):
                 setattr(inst, field_name, fields[field_name].python_value(value))
             else:
                 setattr(inst, field_name, value)
+        #set primary_key
         inst.key = key
-        if inst._meta.useIDInsteadOfKey:
-            inst.id = key.to_legacy_urlsafe().decode()
-        else:
-            inst.id = key.id
+        setattr(inst, inst._meta.primary_key, key.to_legacy_urlsafe().decode())
         return inst
 
     def get_query(self, kind, parent_key=None):
         return self._client.query(kind=kind, ancestor=parent_key)
 
+    def get_aggregation_query(self, queryObj, parent_key=None):
+        kind = queryObj._model_class._meta.name
+        query = self.get_query(kind, parent_key)
+        self.apply_query_condition(queryObj, query)
+        return self.client.aggregation_query(query=query)
+
     def apply_query_condition(self, queryObj, query):
-        [query.add_filter(ft.item, ft.op, ft.value) for ft in queryObj._filters]
+        for ft in queryObj._filters:
+            query.add_filter(filter=PropertyFilter(ft.item, ft.op, ft.value))
         if queryObj._projection:
             query.projection = queryObj._projection
         if queryObj._order:
@@ -131,11 +174,10 @@ class DatastoreClient(NosqlClient):
         return [entities[i:i + batch_size] for i in range(0, len(entities), batch_size)]
 
     #create datastore entity instance
-    def create_entity(self, model):
-        if not model.key:
-            model.key = self.generate_key(model._meta.name)
-        entity = datastore.Entity(key=model.key)
-        data = model.to_python_dict(remove_id=True)
+    def create_entity(self, data: dict, kind=None, key=None, parent_key=None):
+        if not key:
+            key = self.generate_key(kind, parent_key=parent_key)
+        entity = datastore.Entity(key=key)
         entity.update(data)
         return entity
 
@@ -159,6 +201,15 @@ class DatastoreClient(NosqlClient):
         else:
             return Key.from_legacy_urlsafe(key)
 
+    def drop_table(self, model):
+        model = model._meta.name if isinstance(model, BaseModel) else model
+        query = self.get_query(model)
+        for entity in self.query_fetch(query, 500, 0, model_class=None):
+            self._client.delete(entity.key)
+
+    def close(self):
+        self._client.close()
+
 class MongoDbClient(NosqlClient):
     def __init__(self, project, host=None, port=None, username=None, password=None):
         self.project = project
@@ -179,30 +230,25 @@ class MongoDbClient(NosqlClient):
         return {'=': '=', '!=': '$ne', '<': '$lt', '>': '$gt', '<=': '$lte',
             '>=': '$gte', 'IN': '$in', 'NOT_IN': '$nin'}.get(op, op)
 
-    @classmethod
-    def make_safe_id(cls, key, attr_data):
-        return key.to_legacy_urlsafe().decode()
+    #InsertOneResult has inserted_id property
+    def insert_one(self, model_class, data: dict):
+        id_ = self._db[model_class._meta.name].insert_one(data).inserted_id
+        return str(id_)
 
-    @classmethod
-    def make_orig_id(cls, key, attr_data):
-        return key.id
-        
-    def insert_one(self, model):
-        self._db[model._meta.name].insert_one(model.to_python_dict(remove_id=True))
-
-    def insert_many(self, models):
-        self._db[model._meta.name].insert_many([model.to_python_dict(remove_id=True) for model in models])
+    #InsertManyResult has inserted_ids property
+    def insert_many(self, model_class, datas: list):
+        ids = self._db[model_class._meta.name].insert_many(datas).inserted_ids
+        return [str(id_) for id_ in ids]
         
     def update_one(self, model):
-        if getattr(model, '_id', None):
-            self._db[model._meta.name].update({'_id': model._id}, {'$set', model.to_python_dict(remove_id=True)})
+        data = model.dicts(remove_id=True, db_value=True)
+        id_ = getattr(model, model._meta.primary_key, None)
+        if id_:
+            self._db[model._meta.name].update({'_id': ObjectId(id_)}, {'$set': data})
+            return id_
         else:
-            self.insert_one(model)
+            return self.insert_one(model.__class__, data)
      
-    def update_many(self, models):
-        for model in models:
-            self.update_one(model)
-
     def delete_one(self, model):
         if model._id:
             self._db[model._meta.name].delete_one({'_id': model._id})
@@ -217,13 +263,17 @@ class MongoDbClient(NosqlClient):
         query = self.create_query_dict(queryObj._filters)
         sort = [(item[1:], pymongo.DESCENDING) if item.startswith('-') else (item, pymongo.ASCENDING) for item in queryObj._order]
         
-        query_iter = collection.find(query)
-        if sort:
-            query_iter = query_iter.sort(sort)
-        if queryObj._limit:
-            query_iter = query_iter.limit(queryObj._limit)
-        for item in query_iter:
-            yield self.make_instance(model_class, item)
+        with collection.find(query) as cursor:
+            if sort:
+                cursor = cursor.sort(sort)
+            if queryObj._limit:
+                cursor = cursor.limit(queryObj._limit)
+            for item in cursor:
+                yield self.make_instance(model_class, item)
+
+    def count(self, queryObj, parent_key=None):
+        query = self.create_query_dict(queryObj._filters)
+        return self._db[queryObj._model_class._meta.name].count_documents(query)
 
     def create_query_dict(self, filters):
         query = {}
@@ -240,16 +290,28 @@ class MongoDbClient(NosqlClient):
                 setattr(inst, field_name, fields[field_name].python_value(value))
             else:
                 setattr(inst, field_name, value)
-        if inst._meta.useIDInsteadOfKey:
-            inst.id = inst._id
-        
+        #set primary_key
+        setattr(inst, inst._meta.primary_key, str(inst._id))
         return inst
+
+    def ensure_key(self, key, kind=None):
+        if isinstance(key, ObjectId):
+            return key
+        else:
+            return ObjectId(key)
 
     def atomic(self, **kwargs):
         return self._client.start_session(**kwargs)
 
     def transaction(self, **kwargs):
         return self._client.start_session(**kwargs)
+
+    def drop_table(self, model):
+        model = model._meta.name if isinstance(model, BaseModel) else model
+        self._db.drop_collection(model)
+
+    def close(self):
+        self._client.close()
 
 class FieldDescriptor(object):
     def __init__(self, field):
@@ -262,10 +324,12 @@ class FieldDescriptor(object):
         return self.field_inst
 
     def __set__(self, instance, value):
+        if self.field_inst.enforce_type and not self.field_inst.check_type(value):
+            raise ValueError(f'Trying to set a different type of value to "{self.field_name}"')
         instance._data[self.field_name] = value
 
 class BaseModel(type):
-    inheritable_options = ['client', 'order_by', 'useIDInsteadOfKey']
+    inheritable_options = ['client', 'order_by', 'primary_key']
 
     def __new__(cls, name, bases, attrs):
         if not bases:
@@ -290,10 +354,8 @@ class BaseModel(type):
                     attrs[k] = copy.deepcopy(v.field_inst)
 
         meta_options.setdefault('client', None)
-        meta_options.setdefault('useIDInsteadOfKey', False)
-        
-        if meta_options['useIDInsteadOfKey']:
-            attrs['id'] = PrimaryKeyField()
+        meta_options.setdefault('primary_key', 'id')
+        attrs[meta_options['primary_key']] = PrimaryKeyField()
 
         # initialize the new class and set the magic attributes
         cls = super(BaseModel, cls).__new__(cls, name, bases, attrs)
@@ -309,14 +371,14 @@ class BaseModel(type):
         return cls
 
 class ModelOptions(object):
-    def __init__(self, cls, client=None, order_by=None, useIDInsteadOfKey=False, **kwargs):
+    def __init__(self, cls, client=None, order_by=None, primary_key='id', **kwargs):
         self.model_class = cls
         self.name = cls.__name__
         self.fields = {}
         self.defaults = {}
         self.client = client
         self.order_by = order_by
-        self.useIDInsteadOfKey = useIDInsteadOfKey
+        self.primary_key = primary_key
         
     def prepared(self):
         for field in self.fields.values():
@@ -326,6 +388,17 @@ class ModelOptions(object):
     def get_default_dict(self):
         return self.defaults
 
+#Used for overloading arithmetic operators
+def arith_op(op, reverse=False):
+    def inner(self, other):
+        return UpdateExpr(other, op, self) if reverse else UpdateExpr(self, op, other)
+    return inner
+
+#Used for overloading comparison operators
+def comp_op(op):
+    def inner(self, other):
+        return self._generate_filter(op, other)
+    return inner
 
 class Field(object):
     def __init__(self, default=None, enforce_type=False, **kwargs):
@@ -334,8 +407,8 @@ class Field(object):
         self.op_map = lambda x: x
     
     def __eq__(self, other):
-        return (other.__class__ == self.__class__ and getattr(self, 'id', None) and 
-            getattr(other, 'id', None) == getattr(self, 'id', None))
+        return ((other.__class__ == self.__class__) and (other.name == other.name) and 
+            (other.model == other.model))
 
     def __hash__(self):
         return hash((self.model.__name__, self.name))
@@ -357,90 +430,99 @@ class Field(object):
     def python_value(self, value):
         return value
 
-    def __eq__(self, other):
-        return self._generate_filter("=", other)
-    def __ne__(self, other):
-        return self._generate_filter("!=", other)
-    def __lt__(self, other):
-        return self._generate_filter("<", other)
-    def __gt__(self, other):
-        return self._generate_filter(">", other)
-    def __le__(self, other):
-        return self._generate_filter("<=", other)
-    def __ge__(self, other):
-        return self._generate_filter(">=", other)
-    def in_(self, other):
-        assert(isinstance(other, list))
-        return self._generate_filter("IN", other)
-    def not_in(self, other):
-        assert(isinstance(other, list))
-        return self._generate_filter("NOT_IN", other)
-
+    __eq__ = comp_op('=')
+    __ne__ = comp_op('!=')
+    __lt__ = comp_op('<')
+    __gt__ = comp_op('>')
+    __le__ = comp_op('<=')
+    __ge__ = comp_op('>=')
+    in_ = comp_op('IN')
+    not_in = comp_op('NOT_IN')
+    
     def between(self, other1, other2):
         if other1 <= other2:
-            return [self._generate_filter(">=", other1), self._generate_filter("<", other2)]
+            return [self._generate_filter(">", other1), self._generate_filter("<", other2)]
         else:
-            return [self._generate_filter("<", other1), self._generate_filter(">=", other2)]
+            return [self._generate_filter("<", other1), self._generate_filter(">", other2)]
 
     def _generate_filter(self, op, other):
         if self.enforce_type and not self.check_type(other):
             raise ValueError("Comparing field {} with '{}' of type {}".format(self.__class__.__name__, other, type(other)))
         return Filter(self.name, self.op_map(op), other)
 
-    #用来排序的，如果是升序，asc()可以省略
     def asc(self):
         return self.name
         
     def desc(self):
         return '-{}'.format(self.name)
 
+    __add__ = arith_op('+')
+    __sub__ = arith_op('-')
+    __mul__ = arith_op('*')
+    __truediv__ = arith_op('/')
+    __floordiv__ = arith_op('//')
+    __mod__ = arith_op('%')
+    __pow__ = arith_op('**')
+    __lshift__ = arith_op('<<')
+    __rshift__ = arith_op('>>')
+    __and__ = arith_op('&')
+    __or__ = arith_op('|')
+    __xor__ = arith_op('^')
+    __radd__ = arith_op('+', reverse=True)
+    __rsub__ = arith_op('-', reverse=True)
+    __rmul__ = arith_op('*', reverse=True)
+
 class PrimaryKeyField(Field):
     def _generate_filter(self, op, other):
-        if not isinstance(other, Key):
-            raise ValueError("Comparing field {} with '{}' of type {}".format(self.__class__.__name__, other, type(other)))
+        other = self.model._meta.client.ensure_key(other)
         return Filter(self.model._meta.client.primary_key_str(), self.op_map(op), other)
-
-class AnyField(Field):
-    pass
-
-BlobField = AnyField
 
 class BooleanField(Field):
     pass
 
 class IntegerField(Field):
-    pass
+    def check_type(self, value):
+        return isinstance(value, int)
+
+BigIntegerField = IntegerField
+SmallIntegerField = IntegerField
+BitField = IntegerField
+TimestampField = IntegerField
+IPField = IntegerField
 
 class FloatField(Field):
-    pass
+    def check_type(self, value):
+        return isinstance(value, float)
 
-class DoubleField(Field):
-    pass
-
-class DecimalField(Field):
-    pass
-
-class BigIntegerField(Field):
-    pass
+DoubleField = FloatField
+DecimalField = FloatField
 
 class CharField(Field):
-    pass
+    def check_type(self, value):
+        return isinstance(value, str)
 
 TextField = CharField
+FixedCharField = CharField
+UUIDField = CharField
+
+class BlobField(Field):
+    pass
 
 class DateTimeField(Field):
     def check_type(self, value):
         return isinstance(value, datetime.datetime)
 
 class DateField(Field):
-    pass
+    def check_type(self, value):
+        return isinstance(value, datetime.date)
 
 class TimeField(Field):
-    pass
+    def check_type(self, value):
+        return isinstance(value, datetime.time)
 
 class JSONField(Field):
     def check_type(self, value):
-        json_types = [bool, int, float, str, list, dict]
+        json_types = [bool, int, float, str, list, dict, tuple]
         return any(isinstance(value, json_type) for json_type in json_types)
 
     @classmethod
@@ -451,26 +533,17 @@ class JSONField(Field):
     def dict_default(cls):
         return {}
 
-
 class Model(object, metaclass=BaseModel):
     def __init__(self, *args, **kwargs):
         self.key = kwargs.get('key', None)
         self._data = dict((f.name, v()) for f, v in self._meta.defaults.items())
         for key, value in kwargs.items():
             setattr(self, key, value)
-        
-    @classmethod
-    def bind(cls, client):
-        cls._meta.client = client
-        for f in cls._meta.fields:
-            f.op_map = client.op_map
-        
-    @property
-    def client(self):
-        return self._meta.client
 
-    def atomic(self, **kwargs):
-        return self.client.transaction(**kwargs)
+    @classmethod
+    def create(cls, **kwargs):
+        inst = cls(**kwargs)
+        return inst.save()
 
     @classmethod
     def select(cls, *args):
@@ -481,14 +554,23 @@ class Model(object, metaclass=BaseModel):
         return DeleteQueryBuilder(cls)
 
     @classmethod
-    def create(cls, **kwargs):
-        inst = cls(**kwargs)
-        inst.save()
-        return inst
+    def update(cls, *args, **kwargs):
+        return UpdateQueryBuilder(cls, self.combine_args_kwargs(*args, **kwargs))
 
     @classmethod
-    def insert_many(cls, entities, batch_size=500):
-        self.client.insert_many(entities, batch_size)
+    def insert(cls, *args, **kwargs):
+        return InsertQueryBuilder(cls, self.combine_args_kwargs(*args, **kwargs))
+        
+    @classmethod
+    def insert_many(cls, datas: list):
+        return InsertQueryBuilder(cls, datas)
+
+    def combine_args_kwargs(self, *args, **kwargs):
+        if (len(args) > 1) or not isinstance(args[0], dict):
+            raise ValueError('The keyword argument have to be a dict')
+        args = args[0] if args else {}
+        args.update(kwargs)
+        return dict(((f.name if isinstance(f, Field) else f), v) for f, v in args.items())
         
     @classmethod
     def get(cls, query=None):
@@ -513,30 +595,58 @@ class Model(object, metaclass=BaseModel):
         return cls.select().filter_by_id(sid).first()
         
     def save(self, **kwargs):
-        self.client.update_one(self)
+        id_ = self.client.update_one(self)
+        setattr(self, self._meta.primary_key, id_)
+        return self
 
     def delete_instance(self, **kwargs):
         self.client.delete_one(self)
 
+    @property
+    def client(self):
+        return self._meta.client
+
     #Convert model into a dict
     #: params only=[Model.title, ...]
     #: params exclude=[Model.title, ...]
-    #: remove_id remove key and id field from dict
-    def to_python_dict(self, **kwargs):
+    #: remove_id - remove key and id field from dict
+    #: db_value - if prepared for saving to db
+    def dicts(self, **kwargs):
         only = [x.name for x in kwargs.get('only', [])]
         exclude = [x.name for x in kwargs.get('exclude', [])]
         should_skip = lambda n: (n in exclude) or (only and (n not in only))
+        for_db_value = kwargs.get('db_value', False)
 
         data = {}
         for name, field in self._meta.fields.items():
             if not should_skip(name):
-                data[name] = getattr(self, name, None)
+                if for_db_value:
+                    data[name] = field.db_value(getattr(self, name, None))
+                else:
+                    data[name] = getattr(self, name, None)
 
         if kwargs.get('remove_id'):
             data.pop('key', None)
             data.pop('id', None)
             data.pop('_id', None)
         return data
+
+    @classmethod
+    def bind(cls, client):
+        cls._meta.client = client
+        for f in cls._meta.fields:
+            f.op_map = client.op_map
+
+    @classmethod
+    def create_table(cls, **kwargs):
+        pass
+
+    @classmethod
+    def drop_table(cls, **kwargs):
+        self.client.drop_table(cls._meta.name)
+
+    def atomic(self, **kwargs):
+        return self.client.transaction(**kwargs)
 
 class Filter:
     def __init__(self, item, op, value):
@@ -558,7 +668,7 @@ class QueryBuilder:
         _meta = model_class._meta
         self._kind = _meta.name
         self._client = _meta.client
-        self.useIDInsteadOfKey = _meta.useIDInsteadOfKey
+        self._primary_key = _meta.primary_key
         self._filters = []
         self._projection = [(field.name if isinstance(field, Field) else field) for field in args]
         self._order = []
@@ -570,6 +680,7 @@ class QueryBuilder:
             if isinstance(flt, list):
                 self._filters.extend(flt)
             else:
+                assert(isinstance(flt, Filter))
                 self._filters.append(flt)
         return self
 
@@ -613,6 +724,9 @@ class QueryBuilder:
 
     get = first
 
+    def count(self):
+        return self._client.count(self)
+
     def __iter__(self):
         return iter(self.execute())
 
@@ -626,3 +740,73 @@ class DeleteQueryBuilder(QueryBuilder):
     def __repr__(self):
         return f"<DeleteQueryBuilder filters: {self._filters}>"
 
+class InsertQueryBuilder:
+    def __init__(self, model_class, to_insert):
+        self.model_class = model_class
+        self._client = model_class._meta.client
+        self.to_insert = to_insert
+
+    def execute(self):
+        if len(self.to_insert) > 1:
+            return self._client.insert_many(self.model_class, self.to_insert)
+        elif self.to_insert:
+            return self._client.insert_one(self.model_class, self.to_insert[0])
+
+class UpdateQueryBuilder(QueryBuilder):
+    def __init__(self, model_class, to_update):
+        super().__init__(model_class)
+        self._update = to_update #is a dict
+
+    def execute(self):
+        for e in super().execute():
+            get_field = e._meta.fields.get
+            for field_name, value in self._update.items():
+                field = get_field(field_name, None)
+                if field:
+                    if isinstance(value, UpdateExpr):
+                        value = eval(str(value))
+                    setattr(e, field_name, value)
+            self._client.update_one(e)
+
+    def __repr__(self):
+        return f"<UpdateQueryBuilder filters: {self._filters}>"
+
+    def __add__(self, other):
+        return UpdateExpr(self, other)
+
+class UpdateExpr:
+    def __init__(self, inst, op, other):
+        self.inst = inst
+        self.op = op
+        self.other = other
+
+    __add__ = arith_op('+')
+    __sub__ = arith_op('-')
+    __mul__ = arith_op('*')
+    __truediv__ = arith_op('/')
+    __floordiv__ = arith_op('//')
+    __mod__ = arith_op('%')
+    __pow__ = arith_op('**')
+    __lshift__ = arith_op('<<')
+    __rshift__ = arith_op('>>')
+    __and__ = arith_op('&')
+    __or__ = arith_op('|')
+    __xor__ = arith_op('^')
+    __radd__ = arith_op('+', reverse=True)
+    __rsub__ = arith_op('-', reverse=True)
+    __rmul__ = arith_op('*', reverse=True)
+
+    def __str__(self):
+        inst = self.inst
+        if isinstance(inst, Field):
+            inst = f'e.{inst.name}'
+        elif isinstance(inst, str):
+            inst = f'"{inst}"'
+            
+        other = self.other
+        if isinstance(other, Field):
+            other = f'e.{other.name}'
+        elif isinstance(other, str):
+            other = f'"{other}"'
+        
+        return f'({inst} {self.op} {other})'

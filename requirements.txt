@@ -19,7 +19,7 @@ six==1.16.0
 feedparser==6.0.11
 
 #database
-google-cloud-datastore==1.7.4
+google-cloud-datastore==2.19.0
 peewee==3.17.0
 #psycopg2
 #pymysql
@@ -31,4 +31,4 @@ celery==5.3.6
 redis==5.0.1
 eventlet==0.35.1
 
-appengine-python-standard==1.1.4
+appengine-python-standard==1.1.6

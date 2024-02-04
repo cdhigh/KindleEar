@@ -11,6 +11,8 @@
      * 删除__init__()
      * is_file_accessible() 无条件返回 FakeFile.Visibility.OK
      * stubs.py默认位置：C:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\platform\google_appengine\google\appengine\tools\devappserver2\python\runtime\stubs.py
+  3. datastore如果连接不上模拟器，一直使用远端数据库，可以手动修改 site-packages\google\cloud\datastore\client.py
+     Client.__init__()，将 emulator_host 修改为 'localhost:8081'
 
 # [google cloud datastore本地模拟器](https://cloud.google.com/datastore/docs/tools/datastore-emulator)
   0. 安装和配置 Java JDK 11+
@@ -39,7 +41,7 @@ gcloud app deploy queue.yaml
 # Windows 安装配置 MongoDB
 * 下载安装(注意安装时要取消mongodb compass)，创建一个目录保存数据库文件，比如 c:\mongodb\db和c:\mongodb\log
 * 安装启动服务
-  >` "C:\Program Files\MongoDB\Server\3.6\bin\mongod.exe" --dbpath "c:\mongodb\db" --logpath "c:\mongodb\log\MongoDB.log" --install --serviceName "MongoDB"  --journal`
+  >`"C:\Program Files\MongoDB\Server\3.6\bin\mongod.exe" --dbpath "c:\mongodb\db" --logpath "c:\mongodb\log\MongoDB.log" --install --serviceName "MongoDB"  --journal`
   > `net start MongoDB`
   > `"C:\Program Files\MongoDB\Server\3.6\bin\mongo.exe"`
   > `db.Book.insert({"name":"1001 nights"})`
