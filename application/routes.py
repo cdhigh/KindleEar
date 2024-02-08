@@ -33,7 +33,13 @@ def Test():
 
 @bpHome.route('/images/<path:image_file>')
 def ImageFileRoute(image_file):
-    return send_from_directory('images', image_file)
+    imgDir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'images'))
+    return send_from_directory(imgDir, image_file)
+
+@bpHome.route('/recipes/<path:recipes_file>')
+def RecipesFileRoute(recipes_file):
+    recipesDir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'recipes'))
+    return send_from_directory(recipesDir, recipes_file)
 
 @bpHome.route('/favicon.ico')
 def FaviconIcon():

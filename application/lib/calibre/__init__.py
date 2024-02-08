@@ -379,6 +379,16 @@ def human_readable(size, sep=' '):
         size = size[:-2]
     return size + sep + suffix
 
+def random_user_agent(choose=None, allow_ie=True):
+    from calibre.utils.random_ua import common_user_agents, choose_randomly_by_popularity
+    ua_list = common_user_agents()
+    ua_list = tuple(x for x in ua_list if not is_mobile_ua(x))
+    if not allow_ie:
+        ua_list = tuple(x for x in ua_list if 'Trident/' not in x)
+    if choose is not None:
+        return ua_list[choose]
+    return choose_randomly_by_popularity(ua_list)
+    
 def browser(honor_time=True, max_time=2, user_agent=None, verify_ssl_certificates=True, handle_refresh=True, **kw):
     from urlopener import UrlOpener
     return UrlOpener(**kw)

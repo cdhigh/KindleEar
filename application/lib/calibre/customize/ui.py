@@ -15,8 +15,7 @@ from calibre.customize.conversion import InputFormatPlugin, OutputFormatPlugin
 from calibre.customize.profiles import InputProfile, OutputProfile
 from calibre.customize.builtins import plugins as builtin_plugins
 from calibre.ebooks.metadata import MetaInformation
-from calibre.utils.config import (make_config_dir, Config, ConfigProxy,
-                                 plugin_dir, OptionParser)
+from calibre.utils.config import Config, ConfigProxy, plugin_dir, OptionParser
 from calibre.constants import numeric_version, ismacos
 from polyglot.builtins import iteritems, itervalues
 
@@ -644,19 +643,8 @@ def get_system_plugins():
 def initialize_plugins(perf=False):
     global _initialized_plugins
     _initialized_plugins = []
-    system_plugins = get_system_plugins().copy()
-    conflicts = {name for name in config['plugins'] if name in
-            builtin_names or name in system_plugins}
-    for p in conflicts:
-        remove_plugin(p)
-    system_conflicts = [name for name in system_plugins if name in
-            builtin_names]
-    for p in system_conflicts:
-        system_plugins.pop(p, None)
-    external_plugins = config['plugins'].copy()
-    for name in BLACKLISTED_PLUGINS:
-        external_plugins.pop(name, None)
-        system_plugins.pop(name, None)
+    system_plugins = {}
+    external_plugins = {}
     ostdout, ostderr = sys.stdout, sys.stderr
     if perf:
         from collections import defaultdict

@@ -26,7 +26,7 @@
         <input id="enable_wiz" name="wiz" type="checkbox" {% if wiz.get('enable') %}checked="1"{% endif %} />
         {{appendStrs["wiz"]}}
       </label>
-      <input type="text" name="wiz_mail" placeholder="Wiz Email" value="{{ wiz.get('email') }}" class="pure-u-1" />
+      <input type="text" name="wiz_mail" placeholder="Wiz Email" value="{{ wiz.get('email', '') }}" class="pure-u-1" />
     </div>
 
     <hr style="margin:1.5em 0;border:0;border-bottom:1px solid #e5e5e5" />
@@ -52,7 +52,7 @@
         <input type="text" name="instapaper_username" id="instapaper_username" placeholder="{{ _('Email or Username') }}" value="{{ instapaper.get('username', '') }}" onchange="notifyInstapaperVerify();" class="pure-u-1 pure-u-sm-23-24" />
       </div>
       <div class="pure-u-1 pure-u-sm-2-5">
-        <input type="password" name="instapaper_password" id="instapaper_password" placeholder="{{ _('Password') }}" value="{% if instapaper.get('password') %}{{ ke_decrypt(instapaper.get('password'), user.secret_key or '') }}{% endif %}" onchange="notifyInstapaperVerify();" class="pure-u-1 pure-u-sm-23-24" />
+        <input type="password" name="instapaper_password" id="instapaper_password" placeholder="{{ _('Password') }}" value="{% if instapaper.get('password') %}{{ ke_decrypt(instapaper.get('password', ''), user.secret_key or '') }}{% endif %}" onchange="notifyInstapaperVerify();" class="pure-u-1 pure-u-sm-23-24" />
       </div>
       <div class="pure-u-1 pure-u-sm-1-5" style="text-align:center;">
         <a href="javascript:;" id="averInstapaper" onclick="verifyInstapaper();return false;" class="pure-u-1 pure-button">{{_("Verify")}}</a>

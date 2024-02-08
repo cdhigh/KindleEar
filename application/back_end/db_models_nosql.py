@@ -12,10 +12,10 @@ import os, json, datetime
 from config import APP_ID, DATABASE_ENGINE, DATABASE_HOST, DATABASE_PORT, DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_NAME
 
 if DATABASE_ENGINE == "datastore":
-    from petwee import *
+    from weedata import *
     dbInstance = DatastoreClient(project=APP_ID)
 elif DATABASE_ENGINE == "mongodb":
-    from petwee import *
+    from weedata import *
     dbInstance = MongoDbClient(APP_ID, "mongodb://localhost:27017/")
 else:
     raise Exception("database engine '{}' not supported yet".format(DATABASE_ENGINE))
@@ -52,11 +52,6 @@ class MyBaseModel(Model):
             return cls.get_by_key(id_)
         except:
             return None
-
-    #返回Key/Id的字符串表达
-    @property
-    def key_or_id_string(self):
-        return self.key.to_legacy_urlsafe().decode()
 
     #将当前行数据转换为一个字典结构，由子类使用，将外键转换为ID，日期转换为字符串
     #可以传入 only=[Book.title, ...]，或 exclude=[]

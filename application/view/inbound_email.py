@@ -315,7 +315,7 @@ def TrigDeliver(subject, userName):
         for bk in subject.split(','):
             trigBook = Book.get_one(Book.title == bk.strip())
             if trigBook:
-                bkIds.append(trigBook.key_or_id_string)
+                bkIds.append(str(trigBook.id))
             else:
                 log.warning('Book not found : {}'.format(bk.strip()))
         if bkIds:

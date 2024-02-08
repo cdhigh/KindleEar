@@ -20,7 +20,8 @@ feedparser==6.0.11
 
 #database
 google-cloud-datastore==2.19.0
-peewee==3.17.0
+peewee>=3.17.0
+weedata
 #psycopg2
 #pymysql
 #pymongo==3.7.2

@@ -46,7 +46,7 @@ function FetchBuiltinRecipesXml() {
   var hasUserLangRss = false;
   var hasEnRss = false;
   //这个是静态文件，flask和浏览器会通过etag来自动使用本地缓存
-  $.get('/static/builtin_recipes.xml', function(xml) {
+  $.get('/recipes/builtin_recipes.xml', function(xml) {
     var userLang = BrowserLanguage();
     $(xml).find("recipe").each(function() {
       var title=$(this).attr("title");
@@ -850,13 +850,14 @@ var AjaxFileUpload = {
   },
 
   onSuccess: function(response) {
-    if (response == "ok") {
+    response = JSON.parse(response);
+    if (response.status == "ok") {
       if (this.progress) {
         this.progress.html("").css("display", "none");
       }
       ShowSimpleModalDialog('<h2>' + i18n.congratulations + '</h2><p>' + i18n.fileUploaded + '</p>');
     } else {
-      alert(response);
+      alert(response.status);
     }
   },
 

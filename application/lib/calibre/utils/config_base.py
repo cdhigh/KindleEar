@@ -122,12 +122,6 @@ def json_loads(raw):
         raw = raw.decode('utf-8')
     return json.loads(raw, object_hook=from_json)
 
-
-def make_config_dir():
-    if not os.path.exists(plugin_dir):
-        os.makedirs(plugin_dir)
-
-
 class Option:
 
     def __init__(self, name, switches=[], help='', type=None, choices=None,
@@ -371,6 +365,7 @@ class Config(ConfigInterface):
         return os.path.join(config_dir, self.filename_base + '.py.json')
 
     def parse(self):
+        return OptionSet()
         src = ''
         migrate = False
         path = self.config_file_path
@@ -391,19 +386,10 @@ class Config(ConfigInterface):
             else:
                 migrate = bool(src)
         ans = self.option_set.parse_string(src)
-        return ans
+        #return ans
 
     def set(self, name, val):
-        if not self.option_set.has_option(name):
-            raise ValueError('The option %s is not defined.'%name)
-        if not os.path.exists(config_dir):
-            make_config_dir()
-        src = b''
-        with suppress(FileNotFoundError):
-            src = read_data(self.config_file_path)
-        opts = self.option_set.parse_string(src)
-        setattr(opts, name, val)
-        src = self.option_set.serialize(opts)
+        pass
         
 
 class StringConfig(ConfigInterface):
@@ -462,7 +448,7 @@ class ConfigProxy:
     def get(self, key):
         if self.__opts is None:
             self.refresh()
-        return getattr(self.__opts, key)
+        return getattr(self.__opts, key, None)
 
     def set(self, key, val):
         if self.__opts is None:

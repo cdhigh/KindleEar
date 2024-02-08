@@ -4,12 +4,11 @@
 KindleEar配置文件，请务必修改开始几个配置
 如果有的配置是从环境变量获取，也可以使用os.envrion['name']方式
 """
-
+APP_ID = "kindleear"
 SRC_EMAIL = "akindleear@gmail.com"  #Your gmail account for sending mail to Kindle
 KE_DOMAIN = "https://kindleear.appspot.com" #Your domain of app
 #Need for taskqueue, Refers to <https://cloud.google.com/appengine/docs/locations>
 #Upper right corner at <https://console.cloud.google.com/appengine?project=your_app_id>
-APP_ID = "kindleear"
 SERVER_LOCATION = "us-central1"
 
 #Choose the database engine, you can also set Database URL to DATABASE_NAME

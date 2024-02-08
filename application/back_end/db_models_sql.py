@@ -82,11 +82,6 @@ class MyBaseModel(Model):
         except:
             return None
 
-    #返回Key/Id的字符串表达
-    @property
-    def key_or_id_string(self):
-        return str(self.id)
-
     #将当前行数据转换为一个字典结构，由子类使用，将外键转换为ID，日期转换为字符串
     #可以传入 only=[Book.title, ...]，或 exclude=[]
     def to_dict(self, **kwargs):

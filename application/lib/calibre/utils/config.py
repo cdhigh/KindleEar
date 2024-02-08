@@ -12,7 +12,7 @@ from copy import deepcopy
 
 from calibre.constants import (__appname__, __author__, config_dir, iswindows)
 from calibre.utils.config_base import (
-    Config, ConfigInterface, ConfigProxy, Option, OptionSet, OptionValues, StringConfig, from_json, json_dumps, json_loads, make_config_dir, plugin_dir, prefs,
+    Config, ConfigInterface, ConfigProxy, Option, OptionSet, OptionValues, StringConfig, from_json, json_dumps, json_loads, plugin_dir, prefs,
     read_data, to_json, tweaks,
 )
 from polyglot.builtins import native_string_type, string_or_bytes
@@ -24,7 +24,7 @@ optparse._ = _
 if False:
     # Make pyflakes happy
     Config, ConfigProxy, Option, OptionValues, StringConfig, OptionSet,
-    ConfigInterface, tweaks, plugin_dir, prefs, from_json, to_json, make_config_dir
+    ConfigInterface, tweaks, plugin_dir, prefs, from_json, to_json
 
 
 def check_config_write_access():

@@ -3,7 +3,7 @@
 #一些高级设置功能页面
 
 import datetime, hashlib, io
-from urllib.parse import quote_plus, urljoin
+from urllib.parse import quote_plus, unquote_plus, urljoin
 from flask import Blueprint, url_for, render_template, redirect, session, send_file
 from flask_babel import gettext as _
 from PIL import Image
@@ -164,7 +164,7 @@ def AdvImportPost():
                 gae_in_email=USE_GAE_INBOUND_EMAIL)
         
         for o in walkOpmlOutline(rssList):
-            title, url, isfulltext = o.text, urllib.unquote_plus(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
+            title, url, isfulltext = o.text, unquote_plus(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
             if isfulltext:
                 isfulltext = str_to_bool(isfulltext)
             else:
@@ -207,13 +207,13 @@ def AdvExport():
     opmlTpl = """<?xml version="1.0" encoding="utf-8" ?>
     <opml version="2.0">
     <head>
-        <title>KindleEar.opml</title>
-        <dateCreated>{date}</dateCreated>
-        <dateModified>{date}</dateModified>
-        <ownerName>KindleEar</ownerName>
+      <title>KindleEar.opml</title>
+      <dateCreated>{date}</dateCreated>
+      <dateModified>{date}</dateModified>
+      <ownerName>KindleEar</ownerName>
     </head>
     <body>
-        {outLines}
+    {outLines}
     </body>
     </opml>"""
 
@@ -222,29 +222,33 @@ def AdvExport():
     if user.timezone != 0:
         date += '+{:02d}00'.format(user.timezone) if (user.timezone > 0) else '-{:02d}00'.format(abs(user.timezone))
     outLines = []
-    for feed in user.all_custom_rss:
-        outLines.append('        <outline type="rss" text="{}" xmlUrl="{}" isFulltext="{}" />'.format(
-            (feed.title, quote_plus(feed.url), feed.isfulltext)))
+    for feed in user.all_custom_rss():
+        outLines.append('<outline type="rss" text="{}" xmlUrl="{}" isFulltext="{}" />'.format(
+            feed.title, quote_plus(feed.url), feed.isfulltext))
     outLines = '\n'.join(outLines)
     
-    opmlFile = opmlTpl.format(date=date, outlines=outLines)
-    return send_file(io.StringIO(opmlFile), mimetype="text/xml", as_attachment=True, download_name="KindleEar_subscription.xml")
+    opmlFile = opmlTpl.format(date=date, outLines=outLines)
+    outLines = []
+    for line in opmlFile.split('\n'):
+        outLines.append(line[4:] if line.startswith('  ') else line)
+    opmlFile = '\n'.join(outLines).encode('utf-8')
+    return send_file(io.BytesIO(opmlFile), mimetype="text/xml", as_attachment=True, download_name="KindleEar_subscription.xml")
     
 #在本地选择一个图片上传做为自定义RSS书籍的封面
 @bpAdv.route("/advuploadcoverimage")
 def AdvUploadCoverImage(tips=None):
     user = get_login_user()
     return render_template('advcoverimage.html', tab='advset',
-        user=user, advCurr='uploadcoverimage', formaction=url_for("bpAdv.AdvUploadCoverImageAjaxPost"), 
+        user=user, advCurr='uploadcoverimage', formation=url_for("bpAdv.AdvUploadCoverImageAjaxPost"), 
         deletecoverhref=url_for("bpAdv.AdvDeleteCoverImageAjaxPost"), tips=tips,
         gae_in_email=USE_GAE_INBOUND_EMAIL)
 
 #AJAX接口的上传封面图片处理函数
 @bpAdv.post("/advuploadcoverimageajax", endpoint='AdvUploadCoverImageAjaxPost')
-@login_required()
+@login_required(forAjax=True)
 def AdvUploadCoverImageAjaxPost():
     MAX_IMAGE_PIXEL = 1024
-    ret = 'ok'
+    ret = {'status': 'ok'}
     user = get_login_user()
     try:
         upload = request.files.get('cover_file')
@@ -265,17 +269,17 @@ def AdvUploadCoverImageAjaxPost():
         else:
             dbCover = UserBlob(name='cover', data=data.getvalue(), time=datetime.datetime.utcnow())
         dbCover.save()
-        user.covers = ['db://' + dbCover.key_or_id_string]
+        user.covers = ['db://' + str(dbCover.id)]
         user.save()
         upload.close()
     except Exception as e:
-        ret = str(e)
+        ret['status'] = str(e)
         
     return ret
 
 #删除上传的封面图片
 @bpAdv.post("/advdeletecoverimageajax", endpoint='AdvDeleteCoverImageAjaxPost')
-@login_required()
+@login_required(forAjax=True)
 def AdvDeleteCoverImageAjaxPost():
     user = get_login_user()
     if request.form.get('action') == 'delete':
@@ -291,15 +295,15 @@ def AdvDeleteCoverImageAjaxPost():
 def AdvUploadCss(tips=None):
     user = get_login_user()
     return render_template('advuploadcss.html', tab='advset',
-        user=user, advCurr='uploadcss', formaction=url_for("bpAdv.AdvUploadCssAjaxPost"), 
+        user=user, advCurr='uploadcss', formation=url_for("bpAdv.AdvUploadCssAjaxPost"), 
         deletecsshref=url_for("bpAdv.AdvDeleteCssAjaxPost"), tips=tips, 
         gae_in_email=USE_GAE_INBOUND_EMAIL)
 
 #AJAX接口的上传CSS处理函数
 @bpAdv.post("/advuploadcssajax", endpoint='AdvUploadCssAjaxPost')
-@login_required()
+@login_required(forAjax=True)
 def AdvUploadCssAjaxPost():
-    ret = 'ok'
+    ret = {'status': 'ok'}
     user = get_login_user()
     try:
         upload = request.files.get('css_file')
@@ -308,13 +312,13 @@ def AdvUploadCssAjaxPost():
         user.save()
         upload.close()
     except Exception as e:
-        ret = str(e)
+        ret['status'] = str(e)
 
     return ret
 
 #删除上传的CSS
 @bpAdv.post("/advdeletecssajax", endpoint='AdvDeleteCssAjaxPost')
-@login_required()
+@login_required(forAjax=True)
 def AdvDeleteCssAjaxPost():
     ret = {'status': 'ok'}
     user = get_login_user()

@@ -69,7 +69,7 @@ def GetBuiltinRecipeInfo(id_: str):
         return None
 
     try:
-        tree = ET.parse(os.path.join(appDir, 'application', 'static', 'builtin_recipes.xml'))
+        tree = ET.parse(os.path.join(appDir, 'application', 'recipes', 'builtin_recipes.xml'))
         root = tree.getroot()
     except Exception as e:
         default_log.warning('Cannot open builtin_recipes.xml: {}'.format(e))
@@ -89,7 +89,7 @@ def GetBuiltinRecipeSource(id_: str):
 
     id_ = id_[8:] if id_.startswith('builtin:') else id_
     filename = f'{id_}.recipe'
-    recipesZip = os.path.join(appDir, 'application', 'static', 'builtin_recipes.zip')
+    recipesZip = os.path.join(appDir, 'application', 'recipes', 'builtin_recipes.zip')
     try:
         with zipfile.ZipFile(recipesZip, 'r') as zf:
             return zf.read(filename).decode('utf-8')
