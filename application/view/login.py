@@ -45,7 +45,7 @@ def LoginPost():
     
     InitialAdminAccount() #确认管理员账号是否存在
     
-    u = KeUser.get_one(KeUser.name == name)
+    u = KeUser.get_or_none(KeUser.name == name)
     if u:
         secret_key = u.secret_key or ''
         pwdhash = hashlib.md5((passwd + secret_key).encode()).hexdigest()
@@ -61,8 +61,8 @@ def LoginPost():
             u.expires = datetime.datetime.utcnow() + datetime.timedelta(days=days)
             u.save()
         
-        #return redirect(url_for("bpSubscribe.MySubscription") if u.kindle_email else url_for("bpSetting.Setting"))
-        return redirect(url_for("bpSetting.Setting"))
+        return redirect(url_for("bpSubscribe.MySubscription") if u.kindle_email else url_for("bpSetting.Setting"))
+        #return redirect(url_for("bpSetting.Setting"))
     else:  #账号或密码错
         time.sleep(5) #防止暴力破解
         tips = _("The username does not exist or password is wrong.")
@@ -80,7 +80,7 @@ def LoginPost():
 #判断管理员账号是否存在
 #如果管理员账号不存在，创建一个，并返回False，否则返回True
 def InitialAdminAccount():
-    u = KeUser.get_one(KeUser.name == ADMIN_NAME)
+    u = KeUser.get_or_none(KeUser.name == ADMIN_NAME)
     if u:
         return True
 
@@ -89,7 +89,7 @@ def InitialAdminAccount():
     password = hashlib.md5((ADMIN_NAME + secretKey).encode()).hexdigest()
     au = KeUser(name=ADMIN_NAME, passwd=password, kindle_email='', enable_send=False, send_time=8, 
         timezone=TIMEZONE, book_type="epub", device='kindle', expires=None, secret_key=secretKey, 
-        expiration_days=0, share_key=shareKey, book_title='KindleEar', book_language='en')
+        expiration_days=0, share_links={'key': shareKey}, book_title='KindleEar', book_language='en')
     au.save()
     return False
 

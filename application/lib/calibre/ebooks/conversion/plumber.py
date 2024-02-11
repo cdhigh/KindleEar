@@ -90,11 +90,10 @@ class Plumber:
     #recipes: 编译好的recipes列表
     #output: 输出文件绝对路径名，也可能是一个BytesIO
     #user: KeUser 实例
-    def __init__(self, recipes, output, user, output_fmt=None, abort_after_input_dump=False, override_input_metadata=False, view_kepub=False):
+    def __init__(self, recipes, output, output_fmt=None, abort_after_input_dump=False, override_input_metadata=False, view_kepub=False):
         self.recipes = recipes
         self.output = output
         self.log = Log() #calibre里面使用的log和python标准库使用的logging不兼容，所以不要外面传递了
-        self.user = user
         self.abort_after_input_dump = abort_after_input_dump
         self.override_input_metadata = override_input_metadata
         self.pipeline_options = _pipeline_options
@@ -372,7 +371,7 @@ class Plumber:
                 os.makedirs(self.opts.debug_pipeline)
             #with open(os.path.join(self.opts.debug_pipeline, 'README.txt'), 'wb') as f:
             #    f.write(DEBUG_README)
-            for x in ('input', 'parsed', 'structure', 'processed'):
+            for x in ('input', '0.parsed', '1.structure', '2.processed'):
                 x = os.path.join(self.opts.debug_pipeline, x)
                 if os.path.exists(x):
                     shutil.rmtree(x)
@@ -389,7 +388,12 @@ class Plumber:
         
         #调用calibre.customize.conversion.InputFormatPlugin.__call__()，然后调用输入插件的convert()在目标目录生成一大堆文件，包含opf
         #__call__()返回传入的 fs 实例，其属性 opfname 保存了opf文件的路径名
-        self.oeb = self.input_plugin(self.recipes, self.opts, 'recipe', self.log, tdir, fs, self.user)
+        try:
+            self.oeb = self.input_plugin(self.recipes, self.opts, 'recipe', self.log, tdir, fs)
+        except Exception as e:
+            self.log.warning('Failed to execute recipes: {}'.format(str(e)))
+            fs.clear()
+            return
 
         #如果只是要制作epub的话，到目前为止，工作已经完成大半
         #将self.oeb指向的目录拷贝到OEBPS目录，加一个mimetype和一个META-INF/container.xml文件，这两个文件内容是固定的
@@ -411,7 +415,7 @@ class Plumber:
         self.opts.is_image_collection = self.input_plugin.is_image_collection
         self.flush()
         if self.opts.debug_pipeline is not None:
-            out_dir = os.path.join(self.opts.debug_pipeline, 'parsed')
+            out_dir = os.path.join(self.opts.debug_pipeline, '0.parsed')
             self.dump_oeb(self.oeb, out_dir)
             self.log.info('Parsed HTML written to:{}'.format(out_dir))
         self.input_plugin.specialize(self.oeb, self.opts, self.log,
@@ -468,7 +472,7 @@ class Plumber:
         Jacket()(self.oeb, self.opts, self.user_metadata)
         
         if self.opts.debug_pipeline is not None:
-            out_dir = os.path.join(self.opts.debug_pipeline, 'structure')
+            out_dir = os.path.join(self.opts.debug_pipeline, '1.structure')
             self.dump_oeb(self.oeb, out_dir)
             self.log.info('Structured HTML written to:{}'.format(out_dir))
 
@@ -538,7 +542,7 @@ class Plumber:
         self.oeb.toc.rationalize_play_orders()
         
         if self.opts.debug_pipeline is not None:
-            out_dir = os.path.join(self.opts.debug_pipeline, 'processed')
+            out_dir = os.path.join(self.opts.debug_pipeline, '2.processed')
             self.dump_oeb(self.oeb, out_dir)
             self.log.info('Processed HTML written to:{}'.format(out_dir))
 
@@ -548,14 +552,16 @@ class Plumber:
         if system_temp_dir:
             prefix = self.output_plugin.commit_name or 'output_'
             tmpdir = PersistentTemporaryDirectory(prefix=prefix, dir=system_temp_dir)
-            fs = FsDictStub(tmpdir)
+            fs_out = FsDictStub(tmpdir)
         else:
-            fs = FsDictStub(None)
+            fs_out = FsDictStub(None)
 
         #这才是启动输出转换，生成电子书
         with self.output_plugin:
-            self.output_plugin.convert(self.oeb, self.output, self.input_plugin, self.opts, self.log, fs)
+            self.output_plugin.convert(self.oeb, self.output, self.input_plugin, self.opts, self.log, fs_out)
         self.oeb.clean_temp_files()
+        fs.clear()
+        fs_out.clear()
         if not isinstance(self.output, io.BytesIO):
             run_plugins_on_postprocess(self.output, self.output_fmt)
 

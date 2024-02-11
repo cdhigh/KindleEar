@@ -5,47 +5,73 @@
 #gae mail api
 #https://cloud.google.com/appengine/docs/standard/python3/reference/services/bundled/google/appengine/api/mail
 #https://cloud.google.com/appengine/docs/standard/python3/services/mail
-import os
+import os, datetime, zipfile
 from config import *
-from ..utils import local_time
+from ..utils import local_time, ke_decrypt
 from ..base_handler import save_delivery_log
 
-if SEND_MAIL_SERVICE == "gae":
-    from google.appengine.api.mail import send_mail
+try:
+    from google.appengine.api.mail import send_mail as gae_send_mail
     from google.appengine.api.mail_errors import InvalidSenderError, InvalidAttachmentTypeError, InvalidEmailError
     from google.appengine.runtime.apiproxy_errors import OverQuotaError, DeadlineExceededError
-elif SEND_MAIL_SERVICE == "sendgrid":
+except ImportError:
+    gae_send_mail = None
+
+try:
     from sendgrid import SendGridAPIClient
     from sendgrid.helpers.mail import Email, Content, Mail, Attachment
-elif SEND_MAIL_SERVICE == "smtp":
-    from smtp_mail import send_smtp_mail
-elif SEND_MAIL_SERVICE == "savetolocal":
-    pass
-else:
-    raise Exception("send mail service '{}' not supported yet".format(SEND_MAIL_SERVICE))
+except ImportError:
+    SendGridAPIClient = None
+
+try:
+    from smtp_mail import smtp_send_mail
+except ImportError:
+    smtp_send_mail = None
 
 #发送邮件
-#userName: 用户名
-#to: 收件地址，可以是一个单独的字符串，或一个字符串列表，对应发送到多个地址
 #title: 邮件标题
-#bookType: 书籍类型 epub 或 mobi
 #attachment: 附件二进制内容
-#tz: 时区
 #fileWithTime: 发送的附件文件名是否附带当前时间
-def send_to_kindle(userName, to, title, bookType, attachment, tz=TIMEZONE, fileWithTime=True):
-    global default_log
-    lcTime = local_time('%Y-%m-%d_%H-%M', tz)
-    mailSubject = "KindleEar {}".format(lcTime)
+def send_to_kindle(user, title, attachment, fileWithTime=True):
+    lcTime = local_time('%Y-%m-%d_%H-%M', user.timezone)
+    subject = f"KindleEar {lcTime}"
     lcTime = "({})".format(lcTime) if fileWithTime else ""
-    ext = ".{}".format(bookType) if bookType else ""
-    fileName = "{}{}{}".format(title, lcTime, ext)
+    ext = ".{}".format(user.book_type) if user.book_type else ""
+    fileName = f"{title}{lcTime}{ext}"
+    body = "Deliver from KindleEar"
+    attachments = [(fileName, attachment)]
     
+    status = 'ok'
+    srv_type = user.send_mail_service.get('service', 'gae')
+    to = user.kindle_email.replace(';', ',').split(',')
     try:
-        send_mail(SRC_EMAIL, to, mailSubject, "Deliver from KindleEar", attachments=[(fileName, attachment),])
+        send_mail(user, srv_type, to, subject, body, attachments)
     except Exception as e:
-        record_sendmail_Error(userName, to, title, len(attachment), tz, e)
+        status = str(e)
+        default_log.warning(f'Failed to send mail "{title}": {status}')
+    
+    save_delivery_log(user, title, len(attachment), status=status)
+
+#统一的发送邮件函数
+def send_mail(user, srv_type, to, subject, body, attachments=None, html=None):
+    sm_service = user.send_mail_service
+    if srv_type == 'gae':
+        gae_send_mail(SRC_EMAIL, to, subject, body, attachments=attachments)
+    elif srv_type == 'sendgrid':
+        apikey = sm_service.get('apikey', '')
+        grid_send_mail(apikey, SRC_EMAIL, to, subject, body, attachments=attachments)
+    elif srv_type == 'smtp':
+        host = sm_service.get('host', '')
+        port = sm_service.get('port', 587)
+        username = sm_service.get('username', '')
+        password = ke_decrypt(sm_service.get('password', ''), user.secret_key)
+        smtp_send_mail(SRC_EMAIL, to, subject, body, smtp_host=host, 
+            username=username, password=password, smtp_port=port, 
+            attachments=attachments)
+    elif srv_type == 'local':
+        save_mail_to_local(sm_service.get('save_path', 'tests/debug_mail'), subject, body, attachments)
     else:
-        save_delivery_log(userName, to, title, len(attachment), tz=tz, status='ok')
+        raise ValueError(f'Unknown srv [{srv_type}]')
 
 #发送一个HTML邮件
 #userName: 用户名
@@ -53,9 +79,11 @@ def send_to_kindle(userName, to, title, bookType, attachment, tz=TIMEZONE, fileW
 #title: 邮件标题
 #html: 邮件正文的HTML内容
 #attachments: 附件文件名和二进制内容，[(fileName, content),...]
-#tz: 时区
 #textContent: 可选的额外文本内容
-def send_html_mail(userName, to, title, html, attachments, tz=TIMEZONE, textContent=None):
+def send_html_mail(user, to, title, html, attachments, textContent=None):
+    if (';' in to) or (',' in to):
+        to = to.replace(';', ',').split(',')
+
     if not textContent or not isinstance(textContent, str):
         textContent = "Deliver from KindlerEar, refers to html part."
     
@@ -68,101 +96,62 @@ def send_html_mail(userName, to, title, html, attachments, tz=TIMEZONE, textCont
     if attachments:
         extraArgs['attachments'] = attachments
 
+    size = 0
+    status = 'ok'
     try:
         send_mail(SRC_EMAIL, to, title, textContent, **extraArgs)
     except Exception as e:
-        record_sendmail_Error(userName, to, title, len(attachment), tz, e)
-    else:
-        size = len(html or textContent) + sum([len(c) for f, c in (attachments or [])])
-        save_delivery_log(userName, to, title, size, tz=tz)
-
-if SEND_MAIL_SERVICE == "gae":
-    #记录GAE发送邮件的异常
-    def record_sendmail_Error(userName, to, title, bookSize, tz, e):
-        global default_log
-        if isinstance(e, OverQuotaError):
-            info = 'Overquota when sendmail to {}.'.format(to)
-            status = 'over quota'
-        elif isinstance(e, InvalidSenderError):
-            info = 'UNAUTHORIZED_SENDER when sendmail to {}'.format(to)
-            status = 'wrong SRC_EMAIL'
-        elif isinstance(e, InvalidAttachmentTypeError):
-            info ='InvalidAttachmentTypeError when sendmail to {}'.format(to)
-            status = 'wrong SRC_EMAIL'
-        elif isinstance(e, DeadlineExceededError):
-            info = 'Timeout when sendmail to {}'.format(to)
-            status = "timeout"
-        elif isinstance(e, InvalidEmailError):
-            info = 'Invalid email address {}'.format(to)
-            status = "invalid address"
-        else:
-            info = 'sendmail to {} failed: {}'.format(to, str(e))
-            status = "failed"
-        default_log.warning(info)
-        save_delivery_log(userName, to, title, bookSize, tz=tz, status=status)
-elif SEND_MAIL_SERVICE == "sendgrid":
-    #SendGrid发送邮件
-    #sender:: 发送者地址
-    #to: 收件地址，可以是一个单独的字符串，或一个字符串列表，对应发送到多个地址
-    #subject: 邮件标题
-    #body: 邮件正文纯文本内容
-    #html: 邮件正文HTML
-    #attachment: [(fileName, attachment),]
-    #tz: 时区
-    def send_mail(sender, to, subject, body, html=None, attachments=None):
-        global default_log
-        sgClient = SendGridAPIClient(SENDGRID_APIKEY)
-        bodyContent = Content("text/plain", body)
-        htmlContent = Content("text/html", html) if html else None
-        message = Mail(from_email=sender, to_emails=to, subject=subject, plain_text_content=bodyContent, 
-            html_content=htmlContent)
-
-        for fileName, data in (attachments or []):
-            attachedFile = Attachment(
-                file_content=FileContent(base64.b64encode(data).decode()),
-                file_name=FileName(fileName),
-                file_type=FileType("application/x-mobipocket-ebook"),
-                disposition=Disposition("attachment"),
-                content_id="KindleEar")
-            message.add_attachment(attachedFile)
-
-        response = sgClient.send(message)
-        if response.status_code not in (200, 202):
-            default_log.warning('Sendgrid failed, error code: {}'.format(response.status_code))
-
-    #记录SendGrid发送邮件的异常
-    def record_sendmail_Error(userName, to, title, bookSize, tz, e):
-        global default_log
-        default_log.warning('Sendgrid failed, error: {}'.format(e))
-        save_delivery_log(userName, to, title, bookSize, tz=tz, status="failed")
-elif SEND_MAIL_SERVICE == "smtp":
-    def send_mail(sender, to, subject, body, html=None, attachments=None):
-        send_smtp_mail(sender=sender, to=to, subject=subject, text=body, smtp_host=SMTP_HOST, 
-            username=SMTP_USER, password=SMTP_PASSWORD, smtp_port=SMTP_PORT, 
-            attachments=attachments)
+        status = str(e)
     
-    #记录SMTP发送邮件的异常
-    def record_sendmail_Error(userName, to, title, bookSize, tz, e):
-        global default_log
-        default_log.warning('Send mail by smtp failed, error: {}'.format(e))
-        save_delivery_log(userName, to, title, bookSize, tz=tz, status="failed")
-elif SEND_MAIL_SERVICE == "savetolocal":
-    import datetime, zipfile
-    def send_mail(sender, to, subject, body, html=None, attachments=None):
-        mailDir = os.path.join(os.path.dirname(__file__), '..', '..', 'tests', 'debug_mail')
-        if not os.path.exists(mailDir):
-            os.makedirs(mailDir)
+    size = len(html or textContent) + sum([len(c) for f, c in (attachments or [])])
+    save_delivery_log(user, title, size, status=status, to=to)
 
-        subject = subject.replace(':', '_').replace('/', '_').replace('\\', '_').replace('?', '_').replace('*', '_')
-        now = str(datetime.datetime.now().replace(microsecond=0)).replace(':', '_')
+#SendGrid发送邮件
+#sender:: 发送者地址
+#to: 收件地址，可以是一个单独的字符串，或一个字符串列表，对应发送到多个地址
+#subject: 邮件标题
+#body: 邮件正文纯文本内容
+#html: 邮件正文HTML
+#attachment: [(fileName, attachment),]
+#tz: 时区
+def grid_send_mail(apikey, sender, to, subject, body, html=None, attachments=None):
+    global default_log
+    sgClient = SendGridAPIClient(apikey)
+    bodyContent = Content("text/plain", body)
+    htmlContent = Content("text/html", html) if html else None
+    message = Mail(from_email=sender, to_emails=to, subject=subject, plain_text_content=bodyContent, 
+        html_content=htmlContent)
+
+    for fileName, data in (attachments or []):
+        attachedFile = Attachment(
+            file_content=FileContent(base64.b64encode(data).decode()),
+            file_name=FileName(fileName),
+            file_type=FileType("application/x-mobipocket-ebook"),
+            disposition=Disposition("attachment"),
+            content_id="KindleEar")
+        message.add_attachment(attachedFile)
+
+    response = sgClient.send(message)
+    if response.status_code not in (200, 202):
+        raise Exception(f'sendgrid failed: {response.status_code}')
+    
+def save_mail_to_local(dest_dir, subject, body, attachments=None):
+    attachments = attachments or []
+    mailDir = os.path.join(appDir, dest_dir)
+    if not os.path.exists(mailDir):
+        os.makedirs(mailDir)
+
+    subject = subject.replace(':', '_').replace('/', '_').replace('\\', '_').replace('?', '_').replace('*', '_')
+    now = str(datetime.datetime.now().replace(microsecond=0)).replace(':', '_')
+    if len(body) < 100 and len(attachments) == 1:
+        filename, content = attachments[0]
+        b, ext = os.path.splitext(filename)
+        mailFilename = os.path.join(mailDir, f'{b}_{now}{ext}')
+        with open(mailFilename, 'wb') as f:
+            f.write(content)
+    else:
         mailFilename = os.path.join(mailDir, f'{subject}_{now}.zip')
         mailFile = zipfile.ZipFile(mailFilename, 'w')
         mailFile.writestr('textbody.txt', body)
         for fn, content in attachments:
             mailFile.writestr(fn, content)
-    
-    #记录SMTP发送邮件的异常
-    def record_sendmail_Error(userName, to, title, bookSize, tz, e):
-        global default_log
-        default_log.warning('Save mail to local failed, error: {}'.format(e))
-        save_delivery_log(userName, to, title, bookSize, tz=tz, status="failed")

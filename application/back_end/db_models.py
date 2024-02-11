@@ -4,16 +4,10 @@
 #Visit https://github.com/cdhigh/KindleEar for the latest version
 #Author:
 # cdhigh <https://github.com/cdhigh>
-import os, sys, random, re
+import os, sys, random
 from operator import attrgetter
-if __name__ == '__main__': #调试使用，调试时为了单独执行此文件
-    thisDir = os.path.dirname(os.path.abspath(__file__))
-    appDir = os.path.normpath(os.path.join(thisDir, "..", ".."))
-    sys.path.insert(0, appDir)
-    sys.path.insert(0, os.path.join(appDir, 'lib'))
-
 from config import DATABASE_ENGINE
-from ..utils import ke_encrypt, ke_decrypt
+from ..utils import ke_encrypt, ke_decrypt, tz_now
 
 if DATABASE_ENGINE in ("datastore", "mongodb"):
     from .db_models_nosql import *
@@ -36,7 +30,6 @@ class KeUser(MyBaseModel): # kindleEar User
     expires = DateTimeField(null=True) #超过了此日期后账号自动停止推送
 
     book_title = CharField()
-    use_title_in_feed = BooleanField(default=True) # 文章标题优先选择订阅源中的还是网页中的
     title_fmt = CharField(default='') #在元数据标题中添加日期的格式
     author_format = CharField(default='') #修正Kindle 5.9.x固件的bug【将作者显示为日期】
     book_mode = CharField(default='') #书籍模式，'periodical'|'comic'，漫画模式可以直接全屏
@@ -45,15 +38,12 @@ class KeUser(MyBaseModel): # kindleEar User
     oldest_article = IntegerField(default=7)
     book_language = CharField() #自定义RSS的语言
     enable_custom_rss = BooleanField(default=True)
-
-    share_key = CharField(default='')
+    
     share_links = JSONField(default=JSONField.dict_default) #evernote/wiz/pocket/instapaper包含子字典，微博/facebook/twitter等仅包含0/1
-    share_fuckgfw = BooleanField(default=False) #归档和分享时是否需要翻墙
-
-    covers = JSONField(default=JSONField.list_default) #保存封面图片数据库ID
+    
+    covers = JSONField(default=JSONField.dict_default) #保存封面图片数据库ID {'order':,'cover0':,...'cover6':}
     css_content = TextField(default='') #保存用户上传的css样式表
-    sg_enable = BooleanField(default=False)
-    sg_apikey = CharField(default='')
+    send_mail_service = JSONField(default=JSONField.dict_default) #{'service':,...}
     custom = JSONField(default=JSONField.dict_default) #留着扩展，避免后续一些小特性还需要升级数据表结构
     
     #自己直接所属的自定义RSS列表，返回[Recipe,]
@@ -82,27 +72,29 @@ class KeUser(MyBaseModel): # kindleEar User
         BookedRecipe.delete().where(BookedRecipe.user == self.name).execute()
         Recipe.delete().where(Recipe.user == self.name).execute()
         WhiteList.delete().where(WhiteList.user == self.name).execute()
-        DeliverLog.delete().where(DeliverLog.username == self.name).execute() #推送记录
+        DeliverLog.delete().where(DeliverLog.user == self.name).execute()
+        UserBlob.delete().where(UserBlob.user == self.name).execute()
+        LastDelivered.delete().where(LastDelivered.user == self.name).execute()
 
     #获取封面二进制数据
     def get_cover_data(self):
         data = None
-        if self.covers:
-            winAbsPathExpr = re.compile(r'^/{0,1}[A-Za-z]:[\\/].*$')
-            dbId = random.choice(self.covers)
-            if dbId.startswith('db://'):
-                dbId = dbId[3:]
-                dbItem = UserBlob.get_by_id_or_none(dbId)
-                data = dbItem.data if dbItem else None
-            elif dbId.startswith('file://'):
-                path = dbId[7:]
-                if winAbsPathExpr.match(path) and path.startswith('/'):
-                    path = path[1:]
-                try:
-                    with open(path, 'rb') as f:
-                        data = f.read()
-                except:
-                    data = None
+        covers = self.covers or {}
+        order = covers.get('order', 'random')
+        idx = random.randint(0, 6) if (order == 'random') else tz_now(self.timezone).weekday()
+        coverName = f'cover{idx}'
+        cover = covers.get(coverName, f'/images/{coverName}.jpg')
+        if cover.startswith('/images/'):
+            cover = cover[1:]
+            try:
+                with open(os.path.join(appDir, 'application', cover), 'rb') as f:
+                    data = f.read()
+            except:
+                data = None
+        elif cover.startswith('/dbimage/'):
+            dbItem = UserBlob.get_by_id_or_none(cover[9:])
+            data = dbItem.data if dbItem else None
+
         return data
 
 #用户的一些二进制内容，比如封面之类的
@@ -158,20 +150,20 @@ class BookedRecipe(MyBaseModel):
 
     @property
     def password(self):
-        userInst = KeUser.get_one(KeUser.name == self.user)
+        userInst = KeUser.get_or_none(KeUser.name == self.user)
         return ke_decrypt(self.encrypted_pwd, userInst.secret_key if userInst else '')
         
     @password.setter
     def password(self, pwd):
-        userInst = KeUser.get_one(KeUser.name == self.user)
+        userInst = KeUser.get_or_none(KeUser.name == self.user)
         self.encrypted_pwd = ke_encrypt(pwd, userInst.secret_key if userInst else '')
 
 #书籍的推送历史记录
 class DeliverLog(MyBaseModel):
-    username = CharField()
+    user = CharField()
     to = CharField()
     size = IntegerField(default=0)
-    time_str = CharField() #每个用户的时区可能不同，为显示方便，创建时就生成字符串
+    time_str = CharField() #每个用户的时区可能不同，为显示方便，创建记录时就生成推送时间字符串
     datetime = DateTimeField(index=True)
     book = CharField(default='')
     status = CharField()
@@ -207,6 +199,13 @@ class SharedRssCategory(MyBaseModel):
     name = CharField()
     last_updated = DateTimeField(index=True) #for sort
 
+class LastDelivered(MyBaseModel):
+    user = CharField()
+    bookname = CharField()
+    num = IntegerField(default=0)
+    record = CharField(default='')
+    datetime = DateTimeField(default=datetime.datetime.utcnow)
+
 #当前使用:
 #name='dbTableVersion'.int_value 行保存数据库格式版本
 #name='lastSharedRssTime'.time_value 保存共享库的最新更新日期
@@ -235,7 +234,7 @@ def CreateDatabaseTable(force=False):
     if DATABASE_ENGINE not in ("datastore", "mongodb"):
         with dbInstance.connection_context():
             dbInstance.create_tables([KeUser, UserBlob, Recipe, BookedRecipe, DeliverLog, WhiteList,
-                SharedRss, SharedRssCategory, AppInfo], safe=True)
+                SharedRss, SharedRssCategory, LastDelivered, AppInfo], safe=True)
     
     #AppInfo(name='dbTableVersion', int_value=DB_VERSION).save()
     #print(f'Create database "{dbName}" finished')

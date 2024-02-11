@@ -21,14 +21,14 @@ from google.appengine.api import mail
 bpInBoundEmail = Blueprint('bpInBoundEmail', __name__)
 
 #subject of email will be truncated based limit of word count
-SUBJECT_WORDCNT_FOR_APMAIL = 30
+SUBJECT_WORDCNT = 30
 
 #if word count more than the number, the email received by appspotmail will 
 #be transfered to kindle directly, otherwise, will fetch the webpage for links in email.
-WORDCNT_THRESHOLD_FOR_APMAIL = 100
+WORDCNT_THRESHOLD_APMAIL = 100
 
 #clean css in dealing with content from string@appid.appspotmail.com or not
-DELETE_CSS_FOR_APPSPOTMAIL = True
+DELETE_CSS_APMAIL = True
 
 #解码邮件主题
 def decode_subject(subject):
@@ -86,10 +86,10 @@ def ReceiveMail(path):
     #从接收地址提取账号名和真实地址
     userName, to = extractUsernameFromEmail(message.to)
     
-    user = KeUser.get_one(KeUser.name == userName)
+    user = KeUser.get_or_none(KeUser.name == userName)
     if not user:
         userName = ADMIN_NAME
-        user = KeUser.get_one(KeUser.name == userName)
+        user = KeUser.get_or_none(KeUser.name == userName)
     
     if not user or not user.kindle_email:
         return "OK", 200
@@ -202,7 +202,7 @@ def ReceiveMail(path):
                     links[idx] = urljoin(fullPath, link)
         
         #如果字数太多，则认为直接推送正文内容
-        if not forceToLinks and (len(links) != 1 or len(text) > WORDCNT_THRESHOLD_FOR_APMAIL):
+        if not forceToLinks and (len(links) != 1 or len(text) > WORDCNT_THRESHOLD_APMAIL):
             links = []
         
     if links:
@@ -225,10 +225,7 @@ def ReceiveMail(path):
         params = {'u': userName,
                  'urls': base64.urlsafe_b64encode(zlib.compress('|'.join(links).encode('utf-8'))).decode(),
                  'type': bookType,
-                 'to': user.kindle_email,
-                 'tz': user.timezone,
-                 'subj': subject[:SUBJECT_WORDCNT_FOR_APMAIL],
-                 'lng': user.my_rss_book.language}
+                 'subj': subject[:SUBJECT_WORDCNT]}
         create_http_task('/url2book', params)
     else: #直接转发邮件正文
         from lib.makeoeb import ImageMimeFromName
@@ -253,7 +250,7 @@ def ReceiveMail(path):
             from lib.makeoeb import (GetOpts, CreateEmptyOeb, setMetaData, EPUBOutput, MOBIOutput)
             
             #仿照Amazon的转换服务器的处理，去掉CSS
-            if DELETE_CSS_FOR_APPSPOTMAIL:
+            if DELETE_CSS_APMAIL:
                 tag = soup.find('style', attrs={'type': 'text/css'})
                 if tag:
                     tag.decompose()
@@ -268,7 +265,7 @@ def ReceiveMail(path):
             opts = GetOpts()
             oeb = CreateEmptyOeb(opts, log)
             
-            setMetaData(oeb, subject[:SUBJECT_WORDCNT_FOR_APMAIL], user.my_rss_book.language, 
+            setMetaData(oeb, subject[:SUBJECT_WORDCNT], user.my_rss_book.language, 
                 local_time(tz=user.timezone), pubtype='book:book:KindleEar')
 
             id_, href = oeb.manifest.generate(id='page', href='page.html')
@@ -288,8 +285,7 @@ def ReceiveMail(path):
             oIO = io.BytesIO()
             o = EPUBOutput() if user.book_type == "epub" else MOBIOutput()
             o.convert(oeb, oIO, opts, log)
-            send_to_kindle(userName, user.kindle_email, subject[:SUBJECT_WORDCNT_FOR_APMAIL], 
-                user.book_type, oIO.getvalue(), user.timezone)
+            send_to_kindle(user, subject[:SUBJECT_WORDCNT], oIO.getvalue())
         else: #没有图片则直接推送HTML文件，阅读体验更佳
             m = soup.find('meta', attrs={"http-equiv": "Content-Type"})
             if not m:
@@ -299,8 +295,7 @@ def ReceiveMail(path):
             else:
                 m['content'] = "text/html; charset=utf-8"
             
-            send_to_kindle(userName, user.kindle_email, subject[:SUBJECT_WORDCNT_FOR_APMAIL],
-                'html', str(soup), user.timezone, False)
+            send_to_kindle(user, subject[:SUBJECT_WORDCNT], str(soup), fileWithTime=False)
     
     return "OK", 200
 
@@ -313,7 +308,7 @@ def TrigDeliver(subject, userName):
     else:
         bkIds = []
         for bk in subject.split(','):
-            trigBook = Book.get_one(Book.title == bk.strip())
+            trigBook = Book.get_or_none(Book.title == bk.strip())
             if trigBook:
                 bkIds.append(str(trigBook.id))
             else:

@@ -96,7 +96,7 @@ class WorkerThread(threading.Thread):
                 break  # and exit
             try:
                 self.resultQueue.put(
-                    (request, request.callable(*request.args, **request.kwds))
+                    (request, request.callable(request.args, **request.kwds))
                 )
             except Exception as e:
                 request.exception = True

@@ -31,8 +31,8 @@ def Share():
     if not all((action, userName, url, key)):
         return "Some parameter is missing or wrong."
     
-    user = KeUser.get_one(KeUser.name == userName)
-    if not user or not user.kindle_email or not user.share_key != key:
+    user = KeUser.get_or_none(KeUser.name == userName)
+    if not user or not user.kindle_email or not user.share_links.get('key') != key:
         return "The user does not exist."
     
     url = unquote_plus(url)
@@ -103,18 +103,16 @@ def SaveToEvernoteWiz(user, action, orgUrl):
             html = str(soup)
             
     to = wizMail if action == 'wiz' else evernoteMail
-    if (';' in to) or (',' in to):
-        to = to.replace(',', ';').replace(' ', '').split(';')
     
     if html:
-        send_html_mail(user.name, to, title, html, attachments, user.timezone)
+        send_html_mail(user, to, title, html, attachments)
         info = _("'{title}'<br/><br/>Saved to {act} [{email}] success.").format(title=title, act=action, email=hide_email(to))
         info += '<br/><p style="text-align:right;color:silver;">by KindleEar </p>'
         default_log.info(info)
         info = SHARE_INFO_TPL.format(title=title, info=info)
         return info
     else:
-        save_delivery_log(user.name, to, title, 0, status='fetch failed', tz=user.timezone)
+        save_delivery_log(user, title, 0, status='fetch failed', to=to)
         default_log.info("[Share] Fetch url failed.")
         return "[Share] Fetch url failed."
 

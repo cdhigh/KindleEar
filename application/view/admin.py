@@ -67,7 +67,7 @@ def AdminPost():
             tips = _("The username includes unsafe chars.")
         elif password1 != password2:
             tips = _("The two new passwords are dismatch.")
-        elif KeUser.get_one(KeUser.name == userName):
+        elif KeUser.get_or_none(KeUser.name == userName):
             tips = _("Already exist the username.")
         else:
             secret_key = new_secret_key()
@@ -78,7 +78,7 @@ def AdminPost():
             else:
                 au = KeUser(name=userName, passwd=pwd, kindle_email='', enable_send=False,
                     send_time=7, timezone=TIMEZONE, book_type="epub", secret_key=secret_key, 
-                    expiration_days=expiration, share_key=new_secret_key(),
+                    expiration_days=expiration, share_links={'key': new_secret_key()},
                     book_title='KindleEar', book_language='en')
                 if expiration:
                     au.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
@@ -90,7 +90,7 @@ def AdminPost():
     elif actType == 'delete': #删除账号，使用ajax请求的，返回一个字典
         name = form.get('name')
         if name and (name != ADMIN_NAME) and (session.get('userName') in (ADMIN_NAME, name)):
-            u = KeUser.get_one(KeUser.name == name)
+            u = KeUser.get_or_none(KeUser.name == name)
             if not u:
                 return {'status': _("The username '{}' does not exist.").format(name)}
             else:
@@ -106,7 +106,7 @@ def AdminPost():
 @bpAdmin.route("/mgrpwd/<name>", endpoint='AdminManagePassword')
 @login_required(ADMIN_NAME)
 def AdminManagePassword(name):
-    u = KeUser.get_one(KeUser.name == name)
+    u = KeUser.get_or_none(KeUser.name == name)
     expiration = 0
     if not u:
         tips = _("The username '{}' does not exist.").format(name)
@@ -127,7 +127,7 @@ def AdminManagePasswordPost(name):
     tips = _("Username is empty.")
 
     if name and name != ADMIN_NAME:
-        u = KeUser.get_one(KeUser.name == name)
+        u = KeUser.get_or_none(KeUser.name == name)
         if not u:
             tips = _("The username '{}' does not exist.").format(name)
         elif p1 != p2:

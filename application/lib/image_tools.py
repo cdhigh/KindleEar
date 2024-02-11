@@ -49,7 +49,7 @@ def compress_image(data, reduceTo=(600, 800), pngToJpg=False, graying=True):
         if width > newWidth or height > newHeight:
             #按比率缩小，避免失真
             ratio = min(newWidth / width, newHeight / height)
-            imgInst = imgInst.resize((int(width * ratio), int(height * ratio)), Image.ANTIALIAS)
+            imgInst = imgInst.resize((int(width * ratio), int(height * ratio)), Image.Resampling.LANCZOS)
 
     if pngToJpg and fmt == 'PNG':
         data = io.BytesIO()

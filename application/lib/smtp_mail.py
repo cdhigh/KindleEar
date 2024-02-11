@@ -8,7 +8,7 @@ from email.mime.text import MIMEText
 from email.encoders import encode_base64
 from email.mime.multipart import MIMEMultipart
 
-def send_smtp_mail(sender, to, subject, text, smtp_host, username, password, smtp_port=None, 
+def smtp_send_mail(sender, to, subject, text, smtp_host, username, password, smtp_port=None, 
     text_html=None, attachments=None, encoding='utf-8'):
     
     if ':' in smtp_host:

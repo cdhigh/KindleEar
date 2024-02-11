@@ -215,7 +215,6 @@ function PopulateMyCustomRss() {
     row_str.push(title);
     if (isfulltext) {
       row_str.push('<sup> Emb</sup>');
-      //row_str.push('<img alt="' + i18n.fulltext + '" src="static/fulltext.gif" border="0" />');
     }
     row_str.push('</div><div class="summaryRow">');
     if (url.length > 100) {
@@ -306,8 +305,9 @@ function SubscribeRecipe(id, separated) {
         title: recipe.title, description: recipe.description, needs_subscription: recipe.needs_subscription, account: ''};
         my_booked_recipes.unshift(new_item);
         PopulateMySubscribed();
+        $('.additional-btns').stop(true).hide();
         //订阅后跳转到已订阅区段
-        $("html, body").animate({scrollTop: $("#mysubscribed").offset().top}, {duration:500, easing:"swing"});
+        //$("html, body").animate({scrollTop: $("#mysubscribed").offset().top}, {duration:500, easing:"swing"});
       }
     } else if (data.status == i18n.loginRequired) {
       window.location.href = '/login';
@@ -364,13 +364,13 @@ function ScheduleRecipe(id, title) {
   ostr.push('<div class="pure-control-group">');
   ostr.push('<p>' + i18n.delivDays + '</p>');
   ostr.push('<div class="schedule_daytimes">')
-  ostr.push('<label><input type="checkbox" name="Monday" ' + (days.indexOf('Monday') > -1 ? 'checked' : '')  + '/>' + i18n.Mon + '</label>');
-  ostr.push('<label><input type="checkbox" name="Tuesday" ' + (days.indexOf('Tuesday') > -1 ? 'checked' : '')  + '/>' + i18n.Tue + '</label>');
-  ostr.push('<label><input type="checkbox" name="Wednesday" ' + (days.indexOf('Wednesday') > -1 ? 'checked' : '')  + '/>' + i18n.Wed + '</label>');
-  ostr.push('<label><input type="checkbox" name="Thursday" ' + (days.indexOf('Thursday') > -1 ? 'checked' : '')  + '/>' + i18n.Thu + '</label>');
-  ostr.push('<label><input type="checkbox" name="Friday" ' + (days.indexOf('Friday') > -1 ? 'checked' : '')  + '/>' + i18n.Fri + '</label>');
-  ostr.push('<label><input type="checkbox" name="Saturday" ' + (days.indexOf('Saturday') > -1 ? 'checked' : '')  + '/>' + i18n.Sat + '</label>');
-  ostr.push('<label><input type="checkbox" name="Sunday" ' + (days.indexOf('Sunday') > -1 ? 'checked' : '')  + '/>' + i18n.Sun + '</label>');
+  ostr.push('<label><input type="checkbox" name="Monday" ' + (days.indexOf(0) > -1 ? 'checked' : '')  + '/>' + i18n.Mon + '</label>');
+  ostr.push('<label><input type="checkbox" name="Tuesday" ' + (days.indexOf(1) > -1 ? 'checked' : '')  + '/>' + i18n.Tue + '</label>');
+  ostr.push('<label><input type="checkbox" name="Wednesday" ' + (days.indexOf(2) > -1 ? 'checked' : '')  + '/>' + i18n.Wed + '</label>');
+  ostr.push('<label><input type="checkbox" name="Thursday" ' + (days.indexOf(3) > -1 ? 'checked' : '')  + '/>' + i18n.Thu + '</label>');
+  ostr.push('<label><input type="checkbox" name="Friday" ' + (days.indexOf(4) > -1 ? 'checked' : '')  + '/>' + i18n.Fri + '</label>');
+  ostr.push('<label><input type="checkbox" name="Saturday" ' + (days.indexOf(5) > -1 ? 'checked' : '')  + '/>' + i18n.Sat + '</label>');
+  ostr.push('<label><input type="checkbox" name="Sunday" ' + (days.indexOf(6) > -1 ? 'checked' : '')  + '/>' + i18n.Sun + '</label>');
   ostr.push('</div></div><div class="pure-control-group">');
   ostr.push('<p>' + i18n.delivTimes + '</p>');
   ostr.push('<div class="schedule_daytimes">')
@@ -798,7 +798,8 @@ function verifyInstapaper() {
   });
 }
 ///[end] advarchive.html
-///[start] advcoverimage.html & advuploadcss
+
+///[start] advuploadcss.html
 var AjaxFileUpload = {
   mimeType: '',
   form: '',
@@ -964,7 +965,7 @@ var AjaxFileUpload = {
     });
   }
 };
-///[end] advcoverimage.html && advuploadcss.html
+///[end] advuploadcss.html
 
 ///[start] admin.html
 //添加一个账号
@@ -1042,3 +1043,99 @@ function DeleteAccount(name) {
   });
 }
 ///[end] admin.html
+
+///[start] advcoverimage.html
+//根据封面的不同属性设置是否可以添加或删除
+function InitCoversWidgets() {
+  for (var idx = 0; idx < 7; idx++) {
+    (function(index) {
+      if ($('#img' + index).attr('src').startsWith('/images/')) {
+        $('#delImg' + index).hide();
+        $('#addUpload' + index).show();
+      } else {
+        $('#delImg' + index).show();
+        $('#addUpload' + index).hide();
+        $('#delImg' + index).off().on('click', function() {
+          $('#imgFile' + index).val('');
+          SetCoverToDefaultImg(index);
+        });
+      }
+    })(idx);
+  }
+}
+
+//在封面图像上点击加号，弹出选择文件对话框，选择文件后预览并更新全局变量cover_images
+//cover_images 为advcoverimage.html定义的全局变量
+function ChooseCoverImage(idx) {
+  $('#imgFile' + idx).click();
+  $('#imgFile' + idx).off().on('change', function() {
+    var _this = this;
+    file = this.files[0];
+    if (file) {
+      var reader = new FileReader();
+      reader.onloadend = function () {
+        $('#img' + idx).attr("src", reader.result);
+        $('#delImg' + idx).show();
+        $('#addUpload' + idx).hide();
+        cover_images['cover' + idx] = file;
+        $('#delImg' + idx).off().on('click', function() {
+          $('#imgFile' + idx).val('');
+          SetCoverToDefaultImg(idx);
+        });
+      };
+      reader.readAsDataURL(file);
+    } else {
+      SetCoverToDefaultImg(idx);
+    }
+  });
+}
+
+//删除一个图像文件后，恢复默认图像
+//cover_images 为advcoverimage.html定义的全局变量
+function SetCoverToDefaultImg(idx) {
+  var defaultName = '/images/cover' + idx + '.jpg';
+  $('#img' + idx).attr("src", defaultName);
+  $('#delImg' + idx).hide();
+  $('#addUpload' + idx).show();
+  cover_images['cover' + idx] = defaultName;
+}
+
+//开始上传图像到服务器
+//cover_images 为advcoverimage.html定义的全局变量
+function startUploadCoversToServer(url) {
+  var totalSize = 0;
+  var fileDatas = new FormData();
+  fileDatas.append('order', $('#coverOrder').val());
+  for (var idx = 0; idx < 7; idx++) {
+    var coverName = 'cover' + idx;
+    var item = cover_images[coverName];
+    fileDatas.append(coverName, item);
+    if (typeof item == 'object') {
+      totalSize += item.size;
+    }
+  }
+  if (totalSize > 16 * 1024 * 1024) { //限制总大小为16M
+    alert(i18n.imgSizeToLarge);
+    return;
+  }
+  
+  $.ajax({
+      type: "post",
+      url: url,
+      data: fileDatas,
+      cache: false,
+      contentType: false,
+      processData: false,
+      success: function(resp, status, xhr) {
+        if (resp.status == "ok") {
+          ShowSimpleModalDialog('<p>' + i18n.uploadCoversOk + '</p>');
+        } else {
+          alert(resp.status);
+        }
+      },
+      error: function(xhr, status, error) {
+        alert(status);
+      }
+  });
+}
+///[end] advcoverimage.html

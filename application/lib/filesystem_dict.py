@@ -194,6 +194,11 @@ class FsDictStub(object):
     def clear(self):
         if self.fs_dict:
             self.fs_dict.clear()
+        else:
+            try:
+                shutil.rmtree(self.path, ignore_errors=True)
+            except:
+                pass
         self.fs_dict = None
 
     def namelist(self):

@@ -154,20 +154,16 @@ def UpdateBookedCustomRss(user: KeUser):
     #删除孤立的BookedRecipe
     for dbInst in list(BookedRecipe.get_all()):
         recipeType, recipeId = Recipe.type_and_id(dbInst.recipe_id)
-        if not Recipe.get_by_id_or_none(recipeId):
+        if recipeType != 'builtin' and not Recipe.get_by_id_or_none(recipeId):
             dbInst.delete_instance()
             
     if user.enable_custom_rss: #添加订阅
         for rss in user.all_custom_rss()[::-1]:
-            recipe_id = rss.recipe_id
-            if not BookedRecipe.get_one(BookedRecipe.recipe_id == recipe_id):
-                BookedRecipe(recipe_id=recipe_id, separated=False, user=userName, title=rss.title, description=rss.description,
-                    time=datetime.datetime.utcnow()).save()
+            BookedRecipe.get_or_create(recipe_id=rss.recipe_id, defaults={'separated': False, 'user': userName, 
+                'title': rss.title, 'description': rss.description, 'time': datetime.datetime.utcnow()})
     else: #删除订阅
-        for rss in user.all_custom_rss():
-            dbInst = BookedRecipe.get_one(BookedRecipe.recipe_id == rss.recipe_id)
-            if dbInst:
-                dbInst.delete_instance()
+        ids = [rss.recipe_id for rss in user.all_custom_rss()]
+        BookedRecipe.delete().where(BookedRecipe.recipe_id.in_(ids)).execute()
 
 #通知共享服务器，有一个新的订阅
 def SendNewSubscription(title, url, recipeId):
@@ -227,16 +223,16 @@ def RecipeAjaxPost(actType):
         if recipeType == 'builtin':
             return {'status': _('You can only delete the uploaded recipe')}
 
-        dbInst = BookedRecipe.get_one(BookedRecipe.recipe_id == recipeId)
+        dbInst = BookedRecipe.get_or_none(BookedRecipe.recipe_id == recipeId)
         if dbInst:
             dbInst.delete_instance()
         recipe.delete_instance()
         return {'status': 'ok', 'id': recipeId}
     elif actType == 'schedule': #设置某个recipe的自定义推送时间
-        dbInst = BookedRecipe.get_one(BookedRecipe.recipe_id == recipeId)
+        dbInst = BookedRecipe.get_or_none(BookedRecipe.recipe_id == recipeId)
         if dbInst:
             allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-            dbInst.send_days = [day for day in allDays if str_to_bool(form.get(day, ''))]
+            dbInst.send_days = [weekday for weekday, day in enumerate(allDays) if str_to_bool(form.get(day, ''))]
             dbInst.send_times = [tm for tm in range(24) if str_to_bool(form.get(str(tm), ''))]
             dbInst.save()
             return {'status': 'ok', 'id': recipeId, 'send_days': dbInst.send_days, 'send_times': dbInst.send_times}
@@ -281,7 +277,7 @@ def SaveRecipeIfCorrect(user: KeUser, src: str):
     recipe = compile_recipe(src)
     
     #判断是否重复
-    oldRecipe = Recipe.get_one(Recipe.title == recipe.title)
+    oldRecipe = Recipe.get_or_none(Recipe.title == recipe.title)
     if oldRecipe:
         raise Exception(_('The recipe is already in the library'))
 
@@ -305,7 +301,7 @@ def RecipeLoginInfoPostAjax():
     id_ = request.form.get('id', '')
     account = request.form.get('account')
     password = request.form.get('password')
-    recipe = BookedRecipe.get_one(BookedRecipe.recipe_id == id_)
+    recipe = BookedRecipe.get_or_none(BookedRecipe.recipe_id == id_)
     if not recipe:
         return {'status': _('The recipe does not exist.')}
 

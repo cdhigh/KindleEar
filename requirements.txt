@@ -4,19 +4,18 @@ chardet==5.2.0
 pillow==10.2.0
 lxml==5.0.0
 sendgrid==6.11.0
-qrcode==7.4.2
 python-dateutil==2.8.2
 css_parser==1.0.10
 beautifulsoup4==4.12.2
 html2text==2020.1.16
 html5lib==1.1
 #html5-parser==0.4.12
-readability-lxml==0.8.1
 gunicorn
 Flask==3.0.0
 flask-babel==4.0.0
 six==1.16.0
 feedparser==6.0.11
+#qrcode==7.4.2
 
 #database
 google-cloud-datastore==2.19.0

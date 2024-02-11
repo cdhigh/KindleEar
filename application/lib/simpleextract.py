@@ -9,15 +9,17 @@
 但优点也很明显：什么网页都能返回一些文本内容。）
 """
 import re
+from bs4 import BeautifulSoup
 
 #使用简单算法提取正文文本，content为unicode文本
-#返回 content, title
-def simple_extract(content):
+#html_partial: True - 仅返回提取的文本内容而不是BeautifulSoup实例
+#返回 BeautifulSoup 实例
+def simple_extract(content, html_partial=False):
     if not content:
-        return ''
+        return '' if html_partial else BeautifulSoup('')
     
     #如果是经过压缩后的网页，则每个html标签都追加一个回车，方便后续按行统计
-    if content.count('\n') <= 10:
+    if content.count('\n') <= 20:
         content = content.replace('>', '>\n')
     
     content = remove_empty_line(remove_js_css(content))
@@ -26,14 +28,38 @@ def simple_extract(content):
     title = result.group(1) if result else ''
     left,right = rc_extract(content)
     content = '\n'.join(content.split('\n')[left:right])
-    return content, title
+    if html_partial:
+        return content
+
+    if not re.search(r'<html', content[:200], re.IGNORECASE):
+        content = f'<html>{content}</html>'
+
+    soup = BeautifulSoup(content, 'lxml')
+    body_tag = soup.find('body')
+    if not body_tag:
+        body_tag = soup.new_tag('body')
+        body_tag.extend(soup.find_all(recursive=False))
+        soup.html.append(body_tag)
+
+    head_tag = soup.find('head')
+    if not head_tag:
+        head_tag = soup.new_tag('head')
+        soup.html.insert(0, head_tag)
+
+    title_tag = head_tag.find('title')
+    if not title_tag:
+        title_tag = soup.new_tag('title')
+        title_tag.string = title
+        head_tag.append(0, title_tag)
+
+    return soup
     
 """
 采用“基于文本密度的方法”来简单提取正文内容
 http://ipython.iteye.com/blog/1976742
 约定： 本文基于网页的不同行来进行统计，因此，假设网页内容是没有经过压缩的，就是网页有正常的换行的。
        有些新闻网页，可能新闻的文本内容比较短，但其中嵌入一个视频文件，因此，我会给予视频较高的权重；这同样适用于图片，这里有一个不足，应该是要根据图片显示的大小来决定权重的，但本文的方法未能实现这一点。
-       由于广告，导航这些非正文内容通常以超链接的方式出现，因此文本将给予超链接的文本权重为零。
+       由于广告，导航这些非正文内容通常以超链接的方式出现，因此将给予超链接的文本权重为零。
        这里假设正文的内容是连续的，中间不包含非正文的内容，因此实际上，提取正文内容，就是找出正文内容的开始和结束的位置。
 步骤：
        首先清除网页中CSS,Javascript,注释，Meta,Ins这些标签里面的内容，清除空白行。

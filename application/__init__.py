@@ -36,8 +36,8 @@ def init_app(name, debug=False):
     static_folder = os.path.join(thisDir, 'static')
     i18n_folder = os.path.join(thisDir, 'translations')
     app = Flask(name, template_folder=template_folder, static_folder=static_folder)
-    app.config['SECRET_KEY'] = '12345678' if debug else new_secret_key()
-    app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000
+    app.config['SECRET_KEY'] = '12345678' # if debug else new_secret_key()
+    app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024 #32MB
     app.config["BABEL_TRANSLATION_DIRECTORIES"] = i18n_folder
     babel = Babel(app)
     babel.init_app(app, locale_selector=setting.get_locale)

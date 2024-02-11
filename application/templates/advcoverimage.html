@@ -3,57 +3,52 @@
 <title>{{ _("Cover image") }} - KindleEar</title>
 {% endblock -%}
 
-{% block css -%}
-<style type="text/css">
-#preview {
-  text-align: center;
-  background-color: #eee;
-}
-
-#preview:hover {
-  background-color: #ddd;
-}
-
-#preview img{
-  width:90%;
-  max-width:500px;
-  height:auto;
-  margin: 1.5em auto;
-  vertical-align: bottom;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-</style>
-{{super()}}
-{% endblock -%}
-
 {% block advcontent -%}
-<form class="pure-form" id="uploadForm" action="{{formation}}" method="POST" enctype="multipart/form-data">
+<form class="pure-form" id="uploadForm" action="{{uploadUrl}}" method="POST" enctype="multipart/form-data" onsubmit="return false;">
   <fieldset>
     <legend><h3>{{_("Upload cover image")}}</h3></legend>
-    <p><small>{{_("Upload a cover image from local.")}}</small></p>
+    <p><small>{{_("Upload cover images from local with an aspect ratio of approximately 0.65.")}}</small></p>
     <div class="box-list">
-      <input type="file" name="cover_file" id="cover_file" class="pure-input-1 box" accept=".jpg, .png, .jpeg, .gif" />
-      <div id="preview" class="box upload_preview">
-        {% if user.covers -%}
-          <img id="imgPreview" src="/dbimage/cover" class="out_shadow" />
-        {% else -%}
-          <img id="imgPreview" src="/images/cv_default.jpg" class="out_shadow" />
-        {% endif -%}
-          <span id="uploadProgress" class="upload_progress"></span>
+      <div id="preview" class="imgupBox">
+        <div class="imgFileUploade">
+          <div class="pure-control-group">
+            <label style="margin: 0px 20px">{{_("Apply Cover Image Order")}}</label>
+            <select class="pure-u-1 pure-u-sm-1-2" name="order" id="coverOrder">
+              <option value="random" {% if covers.get('order', 'random') == 'random' %}selected="selected"{% endif %}>{{_("Random")}}</option>
+              <option value="sequential" {% if covers.get('order') == 'sequential' %}selected="selected"{% endif %}>{{_("Sequential")}}</option>
+            </select>
+          </div>
+          <hr style="width: 90%" />
+          <div class="imgAll">
+            <ul>
+              {% for idx in range(7) -%}
+              <li>
+                <div class="image-wrapper">
+                  <img id="img{{idx}}" src="{{covers.get('cover' + idx|string)|safe}}" />
+                  <i id="delImg{{idx}}" class="delImg" style="display:none" >X</i>
+                </div>
+                <div id="addUpload{{idx}}" class="top-image" onclick="ChooseCoverImage({{idx}})">
+                  <img src="/static/add-upload.png" />
+                </div>
+                <input type="file" id="imgFile{{idx}}" name="imgFile{{idx}}" style="display:none" accept="image/gif,image/jpeg,image/jpg,image/png">
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
     <div style="text-align:center;">
-      <input type="button" value="{{ _('Upload') }}" id="fileSubmit" class="pure-button pure-button-primary pure-input-rounded" />
-      <a href="javascript:;" deletehref="{{ deletecoverhref }}" id="deletecover" class="pure-button pure-input-rounded">{{_("Delete")}}</a>
+      <input type="button" value="{{ _('Upload/Update') }}" id="fileSubmit" class="pure-button pure-button-primary pure-input-rounded" onclick="startUploadCoversToServer('{{uploadUrl}}')" />
     </div>
   </fieldset>
 </form>
 {% endblock -%}
 {% block js -%}
 <script type="text/javascript">
-$(document).ready(function(){
-  //mimeType, formId, fileInputId, upBtnId, delBtnId, previewTagId, progressId
-  AjaxFileUpload.init('image', '#uploadForm', '#cover_file', '#fileSubmit', '#deletecover', '#imgPreview', '#uploadProgress');
-});
+  var cover_images = {{jsonCovers|safe}};
+  $(document).ready(function() {
+    InitCoversWidgets();
+  });
 </script>
 {% endblock -%}

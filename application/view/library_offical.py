@@ -36,7 +36,7 @@ def SharedLibraryAppspot():
 
     dataType = args.get('data_type')
     if dataType == LIBRARY_GETLASTTIME: #获取分享库的最近更新
-        dbItem = AppInfo.get_one(AppInfo.name == 'lastSharedRssTime')
+        dbItem = AppInfo.get_or_none(AppInfo.name == 'lastSharedRssTime')
         #转换为时间戳，秒数
         lastSharedRssTime = int(dbItem.time_value.timestamp()) if dbItem else 0
         return {'status': 'ok', 'data': lastSharedRssTime}
@@ -86,9 +86,9 @@ def SharedLibraryAppspotAjax():
     #判断是否存在，如果存在，则更新分类或必要的信息，同时返回成功
     now = datetime.datetime.utcnow()
     if url: #自定义RSS，以url为准
-        dbItem = SharedRss.get_one(SharedRss.url == url)
+        dbItem = SharedRss.get_or_none(SharedRss.url == url)
     else: #上传的recipe，以title为准
-        dbItem = SharedRss.get_one(SharedRss.title == title)
+        dbItem = SharedRss.get_or_none(SharedRss.title == title)
     
     #其实这里应该判断是否为同一个作者，但是想想其他人发现错误也可以修改
     prevCategory = ''
@@ -113,7 +113,7 @@ def SharedLibraryAppspotAjax():
 
     #更新分类信息，用于缓存
     if category:
-        cItem = SharedRssCategory.get_one(SharedRssCategory.name == category)
+        cItem = SharedRssCategory.get_or_none(SharedRssCategory.name == category)
         if cItem:
             cItem.last_updated = now
         else:
@@ -121,9 +121,9 @@ def SharedLibraryAppspotAjax():
         cItem.save()
 
     if prevCategory:
-        catItem = SharedRss.get_one(SharedRss.category == prevCategory)
+        catItem = SharedRss.get_or_none(SharedRss.category == prevCategory)
         if not catItem: #没有其他订阅源使用此分类了
-            sItem = SharedRssCategory.get_one(SharedRssCategory.name == prevCategory)
+            sItem = SharedRssCategory.get_or_none(SharedRssCategory.name == prevCategory)
             if sItem:
                 sItem.delete_instance()
 
@@ -131,7 +131,7 @@ def SharedLibraryAppspotAjax():
 
 #更新共享库的最新时间信息(仅用于kindleear.appspot.com"官方"共享服务器)
 def UpdateLastSharedRssTime():
-    dbItem = AppInfo.get_one(AppInfo.name == 'lastSharedRssTime')
+    dbItem = AppInfo.get_or_none(AppInfo.name == 'lastSharedRssTime')
     if dbItem:
         dbItem.time_value = datetime.datetime.utcnow()
         dbItem.save()
@@ -168,7 +168,7 @@ def SharedLibraryMgrAppspotPost(mgrType):
 
         #判断是否存在
         if url:
-            dbItem = SharedRss.get_one(SharedRss.url == url)
+            dbItem = SharedRss.get_or_none(SharedRss.url == url)
         elif recipeId.startswith('db:'):
             dbItem = SharedRss.get_by_id_or_none(recipeId[3:])
 
@@ -191,8 +191,8 @@ def SharedLibraryMgrAppspotPost(mgrType):
             UpdateLastSharedRssTime()
 
             #如果删除的源是它所在的分类下面最后一个，则其分类信息也一并删除
-            if SharedRss.get_one(SharedRss.category == category) is None:
-                cItem = SharedRssCategory.get_one(SharedRssCategory.name == category)
+            if SharedRss.get_or_none(SharedRss.category == category) is None:
+                cItem = SharedRssCategory.get_or_none(SharedRssCategory.name == category)
                 if cItem:
                     cItem.delete_instance()
         else:
@@ -214,7 +214,7 @@ def SharedLibraryMgrAppspotPost(mgrType):
             respDict['url'] = url
 
         #更新数据库实体
-        dbItem = SharedRss.get_one(SharedRss.url == url)
+        dbItem = SharedRss.get_or_none(SharedRss.url == url)
         if dbItem:
             dbItem.subscribed += 1
             dbItem.last_subscribed_time = now

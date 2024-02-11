@@ -23,17 +23,17 @@ def Url2BookRoute():
     userName = args.get('u')
     urls = args.get('urls')
     subject = args.get('subj')
-    to = args.get('to')
-    language = args.get('lng')
     bookType = args.get("type", "epub")
-    tz = int(args.get("tz", TIMEZONE))
-    if not all((userName, urls, subject, to, language, bookType, tz)):
+    if not all((userName, urls, subject, bookType)):
         return "Some parameter missing!"
-    
-    if (';' in to) or (',' in to):
-        to = to.replace(',', ';').replace(' ', '').split(';')
         
     urls = zlib.decompress(base64.urlsafe_b64decode(urls)).decode('utf-8')
+    user = KeUser.get_or_none(KeUser.name == userName)
+    if not user or not user.kindle_email:
+        return "The user does not exist."
+    
+    to = user.kindle_email
+    tz = user.timezone
     
     if bookType == 'Download': #直接下载电子书并推送
         from lib.filedownload import Download
@@ -46,9 +46,9 @@ def Url2BookRoute():
                 fileName = result.fileName or "NoName"
                 
             if result.content:
-                send_to_kindle(userName, to, fileName, '', result.content, tz)
+                send_to_kindle(user, fileName, result.content)
             else:
-                save_delivery_log(userName, to, fileName, 0, status=result.status, tz=tz)
+                save_delivery_log(user, fileName, 0, status=result.status)
             log.info("{} Sent!".format(fileName))
         return "{} Sent!".format(fileName)
     elif bookType == 'Debug': #调试目的，将链接直接下载，发送到管理员邮箱
@@ -63,23 +63,19 @@ def Url2BookRoute():
         log.info('[DEBUG] debug file sent!')
         return 'Debug file sent!'
         
-    user = KeUser.get_one(KeUser.name == userName)
-    if not user or not user.kindle_email:
-        return "The user does not exist."
-    
-    book = url_to_book(subject, urls.split('|'), user, language)
+    book = url_to_book(subject, urls.split('|'), user)
     if book:
-        send_to_kindle(userName, to, subject, user.book_type, book, tz)
+        send_to_kindle(user, subject, book)
         rs = f"Sent {subject}.{user.book_type}"
     else:
-        save_delivery_log(userName, to, title, 0, status='fetch failed', tz=tz)
+        save_delivery_log(user, title, 0, status='fetch failed')
         rs = "[Url2Book]Fetch url failed."
     return rs
 
 #仅通过一个url列表构建一本电子书，返回电子书二进制内容，格式为user.book_type
-def url_to_book(title, urls, user, language=None):
+def url_to_book(title, urls, user):
     feeds = [(title, url) for url in urls]
-    src = GenerateRecipeSource(title, feeds, user, language)
+    src = GenerateRecipeSource(title, feeds, user)
     try:
         ro = compile_recipe(src)
     except Exception as e:

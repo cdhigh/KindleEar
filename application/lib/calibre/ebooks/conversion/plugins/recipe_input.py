@@ -11,13 +11,12 @@ from calibre.customize.conversion import InputFormatPlugin, OptionRecommendation
 from calibre.constants import numeric_version
 from calibre import walk, relpath, unicode_path, strftime, force_unicode
 from calibre.web.feeds.recipes import compile_recipe
-from calibre.web.feeds.news import BasicNewsRecipe
+from calibre.web.feeds.news import BasicNewsRecipe, DEFAULT_MASTHEAD_IMAGE
 from calibre.utils.date import now as nowf
 from calibre.utils.localization import canonicalize_lang
 from calibre.ebooks.metadata import MetaInformation
 from calibre.ebooks.metadata.opf2 import OPFCreator
 from calibre.ebooks.metadata.toc import TOC
-from default_cv_mh import get_default_cover_data, get_default_masthead_data
 
 class RecipeDisabled(Exception):
     pass
@@ -31,7 +30,7 @@ a.feed {{font-weight: bold;}}
 .calibre_navbar {{font-family:monospace;}}
 </style></head><body>
 <div data-calibre-rescale="100"><p style="text-align:center"><img src="{masthead}" alt="masthead"/></p>
-<p style="text-align:right"> [{date}]</p>
+<p style="text-align:right">{date}</p>
 <ul class="calibre_feed_list">
 {toc}
 </ul></div></body></html>"""
@@ -72,18 +71,17 @@ class RecipeInput(InputFormatPlugin):
             help=_('Do not download latest version of builtin recipes from the calibre server')),
         OptionRecommendation(name='lrf', recommended_value=False,
             help='Optimize fetching for subsequent conversion to LRF.'),
-        OptionRecommendation(name='remove_hyperlinks', recommended_value=None,
-            help='remove hyperlinks of image or text.'),
+        OptionRecommendation(name='user', recommended_value=None,
+            help='Keuser instance.'),
         }
 
     #执行转换完成后返回生成的 opf 文件路径，只是路径，不包含文件名
     #recipes: 可以为文件名, StringIO, 或一个列表
     #output_dir: 输出目录
     #fs: plumber生成的FsDictStub实例
-    #user: 数据库 KeUser 实例
     #返回 opf文件的全路径名或传入的fs实例
-    def convert(self, recipes, opts, file_ext, log, output_dir, fs, user):
-        self.user = user
+    def convert(self, recipes, opts, file_ext, log, output_dir, fs):
+        self.user = opts.user
         opts.output_profile.flow_size = 0
         orig_no_inline_navbars = opts.no_inline_navbars
         if not isinstance(recipes, list):
@@ -91,6 +89,7 @@ class RecipeInput(InputFormatPlugin):
 
         #生成 BasicNewsRecipe 对象并执行下载任务
         feed_index_start = 0
+        recipeNum = len(recipes)
         self.recipe_objects = []
         self.feeds = []
         self.index_htmls = []
@@ -99,6 +98,9 @@ class RecipeInput(InputFormatPlugin):
         for recipe in recipes:
             try:
                 ro = recipe(opts, log, output_dir, fs, feed_index_start=feed_index_start)
+                if recipeNum > 1: #只有单独推送才使用recipe的封面或报头
+                    ro.cover_url = None
+                    ro.masthead_url = None
                 ro.download()
             except Exception as e:
                 #raise ValueError('Failed to execute recipe "{}": {}'.format(ro.title, e))
@@ -112,14 +114,16 @@ class RecipeInput(InputFormatPlugin):
             self.index_htmls.append((ro.title, ro.get_root_index_html_name()))
             self.recipe_objects.append(ro)
 
+            #可能会有些副作用，前面的conversion_options会影响后面的recipe
+            for key, val in ro.conversion_options.items():
+                setattr(opts, key, val)
+
         if not self.feeds: #让上层处理
             raise Exception('All feeds are empty, aborting.')
 
         self.build_top_index(self.recipe_objects[0], output_dir, fs)
-        self.create_opf(output_dir, fs, user)
+        self.create_opf(output_dir, fs, self.user)
 
-        #for key, val in ro.conversion_options.items():
-        #    setattr(opts, key, val)
         opts.no_inline_navbars = orig_no_inline_navbars
         
         fs.find_opf_path()
@@ -128,8 +132,12 @@ class RecipeInput(InputFormatPlugin):
     #创建顶层的toc.html
     def build_top_index(self, recipe1, output_dir, fs):
         if len(self.index_htmls) > 1:
-            recipe1 = self.recipe_objects[0]
             toc = []
+            if recipe1.masthead_path:
+                mPath = recipe1.masthead_path
+            else:
+                mPath = os.path.join(output_dir, DEFAULT_MASTHEAD_IMAGE)
+                
             for idx, (title, indexName) in enumerate(self.index_htmls):
                 #构建相对路径，os.path.relpath在这里兼容性不好
                 indexName = indexName.lstrip(output_dir).lstrip('/\\').replace(os.sep, '/')
@@ -137,7 +145,7 @@ class RecipeInput(InputFormatPlugin):
                 toc.append(f'<li id="recipe_{idx}"><a href="{fileName}" data-calibre-rescale="120" class="feed">{title}</a></li>')
 
             html = TOP_INDEX_TMPL.format(lang=recipe1.lang_for_html, title=self.user.book_title, date=strftime(recipe1.timefmt),
-                masthead=os.path.basename(recipe1.masthead_path), toc='\n'.join(toc)).encode('utf-8')
+                masthead=os.path.basename(mPath), toc='\n'.join(toc)).encode('utf-8')
             index = os.path.join(output_dir, 'toc.html')
             fs.write(index, html, 'wb')
             self.top_index_file = 'toc.html'
@@ -160,12 +168,13 @@ class RecipeInput(InputFormatPlugin):
             ref.title = 'Masthead Image'
             opf.guide.append(ref)
 
-        #manifest只是资源列表，所有的文件都出现就行，没有顺序之分
-        manifest = [os.path.join(dir_, 'feed_%d'% (i)) for i in range(len(self.feeds))]
-        for title, indexFile in self.index_htmls:
-            manifest.append(os.path.join(dir_, indexFile))
+        #manifest 资源列表
+        manifest = []
         if not onlyRecipe:
             manifest.append(os.path.join(dir_, self.top_index_file))
+        for title, indexFile in self.index_htmls:
+            manifest.append(os.path.join(dir_, indexFile))
+        manifest.extend([os.path.join(dir_, 'feed_%d'% (i)) for i in range(len(self.feeds))])
         
         cPath, mPath = self.get_cover_masthead(dir_, recipe1, user, fs)
         opf.cover = cPath
@@ -286,7 +295,7 @@ class RecipeInput(InputFormatPlugin):
     #recipe1: 第一个BasicNewsRecipe实例
     #onlyRecipe: 如果一本书仅包含一个BasicNewRecipe，则为True
     def build_meta(self, recipe1, onlyRecipe):
-        title = recipe1.short_title()
+        title = recipe1.short_title() if onlyRecipe else 'KindleEar'
         pdate = recipe1.publication_date()
         if recipe1.output_profile.periodical_date_in_title:
             title += strftime(recipe1.timefmt, pdate)
@@ -303,9 +312,9 @@ class RecipeInput(InputFormatPlugin):
             mi.author_sort = 'KindleEar'
             mi.authors = ['KindleEar']
         if recipe1.publication_type == 'magazine':
-            mi.publication_type = f'periodical:magazine:{recipe1.short_title()}'
+            mi.publication_type = f'periodical:magazine:{title}'
         elif recipe1.publication_type:
-            mi.publication_type = f'book:{recipe1.publication_type}:{recipe1.short_title()}'
+            mi.publication_type = f'book:{recipe1.publication_type}:{title}'
         mi.timestamp = nowf()
         article_titles = []
         aseen = set()
@@ -331,16 +340,21 @@ class RecipeInput(InputFormatPlugin):
         mi.identifier = str(uuid.uuid4())
         return mi
 
-    #获取封面路径，如果没有，生成一个
+    #获取封面和报头路径，如果没有，使用默认图像
     def get_cover_masthead(self, dir_, recipe1, user, fs):
         cPath = getattr(recipe1, 'cover_path', None)
-        if cPath is None:
-            cover_data = user.get_cover_data() or get_default_cover_data()
-            cPath = os.path.join(dir_, 'cover.jpg')
-            self.cover_path = cPath
-            fs.write(cPath, cover_data, 'wb')
+        if not cPath:
+            cover_data = user.get_cover_data()
+            if cover_data:
+                cPath = os.path.join(dir_, 'cover.jpg')
+                self.cover_path = cPath
+                fs.write(cPath, cover_data, 'wb')
 
         mPath = getattr(recipe1, 'masthead_path', None)
+        if not mPath:
+            mh_data = BasicNewsRecipe.default_masthead_image()
+            mPath = os.path.join(dir_, DEFAULT_MASTHEAD_IMAGE)
+            fs.write(mPath, mh_data, 'wb')
         return cPath, mPath
 
     def postprocess_book(self, oeb, opts, log):

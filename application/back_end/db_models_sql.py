@@ -69,11 +69,7 @@ class MyBaseModel(Model):
             return cls.select().where(*query).execute()
         else:
             return cls.select().execute()
-
-    @classmethod
-    def get_one(cls, *query):
-        return cls.get_or_none(*query)
-
+            
     #如果取不到，返回None
     @classmethod
     def get_by_id_or_none(cls, id_):

@@ -45,6 +45,10 @@ def RecipesFileRoute(recipes_file):
 def FaviconIcon():
     return send_from_directory('static', 'favicon.ico')
 
+@bpHome.route('/robots.txt')
+def RobotsTxt():
+    return send_from_directory('static', 'robots.txt')
+
 def register_routes(app):
     with app.app_context():
         app.register_blueprint(bpHome)

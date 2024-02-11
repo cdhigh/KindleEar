@@ -35,8 +35,11 @@ gcloud app deploy queue.yaml
 * 安装并启动redis服务，(Windows只能安装redis3 <https://github.com/MicrosoftArchive/redis/releases>)
 * 安装celery，如果是Windows，还需要安装 eventlet
    > `pip install celery, redis, eventlet`
-* 切换到KindleEar主目录，启动celery服务，main是入口文件的名字: main.py，只有Windows需要参数 '-P eventlet'
+* 切换到KindleEar主目录，启动celery服务，main是入口文件的名字: main.py，只有Windows需要参数 '-P eventlet'，需要cmd最大化可以先输入wmic再quit即可
    > `celery -A main.celery_app worker --loglevel=info --concurrency=2 -P eventlet`
+* celery命令：
+   > `redis-cli.exe -p 6379`
+   > `KEYS *`
 
 # Windows 安装配置 MongoDB
 * 下载安装(注意安装时要取消mongodb compass)，创建一个目录保存数据库文件，比如 c:\mongodb\db和c:\mongodb\log

@@ -25,7 +25,7 @@ def GetAllRecipeSrc(user, idList):
     srcDict = {}
     rssList = []
     ftRssList = []
-    for bked in filter(bool, [BookedRecipe.get_one(BookedRecipe.recipe_id == id_) for id_ in idList]):
+    for bked in filter(bool, [BookedRecipe.get_or_none(BookedRecipe.recipe_id == id_) for id_ in idList]):
         recipeId = bked.recipe_id
         recipeType, dbId = Recipe.type_and_id(recipeId)
         if recipeType == 'builtin':
@@ -74,7 +74,7 @@ def WorkerImpl(userName: str, idList: list, log=None):
     if not userName:
         return "Parameters invalid."
 
-    user = KeUser.get_one(KeUser.name == userName)
+    user = KeUser.get_or_none(KeUser.name == userName)
     if not user:
         return "The user does not exist."
 
@@ -82,9 +82,6 @@ def WorkerImpl(userName: str, idList: list, log=None):
         log = logging.getLogger('WorkerImpl')
         log.setLevel(logging.WARN)
     
-    to = user.kindle_email.replace(';', ',').split(',')
-    tz = user.timezone
-
     if not idList:
         idList = [item.recipe_id for item in user.get_booked_recipe()]
     elif not isinstance(idList, list):
@@ -135,11 +132,11 @@ def WorkerImpl(userName: str, idList: list, log=None):
             if lastSendTime and (now - lastSendTime < 10):
                 time.sleep(10)
 
-            send_to_kindle(userName, to, title, bookType, book, tz)
+            send_to_kindle(user, title, book)
             lastSendTime = time.time()
             ret.append(f"Sent {title}.{bookType}")
         else:
-            save_delivery_log(userName, to, title, 0, status='nonews', tz=tz)
+            save_delivery_log(user, title, 0, status='nonews')
 
     return '\n'.join(ret) if ret else "There are no new feeds available."
 

@@ -1080,6 +1080,7 @@ class Manifest:
             self._data = self._parse_css(str(self))
 
         def unload_data_from_memory(self, memory=None):
+            return
             if isinstance(self._data, bytes):
                 if memory is None:
                     from calibre.ptempfile import PersistentTemporaryFile

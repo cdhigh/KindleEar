@@ -30,8 +30,13 @@ def str_to_int(txt, default=0):
 def str_to_bool(txt):
     return (txt or '').lower().strip() in ('yes', 'true', 'on', 'enable', 'enabled', '1', 'checked')
 
+#返回字符串格式化时间
 def local_time(fmt="%Y-%m-%d %H:%M", tz=0):
     return (datetime.datetime.utcnow() + datetime.timedelta(hours=tz)).strftime(fmt)
+
+#返回datetime实例
+def tz_now(tz):
+    return datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=tz)))
 
 #隐藏真实email地址，使用星号代替部分字符
 #输入单个email字符串或列表，返回部分隐藏的字符串
@@ -90,7 +95,8 @@ def ke_decrypt(txt: str, key: str):
 def _ke_auth_code(txt: str, key: str, operation: str='DECODE'):
     if not txt:
         return ''
-
+        
+    key = key or ''
     key = hashlib.md5(key.encode('utf-8')).hexdigest()
     keyA = hashlib.md5(key[:16].encode('utf-8')).hexdigest()
     keyB = hashlib.md5(key[16:].encode('utf-8')).hexdigest()

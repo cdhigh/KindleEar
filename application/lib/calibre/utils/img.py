@@ -121,7 +121,7 @@ def image_from_x(x):
 def image_and_format_from_data(data):
     ' Create an image object from the specified data which should be a bytestring and also return the format of the image '
     img = Image.open(BytesIO(data))
-    return data, img.format
+    return img, img.format
 # }}}
 
 # Saving images {{{
@@ -204,16 +204,19 @@ def save_cover_data_to(
         orig_fmt = normalize_format_name(orig_fmt)
         changed = (fmt.lower() != orig_fmt.lower())
 
-    if resize_to is not None:
-        changed = True
+    if resize_to or minify_to:
         width, height = img.size
-        newWidth, newHeight = resize_to
+        newWidth, newHeight = resize_to or minify_to
         if width > newWidth or height > newHeight: #按比率缩小，避免失真
+            changed = True
             ratio = min(newWidth / width, newHeight / height)
-            img = img.resize((int(width * ratio), int(height * ratio)), Image.ANTIALIAS)
+            img = img.resize((int(width * ratio), int(height * ratio)), Image.Resampling.LANCZOS)
 
-    if grayscale and not eink and img.mode != "L":
+    if (grayscale or eink) and img.mode != "L":
         img = img.convert("L")
+        changed = True
+    elif img.mode != 'RGB':
+        img = img.convert('RGB')
         changed = True
 
     #if eink:
@@ -222,7 +225,7 @@ def save_cover_data_to(
         #img = eink_dither_image(img)
         #changed = True
     if path is None:
-        return image_to_data(img) if changed else data
+        return image_to_data(img, fmt=fmt) if changed else data
     else:
         with open(path, 'wb') as f:
             f.write(image_to_data(img) if changed else data)
@@ -262,7 +265,7 @@ def remove_borders_from_image(img, fuzz=None):
 
 
 def resize_image(img, width, height):
-    return img.resize((width, height), Image.ANTIALIAS)
+    return img.resize((width, height), Image.Resampling.LANCZOS)
     #return img.scaled(int(width), int(height), Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation)
 
 
@@ -271,7 +274,7 @@ def resize_to_fit(img, width, height):
     width, height = img.size
     newWidth, newHeight = resize_to
     ratio = min(newWidth / width, newHeight / height)
-    img = img.resize((int(width * ratio), int(height * ratio)), Image.ANTIALIAS)
+    img = img.resize((int(width * ratio), int(height * ratio)), Image.Resampling.LANCZOS)
     return True, img
 
 
@@ -291,9 +294,9 @@ def scale_image(data, width=60, height=80, compression_quality=70, as_png=False,
     owidth, oheight = img.size
     if preserve_aspect_ratio:
         ratio = min(width / owidth, height / oheight)
-        img = img.resize((int(owidth * ratio), int(oheight * ratio)), Image.ANTIALIAS)
+        img = img.resize((int(owidth * ratio), int(oheight * ratio)), Image.Resampling.LANCZOS)
     else:
-        img = img.resize((int(width * ratio), int(height * ratio)), Image.ANTIALIAS)
+        img = img.resize((int(width * ratio), int(height * ratio)), Image.Resampling.LANCZOS)
     fmt = 'PNG' if as_png else 'JPEG'
     w, h = img.size
     return w, h, image_to_data(img, fmt=fmt)

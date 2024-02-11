@@ -4,7 +4,7 @@
 
 import datetime, hashlib, io
 from urllib.parse import quote_plus, unquote_plus, urljoin
-from flask import Blueprint, url_for, render_template, redirect, session, send_file
+from flask import Blueprint, url_for, render_template, redirect, session, send_file, abort
 from flask_babel import gettext as _
 from PIL import Image
 from ..base_handler import *
@@ -59,22 +59,19 @@ def AdvArchive():
 
     #jinja自动转义非常麻烦，在代码中先把翻译写好再传过去吧
     appendStrs = {}
-    appendStrs["evernote"] = _("Append hyperlink '{}' to article").format(SAVE_TO_EVERNOTE)
-    appendStrs["wiz"] = _("Append hyperlink '{}' to article").format(SAVE_TO_WIZ)
-    appendStrs["pocket"] = _("Append hyperlink '{}' to article").format(SAVE_TO_POCKET)
-    appendStrs["instapaper"] = _("Append hyperlink '{}' to article").format(SAVE_TO_INSTAPAPER)
-    appendStrs["xweibo"] = _("Append hyperlink '{}' to article").format(SHARE_ON_XWEIBO)
-    appendStrs["tweibo"] = _("Append hyperlink '{}' to article").format(SHARE_ON_TWEIBO)
-    appendStrs["facebook"] = _("Append hyperlink '{}' to article").format(SHARE_ON_FACEBOOK)
-    appendStrs["twitter"] = _("Append hyperlink '{}' to article").format(SHARE_ON_TWITTER)
-    appendStrs["tumblr"] = _("Append hyperlink '{}' to article").format(SHARE_ON_TUMBLR)
-    appendStrs["browser"] = _("Append hyperlink '{}' to article").format(OPEN_IN_BROWSER)
+    appendStrs["evernote"] = _("Append hyperlink '{}' to article").format(_('Save to {}').format('evernote'))
+    appendStrs["wiz"] = _("Append hyperlink '{}' to article").format(_('Save to {}').format('wiz'))
+    appendStrs["pocket"] = _("Append hyperlink '{}' to article").format(_('Save to {}').format('pocket'))
+    appendStrs["instapaper"] = _("Append hyperlink '{}' to article").format(_('Save to {}').format('instapaper'))
+    appendStrs["xweibo"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format('sina weibo'))
+    appendStrs["tweibo"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format('tencent weibo'))
+    appendStrs["facebook"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format('facebook'))
+    appendStrs["twitter"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format('X'))
+    appendStrs["tumblr"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format('tumblr'))
+    appendStrs["browser"] = _("Append hyperlink '{}' to article").format(_('Open in browser'))
     shareLinks = user.share_links
-    #evernote = shareLinks.get('evernote', {})
-    #wiz = shareLinks.get('wiz', {})
-    #pocket = shareLinks.get('pocket', {})
-    #instapaper = shareLinks.get('instapaper', {})
-
+    shareLinks.pop('key', None)
+    
     return render_template('advarchive.html', tab='advset', user=user, advCurr='archive', appendStrs=appendStrs,
         shareLinks=shareLinks, gae_in_email=USE_GAE_INBOUND_EMAIL)
 
@@ -96,34 +93,24 @@ def AdvArchivePost():
     instaPwd = form.get('instapaper_password', '')
     #将instapaper的密码加密
     if instaName and instaPwd:
-        instaPwd = ke_encrypt(instaPwd, user.secret_key or '')
+        instaPwd = ke_encrypt(instaPwd, user.secret_key)
     else:
         instaName = ''
         instaPwd = ''
     
-    oldShrlinks = user.share_links
-    oldPocket = oldShrlinks.get('pocket')
+    shareLinks = user.share_links
+    oldPocket = shareLinks.get('pocket', {})
     accessToken = oldPocket.get('access_token', '') if oldPocket else ''
-    shareLinks = {}
     shareLinks['evernote'] = {'enable': '1' if evernote else '', 'email': evernoteMail}
     shareLinks['wiz'] = {'enable': '1' if wiz else '', 'email': wizMail}
     shareLinks['pocket'] = {'enable': '1' if pocket else '', 'access_token': accessToken}
     shareLinks['instapaper'] = {'enable': '1' if instapaper else '', 'username': instaName, 'password': instaPwd}
-    if bool(form.get('xweibo')):
-        shareLinks['xweibo'] = 1 #只管键有无，值不重要
-    if bool(form.get('tweibo')):
-        shareLinks['tweibo'] = 1
-    if bool(form.get('facebook')):
-        shareLinks['facebook'] = 1
-    if bool(form.get('x')):
-        shareLinks['x'] = 1
-    if bool(form.get('tumblr')):
-        shareLinks['tumblr'] = 1
-    if bool(form.get('browser')):
-        shareLinks['browser'] = 1
-    if bool(form.get('qrcode')):
-        shareLinks['qrcode'] = 1
-    
+    shareLinks['xweibo'] = str_to_bool(form.get('xweibo'))
+    shareLinks['tweibo'] = str_to_bool(form.get('tweibo'))
+    shareLinks['facebook'] = str_to_bool(form.get('facebook'))
+    shareLinks['x'] = str_to_bool(form.get('x'))
+    shareLinks['tumblr'] = str_to_bool(form.get('tumblr'))
+    shareLinks['browser'] = str_to_bool(form.get('browser'))
     user.share_links = shareLinks
     user.save()
     return redirect(url_for("bpAdv.AdvArchive"))
@@ -235,59 +222,68 @@ def AdvExport():
     return send_file(io.BytesIO(opmlFile), mimetype="text/xml", as_attachment=True, download_name="KindleEar_subscription.xml")
     
 #在本地选择一个图片上传做为自定义RSS书籍的封面
-@bpAdv.route("/advuploadcoverimage")
+@bpAdv.route("/advuploadcover")
 def AdvUploadCoverImage(tips=None):
     user = get_login_user()
-    return render_template('advcoverimage.html', tab='advset',
-        user=user, advCurr='uploadcoverimage', formation=url_for("bpAdv.AdvUploadCoverImageAjaxPost"), 
-        deletecoverhref=url_for("bpAdv.AdvDeleteCoverImageAjaxPost"), tips=tips,
-        gae_in_email=USE_GAE_INBOUND_EMAIL)
+    covers = {}
+    covers['order'] = user.covers.get('order', 'random')
+    for idx in range(7):
+        coverName = f'cover{idx}'
+        covers[coverName] = user.covers.get(coverName, f'/images/{coverName}.jpg')
+    jsonCovers = json.dumps(covers)
+    return render_template('advcoverimage.html', tab='advset', user=user, advCurr='uploadcoverimage', 
+        uploadUrl=url_for("bpAdv.AdvUploadCoverAjaxPost"), covers=covers, jsonCovers=jsonCovers,
+        tips=tips, gae_in_email=USE_GAE_INBOUND_EMAIL)
 
 #AJAX接口的上传封面图片处理函数
-@bpAdv.post("/advuploadcoverimageajax", endpoint='AdvUploadCoverImageAjaxPost')
+@bpAdv.post("/advuploadcoverajax", endpoint='AdvUploadCoverAjaxPost')
 @login_required(forAjax=True)
-def AdvUploadCoverImageAjaxPost():
-    MAX_IMAGE_PIXEL = 1024
+def AdvUploadCoverAjaxPost():
+    MAX_WIDTH = 832
+    MAX_HEIGHT = 1280
     ret = {'status': 'ok'}
     user = get_login_user()
-    try:
-        upload = request.files.get('cover_file')
-        #将图像转换为JPEG格式，同时限制分辨率不超过1024
-        imgInst = Image.open(upload)
-        width, height = imgInst.size
-        fmt = imgInst.format
-        if (width > MAX_IMAGE_PIXEL) or (height > MAX_IMAGE_PIXEL):
-            ratio = min(MAX_IMAGE_PIXEL / width, MAX_IMAGE_PIXEL / width)
-            imgInst = imgInst.resize((int(width * ratio), int(height * ratio)))
-        if imgInst.mode != 'RGB':
-            imgInst = imgInst.convert('RGB')
-        data = io.BytesIO()
-        imgInst.save(data, 'JPEG')
-        dbCover = UserBlob.get_one(UserBlob.name == 'cover')
-        if dbCover:
-            dbCover.data = data.getvalue()
-        else:
-            dbCover = UserBlob(name='cover', data=data.getvalue(), time=datetime.datetime.utcnow())
-        dbCover.save()
-        user.covers = ['db://' + str(dbCover.id)]
-        user.save()
-        upload.close()
-    except Exception as e:
-        ret['status'] = str(e)
-        
-    return ret
+    covers = user.covers
+    covers['order'] = request.form.get('order', 'random')
+    for idx in range(7):
+        coverName = f'cover{idx}'
+        upload = request.files.get(coverName) or request.form.get(coverName)
+        if not upload:
+            continue
 
-#删除上传的封面图片
-@bpAdv.post("/advdeletecoverimageajax", endpoint='AdvDeleteCoverImageAjaxPost')
-@login_required(forAjax=True)
-def AdvDeleteCoverImageAjaxPost():
-    user = get_login_user()
-    if request.form.get('action') == 'delete':
-        UserBlob.delete().where(UserBlob.name == 'cover').execute()
-        user.covers = []
-        user.save()
+        if isinstance(upload, str):
+            if upload.startswith('/images/'): #delete the old image data
+                UserBlob.delete().where((UserBlob.user == user.name) & (UserBlob.name == coverName)).execute()
+            covers[coverName] = upload
+            continue
+
+        try:
+            #将图像转换为JPEG格式，同时限制分辨率不超过 832x1280，宽高比为0.625~0.664，建议0.65
+            imgInst = Image.open(upload)
+            width, height = imgInst.size
+            fmt = imgInst.format
+            if (width > MAX_WIDTH) or (height > MAX_HEIGHT):
+                ratio = min(MAX_WIDTH / width, MAX_HEIGHT / width)
+                imgInst = imgInst.resize((int(width * ratio), int(height * ratio)))
+            if imgInst.mode != 'RGB':
+                imgInst = imgInst.convert('RGB')
+            data = io.BytesIO()
+            imgInst.save(data, 'JPEG')
+            dbCover = UserBlob.get_or_none((UserBlob.user == user.name) & (UserBlob.name == coverName))
+            if dbCover:
+                dbCover.data = data.getvalue()
+            else:
+                dbCover = UserBlob(name=coverName, user=user.name, data=data.getvalue())
+            dbCover.save()
+            covers[coverName] = '/dbimage/{}'.format(str(dbCover.id))
+            upload.close()
+        except Exception as e:
+            ret['status'] = str(e)
+            return ret
     
-    return {'status': 'ok'}
+    user.covers = covers
+    user.save()
+    return ret
 
 #在本地选择一个样式文件上传做为所有书籍的样式
 @bpAdv.route("/advuploadcss", endpoint='AdvUploadCss')
@@ -332,31 +328,12 @@ def AdvDeleteCssAjaxPost():
 @bpAdv.route("/dbimage/<id_>", endpoint='DbImage')
 @login_required()
 def DbImage(id_):
-    if id_ != 'cover':
-        return ''
-    
-    user = get_login_user() 
-    if user.covers:
-        data = None
-        cover1 = user.covers[0]
-        if cover1.startswith('db://'):
-            dbItem = UserBlob.get_by_id_or_none(cover1[5:])
-            if dbItem:
-                data = dbItem.data
-        elif cover1.startswith('file://'):
-            cover1 = cover1[7:]
-            if not os.path.isabs(cover1):
-                cover1 = os.path.join(appDir, cover1)
-            try:
-                with open(cover1, 'rb') as f:
-                    data = f.read()
-            except:
-                pass
-        print(data[:100])
-        if data:
-            return send_file(io.BytesIO(data), mimetype='image/jpeg')
-    
-    return ''
+    user = get_login_user()
+    dbItem = UserBlob.get_by_id_or_none(id_)
+    if dbItem:
+        return send_file(io.BytesIO(dbItem.data), mimetype='image/jpeg')
+    else:
+        abort(404)
 
 #集成各种网络服务OAuth2认证的相关处理
 @bpAdv.route("/oauth2/<authType>", endpoint='AdvOAuth2')

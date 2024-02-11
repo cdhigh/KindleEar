@@ -84,7 +84,7 @@ def basename(url):
         return 'index.html'
     return res
 
-#将soup保存到本地，同时将文件内的链接和图像之类的资源修改为相对路径
+#将文章的soup保存到本地，同时将文件内的链接和图像之类的资源修改为相对路径
 #soup: BeautifulSoup对象
 #target: 目标目录
 #fs: BasicNewsRecipe的构造函数里面创建的文件桩 FsDictStub
@@ -134,7 +134,8 @@ class RecursiveFetcher:
     default_timeout = socket.getdefaulttimeout()  # Needed here as it is used in __del__
     #options: 下载选项
     #fs: FsDictStub 实例
-    def __init__(self, options, fs, log, image_map=None, css_map=None, job_info=None):
+    #job_info: JobInfo namedtuple (url, art_dir, f_idx, a_idx, num_of_feeds, article)
+    def __init__(self, options, fs, log, job_info=None, image_map=None, css_map=None):
         bd = options.dir #下载的内容将要保存到哪个目录
         if not isinstance(bd, str):
             bd = bd.decode(filesystem_encoding)
@@ -181,7 +182,6 @@ class RecursiveFetcher:
         self.scale_news_images = getattr(options, 'scale_news_images', None)
         self.get_delay = getattr(options, 'get_delay', lambda url: self.delay)
         self.download_stylesheets = not options.no_stylesheets
-        self.remove_hyperlinks = options.remove_hyperlinks
         self.show_progress = True
         self.failed_links = []
         self.job_info = job_info
@@ -197,14 +197,14 @@ class RecursiveFetcher:
         usrc = self.preprocess_raw_html(usrc, url)
         for pat, repl in nmassage:
             usrc = pat.sub(repl, usrc)
-        soup = BeautifulSoup(usrc)
+        soup = BeautifulSoup(usrc, 'lxml')
 
         replace = self.prepreprocess_html_ext(soup)
         if replace is not None:
             replace = xml_to_unicode(replace, self.verbose, strip_encoding_pats=True)[0]
             for pat, repl in nmassage:
                 replace = pat.sub(repl, replace)
-            soup = BeautifulSoup(replace)
+            soup = BeautifulSoup(replace, 'lxml')
 
         if self.keep_only_tags:
             body = soup.new_tag('body')
@@ -242,18 +242,6 @@ class RecursiveFetcher:
         for kwds in self.remove_tags:
             for tag in soup.find_all(**kwds):
                 tag.extract()
-
-        #如果需要，去掉正文中的超链接(使用斜体下划线标识)，以避免误触
-        if self.remove_hyperlinks in ('text', 'all'):
-            for a_ in soup.find_all('a'):
-                a_.name = 'i'
-                a_.attrs.clear()
-
-        #去掉图像上面的链接，以免误触后打开浏览器
-        if self.remove_hyperlinks in ('image', 'all'):
-            for tag in soup.find_all('img'):
-                if tag.parent and tag.parent.parent and tag.parent.name == 'a':
-                    tag.parent.replace_with(tag)
 
         return self.preprocess_html_ext(soup)
 
@@ -322,7 +310,7 @@ class RecursiveFetcher:
         return data
 
     def start_fetch(self, url):
-        soup = BeautifulSoup('<a href="'+url+'" />')
+        soup = BeautifulSoup('<a href="'+url+'" />', 'lxml')
         res = self.process_links(soup, url, 0, into_dir='') #recrusiveLevel=0
         self.log.debug(url, 'saved to', res)
         return res
@@ -472,10 +460,10 @@ class RecursiveFetcher:
                         itype = 'png' if itype == 'gif' else 'jpeg'
                         data = image_to_data(img, fmt=itype)
                     if self.compress_news_images and itype in {'jpg','jpeg'}:
-                        try:
+                        if 1:
                             data = self.rescale_image(data)
-                        except Exception:
-                            self.log.exception('failed to compress image '+iurl)
+                        #except Exception:
+                        #    self.log.exception('failed to compress image '+iurl)
                     # Moon+ apparently cannot handle .jpeg files
                     if itype == 'jpeg':
                         itype = 'jpg'

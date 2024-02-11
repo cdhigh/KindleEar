@@ -5,10 +5,10 @@
 from calibre.utils.img import image_from_data, scale_image, image_to_data, blend_on_canvas
 
 
-def rescale_image(data, scale_news_images, compress_news_images_max_size, compress_news_images_auto_size):
+def rescale_image(data, scale_news_images, compress_news_images_max_size=None, compress_news_images_auto_size=None):
     orig_data = data  # save it in case compression fails
     img = image_from_data(data)
-    orig_w, orig_h = img.width(), img.height()
+    orig_w, orig_h = img.size
     if scale_news_images is not None:
         wmax, hmax = scale_news_images
         if wmax < orig_w or hmax < orig_h:
@@ -16,7 +16,7 @@ def rescale_image(data, scale_news_images, compress_news_images_max_size, compre
     if compress_news_images_max_size is None:
         if compress_news_images_auto_size is None:  # not compressing
             return data
-        maxsizeb = (orig_w * orig_h)/compress_news_images_auto_size
+        maxsizeb = (orig_w * orig_h) / compress_news_images_auto_size
     else:
         maxsizeb = compress_news_images_max_size * 1024
 

@@ -30,17 +30,19 @@ def login_required(userName=None, forAjax=False):
 #查询当前登录用户名，在使用此函数前最好保证已经登录
 #返回一个数据库行实例，而不是一个字符串
 def get_login_user():
-    return KeUser.get_one(KeUser.name == session.get('userName', ''))
+    return KeUser.get_or_none(KeUser.name == session.get('userName', ''))
     
 #记录投递记录到数据库
-def save_delivery_log(name, to, book, size, status='ok', tz=TIMEZONE):
+def save_delivery_log(user, book, size, status='ok', to=None):
     global default_log
-    to = '; '.join(to) if isinstance(to, (list, tuple)) else to
+    name = user.name
+    to = to or user.kindle_email
+    tz = user.timezone
+    if isinstance(to, list):
+        to = ','.join(to)
     
     try:
-        dl = DeliverLog(username=name, to=to, size=size,
-           time=local_time(tz=tz), datetime=datetime.datetime.utcnow(),
-           book=book, status=status)
-        dl.save()
+        DeliverLog.create(user=name, to=to, size=size, time_str=local_time(tz=tz), 
+           datetime=datetime.datetime.utcnow(), book=book, status=status)
     except Exception as e:
         default_log.warning('DeliverLog failed to save: {}'.format(e))

@@ -8,7 +8,7 @@ from flask_babel import gettext as _
 from ..back_end.task_queue_adpt import create_delivery_task
 from ..back_end.db_models import *
 from ..base_handler import *
-from ..utils import local_time
+from ..utils import local_time, tz_now
 
 bpDeliver = Blueprint('bpDeliver', __name__)
 
@@ -32,22 +32,24 @@ def MultiUserDelivery():
     sentCnt = 0
     return
     for user in KeUser.select().where(KeUser.enable_send == True):
+        now = tz_now(user.timezone)
         for book in user.get_booked_recipe():
             #先判断当天是否需要推送
-            day = local_time('%A', user.timezone)
+            day = now.weekday()
             userDays = user.send_days
-            if book.send_days: #如果特定Recipe设定了推送时间，则以这个时间为优先
-                if day not in book.send_days:
+            bookDays = book.send_days
+            #如果特定Recipe设定了推送时间，则以这个时间为优先，不再考虑全局设置值
+            if bookDays:
+                if day not in bookDays:
                     continue
             elif userDays and day not in userDays: #user.send_days为空也表示每日推送
                 continue
                 
             #时间判断
-            hr = int(local_time("%H", user.timezone)) + 1
-            if hr >= 24:
-                hr -= 24
-            if book.send_times:
-                if hr not in book.send_times:
+            hr = (now.hour + 1) % 24
+            bookTimes = book.send_times
+            if bookTimes:
+                if hr not in bookTimes:
                     continue
             elif user.send_time != hr:
                 continue
@@ -62,7 +64,7 @@ def MultiUserDelivery():
 #userName: 账号名
 #idList: recipe id列表，id格式：custom:xx,upload:xx,builtin:xx，为空则推送指定账号下所有订阅
 def SingleUserDelivery(userName: str, idList: list):
-    user = KeUser.get_one(KeUser.name == userName)
+    user = KeUser.get_or_none(KeUser.name == userName)
     if not user or not user.kindle_email:
         return render_template('autoback.html', tips=_('The username does not exist or the email is empty.'))
 
@@ -76,7 +78,7 @@ def SingleUserDelivery(userName: str, idList: list):
     bkQueue = {user.name: []}
     for bkRecipe in recipesToPush: #BookedRecipe实例
         queueOneBook(bkQueue, user, bkRecipe.recipe_id, bkRecipe.separated)
-        sent.append(bkRecipe.title)
+        sent.append(f'<i>{bkRecipe.title}</i>')
     flushQueueToPush(bkQueue)
     
     if sent:

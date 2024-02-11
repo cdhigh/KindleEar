@@ -535,7 +535,7 @@ def plugin_for_output_format(fmt):
     customization = config['plugin_customization']
     for plugin in output_format_plugins():
         if fmt.lower() == plugin.file_type:
-            plugin.site_customization = customization.get(plugin.name, None)
+            plugin.site_customization = ''
             return plugin
 
 

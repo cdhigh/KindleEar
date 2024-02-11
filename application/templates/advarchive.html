@@ -86,10 +86,6 @@
         <input id="enable_browser" name="browser" type="checkbox" {% if shareLinks.get('browser') %}checked="1"{% endif %} />
         {{appendStrs["browser"]}}
       </label>
-      <label for="enable_qrcode" class="pure-checkbox">
-        <input id="enable_qrcode" name="qrcode" type="checkbox" {% if shareLinks.get('qrcode') %}checked="1"{% endif %} />
-        {{_("Append QR code of url to article")}}
-      </label>
     </div>
 
     <hr style="margin:2em 0;border:0;border-bottom:1px solid #e5e5e5" />

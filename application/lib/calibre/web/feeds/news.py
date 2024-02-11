@@ -14,38 +14,41 @@ import re
 import sys
 import time
 import traceback
-from collections import defaultdict
-from urllib.parse import urlparse, urlsplit
-from urllib.error import HTTPError
+from collections import defaultdict, namedtuple
+from urllib.parse import urlparse, urlsplit, quote_plus
+from urllib.error import HTTPError, URLError
 from calibre import __appname__, as_unicode, force_unicode, iswindows, preferred_encoding, strftime
 from calibre.ebooks.BeautifulSoup import BeautifulSoup, CData, NavigableString, Tag
 from calibre.ebooks.metadata import MetaInformation
 from calibre.ebooks.metadata.opf2 import OPFCreator
 from calibre.ebooks.metadata.toc import TOC
 from calibre.ptempfile import PersistentTemporaryFile
+from calibre.utils.img import save_cover_data_to
 from calibre.utils.date import now as nowf
 from calibre.utils.localization import canonicalize_lang, ngettext
 from calibre.utils.logging import ThreadSafeWrapper
 from calibre.utils.threadpool import NoResultsPending, ThreadPool, WorkRequest
 from calibre.web import Recipe
 from calibre.web.feeds import Feed, feed_from_xml, feeds_from_index, templates
-from calibre.web.fetch.simple import (
-    AbortArticle, RecursiveFetcher, option_parser as web2disk_option_parser,
-)
+from calibre.web.fetch.simple import AbortArticle, RecursiveFetcher
 from calibre.web.fetch.utils import prepare_masthead_image
 from polyglot.builtins import string_or_bytes
 from lxml.html import document_fromstring, fragment_fromstring, tostring
 import readability
+from simpleextract import simple_extract
 from urlopener import UrlOpener
 from requests_file import LocalFileAdapter
 from filesystem_dict import FsDictStub
-from default_cv_mh import get_default_cover_data, get_default_masthead_data
+from config import *
+
+MASTHEAD_WIDTH = 600
+MASTHEAD_HEIGHT = 60
+DEFAULT_MASTHEAD_IMAGE = 'mastheadImage.gif'
 
 def classes(classes):
     q = frozenset(classes.split(' '))
     return dict(attrs={
         'class': lambda x: x and frozenset(x.split()).intersection(q)})
-
 
 def prefixed_classes(classes):
     q = frozenset(classes.split(' '))
@@ -59,10 +62,8 @@ def prefixed_classes(classes):
         return False
     return {'attrs': {'class': matcher}}
 
-
 class LoginFailed(ValueError):
     pass
-
 
 class DownloadDenied(ValueError):
     pass
@@ -70,73 +71,14 @@ class DownloadDenied(ValueError):
 class Web2diskOptions:
     pass
 
-#Monkey path for readability.Document.
-def shorten_title(doc):
-    title = doc.find(".//title")
-    if title is None or title.text is None or len(title.text) == 0:
-        return ""
-    
-    zhPattern = re.compile(u'[\u4e00-\u9fff]+') # added by cdhigh, exp for CJK
-    
-    title = orig = norm_title(title.text)
-
-    candidates = set()
-
-    for item in [".//h1", ".//h2", ".//h3"]:
-        for e in list(doc.iterfind(item)):
-            if e.text:
-                add_match(candidates, e.text, orig)
-            if e.text_content():
-                add_match(candidates, e.text_content(), orig)
-
-    for item in TITLE_CSS_HEURISTICS:
-        for e in doc.cssselect(item):
-            if e.text:
-                add_match(candidates, e.text, orig)
-            if e.text_content():
-                add_match(candidates, e.text_content(), orig)
-
-    if candidates:
-        title = sorted(candidates, key=len)[-1]
-    else:
-        for delimiter in [" | ", " - ", " :: ", " / "]:
-            if delimiter in title:
-                parts = orig.split(delimiter)
-                lp0 = parts[0].split() #split by space
-                lpl = parts[-1].split()
-                if len(lp0) >= 4:
-                    title = parts[0]
-                    break
-                # added by cdhigh, CJK? no use space to split words
-                elif zhPattern.search(parts[0]) and len(parts[0]) > 4:
-                    title = parts[0]
-                    break
-                elif len(lpl) >= 4:
-                    title = parts[-1]
-                    break
-                # added by cdhigh, CJK? no use space to split words
-                elif zhPattern.search(parts[-1]) and len(parts[-1]) > 4:
-                    title = parts[-1]
-                    break
-        else:
-            if ": " in title:
-                parts = orig.split(": ")
-                if len(parts[-1].split()) >= 4:
-                    title = parts[-1]
-                # added by cdhigh
-                elif zhPattern.search(parts[-1]) and len(parts[-1]) > 4:
-                    title = parts[-1]
-                else:
-                    title = orig.split(": ", 1)[1]
-    
-    # added by cdhigh
-    if zhPattern.search(title):
-        if not 4 < len(title) < 100:
-            return orig
-    elif not 15 < len(title) < 150:
-        return orig
-    
-    return title
+#每篇文章的下载任务参数
+#url: 要下载的url
+#art_dir: 下载的内容要保存的目录，包括html文本和里面的图像文件
+#f_idx: Feed索引号
+#a_idx: 文章在Feed里面的索引号
+#feed_len: Feed总数
+#article: calibre.web.feeds.__init__.Article 实例
+JobInfo = namedtuple('JobInfo', 'url art_dir f_idx a_idx feed_len article')
 
 class BasicNewsRecipe(Recipe):
     #: The title to use for the e-book
@@ -787,57 +729,41 @@ class BasicNewsRecipe(Recipe):
         if as_tree:
             from html5_parser import parse
             return parse(_raw)
-        return BeautifulSoup(_raw)
+        return BeautifulSoup(_raw, 'lxml')
 
     #提取正文
     def extract_readable_article(self, html, url):
         try:
             doc = readability.Document(html, positive_keywords=self.auto_cleanup_keep, url=url)
-            article_html = doc.summary(html_partial=True)
+            summary = doc.summary(html_partial=False)
             title = doc.title()
-            #extracted_title = doc.short_title()
-            extracted_title = shorten_title(doc._html(True))
-        except: #如果readability解析失败，则启用备用算法
-            from lib.simpleextract import simple_extract
-            article_html, title = simple_extract(html)
-            extracted_title = title
-            
-        try:
-            frag = fragment_fromstring(article_html)
+            short_title = doc.short_title()
         except:
-            doc = document_fromstring(article_html)
-            frag = doc.xpath('//body')[-1]
+            summary = '<html></html>'
+            title = ''
+            short_title = ''
+        
+        soup = BeautifulSoup(summary, "lxml")
+        body_tag = soup.find('body')
 
-        if not title:
-            title = frag.xpath('//title')
-            extracted_title = title
+        #如果readability解析失败，则启用备用算法（不够好，但有全天候适应能力）
+        if not body_tag or len(body_tag.contents) == 0:
+            soup = simple_extract(html)
+            body_tag = soup.find('body')
+            if not body_tag or len(body_tag.contents) == 0: #再次失败
+                raise
 
-        if frag.tag == 'html':
-            root = frag
-        elif frag.tag == 'body':
-            root = document_fromstring(
-                '<html><head><title>%s</title></head></html>' %
-                extracted_title)
-            root.append(frag)
-        else:
-            root = document_fromstring(
-                '<html><head><title>%s</title></head><body/></html>' %
-                extracted_title)
-            root.xpath('//body')[0].append(frag)
+            #增加备用算法提示，免责声明：）
+            info = soup.new_tag('p', style='color:#555555;font-size:60%;text-align:right;')
+            info.string = 'extracted by alternative algorithm.'
+            body_tag.append(info)
 
-        body = root.xpath('//body')[0]
-        has_title = False
-        for x in body.iterdescendants():
-            if x.text == title:
-                has_title = True
-        inline_titles = body.xpath('//h1|//h2')
-        if not has_title and not inline_titles:
-            heading = body.makeelement('h2')
-            heading.text = extracted_title
-            body.insert(0, heading)
+        if short_title and (title != short_title):
+            title_tag = soup.find('title')
+            if title_tag:
+                title_tag.string = short_title
 
-        raw_html = tostring(root, encoding='unicode')
-        return raw_html
+        return str(soup)
 
     def sort_index_by(self, index, weights):
         '''
@@ -968,6 +894,7 @@ class BasicNewsRecipe(Recipe):
         if not isinstance(self.title, str):
             self.title = str(self.title, 'utf-8', 'replace')
 
+        self.options = options
         self.debug = options.verbose > 1
         self.output_dir = output_dir
         self.fs = fs
@@ -997,7 +924,8 @@ class BasicNewsRecipe(Recipe):
                 raise ValueError(_('The "%s" recipe needs a username and password.')%self.title)
 
         self.browser = self.get_browser()
-        self.image_map, self.image_counter = {}, 1
+        self.image_map = {}
+        self.image_counter = 1
         self.css_map = {}
 
         if options.output_profile.short_name in ('default', 'tablet'):
@@ -1012,7 +940,6 @@ class BasicNewsRecipe(Recipe):
             'match_regexps', 'no_stylesheets', 'verbose', 'delay', 'timeout', 'recursions', 'encoding'):
             setattr(self.w2d_opts, extra, getattr(self, extra))
 
-        wOpts.remove_hyperlinks = options.remove_hyperlinks
         wOpts.postprocess_html = self._postprocess_html
         wOpts.preprocess_image = self.preprocess_image
         wOpts.preprocess_raw_html = self.preprocess_raw_html_
@@ -1033,72 +960,164 @@ class BasicNewsRecipe(Recipe):
 
     def _postprocess_html(self, soup, first_fetch, job_info):
         if self.no_stylesheets:
-            for link in soup.findAll('link'):
+            for link in list(soup.find_all('link')):
                 if (link.get('type') or 'text/css').lower() == 'text/css' and 'stylesheet' in (link.get('rel') or ('stylesheet',)):
                     link.extract()
-            for style in soup.findAll('style'):
+            for style in list(soup.find_all('style')):
                 style.extract()
         head = soup.find('head')
         if not head:
-            head = soup.find('body')
-        if not head:
-            head = soup.find(True)
-        css = self.template_css + '\n\n' + (self.get_extra_css() or '')
+            head = soup.new_tag('head')
+            soup.html.insert(0, head)
+
+        title_tag = head.find('title')
+        if title_tag:
+            title = title_tag.string
+        else: #创建一个Title
+            title = job_info.article.title if job_info else 'Untitled'
+            title_tag = soup.new_tag('title')
+            title_tag.string = title
+            head.append(title_tag)
+
+        extra_css = self.get_extra_css()
+        css = self.template_css + (('\n\n' + extra_css) if extra_css else '')
         style = soup.new_tag('style', type='text/css', title='override_css')
         style.append(css)
         head.append(style)
         if 0 and first_fetch and job_info:
-            url, f, a, feed_len = job_info
             body = soup.find('body')
             if body is not None:
-                templ = self.navbar.generate(False, f, a, feed_len,
+                templ = self.navbar.generate(False, job_info.f_idx, job_info.a_idx, job_info.feed_len,
                                              not self.has_single_feed,
-                                             url, __appname__,
+                                             job_info.url, __appname__,
                                              center=self.center_navbar,
                                              extra_css=self.get_extra_css() or '')
-                elem = BeautifulSoup(templ.render(doctype='xhtml').decode('utf-8')).find('div')
+                elem = BeautifulSoup(templ.render(doctype='xhtml').decode('utf-8'), 'lxml').find('div')
                 body.insert(0, elem)
                 # This is needed because otherwise inserting elements into
                 # the soup breaks find()
-                soup = BeautifulSoup(soup.decode_contents())
+                soup = BeautifulSoup(soup.decode_contents(), 'lxml')
         if self.remove_javascript:
-            for script in list(soup.findAll('script')):
+            for script in list(soup.find_all('script')):
                 script.extract()
-            for o in soup.findAll(onload=True):
+            for o in soup.find_all(onload=True):
                 del o['onload']
 
         for attr in self.remove_attributes:
-            for x in soup.findAll(attrs={attr:True}):
+            for x in soup.find_all(attrs={attr: True}):
                 del x[attr]
-        for bad_tag in list(soup.findAll(['base', 'iframe', 'canvas', 'embed',
+
+        for bad_tag in list(soup.find_all(['base', 'iframe', 'canvas', 'embed',
             'command', 'datalist', 'video', 'audio', 'noscript', 'link', 'meta'])):
-            # link tags can be used for preloading causing network activity in
-            # calibre viewer. meta tags can do all sorts of crazy things,
-            # including http-equiv refresh, viewport shenanigans, etc.
             bad_tag.extract()
-        # srcset causes some viewers, like calibre's to load images from the
-        # web, and it also possible causes iBooks on iOS to barf, see
-        # https://bugs.launchpad.net/bugs/1713986
-        for img in soup.findAll('img', srcset=True):
+        
+        for img in soup.find_all('img', srcset=True): # https://bugs.launchpad.net/bugs/1713986
             del img['srcset']
 
+        #如果需要，去掉正文中的超链接(使用斜体下划线标识)，以避免误触
+        remove_hyperlinks = self.options.user.remove_hyperlinks
+        if remove_hyperlinks in ('text', 'all'):
+            for a_ in soup.find_all('a'):
+                a_.name = 'i'
+                a_.attrs.clear()
+
+        #去掉图像上面的链接，以免误触后打开浏览器
+        if remove_hyperlinks in ('image', 'all'):
+            for tag in soup.find_all('img'):
+                if tag.parent and tag.parent.parent and tag.parent.name == 'a':
+                    tag.parent.replace_with(tag)
+
+        #除了toc里面有标题，内容开头也要有标题，方便阅读
+        body_tag = soup.find("body")
+        h_tag = body_tag.find(['h1','h2'])
+
+        #也要判断此H1/H2是否在文章中间出现，如果是则不是文章标题
+        if not h_tag or any(len(tag.get_text(strip=True)) > 100 for tag in h_tag.previous_siblings):
+            h_tag = soup.new_tag('h2')
+            h_tag.string = title
+            body_tag.insert(0, h_tag)
+
+        #job_info.article.url才是真实的url，对于内嵌内容RSS，job_info.url为一个临时文件名
+        self.append_share_links(soup, url=job_info.article.url)
+        
         ans = self.postprocess_html(soup, first_fetch)
 
         # Nuke HTML5 tags
-        for x in ans.findAll(['article', 'aside', 'header', 'footer', 'nav',
-            'figcaption', 'figure', 'section']):
+        for x in ans.find_all(['article', 'aside', 'header', 'footer', 'nav',
+            'figcaption', 'figure', 'section', 'time']):
             x.name = 'div'
 
         if job_info:
-            url, f, a, feed_len = job_info
             try:
-                article = self.feed_objects[f - self.feed_index_start].articles[a]
+                if job_info.article:
+                    article = job_info.article
+                else:
+                    article = self.feed_objects[job_info.f_idx - self.feed_index_start].articles[job_info.a_idx]
             except:
                 self.log.exception('Failed to get article object for postprocessing')
                 pass
             else:
                 self.populate_article_metadata(article, ans, first_fetch)
         return ans
+
+    #在文章末尾添加分享链接
+    def append_share_links(self, soup, url):
+        if not soup:
+            return
+        
+        user = self.options.user
+        shareLinks = user.share_links
+        aTags = []
+        for type_ in ['evernote', 'wiz', 'pocket', 'instapaper']:
+            if shareLinks.get(type_, {}).get('enable'):
+                ashare = soup.new_tag('a', href=self.make_share_link(type_, user, url, soup))
+                ashare.string = _('Save to {}').format(type_)
+                aTags.append(ashare)
+
+        for type_ in ['xweibo', 'tweibo', 'facebook', 'x', 'tumblr']:
+            if shareLinks.get(type_):
+                ashare = soup.new_tag('a', href=self.make_share_link(type_, user, url, soup))
+                ashare.string =  _('Share on {}').format(type_)
+                aTags.append(ashare)
+
+        if shareLinks.get('browser'):
+            ashare = soup.new_tag('a', href=url)
+            ashare.string = _('Open in browser')
+            aTags.append(ashare)
+
+        bodyTag = soup.find("body")
+        for idx, a in enumerate(aTags):
+            bodyTag.append(a)
+            if idx < len(aTags) - 1:
+                span = soup.new_tag("span")
+                span.string = ' | '
+                bodyTag.append(span)
+
+    #生成保存内容或分享文章链接的KindleEar调用链接
+    def make_share_link(self, shareType, user, url, soup):
+        share_key = user.share_links.get('key', '123')
+        titleTag = soup.find('title')
+        title = titleTag.string if titleTag else 'Untitled'
+        if shareType in ('evernote', 'wiz'):
+            href = f"{KE_DOMAIN}/share?act={shareType}&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}"
+        elif shareType == 'pocket':
+            href = f'{KE_DOMAIN}/share?act=pocket&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
+        elif shareType == 'instapaper':
+            href = f'{KE_DOMAIN}/share?act=instapaper&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
+        elif shareType == 'xweibo':
+            href = f'http://v.t.sina.com.cn/share/share.php?url={quote_plus(url)}'
+        elif shareType == 'tweibo':
+            href = f'http://v.t.qq.com/share/share.php?url={quote_plus(url)}'
+        elif shareType == 'facebook':
+            href = f'http://www.facebook.com/share.php?u={quote_plus(url)}'
+        elif shareType == 'x':
+            href = f'http://twitter.com/home?status={quote_plus(url)}'
+        elif shareType == 'tumblr':
+            href = f'http://www.tumblr.com/share/link?url={quote_plus(url)}'
+        else:
+            href = ''
+
+        return href
 
     #外部调用此函数实际下载
     def download(self):
@@ -1152,7 +1171,7 @@ class BasicNewsRecipe(Recipe):
         templ = templ(lang=self.lang_for_html, feed_index_start=self.feed_index_start)
         css = self.template_css + '\n\n' +(self.get_extra_css() or '')
         timefmt = self.timefmt
-        return templ.generate(self.title, "mastheadImage.gif", timefmt, feeds, extra_css=css).render(doctype='xhtml')
+        return templ.generate(self.title, DEFAULT_MASTHEAD_IMAGE, timefmt, feeds, extra_css=css).render(doctype='xhtml')
 
     @classmethod
     def description_limiter(cls, src):
@@ -1213,24 +1232,20 @@ class BasicNewsRecipe(Recipe):
         return templ.generate(f, feeds, self.description_limiter, extra_css=css).render(doctype='xhtml')
 
     #下载一个url指定的网页和其内部的所有链接
-    #url: 要下载的url
-    #dir_: 下载的文件要保存的目录
-    #f: Feed索引号
-    #a: 文章索引号
-    #num_of_feeds: Feed总数
     #返回：(file, downloads[], failures[]): 
     #       file: url网页内容保存的文件名
     #       downloads[]: 网页内的链接所对应的图像文件保存的文件名
     #       failures[]: 下载失败的url列表
-    def _fetch_article(self, url, dir_, f, a, num_of_feeds, preloaded=None):
+    def _fetch_article(self, job_info, preloaded=None):
+        url = job_info.url
         br = self.browser
         self.w2d_opts.browser = br
-        self.w2d_opts.dir = dir_
-        fetcher = RecursiveFetcher(self.w2d_opts, self.fs, self.log,
-                self.image_map, self.css_map, (url, f, a, num_of_feeds))
+        self.w2d_opts.dir = job_info.art_dir
+        
+        fetcher = RecursiveFetcher(self.w2d_opts, self.fs, self.log, job_info, self.image_map, self.css_map)
         fetcher.browser = br
-        fetcher.base_dir = dir_
-        fetcher.current_dir = dir_
+        fetcher.base_dir = job_info.art_dir
+        fetcher.current_dir = job_info.art_dir
         fetcher.show_progress = False
         fetcher.image_url_processor = self.image_url_processor
         if preloaded is not None:
@@ -1248,10 +1263,13 @@ class BasicNewsRecipe(Recipe):
 
         return res, path, failures
 
-    def fetch_article(self, url, dir_, f, a, num_of_feeds):
-        return self._fetch_article(url, dir_, f, a, num_of_feeds)
+    #article: calibre.web.feeds.__init__.Article 实例
+    def fetch_article(self, job_info):
+        return self._fetch_article(job_info)
 
-    def fetch_obfuscated_article(self, url, dir_, f, a, num_of_feeds):
+    #article: calibre.web.feeds.__init__.Article 实例
+    def fetch_obfuscated_article(self, job_info):
+        url = job_info.url
         x = self.get_obfuscated_article(url)
         if isinstance(x, dict):
             data = x['data']
@@ -1261,22 +1279,19 @@ class BasicNewsRecipe(Recipe):
         else:
             data = self.fs.read(x, 'rb')
             self.fs.delete(x)
-        return self._fetch_article(url, dir_, f, a, num_of_feeds, preloaded=data)
+        return self._fetch_article(job_info, preloaded=data)
 
     #下载全文RSS
-    #article: calibre.web.feeds.__init__.Article 实例
-    #dir_: 下载的内容要保存的目录，包括html文本和里面的图像文件
-    #f: Feed索引号
-    #a: 文章索引号
-    #num_of_feeds: Feed总数
     #这里为什么不将生成的html直接保存到目标位置是因为接下来要使用RecursiveFetcher下载里面的图像文件
-    def fetch_embedded_article(self, article, dir_, f, a, num_of_feeds):
+    def fetch_embedded_article(self, job_info):
         templ = templates.EmbeddedContent()
-        raw = templ.generate(article).render('html') #raw是utf-8编码的二进制内容
+        raw = templ.generate(job_info.article).render('html') #raw是utf-8编码的二进制内容
         with self.fs.make_tempfile(suffix='_feeds2disk.html', dir=self.output_dir) as pt:
             pt.write(raw)
             url = 'file://' + pt.name
-        return self._fetch_article(url, dir_, f, a, num_of_feeds)
+
+        new_job_info = JobInfo(url, job_info.art_dir, job_info.f_idx, job_info.a_idx, job_info.feed_len, job_info.article)
+        return self._fetch_article(new_job_info)
 
     def remove_duplicate_articles(self, feeds):
         seen_keys = defaultdict(set)
@@ -1374,16 +1389,16 @@ class BasicNewsRecipe(Recipe):
                     continue
 
                 #设置多线程爬取网页的回调函数
+                job_info = JobInfo(url, art_dir, f, a, len(feed), article)
                 if self.use_embedded_content or (self.use_embedded_content is None and feed.has_embedded_content()):
-                    func, arg = self.fetch_embedded_article, article #全文RSS
+                    func = self.fetch_embedded_article #全文RSS
                 elif self.articles_are_obfuscated:
-                    func, arg = self.fetch_obfuscated_article, url #需要解密的文章
+                    func = self.fetch_obfuscated_article #需要解密的文章
                 else:
-                    func, arg = self.fetch_article, url #普通RSS
+                    func = self.fetch_article #普通RSS
 
-                #param: callable, args, kwds, requestID, callback, exc_callback):
-                req = WorkRequest(func, (arg, art_dir, f, a, len(feed)),
-                                      {}, (f, a), self.article_downloaded, self.error_in_article_download)
+                #param:        callable, args,   kwds, requestID, callback,            exc_callback):
+                req = WorkRequest(func, job_info, {}, (f, a), self.article_downloaded, self.error_in_article_download)
                 req.feed = feed
                 req.article = article
                 req.feed_dir = feed_dir
@@ -1405,7 +1420,7 @@ class BasicNewsRecipe(Recipe):
         else: #如果是单线程，为了更好的兼容性，在同一个线程抓取网页，上面的线程池即使是单线程，也是另一个线程
             for req in self.jobs:
                 try:
-                    req.callback(req, req.callable(*req.args, **req.kwds))
+                    req.callback(req, req.callable(req.args, **req.kwds))
                 except:
                     import traceback
                     req.exception = True
@@ -1456,28 +1471,29 @@ class BasicNewsRecipe(Recipe):
             self.cover_path = None
 
     def _download_masthead(self, mu):
-        return
-        if hasattr(mu, 'rpartition'):
-            ext = mu.rpartition('.')[-1]
-            if '?' in ext:
-                ext = ''
-        else:
-            ext = mu.name.rpartition('.')[-1]
-        ext = ext.lower() if ext else 'jpg'
-        mpath = os.path.join(self.output_dir, 'masthead_source.'+ext)
-        outfile = os.path.join(self.output_dir, 'mastheadImage.gif')
+        #if hasattr(mu, 'rpartition'):
+        #    ext = mu.rpartition('.')[-1]
+        #    if '?' in ext:
+        #        ext = ''
+        #else:
+        #    ext = mu.name.rpartition('.')[-1]
+        #ext = ext.lower() if ext else 'jpg'
+        #mpath = os.path.join(self.output_dir, 'masthead_source.' + ext)
+        outfile = os.path.join(self.output_dir, DEFAULT_MASTHEAD_IMAGE)
+        mdata = None
         if hasattr(mu, 'read'):
-            self.fs.write(mpath, mu.read(), 'wb')
+            mdata = mu.read()
         elif os.access(mu, os.R_OK):
-            self.fs.write(mpath, open(mu, 'rb').read(), 'wb')
+            mdata = open(mu, 'rb').read()
         else:
             resp = self.browser.open(mu, timeout=self.timeout)
             if resp.status_code == 200:
-                self.fs.write(mpath, resp.content, 'wb')
-        self.prepare_masthead_image(mpath, outfile)
-        self.masthead_path = outfile
-        self.fs.delete(mpath)
+                mdata = resp.content
 
+        if mdata:
+            self.prepare_masthead_image(mdata, outfile)
+            self.masthead_path = outfile
+        
     def download_masthead(self, url):
         try:
             self._download_masthead(url)
@@ -1485,9 +1501,30 @@ class BasicNewsRecipe(Recipe):
             self.log.exception("Failed to download supplied masthead_url")
 
     def resolve_masthead(self):
-        masthead_raw_data = get_default_masthead_data()
-        self.masthead_path = os.path.join(self.output_dir, 'mastheadImage.gif')
-        self.fs.write(self.masthead_path, masthead_raw_data, 'wb')
+        self.masthead_path = None
+        try:
+            murl = self.get_masthead_url()
+        except:
+            self.log.exception('Failed to get masthead url')
+            murl = None
+
+        if murl is not None:
+            if isinstance(murl, (tuple, list)):
+                murl = murl[0]
+            # Try downloading the user-supplied masthead_url
+            # Failure sets self.masthead_path to None
+            self.download_masthead(murl)
+
+        if self.masthead_path is None:
+            self.log.info("Synthesizing mastheadImage")
+            self.masthead_path = os.path.join(self.output_dir, DEFAULT_MASTHEAD_IMAGE)
+            try:
+                masthead_raw_data = self.default_masthead_image()
+            except:
+                self.log.exception('Failed to generate default masthead image')
+                self.masthead_path = None
+
+            self.fs.write(self.masthead_path, masthead_raw_data, 'wb')
 
     def default_cover(self, cover_file):
         return
@@ -1496,17 +1533,22 @@ class BasicNewsRecipe(Recipe):
         'Override in subclass to use something other than the recipe title'
         return self.title
 
-    MI_WIDTH = 600
-    MI_HEIGHT = 60
+    #MI_WIDTH = 600
+    #MI_HEIGHT = 60
 
-    def default_masthead_image(self, out_path):
-        from calibre.ebooks import generate_masthead
-        generate_masthead(self.get_masthead_title(), output_path=out_path,
-                width=self.MI_WIDTH, height=self.MI_HEIGHT)
+    @classmethod
+    def default_masthead_image(cls):
+        with open(os.path.join(appDir, 'application', 'images', DEFAULT_MASTHEAD_IMAGE), 'rb') as f:
+            return f.read()
 
-    def prepare_masthead_image(self, path_to_image, out_path):
-        prepare_masthead_image(path_to_image, out_path, self.MI_WIDTH, self.MI_HEIGHT)
+        #from calibre.ebooks import generate_masthead
+        #generate_masthead(self.get_masthead_title(), output_path=out_path,
+        #        width=self.MI_WIDTH, height=self.MI_HEIGHT)
 
+    def prepare_masthead_image(self, data, out_path):
+        save_cover_data_to(data, out_path, resize_to=(MASTHEAD_WIDTH, MASTHEAD_HEIGHT), grayscale=True)
+        #prepare_masthead_image(path_to_image, out_path, self.MI_WIDTH, self.MI_HEIGHT)
+    
     def publication_date(self):
         '''
         Use this method to set the date when this issue was published.
@@ -1568,15 +1610,14 @@ class BasicNewsRecipe(Recipe):
         manifest.append(os.path.join(dir_, 'index.html'))
         
         # Get cover
-        cpath = getattr(self, 'cover_path', None)
-        if cpath is None and self.feed_index_start == 0: #只要第一个News生成封面
-            cover_data = get_default_cover_data()
-            cpath = os.path.join(dir_, 'cover.jpg')
-            self.cover_path = cpath
-            self.fs.write(cpath, cover_data, 'wb')
-        
-        opf.cover = cpath
-        manifest.append(cpath)
+        #cpath = getattr(self, 'cover_path', None)
+        #if cpath is None and self.feed_index_start == 0: #只要第一个News生成封面
+        #    cover_data = get_default_cover_data()
+        #    cpath = os.path.join(dir_, 'cover.jpg')
+        #    self.cover_path = cpath
+        #    self.fs.write(cpath, cover_data, 'wb')
+        #opf.cover = cpath
+        #manifest.append(cpath)
 
         # Get masthead
         mpath = getattr(self, 'masthead_path', None)
@@ -1591,7 +1632,7 @@ class BasicNewsRecipe(Recipe):
         for mani in opf.manifest:
             if mani.path.endswith('.ncx'):
                 mani.id = 'ncx'
-            if mani.path.endswith('mastheadImage.gif'):
+            if mani.path.endswith(DEFAULT_MASTHEAD_IMAGE):
                 mani.id = 'masthead-image'
 
         entries = ['index.html']
@@ -1649,7 +1690,7 @@ class BasicNewsRecipe(Recipe):
                     #    with open(last, 'rb') as fi:
                     #        src = fi.read().decode('utf-8')
                     #if src:
-                        #soup = BeautifulSoup(src)
+                        #soup = BeautifulSoup(src, 'lxml')
                         #body = soup.find('body')
                         #if body is not None:
                             #prefix = '/'.join('..'for i in range(2*len(re.findall(r'link\d+', last))))
@@ -1657,7 +1698,7 @@ class BasicNewsRecipe(Recipe):
                             #                not self.has_single_feed,
                             #                a.orig_url, __appname__, prefix=prefix,
                             #                center=self.center_navbar)
-                            #elem = BeautifulSoup(templ.render(doctype='xhtml').decode('utf-8')).find('div')
+                            #elem = BeautifulSoup(templ.render(doctype='xhtml').decode('utf-8'), 'lxml').find('div')
                             #body.insert(len(body.contents), elem)
                         #    with open(last, 'wb') as fi:
                         #        fi.write(str(soup).encode('utf-8'))
@@ -1697,7 +1738,7 @@ class BasicNewsRecipe(Recipe):
         self.fs.write(opf_path, opf_file.getvalue(), 'wb')
         self.fs.write(ncx_path, ncx_file.getvalue(), 'wb')
 
-    #下载完成后会回调此函数
+    #文章下载完成后会回调此函数
     #request: 传给线程池的请求对象 calibre.utils.threadpool.WorkRequest
     #result: _fetch_article()执行结果，一个元祖 (file, downloads[], failures[])
     #       file: url网页保存的文件名
@@ -1773,7 +1814,7 @@ class BasicNewsRecipe(Recipe):
                         max_articles_per_feed=self.max_articles_per_feed, get_article_url=self.get_article_url)
                     parsed_feeds.append(feed)
                 else:
-                    raise URLError('Cannot fetch {url}')
+                    raise URLError(f'Cannot fetch {url}:{resp.status_code}')
             except Exception as err:
                 feed = Feed() #创建一个空的Feed返回
                 msg = 'Failed feed: %s'%(title if title else url)
@@ -1833,7 +1874,7 @@ class BasicNewsRecipe(Recipe):
 
     @classmethod
     def soup(cls, raw):
-        return BeautifulSoup(raw)
+        return BeautifulSoup(raw, 'lxml')
 
     @classmethod
     def adeify_images(cls, soup):
@@ -1906,7 +1947,7 @@ class CustomIndexRecipe(BasicNewsRecipe):
         fetcher.current_dir = self.output_dir
         fetcher.show_progress = False
         res = fetcher.start_fetch(url)
-        self.create_opf()
+        #self.create_opf()
         return res
 
 

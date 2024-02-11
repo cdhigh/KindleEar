@@ -48,20 +48,20 @@
       </div>
       <div class="pure-control-group">
         <label>{{_("Delivery days")}}</label>
-        <input type="checkbox" id="mon" name="Monday" {% if not user.send_days or "Monday" in user.send_days %}checked="1"{% endif %} />
-        <span class="font90" style="cursor:default;" onclick="toggleweekbtn('mon');">{{_("Mon")}} &nbsp;</span>
-        <input type="checkbox" id="tue" name="Tuesday" {% if not user.send_days or "Tuesday" in user.send_days %}checked="1"{% endif %} />
-        <span class="font90" style="cursor:default;" onclick="toggleweekbtn('tue');">{{_("Tue")}} &nbsp;</span>
-        <input type="checkbox" id="wed" name="Wednesday" {% if not user.send_days or "Wednesday" in user.send_days %}checked="1"{% endif %} />
-        <span class="font90" style="cursor:default;" onclick="toggleweekbtn('wed');">{{_("Wed")}} &nbsp;</span>
-        <input type="checkbox" id="thu" name="Thursday" {% if not user.send_days or "Thursday" in user.send_days %}checked="1"{% endif %} />
-        <span class="font90" style="cursor:default;" onclick="toggleweekbtn('thu');">{{_("Thu")}} &nbsp;</span>
-        <input type="checkbox" id="fri" name="Friday" {% if not user.send_days or "Friday" in user.send_days %}checked="1"{% endif %} />
-        <span class="font90" style="cursor:default;" onclick="toggleweekbtn('fri');">{{_("Fri")}} &nbsp;</span>
-        <input type="checkbox" id="sat" name="Saturday" {% if not user.send_days or "Saturday" in user.send_days %}checked="1"{% endif %} />
-        <span class="font90" style="cursor:default;" onclick="toggleweekbtn('sat');">{{_("Sat")}} &nbsp;</span>
-        <input type="checkbox" id="sun" name="Sunday" {% if not user.send_days or "Sunday" in user.send_days %}checked="1"{% endif %} />
-        <span class="font90" style="cursor:default;" onclick="toggleweekbtn('sun');">{{_("Sun")}} &nbsp;</span>
+        <input type="checkbox" id="mon" name="Monday" {% if not user.send_days or 0 in user.send_days %}checked="1"{% endif %} />
+        <span class="font90" style="cursor:default;" onclick="ToggleWeekBtn('#mon');">{{_("Mon")}} &nbsp;</span>
+        <input type="checkbox" id="tue" name="Tuesday" {% if not user.send_days or 1 in user.send_days %}checked="1"{% endif %} />
+        <span class="font90" style="cursor:default;" onclick="ToggleWeekBtn('#tue');">{{_("Tue")}} &nbsp;</span>
+        <input type="checkbox" id="wed" name="Wednesday" {% if not user.send_days or 2 in user.send_days %}checked="1"{% endif %} />
+        <span class="font90" style="cursor:default;" onclick="ToggleWeekBtn('#wed');">{{_("Wed")}} &nbsp;</span>
+        <input type="checkbox" id="thu" name="Thursday" {% if not user.send_days or 3 in user.send_days %}checked="1"{% endif %} />
+        <span class="font90" style="cursor:default;" onclick="ToggleWeekBtn('#thu');">{{_("Thu")}} &nbsp;</span>
+        <input type="checkbox" id="fri" name="Friday" {% if not user.send_days or 4 in user.send_days %}checked="1"{% endif %} />
+        <span class="font90" style="cursor:default;" onclick="ToggleWeekBtn('#fri');">{{_("Fri")}} &nbsp;</span>
+        <input type="checkbox" id="sat" name="Saturday" {% if not user.send_days or 5 in user.send_days %}checked="1"{% endif %} />
+        <span class="font90" style="cursor:default;" onclick="ToggleWeekBtn('#sat');">{{_("Sat")}} &nbsp;</span>
+        <input type="checkbox" id="sun" name="Sunday" {% if not user.send_days or 6 in user.send_days %}checked="1"{% endif %} />
+        <span class="font90" style="cursor:default;" onclick="ToggleWeekBtn('#sun');">{{_("Sun")}} &nbsp;</span>
       </div>
       <div class="pure-control-group">
         <label>{{_("Delivery time")}}</label>
@@ -90,13 +90,6 @@
           <option value="kindle_oasis" {% if user.device == 'kindle_oasis' %}selected="selected"{% endif %}>Kindle Oasis</option>
           <option value="kindle_scribe" {% if user.device == 'kindle_scribe' %}selected="selected"{% endif %}>Kindle Scribe</option>
           <option value="others" {% if user.device == 'others' %}selected="selected"{% endif %}>{{_("Others")}}</option>
-        </select>
-      </div>
-      <div class="pure-control-group">
-        <label>{{_("Title from")}}</label>
-        <select class="pure-u-1 pure-u-sm-1-2" name="title_from">
-          <option value="" {% if not user.use_title_in_feed %}selected="selected"{% endif %}>{{_("Webpage")}}</option>
-          <option value="feed" {% if user.use_title_in_feed %}selected="selected"{% endif %}>{{_("Feed")}}</option>
         </select>
       </div>
       <div class="pure-control-group">
@@ -183,8 +176,46 @@
         </select>
       </div>
     </fieldset>
-    <p>
-    {{_("Important: Please activate your kindle firstly, and goto")}}“<a href="https://www.amazon.com/hz/mycd/myx#/home/settings/payment" rel="external" target="_blank">{{_("Personal Document Settings")}}</a>”{{_("Page and add")}} <strong>{{ mailSender }}</strong> {{_("to 'Approved Personal Document E-mail List'.")}}
+    <fieldset id="send_mail_service">
+      {% set sm_srv = user.send_mail_service -%}
+      {% set sm_srv_type = sm_srv.get('service', 'gae') -%}
+      <legend><h3>{{_("Send mail service")}}</h3></legend>
+      <div class="pure-control-group">
+        <label>{{_("Service")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="sm_service" id="sm_service" onchange="SetSmOptiosVisualbility();">
+          <option value="gae" {% if sm_srv_type == 'gae' %}selected="selected"{% endif %}>GAE</option>
+          <option value="sendgrid" {% if sm_srv_type == 'sendgrid' %}selected="selected"{% endif %}>sendgrid</option>
+          <option value="smtp" {% if sm_srv_type == 'smtp' %}selected="selected"{% endif %}>SMTP</option>
+          <option value="local" {% if sm_srv_type == 'local' %}selected="selected"{% endif %}>local (debug)</option>
+        </select>
+      </div>
+      <div class="pure-control-group" id="sm_apikey">
+        <label>{{_("ApiKey")}}</label>
+        <input type="text" name="sm_apikey" value="{{sm_srv.get('apikey', '')}}" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group" id="sm_host">
+        <label>{{_("Host")}}</label>
+        <input type="text" name="sm_host" value="{{sm_srv.get('host', '')}}" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group" id="sm_port">
+        <label>{{_("Port")}}</label>
+        <input type="text" name="sm_port" value="{{sm_srv.get('port', '587')}}" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group" id="sm_username">
+        <label>{{_("Username")}}</label>
+        <input type="text" name="sm_username" value="{{sm_srv.get('username', '')}}" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group" id="sm_password">
+        <label>{{_("Password")}}</label>
+        <input type="password" name="sm_password" value="" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group" id="sm_save_path">
+        <label>{{_("Save path")}}</label>
+        <input type="text" name="sm_save_path" value="{{sm_srv.get('save_path', 'tests/debug_mail')}}" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+    </fieldset>
+
+    <p>{{_("Important: Please activate your kindle firstly, and goto")}}“<a href="https://www.amazon.com/hz/mycd/myx#/home/settings/payment" rel="external" target="_blank">{{_("Personal Document Settings")}}</a>”{{_("Page and add")}} <strong>{{ mailSender }}</strong> {{_("to 'Approved Personal Document E-mail List'.")}}
     </p>
     <p style="text-align:center;">
       <input type="submit" class="pure-button pure-button-primary pure-input-rounded" value="{{_('Save settings')}}" />
@@ -195,15 +226,46 @@
 
 {% block js -%}
 <script type="text/javascript">
-function toggleweekbtn(btn_name) {
-  if (!btn_name) return
-  var btn = document.getElementById(btn_name);
-  btn.checked = !btn.checked;
+$(document).ready(function() {
+  SetSmOptiosVisualbility();
+});
+
+function ToggleWeekBtn(btnName) {
+  var checkbox = $(btnName);
+  checkbox.prop("checked", !checkbox.prop('checked'));
 }
-function setEditEnable(chkName, strName){
-  var elm = document.getElementsByName(strName).item(0);
-  var chk = document.getElementsByName(chkName).item(0);
-  elm.disabled = !chk.checked;
+
+function SetSmOptiosVisualbility() {
+  var svr = $('#sm_service').val();
+  if (svr == 'gae') {
+    $('#sm_apikey').hide();
+    $('#sm_host').hide();
+    $('#sm_port').hide();
+    $('#sm_username').hide();
+    $('#sm_password').hide();
+    $('#sm_save_path').hide();
+  } else if (svr == 'sendgrid') {
+    $('#sm_apikey').show();
+    $('#sm_host').hide();
+    $('#sm_port').hide();
+    $('#sm_username').hide();
+    $('#sm_password').hide();
+    $('#sm_save_path').hide();
+  } else if (svr == 'smtp') {
+    $('#sm_apikey').hide();
+    $('#sm_host').show();
+    $('#sm_port').show();
+    $('#sm_username').show();
+    $('#sm_password').show();
+    $('#sm_save_path').hide();
+  } else if (svr == 'local') {
+    $('#sm_apikey').hide();
+    $('#sm_host').hide();
+    $('#sm_port').hide();
+    $('#sm_username').hide();
+    $('#sm_password').hide();
+    $('#sm_save_path').show();
+  }
 }
 </script>
 {% endblock -%}

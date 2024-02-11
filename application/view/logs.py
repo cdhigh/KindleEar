@@ -5,17 +5,11 @@ import datetime
 from operator import attrgetter
 from flask import Blueprint, request, render_template
 from flask_babel import gettext as _
-from google.appengine.api.datastore_errors import NeedIndexError
 from ..base_handler import *
 from ..back_end.db_models import *
 from config import ADMIN_NAME
 
 bpLogs = Blueprint('bpLogs', __name__)
-
-#查询推送记录，按时间倒排
-def GetOrderedDeliverLog(userName, limit):
-    myLogs = sorted(DeliverLog.get_all(DeliverLog.username == userName), key=attrgetter('datetime'), reverse=True)
-    return myLogs[:limit]
 
 @bpLogs.route("/logs", endpoint='Mylogs')
 @login_required()
@@ -37,15 +31,18 @@ def Mylogs():
 @bpLogs.route("/removelogs")
 def RemoveLogs():
     #停止过期用户的推送
+    now = datetime.datetime.utcnow()
     for user in KeUser.get_all(KeUser.enable_send == True):
-        if user.expires and (user.expires < datetime.datetime.utcnow()):
+        if user.expires and (user.expires < now):
             user.enable_send = False
             user.save()
 
     #清理30天之前的推送记录
-    cnt = 0
-    for item in DeliverLog.get_all(DeliverLog.datetime < (datetime.datetime.utcnow() - datetime.timedelta(days=30))):
-        cnt += 1
-        item.delete_instance()
-    
+    time30 = datetime.datetime.utcnow() - datetime.timedelta(days=30)
+    cnt = DeliverLog.delete().where(DeliverLog.datetime < time30).execute()
     return "{} lines delivery log removed.<br />".format(cnt)
+
+#查询推送记录，按时间倒排
+def GetOrderedDeliverLog(userName, limit):
+    myLogs = sorted(DeliverLog.get_all(DeliverLog.user == userName), key=attrgetter('datetime'), reverse=True)
+    return myLogs[:limit]
