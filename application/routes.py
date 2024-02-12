@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 #主页和其他路由
 import os
-from flask import Blueprint, render_template, send_from_directory
+from flask import Blueprint, render_template, send_from_directory, current_app
 from .view import login
 from .view import admin
 from .view import adv
@@ -15,7 +15,6 @@ from .view import share
 from .view import subscribe
 from .work import worker
 from .work import url2book
-from config import KE_DOMAIN, USE_GAE_INBOUND_EMAIL
 
 bpHome = Blueprint('bpHome', __name__)
 
@@ -63,11 +62,11 @@ def register_routes(app):
         app.register_blueprint(subscribe.bpSubscribe)
         app.register_blueprint(worker.bpWorker)
         app.register_blueprint(url2book.bpUrl2Book)
-        if library_offical.KINDLEEAR_SITE == KE_DOMAIN:
+        if app.config['KE_DOMAIN'] == library_offical.KINDLEEAR_SITE:
             app.register_blueprint(library_offical.bpLibraryOffical)
 
         #使用GAE来接收邮件
-        if USE_GAE_INBOUND_EMAIL:
+        if app.config['USE_GAE_INBOUND_EMAIL']:
             from google.appengine.api import wrap_wsgi_app
             from apps.view.inbound_email import bpInBoundEmail
             app.wsgi_app = wrap_wsgi_app(app.wsgi_app)  #启用GAE邮件服务

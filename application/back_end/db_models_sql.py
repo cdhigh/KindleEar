@@ -7,41 +7,48 @@ import os, json, datetime
 from peewee import *
 from playhouse.db_url import connect
 from playhouse.shortcuts import model_to_dict
-from config import (DATABASE_ENGINE, DATABASE_HOST, DATABASE_PORT, DATABASE_USERNAME, 
-                DATABASE_PASSWORD, DATABASE_NAME)
 
 #用于在数据库结构升级后的兼容设计，数据库结构和前一版本不兼容则需要升级此版本号
 DB_VERSION = 1
 
-if '://' in DATABASE_NAME:
-    dbInstance = connect(DATABASE_NAME)
-elif DATABASE_ENGINE == "sqlite":
+__DB_ENGINE = os.getenv('DATABASE_ENGINE')
+__DB_NAME = os.getenv('DATABASE_NAME', '')
+__DB_USERNAME = os.getenv('DATABASE_USERNAME') or None
+__DB_PASSWORD = os.getenv('DATABASE_PASSWORD') or None
+__DB_HOST = os.getenv('DATABASE_HOST')
+__DB_PORT = int(os.getenv('DATABASE_PORT'))
+
+dbName = ''
+if '://' in __DB_NAME:
+    dbInstance = connect(__DB_NAME)
+    __DB_ENGINE = __DB_NAME.split('://', 1)[0]
+elif __DB_ENGINE == "sqlite":
     thisDir = os.path.dirname(os.path.abspath(__file__))
-    dbName = os.path.normpath(os.path.join(thisDir, "..", "..", DATABASE_NAME))
+    dbName = os.path.normpath(os.path.join(thisDir, "..", "..", __DB_NAME)) if __DB_NAME != ':memory:' else __DB_NAME
     dbInstance = SqliteDatabase(dbName, check_same_thread=False)
-elif DATABASE_ENGINE == "mysql":
-    dbInstance = MySQLDatabase(DATABASE_NAME, user=DATABASE_USERNAME, password=DATABASE_PASSWORD,
-                         host=DATABASE_HOST, port=DATABASE_PORT)
-elif DATABASE_ENGINE == "postgresql":
-    dbInstance = PostgresqlDatabase(DATABASE_NAME, user=DATABASE_USERNAME, password=DATABASE_PASSWORD,
-                         host=DATABASE_HOST, port=DATABASE_PORT)
-elif DATABASE_ENGINE == "cockroachdb":
-    dbInstance = CockroachDatabase(DATABASE_NAME, user=DATABASE_USERNAME, password=DATABASE_PASSWORD,
-                         host=DATABASE_HOST, port=DATABASE_PORT)
+elif __DB_ENGINE == "mysql":
+    dbInstance = MySQLDatabase(__DB_NAME, user=__DB_USERNAME, password=__DB_PASSWORD,
+                         host=__DB_HOST, port=__DB_PORT)
+elif __DB_ENGINE == "postgresql":
+    dbInstance = PostgresqlDatabase(__DB_NAME, user=__DB_USERNAME, password=__DB_PASSWORD,
+                         host=__DB_HOST, port=__DB_PORT)
+elif __DB_ENGINE == "cockroachdb":
+    dbInstance = CockroachDatabase(__DB_NAME, user=__DB_USERNAME, password=__DB_PASSWORD,
+                         host=__DB_HOST, port=__DB_PORT)
 else:
-    raise Exception("database engine '{}' not supported yet".format(DATABASE_ENGINE))
+    raise Exception("database engine '{}' not supported yet".format(__DB_ENGINE))
 
 #调用此函数正式连接到数据库（打开数据库）
-def ConnectToDatabase():
+def connect_database():
     global dbInstance
     dbInstance.connect(reuse_if_open=True)
 
 #关闭数据库连接
-def CloseDatabase():
+def close_database():
     global dbInstance
-    if not dbInstance.is_closed():
+    if not dbInstance.is_closed() and dbName != ':memory:':
         dbInstance.close()
-
+        
 #自定义字段，在本应用用来保存列表
 class JSONField(TextField):
     def db_value(self, value):

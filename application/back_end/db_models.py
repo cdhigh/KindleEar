@@ -6,10 +6,9 @@
 # cdhigh <https://github.com/cdhigh>
 import os, sys, random
 from operator import attrgetter
-from config import DATABASE_ENGINE
 from ..utils import ke_encrypt, ke_decrypt, tz_now
 
-if DATABASE_ENGINE in ("datastore", "mongodb"):
+if os.getenv('DATABASE_ENGINE') in ("datastore", "mongodb"):
     from .db_models_nosql import *
 else:
     from .db_models_sql import *
@@ -220,10 +219,11 @@ class AppInfo(MyBaseModel):
 
 #创建数据库表格，一个数据库只需要创建一次
 #如果是sql数据库，可以使用force=True删掉之前的数据库文件(小心)
-def CreateDatabaseTable(force=False):
-    if DATABASE_ENGINE == "sqlite":
+def create_database_tables(force=False):
+    engine = os.getenv('DATABASE_ENGINE')
+    if engine == "sqlite" and dbName:
         if not force and os.path.exists(dbName):
-            print(f'[Error] Database "{dbName}" already exists')
+            #print(f'[Error] Database "{dbName}" already exists')
             return
         elif os.path.exists(dbName):
             try:
@@ -231,10 +231,12 @@ def CreateDatabaseTable(force=False):
             except:
                 pass
 
-    if DATABASE_ENGINE not in ("datastore", "mongodb"):
-        with dbInstance.connection_context():
-            dbInstance.create_tables([KeUser, UserBlob, Recipe, BookedRecipe, DeliverLog, WhiteList,
-                SharedRss, SharedRssCategory, LastDelivered, AppInfo], safe=True)
-    
+    if engine not in ["datastore", "mongodb"]:
+        #with dbInstance.connection_context():
+        #connect_database()
+        dbInstance.create_tables([KeUser, UserBlob, Recipe, BookedRecipe, DeliverLog, WhiteList,
+            SharedRss, SharedRssCategory, LastDelivered, AppInfo], safe=True)
+        #close_database()
+        
     #AppInfo(name='dbTableVersion', int_value=DB_VERSION).save()
     #print(f'Create database "{dbName}" finished')

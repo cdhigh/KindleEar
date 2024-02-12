@@ -11,13 +11,13 @@ APP_ID = "kindleear"
 SRC_EMAIL = "akindleear@gmail.com"  #Your gmail account for sending mail to Kindle
 KE_DOMAIN = "https://kindleear.appspot.com" #Your domain of app
 
-#Need for google taskqueue, Refers to <https://cloud.google.com/appengine/docs/locations>
+#Need for google taskqueue only, Refers to <https://cloud.google.com/appengine/docs/locations>
 #Find it at Upper right corner of <https://console.cloud.google.com/appengine?project=your_app_id>
 SERVER_LOCATION = "us-central1"
 
 #Choose the database engine, you can also set Database URL to DATABASE_NAME
 DATABASE_ENGINE = "sqlite"  #"datastore", "mysql", "sqlite", "postgresql", "cockroachdb", "mongodb"
-DATABASE_NAME = "test.db"
+DATABASE_NAME = "test.db" #"mongodb://localhost:27017/"
 DATABASE_HOST = "localhost"
 DATABASE_PORT = 0
 DATABASE_USERNAME = ""

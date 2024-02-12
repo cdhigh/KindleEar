@@ -162,7 +162,7 @@ def _run_filetype_plugins(path_to_file, ft=None, occasion='preprocess'):
         ft = os.path.splitext(path_to_file)[-1].lower().replace('.', '')
     nfp = path_to_file
     for plugin in plugins_for_ft(ft, occasion):
-        plugin.site_customization = customization.get(plugin.name, '')
+        plugin.site_customization = ''
         oo, oe = sys.stdout, sys.stderr  # Some file type plugins out there override the output streams with buggy implementations
         with plugin:
             try:
@@ -192,7 +192,7 @@ def run_plugins_on_postimport(db, book_id, fmt):
     customization = config['plugin_customization']
     fmt = fmt.lower()
     for plugin in plugins_for_ft(fmt, 'postimport'):
-        plugin.site_customization = customization.get(plugin.name, '')
+        plugin.site_customization = ''
         with plugin:
             try:
                 plugin.postimport(book_id, fmt, db)
@@ -205,7 +205,7 @@ def run_plugins_on_postconvert(db, book_id, fmt):
     customization = config['plugin_customization']
     fmt = fmt.lower()
     for plugin in plugins_for_ft(fmt, 'postconvert'):
-        plugin.site_customization = customization.get(plugin.name, '')
+        plugin.site_customization = ''
         with plugin:
             try:
                 plugin.postconvert(book_id, fmt, db)
@@ -218,7 +218,7 @@ def run_plugins_on_postdelete(db, book_id, fmt):
     customization = config['plugin_customization']
     fmt = fmt.lower()
     for plugin in plugins_for_ft(fmt, 'postdelete'):
-        plugin.site_customization = customization.get(plugin.name, '')
+        plugin.site_customization = ''
         with plugin:
             try:
                 plugin.postdelete(book_id, fmt, db)
@@ -232,7 +232,7 @@ def run_plugins_on_postadd(db, book_id, fmt_map):
     for plugin in _on_postadd:
         if is_disabled(plugin):
             continue
-        plugin.site_customization = customization.get(plugin.name, '')
+        plugin.site_customization = ''
         with plugin:
             try:
                 plugin.postadd(book_id, fmt_map, db)
@@ -279,7 +279,7 @@ def interface_actions():
     for plugin in _initialized_plugins:
         if isinstance(plugin, InterfaceAction):
             if not is_disabled(plugin):
-                plugin.site_customization = customization.get(plugin.name, '')
+                plugin.site_customization = ''
                 yield plugin
 # }}}
 
@@ -291,7 +291,7 @@ def preferences_plugins():
     for plugin in _initialized_plugins:
         if isinstance(plugin, PreferencesPlugin):
             if not is_disabled(plugin):
-                plugin.site_customization = customization.get(plugin.name, '')
+                plugin.site_customization = ''
                 yield plugin
 # }}}
 
@@ -303,7 +303,7 @@ def available_library_closed_plugins():
     for plugin in _initialized_plugins:
         if isinstance(plugin, LibraryClosedPlugin):
             if not is_disabled(plugin):
-                plugin.site_customization = customization.get(plugin.name, '')
+                plugin.site_customization = ''
                 yield plugin
 
 
@@ -322,7 +322,7 @@ def store_plugins():
     customization = config['plugin_customization']
     for plugin in _initialized_plugins:
         if isinstance(plugin, Store):
-            plugin.site_customization = customization.get(plugin.name, '')
+            plugin.site_customization = ''
             yield plugin
 
 
@@ -470,7 +470,7 @@ def set_file_type_metadata(stream, mi, ftype, report_error=None):
                     try:
                         plugin.apply_null = apply_null_metadata.apply_null
                         plugin.force_identifiers = force_identifiers.force_identifiers
-                        plugin.site_customization = customization.get(plugin.name, '')
+                        plugin.site_customization = ''
                         plugin.set_metadata(stream, mi, ftype.lower().strip())
                         break
                     except:
@@ -503,7 +503,7 @@ def plugin_for_input_format(fmt):
     customization = config['plugin_customization']
     for plugin in input_format_plugins():
         if fmt.lower() in plugin.file_types:
-            plugin.site_customization = customization.get(plugin.name, None)
+            plugin.site_customization = ''
             return plugin
 
 

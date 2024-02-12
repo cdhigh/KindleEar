@@ -3,11 +3,10 @@
 #投递历史页面和维护投递历史
 import datetime
 from operator import attrgetter
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request, render_template, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
-from config import ADMIN_NAME
 
 bpLogs = Blueprint('bpLogs', __name__)
 
@@ -19,8 +18,8 @@ def Mylogs():
 
     #其他用户的推送记录
     logs = {}
-    if user.name == ADMIN_NAME:
-        for u in KeUser.get_all(KeUser.name != ADMIN_NAME):
+    if user.name == app.config['ADMIN_NAME']:
+        for u in KeUser.get_all(KeUser.name != app.config['ADMIN_NAME']):
             theLog = GetOrderedDeliverLog(u.name, 5)
             if theLog:
                 logs[u.name] =  theLog

@@ -3,12 +3,11 @@
 #登录页面
 
 import hashlib, datetime, time
-from flask import Blueprint, url_for, render_template, redirect, session
+from flask import Blueprint, url_for, render_template, redirect, session, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
 from ..utils import new_secret_key
-from config import *
 
 bpLogin = Blueprint('bpLogin', __name__)
 
@@ -20,7 +19,7 @@ def Login():
     if InitialAdminAccount():
         tips = (_("Please input username and password."))
     else:
-        tips = (_("Please use {}/{} to login at first time.").format(ADMIN_NAME, ADMIN_NAME))
+        tips = (_("Please use {}/{} to login at first time.").format(app.config['ADMIN_NAME'], app.config['ADMIN_NAME']))
     
     session['login'] = 0
     session['userName'] = ''
@@ -55,7 +54,7 @@ def LoginPost():
     if u:
         session['login'] = 1
         session['userName'] = name
-        session['role'] = 'admin' if name == ADMIN_NAME else 'user'
+        session['role'] = 'admin' if name == app.config['ADMIN_NAME'] else 'user'
         if u.expires and u.expiration_days > 0: #用户登陆后自动续期
             days = u.expiration_days
             u.expires = datetime.datetime.utcnow() + datetime.timedelta(days=days)
@@ -80,20 +79,21 @@ def LoginPost():
 #判断管理员账号是否存在
 #如果管理员账号不存在，创建一个，并返回False，否则返回True
 def InitialAdminAccount():
-    u = KeUser.get_or_none(KeUser.name == ADMIN_NAME)
+    adminName = app.config['ADMIN_NAME']
+    u = KeUser.get_or_none(KeUser.name == adminName)
     if u:
         return True
 
     secretKey = new_secret_key()
     shareKey = new_secret_key()
-    password = hashlib.md5((ADMIN_NAME + secretKey).encode()).hexdigest()
-    au = KeUser(name=ADMIN_NAME, passwd=password, kindle_email='', enable_send=False, send_time=8, 
-        timezone=TIMEZONE, book_type="epub", device='kindle', expires=None, secret_key=secretKey, 
+    password = hashlib.md5((adminName + secretKey).encode()).hexdigest()
+    au = KeUser(name=adminName, passwd=password, kindle_email='', enable_send=False, send_time=8, 
+        timezone=app.config['TIMEZONE'], book_type="epub", device='kindle', expires=None, secret_key=secretKey, 
         expiration_days=0, share_links={'key': shareKey}, book_title='KindleEar', book_language='en')
     au.save()
     return False
 
-@bpLogin.route("/logout")
+@bpLogin.route("/logout", methods=['GET', 'POST'])
 def Logout():
     session['login'] = 0
     session['userName'] = ''

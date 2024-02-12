@@ -8,15 +8,15 @@ from urllib.parse import urljoin
 from email.header import decode_header
 from email.utils import parseaddr, collapse_rfc2231_value
 from bs4 import BeautifulSoup
-from flask import Blueprint, request
+from flask import Blueprint, request, current_app as app
+from google.appengine.api import mail
+from calibre import guess_type
 from ..back_end.task_queue_adpt import create_http_task
 from ..back_end.db_models import KeUser, WhiteList
 from ..back_end.send_mail_adpt import send_to_kindle
 from ..base_handler import *
 from ..utils import local_time
-from config import *
-
-from google.appengine.api import mail
+from build_ebook import html_to_book
 
 bpInBoundEmail = Blueprint('bpInBoundEmail', __name__)
 
@@ -51,10 +51,10 @@ def extractUsernameFromEmail(to):
     to = to.split('@')[0] if to and '@' in to else 'xxx'
     if '__' in to:
         userNameParts = to.split('__')
-        userName = userNameParts[0] if userNameParts[0] else ADMIN_NAME
+        userName = userNameParts[0] if userNameParts[0] else app.config['ADMIN_NAME']
         return userName, userNameParts[1]
     else:
-        return ADMIN_NAME, to
+        return app.config['ADMIN_NAME'], to
 
 #判断是否是垃圾邮件
 #sender: 发件人地址
@@ -88,7 +88,7 @@ def ReceiveMail(path):
     
     user = KeUser.get_or_none(KeUser.name == userName)
     if not user:
-        userName = ADMIN_NAME
+        userName = app.config['ADMIN_NAME']
         user = KeUser.get_or_none(KeUser.name == userName)
     
     if not user or not user.kindle_email:
@@ -228,10 +228,9 @@ def ReceiveMail(path):
                  'subj': subject[:SUBJECT_WORDCNT]}
         create_http_task('/url2book', params)
     else: #直接转发邮件正文
-        from lib.makeoeb import ImageMimeFromName
         imageContents = []
         if hasattr(message, 'attachments'):  #先判断是否有图片
-            imageContents = [(f, c) for f, c in message.attachments if ImageMimeFromName(f)]
+            imageContents = [(f, c) for f, c in message.attachments if (guess_type(f)[0] or '').startswith('image/')]
         
         #先修正不规范的HTML邮件
         h = soup.find('head')
@@ -246,9 +245,7 @@ def ReceiveMail(path):
         
         #有图片的话，要生成MOBI或EPUB才行
         #而且多看邮箱不支持html推送，也先转换epub再推送
-        if imageContents or (user.book_type == "epub"):
-            from lib.makeoeb import (GetOpts, CreateEmptyOeb, setMetaData, EPUBOutput, MOBIOutput)
-            
+        if imageContents:
             #仿照Amazon的转换服务器的处理，去掉CSS
             if DELETE_CSS_APMAIL:
                 tag = soup.find('style', attrs={'type': 'text/css'})
@@ -261,31 +258,8 @@ def ReceiveMail(path):
             for img in soup.find_all('img', attrs={'src': True}):
                 if img['src'].lower().startswith('cid:'):
                     img['src'] = img['src'][4:]
-            
-            opts = GetOpts()
-            oeb = CreateEmptyOeb(opts, log)
-            
-            setMetaData(oeb, subject[:SUBJECT_WORDCNT], user.my_rss_book.language, 
-                local_time(tz=user.timezone), pubtype='book:book:KindleEar')
 
-            id_, href = oeb.manifest.generate(id='page', href='page.html')
-            manif = oeb.manifest.add(id_, href, 'application/xhtml+xml', data=str(soup))
-            oeb.spine.add(manif, False)
-            oeb.toc.add(subject, href)
-            
-            for fileName, content in imageContents:
-                try:
-                    content = content.decode()
-                except:
-                    pass
-                else:
-                    id_, href = oeb.manifest.generate(id='img', href=fileName)
-                    oeb.manifest.add(id_, href, ImageMimeFromName(fileName), data=content)
-            
-            oIO = io.BytesIO()
-            o = EPUBOutput() if user.book_type == "epub" else MOBIOutput()
-            o.convert(oeb, oIO, opts, log)
-            send_to_kindle(user, subject[:SUBJECT_WORDCNT], oIO.getvalue())
+            book = html_to_book(str(soup), subject[:SUBJECT_WORDCNT], imageContents, user)
         else: #没有图片则直接推送HTML文件，阅读体验更佳
             m = soup.find('meta', attrs={"http-equiv": "Content-Type"})
             if not m:
@@ -294,8 +268,9 @@ def ReceiveMail(path):
                 soup.html.head.insert(0, m)
             else:
                 m['content'] = "text/html; charset=utf-8"
-            
-            send_to_kindle(user, subject[:SUBJECT_WORDCNT], str(soup), fileWithTime=False)
+            book = str(soup)
+
+        send_to_kindle(user, subject[:SUBJECT_WORDCNT], str(soup), fileWithTime=False)
     
     return "OK", 200
 

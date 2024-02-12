@@ -145,13 +145,13 @@ class RecursiveFetcher:
         fs.makedirs(self.base_dir)
         self.log = log
         self.verbose = options.verbose
-        self.timeout = options.timeout
+        self.timeout = options.timeout or 60
         self.encoding = options.encoding
-        self.browser = options.browser if hasattr(options, 'browser') else browser()
+        self.browser = options.browser
         self.max_recursions = options.recursions
         self.match_regexps  = [re.compile(i, re.IGNORECASE) for i in options.match_regexps]
         self.filter_regexps = [re.compile(i, re.IGNORECASE) for i in options.filter_regexps]
-        self.max_files = options.max_files
+        self.max_files = options.max_files or 0x7fffffff
         self.delay = options.delay
         self.last_fetch_at = 0.
         self.filemap = {}
@@ -168,21 +168,19 @@ class RecursiveFetcher:
         self.remove_tags_after   = getattr(options, 'remove_tags_after', None)
         self.remove_tags_before  = getattr(options, 'remove_tags_before', None)
         self.keep_only_tags      = getattr(options, 'keep_only_tags', [])
-        self.preprocess_html_ext = getattr(options, 'preprocess_html', lambda soup: soup)
-        self.preprocess_raw_html = getattr(options, 'preprocess_raw_html',
-                lambda raw, url: raw)
-        self.prepreprocess_html_ext = getattr(options, 'skip_ad_pages', lambda soup: None)
+        self.preprocess_html_ext = getattr(options, 'preprocess_html', None)
+        self.preprocess_raw_html = getattr(options, 'preprocess_raw_html', None)
+        self.prepreprocess_html_ext = getattr(options, 'skip_ad_pages', None)
         self.postprocess_html_ext = getattr(options, 'postprocess_html', None)
         self.preprocess_image_ext = getattr(options, 'preprocess_image', None)
-        self._is_link_wanted     = getattr(options, 'is_link_wanted',
-                default_is_link_wanted)
+        self._is_link_wanted     = getattr(options, 'is_link_wanted', None)
         self.compress_news_images_max_size = getattr(options, 'compress_news_images_max_size', None)
         self.compress_news_images = getattr(options, 'compress_news_images', False)
         self.compress_news_images_auto_size = getattr(options, 'compress_news_images_auto_size', 16)
         self.scale_news_images = getattr(options, 'scale_news_images', None)
-        self.get_delay = getattr(options, 'get_delay', lambda url: self.delay)
+        self.get_delay = getattr(options, 'get_delay', None)
         self.download_stylesheets = not options.no_stylesheets
-        self.show_progress = True
+        self.show_progress = False
         self.failed_links = []
         self.job_info = job_info
         self.preloaded_urls = {}
@@ -194,12 +192,12 @@ class RecursiveFetcher:
         # multiple nested comments
         nmassage.append((re.compile(r'<!--.*?-->', re.DOTALL), lambda m: ''))
         usrc = xml_to_unicode(src, self.verbose, strip_encoding_pats=True)[0]
-        usrc = self.preprocess_raw_html(usrc, url)
+        usrc = self.preprocess_raw_html(usrc, url) if self.preprocess_raw_html else usrc
         for pat, repl in nmassage:
             usrc = pat.sub(repl, usrc)
         soup = BeautifulSoup(usrc, 'lxml')
 
-        replace = self.prepreprocess_html_ext(soup)
+        replace = self.prepreprocess_html_ext(soup) if self.prepreprocess_html_ext else None
         if replace is not None:
             replace = xml_to_unicode(replace, self.verbose, strip_encoding_pats=True)[0]
             for pat, repl in nmassage:
@@ -243,7 +241,7 @@ class RecursiveFetcher:
             for tag in soup.find_all(**kwds):
                 tag.extract()
 
-        return self.preprocess_html_ext(soup)
+        return self.preprocess_html_ext(soup) if self.preprocess_html_ext else soup
 
     #返回一个增加了newurl属性的bytes对象 response
     def fetch_url(self, url):
@@ -275,7 +273,7 @@ class RecursiveFetcher:
             return data
         #开始是网络文件
         delta = time.monotonic() - self.last_fetch_at
-        delay = self.get_delay(url)
+        delay = self.get_delay(url) if self.get_delay else self.delay
         if delta < delay:
             time.sleep(delay - delta)
         url = canonicalize_url(url)
@@ -322,12 +320,13 @@ class RecursiveFetcher:
         return True
 
     def is_link_wanted(self, url, tag):
-        try:
-            return self._is_link_wanted(url, tag)
-        except NotImplementedError:
-            pass
-        except:
-            return False
+        if self._is_link_wanted:
+            try:
+                return self._is_link_wanted(url, tag)
+            except NotImplementedError:
+                pass
+            except:
+                return False
         if self.filter_regexps:
             for f in self.filter_regexps:
                 if f.search(url):

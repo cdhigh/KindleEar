@@ -6,5 +6,8 @@
 *.epub
 *.azw3
 
-tests/*
+tests/tools/*
+tests/rss/*
+tests/debug_mail/*
+tests/cov_html/*
 .idea/

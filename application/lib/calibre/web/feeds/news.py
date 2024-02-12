@@ -39,7 +39,6 @@ from simpleextract import simple_extract
 from urlopener import UrlOpener
 from requests_file import LocalFileAdapter
 from filesystem_dict import FsDictStub
-from config import *
 
 MASTHEAD_WIDTH = 600
 MASTHEAD_HEIGHT = 60
@@ -69,7 +68,33 @@ class DownloadDenied(ValueError):
     pass
 
 class Web2diskOptions:
-    pass
+    def __init__(self):
+        self.keep_only_tags = []
+        self.remove_tags = []
+        self.preprocess_regexps = []
+        self.skip_ad_pages = lambda soup: None
+        self.preprocess_html = lambda soup: soup
+        self.remove_tags_after = None
+        self.remove_tags_before = None
+        self.is_link_wanted = None
+        self.compress_news_images = False
+        self.compress_news_images_max_size = None
+        self.compress_news_images_auto_size = 16
+        self.scale_news_images = None
+        self.filter_regexps = []
+        self.match_regexps = []
+        self.no_stylesheets = False
+        self.verbose = False
+        self.delay = 0
+        self.timeout = 60
+        self.recursions = 0
+        self.encoding = None
+        self.postprocess_html = None
+        self.preprocess_image = None
+        self.preprocess_raw_html = None
+        self.get_delay = None
+        self.max_files = None
+
 
 #每篇文章的下载任务参数
 #url: 要下载的url
@@ -934,11 +959,11 @@ class BasicNewsRecipe(Recipe):
             self.scale_news_images = options.output_profile.screen_size
 
         self.w2d_opts = wOpts = Web2diskOptions()
-        for extra in ('keep_only_tags', 'remove_tags', 'preprocess_regexps', 'skip_ad_pages', 'preprocess_html', 
+        for attr in ('keep_only_tags', 'remove_tags', 'preprocess_regexps', 'skip_ad_pages', 'preprocess_html', 
             'remove_tags_after', 'remove_tags_before', 'is_link_wanted', 'compress_news_images', 
             'compress_news_images_max_size', 'compress_news_images_auto_size', 'scale_news_images', 'filter_regexps',
             'match_regexps', 'no_stylesheets', 'verbose', 'delay', 'timeout', 'recursions', 'encoding'):
-            setattr(self.w2d_opts, extra, getattr(self, extra))
+            setattr(wOpts, attr, getattr(self, attr))
 
         wOpts.postprocess_html = self._postprocess_html
         wOpts.preprocess_image = self.preprocess_image
@@ -1098,12 +1123,13 @@ class BasicNewsRecipe(Recipe):
         share_key = user.share_links.get('key', '123')
         titleTag = soup.find('title')
         title = titleTag.string if titleTag else 'Untitled'
+        keDomain = os.getenv('KE_DOMAIN')
         if shareType in ('evernote', 'wiz'):
-            href = f"{KE_DOMAIN}/share?act={shareType}&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}"
+            href = f"{keDomain}/share?act={shareType}&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}"
         elif shareType == 'pocket':
-            href = f'{KE_DOMAIN}/share?act=pocket&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
+            href = f'{keDomain}/share?act=pocket&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
         elif shareType == 'instapaper':
-            href = f'{KE_DOMAIN}/share?act=instapaper&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
+            href = f'{keDomain}/share?act=instapaper&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
         elif shareType == 'xweibo':
             href = f'http://v.t.sina.com.cn/share/share.php?url={quote_plus(url)}'
         elif shareType == 'tweibo':
@@ -1252,7 +1278,9 @@ class BasicNewsRecipe(Recipe):
             fetcher.preloaded_urls[url] = preloaded
         
         #res为对应url的一个html文件名
-        res, path, failures = fetcher.start_fetch(url), fetcher.downloaded_paths, fetcher.failed_links
+        res = fetcher.start_fetch(url)
+        path = fetcher.downloaded_paths
+        failures = fetcher.failed_links
         if not res or not self.fs.exists(res):
             msg = _('Could not fetch article.') + ' ' + url + ' '
             if self.debug:
@@ -2009,3 +2037,19 @@ class CalibrePeriodical(BasicNewsRecipe):
         except:
             self.log.exception('Failed to compile downloaded recipe')
         return os.path.abspath('index.html')
+
+#下载url对应的html和其内部的图像文件
+#fs: FsDictStub 对象
+def recursive_fetch_url(url: str, fs):
+    wOpts = Web2diskOptions()
+    wOpts.browser = UrlOpener(file_stub=fs)
+    wOpts.dir = fs.path
+    image_map = {}
+    css_map = {}
+    fetcher = RecursiveFetcher(wOpts, fs, default_log, None, image_map, css_map)
+    
+    #res为对应url的一个html文件名
+    res = fetcher.start_fetch(url)
+    paths = fetcher.downloaded_paths
+    failures = fetcher.failed_links
+    return res, paths, failures

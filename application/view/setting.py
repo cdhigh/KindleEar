@@ -3,12 +3,12 @@
 #设置页面
 import locale
 from flask import Blueprint, render_template, request, redirect, session
+from flask import current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..utils import str_to_bool, str_to_int, ke_encrypt
 from ..back_end.db_models import *
 from .subscribe import UpdateBookedCustomRss
-from config import *
 
 bpSetting = Blueprint('bpSetting', __name__)
 
@@ -47,7 +47,8 @@ def LangMap():
 @login_required()
 def Setting(tips=None):
     user = get_login_user()
-    return render_template('setting.html', tab='set', user=user, tips=tips, mailSender=SRC_EMAIL, langMap=LangMap())
+    return render_template('setting.html', tab='set', user=user, tips=tips, mailSender=app.config['SRC_EMAIL'], 
+        langMap=LangMap())
 
 @bpSetting.post("/setting", endpoint='SettingPost')
 @login_required()
@@ -90,7 +91,7 @@ def SettingPost():
             user.enable_custom_rss = False
 
         user.kindle_email = keMail
-        user.timezone = int(form.get('timezone', TIMEZONE))
+        user.timezone = int(form.get('timezone', app.config['TIMEZONE']))
         user.send_time = int(form.get('send_time', '0'))
         user.book_type = form.get('book_type', 'epub')
         user.device = form.get('device_type', 'kindle')
@@ -98,7 +99,7 @@ def SettingPost():
         allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         user.send_days = [weekday for weekday, day in enumerate(allDays) if str_to_bool(form.get(day, ''))]
         user.book_mode = form.get('book_mode', '')
-        user.remove_hyperlinks = form.get('removehyperlinks', '')
+        user.remove_hyperlinks = form.get('remove_hyperlinks', '')
         user.author_format = form.get('author_format', '')
         user.book_title = myTitle
         user.book_language = form.get("book_language", "en")
@@ -111,7 +112,8 @@ def SettingPost():
         #根据自定义RSS的使能设置，将自定义RSS添加进订阅列表或从订阅列表移除
         UpdateBookedCustomRss(user)
     
-    return render_template('setting.html', tab='set', user=user, tips=tips, mailSender=SRC_EMAIL, langMap=LangMap())
+    return render_template('setting.html', tab='set', user=user, tips=tips, mailSender=app.config['SRC_EMAIL'], 
+        langMap=LangMap())
 
 #设置国际化语种
 @bpSetting.route("/setlocale/<langCode>")

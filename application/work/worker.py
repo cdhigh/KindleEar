@@ -11,7 +11,7 @@ from ..back_end.db_models import *
 from ..utils import local_time
 from calibre.web.feeds.recipes import compile_recipe
 from ..lib.recipe_helper import *
-from ..lib.build_ebook import ConvertRecipeToEbook
+from ..lib.build_ebook import recipes_to_ebook
 
 bpWorker = Blueprint('bpWorker', __name__)
 
@@ -123,9 +123,7 @@ def WorkerImpl(userName: str, idList: list, log=None):
     bookType = user.book_type
     ret = []
     for title, ro in recipes.items():
-        output = io.BytesIO()
-        ConvertRecipeToEbook(ro, output, user)
-        book = output.getvalue()
+        book = recipes_to_ebook(ro, user)
         if book:
             #避免触发垃圾邮件机制，最短10s发送一次
             now = time.time() #单位为s

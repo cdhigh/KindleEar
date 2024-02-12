@@ -3,7 +3,7 @@
 #网友共享的订阅源数据
 import datetime
 from urllib.parse import urljoin
-from flask import Blueprint, render_template, request, current_app
+from flask import Blueprint, render_template, request, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..utils import str_to_bool
@@ -24,7 +24,9 @@ def SharedLibrary():
     return render_template('library.html', tab='shared', user=user, tips=tips)
 
 def buildKeUrl(path, url=KINDLEEAR_SITE):
-    return urljoin('http://localhost:5000/', path) if current_app.debug else urljoin(url, path)
+    url = 'http://localhost:5000/' if app.debug or app.testing else url
+    return urljoin(url, path)
+    
 def srvErrStr(status_code, url=KINDLEEAR_SITE):
     return _('Cannot fetch data from {}, status: {}').format(url, UrlOpener.CodeMap(status_code))
 

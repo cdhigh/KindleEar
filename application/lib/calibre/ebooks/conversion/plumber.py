@@ -87,15 +87,14 @@ class Plumber:
         'tags', 'book_producer', 'language', 'pubdate', 'timestamp'
         ]
 
-    #recipes: 编译好的recipes列表
+    #input_: 输入，编译好的recipes列表或包含html和相关图像的一个字典
     #output: 输出文件绝对路径名，也可能是一个BytesIO
     #user: KeUser 实例
-    def __init__(self, recipes, output, output_fmt=None, abort_after_input_dump=False, override_input_metadata=False, view_kepub=False):
-        self.recipes = recipes
+    def __init__(self, input_, output, input_fmt, output_fmt=None, abort_after_input_dump=False):
+        self.input_ = input_
         self.output = output
         self.log = Log() #calibre里面使用的log和python标准库使用的logging不兼容，所以不要外面传递了
         self.abort_after_input_dump = abort_after_input_dump
-        self.override_input_metadata = override_input_metadata
         self.pipeline_options = _pipeline_options
         
         if not isinstance(output, io.BytesIO) and not output_fmt:
@@ -107,11 +106,12 @@ class Plumber:
                     output_fmt = '.oeb'
                 output_fmt = output_fmt[1:].lower()
 
-        self.input_plugin = RecipeInput()
+        self.input_plugin = plugin_for_input_format(input_fmt)
         self.output_plugin = plugin_for_output_format(output_fmt)
         if self.output_plugin is None:
             raise ValueError(f'No plugin to handle output format: {output_fmt}')
 
+        self.input_fmt = input_fmt
         self.output_fmt = output_fmt
         self.input_options  = self.input_plugin.options.union(self.input_plugin.common_options)
         self.output_options = self.output_plugin.options.union(self.output_plugin.common_options)
@@ -376,10 +376,10 @@ class Plumber:
                 if os.path.exists(x):
                     shutil.rmtree(x)
                     
-        self.output_plugin.specialize_options(self.log, self.opts, 'recipe')
+        self.output_plugin.specialize_options(self.log, self.opts, self.input_fmt)
         #根据需要，创建临时目录或创建内存缓存
         system_temp_dir = os.environ.get('TEMP_DIR')
-        if system_temp_dir:
+        if system_temp_dir and self.input_fmt != 'html':
             tdir = PersistentTemporaryDirectory(prefix='plumber_', dir=system_temp_dir)
             fs = FsDictStub(tdir)
         else:
@@ -389,7 +389,7 @@ class Plumber:
         #调用calibre.customize.conversion.InputFormatPlugin.__call__()，然后调用输入插件的convert()在目标目录生成一大堆文件，包含opf
         #__call__()返回传入的 fs 实例，其属性 opfname 保存了opf文件的路径名
         try:
-            self.oeb = self.input_plugin(self.recipes, self.opts, 'recipe', self.log, tdir, fs)
+            self.oeb = self.input_plugin(self.input_, self.opts, self.input_fmt, self.log, tdir, fs)
         except Exception as e:
             self.log.warning('Failed to execute recipes: {}'.format(str(e)))
             fs.clear()
@@ -441,8 +441,7 @@ class Plumber:
         from calibre.ebooks.oeb.transforms.jacket import RemoveFirstImage
         RemoveFirstImage()(self.oeb, self.opts, self.user_metadata)
         from calibre.ebooks.oeb.transforms.metadata import MergeMetadata
-        MergeMetadata()(self.oeb, self.user_metadata, self.opts,
-                override_input_metadata=self.override_input_metadata)
+        MergeMetadata()(self.oeb, self.user_metadata, self.opts, override_input_metadata=False)
 
         from calibre.ebooks.oeb.transforms.structure import DetectStructure
         DetectStructure()(self.oeb, self.opts)

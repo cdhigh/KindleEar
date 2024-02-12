@@ -8,9 +8,7 @@ from ..base_handler import *
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import send_to_kindle
 from ..utils import local_time
-from ..lib.recipe_helper import GenerateRecipeSource
-from calibre.web.feeds.recipes import compile_recipe
-from config import *
+from build_ebook import urls_to_book
 
 bpUrl2Book = Blueprint('bpUrl2Book', __name__)
 
@@ -63,7 +61,7 @@ def Url2BookRoute():
         log.info('[DEBUG] debug file sent!')
         return 'Debug file sent!'
         
-    book = url_to_book(subject, urls.split('|'), user)
+    book = urls_to_book(urls.split('|'), subject, user)
     if book:
         send_to_kindle(user, subject, book)
         rs = f"Sent {subject}.{user.book_type}"
@@ -72,20 +70,3 @@ def Url2BookRoute():
         rs = "[Url2Book]Fetch url failed."
     return rs
 
-#仅通过一个url列表构建一本电子书，返回电子书二进制内容，格式为user.book_type
-def url_to_book(title, urls, user):
-    feeds = [(title, url) for url in urls]
-    src = GenerateRecipeSource(title, feeds, user)
-    try:
-        ro = compile_recipe(src)
-    except Exception as e:
-        default_log.warning('Failed to compile recipe {}: {}'.format(title, e))
-        return None
-
-    #合并自定义css
-    if user.css_content:
-        ro.extra_css = ro.extra_css + '\n\n' + user.css_content if ro.extra_css else user.css_content
-
-    output = io.BytesIO()
-    ConvertRecipeToEbook(ro, output, user)
-    return output.getvalue()

@@ -3,12 +3,11 @@
 #账号管理页面
 
 import hashlib, datetime
-from flask import Blueprint, request, url_for, render_template, redirect, session
+from flask import Blueprint, request, url_for, render_template, redirect, session, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
 from ..utils import new_secret_key, str_to_int
-from config import *
 
 bpAdmin = Blueprint('bpAdmin', __name__)
 
@@ -19,15 +18,17 @@ def Admin():
     user = get_login_user()
 
     #只有管理员才能管理其他用户
-    users = KeUser.get_all() if user.name == ADMIN_NAME else None
-    return render_template('admin.html', title='Admin', tab='admin', user=user, users=users, admin_name=ADMIN_NAME)
+    adminName = app.config['ADMIN_NAME']
+    users = KeUser.get_all() if user.name == adminName else None
+    return render_template('admin.html', title='Admin', tab='admin', user=user, users=users, admin_name=adminName)
 
 @bpAdmin.post("/admin", endpoint='AdminPost')
 @login_required(forAjax=True)
 def AdminPost():
+    adminName = app.config['ADMIN_NAME']
     form = request.form
     user = get_login_user()
-    users = KeUser.get_all() if user.name == ADMIN_NAME else None
+    users = KeUser.get_all() if user.name == adminName else None
     actType = form.get('actType')
 
     if actType == 'change': #修改当前登陆账号的密码
@@ -44,7 +45,7 @@ def AdminPost():
             if not all((oldPassword, newP1, newP2)):
                 tips = _("The username or password is empty.")
             elif user.passwd != pwd:
-                tips = _("Old password is wrong.")
+                tips = _("The old password is wrong.")
             elif newP1 != newP2:
                 tips = _("The two new passwords are dismatch.")
             else:
@@ -59,11 +60,11 @@ def AdminPost():
         expiration = str_to_int(form.get('new_u_expiration', '0'))
 
         specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}', ',', ';', '|']
-        if user.name != ADMIN_NAME: #只有管理员能添加账号
+        if user.name != adminName: #只有管理员能添加账号
             tips = _("You do not have sufficient privileges.")
         elif not all((userName, password1, password2)):
             tips = _("The username or password is empty.")
-        elif any([char in user.name for char in specialChars]):
+        elif any([char in userName for char in specialChars]):
             tips = _("The username includes unsafe chars.")
         elif password1 != password2:
             tips = _("The two new passwords are dismatch.")
@@ -77,19 +78,19 @@ def AdminPost():
                 tips = _("The password includes non-ascii chars.")
             else:
                 au = KeUser(name=userName, passwd=pwd, kindle_email='', enable_send=False,
-                    send_time=7, timezone=TIMEZONE, book_type="epub", secret_key=secret_key, 
+                    send_time=7, timezone=app.config['TIMEZONE'], book_type="epub", secret_key=secret_key, 
                     expiration_days=expiration, share_links={'key': new_secret_key()},
                     book_title='KindleEar', book_language='en')
                 if expiration:
                     au.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
 
                 au.save()
-                users = KeUser.get_all() if user.name == ADMIN_NAME else None
+                users = KeUser.get_all() if user.name == adminName else None
                 tips = 'ok'
         return {'status': tips}
     elif actType == 'delete': #删除账号，使用ajax请求的，返回一个字典
         name = form.get('name')
-        if name and (name != ADMIN_NAME) and (session.get('userName') in (ADMIN_NAME, name)):
+        if name and (name != adminName) and (session.get('userName') in (adminName, name)):
             u = KeUser.get_or_none(KeUser.name == name)
             if not u:
                 return {'status': _("The username '{}' does not exist.").format(name)}
@@ -104,8 +105,12 @@ def AdminPost():
 
 #管理员修改其他账户的密码
 @bpAdmin.route("/mgrpwd/<name>", endpoint='AdminManagePassword')
-@login_required(ADMIN_NAME)
+@login_required()
 def AdminManagePassword(name):
+    user = get_login_user()
+    if user.name != app.config['ADMIN_NAME']:
+        return redirect(url_for("bpLogin.Login"))
+
     u = KeUser.get_or_none(KeUser.name == name)
     expiration = 0
     if not u:
@@ -117,16 +122,20 @@ def AdminManagePassword(name):
     return render_template('adminmgrpwd.html', tips=tips, userName=name, expiration=expiration)
 
 @bpAdmin.post("/mgrpwd/<name>", endpoint='AdminManagePasswordPost')
-@login_required(ADMIN_NAME)
+@login_required()
 def AdminManagePasswordPost(name):
     form = request.form
-    name = form.get('name')
+    fname = form.get('name')
     p1 = form.get('p1')
     p2 = form.get('p2')
     expiration = str_to_int(form.get('ep', '0'))
     tips = _("Username is empty.")
 
-    if name and name != ADMIN_NAME:
+    user = get_login_user()
+    if user.name != app.config['ADMIN_NAME']:
+        return redirect(url_for("bpLogin.Login"))
+
+    if name and name != app.config['ADMIN_NAME']:
         u = KeUser.get_or_none(KeUser.name == name)
         if not u:
             tips = _("The username '{}' does not exist.").format(name)

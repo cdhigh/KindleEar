@@ -2,13 +2,15 @@
 # -*- coding:utf-8 -*-
 #封装后台的任务队列，以适用不同的平台部署要求
 #Author: cdhigh <https://github.com/cdhigh>
+import os, json
 
-import json
-from config import TASK_QUEUE_SERVICE
-
-if TASK_QUEUE_SERVICE == "gae":
+__TASK_QUEUE_SERVICE = os.getenv('TASK_QUEUE_SERVICE')
+if __TASK_QUEUE_SERVICE == "gae":
     from google.cloud import tasks_v2
     DEFAULT_QUEUE_NAME = "default"
+
+    def init_task_queue_service(app):
+        pass
 
     #外部调用此接口即可
     def create_delivery_task(payload: dict):
@@ -35,24 +37,29 @@ if TASK_QUEUE_SERVICE == "gae":
         #task = tasks_v2.Task(httpRequest=httpRequest)
         #taskParent = client.queue_path(APP_ID, SERVER_LOCATION, DEFAULT_QUEUE_NAME)
         #return client.create_task(tasks_v2.CreateTaskRequest(parent=taskParent, task=task))
-
     
-elif TASK_QUEUE_SERVICE == 'celery':
+elif __TASK_QUEUE_SERVICE == 'celery':
     from celery import Celery, Task, shared_task
     from ..work.worker import WorkerImpl
 
-    def celery_init_app(app):
+    def init_task_queue_service(app):
         class FlaskTask(Task):
             def __call__(self, *args, **kwargs):
                 with app.app_context():
                     return self.run(*args, **kwargs)
+                    
+        app.config.from_mapping(
+            CELERY={'broker_url': app.config['CELERY_BROKER_URL'],
+                'result_backend': app.config['CELERY_RESULT_BACKEND'],
+                'task_ignore_result': True,
+            },)
 
         celery_app = Celery(app.name, task_cls=FlaskTask)
         celery_app.config_from_object(app.config["CELERY"])
         celery_app.set_default()
         app.extensions["celery"] = celery_app
         return celery_app
-
+    
     @shared_task(ignore_result=True)
     def start_celery_worker_impl(userName: str, idList: list):
         return WorkerImpl(userName, idList)

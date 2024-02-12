@@ -11,20 +11,19 @@ def py3_repr(x):
         ans = ans[1:]
     return ans
 
-
+#根据输入的一些信息，自动创建一个recipe的源码
 def GenerateRecipeSource(title, feeds, user, max_articles=30, isfulltext=False, language=None):
     classname = 'BasicUserRecipe%d' % int(time.time())
     title = str(title).strip() or classname
     indent = ' ' * 8
     feedTitles = []
     feedsStr = []
-    if feeds:
-        if len(feeds[0]) > 1:
-            for title, url in feeds:
-                feedsStr.append(f'{indent}({py3_repr(title)}, {py3_repr(url)}),')
-                feedTitles.append(title)
-        else:
-            feedsStr = [f'{indent}{py3_repr(url)},' for url in feeds]
+    if feeds and isinstance(feeds[0], (tuple, list)):
+        for title, url in feeds:
+            feedsStr.append(f'{indent}({py3_repr(title)}, {py3_repr(url)}),')
+            feedTitles.append(title)
+    else:
+        feedsStr = [f'{indent}{py3_repr(url)},' for url in feeds]
     
     feeds = 'feeds          = [\n{}\n    ]'.format('\n'.join(feedsStr)) if feedsStr else ''
     desc = 'News from {}'.format(', '.join(feedTitles)) if feedTitles else 'Deliver from KindleEar'

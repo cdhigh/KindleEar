@@ -4,7 +4,7 @@
 
 import datetime, hashlib, io
 from urllib.parse import quote_plus, unquote_plus, urljoin
-from flask import Blueprint, url_for, render_template, redirect, session, send_file, abort
+from flask import Blueprint, url_for, render_template, redirect, session, send_file, abort, current_app as app
 from flask_babel import gettext as _
 from PIL import Image
 from ..base_handler import *
@@ -12,23 +12,18 @@ from ..back_end.db_models import *
 from ..utils import local_time, ke_encrypt, ke_decrypt, str_to_bool
 from ..lib.pocket import Pocket
 from ..lib.urlopener import UrlOpener
-from config import *
 
 bpAdv = Blueprint('bpAdv', __name__)
 
-#高级设置的主入口
-#def AdvSettings():
-#    return redirect(url_for("bpAdv.AdvDeliverNow"))
-
 #现在推送
-@bpAdv.route("/adv", endpoint='AdvSettings')
+@bpAdv.route("/adv", endpoint='AdvDeliverNowEntry')
 @bpAdv.route("/advdelivernow", endpoint='AdvDeliverNow')
 @login_required()
 def AdvDeliverNow():
     user = get_login_user()
     recipes = user.get_booked_recipe()
     return render_template('advdelivernow.html', tab='advset', user=user, 
-        advCurr='delivernow', recipes=recipes, gae_in_email=USE_GAE_INBOUND_EMAIL)
+        advCurr='delivernow', recipes=recipes, gae_in_email=app.config['USE_GAE_INBOUND_EMAIL'])
 
 #设置邮件白名单
 @bpAdv.route("/advwhitelist", endpoint='AdvWhiteList')
@@ -36,7 +31,7 @@ def AdvDeliverNow():
 def AdvWhiteList():
     user = get_login_user()
     return render_template('advwhitelist.html', tab='advset',user=user, 
-        advCurr='whitelist', adminName=ADMIN_NAME, gae_in_email=USE_GAE_INBOUND_EMAIL)
+        advCurr='whitelist', adminName=app.config['ADMIN_NAME'], gae_in_email=app.config['USE_GAE_INBOUND_EMAIL'])
 
 @bpAdv.post("/advwhitelist", endpoint='AdvWhiteListPost')
 @login_required()
@@ -73,7 +68,7 @@ def AdvArchive():
     shareLinks.pop('key', None)
     
     return render_template('advarchive.html', tab='advset', user=user, advCurr='archive', appendStrs=appendStrs,
-        shareLinks=shareLinks, gae_in_email=USE_GAE_INBOUND_EMAIL)
+        shareLinks=shareLinks, gae_in_email=app.config['USE_GAE_INBOUND_EMAIL'])
 
 @bpAdv.post("/advarchive", endpoint='AdvArchivePost')
 @login_required()
@@ -134,7 +129,7 @@ def AdvDel():
 def AdvImport(tips=None):
     user = get_login_user()
     return render_template('advimport.html', tab='advset', user=user, advCurr='import', tips=tips,
-        gae_in_email=USE_GAE_INBOUND_EMAIL)
+        gae_in_email=app.config['USE_GAE_INBOUND_EMAIL'])
 
 @bpAdv.post("/advimport", endpoint='AdvImportPost')
 @login_required()
@@ -148,7 +143,7 @@ def AdvImportPost():
             rssList = opml.from_string(upload.read())
         except Exception as e:
             return render_template('advimport.html', tab='advset', user=user, advCurr='import', tips=str(e),
-                gae_in_email=USE_GAE_INBOUND_EMAIL)
+                gae_in_email=app.config['USE_GAE_INBOUND_EMAIL'])
         
         for o in walkOpmlOutline(rssList):
             title, url, isfulltext = o.text, unquote_plus(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
@@ -233,7 +228,7 @@ def AdvUploadCoverImage(tips=None):
     jsonCovers = json.dumps(covers)
     return render_template('advcoverimage.html', tab='advset', user=user, advCurr='uploadcoverimage', 
         uploadUrl=url_for("bpAdv.AdvUploadCoverAjaxPost"), covers=covers, jsonCovers=jsonCovers,
-        tips=tips, gae_in_email=USE_GAE_INBOUND_EMAIL)
+        tips=tips, gae_in_email=app.config['USE_GAE_INBOUND_EMAIL'])
 
 #AJAX接口的上传封面图片处理函数
 @bpAdv.post("/advuploadcoverajax", endpoint='AdvUploadCoverAjaxPost')
@@ -293,7 +288,7 @@ def AdvUploadCss(tips=None):
     return render_template('advuploadcss.html', tab='advset',
         user=user, advCurr='uploadcss', formation=url_for("bpAdv.AdvUploadCssAjaxPost"), 
         deletecsshref=url_for("bpAdv.AdvDeleteCssAjaxPost"), tips=tips, 
-        gae_in_email=USE_GAE_INBOUND_EMAIL)
+        gae_in_email=app.config['USE_GAE_INBOUND_EMAIL'])
 
 #AJAX接口的上传CSS处理函数
 @bpAdv.post("/advuploadcssajax", endpoint='AdvUploadCssAjaxPost')
@@ -343,8 +338,8 @@ def AdvOAuth2(authType):
         return 'Auth Type ({}) Unsupported!'.format(authType)
         
     user = get_login_user()
-    cbUrl = urljoin(KE_DOMAIN, '/oauth2cb/pocket?redirect=/advarchive')
-    pocket = Pocket(POCKET_CONSUMER_KEY, cbUrl)
+    cbUrl = urljoin(app.config['KE_DOMAIN'], '/oauth2cb/pocket?redirect=/advarchive')
+    pocket = Pocket(app.config['POCKET_CONSUMER_KEY'], cbUrl)
     try:
         request_token = pocket.get_request_token()
         url = pocket.get_authorize_url(request_token)
@@ -363,7 +358,7 @@ def AdvOAuth2Callback(authType):
         
     user = get_login_user()
     
-    pocketInst = Pocket(POCKET_CONSUMER_KEY)
+    pocketInst = Pocket(app.config['POCKET_CONSUMER_KEY'])
     request_token = session.get('pocket_request_token', '')
     shareLinks = user.share_links
     try:

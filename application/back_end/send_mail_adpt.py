@@ -6,7 +6,6 @@
 #https://cloud.google.com/appengine/docs/standard/python3/reference/services/bundled/google/appengine/api/mail
 #https://cloud.google.com/appengine/docs/standard/python3/services/mail
 import os, datetime, zipfile
-from config import *
 from ..utils import local_time, ke_decrypt
 from ..base_handler import save_delivery_log
 
@@ -55,17 +54,18 @@ def send_to_kindle(user, title, attachment, fileWithTime=True):
 #统一的发送邮件函数
 def send_mail(user, srv_type, to, subject, body, attachments=None, html=None):
     sm_service = user.send_mail_service
+    sender = os.getenv('SRC_EMAIL')
     if srv_type == 'gae':
-        gae_send_mail(SRC_EMAIL, to, subject, body, attachments=attachments)
+        gae_send_mail(sender, to, subject, body, attachments=attachments)
     elif srv_type == 'sendgrid':
         apikey = sm_service.get('apikey', '')
-        grid_send_mail(apikey, SRC_EMAIL, to, subject, body, attachments=attachments)
+        grid_send_mail(apikey, sender, to, subject, body, attachments=attachments)
     elif srv_type == 'smtp':
         host = sm_service.get('host', '')
         port = sm_service.get('port', 587)
         username = sm_service.get('username', '')
         password = ke_decrypt(sm_service.get('password', ''), user.secret_key)
-        smtp_send_mail(SRC_EMAIL, to, subject, body, smtp_host=host, 
+        smtp_send_mail(sender, to, subject, body, smtp_host=host, 
             username=username, password=password, smtp_port=port, 
             attachments=attachments)
     elif srv_type == 'local':
@@ -99,7 +99,7 @@ def send_html_mail(user, to, title, html, attachments, textContent=None):
     size = 0
     status = 'ok'
     try:
-        send_mail(SRC_EMAIL, to, title, textContent, **extraArgs)
+        send_mail(os.getenv('SRC_EMAIL'), to, title, textContent, **extraArgs)
     except Exception as e:
         status = str(e)
     

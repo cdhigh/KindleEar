@@ -12,7 +12,6 @@ from ..back_end.db_models import *
 from ..utils import str_to_bool
 from ..lib.urlopener import UrlOpener
 from ..lib.recipe_helper import GetBuiltinRecipeInfo, GetBuiltinRecipeSource
-from config import *
 from .library import KINDLEEAR_SITE, LIBRARY_MGR, SUBSCRIBED_FROM_LIBRARY, LIBRARY_GETSRC, buildKeUrl
 
 bpSubscribe = Blueprint('bpSubscribe', __name__)
@@ -56,7 +55,7 @@ def MySubscriptionPost():
         return redirect(url_for("bpSubscribe.MySubscription", tips=(_("Title or url is empty!"))))
 
     if not url.lower().startswith('http'): #http and https
-        url = 'https://' + url
+        url = ('https:/' if url.startswith('/') else 'https://') + url
 
     #判断是否重复
     if url.lower() in [item.url.lower() for item in user.all_custom_rss()]:
@@ -125,7 +124,7 @@ def FeedsAjaxPost(actType):
                 respDict.update(params)
         else: #自定义RSS
             if not url.lower().startswith('http'):
-                url = 'https://' + url
+                url = ('https:/' if url.startswith('/') else 'https://') + url
                 respDict['url'] = url
 
             #判断是否重复
@@ -197,9 +196,7 @@ def RecipeAjaxPost(actType):
     needSubscription = recipe.needs_subscription or False
 
     if actType == 'unsubscribe': #退订
-        dbInst = user.get_booked_recipe(recipeId)
-        if dbInst:
-            dbInst.delete_instance()
+        BookedRecipe.delete().where((BookedRecipe.user == user.name) & (BookedRecipe.recipe_id == recipeId)).execute()
         return {'status':'ok', 'id': recipeId, 'title': title, 'desc': desc}
     elif actType == 'subscribe': #订阅
         separated = str_to_bool(form.get('separated', ''))
@@ -221,11 +218,9 @@ def RecipeAjaxPost(actType):
         return respDict
     elif actType == 'delete': #删除已经上传的recipe
         if recipeType == 'builtin':
-            return {'status': _('You can only delete the uploaded recipe')}
+            return {'status': _('You can only delete the uploaded recipe.')}
 
-        dbInst = BookedRecipe.get_or_none(BookedRecipe.recipe_id == recipeId)
-        if dbInst:
-            dbInst.delete_instance()
+        BookedRecipe.delete().where((BookedRecipe.user == user.name) & (BookedRecipe.recipe_id == recipeId)).execute()
         recipe.delete_instance()
         return {'status': 'ok', 'id': recipeId}
     elif actType == 'schedule': #设置某个recipe的自定义推送时间

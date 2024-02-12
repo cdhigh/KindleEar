@@ -12,7 +12,6 @@ from calibre.constants import numeric_version
 from calibre import walk, relpath, unicode_path, strftime, force_unicode
 from calibre.web.feeds.recipes import compile_recipe
 from calibre.web.feeds.news import BasicNewsRecipe, DEFAULT_MASTHEAD_IMAGE
-from calibre.utils.date import now as nowf
 from calibre.utils.localization import canonicalize_lang
 from calibre.ebooks.metadata import MetaInformation
 from calibre.ebooks.metadata.opf2 import OPFCreator
@@ -303,11 +302,11 @@ class RecipeInput(InputFormatPlugin):
         mi.publisher = 'KindleEar'
         #修正Kindle固件5.9.x将作者显示为日期的BUG
         authorFmt = self.user.author_format
+        now = datetime.datetime.utcnow() + datetime.timedelta(hours=self.user.timezone)
         if authorFmt:
-            now = datetime.datetime.utcnow() + datetime.timedelta(hours=self.user.timezone)
-            now = now.strftime(authorFmt)
-            mi.author_sort = now
-            mi.authors = [now]
+            snow = now.strftime(authorFmt)
+            mi.author_sort = snow
+            mi.authors = [snow]
         else:
             mi.author_sort = 'KindleEar'
             mi.authors = ['KindleEar']
@@ -315,7 +314,7 @@ class RecipeInput(InputFormatPlugin):
             mi.publication_type = f'periodical:magazine:{title}'
         elif recipe1.publication_type:
             mi.publication_type = f'book:{recipe1.publication_type}:{title}'
-        mi.timestamp = nowf()
+        mi.timestamp = now
         article_titles = []
         aseen = set()
         for (af, aa) in self.aborted_articles:
