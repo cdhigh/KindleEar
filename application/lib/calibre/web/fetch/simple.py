@@ -284,10 +284,10 @@ class RecursiveFetcher:
                 data = response(resp.content)
                 data.newurl = resp.url
             else:
-                raise HTTPError(url, resp.status_code)
-        except URLError as err:
-            if hasattr(err, 'code') and err.code in responses:
-                raise FetchError(responses[err.code])
+                raise Exception(f'status: {resp.status_code}')
+        except Exception as err: #URLError
+            #if hasattr(err, 'code') and err.code in responses:
+            #    raise FetchError(responses[err.code])
             #is_temp = False
             #reason = getattr(err, 'reason', None)
             #if isinstance(reason, socket.gaierror):
@@ -362,8 +362,8 @@ class RecursiveFetcher:
                     continue
                 try:
                     data = self.fetch_url(iurl)
-                except Exception:
-                    self.log.exception('Could not fetch stylesheet ', iurl)
+                except Exception as e:
+                    self.log.exception(f'Could not fetch stylesheet {iurl} : {str(e)}')
                     continue
                 stylepath = os.path.join(diskpath, 'style'+str(c)+'.css')
                 with self.stylemap_lock:
@@ -387,8 +387,8 @@ class RecursiveFetcher:
                             continue
                         try:
                             data = self.fetch_url(iurl)
-                        except Exception:
-                            self.log.exception('Could not fetch stylesheet ', iurl)
+                        except Exception as e:
+                            self.log.exception(f'Could not fetch stylesheet {iurl} : {str(e)}')
                             continue
                         c += 1
                         stylepath = os.path.join(diskpath, 'style'+str(c)+'.css')
@@ -431,11 +431,11 @@ class RecursiveFetcher:
                     continue
                 try:
                     data = self.fetch_url(iurl)
-                    if data == b'GIF89a\x01':
+                    if not data or data == b'GIF89a\x01':
                         # Skip empty GIF files as PIL errors on them anyway
                         continue
-                except Exception:
-                    self.log.exception('Could not fetch image ', iurl)
+                except Exception as e:
+                    self.log.exception(f'Could not fetch image {iurl}: {str(e)}')
                     continue
             c += 1
             fname = ascii_filename('img'+str(c))
@@ -568,7 +568,7 @@ class RecursiveFetcher:
                 linkdiskpath = os.path.join(diskpath, linkdir)
                 self.fs.mkdir(linkdiskpath)
                 
-                if 1:
+                try:
                     self.current_dir = linkdiskpath
                     dsrc = self.fetch_url(iurl)
                     newbaseurl = dsrc.newurl
@@ -624,12 +624,12 @@ class RecursiveFetcher:
                     save_soup(soup, res, self.fs)
                     self.localize_link(tag, 'href', res)
                     
-                    #except Exception as err:
-                    #if isinstance(err, AbortArticle):
-                    #    raise
-                    #self.failed_links.append((iurl, traceback.format_exc()))
-                    #self.log.exception('Could not fetch link', iurl)
-                    #finally:
+                except Exception as e:
+                    if isinstance(e, AbortArticle):
+                        raise
+                    self.failed_links.append((iurl, traceback.format_exc()))
+                    self.log.exception(f'Could not fetch link {iurl} : {str(e)}')
+                finally:
                     self.current_dir = diskpath
                     self.files += 1
             #finally:

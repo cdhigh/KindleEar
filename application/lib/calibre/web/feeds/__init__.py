@@ -172,7 +172,7 @@ class Feed:
             author      = item.get('author', '')
             article = Article(id, title, link, author, description, published, content)
             delta = utcnow() - article.utctime
-            if delta.days*24*3600 + delta.seconds <= 24*3600*self.oldest_article:
+            if (self.oldest_article == 0) or (delta.days*24*3600 + delta.seconds <= 24*3600*self.oldest_article):
                 self.articles.append(article)
             else:
                 t = strftime('%a, %d %b, %Y %H:%M', article.localtime.timetuple())
@@ -229,7 +229,7 @@ class Feed:
             return
         article = Article(id, title, link, author, description, published, content)
         delta = utcnow() - article.utctime
-        if delta.days*24*3600 + delta.seconds <= 24*3600*self.oldest_article:
+        if (self.oldest_article == 0) or (delta.days*24*3600 + delta.seconds <= 24*3600*self.oldest_article):
             self.articles.append(article)
         else:
             try:

@@ -8,7 +8,7 @@ __copyright__ = '2008, Kovid Goyal <kovid at kovidgoyal.net>'
 import copy
 
 from lxml import html, etree
-from lxml.html.builder import HTML, HEAD, TITLE, STYLE, DIV, BODY, \
+from lxml.html.builder import HTML, HEAD, META, TITLE, STYLE, DIV, BODY, \
         STRONG, BR, SPAN, A, HR, UL, LI, H2, H3, IMG, P as PT, \
         TABLE, TD, TR
 
@@ -68,7 +68,7 @@ class EmbeddedContent(Template):
         content = article.content if article.content else ''
         summary = article.summary if article.summary else ''
         text = content if len(content) > len(summary) else summary
-        head = HEAD(TITLE(article.title))
+        head = HEAD(META(charset="utf-8"), TITLE(article.title))
         if style:
             head.append(STYLE(style, type='text/css'))
         if extra_css:

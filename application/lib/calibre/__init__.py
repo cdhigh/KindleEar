@@ -7,6 +7,7 @@ import sys, os, re, time, builtins
 from polyglot.builtins import codepoint_to_chr, hasenv, native_string_type
 from math import floor
 from functools import partial
+import chardet as ext_chardet
 
 from calibre.constants import (preferred_encoding, __appname__, __version__, __author__,
         iswindows, plugins, filesystem_encoding, config_dir)

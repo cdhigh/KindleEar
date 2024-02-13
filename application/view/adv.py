@@ -23,7 +23,7 @@ def AdvDeliverNow():
     user = get_login_user()
     recipes = user.get_booked_recipe()
     return render_template('advdelivernow.html', tab='advset', user=user, 
-        advCurr='delivernow', recipes=recipes, gae_in_email=app.config['USE_GAE_INBOUND_EMAIL'])
+        advCurr='delivernow', recipes=recipes, in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
 
 #设置邮件白名单
 @bpAdv.route("/advwhitelist", endpoint='AdvWhiteList')
@@ -31,7 +31,7 @@ def AdvDeliverNow():
 def AdvWhiteList():
     user = get_login_user()
     return render_template('advwhitelist.html', tab='advset',user=user, 
-        advCurr='whitelist', adminName=app.config['ADMIN_NAME'], gae_in_email=app.config['USE_GAE_INBOUND_EMAIL'])
+        advCurr='whitelist', adminName=app.config['ADMIN_NAME'], in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
 
 @bpAdv.post("/advwhitelist", endpoint='AdvWhiteListPost')
 @login_required()
@@ -68,7 +68,7 @@ def AdvArchive():
     shareLinks.pop('key', None)
     
     return render_template('advarchive.html', tab='advset', user=user, advCurr='archive', appendStrs=appendStrs,
-        shareLinks=shareLinks, gae_in_email=app.config['USE_GAE_INBOUND_EMAIL'])
+        shareLinks=shareLinks, in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
 
 @bpAdv.post("/advarchive", endpoint='AdvArchivePost')
 @login_required()
@@ -129,7 +129,7 @@ def AdvDel():
 def AdvImport(tips=None):
     user = get_login_user()
     return render_template('advimport.html', tab='advset', user=user, advCurr='import', tips=tips,
-        gae_in_email=app.config['USE_GAE_INBOUND_EMAIL'])
+        in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
 
 @bpAdv.post("/advimport", endpoint='AdvImportPost')
 @login_required()
@@ -143,7 +143,7 @@ def AdvImportPost():
             rssList = opml.from_string(upload.read())
         except Exception as e:
             return render_template('advimport.html', tab='advset', user=user, advCurr='import', tips=str(e),
-                gae_in_email=app.config['USE_GAE_INBOUND_EMAIL'])
+                in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
         
         for o in walkOpmlOutline(rssList):
             title, url, isfulltext = o.text, unquote_plus(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
@@ -228,7 +228,7 @@ def AdvUploadCoverImage(tips=None):
     jsonCovers = json.dumps(covers)
     return render_template('advcoverimage.html', tab='advset', user=user, advCurr='uploadcoverimage', 
         uploadUrl=url_for("bpAdv.AdvUploadCoverAjaxPost"), covers=covers, jsonCovers=jsonCovers,
-        tips=tips, gae_in_email=app.config['USE_GAE_INBOUND_EMAIL'])
+        tips=tips, in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
 
 #AJAX接口的上传封面图片处理函数
 @bpAdv.post("/advuploadcoverajax", endpoint='AdvUploadCoverAjaxPost')
@@ -288,7 +288,7 @@ def AdvUploadCss(tips=None):
     return render_template('advuploadcss.html', tab='advset',
         user=user, advCurr='uploadcss', formation=url_for("bpAdv.AdvUploadCssAjaxPost"), 
         deletecsshref=url_for("bpAdv.AdvDeleteCssAjaxPost"), tips=tips, 
-        gae_in_email=app.config['USE_GAE_INBOUND_EMAIL'])
+        in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
 
 #AJAX接口的上传CSS处理函数
 @bpAdv.post("/advuploadcssajax", endpoint='AdvUploadCssAjaxPost')

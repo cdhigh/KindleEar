@@ -64,6 +64,7 @@ def ke_opts(user, options=None):
     options.setdefault('input_profile', 'kindle')
     options.setdefault('no_inline_toc', True)
     options.setdefault('dont_compress', True)
+    options.setdefault('dont_split_on_page_breaks', True)
     options['user'] = user
 
     options.setdefault('debug_pipeline', os.getenv('TEMP_DIR'))

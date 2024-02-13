@@ -43,7 +43,7 @@
                         <a href="/advdelivernow" class="pure-menu-link">{{_("Deliver now")}} </a>
                     </li>
                     {% endif -%}
-                    {% if gae_in_email %}
+                    {% if in_email_service == 'gae' -%}
                     {% if advCurr=='whitelist' -%}
                     <li class="pure-menu-item pure-menu-selected">
                         <span>{{_("White List")}}</span>
@@ -53,7 +53,7 @@
                         <a href="/advwhitelist" class="pure-menu-link">{{_("White List")}} </a>
                     </li>
                     {% endif -%}
-                    {% endif %}
+                    {% endif -%}
                     {% if advCurr=='archive' -%}
                     <li class="pure-menu-item pure-menu-selected">
                         <span>{{_("Archive")}}</span>

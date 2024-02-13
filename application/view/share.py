@@ -7,7 +7,6 @@ from urllib.parse import unquote_plus
 from bs4 import BeautifulSoup
 from flask import Blueprint, render_template, request, current_app as app
 from flask_babel import gettext as _
-from calibre import guess_type
 from calibre.web.feeds.news import recursive_fetch_url
 from ..base_handler import *
 from ..back_end.db_models import *
@@ -36,13 +35,11 @@ def Share():
         return "Some parameter is missing or wrong."
     
     user = KeUser.get_or_none(KeUser.name == userName)
-    if not user or not user.kindle_email or not user.share_links.get('key') != key:
+    print(user.to_dict())
+    if not user or not user.kindle_email or user.share_links.get('key') != key:
         return "The user does not exist."
     
     url = unquote_plus(url)
-    
-    #from lib.debug_utils import debug_mail
-    #debug_mail(content)
     
     if action in ('evernote', 'wiz'): #保存至evernote/wiz
         return SaveToEvernoteWiz(user, action, url, title)
@@ -79,9 +76,19 @@ def SaveToEvernoteWiz(user, action, orgUrl, title):
         soup.html.body.insert(0, p)
         
         #标注图片位置
+        attachments = []
         for img in soup.find_all('img', attrs={'src': True}):
+            src = img['src']
+            data = fs.read(os.path.join(fs.path, src))
+            if not data:
+                continue
+
+            if src.startswith('images/'):
+                src = src[7:]
+            img['src'] = src
+            attachments.append((src, data))
             p = soup.new_tag('p')
-            p.string = 'Image : ' + img['src']
+            p.string = 'Image : ' + src
             img.insert_after(p)
 
         try:
@@ -89,10 +96,6 @@ def SaveToEvernoteWiz(user, action, orgUrl, title):
         except:
             pass
         html = str(soup)
-
-        #图像附件
-        for fileName in filter(lambda x: (guess_type(x)[0] or '').startswith('image/'), fs.namelist()):
-            attachments.append((fileName.lstrip('/images/'), fs.read(fileName)))
 
     to = wizMail if action == 'wiz' else evernoteMail
     if html:

@@ -65,9 +65,15 @@ def SettingPost():
     sm_password = form.get('sm_password', '')
     sm_save_path = form.get('sm_save_path', '')
     send_mail_service = {'service': sm_srv_type, 'apikey': sm_apikey, 'host': sm_host,
-        'port': sm_port, 'username': sm_username, 'password': ke_encrypt(sm_password, user.secret_key), 
+        'port': sm_port, 'username': sm_username, 'password': '', 
         'save_path': sm_save_path}
-
+    #只有处于smtp模式并且密码存在才更新，空或几个星号则不更新
+    if sm_srv_type == 'smtp':
+        if sm_password and sm_password.strip('*'):
+            send_mail_service['password'] = ke_encrypt(sm_password, user.secret_key)
+        else:
+            send_mail_service['password'] = user.send_mail_service.get('password', '')
+    
     if not keMail:
         tips = _("Kindle E-mail is requied!")
     elif not myTitle:

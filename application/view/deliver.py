@@ -30,7 +30,6 @@ def Deliver():
 def MultiUserDelivery():
     bkQueue = defaultdict(list)
     sentCnt = 0
-    return
     for user in KeUser.select().where(KeUser.enable_send == True):
         now = tz_now(user.timezone)
         for book in user.get_booked_recipe():
@@ -58,12 +57,12 @@ def MultiUserDelivery():
             queueOneBook(bkQueue, user, book.recipe_id, book.separated)
             sentCnt += 1
     flushQueueToPush(bkQueue)
-    return "Put {} books into queue.".format(sentCnt)
+    return "Put {} recipes into queue.".format(sentCnt)
 
 #判断指定用户的书籍和订阅哪些需要推送
 #userName: 账号名
 #idList: recipe id列表，id格式：custom:xx,upload:xx,builtin:xx，为空则推送指定账号下所有订阅
-def SingleUserDelivery(userName: str, idList: list):
+def SingleUserDelivery(userName: str, idList: list=None):
     user = KeUser.get_or_none(KeUser.name == userName)
     if not user or not user.kindle_email:
         return render_template('autoback.html', tips=_('The username does not exist or the email is empty.'))
@@ -75,17 +74,17 @@ def SingleUserDelivery(userName: str, idList: list):
     else: #推送特定账号所有订阅的书籍
         recipesToPush = user.get_booked_recipe()
     
-    bkQueue = {user.name: []}
+    bkQueue = defaultdict(list)
     for bkRecipe in recipesToPush: #BookedRecipe实例
         queueOneBook(bkQueue, user, bkRecipe.recipe_id, bkRecipe.separated)
         sent.append(f'<i>{bkRecipe.title}</i>')
     flushQueueToPush(bkQueue)
     
     if sent:
-        tips = (_("The following recipe has been added to the push queue.") + '<br/>&nbsp;&nbsp;&nbsp;&nbsp;' 
+        tips = (_("The following recipes has been added to the push queue.") + '<br/>&nbsp;&nbsp;&nbsp;&nbsp;' 
             + '<br/>&nbsp;&nbsp;&nbsp;&nbsp;'.join(sent))
     else:
-        tips = _("There are no books to deliver.")
+        tips = _("There are no recipes to deliver.")
 
     return render_template('autoback.html', tips=tips)
 
@@ -95,6 +94,7 @@ def SingleUserDelivery(userName: str, idList: list):
 #recipeId: Recipe Id, custom:xx, upload:xx, builtin:xx
 #separated: 是否单独推送
 def queueOneBook(queueToPush: defaultdict, user: KeUser, recipeId: str, separated: bool):
+    recipeId = recipeId.replace(':', '__')
     if separated:
         create_delivery_task({"userName": user.name, "recipeId": recipeId})
     else:
@@ -106,6 +106,3 @@ def flushQueueToPush(queueToPush: defaultdict):
         create_delivery_task({'userName': name, 'recipeId': ','.join(queueToPush[name])})
 
 
-#用于除GAE以外的托管环境，使用cron执行此文件即可启动推送
-if __name__ == '__main__':
-    MultiUserDelivery()

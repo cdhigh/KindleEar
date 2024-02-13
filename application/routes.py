@@ -42,11 +42,11 @@ def RecipesFileRoute(recipes_file):
 
 @bpHome.route('/favicon.ico')
 def FaviconIcon():
-    return send_from_directory('static', 'favicon.ico')
+    return send_from_directory(current_app.static_folder, 'favicon.ico')
 
 @bpHome.route('/robots.txt')
 def RobotsTxt():
-    return send_from_directory('static', 'robots.txt')
+    return send_from_directory(current_app.static_folder, 'robots.txt')
 
 def register_routes(app):
     with app.app_context():
@@ -66,8 +66,8 @@ def register_routes(app):
             app.register_blueprint(library_offical.bpLibraryOffical)
 
         #使用GAE来接收邮件
-        if app.config['USE_GAE_INBOUND_EMAIL']:
+        if app.config['INBOUND_EMAIL_SERVICE'] == 'gae':
             from google.appengine.api import wrap_wsgi_app
-            from apps.view.inbound_email import bpInBoundEmail
+            from application.view.inbound_email import bpInBoundEmail
             app.wsgi_app = wrap_wsgi_app(app.wsgi_app)  #启用GAE邮件服务
             app.register_blueprint(bpInBoundEmail)

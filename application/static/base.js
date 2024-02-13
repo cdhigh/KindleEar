@@ -306,6 +306,7 @@ function SubscribeRecipe(id, separated) {
         my_booked_recipes.unshift(new_item);
         PopulateMySubscribed();
         $('.additional-btns').stop(true).hide();
+        $("#toast").fadeIn().delay(2000).fadeOut();
         //订阅后跳转到已订阅区段
         //$("html, body").animate({scrollTop: $("#mysubscribed").offset().top}, {duration:500, easing:"swing"});
       }

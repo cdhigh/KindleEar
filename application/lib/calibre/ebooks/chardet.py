@@ -11,7 +11,8 @@ _encoding_pats = (
     # XML declaration
     r'<\?[^<>]+encoding\s*=\s*[\'"](.*?)[\'"][^<>]*>',
     # HTML 5 charset
-    r'''<meta\s+charset=['"]([-_a-z0-9]+)['"][^<>]*>(?:\s*</meta>){0,1}''',
+    r'''<meta\s+[^<>]*\bcharset\s*=\s*['"]([-_a-z0-9]+)['"][^<>]*>(?:\s*</meta>){0,1}''',
+
     # HTML 4 Pragma directive
     r'''<meta\s+?[^<>]*?content\s*=\s*['"][^'"]*?charset=([-_a-z0-9]+)[^'"]*?['"][^<>]*>(?:\s*</meta>){0,1}''',
 )
@@ -105,18 +106,22 @@ _CHARSET_ALIASES = {"macintosh" : "mac-roman", "x-sjis" : "shift-jis"}
 
 
 def detect(bytestring):
+    from calibre import ext_chardet
     if isinstance(bytestring, str):
         bytestring = bytestring.encode('utf-8', 'replace')
-    try:
-        from calibre_extensions.uchardet import detect as implementation
-    except ImportError:
-        # People running from source without updated binaries
-        from cchardet import detect as cdi
 
-        def implementation(x):
-            return cdi(x).get('encoding') or ''
-    enc = implementation(bytestring).lower()
-    return {'encoding': enc, 'confidence': 1 if enc else 0}
+    return ext_chardet.detect(bytestring)
+    
+    #try:
+    #    from calibre_extensions.uchardet import detect as implementation
+    #except ImportError:
+    #    # People running from source without updated binaries
+    #    from cchardet import detect as cdi
+
+    #    def implementation(x):
+    #        return cdi(x).get('encoding') or ''
+    #enc = implementation(bytestring).lower()
+    #return {'encoding': enc, 'confidence': 1 if enc else 0}
 
 
 def force_encoding(raw, verbose, assume_utf8=False):
@@ -126,11 +131,11 @@ def force_encoding(raw, verbose, assume_utf8=False):
     except Exception:
         chardet = {'encoding':preferred_encoding, 'confidence':0}
     encoding = chardet['encoding']
-    if chardet['confidence'] < 1:
-        if verbose:
-            print(f'WARNING: Encoding detection confidence for {chardet["encoding"]} is {chardet["confidence"]}', file=sys.stderr)
-        if assume_utf8:
-            encoding = 'utf-8'
+    #if chardet['confidence'] < 1:
+    #    if verbose:
+    #        print(f'WARNING: Encoding detection confidence for {chardet["encoding"]} is {chardet["confidence"]}', file=sys.stderr)
+    #    if assume_utf8:
+    #        encoding = 'utf-8'
     if not encoding:
         encoding = preferred_encoding
     encoding = encoding.lower()
@@ -149,8 +154,9 @@ def detect_xml_encoding(raw, verbose=False, assume_utf8=False):
         if raw.startswith(bom):
             return raw[len(bom):], x
     encoding = None
+    raw4 = raw[:1024]
     for pat in lazy_encoding_pats(True):
-        match = pat.search(raw)
+        match = pat.search(raw4)
         if match:
             encoding = match.group(1)
             encoding = encoding.decode('ascii', 'replace')

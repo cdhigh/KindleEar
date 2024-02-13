@@ -23,11 +23,11 @@ DATABASE_PORT = 0
 DATABASE_USERNAME = ""
 DATABASE_PASSWORD = ""
 
-#If you need to use google appengine email receiving service, please set it to True
-USE_GAE_INBOUND_EMAIL = False
+#Email receiving service, "gae" | ""
+INBOUND_EMAIL_SERVICE = "gae"
 
-#Select the type of task queue, "gae", "celery", "cron"
-TASK_QUEUE_SERVICE = "celery"
+#Select the type of task queue, "gae" | "celery" | ""
+TASK_QUEUE_SERVICE = ""
 
 #If task queue service is celery
 CELERY_BROKER_URL = "redis://127.0.0.1:6379/"
@@ -35,7 +35,7 @@ CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/"
 
 #If this option is empty, temporary files will be stored in memory
 #Setting this option can reduce memory consumption, supports both relative and absolute paths
-TEMP_DIR = 'd:/temp'
+TEMP_DIR = ""
 
 #If the depolyment plataform supports multi-threads, set this option will boost the download speed
 DOWNLOAD_THREAD_NUM = 1

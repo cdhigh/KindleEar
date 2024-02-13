@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from flask import Blueprint, request, current_app as app
 from google.appengine.api import mail
 from calibre import guess_type
-from ..back_end.task_queue_adpt import create_http_task
+from ..back_end.task_queue_adpt import create_delivery_task
 from ..back_end.db_models import KeUser, WhiteList
 from ..back_end.send_mail_adpt import send_to_kindle
 from ..base_handler import *
@@ -120,7 +120,7 @@ def ReceiveMail(path):
         
     #通过邮件触发一次“现在投递”
     if to.lower() == 'trigger':
-        TrigDeliver(subject, userName)
+        create_delivery_task({'userName': userName, 'recipeId': subject})
         return "OK", 200
     
     #获取和解码邮件内容
@@ -215,18 +215,18 @@ def ReceiveMail(path):
         isDebug = bool(to.lower() == 'debug')
 
         if isDebug:
-            bookType = 'Debug'
+            action = 'debug'
         elif isBook:
-            bookType = 'Download'
+            action = 'download'
         else:
-            bookType = user.book_type
+            action = ''
         
         #url需要压缩，避免URL太长
-        params = {'u': userName,
+        params = {'userName': userName,
                  'urls': base64.urlsafe_b64encode(zlib.compress('|'.join(links).encode('utf-8'))).decode(),
-                 'type': bookType,
-                 'subj': subject[:SUBJECT_WORDCNT]}
-        create_http_task('/url2book', params)
+                 'action': action,
+                 'subject': subject[:SUBJECT_WORDCNT]}
+        create_url2book_task(params)
     else: #直接转发邮件正文
         imageContents = []
         if hasattr(message, 'attachments'):  #先判断是否有图片
@@ -270,23 +270,6 @@ def ReceiveMail(path):
                 m['content'] = "text/html; charset=utf-8"
             book = str(soup)
 
-        send_to_kindle(user, subject[:SUBJECT_WORDCNT], str(soup), fileWithTime=False)
+        send_to_kindle(user, subject[:SUBJECT_WORDCNT], book, fileWithTime=False)
     
     return "OK", 200
-
-#触发一次推送 
-#邮件主题为需要投递的书籍，为空或all则等同于网页的"现在投递"按钮
-#如果是书籍名，则单独投递，多个书籍名使用逗号分隔
-def TrigDeliver(subject, userName):
-    if subject.lower() in ('NoSubject', 'all'):
-        create_http_task('/deliver', {'u': userName})
-    else:
-        bkIds = []
-        for bk in subject.split(','):
-            trigBook = Book.get_or_none(Book.title == bk.strip())
-            if trigBook:
-                bkIds.append(str(trigBook.id))
-            else:
-                log.warning('Book not found : {}'.format(bk.strip()))
-        if bkIds:
-            create_http_task('/worker', {'u': userName, 'id_': ','.join(bkIds)})

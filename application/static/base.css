@@ -819,3 +819,17 @@ div[class="schedule_daytimes"] input {
 .imgupBox,.imgupBox1,.imgupBox2,.imgupBox3{
     border:solid 1px #ccc;
 }
+
+.toast {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ffe135;
+    color: #333;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+}

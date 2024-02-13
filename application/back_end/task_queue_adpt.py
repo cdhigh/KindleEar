@@ -16,6 +16,9 @@ if __TASK_QUEUE_SERVICE == "gae":
     def create_delivery_task(payload: dict):
         create_http_task('/worker', payload)
 
+    def create_url2book_task(payload: dict):
+        create_http_task('/url2book', payload)
+
     #创建一个任务
     #url: 任务要调用的链接
     #payload: 要传递给url的参数，为一个Python字典
@@ -41,6 +44,7 @@ if __TASK_QUEUE_SERVICE == "gae":
 elif __TASK_QUEUE_SERVICE == 'celery':
     from celery import Celery, Task, shared_task
     from ..work.worker import WorkerImpl
+    from ..work.url2book import Url2BookImpl
 
     def init_task_queue_service(app):
         class FlaskTask(Task):
@@ -61,11 +65,28 @@ elif __TASK_QUEUE_SERVICE == 'celery':
         return celery_app
     
     @shared_task(ignore_result=True)
-    def start_celery_worker_impl(userName: str, idList: list):
-        return WorkerImpl(userName, idList)
+    def start_celery_worker_impl(**payload):
+        return WorkerImpl(**payload)
+
+    @shared_task(ignore_result=True)
+    def start_celery_url2book(**payload):
+        return Url2BookImpl(**payload)
 
     def create_delivery_task(payload: dict):
-        payload = payload or {}
-        userName = payload.get('userName', None)
-        idList = payload.get('recipeId', None)
-        start_celery_worker_impl.delay(userName, idList)
+        start_celery_worker_impl.delay(**payload)
+
+    def create_url2book_task(payload: dict):
+        start_celery_url2book.delay(**payload)
+
+elif not __TASK_QUEUE_SERVICE:
+    from ..work.worker import WorkerImpl
+    from ..work.url2book import Url2BookImpl
+    def create_delivery_task(payload: dict):
+        return WorkerImpl(**payload)
+
+    def create_url2book_task(payload: dict):
+        return Url2BookImpl(**payload)
+
+    def init_task_queue_service(app):
+        pass
+        

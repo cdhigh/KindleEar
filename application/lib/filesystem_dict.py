@@ -309,7 +309,7 @@ class StubTemporaryFile:
     #fs: FileSystemDict 实例
     def __init__(self, suffix="", prefix="", dir=None, mode='w+b'):
         self.fs = None
-        self.filename = FileSystemDict.make_tempfile(self, suffix=suffix, prefix=prefix, dir_=dir, mode=mode)
+        self.filename = FileSystemDict.make_tempfile(suffix=suffix, prefix=prefix, dir_=dir, mode=mode)
     def __enter__(self):
         return self
     def __exit__(self, type=None, value=None, traceback=None):

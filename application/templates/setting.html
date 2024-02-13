@@ -25,9 +25,9 @@
       <div class="pure-control-group">
         <label>{{_("Auto Delivery")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="enable_send">
-          <option value="all" {% if user.enable_send %}selected="selected"{% endif %}>{{_("Enable all")}}</option>
-          <option value="recipes" {% if not user.enable_send %}selected="selected"{% endif %}>{{_("Enable recipes only")}}</option>
-          <option value="none" {% if not user.enable_send %}selected="selected"{% endif %}>{{_("Disable all")}}</option>
+          <option value="all" {% if user.enable_send %}selected="selected"{% endif %}>{{_("Recipes and custom RSS")}}</option>
+          <option value="recipes" {% if not user.enable_send %}selected="selected"{% endif %}>{{_("Recipes only")}}</option>
+          <option value="no" {% if not user.enable_send %}selected="selected"{% endif %}>{{_("Disable all")}}</option>
         </select>
       </div>
       <div class="pure-control-group">
@@ -207,7 +207,7 @@
       </div>
       <div class="pure-control-group" id="sm_password">
         <label>{{_("Password")}}</label>
-        <input type="password" name="sm_password" value="" class="pure-u-1 pure-u-sm-1-2" />
+        <input type="password" name="sm_password" value="{% if sm_srv.get('password', '') %}****{% endif %}" class="pure-u-1 pure-u-sm-1-2" />
       </div>
       <div class="pure-control-group" id="sm_save_path">
         <label>{{_("Save path")}}</label>

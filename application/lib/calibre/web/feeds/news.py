@@ -160,7 +160,7 @@ class BasicNewsRecipe(Recipe):
     feeds = None
 
     #: Max number of characters in the short description
-    summary_length         = 500
+    summary_length         = 300
 
     #: Convenient flag to disable loading of stylesheets for websites
     #: that have overly complex stylesheets unsuitable for conversion
@@ -1345,9 +1345,9 @@ class BasicNewsRecipe(Recipe):
         return feeds
 
     #如果有多个Recipe一起生成一本电子书，每个的index.html名字不一样
-    #index.html, index.10.html, ...
+    #index.html, index_10.html, ...
     def get_root_index_html_name(self):
-        suffix = '.html' if self.feed_index_start == 0 else f'.{self.feed_index_start}.html'
+        suffix = '.html' if self.feed_index_start == 0 else f'_{self.feed_index_start}.html'
         return f'index{suffix}'
 
     #实际下载feeds并创建index.html
@@ -1383,7 +1383,7 @@ class BasicNewsRecipe(Recipe):
         self.has_single_feed = (len(feeds) == 1)
         
         html = self.feeds2index(feeds)
-        #如果是多个BasicNewsRecipe一起生成电子书的话，第一个为index.html，之后的index.num.html
+        #如果是多个BasicNewsRecipe一起生成电子书的话，第一个为index.html，之后的index_num.html
         index = os.path.join(self.output_dir, self.get_root_index_html_name())
         self.fs.write(index, html, 'wb')
 
@@ -1453,6 +1453,11 @@ class BasicNewsRecipe(Recipe):
                     import traceback
                     req.exception = True
                     req.exc_callback(req, traceback.format_exc())
+
+        #统计看本Recipe的文章实际下载数量
+        article_num = sum(1 for feed in feeds for article in feed if article.downloaded)
+        if not article_num:
+            raise ValueError('No articles downloaded, aborting')
 
         for f, feed in enumerate(feeds, self.feed_index_start):
             html = self.feed2index(f, feeds) #生成每个feed对应的html，都叫index.html
@@ -1778,12 +1783,10 @@ class BasicNewsRecipe(Recipe):
         if index != file_name:
             self.fs.rename(file_name, index)
         
-        a = request.requestID[1]
-
         article = request.article
         self.log.debug('Downloaded article:', article.title, 'from', article.url)
         article.orig_url = article.url
-        article.url = 'article_%d/index.html'%a
+        article.url = f'article_{request.requestID[1]}/index.html'
         article.downloaded = True
         article.sub_pages  = downloads[1:]
         self.jobs_done += 1

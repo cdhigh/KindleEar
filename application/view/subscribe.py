@@ -324,13 +324,15 @@ def ViewRecipeSourceCode(id_):
     if recipeType == 'upload':
         recipe = Recipe.get_by_id_or_none(dbId)
         if recipe and recipe.src:
-            return htmlTpl.format(title=recipe.title, body=recipe.src)
+            src = recipe.src.replace('<', '&lt').replace('>', '&gt')
+            return htmlTpl.format(title=recipe.title, body=src)
         else:
             return htmlTpl.format(title="Error", body=_('The recipe does not exist.'))
     else: #内置recipe
         recipe = GetBuiltinRecipeInfo(recipeId)
         src = GetBuiltinRecipeSource(recipeId)
         if recipe and src:
+            src = src.replace('<', '&lt').replace('>', '&gt')
             return htmlTpl.format(title=recipe.get('title'), body=src)
         else:
             return htmlTpl.format(title="Error", body=_('The recipe does not exist.'))

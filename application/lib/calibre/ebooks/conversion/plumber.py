@@ -408,8 +408,13 @@ class Plumber:
         #        return
         self.opts_to_mi(self.user_metadata)
         if not hasattr(self.oeb, 'manifest'): #从一堆文件里面创建OEBBook实例
-            self.oeb = create_oebbook(self.log, self.oeb, self.opts, encoding=self.input_plugin.output_encoding,
-                removed_items=getattr(self.input_plugin, 'removed_items_to_ignore', ()))
+            try:
+                self.oeb = create_oebbook(self.log, self.oeb, self.opts, encoding=self.input_plugin.output_encoding,
+                    removed_items=getattr(self.input_plugin, 'removed_items_to_ignore', ()))
+            except Exception as e:
+                self.log.warning('Failed to create oebbook for recipes: {}'.format(str(e)))
+                fs.clear()
+                return
         
         self.input_plugin.postprocess_book(self.oeb, self.opts, self.log)
         self.opts.is_image_collection = self.input_plugin.is_image_collection

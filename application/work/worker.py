@@ -37,22 +37,12 @@ def GetAllRecipeSrc(user, idList):
         
         recipe = Recipe.get_by_id_or_none(dbId)
         if recipe:
+            title = recipe.title
             if recipeType == 'upload': #上传的Recipe
-                srcDict[recipe.title] = [bked, recipe, recipe.src]
-            elif recipe.isfulltext: #全文自定义RSS
-                ftRssList.append((bked, recipe))
-            else: #摘要自定义RSS
-                rssList.append((bked, recipe))
-
-    #全文和概要rss各建一个源码
-    title = user.book_title
-    if ftRssList:
-        feeds = [(item.title, item.url) for bked, item in ftRssList]
-        srcDict[title + '_f'] = [*ftRssList[0], GenerateRecipeSource(title, feeds, user, isfulltext=True)]
-
-    if rssList:
-        feeds = [(item.title, item.url) for bked, item in rssList]
-        srcDict[title] = [*rssList[0], GenerateRecipeSource(title, feeds, user, isfulltext=False)]
+                srcDict[title] = [bked, recipe, recipe.src]
+            else: #自定义RSS
+                src = GenerateRecipeSource(title, [(title, recipe.url)], user, isfulltext=recipe.isfulltext)
+                srcDict[title] = [bked, recipe, src]
     return srcDict
 
 # 实际下载文章和生成电子书并且发送邮件
@@ -68,9 +58,9 @@ def Worker():
 
 #执行实际抓取网页生成电子书任务
 #userName: 需要执行任务的账号名
-#idList: 需要投递的Recipe ID列表
+#recipeId: 需要投递的Recipe ID，如果有多个，使用逗号分隔
 #返回执行结果字符串
-def WorkerImpl(userName: str, idList: list, log=None):
+def WorkerImpl(userName: str, recipeId: list=None, log=None):
     if not userName:
         return "Parameters invalid."
 
@@ -82,17 +72,17 @@ def WorkerImpl(userName: str, idList: list, log=None):
         log = logging.getLogger('WorkerImpl')
         log.setLevel(logging.WARN)
     
-    if not idList:
-        idList = [item.recipe_id for item in user.get_booked_recipe()]
-    elif not isinstance(idList, list):
-        idList = idList.replace('__', ':').split(',')
+    if not recipeId:
+        recipeId = [item.recipe_id for item in user.get_booked_recipe()]
+    elif not isinstance(recipeId, list):
+        recipeId = recipeId.replace('__', ':').split(',')
     
-    if not idList:
+    if not recipeId:
         log.warning('There are nothing to push.')
         return 'There are nothing to push.'
 
     #编译recipe
-    srcDict = GetAllRecipeSrc(user, idList)
+    srcDict = GetAllRecipeSrc(user, recipeId)
     recipes = defaultdict(list) #编译好的recipe代码对象
     for title, (bked, recipeDb, src) in srcDict.items():
         try:
@@ -137,4 +127,12 @@ def WorkerImpl(userName: str, idList: list, log=None):
             save_delivery_log(user, title, 0, status='nonews')
 
     return '\n'.join(ret) if ret else "There are no new feeds available."
+
+
+#提供给外部不通过任务队列直接调用的接口
+def WorkerAllNow():
+    result = []
+    for user in KeUser.get_all():
+        result.append(WorkerImpl(user.name))
+    return '\n'.join(result)
 

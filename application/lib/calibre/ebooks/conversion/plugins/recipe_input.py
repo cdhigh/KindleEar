@@ -7,6 +7,7 @@ __docformat__ = 'restructuredtext en'
 
 import os, io, uuid, datetime
 from collections import defaultdict
+from bs4 import BeautifulSoup
 from calibre.customize.conversion import InputFormatPlugin, OptionRecommendation
 from calibre.constants import numeric_version
 from calibre import walk, relpath, unicode_path, strftime, force_unicode
@@ -19,20 +20,6 @@ from calibre.ebooks.metadata.toc import TOC
 
 class RecipeDisabled(Exception):
     pass
-
-TOP_INDEX_TMPL = """<?xml version='1.0' encoding='utf-8'?><html lang="{lang}"><head><title>{title}</title>
-<style type="text/css">
-.article_date {{color: gray; font-family: monospace;}}
-.article_description {{text-indent: 0pt;}}
-a.article {{font-weight: bold; text-align:left;}}
-a.feed {{font-weight: bold;}}
-.calibre_navbar {{font-family:monospace;}}
-</style></head><body>
-<div data-calibre-rescale="100"><p style="text-align:center"><img src="{masthead}" alt="masthead"/></p>
-<p style="text-align:right">{date}</p>
-<ul class="calibre_feed_list">
-{toc}
-</ul></div></body></html>"""
 
 class RecipeInput(InputFormatPlugin):
 
@@ -120,7 +107,7 @@ class RecipeInput(InputFormatPlugin):
         if not self.feeds: #让上层处理
             raise Exception('All feeds are empty, aborting.')
 
-        self.build_top_index(self.recipe_objects[0], output_dir, fs)
+        self.build_top_index(output_dir, fs)
         self.create_opf(output_dir, fs, self.user)
 
         opts.no_inline_navbars = orig_no_inline_navbars
@@ -128,28 +115,47 @@ class RecipeInput(InputFormatPlugin):
         fs.find_opf_path()
         return fs
 
-    #创建顶层的toc.html
-    def build_top_index(self, recipe1, output_dir, fs):
+    #将几个顶层的index.html合并
+    def build_top_index(self, output_dir, fs):
         if len(self.index_htmls) > 1:
-            toc = []
-            if recipe1.masthead_path:
-                mPath = recipe1.masthead_path
-            else:
-                mPath = os.path.join(output_dir, DEFAULT_MASTHEAD_IMAGE)
-                
-            for idx, (title, indexName) in enumerate(self.index_htmls):
-                #构建相对路径，os.path.relpath在这里兼容性不好
-                indexName = indexName.lstrip(output_dir).lstrip('/\\').replace(os.sep, '/')
-                fileName = unicode_path(indexName)
-                toc.append(f'<li id="recipe_{idx}"><a href="{fileName}" data-calibre-rescale="120" class="feed">{title}</a></li>')
+            firstName = os.path.join(output_dir, 'index.html')
+            soup1 = BeautifulSoup(fs.read(firstName), 'lxml')
+            title_tag = soup1.find('title')
+            title1 = title_tag.string if title_tag else 'KindleEar'
 
-            html = TOP_INDEX_TMPL.format(lang=recipe1.lang_for_html, title=self.user.book_title, date=strftime(recipe1.timefmt),
-                masthead=os.path.basename(mPath), toc='\n'.join(toc)).encode('utf-8')
-            index = os.path.join(output_dir, 'toc.html')
-            fs.write(index, html, 'wb')
-            self.top_index_file = 'toc.html'
-        else: #如果只有一个Recipe，则直接使用index.html
-            self.top_index_file = 'index.html'
+            #ul里面的li提取出来，外面套ul作为原先ul的一个li
+            ul1 = soup1.find('ul', class_='calibre_feed_list')
+            if ul1:
+                li_list = ul1.find_all("li")
+                if len(li_list) > 1:
+                    new_ul = soup1.new_tag("ul", attrs={'class': ['calibre_feed_list']})
+                    for li in li_list:
+                        li.extract()
+                        new_ul.append(li)
+
+                    new_li = soup1.new_tag("li", attrs={'class': ['calibre5']})
+                    new_li.append(soup1.new_string(title1))
+                    new_li.append(new_ul)
+                    ul1.append(new_li)
+            
+            for title, name in self.index_htmls[1:]:
+                fileName = os.path.join(output_dir, name)
+                soup = BeautifulSoup(fs.read(fileName), 'lxml')
+                ul = soup.find('ul', attrs={'class': ['calibre_feed_list']})
+                if ul:
+                    li_list = ul.find_all("li")
+                    if len(li_list) > 1:
+                        new_li = soup1.new_tag("li", attrs={'class': ['calibre5']})
+                        new_li.append(soup1.new_string(title))
+                        new_li.append(ul)
+                        ul1.append(new_li)
+                    elif li_list:
+                        ul1.append(li_list[0])
+                fs.delete(fileName) #删掉不要了
+
+            if title_tag:
+                title_tag.string = 'KindleEar'
+            fs.write(firstName, str(soup1).encode('utf-8'))
 
     #通过Feed对象列表构建一个opf文件，将这个函数从 BasicNewsRecipe 里面移出来，方便一次处理多个Recipe
     def create_opf(self, dir_, fs, user):
@@ -168,11 +174,7 @@ class RecipeInput(InputFormatPlugin):
             opf.guide.append(ref)
 
         #manifest 资源列表
-        manifest = []
-        if not onlyRecipe:
-            manifest.append(os.path.join(dir_, self.top_index_file))
-        for title, indexFile in self.index_htmls:
-            manifest.append(os.path.join(dir_, indexFile))
+        manifest = [os.path.join(dir_, 'index.html')]
         manifest.extend([os.path.join(dir_, 'feed_%d'% (i)) for i in range(len(self.feeds))])
         
         cPath, mPath = self.get_cover_masthead(dir_, recipe1, user, fs)
@@ -201,46 +203,44 @@ class RecipeInput(InputFormatPlugin):
     
     #创建多级TOC和书脊
     def create_toc_spine(self, opf, dir_):
+        recipe1 = self.recipe_objects[0]
+        onlyRecipe = len(self.recipe_objects) == 1
+        title = recipe1.title if onlyRecipe else 'Overview'
+        desc = recipe1.description if onlyRecipe else 'KindleEar'
+        author = recipe1.__author__ if onlyRecipe else 'KindleEar'
         #创建顶层toc
-        onlyRecipe = True if len(self.recipe_objects) == 1 else False
-        entries = [self.top_index_file]
+        entries = ['index.html']
         toc = TOC(base_path=dir_)
-        self.top_toc = []
-        self.play_order = 0
-        if not onlyRecipe:
-            for idx, (title, indexFile) in enumerate(self.index_htmls):
-                ro = self.recipe_objects[idx]
-                self.play_order += 1
-                self.top_toc.append(toc.add_item(indexFile, None, title, play_order=self.play_order, 
-                    description=ro.description, author=ro.__author__))
-                entries.append(indexFile)
-        else:
-            self.top_toc.append(toc)
+        self.play_order = 1
+        index_toc = toc.add_item('index.html', None, title, play_order=self.play_order, 
+            description=desc, author=author)
         
-        if len(self.feeds) == 1: #只有一个Feed时，直接将Article做为顶层目录
-            entries.append('feed_0/index.html')
-            self.add_article_toc(toc, entries, feedIdx=0)
-        else:
-            feedIdx = 0
-            for recipeIdx, recipe in enumerate(self.recipe_objects):
-                for feed in recipe.feed_objects:
-                    feedIndexFile = f'feed_{feedIdx}/index.html'
-                    entries.append(feedIndexFile)
-                    author = getattr(feed, 'author', None) or None
-                    desc = getattr(feed, 'description', None) or None
-                    self.play_order += 1
-                    item = self.top_toc[recipeIdx].add_item(feedIndexFile, None, feed.title, play_order=self.play_order, description=desc, author=author)
-                    self.add_article_toc(item, entries, feedIdx=feedIdx)
-                    feedIdx += 1
+        #if len(self.feeds) == 1: #只有一个Feed时，直接将Article做为顶层目录
+        #    entries.append('feed_0/index.html')
+        #    self.add_article_toc(self.index_toc, entries, feedIdx=0)
+        #else:
+        feedIdx = 0
+        for recipeIdx, recipe in enumerate(self.recipe_objects):
+            for feed in recipe.feed_objects:
+                feedIndexFile = f'feed_{feedIdx}/index.html'
+                entries.append(feedIndexFile)
+                author = getattr(feed, 'author', None) or None
+                desc = getattr(feed, 'description', None) or None
+                self.play_order += 1
+                item = toc.add_item(feedIndexFile, None, feed.title, play_order=self.play_order, description=desc, author=author)
+                self.add_article_toc(item, entries, feedIdx=feedIdx)
+                feedIdx += 1
 
         for i, p in enumerate(entries):
-            entries[i] = os.path.join(dir_, p.replace('/', os.sep))
+            entries[i] = os.path.join(dir_, p)
         opf.create_spine(entries)
         opf.set_toc(toc)
 
     #创建下级toc，包括文章toc或可能的文章内toc
+    #parent: 本级toc的父目录
+    #entries: 输出参数，用于保存所有添加到toc的html内容，用于之后创建spine
+    #feedIdx: 在本书内的Feed索引号
     def add_article_toc(self, parent, entries, feedIdx):
-        recipe1 = self.recipe_objects[0]
         feed = self.feeds[feedIdx]
         for idx, arti in enumerate(feed):
             if not getattr(arti, 'downloaded', False):
