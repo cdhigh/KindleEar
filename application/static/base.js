@@ -737,7 +737,7 @@ function insertBookmarkletGmailThis(subscribeUrl, mailPrefix) {
 }
 ///[end] my.html使用的js部分
 
-///[start] advdelivernow.html使用的部分
+///[start] adv_delivernow.html使用的部分
 //根据选择推送的订阅信息，更新接下来要访问服务器的链接参数，使用get而不使用post是因为gae的cron支持get访问
 function UpdateDeliverRecipeLink(name) {
   var recipeIds = [];
@@ -764,9 +764,9 @@ function SelectDeliverNone() {
     $(this).prop('checked', false);
   });
 };
-///[end] advdelivernow.html
+///[end] adv_delivernow.html
 
-///[start] advarchive.html
+///[start] adv_archive.html
 function verifyInstapaper() {
   var notifyInstapaperVerify = function () {
     $("#averInstapaper").html(i18n.verify);
@@ -798,9 +798,9 @@ function verifyInstapaper() {
     }
   });
 }
-///[end] advarchive.html
+///[end] adv_archive.html
 
-///[start] advuploadcss.html
+///[start] adv_uploadcss.html
 var AjaxFileUpload = {
   mimeType: '',
   form: '',
@@ -966,7 +966,7 @@ var AjaxFileUpload = {
     });
   }
 };
-///[end] advuploadcss.html
+///[end] adv_uploadcss.html
 
 ///[start] admin.html
 //添加一个账号
@@ -1045,7 +1045,7 @@ function DeleteAccount(name) {
 }
 ///[end] admin.html
 
-///[start] advcoverimage.html
+///[start] adv_uploadcover.html
 //根据封面的不同属性设置是否可以添加或删除
 function InitCoversWidgets() {
   for (var idx = 0; idx < 7; idx++) {
@@ -1066,7 +1066,7 @@ function InitCoversWidgets() {
 }
 
 //在封面图像上点击加号，弹出选择文件对话框，选择文件后预览并更新全局变量cover_images
-//cover_images 为advcoverimage.html定义的全局变量
+//cover_images 为adv_uploadcover.html定义的全局变量
 function ChooseCoverImage(idx) {
   $('#imgFile' + idx).click();
   $('#imgFile' + idx).off().on('change', function() {
@@ -1092,7 +1092,7 @@ function ChooseCoverImage(idx) {
 }
 
 //删除一个图像文件后，恢复默认图像
-//cover_images 为advcoverimage.html定义的全局变量
+//cover_images 为adv_uploadcover.html定义的全局变量
 function SetCoverToDefaultImg(idx) {
   var defaultName = '/images/cover' + idx + '.jpg';
   $('#img' + idx).attr("src", defaultName);
@@ -1102,7 +1102,7 @@ function SetCoverToDefaultImg(idx) {
 }
 
 //开始上传图像到服务器
-//cover_images 为advcoverimage.html定义的全局变量
+//cover_images 为adv_uploadcover.html定义的全局变量
 function startUploadCoversToServer(url) {
   var totalSize = 0;
   var fileDatas = new FormData();
@@ -1139,4 +1139,4 @@ function startUploadCoversToServer(url) {
       }
   });
 }
-///[end] advcoverimage.html
+///[end] adv_uploadcover.html

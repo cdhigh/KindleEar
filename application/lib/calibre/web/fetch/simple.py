@@ -580,7 +580,7 @@ class RecursiveFetcher:
                     elif self.encoding is not None:
                         dsrc = dsrc.decode(self.encoding, 'replace')
                     else:
-                        dsrc = xml_to_unicode(dsrc, self.verbose)[0]
+                        dsrc = xml_to_unicode(dsrc, self.verbose, assume_utf8=True)[0]
 
                     st = time.monotonic()
                     soup = self.get_soup(dsrc, url=iurl)

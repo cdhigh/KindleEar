@@ -40,9 +40,9 @@ from urlopener import UrlOpener
 from requests_file import LocalFileAdapter
 from filesystem_dict import FsDictStub
 
-MASTHEAD_WIDTH = 600
-MASTHEAD_HEIGHT = 60
+MASTHEAD_SIZE = (600, 60)
 DEFAULT_MASTHEAD_IMAGE = 'mastheadImage.gif'
+COVER_SIZE = (832, 1280)
 
 def classes(classes):
     q = frozenset(classes.split(' '))
@@ -746,7 +746,7 @@ class BasicNewsRecipe(Recipe):
         if isinstance(_raw, str):
             _raw = strip_encoding_declarations(_raw)
         else:
-            _raw = xml_to_unicode(_raw, strip_encoding_pats=True, resolve_entities=True)[0]
+            _raw = xml_to_unicode(_raw, strip_encoding_pats=True, resolve_entities=True, assume_utf8=True)[0]
         _raw = clean_xml_chars(_raw)
         if save_raw:
             with open(save_raw, 'wb') as f:
@@ -1093,19 +1093,19 @@ class BasicNewsRecipe(Recipe):
         user = self.options.user
         shareLinks = user.share_links
         aTags = []
-        for type_ in ['evernote', 'wiz', 'pocket', 'instapaper']:
+        for type_ in ['Evernote', 'Wiz', 'Pocket', 'Instapaper']:
             if shareLinks.get(type_, {}).get('enable'):
                 ashare = soup.new_tag('a', href=self.make_share_link(type_, user, url, soup))
                 ashare.string = _('Save to {}').format(type_)
                 aTags.append(ashare)
 
-        for type_ in ['xweibo', 'tweibo', 'facebook', 'x', 'tumblr']:
+        for type_ in ['Weibo', 'TencentWeibo', 'Facebook', 'X', 'Tumblr']:
             if shareLinks.get(type_):
                 ashare = soup.new_tag('a', href=self.make_share_link(type_, user, url, soup))
                 ashare.string =  _('Share on {}').format(type_)
                 aTags.append(ashare)
 
-        if shareLinks.get('browser'):
+        if shareLinks.get('Browser'):
             ashare = soup.new_tag('a', href=url)
             ashare.string = _('Open in browser')
             aTags.append(ashare)
@@ -1124,22 +1124,22 @@ class BasicNewsRecipe(Recipe):
         titleTag = soup.find('title')
         title = titleTag.string if titleTag else 'Untitled'
         keDomain = os.getenv('KE_DOMAIN')
-        if shareType in ('evernote', 'wiz'):
+        if shareType in ('Evernote', 'Wiz'):
             href = f"{keDomain}/share?act={shareType}&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}"
-        elif shareType == 'pocket':
+        elif shareType == 'Pocket':
             href = f'{keDomain}/share?act=pocket&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
-        elif shareType == 'instapaper':
+        elif shareType == 'Instapaper':
             href = f'{keDomain}/share?act=instapaper&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
-        elif shareType == 'xweibo':
-            href = f'http://v.t.sina.com.cn/share/share.php?url={quote_plus(url)}'
-        elif shareType == 'tweibo':
-            href = f'http://v.t.qq.com/share/share.php?url={quote_plus(url)}'
-        elif shareType == 'facebook':
-            href = f'http://www.facebook.com/share.php?u={quote_plus(url)}'
-        elif shareType == 'x':
-            href = f'http://twitter.com/home?status={quote_plus(url)}'
-        elif shareType == 'tumblr':
-            href = f'http://www.tumblr.com/share/link?url={quote_plus(url)}'
+        elif shareType == 'Weibo':
+            href = f'https://service.weibo.com/share/share.php?url={quote_plus(url)}'
+        elif shareType == 'TencentWeibo':
+            href = f'https://share.v.t.qq.com/index.php?c=share&a=index&url={quote_plus(url)}'
+        elif shareType == 'Facebook':
+            href = f'https://www.facebook.com/share.php?u={quote_plus(url)}'
+        elif shareType == 'X':
+            href = f'https://twitter.com/home?status={quote_plus(url)}'
+        elif shareType == 'Tumblr':
+            href = f'https://www.tumblr.com/share/link?url={quote_plus(url)}'
         else:
             href = ''
 
@@ -1374,10 +1374,14 @@ class BasicNewsRecipe(Recipe):
 
         if self.ignore_duplicate_articles is not None:
             feeds = self.remove_duplicate_articles(feeds)
-
-        self.download_cover() #如果cover_url设置的话
-        self.resolve_masthead() #这里固定使用默认的报头
-
+            
+        if self.feed_index_start == 0:
+            self.download_cover()
+            self.resolve_masthead()
+        else:
+            self.cover_path = None
+            self.masthead_path = None
+            
         if self.test:
             feeds = feeds[:self.test[0]]
         self.has_single_feed = (len(feeds) == 1)
@@ -1491,6 +1495,8 @@ class BasicNewsRecipe(Recipe):
                     cdata = resp.content
             if not cdata:
                 return
+
+            cdata = save_cover_data_to(cdata, resize_to=COVER_SIZE)
             self.cover_path = os.path.join(self.output_dir, 'cover.jpg')
             self.fs.write(self.cover_path, cdata, 'wb')
     
@@ -1566,9 +1572,6 @@ class BasicNewsRecipe(Recipe):
         'Override in subclass to use something other than the recipe title'
         return self.title
 
-    #MI_WIDTH = 600
-    #MI_HEIGHT = 60
-
     @classmethod
     def default_masthead_image(cls):
         with open(os.path.join(appDir, 'application', 'images', DEFAULT_MASTHEAD_IMAGE), 'rb') as f:
@@ -1579,7 +1582,7 @@ class BasicNewsRecipe(Recipe):
         #        width=self.MI_WIDTH, height=self.MI_HEIGHT)
 
     def prepare_masthead_image(self, data, out_path):
-        save_cover_data_to(data, out_path, resize_to=(MASTHEAD_WIDTH, MASTHEAD_HEIGHT), grayscale=True)
+        save_cover_data_to(data, out_path, resize_to=MASTHEAD_SIZE)
         #prepare_masthead_image(path_to_image, out_path, self.MI_WIDTH, self.MI_HEIGHT)
     
     def publication_date(self):

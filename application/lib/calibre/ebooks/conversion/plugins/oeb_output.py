@@ -93,8 +93,8 @@ class OEBOutput(OutputFormatPlugin):
                 if len(manifest_item) == 1 and \
                         manifest_item[0].get('media-type',
                                 '').startswith('image/'):
-                    self.log.warn('The cover image has an id != "cover". Renaming'
-                            ' to work around bug in Nook Color')
+                    #self.log.warn('The cover image has an id != "cover". Renaming'
+                    #        ' to work around bug in Nook Color')
 
                     from calibre.ebooks.oeb.base import uuid_id
                     newid = uuid_id()

@@ -41,7 +41,6 @@ class KeUser(MyBaseModel): # kindleEar User
     share_links = JSONField(default=JSONField.dict_default) #evernote/wiz/pocket/instapaper包含子字典，微博/facebook/twitter等仅包含0/1
     
     covers = JSONField(default=JSONField.dict_default) #保存封面图片数据库ID {'order':,'cover0':,...'cover6':}
-    css_content = TextField(default='') #保存用户上传的css样式表
     send_mail_service = JSONField(default=JSONField.dict_default) #{'service':,...}
     custom = JSONField(default=JSONField.dict_default) #留着扩展，避免后续一些小特性还需要升级数据表结构
     
@@ -77,7 +76,7 @@ class KeUser(MyBaseModel): # kindleEar User
 
     #获取封面二进制数据
     def get_cover_data(self):
-        data = None
+        data = b''
         covers = self.covers or {}
         order = covers.get('order', 'random')
         idx = random.randint(0, 6) if (order == 'random') else tz_now(self.timezone).weekday()
@@ -89,12 +88,22 @@ class KeUser(MyBaseModel): # kindleEar User
                 with open(os.path.join(appDir, 'application', cover), 'rb') as f:
                     data = f.read()
             except:
-                data = None
+                data = b''
         elif cover.startswith('/dbimage/'):
             dbItem = UserBlob.get_by_id_or_none(cover[9:])
-            data = dbItem.data if dbItem else None
-
+            data = dbItem.data if dbItem else b''
         return data
+
+    #获取用户自定义的CSS
+    #css为Recipe预定义的CSS
+    #返回两个CSS合并后的字符串
+    def get_extra_css(self, css=''):
+        dbItem = UserBlob.get_or_none((UserBlob.user == self.name) & (UserBlob.name == 'css'))
+        if dbItem:
+            extra_css = dbItem.data.decode('utf-8')
+            return (css + '\n\n' + extra_css) if css else extra_css
+        else:
+            return css
 
 #用户的一些二进制内容，比如封面之类的
 class UserBlob(MyBaseModel):
@@ -170,6 +179,7 @@ class DeliverLog(MyBaseModel):
 class WhiteList(MyBaseModel):
     mail = CharField()
     user = CharField()
+    time = DateTimeField(default=datetime.datetime.utcnow)
 
 #Shared RSS links from other users [for kindleear.appspot.com only]
 class SharedRss(MyBaseModel):

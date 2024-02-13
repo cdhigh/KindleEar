@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block css -%}
+<style type="text/css">
+.submenu-box {
+    padding: .5em 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.submenu-box .pure-menu-selected {
+    font-weight: bold;
+    color: #0078e7;
+}
+
+.submenu-box span {
+    display: block;
+    padding: .5em 1em;
+    cursor: default;
+}
+
+@media (min-width: 768px) {
+    .submenu-box {
+        margin-right: 20px;
+    }
+}
+</style>
+{% endblock -%}
+
+{% block content -%}
+<div class="main">
+  <div class="pure-g">
+    <div class="pure-u-1 pure-u-md-1-5">
+      <div class="pure-menu">
+        <ul class="pure-menu-list submenu-box">
+          {% if advCurr=='deliverNow' -%}
+          <li class="pure-menu-item pure-menu-selected">
+            <span>{{_("Deliver now")}}</span>
+          </li>
+          {% else -%}
+          <li class="pure-menu-item">
+            <a href="/adv/delivernow" class="pure-menu-link">{{_("Deliver now")}} </a>
+          </li>
+          {% endif -%}
+          {% if in_email_service == 'gae' -%}
+          {% if advCurr=='whitelist' -%}
+          <li class="pure-menu-item pure-menu-selected">
+            <span>{{_("White List")}}</span>
+          </li>
+          {% else -%}
+          <li class="pure-menu-item">
+            <a href="/adv/whitelist" class="pure-menu-link">{{_("White List")}} </a>
+          </li>
+          {% endif -%}
+          {% endif -%}
+          {% if advCurr=='archive' -%}
+          <li class="pure-menu-item pure-menu-selected">
+            <span>{{_("Archive")}}</span>
+          </li>
+          {% else -%}
+          <li class="pure-menu-item">
+            <a href="/adv/archive" class="pure-menu-link">{{_("Archive")}} </a>
+          </li>
+          {% endif -%}
+          {% if advCurr=='import' -%}
+          <li class="pure-menu-item pure-menu-selected">
+            <span>{{_("Import Feeds")}}</span>
+          </li>
+          {% else -%}
+          <li class="pure-menu-item">
+            <a href="/adv/import" class="pure-menu-link">{{_("Import Feeds")}} </a>
+          </li>
+          {% endif -%}
+          {% if advCurr=='uploadCover' -%}
+          <li class="pure-menu-item pure-menu-selected">
+            <span>{{_("Cover Image")}}</span>
+          </li>
+          {% else -%}
+          <li class="pure-menu-item">
+            <a href="/adv/cover" class="pure-menu-link">{{_("Cover Image")}}</a>
+          </li>
+          {% endif -%}
+          {% if advCurr=='uploadCss' -%}
+          <li class="pure-menu-item pure-menu-selected">
+            <span>{{_("Stylesheet")}}</span>
+          </li>
+          {% else -%}
+          <li class="pure-menu-item">
+            <a href="/adv/css" class="pure-menu-link">{{_("Stylesheet")}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
+          </li>
+          {% endif -%}
+        </ul>
+      </div>
+    </div>
+    <div class="pure-u-1 pure-u-md-4-5">
+      {% block advcontent -%}
+      {% endblock -%}
+    </div>
+  </div>
+</div>
+{% endblock -%}

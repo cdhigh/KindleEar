@@ -1,4 +1,4 @@
-{% extends "advbase.html" %}
+{% extends "adv_base.html" %}
 {% block titleTag -%}
 <title>{{ _("White list") }} - KindleEar</title>
 {% endblock -%}
@@ -15,11 +15,11 @@
     {{_("Emails sent to %(name)sxxx@appid.appspotmail.com will be transferred to your email.", name='' if (user.name == adminName) else user.name + '__')}}
     </small></p>
     <div class="box-list">
-      {%- for lst in user.white_lists() -%}
+      {%- for wl in user.white_lists() -%}
       <div class="box">
-        {{ lst.mail }}
+        {{ wl.mail }}
         <div class="cornerControls">
-          <a href="/advdel?delwlist={{ lst.id }}" class="actionButton">{{ _("Delete") }}</a>
+          <a href="/advdel?wlist_id={{wl.id}}" class="actionButton">{{ _("Delete") }}</a>
         </div>
       </div>
       {%- endfor -%}

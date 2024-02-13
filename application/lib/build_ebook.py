@@ -42,8 +42,7 @@ def urls_to_book(urls: list, title: str, user, options: dict=None, output_fmt: s
         return None
 
     #合并自定义css
-    if user.css_content:
-        ro.extra_css = ro.extra_css + '\n\n' + user.css_content if ro.extra_css else user.css_content
+    ro.extra_css = user.get_extra_css(ro.extra_css)
 
     return recipes_to_ebook(ro, user, options, output_fmt)
 
@@ -62,7 +61,8 @@ def ke_opts(user, options=None):
     options = options or {}
     options.setdefault('output_profile', user.device)
     options.setdefault('input_profile', 'kindle')
-    options.setdefault('no_inline_toc', True)
+    options.setdefault('no_inline_toc', False)
+    options.setdefault('epub_inline_toc', True)
     options.setdefault('dont_compress', True)
     options.setdefault('dont_split_on_page_breaks', True)
     options['user'] = user

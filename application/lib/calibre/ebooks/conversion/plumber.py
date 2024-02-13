@@ -364,7 +364,7 @@ class Plumber:
         css_parser.log.setLevel(logging.WARN)
         #get_types_map()  # Ensure the mimetypes module is initialized
 
-        if self.opts.debug_pipeline is not None:
+        if self.opts.debug_pipeline:
             self.opts.verbose = max(self.opts.verbose, 4)
             self.opts.debug_pipeline = os.path.abspath(self.opts.debug_pipeline)
             if not os.path.exists(self.opts.debug_pipeline):
@@ -398,7 +398,7 @@ class Plumber:
         #如果只是要制作epub的话，到目前为止，工作已经完成大半
         #将self.oeb指向的目录拷贝到OEBPS目录，加一个mimetype和一个META-INF/container.xml文件，这两个文件内容是固定的
         #再将这些文件和文件夹一起打包为zip格式，就是完整的epub电子书了
-        #if self.opts.debug_pipeline is not None:
+        #if self.opts.debug_pipeline:
         #   fs.dump(self.opts.debug_pipeline)
         #   if self.abort_after_input_dump:
         #       return
@@ -419,7 +419,7 @@ class Plumber:
         self.input_plugin.postprocess_book(self.oeb, self.opts, self.log)
         self.opts.is_image_collection = self.input_plugin.is_image_collection
         self.flush()
-        if self.opts.debug_pipeline is not None:
+        if self.opts.debug_pipeline:
             out_dir = os.path.join(self.opts.debug_pipeline, '0.parsed')
             self.dump_oeb(self.oeb, out_dir)
             self.log.info('Parsed HTML written to:{}'.format(out_dir))
@@ -475,7 +475,7 @@ class Plumber:
         from calibre.ebooks.oeb.transforms.jacket import Jacket
         Jacket()(self.oeb, self.opts, self.user_metadata)
         
-        if self.opts.debug_pipeline is not None:
+        if self.opts.debug_pipeline:
             out_dir = os.path.join(self.opts.debug_pipeline, '1.structure')
             self.dump_oeb(self.oeb, out_dir)
             self.log.info('Structured HTML written to:{}'.format(out_dir))
@@ -545,7 +545,7 @@ class Plumber:
 
         self.oeb.toc.rationalize_play_orders()
         
-        if self.opts.debug_pipeline is not None:
+        if self.opts.debug_pipeline:
             out_dir = os.path.join(self.opts.debug_pipeline, '2.processed')
             self.dump_oeb(self.oeb, out_dir)
             self.log.info('Processed HTML written to:{}'.format(out_dir))
@@ -559,6 +559,7 @@ class Plumber:
             fs_out = FsDictStub(tmpdir)
         else:
             fs_out = FsDictStub(None)
+        fs_out = fs
 
         #这才是启动输出转换，生成电子书
         with self.output_plugin:

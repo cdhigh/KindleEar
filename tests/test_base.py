@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 from contextlib import contextmanager
 from functools import wraps
-import datetime, logging, os, re, unittest, json
+import datetime, logging, os, re, unittest, json, io
 from unittest import mock
 
 VERBOSITY = int(os.environ.get('KE_TEST_VERBOSITY') or 1)
@@ -10,9 +10,9 @@ SLOW_TESTS = bool(os.environ.get('KE_SLOW_TESTS'))
 
 from application import init_app
 app = init_app(__name__, debug=True)
-celery_app = app.extensions["celery"]
+celery_app = app.extensions.get("celery", None)
 
-from application.back_end.db_models import create_database_tables, connect_database, close_database
+from application.back_end.db_models import *
 
 class BaseTestCase(unittest.TestCase):
     login_required = None

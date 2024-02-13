@@ -107,7 +107,7 @@ class RecipeInput(InputFormatPlugin):
         if not self.feeds: #让上层处理
             raise Exception('All feeds are empty, aborting.')
 
-        self.build_top_index(output_dir, fs)
+        #self.build_top_index(output_dir, fs)
         self.create_opf(output_dir, fs, self.user)
 
         opts.no_inline_navbars = orig_no_inline_navbars
@@ -162,8 +162,12 @@ class RecipeInput(InputFormatPlugin):
         recipe1 = self.recipe_objects[0]
         onlyRecipe = True if len(self.recipe_objects) == 1 else False
         mi = self.build_meta(recipe1, onlyRecipe)
-        
+        cover_data, cPath, mPath = self.get_cover_masthead(dir_, recipe1, user, fs)
+        mi.cover = cPath
+        mi.cover_data = ('jpg', cover_data) # if cover_data else (None, None)
+
         opf = OPFCreator(dir_, mi, fs)
+        opf.cover = None
         # Add mastheadImage entry to <guide> section
         mp = getattr(recipe1, 'masthead_path', None)
         if mp is not None: # and os.access(mp, os.R_OK):
@@ -174,14 +178,8 @@ class RecipeInput(InputFormatPlugin):
             opf.guide.append(ref)
 
         #manifest 资源列表
-        manifest = [os.path.join(dir_, 'index.html')]
+        manifest = [mPath, cPath] #os.path.join(dir_, 'index.html')
         manifest.extend([os.path.join(dir_, 'feed_%d'% (i)) for i in range(len(self.feeds))])
-        
-        cPath, mPath = self.get_cover_masthead(dir_, recipe1, user, fs)
-        opf.cover = cPath
-        manifest.append(cPath)
-        manifest.append(mPath)
-
         opf.create_manifest_from_files_in(manifest)
 
         #上面的语句执行时ncx还没有生成，要在函数末才生成，需要手动添加
@@ -203,17 +201,17 @@ class RecipeInput(InputFormatPlugin):
     
     #创建多级TOC和书脊
     def create_toc_spine(self, opf, dir_):
-        recipe1 = self.recipe_objects[0]
-        onlyRecipe = len(self.recipe_objects) == 1
-        title = recipe1.title if onlyRecipe else 'Overview'
-        desc = recipe1.description if onlyRecipe else 'KindleEar'
-        author = recipe1.__author__ if onlyRecipe else 'KindleEar'
+        #recipe1 = self.recipe_objects[0]
+        #onlyRecipe = len(self.recipe_objects) == 1
+        #title = recipe1.title if onlyRecipe else 'Overview'
+        #desc = recipe1.description if onlyRecipe else 'KindleEar'
+        #author = recipe1.__author__ if onlyRecipe else 'KindleEar'
         #创建顶层toc
-        entries = ['index.html']
+        entries = []
         toc = TOC(base_path=dir_)
-        self.play_order = 1
-        index_toc = toc.add_item('index.html', None, title, play_order=self.play_order, 
-            description=desc, author=author)
+        self.play_order = 0
+        #index_toc = toc.add_item('index.html', None, title, play_order=self.play_order, 
+        #    description=desc, author=author)
         
         #if len(self.feeds) == 1: #只有一个Feed时，直接将Article做为顶层目录
         #    entries.append('feed_0/index.html')
@@ -330,7 +328,7 @@ class RecipeInput(InputFormatPlugin):
         desc = recipe1.description if onlyRecipe else 'KindleEar'
         if not isinstance(desc, str):
             desc = desc.decode('utf-8', 'replace')
-        mi.comments = (_('Articles in this issue:') + '\n\n' + '\n\n'.join(article_titles)) + '\n\n' + desc
+        mi.comments = (_('Articles in this issue:') + '\n' + '\n'.join(article_titles)) + '\n\n' + desc
 
         language = canonicalize_lang(recipe1.language if onlyRecipe else self.user.book_language)
         if language is not None:
@@ -342,19 +340,19 @@ class RecipeInput(InputFormatPlugin):
     #获取封面和报头路径，如果没有，使用默认图像
     def get_cover_masthead(self, dir_, recipe1, user, fs):
         cPath = getattr(recipe1, 'cover_path', None)
-        if not cPath:
+        if cPath:
+            cover_data = fs.read(cPath, 'rb')
+        else:
+            cPath = os.path.join(dir_, 'cover.jpg')
             cover_data = user.get_cover_data()
-            if cover_data:
-                cPath = os.path.join(dir_, 'cover.jpg')
-                self.cover_path = cPath
-                fs.write(cPath, cover_data, 'wb')
+            fs.write(cPath, cover_data)
 
         mPath = getattr(recipe1, 'masthead_path', None)
         if not mPath:
             mh_data = BasicNewsRecipe.default_masthead_image()
             mPath = os.path.join(dir_, DEFAULT_MASTHEAD_IMAGE)
             fs.write(mPath, mh_data, 'wb')
-        return cPath, mPath
+        return cover_data, cPath, mPath
 
     def postprocess_book(self, oeb, opts, log):
         return

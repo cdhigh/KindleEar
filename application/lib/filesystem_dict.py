@@ -102,13 +102,13 @@ class FileSystemDict(dict):
 class FsDictStub(object):
     #path: 如果path=str，则使用操作系统文件读写，否则使用path对应的FileSystemDict读写
     def __init__(self, path, log=None, ignore_opf=False):
-        if not path:
-            self.path = '/'
-            self.fs_dict = FileSystemDict()
-        else:
+        if path:
             assert(os.path.isabs(path))
             self.path = path
             self.fs_dict = None
+        else:
+            self.path = '/'
+            self.fs_dict = FileSystemDict()
         self.log = log if log else default_log
         self.opfname = None
         if not ignore_opf:
@@ -194,12 +194,11 @@ class FsDictStub(object):
     def clear(self):
         if self.fs_dict:
             self.fs_dict.clear()
-        else:
+        elif self.path != '/':
             try:
                 shutil.rmtree(self.path, ignore_errors=True)
             except:
                 pass
-        self.fs_dict = None
 
     def namelist(self):
         if self.fs_dict:

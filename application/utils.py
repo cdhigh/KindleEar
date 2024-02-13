@@ -28,7 +28,7 @@ def str_to_int(txt, default=0):
 
 #字符串转bool(txt)
 def str_to_bool(txt):
-    return (txt or '').lower().strip() in ('', 'yes', 'true', 'on', 'enable', 'enabled', '1', 'checked', 'none')
+    return (txt or '').lower().strip() in ('yes', 'true', 'on', 'enable', 'enabled', '1', 'checked')
 
 #返回字符串格式化时间
 def local_time(fmt="%Y-%m-%d %H:%M", tz=0):

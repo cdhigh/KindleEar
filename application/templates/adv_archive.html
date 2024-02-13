@@ -1,13 +1,13 @@
-{% extends "advbase.html" %}
+{% extends "adv_base.html" %}
 {% block titleTag -%}
 <title>{{ _("Archive") }} - KindleEar</title>
 {% endblock -%}
 
 {% block advcontent -%}
-{% set evernote = shareLinks.get('evernote', {}) %}
-{% set wiz = shareLinks.get('wiz', {}) %}
-{% set instapaper = shareLinks.get('instapaper', {}) %}
-{% set pocket = shareLinks.get('pocket', {}) %}
+{% set evernote = shareLinks.get('Evernote', {}) %}
+{% set wiz = shareLinks.get('Wiz', {}) %}
+{% set instapaper = shareLinks.get('Instapaper', {}) %}
+{% set pocket = shareLinks.get('Pocket', {}) %}
 <form class="pure-form" action="" method="POST">
   <fieldset>
     <legend><h3>{{_("Archive")}}</h3></legend>
@@ -16,7 +16,7 @@
       <label for="enable_evernote" class="pure-checkbox">
         <input id="enable_evernote" name="evernote" type="checkbox" 
         {% if evernote.get('enable') %} checked="1" {% endif %} />
-        {{appendStrs['evernote']}}
+        {{appendStrs['Evernote']}}
       </label>
       <input type="text" name="evernote_mail" placeholder="Evernote Email" value="{{evernote.get('email', '')}}" class="pure-u-1" />
     </div>
@@ -24,7 +24,7 @@
     <div class="pure-control-group">
       <label for="enable_wiz" class="pure-checkbox">
         <input id="enable_wiz" name="wiz" type="checkbox" {% if wiz.get('enable') %}checked="1"{% endif %} />
-        {{appendStrs["wiz"]}}
+        {{appendStrs["Wiz"]}}
       </label>
       <input type="text" name="wiz_mail" placeholder="Wiz Email" value="{{ wiz.get('email', '') }}" class="pure-u-1" />
     </div>
@@ -34,7 +34,7 @@
     <div class="pure-control-group">
       <label for="enable_pocket" class="pure-checkbox">
         <input id="enable_pocket" name="pocket" type="checkbox" {% if pocket.get('enable') and pocket.get('access_token') %} checked="1" {% endif %} {% if not pocket.get('access_token') %} disabled="1" {% endif %} />
-        {{appendStrs["pocket"]}}&nbsp;&nbsp;&nbsp;&nbsp;
+        {{appendStrs["Pocket"]}}&nbsp;&nbsp;&nbsp;&nbsp;
         {%if pocket.get('access_token') -%}
         [<a href="/oauth2/pocket" style="text-decoration:none;color:silver;">{{ _("Authorized") }}</a>]
         {%else -%}
@@ -46,7 +46,7 @@
       <label for="enable_instapaper" class="pure-u-1 pure-checkbox">
         <input id="enable_instapaper" name="instapaper" type="checkbox"
         {% if instapaper.get('enable') %} checked="1"{% endif %} />
-        {{appendStrs["instapaper"]}}
+        {{appendStrs["Instapaper"]}}
       </label>
       <div class="pure-u-1 pure-u-sm-2-5">
         <input type="text" name="instapaper_username" id="instapaper_username" placeholder="{{ _('Email or Username') }}" value="{{ instapaper.get('username', '') }}" onchange="notifyInstapaperVerify();" class="pure-u-1 pure-u-sm-23-24" />
@@ -63,28 +63,28 @@
 
     <div class="pure-control-group">
       <label for="enable_facebook" class="pure-checkbox">
-        <input id="enable_facebook" name="facebook" type="checkbox" {% if shareLinks.get('facebook') %}checked="1"{% endif %} />
-        {{appendStrs["facebook"]}}
+        <input id="enable_facebook" name="facebook" type="checkbox" {% if shareLinks.get('Facebook') %}checked="1"{% endif %} />
+        {{appendStrs["Facebook"]}}
       </label>
       <label for="enable_twitter" class="pure-checkbox">
-        <input id="enable_twitter" name="x" type="checkbox" {% if shareLinks.get('x') %}checked="1"{% endif %} />
-        {{appendStrs["twitter"]}}
+        <input id="enable_twitter" name="x" type="checkbox" {% if shareLinks.get('X') %}checked="1"{% endif %} />
+        {{appendStrs["X"]}}
       </label>
       <label for="enable_tumblr" class="pure-checkbox">
-        <input id="enable_tumblr" name="tumblr" type="checkbox" {% if shareLinks.get('tumblr') %}checked="1"{% endif %} />
-        {{appendStrs["tumblr"]}}
+        <input id="enable_tumblr" name="tumblr" type="checkbox" {% if shareLinks.get('Tumblr') %}checked="1"{% endif %} />
+        {{appendStrs["Tumblr"]}}
       </label>
-      <label for="enable_xweibo" class="pure-checkbox">
-        <input id="enable_xweibo" name="xweibo" type="checkbox" {% if shareLinks.get('xweibo') %}checked="1"{% endif %} />
-        {{appendStrs["xweibo"]}}
+      <label for="enable_weibo" class="pure-checkbox">
+        <input id="enable_weibo" name="weibo" type="checkbox" {% if shareLinks.get('Weibo') %}checked="1"{% endif %} />
+        {{appendStrs["Weibo"]}}
       </label>
       <label for="enable_tweibo" class="pure-checkbox">
-        <input id="enable_tweibo" name="tweibo" type="checkbox" {% if shareLinks.get('tweibo') %}checked="1"{% endif %} />
-        {{appendStrs["tweibo"]}}
+        <input id="enable_tweibo" name="tencentweibo" type="checkbox" {% if shareLinks.get('TencentWeibo') %}checked="1"{% endif %} />
+        {{appendStrs["TencentWeibo"]}}
       </label>
       <label for="enable_browser" class="pure-checkbox">
-        <input id="enable_browser" name="browser" type="checkbox" {% if shareLinks.get('browser') %}checked="1"{% endif %} />
-        {{appendStrs["browser"]}}
+        <input id="enable_browser" name="browser" type="checkbox" {% if shareLinks.get('Browser') %}checked="1"{% endif %} />
+        {{appendStrs["Browser"]}}
       </label>
     </div>
 

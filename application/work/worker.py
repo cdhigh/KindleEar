@@ -95,9 +95,8 @@ def WorkerImpl(userName: str, recipeId: list=None, log=None):
             ro.language = user.book_language
 
         #合并自定义css
-        if user.css_content:
-            ro.extra_css = ro.extra_css + '\n\n' + user.css_content if ro.extra_css else user.css_content
-
+        ro.extra_css = user.get_extra_css(ro.extra_css)
+        
         #如果需要登录网站
         if ro.needs_subscription:
             ro.username = bked.account

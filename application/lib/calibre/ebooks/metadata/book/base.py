@@ -550,7 +550,7 @@ class Metadata:
                     self.tags[sidx] = other.tags[oidx]
                 self.tags += [t for t in other.tags if t.lower() in ot-st]
 
-            if getattr(other, 'cover_data', False):
+            if getattr(other, 'cover_data', False): #cover_data=(ext, data)
                 other_cover = other.cover_data[-1]
                 self_cover = self.cover_data[-1] if self.cover_data else b''
                 if not self_cover:

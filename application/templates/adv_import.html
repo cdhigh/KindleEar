@@ -1,4 +1,4 @@
-{% extends "advbase.html" %}
+{% extends "adv_base.html" %}
 {% block titleTag -%}
 <title>{{ _("Import") }} - KindleEar</title>
 {% endblock -%}
@@ -6,7 +6,7 @@
 <form class="pure-form" action="" method="POST" enctype="multipart/form-data">
   <fieldset>
     <legend><h3>{{_("Import Feeds")}}</h3></legend>
-    <p><small>{{ _("Import custom rss from a OPML file.") }}</small></p>
+    <p><small>{{ _("Import custom rss from an OPML file.") }}</small></p>
     <div class="box-list">
       <input type="file" name="import_file" class="pure-input-1 box" accept=".opml, .xml" />
     </div>
@@ -16,7 +16,7 @@
     </label>
     <div style="text-align:center;">
       <input type="submit" value="{{_('Import')}}" class="pure-button pure-button-primary pure-input-rounded" />
-      <a href="/advexport" class="pure-button pure-input-rounded">{{_("Download")}}</a>
+      <a href="/adv/export" class="pure-button pure-input-rounded">{{_("Download")}}</a>
     </div>
     {% if tips -%}
     <br />
