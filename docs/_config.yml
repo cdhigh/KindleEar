@@ -1,6 +1,6 @@
-title: Your project name
+title: KindleEar
 lang: en
-description: a catchy description for your project
+description: KindleEar is a free webapp that running on Google App Engine, it aggregates feeds and deliver the generated docs to your Kindle periodically.
 
 remote_theme: rundocs/jekyll-rtd-theme
 
@@ -12,3 +12,4 @@ exclude:
   - CNAME
   - Gemfile
   - Gemfile.lock
+  
