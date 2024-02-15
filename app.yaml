@@ -15,7 +15,7 @@ basic_scaling:
 #  min_idle_instances: 0
 
 app_engine_apis: true
-entrypoint: gunicorn -b :$PORT main:app
+entrypoint: gunicorn -b :$PORT -w 2 main:app
 
 inbound_services:
 - mail

@@ -42,7 +42,7 @@ def Url2BookImpl(userName: str, urls: str, subject: str, action: str):
     urls = zlib.decompress(base64.urlsafe_b64decode(urls)).decode('utf-8')
     urls = urls.split('|')
 
-    if bookType == 'download': #直接下载电子书并推送
+    if action == 'download': #直接下载电子书并推送
         from filedownload import Download
         for url in urls:
             result = Download(url)
@@ -58,7 +58,7 @@ def Url2BookImpl(userName: str, urls: str, subject: str, action: str):
                 save_delivery_log(user, fileName, 0, status=result.status)
             default_log.info("{} Sent!".format(fileName))
         return "{} Sent!".format(fileName)
-    elif bookType == 'debug': #调试目的，将链接直接下载，发送到管理员邮箱
+    elif action == 'debug': #调试目的，将链接直接下载，发送到管理员邮箱
         #如果标题已经给定了文件名，则使用标题文件名，否则为默认文件名(page.html)
         fileName = None
         if '.' in subject and (1 < len(subject.split('.')[-1]) < 5):
@@ -81,6 +81,6 @@ def Url2BookImpl(userName: str, urls: str, subject: str, action: str):
             send_to_kindle(user, subject, book)
             rs = f"Sent {subject}.{user.book_type}"
         else:
-            save_delivery_log(user, title, 0, status='fetch failed')
+            save_delivery_log(user, subject, 0, status='fetch failed')
             rs = "[Url2Book]Fetch url failed."
         return rs

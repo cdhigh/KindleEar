@@ -151,11 +151,11 @@ def SaveToInstapaper(user, action, orgUrl, title):
         info += '<br/><p style="text-align:right;color:red;">by KindleEar &nbsp;</p>'
         info = SHARE_INFO_TPL.format(title='Saved to Instapaper', info=info)
     elif ret.status_code == 403:
-        info = _("Failed save to Instapaper<br/>'{}'<br/><br/>Reason : Invalid username or password.").format(title)
+        info = _("Failed save to Instapaper<br/>'{}'<br/><br/>Reason :").format(title) + _("The username does not exist or password is wrong.")
         info += '<br/><p style="text-align:right;color:red;">by KindleEar &nbsp;</p>'
         info = T_INFO % ('Failed to save', info)
     else:
-        info = _("Failed save to Instapaper<br/>'{}'<br/><br/>Reason : Unknown({}).").format(title, ret.status_code)
+        info = _("Failed save to Instapaper<br/>'{}'<br/><br/>Reason :").format(title) + _('Unknown({})').format(ret.status_code)
         info += '<br/><p style="text-align:right;color:red;">by KindleEar &nbsp;</p>'
         info = SHARE_INFO_TPL.format(title='Failed to save', info=info)
     

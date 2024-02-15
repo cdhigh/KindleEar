@@ -57,8 +57,6 @@ class RecipeInput(InputFormatPlugin):
             help=_('Do not download latest version of builtin recipes from the calibre server')),
         OptionRecommendation(name='lrf', recommended_value=False,
             help='Optimize fetching for subsequent conversion to LRF.'),
-        OptionRecommendation(name='user', recommended_value=None,
-            help='Keuser instance.'),
         }
 
     #执行转换完成后返回生成的 opf 文件路径，只是路径，不包含文件名

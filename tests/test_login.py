@@ -10,7 +10,7 @@ class LoginTestCase(BaseTestCase):
         self.assertTrue(('Please use admin/admin to login at first time.' in data) or 
             ('Please input username and password.' in data))
 
-    def test_login_fail(self):
+    def test_login_wrong_parms(self):
         resp = self.client.post('/login', data={'u': '', 'p': 'password'})
         self.assertEqual(resp.status_code, 200)
         self.assertIn('Username is empty.', resp.text)

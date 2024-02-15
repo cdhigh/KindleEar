@@ -29,18 +29,22 @@ except ImportError:
 
 #发送邮件
 #title: 邮件标题
-#attachment: 附件二进制内容
+#attachment: 附件二进制内容，或元祖 (filename, content)
 #fileWithTime: 发送的附件文件名是否附带当前时间
 def send_to_kindle(user, title, attachment, fileWithTime=True):
     lcTime = local_time('%Y-%m-%d_%H-%M', user.timezone)
     subject = f"KindleEar {lcTime}"
-    lcTime = "({})".format(lcTime) if fileWithTime else ""
-    ext = ".{}".format(user.book_type) if user.book_type else ""
-    fileName = f"{title}{lcTime}{ext}"
-    body = "Deliver from KindleEar"
-    attachments = [(fileName, attachment)]
+
+    if not isinstance(attachment, tuple):
+        lcTime = "({})".format(lcTime) if fileWithTime else ""
+        fileName = f"{title}{lcTime}.{user.book_type}"
+        attachment = (fileName, attachment)
+
+    if not isinstance(attachment, list):
+        attachments = [attachment]
     
     status = 'ok'
+    body = "Deliver from KindleEar"
     try:
         send_mail(user, user.kindle_email, subject, body, attachments)
     except Exception as e:

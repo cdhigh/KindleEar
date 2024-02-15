@@ -34,11 +34,16 @@ def set_env():
     os.environ['CELERY_BROKER_URL'] = CELERY_BROKER_URL
     os.environ['CELERY_RESULT_BACKEND'] = CELERY_RESULT_BACKEND
     os.environ['KE_DOMAIN'] = KE_DOMAIN
+    os.environ['SRC_EMAIL'] = SRC_EMAIL
     
 set_env()
 
-TEST_MODULES = ['test_login', 'test_setting', 'test_admin', 'test_subscribe']
-#TEST_MODULES = ['test_subscribe']
+TEST_MODULES = ['test_login', 'test_setting', 'test_admin', 'test_subscribe', 'test_adv']
+if INBOUND_EMAIL_SERVICE == 'gae':
+    TEST_MODULES.append('test_inbound_email')
+
+#TEST_MODULES = ['test_inbound_email']
+
 
 def runtests(suite, verbosity=1, failfast=False):
     runner = unittest.TextTestRunner(verbosity=verbosity, failfast=failfast)
@@ -68,7 +73,7 @@ def reload_module(module_name):
 def main():
     verbosity = 4 #Verbosity of output, 0 | 1 | 4
     failfast = 0 #Exit on first failure/error
-    report = 'html' # '' | 'html' | 'console'
+    report = '' # '' | 'html' | 'console'
 
     os.environ['KE_TEST_VERBOSITY'] = str(verbosity)
     os.environ['KE_SLOW_TESTS'] = '1' #Run tests that may be slow

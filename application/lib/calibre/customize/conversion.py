@@ -173,8 +173,9 @@ class InputFormatPlugin(Plugin):
                    'set this option will override any encoding declared by the '
                    'document itself. Particularly useful for documents that '
                    'do not declare an encoding or that have erroneous '
-                   'encoding declarations.')
-        )}
+                   'encoding declarations.')),
+        OptionRecommendation(name='user', recommended_value=None,
+            help='Keuser instance.'),}
 
     #: Options to customize the behavior of this plugin. Every option must be an
     #: instance of :class:`OptionRecommendation`.

@@ -12,10 +12,10 @@
       <div id="preview" class="imgupBox">
         <div class="imgFileUploade">
           <div class="pure-control-group">
-            <label style="margin: 0px 20px">{{_("Apply Cover Image Order")}}</label>
+            <label style="margin: 0px 20px">{{_("Rule to pick cover images")}}</label>
             <select class="pure-u-1 pure-u-sm-1-2" name="order" id="coverOrder">
               <option value="random" {% if covers.get('order', 'random') == 'random' %}selected="selected"{% endif %}>{{_("Random")}}</option>
-              <option value="sequential" {% if covers.get('order') == 'sequential' %}selected="selected"{% endif %}>{{_("Sequential")}}</option>
+              <option value="weekday" {% if covers.get('order') == 'weekday' %}selected="selected"{% endif %}>{{_("Weekday")}}</option>
             </select>
           </div>
           <hr style="width: 90%" />

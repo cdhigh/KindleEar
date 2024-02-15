@@ -59,7 +59,7 @@ class FileSystemDict(dict):
 
     #全部清除，释放内存
     def clear(self):
-        self.dirs = None
+        self.dirs = set()
         for key in list(self.keys()):
             del self[key]
 
@@ -101,7 +101,7 @@ class FileSystemDict(dict):
 #提供给OEB的文件读写桩，给外部提供一个统一的文件系统接口，内部根据情况使用模拟文件系统字典或调用系统函数
 class FsDictStub(object):
     #path: 如果path=str，则使用操作系统文件读写，否则使用path对应的FileSystemDict读写
-    def __init__(self, path, log=None, ignore_opf=False):
+    def __init__(self, path=None, log=None, ignore_opf=False):
         if path:
             assert(os.path.isabs(path))
             self.path = path

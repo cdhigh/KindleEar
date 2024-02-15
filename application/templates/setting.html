@@ -11,7 +11,7 @@
 <div class="main">
   {% if user.expires -%}
   <div class="grey">
-    {{_("Your account will pause after")}} <strong id="expires">{{ user.expires.strftime("%Y-%m-%d") }}</strong> {{_(", Please login before expire.")}}
+    {{_("Your account will pause after {0}, please log in again before it expires.").format(user.expires.strftime("%Y-%m-%d")) }}<br />
     <a href="/delaccount/{{user.name}}">{{_("Delete Account")}}</a>
   </div>
   {% endif -%}
@@ -214,8 +214,10 @@
         <input type="text" name="sm_save_path" value="{{sm_srv.get('save_path', 'tests/debug_mail')}}" class="pure-u-1 pure-u-sm-1-2" />
       </div>
     </fieldset>
-
-    <p>{{_("Important: Please activate your kindle firstly, and goto")}}“<a href="https://www.amazon.com/hz/mycd/myx#/home/settings/payment" rel="external" target="_blank">{{_("Personal Document Settings")}}</a>”{{_("Page and add")}} <strong>{{ mailSender }}</strong> {{_("to 'Approved Personal Document E-mail List'.")}}
+    <p>
+      {% autoescape off -%}
+      {{_("Important: Please activate your kindle firstly, then goto %(personal)s Page and add %(sender)s to 'Approved Personal Document E-mail List'.", personal='<a href="https://www.amazon.com/hz/mycd/myx#/home/settings/payment" rel="external" target="_blank">' + _("Personal Document Settings") + '</a>', sender='<strong>' + mailSender + '</strong>')|safe}}
+      {% endautoescape -%}
     </p>
     <p style="text-align:center;">
       <input type="submit" class="pure-button pure-button-primary pure-input-rounded" value="{{_('Save settings')}}" />

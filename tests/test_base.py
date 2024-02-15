@@ -26,10 +26,17 @@ class BaseTestCase(unittest.TestCase):
         self.runner = app.test_cli_runner()
         if self.login_required:
             self.client.post('/login', data={'u': self.login_required, 'p': self.login_required})
+        self.temp_files = []
 
     def tearDown(self):
         if self.login_required:
             self.client.post('/logout')
+        if self.temp_files:
+            for f in self.temp_files:
+                try:
+                    os.remove(f)
+                except:
+                    pass
 
     def assertIsNone(self, value):
         self.assertTrue(value is None, '%r is not None' % value)
@@ -61,3 +68,4 @@ def slow_test():
     def decorator(method):
         return unittest.skipUnless(SLOW_TESTS, 'skipping slow test')(method)
     return decorator
+

@@ -285,7 +285,7 @@ def AdvUploadCoverAjaxPost():
 @login_required()
 def AdvUploadCss(tips=None):
     user = get_login_user()
-    extra_css = user.get_extra_css('')
+    extra_css = user.get_extra_css()
     return render_template('adv_uploadcss.html', tab='advset', extra_css=extra_css,
         user=user, advCurr='uploadCss', uploadUrl=url_for("bpAdv.AdvUploadCssAjaxPost"), 
         deleteUrl=url_for("bpAdv.AdvDeleteCssAjaxPost"), tips=tips, 

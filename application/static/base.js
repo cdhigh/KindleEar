@@ -256,7 +256,6 @@ function PopulateMySubscribed() {
       row_str.push(title);
     }
     if (separated) {
-      //row_str.push('<img alt="' + i18n.separated + '" src="static/separate.gif" border="0" />');
       row_str.push('<sup> Sep</sup>');
     }
     row_str.push('</div><div class="summaryRow">');
@@ -517,16 +516,16 @@ function ShareRssToServer(id, title, category, lang) {
   $.post("/library", {id: id, category: category, title: title, lang: lang, creator: window.location.hostname}, function (data) {
     if (data.status == "ok") {
       var idx = g_rss_categories.indexOf(category);
-      if (g_rss_categories && (category != "")) { //将刚才使用到的分类移动到开头
-        if (idx > 0){
-          g_rss_categories.splice(idx, 1);
+      if (g_rss_categories && (category != "")) {
+        if (idx > 0) {
+          g_rss_categories.splice(idx, 1); //将刚才使用到的分类移动到开头
         }
         if (idx != 0) {
-          g_rss_categories.unshift(category);
+          g_rss_categories.unshift(category); //添加一个新的类别
         }
       }
       window.localStorage.setItem('rss_category', JSON.stringify(g_rss_categories));
-      window.localStorage.setItem('shared_rss', ''); //让分享库页面从服务器取新数据
+      window.localStorage.setItem('shared_rss', ''); //清除本地存储，让分享库页面从服务器取新数据
       ShowSimpleModalDialog('<p>' + i18n.thankForShare + '</p>');
     } else if (data.status == i18n.loginRequired) {
       window.location.href = '/login';

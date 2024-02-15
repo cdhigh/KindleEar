@@ -384,7 +384,7 @@ class Plumber:
             fs = FsDictStub(tdir)
         else:
             tdir = '/'
-            fs = FsDictStub(None)
+            fs = FsDictStub()
         
         #调用calibre.customize.conversion.InputFormatPlugin.__call__()，然后调用输入插件的convert()在目标目录生成一大堆文件，包含opf
         #__call__()返回传入的 fs 实例，其属性 opfname 保存了opf文件的路径名
@@ -551,16 +551,15 @@ class Plumber:
             self.log.info('Processed HTML written to:{}'.format(out_dir))
 
         self.log.info('Creating %s...'%self.output_plugin.name)
-        
+
         #创建输出临时文件缓存
         if system_temp_dir:
             prefix = self.output_plugin.commit_name or 'output_'
             tmpdir = PersistentTemporaryDirectory(prefix=prefix, dir=system_temp_dir)
             fs_out = FsDictStub(tmpdir)
         else:
-            fs_out = FsDictStub(None)
-        fs_out = fs
-
+            fs_out = FsDictStub()
+        
         #这才是启动输出转换，生成电子书
         with self.output_plugin:
             self.output_plugin.convert(self.oeb, self.output, self.input_plugin, self.opts, self.log, fs_out)

@@ -75,10 +75,10 @@ class HTMLInput(InputFormatPlugin):
         
         #manifest 资源列表
         manifest = ['/index.html']
-        for filename, content in input_.get('imgs', []):
-            filename = os.path.join(fs.path, filename)
+        for fileName, content in input_.get('imgs', []):
+            fileName = os.path.join(fs.path, fileName)
             fs.write(fileName, content)
-            manifest.append(filename)
+            manifest.append(fileName)
         opf.create_manifest_from_files_in(manifest)
         ncx_id = opf.manifest.add_item(os.path.join(fs.path, 'index.ncx'), mime_type="application/x-dtbncx+xml")
         opf.manifest.item(ncx_id).id = 'ncx'

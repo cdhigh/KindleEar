@@ -79,12 +79,14 @@ def SharedLibraryMgrPost(mgrType):
         url = buildKeUrl(LIBRARY_KINDLEEAR)
         resp = opener.open(f'{url}?key={KINDLEEAR_SITE_KEY}&data_type={LIBRARY_GETRSS}')
         keRss = []
+        keStatus = ''
         if resp.status_code == 200:
             keRss = resp.json()
         else:
-            ret['status'] = srvErrStr(resp.status_code)
+            keStatus = srvErrStr(resp.status_code)
 
         #另一个来源是github分享库
+        ghStatus = ''
         resp = opener.open(GITHUB_SHARED_RSS)
         if resp.status_code == 200:
             recipes = resp.json()
@@ -93,8 +95,10 @@ def SharedLibraryMgrPost(mgrType):
                 for item in recipes:
                     if item.get('u') not in existingUrls:
                         keRss.append(item)
-        #elif ret['status'] == 'ok':
-        #    ret['status'] = srvErrStr(resp.status_code, 'github')
+        else:
+            ghStatus = srvErrStr(resp.status_code, 'github')
+
+        ret['status'] = 'ok' if not (keStatus and ghStatus) else keStatus
         ret['data'] = keRss
         return ret
     elif mgrType == LIBRARY_REPORT_INVALID: #报告一个源失效了

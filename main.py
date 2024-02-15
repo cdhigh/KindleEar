@@ -37,6 +37,7 @@ def set_env():
     os.environ['CELERY_BROKER_URL'] = CELERY_BROKER_URL
     os.environ['CELERY_RESULT_BACKEND'] = CELERY_RESULT_BACKEND
     os.environ['KE_DOMAIN'] = 'http://127.0.0.1:5000/' #KE_DOMAIN
+    os.environ['SRC_EMAIL'] = SRC_EMAIL
 
 set_env()
 

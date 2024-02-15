@@ -59,7 +59,7 @@ def AdminPost():
         password2 = form.get('new_u_pwd2')
         expiration = str_to_int(form.get('new_u_expiration', '0'))
 
-        specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}', ',', ';', '|']
+        specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}', ',', ';', '|', ' ']
         if user.name != adminName: #只有管理员能添加账号
             tips = _("You do not have sufficient privileges.")
         elif not all((userName, password1, password2)):

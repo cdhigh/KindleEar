@@ -18,7 +18,6 @@
 
     {% autoescape off %}
     <script type="text/javascript">
-      //在所有脚本里面用到的字符串翻译都放在这里让pybabel可以简单提取，脚本里面使用键名引用
       var i18n = {
         delete: '{{_("Delete")|safe}}',
         viewSrc: '{{_("View Source Code")|safe}}',
@@ -38,7 +37,6 @@
         langInvalid: '{{_("Language code invalid")|safe}}',
         thankForShare: '{{_("Thank you for sharing.")|safe}}',
         close: '{{_("Close")|safe}}',
-        separated: '{{_("Separated")|safe}}',
         unsubscribe: '{{_("Unsubscribe")|safe}}',
         cannotSubsRecipe: '{{_("Cannot subscribe this recipe, Error:")|safe}}',
         areYouSureUnsubscribe: '{{_("Are you sure to Unsubscribe ({0})?")|safe}}',
@@ -50,7 +48,7 @@
         submit: '{{_("Submit")|safe}}',
         recipeLoginTips: '{{_("If any field is left blank, the server will clear the saved login information.")|safe}}',
         cannotSetSubsInfo: '{{_("Cannot set the subscription infomation, Error:")|safe}}',
-        chooseRecipeFile: '{{_("Choose a recipe file for upload")|safe}}',
+        chooseRecipeFile: '{{_("Choose a recipe file to upload")|safe}}',
         congratulations: '{{_("Congratulations")|safe}}',
         thanks: '{{_("Thanks")|safe}}',
         recipeUploadedTips: '{{_("Your recipe has been uploaded, and it can be found in the Library section. If you dont see it, please make sure to switch to the correct language.")|safe}}',
@@ -88,7 +86,7 @@
         addAccountOk: '{{_("Account added successfully.")|safe}}',
         loginRequired: '{{_("login required")|safe}}',
         uploadCoversOk: '{{_("Upload cover files successfully.")|safe}}',
-        imgSizeToLarge: '{{_("Total size of the files you selected exceeds 16MB. Please reduce the image resolution or upload in batches.")|safe}}',
+        imgSizeToLarge: '{{_("Total size of the files you selected exceeds 16MB. Please reduce the image resolution or upload in batches.")|safe}}'
       };
     </script>
     {% block javascript_inhead %}

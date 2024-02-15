@@ -44,7 +44,8 @@ class SubscribeTestCase(BaseTestCase):
         data = {'title': 'bbc', 'url': '', 'fulltext': False, 'recipeId': 'builtin:am730', 'fromsharedlibrary': ''}
         resp = self.client.post('/customrss/add', data=data)
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.json['status'], 'The recipe does not exist.')
+        #depends if local server is executing or not
+        self.assertTrue(resp.json['status'] in ['The recipe does not exist.', 'Failed to fetch the recipe.'])
 
         resp = self.client.post('/customrss/delete', data={'id': bbc_id})
         self.assertEqual(resp.status_code, 200)

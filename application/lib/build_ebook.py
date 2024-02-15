@@ -42,7 +42,8 @@ def urls_to_book(urls: list, title: str, user, options: dict=None, output_fmt: s
         return None
 
     #合并自定义css
-    ro.extra_css = user.get_extra_css(ro.extra_css)
+    userCss = user.get_extra_css()
+    ro.extra_css = f'{ro.extra_css}\n\n{userCss}' if ro.extra_css else userCss
 
     return recipes_to_ebook(ro, user, options, output_fmt)
 

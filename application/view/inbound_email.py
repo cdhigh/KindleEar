@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from flask import Blueprint, request, current_app as app
 from google.appengine.api import mail
 from calibre import guess_type
-from ..back_end.task_queue_adpt import create_delivery_task
+from ..back_end.task_queue_adpt import create_delivery_task, create_url2book_task
 from ..back_end.db_models import KeUser, WhiteList
 from ..back_end.send_mail_adpt import send_to_kindle
 from ..base_handler import *
@@ -42,7 +42,7 @@ def decode_subject(subject):
 def IsHyperLink(txt):
     expr = r"""^(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>???“”‘’]))"""
     match = re.match(expr, txt)
-    return m.group() if match else ''
+    return match.group() if match else ''
 
 #从接收地址提取账号名和真实地址
 #如果有多个收件人的话，只解释第一个收件人
@@ -64,32 +64,31 @@ def IsSpamMail(sender, user):
         return True
 
     mailHost = sender.split('@')[1]
-    whitelist = [item.mail.lower() for item in user.white_lists]
+    whitelist = [item.mail.lower() for item in user.white_lists()]
 
-    return not (('*' in whitelist) or (sender.lower() in whitelist) or (f'@{mail_host}' in whitelist))
+    return not (('*' in whitelist) or (sender.lower() in whitelist) or (f'@{mailHost}' in whitelist))
 
 #GAE的退信通知
 @bpInBoundEmail.post("/_ah/bounce")
 def ReceiveBounce():
     msg = mail.BounceNotification(dict(request.form.lists()))
-    default_log.warning("Bounce original: {}, notification: {}".format(msg.original, msg.notification))
+    #default_log.warning("Bounce original: {}, notification: {}".format(msg.original, msg.notification))
     return "OK", 200
 
-#有新的邮件到达
+#有新的邮件到达, _ah=apphosting
+#每个邮件限额: 31.5 MB
 @bpInBoundEmail.post("/_ah/mail/<path>")
 def ReceiveMail(path):
     global default_log
     log = default_log
 
     message = mail.InboundEmailMessage(request.get_data())
+    userName, to = extractUsernameFromEmail(message.to) #从接收地址提取账号名和真实地址
+    adminName = app.config['ADMIN_NAME']
 
-    #从接收地址提取账号名和真实地址
-    userName, to = extractUsernameFromEmail(message.to)
-    
-    user = KeUser.get_or_none(KeUser.name == userName)
-    if not user:
-        userName = app.config['ADMIN_NAME']
-        user = KeUser.get_or_none(KeUser.name == userName)
+    user = KeUser.get_or_none(KeUser.name == (userName or adminName))
+    if not user and (userName != adminName):
+        user = KeUser.get_or_none(KeUser.name == adminName)
     
     if not user or not user.kindle_email:
         return "OK", 200
@@ -97,9 +96,8 @@ def ReceiveMail(path):
     #阻挡垃圾邮件
     sender = parseaddr(message.sender)[1]
     if IsSpamMail(sender, user):
-        self.response.out.write("Spam mail!")
         log.warning('Spam mail from : {}'.format(sender))
-        return "OK", 200
+        return "Spam mail!"
     
     if hasattr(message, 'subject'):
         subject = decode_subject(message.subject).strip()
@@ -121,7 +119,7 @@ def ReceiveMail(path):
     #通过邮件触发一次“现在投递”
     if to.lower() == 'trigger':
         create_delivery_task({'userName': userName, 'recipeId': subject})
-        return "OK", 200
+        return f'A delivery task for "{userName}" is triggered'
     
     #获取和解码邮件内容
     txtBodies = message.bodies('text/plain')
@@ -133,7 +131,7 @@ def ReceiveMail(path):
     
     #此邮件为纯文本邮件，将文本信息转换为HTML格式
     if not allBodies:
-        log.info('There is no html body, use text body.')
+        log.info('There is no html body, use text body instead.')
         try:
             allBodies = [body.decode() for cType, body in txtBodies]
         except:
@@ -141,7 +139,7 @@ def ReceiveMail(path):
             allBodies = []
         bodies = ''.join(allBodies)
         if not bodies:
-            return "OK", 200
+            return "There is no html body neither text body."
 
         bodyUrls = []
         for line in bodies.split('\n'):
@@ -268,8 +266,8 @@ def ReceiveMail(path):
                 soup.html.head.insert(0, m)
             else:
                 m['content'] = "text/html; charset=utf-8"
-            book = str(soup)
+            book = (f'KindleEar_{local_time("%Y-%m-%d_%H-%M", user.timezone)}.html', str(soup).encode('utf-8'))
 
         send_to_kindle(user, subject[:SUBJECT_WORDCNT], book, fileWithTime=False)
     
-    return "OK", 200
+    return 'OK'

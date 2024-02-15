@@ -95,16 +95,10 @@ class KeUser(MyBaseModel): # kindleEar User
         return data
 
     #获取用户自定义的CSS
-    #css为Recipe预定义的CSS
-    #返回两个CSS合并后的字符串
-    def get_extra_css(self, css=''):
+    def get_extra_css(self):
         dbItem = UserBlob.get_or_none((UserBlob.user == self.name) & (UserBlob.name == 'css'))
-        if dbItem:
-            extra_css = dbItem.data.decode('utf-8')
-            return (css + '\n\n' + extra_css) if css else extra_css
-        else:
-            return css
-
+        return dbItem.data.decode('utf-8') if dbItem else ''
+        
 #用户的一些二进制内容，比如封面之类的
 class UserBlob(MyBaseModel):
     name = CharField()
