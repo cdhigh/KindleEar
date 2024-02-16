@@ -2,113 +2,90 @@
 {% block titleTag -%}
 <title>{{ _("Logs") }} - KindleEar</title>
 {% endblock -%}
-{% block bodytag -%}
-<body class="logs">
-{% endblock -%}
-
-{% block css -%}
-<style type="text/css">
-.logs .status {
-  display: inline-block;
-  border-radius: 20px;
-  background-color: grey;
-  color: #fff;
-  text-align: center;
-  padding: 3px 15px;
-  white-space: nowrap;
-}
-
-.logs .status.success {
-  background-color: green;
-}
-
-.logs .status.error {
-  background-color: darkorange;
-}
-</style>
-{% endblock -%}
 
 {% block content -%}
 <div class="main">
-  {% if mylogs -%}
-  <legend><h3>{{ _("Only display last 10 logs") }}</h3></legend>
-  <table class="pure-table pure-table-horizontal logs_list" width="100%">
-    <colgroup>
-    <col width="30%">
-    <col width="40%">
-    <col width="15%">
-    <col width="10%">
-    <col width="5%">
-    </colgroup>
-    <thead>
-      <tr>
-        <th>{{ _("Time") }}</th>
-        <th>{{ _("Title") }}</th>
-        <th>{{ _("Size") }}</th>
-        <th>{{ _("To") }}</th>
-        <th>{{ _("Status") }}</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for log in mylogs -%}
-      <tr>
-        <td>{{log.time_str}}</td>
-        <td>{{log.book}}</td>
-        <td>{{log.size|filesizeformat}}</td>
-        <td>{{log.to}}</td>
-        <td>
-          <span class="status {% if 'ok' in log.status -%} success {%- else -%} error {%- endif %}">
-          {{ log.status }}
-          </span>
-        </td>
-      </tr>
-    {% endfor -%}
-    </tbody>
-  </table>
-  {% else -%}
-  <div class="notice-box">{{_('There is no log')}}</div>
-  {% endif -%}
+  <div class="logs">
+    {% if mylogs -%}
+    <legend><h3>{{ _("Only display last 10 logs") }}</h3></legend>
+    <table class="pure-table pure-table-horizontal" width="100%">
+      <colgroup>
+      <col width="30%">
+      <col width="40%">
+      <col width="15%">
+      <col width="10%">
+      <col width="5%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>{{ _("Time") }}</th>
+          <th>{{ _("Title") }}</th>
+          <th>{{ _("Size") }}</th>
+          <th>{{ _("To") }}</th>
+          <th>{{ _("Status") }}</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for log in mylogs -%}
+        <tr>
+          <td>{{log.time_str}}</td>
+          <td>{{log.book}}</td>
+          <td>{{log.size|filesizeformat}}</td>
+          <td>{{log.to}}</td>
+          <td>
+            <span class="status {% if 'ok' in log.status -%} success {%- else -%} error {%- endif %}">
+            {{ log.status }}
+            </span>
+          </td>
+        </tr>
+      {% endfor -%}
+      </tbody>
+    </table>
+    {% else -%}
+    <div class="notice-box">{{_('There is no log')}}</div>
+    {% endif -%}
 
-  {% if logs -%}
-  <legend><h3>{{ _("Logs of other users") }}</h3></legend>
-  <table class="pure-table pure-table-horizontal logs_list" width="100%">
-    <colgroup>
-      <col width="10%" />
-      <col width="25%" />
-      <col width="25%" />
-      <col width="15%" />
-      <col width="20%" />
-      <col width="5%" />
-    </colgroup>
-    <thead>
-      <tr>
-        <th>{{ _("Username") }}</th>
-        <th>{{ _("Time") }}</th>
-        <th>{{ _("Title") }}</th>
-        <th>{{ _("Size") }}</th>
-        <th>{{ _("To") }}</th>
-        <th>{{ _("Status") }}</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for u in logs -%}
-    {% for log in logs[u] -%}
-      <tr>
-        <td>{{u}}</td>
-        <td>{{log.time_str}}</td>
-        <td>{{log.book}}</td>
-        <td>{{log.size|filesizeformat}}</td>
-        <td>{{log.to}}</td>
-        <td>
-          <span class="status {% if 'ok' in log.status -%} success {%- else -%} error {%- endif %}">
-          {{ log.status }}
-          </span>
-        </td>
-      </tr>
-    {% endfor -%}
-    {% endfor -%}
-    </tbody>
-  </table>
-  {% endif -%} {# endif of if logs -#}
+    {% if logs -%}
+    <legend><h3>{{ _("Logs of other users") }}</h3></legend>
+    <table class="pure-table pure-table-horizontal" width="100%">
+      <colgroup>
+        <col width="10%" />
+        <col width="25%" />
+        <col width="25%" />
+        <col width="15%" />
+        <col width="20%" />
+        <col width="5%" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>{{ _("Username") }}</th>
+          <th>{{ _("Time") }}</th>
+          <th>{{ _("Title") }}</th>
+          <th>{{ _("Size") }}</th>
+          <th>{{ _("To") }}</th>
+          <th>{{ _("Status") }}</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for u in logs -%}
+      {% for log in logs[u] -%}
+        <tr>
+          <td>{{u}}</td>
+          <td>{{log.time_str}}</td>
+          <td>{{log.book}}</td>
+          <td>{{log.size|filesizeformat}}</td>
+          <td>{{log.to}}</td>
+          <td>
+            <span class="status {% if 'ok' in log.status -%} success {%- else -%} error {%- endif %}">
+            {{ log.status }}
+            </span>
+          </td>
+        </tr>
+      {% endfor -%}
+      {% endfor -%}
+      </tbody>
+    </table>
+    {% endif -%} {# endif of if logs -#}
+  </div>
 </div>
 {% endblock -%}

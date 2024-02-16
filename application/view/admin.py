@@ -35,10 +35,9 @@ def AdminPost():
         oldPassword = form.get('op')
         newP1 = form.get('p1')
         newP2 = form.get('p2')
-        secret_key = user.secret_key or ''
         try:
-            pwd = hashlib.md5((oldPassword + secret_key).encode()).hexdigest()
-            newPwd = hashlib.md5((newP1 + secret_key).encode()).hexdigest()
+            pwd = hashlib.md5((oldPassword + user.secret_key).encode()).hexdigest()
+            newPwd = hashlib.md5((newP1 + user.secret_key).encode()).hexdigest()
         except:
             tips = _("The password includes non-ascii chars.")
         else:
@@ -57,6 +56,8 @@ def AdminPost():
         userName = form.get('new_username')
         password1 = form.get('new_u_pwd1')
         password2 = form.get('new_u_pwd2')
+        new_email = form.get('new_email', '')
+        sm_service = form.get('sm_service') #send mail service
         expiration = str_to_int(form.get('new_u_expiration', '0'))
 
         specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}', ',', ';', '|', ' ']
@@ -77,10 +78,11 @@ def AdminPost():
             except:
                 tips = _("The password includes non-ascii chars.")
             else:
+                send_mail_service = {'service': 'admin'} if sm_service == 'admin' else {}
                 au = KeUser(name=userName, passwd=pwd, kindle_email='', enable_send=False,
                     send_time=7, timezone=app.config['TIMEZONE'], book_type="epub", secret_key=secret_key, 
                     expiration_days=expiration, share_links={'key': new_secret_key()},
-                    book_title='KindleEar', book_language='en')
+                    book_title='KindleEar', book_language='en', email=new_email, send_mail_service=send_mail_service)
                 if expiration:
                     au.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
 

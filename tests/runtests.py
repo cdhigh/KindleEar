@@ -35,15 +35,17 @@ def set_env():
     os.environ['CELERY_RESULT_BACKEND'] = CELERY_RESULT_BACKEND
     os.environ['KE_DOMAIN'] = KE_DOMAIN
     os.environ['SRC_EMAIL'] = SRC_EMAIL
+    os.environ['ADMIN_NAME'] = ADMIN_NAME
     
 set_env()
 
-TEST_MODULES = ['test_login', 'test_setting', 'test_admin', 'test_subscribe', 'test_adv']
-if INBOUND_EMAIL_SERVICE == 'gae':
-    TEST_MODULES.append('test_inbound_email')
-
-#TEST_MODULES = ['test_inbound_email']
-
+if 1:
+    TEST_MODULES = ['test_login', 'test_setting', 'test_admin', 'test_subscribe', 'test_adv', 
+        'test_share', 'test_logs']
+    if INBOUND_EMAIL_SERVICE == 'gae':
+        TEST_MODULES.append('test_inbound_email')
+else:
+    TEST_MODULES = ['test_library_official']
 
 def runtests(suite, verbosity=1, failfast=False):
     runner = unittest.TextTestRunner(verbosity=verbosity, failfast=failfast)

@@ -8,6 +8,7 @@
 import os, datetime, zipfile
 from ..utils import local_time, ke_decrypt
 from ..base_handler import save_delivery_log
+from .db_models import KeUser
 
 try:
     from google.appengine.api import mail as gae_mail
@@ -57,15 +58,13 @@ def send_to_kindle(user, title, attachment, fileWithTime=True):
 def send_mail(user, to, subject, body, attachments=None, html=None):
     if not isinstance(to, list) and (',' in to):
         to = to.split(',')
-    sm_service = user.send_mail_service
+    sm_service = user.get_send_mail_service()
     srv_type = sm_service.get('service', 'gae')
     data = {'sender': os.getenv('SRC_EMAIL'), 'to': to, 'subject': subject, 'body': body}
     if attachments:
         data['attachments'] = attachments
     if html:
-        if isinstance(html, str):
-            html = html.encode("utf-8")
-        data['html'] = html
+        data['html'] = html.encode("utf-8") if isinstance(html, str) else html
 
     default_log.info(f'Sending email using service : {srv_type}')
     if srv_type == 'gae':
@@ -91,6 +90,7 @@ def send_mail(user, to, subject, body, attachments=None, html=None):
 #html: 邮件正文的HTML内容
 #attachments: 附件文件名和二进制内容，[(fileName, content),...]
 #body: 可选的额外文本内容
+#返回'ok'表示成功，否则返回错误描述字符串
 def send_html_mail(user, to, subject, html, attachments=None, body=None):
     if not body or not isinstance(body, str):
         body = "Deliver from KindlerEar, refers to html part."
@@ -103,6 +103,7 @@ def send_html_mail(user, to, subject, html, attachments=None, body=None):
     
     size = len(html or body) + sum([len(c) for f, c in (attachments or [])])
     save_delivery_log(user, subject, size, status=status, to=to)
+    return status
 
 #SendGrid发送邮件
 #sender:: 发送者地址

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #设置页面
-import locale
+import locale, os
 from flask import Blueprint, render_template, request, redirect, session
 from flask import current_app as app
 from flask_babel import gettext as _
@@ -57,22 +57,28 @@ def SettingPost():
     form = request.form
     keMail = form.get('kindle_email', '').strip(';, ')
     myTitle = form.get('rss_title')
-    sm_srv_type = form.get('sm_service', 'gae')
-    sm_apikey = form.get('sm_apikey', '')
-    sm_host = form.get('sm_host', '')
-    sm_port = str_to_int(form.get('sm_port'))
-    sm_username = form.get('sm_username', '')
-    sm_password = form.get('sm_password', '')
-    sm_save_path = form.get('sm_save_path', '')
-    send_mail_service = {'service': sm_srv_type, 'apikey': sm_apikey, 'host': sm_host,
-        'port': sm_port, 'username': sm_username, 'password': '', 
-        'save_path': sm_save_path}
-    #只有处于smtp模式并且密码存在才更新，空或几个星号则不更新
-    if sm_srv_type == 'smtp':
-        if sm_password and sm_password.strip('*'):
-            send_mail_service['password'] = ke_encrypt(sm_password, user.secret_key)
-        else:
-            send_mail_service['password'] = user.send_mail_service.get('password', '')
+
+    #service==admin 说明和管理员的设置一致
+    sm_srv_need = False
+    sm_srv_type = ''
+    if user.name == os.getenv('ADMIN_NAME') or user.send_mail_service.get('service') != 'admin':
+        sm_srv_need = True
+        sm_srv_type = form.get('sm_service', 'gae')
+        sm_apikey = form.get('sm_apikey', '')
+        sm_host = form.get('sm_host', '')
+        sm_port = str_to_int(form.get('sm_port'))
+        sm_username = form.get('sm_username', '')
+        sm_password = form.get('sm_password', '')
+        sm_save_path = form.get('sm_save_path', '')
+        send_mail_service = {'service': sm_srv_type, 'apikey': sm_apikey, 'host': sm_host,
+            'port': sm_port, 'username': sm_username, 'password': '', 
+            'save_path': sm_save_path}
+        #只有处于smtp模式并且密码存在才更新，空或几个星号则不更新
+        if sm_srv_type == 'smtp':
+            if sm_password and sm_password.strip('*'):
+                send_mail_service['password'] = ke_encrypt(sm_password, user.secret_key)
+            else:
+                send_mail_service['password'] = user.send_mail_service.get('password', '')
     
     if not keMail:
         tips = _("Kindle E-mail is requied!")
@@ -111,7 +117,8 @@ def SettingPost():
         user.book_language = form.get("book_language", "en")
         user.oldest_article = int(form.get('oldest', 7))
         user.time_fmt = form.get('time_fmt', '')
-        user.send_mail_service = send_mail_service
+        if sm_srv_need:
+            user.send_mail_service = send_mail_service
         user.save()
         tips = _("Settings Saved!")
 

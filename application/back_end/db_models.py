@@ -19,23 +19,23 @@ class KeUser(MyBaseModel): # kindleEar User
     expiration_days = IntegerField(default=0) #账号超期设置值，0为永久有效
     secret_key = CharField(default='')
     kindle_email = CharField(default='')
-    email = CharField(default='') #可能以后用于重置密码之类的操作
+    email = CharField(default='') #用于重置密码之类的操作
     enable_send = BooleanField(default=False)
     send_days = JSONField(default=JSONField.list_default)
-    send_time = IntegerField()
+    send_time = IntegerField(default=0)
     timezone = IntegerField(default=0)
     book_type = CharField(default='epub') #mobi,epub
     device = CharField(default='')
     expires = DateTimeField(null=True) #超过了此日期后账号自动停止推送
 
-    book_title = CharField()
+    book_title = CharField(default='KindleEar')
     title_fmt = CharField(default='') #在元数据标题中添加日期的格式
     author_format = CharField(default='') #修正Kindle 5.9.x固件的bug【将作者显示为日期】
     book_mode = CharField(default='') #书籍模式，'periodical'|'comic'，漫画模式可以直接全屏
     remove_hyperlinks = CharField(default='') #去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
     time_fmt = CharField(default='%Y-%m-%d')
     oldest_article = IntegerField(default=7)
-    book_language = CharField() #自定义RSS的语言
+    book_language = CharField(default='en') #自定义RSS的语言
     enable_custom_rss = BooleanField(default=True)
     
     share_links = JSONField(default=JSONField.dict_default) #evernote/wiz/pocket/instapaper包含子字典，微博/facebook/twitter等仅包含0/1
@@ -98,6 +98,16 @@ class KeUser(MyBaseModel): # kindleEar User
     def get_extra_css(self):
         dbItem = UserBlob.get_or_none((UserBlob.user == self.name) & (UserBlob.name == 'css'))
         return dbItem.data.decode('utf-8') if dbItem else ''
+
+    #根据设置，获取发送邮件的配置数据
+    def get_send_mail_service(self):
+        srv = self.send_mail_service
+        adminName = os.getenv('ADMIN_NAME')
+        if self.name == adminName or srv.get('service') != 'admin':
+            return srv
+        else:
+            dbItem = KeUser.get_or_none(KeUser.name == adminName)
+            return dbItem.send_mail_service if dbItem else {}
         
 #用户的一些二进制内容，比如封面之类的
 class UserBlob(MyBaseModel):
@@ -199,8 +209,8 @@ class SharedRss(MyBaseModel):
     
 #Buffer for category of shared rss [for kindleear.appspot.com only]
 class SharedRssCategory(MyBaseModel):
-    name = CharField()
-    last_updated = DateTimeField(index=True) #for sort
+    name = CharField(unique=True)
+    last_updated = DateTimeField()
 
 class LastDelivered(MyBaseModel):
     user = CharField()

@@ -6,9 +6,9 @@
 {% block css -%}
 <style type="text/css">
 #note{
-    color:grey;
-    font-size:0.8em;
-    text-align:center;
+  color:grey;
+  font-size:0.8em;
+  text-align:center;
 }
 </style>
 {% endblock -%}
@@ -20,23 +20,23 @@
 {% endblock -%}
 
 {% block content -%}
-<div class="main" id="fs_login">
-    {% if tips -%}
-    <div class="notice-box">{{tips|safe}}</div>
-    {% endif -%}
-    <form action="/login" method="POST" class="pure-form pure-form-aligned">
-        <div class="pure-control-group">
-            <label for="u">{{_("Username")}}</label>
-            <input id="u" name="u" type="text" placeholder="{{ _('Username') }}" {% if userName %}value="{{ userName }}"{% endif %} class="pure-u-1 pure-u-sm-1-2" autofocus />
-        </div>
-        <div class="pure-control-group">
-            <label for="p">{{_("Password")}}</label>
-            <input id="p" name="p" type="password" placeholder="{{_('Password')}}" class="pure-u-1 pure-u-sm-1-2" />
-        </div>
-        <div class="pure-control-group" style="text-align:center;">
-            <button type="submit" class="pure-button pure-button-primary pure-input-rounded">{{_("Login")}}</button>
-        </div>
-    </form>
-    <p id="note">{{_("The website doesn't allow registration. You can ask the owner for an account.")}}</p>
+<div class="main">
+  {% if tips -%}
+  <div class="notice-box">{{tips|safe}}</div>
+  {% endif -%}
+  <form action="/login" method="POST" class="pure-form pure-form-aligned">
+    <div class="pure-control-group">
+      <label for="u">{{_("Username")}}</label>
+      <input id="u" name="u" type="text" placeholder="{{ _('Username') }}" {% if userName %}value="{{ userName }}"{% endif %} class="pure-u-1 pure-u-sm-1-2" autofocus />
+    </div>
+    <div class="pure-control-group">
+      <label for="p">{{_("Password")}}</label>
+      <input id="p" name="p" type="password" placeholder="{{_('Password')}}" class="pure-u-1 pure-u-sm-1-2" />
+    </div>
+    <div class="pure-control-group" style="text-align:center;">
+      <button type="submit" class="pure-button pure-button-primary pure-input-rounded">{{_("Login")}}</button>
+    </div>
+  </form>
+  <p id="note">{{_("The website doesn't allow registration. You can ask the owner for an account.")}}</p>
 </div>
 {% endblock -%}

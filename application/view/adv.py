@@ -241,7 +241,7 @@ def AdvUploadCoverAjaxPost():
     covers['order'] = request.form.get('order', 'random')
     for idx in range(7):
         coverName = f'cover{idx}'
-        upload = request.files.get(coverName) or request.form.get('coverName')
+        upload = request.files.get(coverName) or request.form.get(coverName)
         if not upload:
             continue
 

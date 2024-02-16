@@ -48,9 +48,9 @@ def SharedLibraryAppspot():
         sharedData = [{'t': d.title, 'u': d.url, 'f': d.isfulltext, 'l': d.language, 'c': d.category, 's': d.subscribed,
                 'd': int(d.last_subscribed_time.timestamp()), 'r': f'db:{d.id}', 'e': d.description}
                 for d in SharedRss.select().order_by(SharedRss.last_subscribed_time.desc()).limit(2000).execute()]
+
         #使用更紧凑的输出格式
         #return sharedData
-
         return Response(json.dumps(sharedData, separators=(',', ':')), mimetype='application/json')
         
 #网友分享了一个订阅链接或recipe(仅用于kindleear.appspot.com"官方"共享服务器)
@@ -72,7 +72,8 @@ def SharedLibraryAppspotAjax():
     src = form.get('src', '')
     description = form.get('description', '')
 
-    respDict = {'status':'ok', 'category':category, 'title':title, 'url':url, 'lang':lang, 'isfulltext':isfulltext, 'creator':creator}
+    respDict = {'status': 'ok', 'category': category, 'title': title, 'url': url, 'lang': lang, 
+        'isfulltext': isfulltext, 'creator': creator}
 
     if not title or not (url or src): #url 和 src 至少要有一个
         respDict['status'] = "The title or url or src is empty!"
@@ -120,13 +121,10 @@ def SharedLibraryAppspotAjax():
             cItem = SharedRssCategory(name=category, last_updated=now)
         cItem.save()
 
-    if prevCategory:
-        catItem = SharedRss.get_or_none(SharedRss.category == prevCategory)
-        if not catItem: #没有其他订阅源使用此分类了
-            sItem = SharedRssCategory.get_or_none(SharedRssCategory.name == prevCategory)
-            if sItem:
-                sItem.delete_instance()
-
+    #没有其他订阅源使用此分类了
+    if prevCategory and not SharedRss.get_or_none(SharedRss.category == prevCategory):
+        SharedRssCategory.delete().where(SharedRssCategory.name == prevCategory).execute()
+        
     return respDict
 
 #更新共享库的最新时间信息(仅用于kindleear.appspot.com"官方"共享服务器)
@@ -136,7 +134,7 @@ def UpdateLastSharedRssTime():
         dbItem.time_value = datetime.datetime.utcnow()
         dbItem.save()
     else:
-        AppInfo(name='lastSharedRssTime', time_value=datetime.datetime.utcnow()).save()
+        AppInfo.create(name='lastSharedRssTime', time_value=datetime.datetime.utcnow())
 
 #共享库的订阅源信息管理(仅用于kindleear.appspot.com"官方"共享服务器)
 @bpLibraryOffical.post(LIBRARY_MGR + "<mgrType>")

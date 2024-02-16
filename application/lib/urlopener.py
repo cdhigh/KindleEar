@@ -14,7 +14,7 @@ class UrlOpener:
         self.timeout = timeout
         self.addheaders = [("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")]
         if headers:
-            for key,value in headers:
+            for key, value in (headers.items() if isinstance(headers, dict) else headers):
                 self.addheaders.append((key, value))
         if 'user_agent' in kwargs:
             self.addheaders.append(('User-Agent', kwargs.get('user_agent')))

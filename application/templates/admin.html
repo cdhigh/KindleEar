@@ -35,56 +35,67 @@
 
   {% if session.get('role') == 'admin' -%}
   <form class="pure-form pure-form-aligned" action="" method="POST" style="margin-top:10px;" onsubmit="return false;">
-      <fieldset>
-          <legend><h3>{{_("Add Account")}}</h3></legend>
-          {% if actips -%}
-          <div class="notice-box">{{actips|safe}}</div>
-          {% endif -%}
-          <div class="pure-control-group">
-              <label>{{_("Username")}}</label>
-              <input type="text" name="new_username" id="new_username" class="pure-u-1 pure-u-sm-1-2" />
-          </div>
-          <div class="pure-control-group">
-              <label for="new_u_pwd1">{{_("Password")}}</label>
-              <input type="text" name="new_u_pwd1" id="new_u_pwd1" class="pure-u-1 pure-u-sm-1-2" />
-          </div>
-          <div class="pure-control-group">
-              <label for="new_u_pwd2">{{_("Confirm password")}}</label>
-              <input type="text" name="new_u_pwd2" id="new_u_pwd2" class="pure-u-1 pure-u-sm-1-2" />
-          </div>
-          <div class="pure-control-group">
-              <label for="new_u_expiration">{{_("Expiration")}}</label>
-              <select class="pure-u-1 pure-u-sm-1-2 bool" name="new_u_expiration" id="new_u_expiration">
-                  <option value="0" selected="selected">{{_("Never expire")}}</option>
-                  <option value="7">{{_("7 Days")}}</option>
-                  <option value="30">{{_("1 Month")}}</option>
-                  <option value="90">{{_("3 Months")}}</option>
-                  <option value="180">{{_("6 Months")}}</option>
-                  <option value="365">{{_("1 Year")}}</option>
-                  <option value="730">{{_("2 Years")}}</option>
-              </select>
-          </div>
-          <div style="text-align:center;">
-              <button onclick="AddAccount('{{user.name}}')" class="pure-button pure-button-primary pure-input-rounded">{{_("Add")}}</button>
-          </div>
-      </fieldset>
+    <fieldset>
+      <legend><h3>{{_("Add Account")}}</h3></legend>
+      {% if actips -%}
+      <div class="notice-box">{{actips|safe}}</div>
+      {% endif -%}
+      <div class="pure-control-group">
+        <label for="new_username">{{_("Username")}}</label>
+        <input type="text" name="new_username" id="new_username" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group">
+        <label for="new_u_pwd1">{{_("Password")}}</label>
+        <input type="text" name="new_u_pwd1" id="new_u_pwd1" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group">
+        <label for="new_u_pwd2">{{_("Confirm password")}}</label>
+        <input type="text" name="new_u_pwd2" id="new_u_pwd2" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group">
+        <label for="new_email">{{_("Email")}}</label>
+        <input type="email" name="new_email" id="new_email" class="pure-u-1 pure-u-sm-1-2" placeholder="{{_('Optional')}}" />
+      </div>
+      <div class="pure-control-group">
+        <label for="sm_service">{{_("Email service")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2 bool" name="sm_service" id="sm_service">
+          <option value="admin" selected="selected">{{_("Same as admin")}}</option>
+          <option value="independent">{{_("Independent")}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label for="new_u_expiration">{{_("Expiration")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2 bool" name="new_u_expiration" id="new_u_expiration">
+          <option value="0" selected="selected">{{_("Never expire")}}</option>
+          <option value="7">{{_("7 Days")}}</option>
+          <option value="30">{{_("1 Month")}}</option>
+          <option value="90">{{_("3 Months")}}</option>
+          <option value="180">{{_("6 Months")}}</option>
+          <option value="365">{{_("1 Year")}}</option>
+          <option value="730">{{_("2 Years")}}</option>
+        </select>
+      </div>
+      <div style="text-align:center;">
+        <button onclick="AddAccount('{{user.name}}')" class="pure-button pure-button-primary pure-input-rounded">{{_("Add")}}</button>
+      </div>
+    </fieldset>
   </form>
 
   <div class="pure-form">
     <legend><h3>{{_("Accounts")}}</h3></legend>
     <table class="pure-table pure-table-horizontal usrtb" width="100%">
       <colgroup>
-        <col width="12%">
-        <col width="22%">
-        <col width="22%">
-        <col width="22%">
-        <col width="22%">
+        <col width="15%">
+        <col width="15%">
+        <col width="30%">
+        <col width="20%">
+        <col width="20%">
       </colgroup>
       <thead>
         <tr>
-          <th>{{_("No.")}}</th>
           <th>{{_("Username")}}</th>
           <th>{{_("AutoSend")}}</th>
+          <th>{{_("Email")}}</th>
           <th>{{_("Expiration")}}</th>
           <th>{{_("Operation")}}</th>
         </tr>
@@ -92,9 +103,9 @@
       <tbody>
         {% for u in users -%}
         <tr>
-          <td>{{loop.index}}</td>
           <td>{{u.name}}</td>
           <td>{{_("Yes") if u.enable_send else _("No")}}</td>
+          <td>{{u.email}}</td>
           {% if u.expiration_days == 0 -%}
           <td>{{_("Never expire")}}</td>
           {% elif u.expiration_days == 7 -%}

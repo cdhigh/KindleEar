@@ -973,6 +973,8 @@ function AddAccount(name) {
   var newName = $('#new_username').val();
   var newPwd1 = $('#new_u_pwd1').val();
   var newPwd2 = $('#new_u_pwd2').val();
+  var newEmail = $('#new_email').val();
+  var smService = $('#sm_service').val(); //send mail service
   var expiration = $('#new_u_expiration').val();
   if (!newName || !newPwd1 || !newPwd2) {
     alert(i18n.namePwdEmpty);
@@ -983,13 +985,14 @@ function AddAccount(name) {
   }
 
   $.post("/admin", {actType: 'add', new_username: newName, new_u_pwd1: newPwd1, new_u_pwd2: newPwd2, 
-    new_u_expiration: expiration}, function (data) {
+    new_u_expiration: expiration, new_email: newEmail, sm_service: smService}, function (data) {
     if (data.status == "ok") {
       $('#new_username').val('');
       $('#new_u_pwd1').val('');
       $('#new_u_pwd2').val('');
-      ShowSimpleModalDialog('<p>' + i18n.addAccountOk + '</p>');
+      $('#new_email').val('');
       window.location.reload(true);
+      ShowSimpleModalDialog('<p>' + i18n.addAccountOk + '</p>');
     } else if (data.status == i18n.loginRequired) {
       window.location.href = '/login';
     } else {

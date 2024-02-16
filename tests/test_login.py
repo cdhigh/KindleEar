@@ -41,3 +41,12 @@ class LoginTestCase(BaseTestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json, {'status': 'login required'})
         
+    def test_resetpwd(self):
+        resp = self.client.get('/resetpwd')
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('Please input the correct username and email to reset password.', resp.text)
+
+        resp = self.client.get('/resetpwd?name=admin')
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('The email of account', resp.text)
+        

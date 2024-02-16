@@ -563,6 +563,25 @@ table.pure-table thead {
   border: none;
 }
 
+/* logs html */
+.logs .status {
+  display: inline-block;
+  border-radius: 20px;
+  background-color: grey;
+  color: #fff;
+  text-align: center;
+  padding: 3px 15px;
+  white-space: nowrap;
+}
+
+.logs .status.success {
+  background-color: green;
+}
+
+.logs .status.error {
+  background-color: darkorange;
+}
+
 .width1_3 {
   width: calc(100% / 3);
 }

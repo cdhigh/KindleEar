@@ -51,7 +51,7 @@ def hide_email(email):
         item = item.split('@')
         if len(item[0]) < 4:
             return item[0][0] + '**@' + item[-1]
-        to = item[0][0:2] + ''.join(['*' for s in item[0][2:-1]]) + item[0][-1]
+        to = item[0][0] + '*****' + item[0][-1]
         newEmails.append(to + '@' + item[-1])
     if not newEmails:
         return email
@@ -104,7 +104,10 @@ def _ke_auth_code(txt: str, key: str, operation: str='DECODE'):
     keyLength = len(cryptKey)
     
     if operation == 'DECODE':
-        txt = base64.urlsafe_b64decode(txt).decode('utf-8')
+        try:
+            txt = base64.urlsafe_b64decode(txt).decode('utf-8')
+        except:
+            txt = ''
     else:
         txt = hashlib.md5((txt + keyB).encode('utf-8')).hexdigest()[:16] + txt
     stringLength = len(txt)

@@ -25,8 +25,8 @@
       <div class="pure-control-group">
         <label>{{_("Auto Delivery")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="enable_send">
-          <option value="all" {% if user.enable_send %}selected="selected"{% endif %}>{{_("Recipes and custom RSS")}}</option>
-          <option value="recipes" {% if not user.enable_send %}selected="selected"{% endif %}>{{_("Recipes only")}}</option>
+          <option value="all" {% if user.enable_send and user.enable_custom_rss %}selected="selected"{% endif %}>{{_("Recipes and custom RSS")}}</option>
+          <option value="recipes" {% if user.enable_send and not user.enable_custom_rss %}selected="selected"{% endif %}>{{_("Recipes only")}}</option>
           <option value="no" {% if not user.enable_send %}selected="selected"{% endif %}>{{_("Disable all")}}</option>
         </select>
       </div>
@@ -176,9 +176,10 @@
         </select>
       </div>
     </fieldset>
+    {% set sm_srv = user.send_mail_service -%}
+    {% set sm_srv_type = sm_srv.get('service', 'gae') -%}
+    {% if session.get('role') == 'admin' or sm_srv_type != 'admin' -%}
     <fieldset id="send_mail_service">
-      {% set sm_srv = user.send_mail_service -%}
-      {% set sm_srv_type = sm_srv.get('service', 'gae') -%}
       <legend><h3>{{_("Send mail service")}}</h3></legend>
       <div class="pure-control-group">
         <label>{{_("Service")}}</label>
@@ -214,6 +215,7 @@
         <input type="text" name="sm_save_path" value="{{sm_srv.get('save_path', 'tests/debug_mail')}}" class="pure-u-1 pure-u-sm-1-2" />
       </div>
     </fieldset>
+    {% endif -%}
     <p>
       {% autoescape off -%}
       {{_("Important: Please activate your kindle firstly, then goto %(personal)s Page and add %(sender)s to 'Approved Personal Document E-mail List'.", personal='<a href="https://www.amazon.com/hz/mycd/myx#/home/settings/payment" rel="external" target="_blank">' + _("Personal Document Settings") + '</a>', sender='<strong>' + mailSender + '</strong>')|safe}}

@@ -274,7 +274,7 @@ def SaveRecipeIfCorrect(user: KeUser, src: str):
     #判断是否重复
     oldRecipe = Recipe.get_or_none(Recipe.title == recipe.title)
     if oldRecipe:
-        raise Exception(_('The recipe is already in the library'))
+        raise Exception(_('The recipe is already in the library.'))
 
     params = {"title": recipe.title, "description": recipe.description, "type_": 'upload', 
         "needs_subscription": recipe.needs_subscription, "src": src, "time": datetime.datetime.utcnow(),
@@ -305,11 +305,11 @@ def RecipeLoginInfoPostAjax():
     if not account or not password:
         recipe.account = ''
         recipe.password = ''
-        ret['result'] = _('The login information for this recipe has been cleared')
+        ret['result'] = _('The login information for this recipe has been cleared.')
     else:
         recipe.account = account
         recipe.password = password
-        ret['result'] =  _('The login information for this recipe has been saved')
+        ret['result'] =  _('The login information for this recipe has been saved.')
     recipe.save()
     return ret
 
