@@ -11,8 +11,7 @@
 <div class="main">
   {% if user.expires -%}
   <div class="grey">
-    {{_("Your account will pause after {0}, please log in again before it expires.").format(user.expires.strftime("%Y-%m-%d")) }}<br />
-    <a href="/delaccount/{{user.name}}">{{_("Delete Account")}}</a>
+    {{_("Your account will pause after {0}, please log in again before it expires.").format(user.expires.strftime("%Y-%m-%d")) }}
   </div>
   {% endif -%}
   <form class="pure-form pure-form-aligned" action="" method="POST">
@@ -21,7 +20,7 @@
     {% endif -%}
 
     <fieldset>
-      <legend><h3>{{_("Base Setting")}}</h3></legend>
+      <legend><h3>{{_("Base")}}</h3></legend>
       <div class="pure-control-group">
         <label>{{_("Auto Delivery")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="enable_send">
@@ -102,13 +101,13 @@
           <option value="%a, %b %d" {% if user.title_fmt=='%a, %b %d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%a, %b %d")}}</option>
         </select>
       </div>
-      <div class="pure-control-group">
+      {#<div class="pure-control-group">
         <label>{{_("Book mode")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="book_mode">
           <option value="periodical" {% if not user.book_mode or user.book_mode=='periodical' %}selected="selected"{% endif %}>{{_("Periodical")}}</option>
           <option value="comic" {% if user.book_mode=='comic' %}selected="selected"{% endif %}>{{_("Comic")}}</option>
         </select>
-      </div>
+      </div>#}
       <div class="pure-control-group">
         <label>{{_("Remove hyperlinks")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="remove_hyperlinks">
@@ -121,7 +120,7 @@
     </fieldset>
 
     <fieldset id="adv_fieldset">
-      <legend><h3>{{_("Custom Rss Setting")}}</h3></legend>
+      <legend><h3>{{_("Custom RSS")}}</h3></legend>
       <div class="pure-control-group">
         <label><em class="required">*</em> {{_("Title")}}</label>
         <input type="text" name="rss_title" value="{{ user.book_title }}" required class="pure-u-1 pure-u-sm-1-2" />
@@ -180,13 +179,19 @@
     {% set sm_srv_type = sm_srv.get('service', 'gae') -%}
     {% if session.get('role') == 'admin' or sm_srv_type != 'admin' -%}
     <fieldset id="send_mail_service">
-      <legend><h3>{{_("Send mail service")}}</h3></legend>
+      <legend><h3>{{_("Send Mail Service")}}</h3></legend>
       <div class="pure-control-group">
         <label>{{_("Service")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="sm_service" id="sm_service" onchange="SetSmOptiosVisualbility();">
+          {% if 'gae' in sm_services -%}
           <option value="gae" {% if sm_srv_type == 'gae' %}selected="selected"{% endif %}>GAE</option>
+          {% endif -%}
+          {% if 'sendgrid' in sm_services -%}
           <option value="sendgrid" {% if sm_srv_type == 'sendgrid' %}selected="selected"{% endif %}>sendgrid</option>
+          {% endif -%}
+          {% if 'smtp' in sm_services -%}
           <option value="smtp" {% if sm_srv_type == 'smtp' %}selected="selected"{% endif %}>SMTP</option>
+          {% endif -%}
           <option value="local" {% if sm_srv_type == 'local' %}selected="selected"{% endif %}>local (debug)</option>
         </select>
       </div>
@@ -218,7 +223,7 @@
     {% endif -%}
     <p>
       {% autoescape off -%}
-      {{_("Important: Please activate your kindle firstly, then goto %(personal)s Page and add %(sender)s to 'Approved Personal Document E-mail List'.", personal='<a href="https://www.amazon.com/hz/mycd/myx#/home/settings/payment" rel="external" target="_blank">' + _("Personal Document Settings") + '</a>', sender='<strong>' + mailSender + '</strong>')|safe}}
+      {{_("Important: Please activate your kindle firstly, then goto %(personal)s Page and add %(sender)s to 'Approved Personal Document E-mail List'.", personal='<a href="https://www.amazon.com/hz/mycd/myx#/home/settings/payment" rel="external" target="_blank">' + _("Personal Document Settings") + '</a>', sender='<strong>' + src_mail + '</strong>')|safe}}
       {% endautoescape -%}
     </p>
     <p style="text-align:center;">

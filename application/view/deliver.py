@@ -5,7 +5,6 @@
 from collections import defaultdict
 from flask import Blueprint, render_template, request
 from flask_babel import gettext as _
-from ..back_end.task_queue_adpt import create_delivery_task
 from ..back_end.db_models import *
 from ..base_handler import *
 from ..utils import local_time, tz_now
@@ -94,6 +93,7 @@ def SingleUserDelivery(userName: str, idList: list=None):
 #recipeId: Recipe Id, custom:xx, upload:xx, builtin:xx
 #separated: 是否单独推送
 def queueOneBook(queueToPush: defaultdict, user: KeUser, recipeId: str, separated: bool):
+    from ..back_end.task_queue_adpt import create_delivery_task
     recipeId = recipeId.replace(':', '__')
     if separated:
         create_delivery_task({"userName": user.name, "recipeId": recipeId})
@@ -102,6 +102,7 @@ def queueOneBook(queueToPush: defaultdict, user: KeUser, recipeId: str, separate
 
 #启动推送队列中的书籍
 def flushQueueToPush(queueToPush: defaultdict):
+    from ..back_end.task_queue_adpt import create_delivery_task
     for name in queueToPush:
         create_delivery_task({'userName': name, 'recipeId': ','.join(queueToPush[name])})
 

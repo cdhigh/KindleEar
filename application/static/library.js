@@ -195,7 +195,7 @@ function CreatePageContent(category, page) {
   }
 
   if (pageData.data.length == 0) {
-    return '<p style="text-align:center;">' + i18n.noLinksInLang + '</p>';
+    return '<p style="text-align:center;">' + i18n.noLinksFound + '</p>';
   }
 
   var rssStr = ['<div class="box-list">'];
@@ -242,8 +242,7 @@ function CreatePageContent(category, page) {
 
 //转到某一页
 function ToPage(category, page) {
-  var contentDiv = $("#librarycontent");
-  contentDiv.html(CreatePageContent(category, page));
+  $("#librarycontent").html(CreatePageContent(category, page));
 };
 
 //创建屏幕下部的分页按钮
@@ -304,10 +303,6 @@ function DoSearchInShared() {
   var $div = $("#all_recipes");
   $div.empty();
   var lang = $("#shared_rss_lang_pick").val();
-  if (!lang) {
-    return;
-  }
-
   BuildSharedRssByCategory(lang, txt);
   CreateCategoryMenu();
   SelectCategory(".category-menu", i18n.catAll); //自动选择第一项
@@ -432,10 +427,13 @@ function InitSharedRssData(lastRssTime) {
 
     if (needLatestTime) { //向服务器发起请求，要求新的数据
       $.ajax({url: "/library/mgr/latesttime",
-        type: "post",
+        type: "POST",
         async: false, //阻塞式ajax
         success: function (resp) {
           if (resp.status == "ok") {
+            if (resp.tips) {
+              $('#library_tips').html('<div class="notice-box">' + resp.tips + '</div>');
+            }
             if (resp.data > latestTime) { //自从上次获取数据以来服务器有数据更新
               needData = true;
             }
@@ -447,7 +445,7 @@ function InitSharedRssData(lastRssTime) {
     }
     if (needData) {
       $.ajax({url: "/library/mgr/getrss", 
-        type: "post",
+        type: "POST",
         async: false, //阻塞式ajax
         success: function (resp) {
           if (resp.status == "ok") {
@@ -462,7 +460,7 @@ function InitSharedRssData(lastRssTime) {
     }
   } else { //浏览器不支持本地存储
     $.ajax({url: "/library/mgr/getrss", 
-      type: "post",
+      type: "POST",
       async: false, //阻塞式ajax
       success: function (resp) {
         if (resp.status == "ok") {

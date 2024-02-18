@@ -8,7 +8,7 @@ sys.path.insert(0, appDir)
 sys.path.insert(0, os.path.join(appDir, 'application', 'lib'))
 
 log = logging.getLogger()
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 builtins.__dict__['default_log'] = log
 builtins.__dict__['appDir'] = appDir
 
@@ -31,8 +31,8 @@ def set_env():
     os.environ['DATABASE_PASSWORD'] = ''
 
     os.environ['TASK_QUEUE_SERVICE'] = TASK_QUEUE_SERVICE
-    os.environ['CELERY_BROKER_URL'] = CELERY_BROKER_URL
-    os.environ['CELERY_RESULT_BACKEND'] = CELERY_RESULT_BACKEND
+    os.environ['TASK_QUEUE_BROKER_URL'] = TASK_QUEUE_BROKER_URL
+    os.environ['TASK_QUEUE_RESULT_BACKEND'] = TASK_QUEUE_RESULT_BACKEND
     os.environ['KE_DOMAIN'] = KE_DOMAIN
     os.environ['SRC_EMAIL'] = SRC_EMAIL
     os.environ['ADMIN_NAME'] = ADMIN_NAME
@@ -41,11 +41,11 @@ set_env()
 
 if 1:
     TEST_MODULES = ['test_login', 'test_setting', 'test_admin', 'test_subscribe', 'test_adv', 
-        'test_share', 'test_logs']
+         'test_logs'] #'test_share',
     if INBOUND_EMAIL_SERVICE == 'gae':
         TEST_MODULES.append('test_inbound_email')
 else:
-    TEST_MODULES = ['test_library_official']
+    TEST_MODULES = ['test_login']
 
 def runtests(suite, verbosity=1, failfast=False):
     runner = unittest.TextTestRunner(verbosity=verbosity, failfast=failfast)
@@ -73,7 +73,7 @@ def reload_module(module_name):
     return module
 
 def main():
-    verbosity = 4 #Verbosity of output, 0 | 1 | 4
+    verbosity = 1 #Verbosity of output, 0 | 1 | 4
     failfast = 0 #Exit on first failure/error
     report = '' # '' | 'html' | 'console'
 

@@ -34,8 +34,8 @@ def set_env():
     os.environ['DATABASE_PASSWORD'] = DATABASE_PASSWORD
 
     os.environ['TASK_QUEUE_SERVICE'] = TASK_QUEUE_SERVICE
-    os.environ['CELERY_BROKER_URL'] = CELERY_BROKER_URL
-    os.environ['CELERY_RESULT_BACKEND'] = CELERY_RESULT_BACKEND
+    os.environ['TASK_QUEUE_BROKER_URL'] = TASK_QUEUE_BROKER_URL
+    os.environ['TASK_QUEUE_RESULT_BACKEND'] = TASK_QUEUE_RESULT_BACKEND
     os.environ['KE_DOMAIN'] = 'http://127.0.0.1:5000/' #KE_DOMAIN
     os.environ['SRC_EMAIL'] = SRC_EMAIL
     os.environ['ADMIN_NAME'] = ADMIN_NAME
@@ -48,7 +48,6 @@ celery_app = app.extensions.get("celery", None)
 
 from application.back_end.db_models import create_database_tables
 create_database_tables()
-
 
 def main():
     if len(sys.argv) <= 1:

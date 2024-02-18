@@ -12,8 +12,8 @@
       <a class="pure-button pure-button-primary" href="/logout" style="margin-left:.6em; margin-bottom: 10px;">{{_('Logout')}}</a>
       {% else -%}
     <form class="pure-form" action="/login" method="POST">
-      <input type="text" name="u" id="u" placeholder="{{_('Username')}}" class="pure-input-rounded pure-u-1 pure-u-sm-1-4 pure-u-lg-1-6" autofocus />
-      <input type="password" name="p" placeholder="{{_('Password')}}" class="pure-input-rounded pure-u-1 pure-u-sm-1-4 pure-u-lg-1-6"/>
+      <input type="text" name="username" placeholder="{{_('Username')}}" class="pure-input-rounded pure-u-1 pure-u-sm-1-4 pure-u-lg-1-6" autofocus />
+      <input type="password" name="password" placeholder="{{_('Password')}}" class="pure-input-rounded pure-u-1 pure-u-sm-1-4 pure-u-lg-1-6"/>
       <button type="submit" class="pure-button pure-button-primary pure-input-rounded pure-u-1 pure-u-sm-1-6 pure-u-lg-1-12">{{_('Login')}}</button>
     </form>
     {% endif -%}

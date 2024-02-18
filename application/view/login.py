@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 #登录页面
 
-import hashlib, datetime, time
+import hashlib, datetime, time, json
 from urllib.parse import urljoin, urlencode
 from flask import Blueprint, url_for, render_template, redirect, session, current_app as app
 from flask_babel import gettext as _
@@ -13,14 +13,15 @@ from ..utils import new_secret_key, hide_email
 
 bpLogin = Blueprint('bpLogin', __name__)
 
+#账号名不允许的特殊字符
+specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}', ',', ';', '|', ' ']
+
 @bpLogin.route("/login")
 def Login():
     # 第一次登陆时如果没有管理员帐号，
     # 则增加一个管理员帐号 ADMIN_NAME，密码 ADMIN_NAME，后续可以修改密码
     tips = ''
-    if InitialAdminAccount():
-        tips = (_("Please input username and password."))
-    else:
+    if CreateAccountIfNotExist(app.config['ADMIN_NAME']):
         tips = (_("Please use {}/{} to login at first time.").format(app.config['ADMIN_NAME'], app.config['ADMIN_NAME']))
     
     session['login'] = 0
@@ -30,9 +31,8 @@ def Login():
 
 @bpLogin.post("/login")
 def LoginPost():
-    name = request.form.get('u', '').strip()
-    passwd = request.form.get('p', '')
-    specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}', ',', ';', '|']
+    name = request.form.get('username', '').strip()
+    passwd = request.form.get('password', '')
     tips = ''
     if not name:
         tips = _("Username is empty.")
@@ -44,7 +44,7 @@ def LoginPost():
     if tips:
         return render_template('login.html', tips=tips)
     
-    InitialAdminAccount() #确认管理员账号是否存在
+    CreateAccountIfNotExist(app.config['ADMIN_NAME']) #确认管理员账号是否存在
     
     u = KeUser.get_or_none(KeUser.name == name)
     if u:
@@ -78,22 +78,31 @@ def LoginPost():
         session['role'] = ''
         return render_template('login.html', userName=name, tips=tips)
 
-#判断管理员账号是否存在
-#如果管理员账号不存在，创建一个，并返回False，否则返回True
-def InitialAdminAccount():
-    adminName = app.config['ADMIN_NAME']
-    u = KeUser.get_or_none(KeUser.name == adminName)
-    if u:
-        return True
+#判断账号是否存在
+#如果账号不存在，创建一个，并返回True，否则返回False
+def CreateAccountIfNotExist(name, password=None, email=None):
+    if KeUser.get_or_none(KeUser.name == name):
+        return False
 
+    password = password if password else name
+    email = email if email else app.config['SRC_EMAIL']
     secretKey = new_secret_key()
     shareKey = new_secret_key()
-    password = hashlib.md5((adminName + secretKey).encode()).hexdigest()
-    KeUser.create(name=adminName, passwd=password, kindle_email='', enable_send=False, send_time=8, 
+    try:
+        password = hashlib.md5((password + secretKey).encode()).hexdigest()
+    except Exception as e:
+        default_log.warning('CreateAccountIfNotExist() failed to hash password: {}'.format(str(e)))
+        return False
+
+    send_mail_service = {}
+    if name != app.config['ADMIN_NAME'] and AppInfo.get_value(AppInfo.newUserMailService, 'admin') == 'admin':
+        send_mail_service = {'service': 'admin'}
+        
+    KeUser.create(name=name, passwd=password, kindle_email='', enable_send=False, send_time=6, 
         timezone=app.config['TIMEZONE'], book_type="epub", device='kindle', expires=None, secret_key=secretKey, 
         expiration_days=0, share_links={'key': shareKey}, book_title='KindleEar', book_language='en',
-        email=app.config['SRC_EMAIL'])
-    return False
+        email=email, send_mail_service=send_mail_service)
+    return True
 
 @bpLogin.route("/logout", methods=['GET', 'POST'])
 def Logout():
@@ -121,7 +130,7 @@ def ResetPasswordRoute():
             return render_template('reset_password.html', tips='', userName=name, firstStep=False,
                 token=token)
         else:
-            tips = _('The token is wrong or expired')
+            tips = _('The token is wrong or expired.')
             return render_template('tipsback.html', tips=tips, urltoback=url_for('bpLogin.ResetPasswordRoute'))
 
     tips = [_('Please input the correct username and email to reset password.')]
@@ -150,7 +159,7 @@ def ResetPasswordPost():
             tips = _('Reset password success, Please close this page and login again.')
             return render_template('reset_password.html', tips=tips, userName=name, firstStep=True)
     elif user.email != email:
-        tips = _("The email you input is not the account's email.")
+        tips = _("The email you input is not associated with this account.")
         return render_template('reset_password.html', tips=tips, userName=name, firstStep=True)
     else:
         token = new_secret_key(length=24)
@@ -161,9 +170,60 @@ def ResetPasswordPost():
         user.save()
         tips = send_resetpwd_email(user, token)
         if tips == 'ok':
-            tips = (_('The link to reset password is sent to your email.') + '<br/>' +
-                _('Please check your email inputbox in 24 hours.'))
+            tips = (_('The link to reset your password has been sent to your email.') + '<br/>' +
+                _('Please check your email inbox within 24 hours.'))
         return render_template('reset_password.html', tips=tips, userName=name, firstStep=True)
+
+#注册表单
+@bpLogin.route("/signup")
+def Signup():
+    if app.config['ALLOW_SIGNUP']:
+        inviteNeed = AppInfo.get_value(AppInfo.signupType, 'oneTimeCode') != 'public'
+        return render_template('signup.html', tips='', inviteNeed=inviteNeed)
+    else:
+        tips = _("The website does not allow registration. You can ask the owner for an account.")
+        return render_template('tipsback.html', title='not allow', urltoback='/', tips=tips)
+
+#注册验证
+@bpLogin.post("/signup")
+def SignupPost():
+    if not app.config['ALLOW_SIGNUP']:
+        tips = _("The website does not allow registration. You can ask the owner for an account.")
+        return render_template('tipsback.html', title='not allow', urltoback='/', tips=tips)
+
+    signupType = AppInfo.get_value(AppInfo.signupType, 'oneTimeCode')
+    inviteCodes = AppInfo.get_value(AppInfo.inviteCodes, '').splitlines()
+    form = request.form
+    name = form.get('username', '')
+    password1 = form.get('password1')
+    password2 = form.get('password2')
+    email = form.get('email', '')
+    code = form.get('invite_code')
+    if not all([name, password1, password2, email, len(name) < 25, '@' in email]):
+        tips = _("Some parameters are missing or wrong.")
+    elif (signupType != 'public') and (not code or (code not in inviteCodes)):
+        tips = _("The invitation code is invalid.")
+    elif password1 != password2:
+        tips = _("The two new passwords are dismatch.")
+    elif any([char in name for char in specialChars]):
+        tips = _("The username includes unsafe chars.")
+    elif KeUser.get_or_none(KeUser.name == name):
+        tips = _("Already exist the username.")
+    elif not CreateAccountIfNotExist(name, password1, email):
+        tips = _("Failed to create an account. Please contact the administrator for assistance.")
+    else:
+        #如果邀请码是一次性的，注册成功后从列表中去除
+        if inviteCodes and signupType == 'oneTimeCode':
+            try:
+                inviteCodes.remove(code)
+            except:
+                pass
+            AppInfo.set_value(AppInfo.inviteCodes, '\n'.join(inviteCodes))
+
+        tips = _('Successfully created account.')
+        return render_template('tipsback.html', title='Success', urltoback=url_for('bpLogin.Login'), tips=tips)
+
+    return render_template('signup.html', tips=tips, inviteNeed=(signupType != 'public'))
 
 #发送重设密码邮件
 #返回 'ok' 表示成功
@@ -172,7 +232,7 @@ def send_resetpwd_email(user, token):
         return _("Some parameters are missing or wrong.")
 
     subject = _('Reset KindleEar password')
-    info = [_('This is auto-send email, please do not reply this email.'),
+    info = [_('This is an automated email. Please do not reply to it.'),
         _('You can click the following link to reset your KindleEar password.'),
         '<br/>']
     query = urlencode({'token': token, 'name': user.name})
@@ -206,4 +266,4 @@ def reset_pwd_final_step(user, token, new_p1, new_p2):
         else:
             return _("The two new passwords are dismatch.")
     else:
-        return _('The token is wrong or expired')
+        return _('The token is wrong or expired.')

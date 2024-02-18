@@ -97,7 +97,7 @@ def SharedLibraryMgrPost(mgrType):
                         keRss.append(item)
         else:
             ghStatus = srvErrStr(resp.status_code, 'github')
-
+        
         ret['status'] = 'ok' if not (keStatus and ghStatus) else keStatus
         ret['data'] = keRss
         return ret

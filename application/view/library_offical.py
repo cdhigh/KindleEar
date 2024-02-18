@@ -6,7 +6,7 @@ from operator import attrgetter
 from flask import Blueprint, render_template, request, Response
 from flask_babel import gettext as _
 from ..base_handler import *
-from ..utils import str_to_bool
+from ..utils import str_to_bool, str_to_int
 from ..back_end.db_models import *
 
 #几个"官方"服务的地址
@@ -36,10 +36,8 @@ def SharedLibraryAppspot():
 
     dataType = args.get('data_type')
     if dataType == LIBRARY_GETLASTTIME: #获取分享库的最近更新
-        dbItem = AppInfo.get_or_none(AppInfo.name == 'lastSharedRssTime')
-        #转换为时间戳，秒数
-        lastSharedRssTime = int(dbItem.time_value.timestamp()) if dbItem else 0
-        return {'status': 'ok', 'data': lastSharedRssTime}
+        
+        return {'status': 'ok', 'data': str_to_int(AppInfo.get_value(AppInfo.lastSharedRssTime, '0')), 'tips': ''}
     else:
         #本来想在服务器端分页的，但是好像CPU/数据库存取资源比带宽资源更紧张，所以干脆一次性提供给客户端，由客户端分页和分类
         #如果后续发现这样不理想，也可以考虑修改为服务器端分页
@@ -114,12 +112,7 @@ def SharedLibraryAppspotAjax():
 
     #更新分类信息，用于缓存
     if category:
-        cItem = SharedRssCategory.get_or_none(SharedRssCategory.name == category)
-        if cItem:
-            cItem.last_updated = now
-        else:
-            cItem = SharedRssCategory(name=category, last_updated=now)
-        cItem.save()
+        SharedRssCategory.replace(name=category, last_updated=now).execute()
 
     #没有其他订阅源使用此分类了
     if prevCategory and not SharedRss.get_or_none(SharedRss.category == prevCategory):
@@ -129,13 +122,8 @@ def SharedLibraryAppspotAjax():
 
 #更新共享库的最新时间信息(仅用于kindleear.appspot.com"官方"共享服务器)
 def UpdateLastSharedRssTime():
-    dbItem = AppInfo.get_or_none(AppInfo.name == 'lastSharedRssTime')
-    if dbItem:
-        dbItem.time_value = datetime.datetime.utcnow()
-        dbItem.save()
-    else:
-        AppInfo.create(name='lastSharedRssTime', time_value=datetime.datetime.utcnow())
-
+    AppInfo.set_value(AppInfo.lastSharedRssTime, str(datetime.datetime.utcnow().timestamp()))
+    
 #共享库的订阅源信息管理(仅用于kindleear.appspot.com"官方"共享服务器)
 @bpLibraryOffical.post(LIBRARY_MGR + "<mgrType>")
 def SharedLibraryMgrAppspotPost(mgrType):

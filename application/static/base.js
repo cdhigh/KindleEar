@@ -968,73 +968,13 @@ var AjaxFileUpload = {
 ///[end] adv_uploadcss.html
 
 ///[start] admin.html
-//添加一个账号
-function AddAccount(name) {
-  var newName = $('#new_username').val();
-  var newPwd1 = $('#new_u_pwd1').val();
-  var newPwd2 = $('#new_u_pwd2').val();
-  var newEmail = $('#new_email').val();
-  var smService = $('#sm_service').val(); //send mail service
-  var expiration = $('#new_u_expiration').val();
-  if (!newName || !newPwd1 || !newPwd2) {
-    alert(i18n.namePwdEmpty);
-    return;
-  } else if (newPwd1 != newPwd2) {
-    alert(i18n.pwdDismatch);
-    return;
-  }
-
-  $.post("/admin", {actType: 'add', new_username: newName, new_u_pwd1: newPwd1, new_u_pwd2: newPwd2, 
-    new_u_expiration: expiration, new_email: newEmail, sm_service: smService}, function (data) {
-    if (data.status == "ok") {
-      $('#new_username').val('');
-      $('#new_u_pwd1').val('');
-      $('#new_u_pwd2').val('');
-      $('#new_email').val('');
-      window.location.reload(true);
-      ShowSimpleModalDialog('<p>' + i18n.addAccountOk + '</p>');
-    } else if (data.status == i18n.loginRequired) {
-      window.location.href = '/login';
-    } else {
-      alert(data.status);
-    }
-  });
-}
-
-//修改账号的密码
-function ChangeAccountPassword(name) {
-  var oldPwd = $('#orgpwd').val();
-  var newPwd1 = $('#newpwd1').val();
-  var newPwd2 = $('#newpwd2').val();
-  if (!oldPwd || !newPwd1 || !newPwd2) {
-    alert(i18n.namePwdEmpty);
-    return;
-  } else if (newPwd1 != newPwd2) {
-    alert(i18n.pwdDismatch);
-    return;
-  }
-
-  $.post("/admin", {actType: 'change', name: name, op: oldPwd, p1: newPwd1, p2: newPwd2}, function (data) {
-    if (data.status == "ok") {
-      $('#orgpwd').val('');
-      $('#newpwd1').val('');
-      $('#newpwd2').val('');
-      ShowSimpleModalDialog('<p>' + i18n.chPwdSuccess + '</p>');
-    } else if (data.status == i18n.loginRequired) {
-      window.location.href = '/login';
-    } else {
-      alert(data.status);
-    }
-  });
-}
-
 //删除一个账号
 function DeleteAccount(name) {
   if (!confirm(i18n.areYouSureDelete.format(name))) {
     return;
   }
 
-  $.post("/admin", {actType: 'delete', name: name}, function (data) {
+  $.post("/account/delete", {name: name}, function (data) {
     if (data.status == "ok") {
       ShowSimpleModalDialog('<p>' + i18n.accountDeleted + '</p>');
       window.location.reload(true);

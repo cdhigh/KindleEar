@@ -9,80 +9,38 @@
 
 {% block content -%}
 <div class="main">
-  <form class="pure-form pure-form-aligned" action="" method="POST" onsubmit="return false;">
-    <fieldset>
-      <legend><h3>{{_('Change Password')}}</h3></legend>
-      {% if chpwdtips -%}
-      <div class="notice-box">{{chpwdtips|safe}}</div>
-      {% endif -%}
-      <div class="pure-control-group">
-        <label for="orgpwd">{{_("Old password")}}</label>
-        <input type="password" name="op" id="orgpwd" class="pure-u-1 pure-u-sm-1-2" />
-      </div>
-      <div class="pure-control-group">
-        <label for="newpwd1">{{_("New password")}}</label>
-        <input type="password" name="p1" id="newpwd1" class="pure-u-1 pure-u-sm-1-2" />
-      </div>
-      <div class="pure-control-group">
-        <label for="newpwd2">{{_("Confirm password")}}</label>
-        <input type="password" name="p2" id="newpwd2" class="pure-u-1 pure-u-sm-1-2" />
-      </div>
-      <div style="text-align:center;">
-        <button onclick="ChangeAccountPassword('{{user.name}}')" class="pure-button pure-button-primary pure-input-rounded">{{_("Confirm Change")}}</button>
-      </div>
-    </fieldset>
-  </form>
-
   {% if session.get('role') == 'admin' -%}
-  <form class="pure-form pure-form-aligned" action="" method="POST" style="margin-top:10px;" onsubmit="return false;">
+  {% if g.allowSignup -%}
+  <form action="" method="POST" class="pure-form pure-form-aligned">
+    {% if tips -%}
+    <div class="notice-box error">{{tips}}</div>
+    {% endif -%}
     <fieldset>
-      <legend><h3>{{_("Add Account")}}</h3></legend>
-      {% if actips -%}
-      <div class="notice-box">{{actips|safe}}</div>
-      {% endif -%}
-      <div class="pure-control-group">
-        <label for="new_username">{{_("Username")}}</label>
-        <input type="text" name="new_username" id="new_username" class="pure-u-1 pure-u-sm-1-2" />
-      </div>
-      <div class="pure-control-group">
-        <label for="new_u_pwd1">{{_("Password")}}</label>
-        <input type="text" name="new_u_pwd1" id="new_u_pwd1" class="pure-u-1 pure-u-sm-1-2" />
-      </div>
-      <div class="pure-control-group">
-        <label for="new_u_pwd2">{{_("Confirm password")}}</label>
-        <input type="text" name="new_u_pwd2" id="new_u_pwd2" class="pure-u-1 pure-u-sm-1-2" />
-      </div>
-      <div class="pure-control-group">
-        <label for="new_email">{{_("Email")}}</label>
-        <input type="email" name="new_email" id="new_email" class="pure-u-1 pure-u-sm-1-2" placeholder="{{_('Optional')}}" />
-      </div>
+      <legend><h3>{{_("Signup settings")}} <button type="submit" class="h3button">{{_("Save")}}</a></h3></legend>
       <div class="pure-control-group">
         <label for="sm_service">{{_("Email service")}}</label>
-        <select class="pure-u-1 pure-u-sm-1-2 bool" name="sm_service" id="sm_service">
-          <option value="admin" selected="selected">{{_("Same as admin")}}</option>
-          <option value="independent">{{_("Independent")}}</option>
+        <select class="pure-u-1 pure-u-sm-1-2" name="sm_service">
+          <option value="admin" {% if mailSrv == 'admin' %} selected="selected" {% endif %}>{{_("Same as admin")}}</option>
+          <option value="independent" {% if mailSrv != 'admin' %} selected="selected" {% endif %}>{{_("Independent")}}</option>
         </select>
       </div>
       <div class="pure-control-group">
-        <label for="new_u_expiration">{{_("Expiration")}}</label>
-        <select class="pure-u-1 pure-u-sm-1-2 bool" name="new_u_expiration" id="new_u_expiration">
-          <option value="0" selected="selected">{{_("Never expire")}}</option>
-          <option value="7">{{_("7 Days")}}</option>
-          <option value="30">{{_("1 Month")}}</option>
-          <option value="90">{{_("3 Months")}}</option>
-          <option value="180">{{_("6 Months")}}</option>
-          <option value="365">{{_("1 Year")}}</option>
-          <option value="730">{{_("2 Years")}}</option>
+        <label for="sm_service">{{_("Signup type")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="signup_type">
+          <option value="public" {% if signupType == 'public' %} selected="selected" {% endif %}>{{_("Public")}}</option>
+          <option value="oneTimeCode" {% if signupType == 'oneTimeCode' %} selected="selected" {% endif %}>{{_("One time code")}}</option>
+          <option value="permanentCode" {% if signupType == 'permanentCode' %} selected="selected" {% endif %}>{{_("Permanent code")}}</option>
         </select>
       </div>
-      <div style="text-align:center;">
-        <button onclick="AddAccount('{{user.name}}')" class="pure-button pure-button-primary pure-input-rounded">{{_("Add")}}</button>
+      <div class="pure-control-group">
+        <label>{{_("Invitation codes")}}</label>
+        <textarea class="pure-u-1 pure-u-sm-1-2" name="invite_codes" placeholder="one code per line">{{inviteCodes}}</textarea>
       </div>
     </fieldset>
   </form>
-
+  {% endif %}
   <div class="pure-form">
-    <legend><h3>{{_("Accounts")}}</h3></legend>
+    <legend><h3>{{_("Accounts")}} <a href='/account/add' class="h3button">{{_("Add")}}</a></h3></legend>
     <table class="pure-table pure-table-horizontal usrtb" width="100%">
       <colgroup>
         <col width="15%">
@@ -124,12 +82,11 @@
           <td>{{u.expiration_days}} Days</td>
           {% endif -%}
           <td>
-            {% if u.name == admin_name -%}
-            <a href="#" class="actionButton act" style="pointer-events:none">{{_("Change")}}</a>
-            <a href="#" class="actionButton" style="pointer-events:none">{{_("Delete")}}</a>
+            <button class="additional-btn btn-B" title="{{_('Change password')}}"><a href="/account/change/{{u.name}}"><i class="iconfont icon-upload"></i></a></button>
+            {% if u.name == adminName -%}
+            <button class="additional-btn btn-A additional-btn-disabled"><i class="iconfont icon-delete"></i></button>
             {% else -%}
-            <a href="/mgrpwd/{{u.name}}" class="actionButton act">{{_("Change")}}</a>
-            <a href="javascript:;" class="actionButton" onclick="DeleteAccount('{{u.name}}')">{{_("Delete")}}</a>
+            <button class="additional-btn btn-A" title="{{_('Delete')}}" onclick="DeleteAccount('{{u.name}}')"><i class="iconfont icon-delete"></i></button>
             {% endif -%}
           </td>
         </tr>

@@ -48,13 +48,13 @@
         {% if instapaper.get('enable') %} checked="1"{% endif %} />
         {{appendStrs["Instapaper"]}}
       </label>
-      <div class="pure-u-1 pure-u-sm-2-5">
+      <div class="pure-u-1 pure-u-sm-9-24">
         <input type="text" name="instapaper_username" id="instapaper_username" placeholder="{{ _('Email or Username') }}" value="{{ instapaper.get('username', '') }}" onchange="notifyInstapaperVerify();" class="pure-u-1 pure-u-sm-23-24" />
       </div>
-      <div class="pure-u-1 pure-u-sm-2-5">
-        <input type="password" name="instapaper_password" id="instapaper_password" placeholder="{{ _('Password') }}" value="{% if instapaper.get('password') %}{{ ke_decrypt(instapaper.get('password', ''), user.secret_key or '') }}{% endif %}" onchange="notifyInstapaperVerify();" class="pure-u-1 pure-u-sm-23-24" />
+      <div class="pure-u-1 pure-u-sm-9-24">
+        <input type="password" name="instapaper_password" id="instapaper_password" placeholder="{{ _('Password') }}" value="{% if instapaper.get('password') %}{{ ke_decrypt(instapaper.get('password', ''), user.secret_key) }}{% endif %}" onchange="notifyInstapaperVerify();" class="pure-u-1 pure-u-sm-23-24" />
       </div>
-      <div class="pure-u-1 pure-u-sm-1-5" style="text-align:center;">
+      <div class="pure-u-1 pure-u-sm-6-24" style="text-align:center;">
         <a href="javascript:;" id="averInstapaper" onclick="verifyInstapaper();return false;" class="pure-u-1 pure-button">{{_("Verify")}}</a>
       </div>
     </div>

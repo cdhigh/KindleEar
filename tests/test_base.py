@@ -25,9 +25,9 @@ class BaseTestCase(unittest.TestCase):
         self.client = app.test_client()
         self.runner = app.test_cli_runner()
         if self.login_required:
-            self.client.post('/login', data={'u': self.login_required, 'p': self.login_required})
+            self.client.post('/login', data={'username': self.login_required, 'password': self.login_required})
         self.temp_files = []
-
+        
     def tearDown(self):
         if self.login_required:
             self.client.post('/logout')

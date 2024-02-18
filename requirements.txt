@@ -30,5 +30,6 @@ google-cloud-tasks==2.15.0
 celery==5.3.6
 redis==5.0.1
 eventlet==0.35.1
+#flask-rq2==18.3
 
 appengine-python-standard==1.1.6

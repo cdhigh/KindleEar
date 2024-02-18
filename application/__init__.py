@@ -43,6 +43,7 @@ def init_app(name, debug=False):
     def BeforeRequest():
         g.version = __Version__
         g.now = datetime.datetime.utcnow
+        g.allowSignup = app.config['ALLOW_SIGNUP']
         connect_database()
 
     @app.teardown_request

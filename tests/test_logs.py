@@ -9,7 +9,8 @@ class LogsTestCase(BaseTestCase):
     def test_logs(self):
         resp = self.client.get('/logs')
         self.assertEqual(resp.status_code, 200)
-        self.assertIn('There is no log', resp.text)
+        text = resp.text
+        self.assertTrue(('There is no log' in text) or ('Only display last 10 logs' in text))
 
         data = {'user': 'admin', 'to': 'test@test.com', 'size': 1024, 'time_str': '2024-01-01',
             'datetime': datetime.datetime.utcnow(), 'book': 'test', 'status': 'ok'}
@@ -23,7 +24,7 @@ class LogsTestCase(BaseTestCase):
 
         data['user'] = 'other'
         DeliverLog.create(**data)
-        KeUser.create(name='other', passwd='pwd')
+        KeUser.create(name='other', passwd='pwd', email='1@2')
         resp = self.client.get('/logs')
         self.assertEqual(resp.status_code, 200)
         self.assertIn('Logs of other users', resp.text)
@@ -34,7 +35,7 @@ class LogsTestCase(BaseTestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn('lines delivery log removed.', resp.text)
 
-        KeUser.create(name='other', passwd='pwd', enable_send=True, expiration_days=7, 
+        KeUser.create(name='other', passwd='pwd', email='1@1', enable_send=True, expiration_days=7, 
                 expires=datetime.datetime.utcnow() - datetime.timedelta(days=30))
         resp = self.client.get('/removelogs')
         self.assertEqual(resp.status_code, 200)

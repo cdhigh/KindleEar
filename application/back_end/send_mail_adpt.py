@@ -28,6 +28,17 @@ try:
 except ImportError:
     smtp_send_mail = None
 
+#返回当前可用的发送邮件服务列表
+def avaliable_sm_services():
+    sm = ['local']
+    if gae_mail:
+        sm.append('gae')
+    if SendGridAPIClient:
+        sm.append('sendgrid')
+    if smtp_send_mail:
+        sm.append('smtp')
+    return sm
+
 #发送邮件
 #title: 邮件标题
 #attachment: 附件二进制内容，或元祖 (filename, content)

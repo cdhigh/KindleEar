@@ -12,14 +12,12 @@ from .utils import local_time
 #一些共同的工具函数，工具函数都是小写+下划线形式
 
 #确认登录的装饰器
-#如果提供userName，则要求登录的用户名=userName
-#forAjax:是返回一个json字典
-def login_required(userName=None, forAjax=False):
+#forAjax:是否返回一个json字典
+def login_required(forAjax=False):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            if ((session.get('login') == 1) and (not userName or (userName == session.get('userName')))
-                and get_login_user()):
+            if ((session.get('login') == 1) and get_login_user()):
                 return func(*args, **kwargs)
             else:
                 return redirect(url_for("bpLogin.NeedLoginAjax") if forAjax else url_for("bpLogin.Login"))

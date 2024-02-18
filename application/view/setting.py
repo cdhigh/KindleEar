@@ -8,47 +8,20 @@ from flask_babel import gettext as _
 from ..base_handler import *
 from ..utils import str_to_bool, str_to_int, ke_encrypt
 from ..back_end.db_models import *
+from ..back_end.send_mail_adpt import avaliable_sm_services
 from .subscribe import UpdateBookedCustomRss
 
 bpSetting = Blueprint('bpSetting', __name__)
 
 supported_languages = ['zh', 'tr_TR', 'en']
 
-#各种语言的语种代码和文字描述的对应关系
-def LangMap(): 
-    return {"zh-cn": _("Chinese"),
-        "en-us": _("English"),
-        "fr-fr": _("French"),
-        "es-es": _("Spanish"),
-        "pt-br": _("Portuguese"),
-        "de-de": _("German"),
-        "it-it": _("Italian"),
-        "ja-jp": _("Japanese"),
-        "ru-ru": _("Russian"),
-        "tr-tr": _("Turkish"),
-        "ko-kr": _("Korean"),
-        "ar": _("Arabic"),
-        "cs": _("Czech"),
-        "nl": _("Dutch"),
-        "el": _("Greek"),
-        "hi": _("Hindi"),
-        "ms": _("Malaysian"),
-        "bn": _("Bengali"),
-        "fa": _("Persian"),
-        "ur": _("Urdu"),
-        "sw": _("Swahili"),
-        "vi": _("Vietnamese"),
-        "pa": _("Punjabi"),
-        "jv": _("Javanese"),
-        "tl": _("Tagalog"),
-        "ha": _("Hausa"),}
-
 @bpSetting.route("/setting", endpoint='Setting')
 @login_required()
 def Setting(tips=None):
     user = get_login_user()
-    return render_template('setting.html', tab='set', user=user, tips=tips, mailSender=app.config['SRC_EMAIL'], 
-        langMap=LangMap())
+    sm_services = avaliable_sm_services()
+    return render_template('setting.html', tab='set', user=user, tips=tips, src_mail=app.config['SRC_EMAIL'], 
+        langMap=LangMap(), sm_services=sm_services)
 
 @bpSetting.post("/setting", endpoint='SettingPost')
 @login_required()
@@ -63,7 +36,7 @@ def SettingPost():
     sm_srv_type = ''
     if user.name == os.getenv('ADMIN_NAME') or user.send_mail_service.get('service') != 'admin':
         sm_srv_need = True
-        sm_srv_type = form.get('sm_service', 'gae')
+        sm_srv_type = form.get('sm_service')
         sm_apikey = form.get('sm_apikey', '')
         sm_host = form.get('sm_host', '')
         sm_port = str_to_int(form.get('sm_port'))
@@ -125,8 +98,9 @@ def SettingPost():
         #根据自定义RSS的使能设置，将自定义RSS添加进订阅列表或从订阅列表移除
         UpdateBookedCustomRss(user)
     
-    return render_template('setting.html', tab='set', user=user, tips=tips, mailSender=app.config['SRC_EMAIL'], 
-        langMap=LangMap())
+    sm_services = avaliable_sm_services()
+    return render_template('setting.html', tab='set', user=user, tips=tips, src_mail=app.config['SRC_EMAIL'], 
+        langMap=LangMap(), sm_services=sm_services)
 
 #设置国际化语种
 @bpSetting.route("/setlocale/<langCode>")
@@ -144,3 +118,32 @@ def get_locale():
     except: #Working outside of request context
         langCode = 'en'
     return langCode if langCode else request.accept_languages.best_match(supported_languages)
+
+#各种语言的语种代码和文字描述的对应关系
+def LangMap():
+    return {"zh-cn": _("Chinese"),
+        "en-us": _("English"),
+        "fr-fr": _("French"),
+        "es-es": _("Spanish"),
+        "pt-br": _("Portuguese"),
+        "de-de": _("German"),
+        "it-it": _("Italian"),
+        "ja-jp": _("Japanese"),
+        "ru-ru": _("Russian"),
+        "tr-tr": _("Turkish"),
+        "ko-kr": _("Korean"),
+        "ar": _("Arabic"),
+        "cs": _("Czech"),
+        "nl": _("Dutch"),
+        "el": _("Greek"),
+        "hi": _("Hindi"),
+        "ms": _("Malaysian"),
+        "bn": _("Bengali"),
+        "fa": _("Persian"),
+        "ur": _("Urdu"),
+        "sw": _("Swahili"),
+        "vi": _("Vietnamese"),
+        "pa": _("Punjabi"),
+        "jv": _("Javanese"),
+        "tl": _("Tagalog"),
+        "ha": _("Hausa"),}

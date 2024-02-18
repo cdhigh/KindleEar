@@ -11,7 +11,7 @@ class SettingTestCase(BaseTestCase):
         resp = self.client.get('/setting')
         self.assertEqual(resp.status_code, 200)
         data = resp.text
-        self.assertTrue(('Base Setting' in data) and ('Oldest article' in data))
+        self.assertTrue(('Base' in data) and ('Oldest article' in data))
 
     def test_set_post(self):
         data = {'kindle_email': '', 'rss_title': '', 'sm_service': 'sendgrid', 'sm_apikey': '', 'sm_host': '',

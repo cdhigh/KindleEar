@@ -16,18 +16,19 @@ else:
 class KeUser(MyBaseModel): # kindleEar User
     name = CharField(unique=True)
     passwd = CharField()
-    expiration_days = IntegerField(default=0) #账号超期设置值，0为永久有效
+    email = CharField()
     secret_key = CharField(default='')
     kindle_email = CharField(default='')
-    email = CharField(default='') #用于重置密码之类的操作
     enable_send = BooleanField(default=False)
     send_days = JSONField(default=JSONField.list_default)
     send_time = IntegerField(default=0)
     timezone = IntegerField(default=0)
-    book_type = CharField(default='epub') #mobi,epub
-    device = CharField(default='')
+    expiration_days = IntegerField(default=0) #账号超期设置值，0为永久有效
     expires = DateTimeField(null=True) #超过了此日期后账号自动停止推送
+    created_time = DateTimeField(default=datetime.datetime.utcnow)
 
+    device = CharField(default='')
+    book_type = CharField(default='epub') #mobi,epub
     book_title = CharField(default='KindleEar')
     title_fmt = CharField(default='') #在元数据标题中添加日期的格式
     author_format = CharField(default='') #修正Kindle 5.9.x固件的bug【将作者显示为日期】
@@ -36,10 +37,9 @@ class KeUser(MyBaseModel): # kindleEar User
     time_fmt = CharField(default='%Y-%m-%d')
     oldest_article = IntegerField(default=7)
     book_language = CharField(default='en') #自定义RSS的语言
-    enable_custom_rss = BooleanField(default=True)
+    enable_custom_rss = BooleanField(default=False)
     
     share_links = JSONField(default=JSONField.dict_default) #evernote/wiz/pocket/instapaper包含子字典，微博/facebook/twitter等仅包含0/1
-    
     covers = JSONField(default=JSONField.dict_default) #保存封面图片数据库ID {'order':,'cover0':,...'cover6':}
     send_mail_service = JSONField(default=JSONField.dict_default) #{'service':,...}
     custom = JSONField(default=JSONField.dict_default) #留着扩展，避免后续一些小特性还需要升级数据表结构
@@ -219,31 +219,38 @@ class LastDelivered(MyBaseModel):
     record = CharField(default='')
     datetime = DateTimeField(default=datetime.datetime.utcnow)
 
-#当前使用:
-#name='dbTableVersion'.int_value 行保存数据库格式版本
-#name='lastSharedRssTime'.time_value 保存共享库的最新更新日期
 class AppInfo(MyBaseModel):
-    name = CharField()
-    int_value = IntegerField(default=0)
-    str_value = CharField(default='')
-    time_value = DateTimeField(default=datetime.datetime.utcnow)
+    name = CharField(unique=True)
+    value = CharField(default='')
     description = CharField(default='')
-    comment = CharField(default='')
 
+    lastSharedRssTime = 'lastSharedRssTime'
+    newUserMailService = 'newUserMailService'
+    signupType = 'signupType'
+    inviteCodes = 'inviteCodes'
+    
+    @classmethod
+    def get_value(cls, name, default):
+        dbItem = cls.get_or_none(AppInfo.name == name)
+        return dbItem.value if dbItem else default
 
+    @classmethod
+    def set_value(cls, name, value):
+        cls.replace(name=name, value=value).execute()
+        
 #创建数据库表格，一个数据库只需要创建一次
 #如果是sql数据库，可以使用force=True删掉之前的数据库文件(小心)
 def create_database_tables(force=False):
     engine = os.getenv('DATABASE_ENGINE')
-    if engine == "sqlite" and dbName:
-        if not force and os.path.exists(dbName):
-            #print(f'[Error] Database "{dbName}" already exists')
-            return
-        elif os.path.exists(dbName):
-            try:
-                os.remove(dbName)
-            except:
-                pass
+    #if engine == "sqlite" and dbName:
+    #    if not force and os.path.exists(dbName):
+    #        #print(f'[Error] Database "{dbName}" already exists')
+    #        return
+    #    elif os.path.exists(dbName):
+    #        try:
+    #            os.remove(dbName)
+    #        except:
+    #            pass
 
     if engine not in ["datastore", "mongodb"]:
         #with dbInstance.connection_context():
@@ -252,5 +259,4 @@ def create_database_tables(force=False):
             SharedRss, SharedRssCategory, LastDelivered, AppInfo], safe=True)
         #close_database()
         
-    #AppInfo(name='dbTableVersion', int_value=DB_VERSION).save()
     #print(f'Create database "{dbName}" finished')

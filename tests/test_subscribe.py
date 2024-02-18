@@ -12,7 +12,7 @@ class SubscribeTestCase(BaseTestCase):
         resp = self.client.get('/my')
         self.assertEqual(resp.status_code, 200)
         data = resp.text
-        self.assertTrue(('Custom Rss' in data) and ('Subscribed' in data))
+        self.assertTrue(('Custom RSS' in data) and ('Subscribed' in data))
 
     def test_web_custom_rss(self):
         resp = self.client.post('/my', data={'rss_title': 'bbc', 'url': '', 'fulltext': False})

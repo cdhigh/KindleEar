@@ -26,12 +26,12 @@ DATABASE_PASSWORD = ""
 #Email receiving service, "gae" | ""
 INBOUND_EMAIL_SERVICE = "gae"
 
-#Select the type of task queue, "gae" | "celery" | ""
-TASK_QUEUE_SERVICE = ""
+#Select the type of task queue, "gae" | "celery" | "rq" | ""
+TASK_QUEUE_SERVICE = "celery"
 
-#If task queue service is celery
-CELERY_BROKER_URL = "redis://127.0.0.1:6379/"
-CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/"
+#If task queue service is celery | rq
+TASK_QUEUE_BROKER_URL = "redis://127.0.0.1:6379/"
+TASK_QUEUE_RESULT_BACKEND = "redis://127.0.0.1:6379/"
 
 #If this option is empty, temporary files will be stored in memory
 #Setting this option can reduce memory consumption, supports both relative and absolute paths
@@ -39,6 +39,9 @@ TEMP_DIR = ""
 
 #If the depolyment plataform supports multi-threads, set this option will boost the download speed
 DOWNLOAD_THREAD_NUM = 1
+
+#If the website allow visitors to signup or not
+ALLOW_SIGNUP = False
 
 #------------------------------------------------------------------------------------
 #Configurations below this line generally do not need to be modified

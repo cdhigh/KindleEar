@@ -28,6 +28,9 @@ def Mylogs():
 
 #每天自动运行的任务，清理过期log
 @bpLogs.route("/removelogs")
+def RemoveLogsRoute():
+    return RemoveLogs()
+
 def RemoveLogs():
     #停止过期用户的推送
     now = datetime.datetime.utcnow()

@@ -11,24 +11,24 @@ class LoginTestCase(BaseTestCase):
             ('Please input username and password.' in data))
 
     def test_login_wrong_parms(self):
-        resp = self.client.post('/login', data={'u': '', 'p': 'password'})
+        resp = self.client.post('/login', data={'username': '', 'password': 'password'})
         self.assertEqual(resp.status_code, 200)
         self.assertIn('Username is empty.', resp.text)
 
-        resp = self.client.post('/login', data={'u': '1111111111111111111111111111111111111111111111111', 'p': 'password'})
+        resp = self.client.post('/login', data={'username': '1111111111111111111111111111111111111111111111111', 'password': 'password'})
         self.assertEqual(resp.status_code, 200)
         self.assertIn('The len of username reached the limit of 25 chars.', resp.text)
 
-        resp = self.client.post('/login', data={'u': '<kindleear>', 'p': 'password'})
+        resp = self.client.post('/login', data={'username': '<kindleear>', 'password': 'password'})
         self.assertEqual(resp.status_code, 200)
         self.assertIn('The username includes unsafe chars.', resp.text)
 
-        resp = self.client.post('/login', data={'u': 'admin', 'p': 'password'})
+        resp = self.client.post('/login', data={'username': 'admin', 'password': 'password'})
         self.assertEqual(resp.status_code, 200)
         self.assertIn('The username does not exist or password is wrong.', resp.text)
 
     def test_login_success(self):
-        resp = self.client.post('/login', data={'u': 'admin', 'p': 'admin'})
+        resp = self.client.post('/login', data={'username': 'admin', 'password': 'admin'})
         self.assertEqual(resp.status_code, 302)
 
         resp = self.client.post('/logout')

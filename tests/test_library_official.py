@@ -14,8 +14,8 @@ class LibraryOfficalTestCase(BaseTestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json, {'status': 'ok', 'data': 0})
 
-        now = datetime.datetime.utcnow()
-        AppInfo.create(name='lastSharedRssTime', time_value=now)
+        now = str(datetime.datetime.utcnow().timestamp())
+        AppInfo.create(name='lastSharedRssTime', value=now)
         resp = self.client.get('/kindleearappspotlibrary', query_string=query)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json, {'status': 'ok', 'data': int(now.timestamp())})

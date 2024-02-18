@@ -43,7 +43,7 @@ def AdvWhiteListPost():
         if wlist.startswith('*@'): #输入*@xx.xx则修改为@xx.xx
             wlist = wlist[1:]
         if wlist:
-            WhiteList(mail=wlist, user=user.name).save()
+            WhiteList.get_or_create(mail=wlist, user=user.name)
     return redirect(url_for('bpAdv.AdvWhiteList'))
 
 #删除白名单项目
@@ -153,14 +153,14 @@ def AdvImportPost():
                 url = ('https:/' if url.startswith('/') else 'https://') + url
 
             if title and url: #查询是否有重复的
-                dbItem = Recipe.get_or_none((Recipe.user == user.name) & (Recipe.url == url))
+                dbItem = Recipe.get_or_none((Recipe.user == user.name) & (Recipe.title == title))
                 if dbItem:
-                    dbItem.title = title
+                    dbItem.url = url
                     dbItem.isfulltext = isfulltext
                     dbItem.save()
                 else:
-                    Recipe(title=title, url=url, user=user.name, isfulltext=isfulltext, type_='custom',
-                        time=datetime.datetime.utcnow()).save()
+                    Recipe.create(title=title, url=url, user=user.name, isfulltext=isfulltext, type_='custom',
+                        time=datetime.datetime.utcnow())
                         
         return redirect(url_for("bpSubscribe.MySubscription"))
     else:
@@ -217,6 +217,7 @@ def AdvExport():
     
 #在本地选择一个图片上传做为自定义RSS书籍的封面
 @bpAdv.route("/adv/cover")
+@login_required()
 def AdvUploadCoverImage(tips=None):
     user = get_login_user()
     covers = {}
@@ -319,7 +320,7 @@ def AdvDeleteCssAjaxPost():
     ret = {'status': 'ok'}
     user = get_login_user()
     if request.form.get('action') == 'delete':
-        UserBlob.delete().where((UserBlob.name=='css') & (UserBlob.user == user.name)).execute()
+        UserBlob.delete().where((UserBlob.user == user.name) & (UserBlob.name=='css')).execute()
     
     return ret
 
@@ -348,7 +349,8 @@ def AdvOAuth2(authType):
         request_token = pocket.get_request_token()
         url = pocket.get_authorize_url(request_token)
     except Exception as e:
-        return render_template('tipsback.html', title='Authorization Error', urltoback='/adv/archive', tips=_('Authorization Error!<br/>{}').format(e))
+        return render_template('tipsback.html', title='Authorization Error', urltoback=url_for('bpAdv.AdvArchive'),
+            tips=_('Authorization Error!<br/>{}').format(e))
 
     session['pocket_request_token'] = request_token
     return redirect(url)
@@ -371,12 +373,12 @@ def AdvOAuth2Callback(authType):
         pocket['access_token'] = resp.get('access_token', '')
         user.share_links = shareLinks
         user.save()
-        return render_template('tipsback.html', title='Success authorized', urltoback='/adv/archive', tips=_('Success authorized by Pocket!'))
+        return render_template('tipsback.html', title='Success authorized', urltoback=url_for('bpAdv.AdvArchive'), tips=_('Success authorized by Pocket!'))
     except Exception as e:
         shareLinks[pocket] = {'enable': '', 'access_token': ''}
         user.share_links = shareLinks
         user.save()
-        return render_template('tipsback.html', title='Failed to authorize', urltoback='/adv/archive', 
+        return render_template('tipsback.html', title='Failed to authorize', urltoback=url_for('bpAdv.AdvArchive'), 
             tips=_('Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>{}').format(e))
 
 #通过AJAX验证密码等信息的函数

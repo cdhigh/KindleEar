@@ -3,7 +3,8 @@ sort: 1
 ---
 # English docs
 
-- [Intro&Deployment](https://cdhigh.github.io/Chinese/1.intro.html)
+- [Intro](https://cdhigh.github.io/English/1.intro.html)
 
-- [Usage](https://cdhigh.github.io/Chinese/2.deployment.html)
+- [Deployment](https://cdhigh.github.io/English/2.deployment.html)
     
+- [FAQ](https://cdhigh.github.io/English/3.faq.html)

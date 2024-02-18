@@ -58,12 +58,12 @@ def MySubscriptionPost():
         url = ('https:/' if url.startswith('/') else 'https://') + url
 
     #判断是否重复
-    if url.lower() in [item.url.lower() for item in user.all_custom_rss()]:
+    if Recipe.get_or_none((Recipe.user == user.name) & (Recipe.title == title)):
         return redirect(url_for("bpSubscribe.MySubscription", tips=(_("Duplicated subscription!"))))
-
-    Recipe(title=title, url=url, isfulltext=isfulltext, type_='custom', user=user.name,
-        time=datetime.datetime.utcnow()).save()
-    return redirect(url_for("bpSubscribe.MySubscription"))
+    else:
+        Recipe.create(title=title, url=url, isfulltext=isfulltext, type_='custom', user=user.name,
+            time=datetime.datetime.utcnow())
+        return redirect(url_for("bpSubscribe.MySubscription"))
 
 #添加/删除自定义RSS订阅的AJAX处理函数
 @bpSubscribe.post("/customrss/<actType>", endpoint='FeedsAjaxPost')
@@ -90,11 +90,11 @@ def FeedsAjaxPost(actType):
         fromSharedLibrary = str_to_bool(form.get('fromsharedlibrary', ''))
         recipeId = form.get('recipeId', '')
 
-        respDict = {'status':'ok', 'title':title, 'url':url, 'isfulltext':isfulltext, 'recipeId': recipeId}
+        ret = {'status':'ok', 'title':title, 'url':url, 'isfulltext':isfulltext, 'recipeId': recipeId}
 
         if not title or not (url or recipeId):
-            respDict['status'] = _("The Title or Url is empty.")
-            return respDict
+            ret['status'] = _("The Title or Url is empty.")
+            return ret
 
         #如果url不存在，则可能是分享的recipe，需要连接服务器获取recipe代码
         if not url:
@@ -106,43 +106,42 @@ def FeedsAjaxPost(actType):
                 resp = opener.open(buildKeUrl(path), {'recipeId': recipeId})
 
             if resp.status_code != 200:
-                respDict['status'] = _("Failed to fetch the recipe.")
-                return respDict
+                ret['status'] = _("Failed to fetch the recipe.")
+                return ret
 
             if recipeId.startswith('http'):
                 src = resp.text
             else:
                 data = resp.json()
                 if data.get('status') != 'ok':
-                    respDict['status'] = data.get('status', '')
-                    return respDict
+                    ret['status'] = data.get('status', '')
+                    return ret
                 src = data.get('src', '')
                 try:
                     params = SaveRecipeIfCorrect(user, src)
                 except Exception as e:
                     return {'status': _("Failed to save the recipe. Error:") + str(e)}
-                respDict.update(params)
+                ret.update(params)
         else: #自定义RSS
             if not url.lower().startswith('http'):
                 url = ('https:/' if url.startswith('/') else 'https://') + url
-                respDict['url'] = url
+                ret['url'] = url
 
             #判断是否重复
-            if url.lower() in [item.url.lower() for item in user.all_custom_rss()]:
-                respDict['status'] = _("Duplicated subscription!")
-                return respDict
-
-            rss = Recipe(title=title, url=url, isfulltext=isfulltext, type_='custom', user=user.name,
-                time=datetime.datetime.utcnow())
-            rss.save()
-            respDict['id'] = rss.recipe_id
-            UpdateBookedCustomRss(user)
+            if Recipe.get_or_none((Recipe.user == user.name) & (Recipe.title == title)):
+                ret['status'] = _("Duplicated subscription!")
+                return ret
+            else:
+                rss = Recipe.create(title=title, url=url, isfulltext=isfulltext, type_='custom', user=user.name,
+                    time=datetime.datetime.utcnow())
+                ret['id'] = rss.recipe_id
+                UpdateBookedCustomRss(user)
         
         #如果是从共享库中订阅的，则通知共享服务器，提供订阅数量信息，以便排序
         if fromSharedLibrary:
             SendNewSubscription(title, url, recipeId)
 
-        return respDict
+        return ret
     else:
         return {'status': 'Unknown command: {}'.format(actType)}
 
@@ -207,9 +206,9 @@ def RecipeAjaxPost(actType):
             dbInst.separated = separated
             dbInst.save()
         else:
-            BookedRecipe(recipe_id=recipeId, separated=separated, user=user.name, title=title, 
+            BookedRecipe.create(recipe_id=recipeId, separated=separated, user=user.name, title=title, 
                 description=desc, needs_subscription=needSubscription,
-                time=datetime.datetime.utcnow()).save()
+                time=datetime.datetime.utcnow())
 
         respDict['title'] = title
         respDict['desc'] = desc
@@ -219,10 +218,13 @@ def RecipeAjaxPost(actType):
     elif actType == 'delete': #删除已经上传的recipe
         if recipeType == 'builtin':
             return {'status': _('You can only delete the uploaded recipe.')}
-
-        BookedRecipe.delete().where((BookedRecipe.user == user.name) & (BookedRecipe.recipe_id == recipeId)).execute()
-        recipe.delete_instance()
-        return {'status': 'ok', 'id': recipeId}
+        else:
+            bkRecipe = user.get_booked_recipe(recipeId)
+            if bkRecipe:
+                return {'status': _('The recipe have been subscribed, please unsubscribe it before delete.')}
+            else:
+                recipe.delete_instance()
+                return {'status': 'ok', 'id': recipeId}
     elif actType == 'schedule': #设置某个recipe的自定义推送时间
         dbInst = BookedRecipe.get_or_none(BookedRecipe.recipe_id == recipeId)
         if dbInst:
@@ -272,15 +274,14 @@ def SaveRecipeIfCorrect(user: KeUser, src: str):
     recipe = compile_recipe(src)
     
     #判断是否重复
-    oldRecipe = Recipe.get_or_none(Recipe.title == recipe.title)
+    oldRecipe = Recipe.get_or_none((Recipe.user == user.name) & (Recipe.title == recipe.title))
     if oldRecipe:
         raise Exception(_('The recipe is already in the library.'))
 
     params = {"title": recipe.title, "description": recipe.description, "type_": 'upload', 
         "needs_subscription": recipe.needs_subscription, "src": src, "time": datetime.datetime.utcnow(),
         "user": user.name, "language": recipe.language}
-    dbInst = Recipe(**params)
-    dbInst.save()
+    dbInst = Recipe.create(**params)
     params.pop('src')
     params.pop('time')
     params.pop('type_')
