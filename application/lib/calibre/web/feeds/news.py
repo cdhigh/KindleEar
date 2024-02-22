@@ -1123,13 +1123,13 @@ class BasicNewsRecipe(Recipe):
         share_key = user.share_links.get('key', '123')
         titleTag = soup.find('title')
         title = titleTag.string if titleTag else 'Untitled'
-        keDomain = os.getenv('KE_DOMAIN')
+        appDomain = os.getenv('APP_DOMAIN')
         if shareType in ('Evernote', 'Wiz'):
-            href = f"{keDomain}/share?act={shareType}&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}"
+            href = f"{appDomain}/share?act={shareType}&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}"
         elif shareType == 'Pocket':
-            href = f'{keDomain}/share?act=pocket&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
+            href = f'{appDomain}/share?act=pocket&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
         elif shareType == 'Instapaper':
-            href = f'{keDomain}/share?act=instapaper&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
+            href = f'{appDomain}/share?act=instapaper&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
         elif shareType == 'Weibo':
             href = f'https://service.weibo.com/share/share.php?url={quote_plus(url)}'
         elif shareType == 'TencentWeibo':

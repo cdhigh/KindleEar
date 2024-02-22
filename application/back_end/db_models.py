@@ -8,7 +8,7 @@ import os, sys, random
 from operator import attrgetter
 from ..utils import ke_encrypt, ke_decrypt, tz_now
 
-if os.getenv('DATABASE_ENGINE') in ("datastore", "mongodb"):
+if os.getenv('DATABASE_ENGINE') in ("datastore", "mongodb", "redis"):
     from .db_models_nosql import *
 else:
     from .db_models_sql import *

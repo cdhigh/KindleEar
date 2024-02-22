@@ -236,7 +236,7 @@ def send_resetpwd_email(user, token):
         _('You can click the following link to reset your KindleEar password.'),
         '<br/>']
     query = urlencode({'token': token, 'name': user.name})
-    link = urljoin(app.config['KE_DOMAIN'], url_for('bpLogin.ResetPasswordRoute') + '?' + query)
+    link = urljoin(app.config['APP_DOMAIN'], url_for('bpLogin.ResetPasswordRoute') + '?' + query)
     info.append(f'<a href="{link}">' + subject + '</a>')
     info = '<br/>'.join(info)
     html = f"""<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>

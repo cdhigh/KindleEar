@@ -33,7 +33,7 @@ def set_env():
     os.environ['TASK_QUEUE_SERVICE'] = TASK_QUEUE_SERVICE
     os.environ['TASK_QUEUE_BROKER_URL'] = TASK_QUEUE_BROKER_URL
     os.environ['TASK_QUEUE_RESULT_BACKEND'] = TASK_QUEUE_RESULT_BACKEND
-    os.environ['KE_DOMAIN'] = KE_DOMAIN
+    os.environ['APP_DOMAIN'] = APP_DOMAIN
     os.environ['SRC_EMAIL'] = SRC_EMAIL
     os.environ['ADMIN_NAME'] = ADMIN_NAME
     

@@ -12,11 +12,20 @@ __APP_ID = os.getenv('APP_ID', 'kindleear')
 
 if __DB_NAME.startswith('mongodb://'):
     dbInstance = MongoDbClient(__APP_ID, __DB_NAME)
+elif __DB_NAME.startswith('redis://'):
+    dbInstance = RedisDbClient(__APP_ID, __DB_NAME)
 elif __DB_ENGINE == "datastore":
     dbInstance = DatastoreClient(project=__APP_ID)
 elif __DB_ENGINE == "mongodb":
     dbInstance = MongoDbClient(__APP_ID, host=os.getenv('DATABASE_HOST'), port=int(os.getenv('DATABASE_PORT')), 
         username=(os.getenv('DATABASE_USERNAME') or None), password=(os.getenv('DATABASE_PASSWORD') or None))
+elif __DB_ENGINE == "redis":
+    try:
+        db_no = int(os.getenv('DATABASE_NAME') or '0')
+    except:
+        db_no = 0
+    dbInstance = RedisDbClient(__APP_ID, host=os.getenv('DATABASE_HOST'), port=int(os.getenv('DATABASE_PORT')), 
+        db=db_no, password=(os.getenv('DATABASE_PASSWORD') or None))
 else:
     raise Exception("database engine '{}' not supported yet".format(__DB_ENGINE))
 

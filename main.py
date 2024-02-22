@@ -7,7 +7,7 @@ import os, sys, builtins, logging
 
 appDir = os.path.dirname(os.path.abspath(__file__))
 log = logging.getLogger()
-log.setLevel(logging.WARN) #logging.DEBUG
+log.setLevel(logging.DEBUG) #logging.DEBUG
 builtins.__dict__['default_log'] = log
 builtins.__dict__['appDir'] = appDir
 sys.path.insert(0, os.path.join(appDir, 'application', 'lib'))
@@ -36,7 +36,7 @@ def set_env():
     os.environ['TASK_QUEUE_SERVICE'] = TASK_QUEUE_SERVICE
     os.environ['TASK_QUEUE_BROKER_URL'] = TASK_QUEUE_BROKER_URL
     os.environ['TASK_QUEUE_RESULT_BACKEND'] = TASK_QUEUE_RESULT_BACKEND
-    os.environ['KE_DOMAIN'] = 'http://127.0.0.1:5000/' #KE_DOMAIN
+    os.environ['APP_DOMAIN'] = 'http://127.0.0.1:5000/' #APP_DOMAIN
     os.environ['SRC_EMAIL'] = SRC_EMAIL
     os.environ['ADMIN_NAME'] = ADMIN_NAME
 
