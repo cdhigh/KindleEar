@@ -5,7 +5,8 @@
 *.mobi
 *.epub
 *.azw3
-
+*.pkl
+*.bak
 tests/tools/*
 tests/rss/*
 tests/debug_mail/*

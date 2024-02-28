@@ -23,48 +23,28 @@ def set_env():
     else:
         os.environ['TEMP_DIR'] = os.path.join(appDir, TEMP_DIR)
     os.environ['DOWNLOAD_THREAD_NUM'] = str(int(DOWNLOAD_THREAD_NUM))
-    os.environ['DATABASE_ENGINE'] = 'sqlite'
-    os.environ['DATABASE_NAME'] = ':memory:'
-    os.environ['DATABASE_HOST'] = 'localhost'
-    os.environ['DATABASE_PORT'] = str(8081)
-    os.environ['DATABASE_USERNAME'] = ''
-    os.environ['DATABASE_PASSWORD'] = ''
-
+    os.environ['DATABASE_URL'] = 'sqlite://:memory:'
     os.environ['TASK_QUEUE_SERVICE'] = TASK_QUEUE_SERVICE
     os.environ['TASK_QUEUE_BROKER_URL'] = TASK_QUEUE_BROKER_URL
-    os.environ['TASK_QUEUE_RESULT_BACKEND'] = TASK_QUEUE_RESULT_BACKEND
     os.environ['APP_DOMAIN'] = APP_DOMAIN
     os.environ['SRC_EMAIL'] = SRC_EMAIL
     os.environ['ADMIN_NAME'] = ADMIN_NAME
+    os.environ['HIDE_MAIL_TO_LOCAL'] = '1' if HIDE_MAIL_TO_LOCAL else ''
     
 set_env()
-
-if 1:
-    TEST_MODULES = ['test_login', 'test_setting', 'test_admin', 'test_subscribe', 'test_adv', 
-         'test_logs'] #'test_share',
-    if INBOUND_EMAIL_SERVICE == 'gae':
-        TEST_MODULES.append('test_inbound_email')
-else:
-    TEST_MODULES = ['test_login']
 
 def runtests(suite, verbosity=1, failfast=False):
     runner = unittest.TextTestRunner(verbosity=verbosity, failfast=failfast)
     results = runner.run(suite)
     return results.failures, results.errors
 
-def collect_tests(args=None):
+def collect_tests(module=None):
     suite = unittest.TestSuite()
-
-    if not args:
-        for m in [reload_module(m) for m in TEST_MODULES]:
-            module_suite = unittest.TestLoader().loadTestsFromModule(m)
-            suite.addTest(module_suite)
-    else:
-        for arg in args:
-            m = reload_module(arg)
-            user_suite = unittest.TestLoader().loadTestsFromNames(m)
-            suite.addTest(user_suite)
-
+    modules = [module] if module else TEST_MODULES
+    for target in modules:
+        m = reload_module(target)
+        user_suite = unittest.TestLoader().loadTestsFromModule(m)
+        suite.addTest(user_suite)
     return suite
 
 def reload_module(module_name):
@@ -72,30 +52,35 @@ def reload_module(module_name):
     #importlib.reload(module)
     return module
 
-def main():
-    verbosity = 1 #Verbosity of output, 0 | 1 | 4
-    failfast = 0 #Exit on first failure/error
-    report = '' # '' | 'html' | 'console'
-
-    os.environ['KE_TEST_VERBOSITY'] = str(verbosity)
-    os.environ['KE_SLOW_TESTS'] = '1' #Run tests that may be slow
-
+def start_test(verbosity=1, failfast=0, testonly='', report=''):
     if report:
         cov = coverage.coverage()
         cov.start()
 
-    suite = collect_tests()
-    runtests(suite, verbosity, failfast)
+    runtests(collect_tests(), verbosity, failfast)
 
     if report:
         cov.stop()
         cov.save()
         if report == 'html':
-            cov.html_report(directory=os.path.join(testDir, 'cov_html'))
+            cov.html_report(directory=os.path.join(testDir, 'covhtml'))
         else:
             cov.report()
             
     return 0
 
+TEST_MODULES = ['test_login', 'test_setting', 'test_admin', 'test_subscribe', 'test_adv', 
+     'test_logs'] #'test_share',
+if INBOUND_EMAIL_SERVICE == 'gae':
+    TEST_MODULES.append('test_inbound_email')
+
 if __name__ == '__main__':
-    sys.exit(main())
+    verbosity = 1 #Verbosity of output, 0 | 1 | 4
+    failfast = 0 #Exit on first failure/error
+    report = '' # '' | 'html' | 'console'
+    testonly = '' #module name, empty for testing all
+
+    os.environ['KE_TEST_VERBOSITY'] = str(verbosity)
+    os.environ['KE_SLOW_TESTS'] = '1' #Run tests that may be slow
+    sys.exit(start_test(verbosity, failfast, testonly, report))
+

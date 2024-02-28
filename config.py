@@ -7,6 +7,7 @@ you can use the form os.environ['name'] (import os firstly)
 KindleEar配置文件，请务必修改开始几个配置
 如果有的配置是从环境变量获取，也可以使用os.envrion['name']方式。（在开头增加一行: import os）
 """
+
 APP_ID = "kindleear"
 SRC_EMAIL = "akindleear@gmail.com"  #Your gmail account for sending mail to Kindle
 APP_DOMAIN = "https://kindleear.appspot.com"  #Your domain of app
@@ -15,24 +16,23 @@ APP_DOMAIN = "https://kindleear.appspot.com"  #Your domain of app
 #Find it at Upper right corner of <https://console.cloud.google.com/appengine?project=your_app_id>
 SERVER_LOCATION = "us-central1"
 
-#Choose the database engine, you can also set Database URL to DATABASE_NAME
-#Supports: "datastore", "sqlite", "mysql", "postgresql", "cockroachdb", "mongodb", "redis"
-DATABASE_ENGINE = "redis"
-DATABASE_NAME = "test.db"  # or "mongodb://localhost:27017/", for redis it is db number
-DATABASE_HOST = "127.0.0.1"
-DATABASE_PORT = 6379
-DATABASE_USERNAME = ""
-DATABASE_PASSWORD = ""
+#Choose the database
+#Supports: "datastore", "sqlite", "mysql", "postgresql", "cockroachdb", "mongodb", "redis", "pickle"
+#DATABASE_URL = "mongodb://127.0.0.1:27017/"
+DATABASE_URL = 'pickle:////D:/Programer/Project/KindleEar/test.pkl'
+#DATABASE_URL = 'redis://127.0.0.1:6379/0'
 
-#Email receiving service, "gae" | ""
+#Email receiving service, "gae", ""
 INBOUND_EMAIL_SERVICE = ""
 
-#Select the type of task queue, "gae" | "apscheduler" | "celery" | "rq"
+#Select the type of task queue, "gae", "apscheduler", "celery", "rq"
 TASK_QUEUE_SERVICE = "apscheduler"
 
-#If task queue service is celery | rq
+#If task queue service is apscheduler, celery, rq
+#Options: 'redis://', 'mongodb://', 'sqlite://', 'mysql://', 'postgresql://'
+#For apscheduler, it can be a empty str '' if a memory store is used
+#For rq, only 'redis://' is supported
 TASK_QUEUE_BROKER_URL = "redis://127.0.0.1:6379/"
-TASK_QUEUE_RESULT_BACKEND = "redis://127.0.0.1:6379/"
 
 #If this option is empty, temporary files will be stored in memory
 #Setting this option can reduce memory consumption, supports both relative and absolute paths
@@ -55,3 +55,6 @@ TIMEZONE = 8  #Default timezone, you can modify it in webpage after deployed
 
 #You can use this public key or apply for your own key
 POCKET_CONSUMER_KEY = '50188-e221424f1c9ed0c010058aef'
+
+#Hide the option 'local (debug)' of 'Send Mail Service' setting or not
+HIDE_MAIL_TO_LOCAL = False

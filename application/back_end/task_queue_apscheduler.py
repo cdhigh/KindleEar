@@ -2,26 +2,41 @@
 # -*- coding:utf-8 -*-
 #任务队列APScheduler
 #Author: cdhigh <https://github.com/cdhigh>
-import random
+import os, random
 
 from flask_apscheduler import APScheduler
-#from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR, EVENT_JOB_MISSED
+from apscheduler.schedulers.background import BackgroundScheduler
 
-scheduler = APScheduler()
+_broker_url = os.getenv('TASK_QUEUE_BROKER_URL')
+if _broker_url.startswith('redis://'):
+    import redis
+    from apscheduler.jobstores.redis import RedisJobStore
+    _client = RedisJobStore()
+    _client.redis = redis.from_url(_broker_url)
+    jobstores = {"default": _client}
+elif _broker_url.startswith('mongodb://'):
+    import pymongo
+    from apscheduler.jobstores.mongodb import MongoDBJobStore
+    _client = pymongo.MongoClient(_broker_url)
+    jobstores = {"default": MongoDBJobStore(client=_client)}
+elif _broker_url.startswith(('sqlite://', 'mysql://', 'postgresql://')):
+    from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+    jobstores = {"default": SQLAlchemyJobStore(url=_broker_url)}
+elif _broker_url == '':
+    jobstores = None #default is memory store
+else:
+    raise ValueError('Unsupported TASK_QUEUE_BROKER_URL type: {_broker_url}')
+
+scheduler = APScheduler(scheduler=BackgroundScheduler(jobstores=jobstores))
 
 #https://viniciuschiele.github.io/flask-apscheduler/rst/api.html
 scheduler.api_enabled = True #提供/scheduler/jobs等几个有用的url
 
 def init_task_queue_service(app):
     scheduler.init_app(app)
-    #scheduler.add_listener(job_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR | EVENT_JOB_MISSED)
     scheduler.start()
     app.extensions["scheduler"] = scheduler
     return scheduler
-
-#APScheduler会自动删除trigger为date的任务，这个函数不需要了
-#def job_listener(event):
-#    scheduler.remove_job(event.job_id)
 
 #@scheduler.task('interval', id='check_deliver', hours=1, misfire_grace_time=20*60, coalesce=True)
 @scheduler.task('cron', minute=50, id='check_deliver', misfire_grace_time=20*60, coalesce=True)

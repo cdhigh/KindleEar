@@ -19,7 +19,8 @@ REQ_COMM = [('requests', '>=2.0.0,<=2.99.0'),
     ('Flask', '>=3.0.0,<=3.99.0'),
     ('flask-babel', '>=4.0.0,<=4.99.0'),
     ('six', '>=1.0.0,<=1.99.0'),
-    ('feedparser', '>=6.0.0,<=6.99.0'),]
+    ('feedparser', '>=6.0.0,<=6.99.0'),
+]
 
 REQ_DB = {
     'datastore': [('weedata', '>=0.1.0,<=0.99.0'), ('google-cloud-datastore', '>=2.19.0,<=2.99.0'),],
@@ -28,7 +29,9 @@ REQ_DB = {
     'postgresql': [('peewee', '>=3.0.0,<=3.99.0'), ('psycopg2', '>=2.0.0,<=2.99.0'),],
     'cockroachdb': [('peewee', '>=3.0.0,<=3.99.0'), ('psycopg2', '>=2.0.0,<=2.99.0'),],
     'mongodb': [('weedata', '>=0.1.0,<=0.99.0'), ('pymongo', '>=3.0.0,<=3.99.0'),],
-    'redis': [('weedata', '>=0.1.0,<=0.99.0'), ('redis', '>=4.5.0,<=5.99.0'),],}
+    'redis': [('weedata', '>=0.1.0,<=0.99.0'), ('redis', '>=4.5.0,<=5.99.0'),],
+    'pickle': [('weedata', '>=0.1.0,<=0.99.0'),],
+}
 
 REQ_TASK = {
     'gae': [('google-cloud-tasks', '>=2.0.0,<=2.99.0'),],
@@ -39,17 +42,23 @@ REQ_TASK = {
 
 REQ_PLAT = {'gae': [('appengine-python-standard', '>=1.1.0,<=1.99.0'),],}
 
-def write_req(reqFile, db, task, plat):
+EXTRA = {
+    'sqlalchemy': [('sqlalchemy', '')],
+}
+
+def write_req(reqFile, db, task, plat, *extra):
     with open(reqFile, 'w', encoding='utf-8') as f:
         f.write('\n'.join([''.join(item) for item in REQ_COMM]))
         f.write('\n')
-        for req, opt in zip([REQ_DB, REQ_TASK, REQ_PLAT], [db, task, plat]):
+        EXTRAS = [EXTRA for idx in range(len(extra))]
+        for req, opt in zip([REQ_DB, REQ_TASK, REQ_PLAT, *EXTRAS], [db, task, plat, *extra]):
             f.write('\n')
             items = req.get(opt, None)
             seen = set()
             for item in (items or []):
+                if item[0] not in seen:
+                    f.write(''.join(item) + '\n')
                 seen.add(item[0])
-                f.write(''.join(item) + '\n')
             for key, items in req.items():
                 if key != opt:
                     for item in filter(lambda x: x[0] not in seen, (items or [])):
@@ -57,26 +66,33 @@ def write_req(reqFile, db, task, plat):
                         f.write('#' + ''.join(item) + '\n')
 
 #parse config.py to a string with format symbols
-def config_to_fmtstr(cfgFile):
+def config_to_fmtstr(cfgFile, fmt='dict'):
     with open(cfgFile, 'r', encoding='utf-8') as f:
         lines = f.read().splitlines()
 
-    ret = []
+    ret = [] if fmt == 'list' else {}
     docComment = False
-    pattern = r"""^([_A-Z]+)\s*=\s*("[^"]*"|'[^']*'|\S+)\s*(#.*)?$"""
+    pattern = r"""^([_A-Z]+)\s*=\s*([f]{0,1}"[^"]*"|[f]{0,1}'[^']*'|\S+)\s*(#.*)?$"""
     for line in lines:
         line = line.strip()
         if line.startswith(('"""', "'''")):
             docComment = not docComment
-            ret.append(line)
+            if fmt == 'list':
+                ret.append(line)
             continue
         elif not line or line.startswith('#') or docComment:
-            ret.append(line)
+            if fmt == 'list':
+                ret.append(line)
             continue
 
         match = re.match(pattern, line)
         if match:
-            ret.append((match.group(1), match.group(2), match.group(3)))
+            if fmt == 'list':
+                ret.append((match.group(1), match.group(2), match.group(3)))
+            else:
+                ret[match.group(1)] = match.group(2).strip('f"\'')
+        else:
+            ret.append(line)
     return ret
 
 #Write to config.py, cfgItems={'APPID':,...}
@@ -107,6 +123,27 @@ def write_cfg(cfgFile, cfgItems):
             else:
                 f.write(f'{item} = {orgValue}{comment}\n')
 
-#write_cfg(r'D:\Programer\Project\KindleEar\config.py', {'APP_ID': 'suqiyuan', 'DATABASE_PORT': 99, 'ALLOW_SIGNUP': True})
+if __name__ == '__main__':
+    print('\nThis script can help you to generate requirements.txt.\n')
+    thisDir = os.path.dirname(__file__)
+    cfgFile = os.path.join(thisDir, '..', 'config.py')
+    reqFile = os.path.join(thisDir, '..', 'requirements.txt')
 
-#write_req(r'D:\Programer\Project\KindleEar\requirements.txt', 'mysql', 'rq', 'gae')
+    cfg = config_to_fmtstr(cfgFile)
+    db = cfg['DATABASE_URL'].split('://')[0]
+    task = cfg['TASK_QUEUE_SERVICE']
+    broker = cfg['TASK_QUEUE_BROKER_URL']
+    if (cfg['DATABASE_URL'].startswith('datastore') or cfg['INBOUND_EMAIL_SERVICE'] == 'gae' or 
+        cfg['TASK_QUEUE_SERVICE'] == 'gae'):
+        plat = 'gae'
+    else:
+        plat = ''
+    extras = set()
+    if broker.startswith('redis://'):
+        extras.add('redis')
+    elif broker.startswith('mongodb://'):
+        extras.add('pymongo')
+    elif broker.startswith(('sqlite://', 'mysql://', 'postgresql://')):
+        extras.add('sqlalchemy')
+    write_req(reqFile, db, task, plat, *extras)
+

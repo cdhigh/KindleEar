@@ -29,22 +29,28 @@ def AdvDeliverNow():
 @bpAdv.route("/adv/whitelist", endpoint='AdvWhiteList')
 @login_required()
 def AdvWhiteList():
-    user = get_login_user()
-    return render_template('adv_whitelist.html', tab='advset',user=user, 
-        advCurr='whitelist', adminName=app.config['ADMIN_NAME'], in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
+    if app.config['INBOUND_EMAIL_SERVICE'] == 'gae':
+        user = get_login_user()
+        return render_template('adv_whitelist.html', tab='advset',user=user, 
+            advCurr='whitelist', adminName=app.config['ADMIN_NAME'], in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
+    else:
+        abort(404)
 
 @bpAdv.post("/adv/whitelist", endpoint='AdvWhiteListPost')
 @login_required()
 def AdvWhiteListPost():
-    user = get_login_user()
-    wlist = request.form.get('wlist')
-    if wlist:
-        wlist = wlist.replace('"', "").replace("'", "").strip()
-        if wlist.startswith('*@'): #输入*@xx.xx则修改为@xx.xx
-            wlist = wlist[1:]
+    if app.config['INBOUND_EMAIL_SERVICE'] == 'gae':
+        user = get_login_user()
+        wlist = request.form.get('wlist')
         if wlist:
-            WhiteList.get_or_create(mail=wlist, user=user.name)
-    return redirect(url_for('bpAdv.AdvWhiteList'))
+            wlist = wlist.replace('"', "").replace("'", "").strip()
+            if wlist.startswith('*@'): #输入*@xx.xx则修改为@xx.xx
+                wlist = wlist[1:]
+            if wlist:
+                WhiteList.get_or_create(mail=wlist, user=user.name)
+        return redirect(url_for('bpAdv.AdvWhiteList'))
+    else:
+        abort(404)
 
 #删除白名单项目
 @bpAdv.route("/advdel", endpoint='AdvDel')

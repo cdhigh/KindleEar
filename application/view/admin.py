@@ -9,6 +9,7 @@ from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
 from ..utils import new_secret_key, str_to_int
+from .login import CreateAccountIfNotExist
 
 bpAdmin = Blueprint('bpAdmin', __name__)
 
@@ -85,20 +86,10 @@ def AdminAddAccountPost():
         tips = _("The two new passwords are dismatch.")
     elif KeUser.get_or_none(KeUser.name == username):
         tips = _("Already exist the username.")
-    else:
-        secret_key = new_secret_key()
-        try:
-            pwd = hashlib.md5((password1 + secret_key).encode()).hexdigest()
-        except:
-            tips = _("The password includes non-ascii chars.")
-        else:
-            send_mail_service = {'service': 'admin'} if sm_service == 'admin' else {}
-            user = KeUser(name=username, passwd=pwd, timezone=app.config['TIMEZONE'], secret_key=secret_key, 
-                expiration_days=expiration, share_links={'key': new_secret_key()},
-                email=email, send_mail_service=send_mail_service)
-            if expiration:
-                user.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
-            user.save()
+    elif not CreateAccountIfNotExist(username, password1, email, 
+        {'service': 'admin'} if sm_service == 'admin' else {}, expiration):
+        tips = _("The password includes non-ascii chars.")
+
     if tips:
         return render_template('user_account.html', tips=tips, formTitle=_('Add account'), submitTitle=_('Add'), 
             user=None, tab='admin')
@@ -119,7 +110,7 @@ def AdminDeleteAccountAjax():
     if not u:
         return {'status': _("The username '{}' does not exist.").format(name)}
     else:
-        u.erase_traces() #删除账号订阅的书，白名单，过滤器等，就是完全的清理
+        u.erase_traces() #删除账号订阅的书，白名单，过滤器等，完全的清理其痕迹
         u.delete_instance()
         return {'status': 'ok'}
     

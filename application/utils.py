@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 #一些常用工具函数
 
-import os, sys, hashlib, base64, random, datetime
+import os, sys, hashlib, base64, secrets, datetime
 from urllib.parse import urlparse
 
 #当异常出现时，使用此函数返回真实引发异常的文件名，函数名和行号
@@ -82,17 +82,17 @@ def hide_website(site):
     return site
 
 #-----------以下几个函数为安全相关的
-def new_secret_key(length=8):
-    allchars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXZY0123456789'
-    return ''.join([random.choice(allchars) for i in range(length)])
+def new_secret_key(length=12):
+    allchars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz'
+    return ''.join([secrets.choice(allchars) for i in range(length)])
     
 def ke_encrypt(txt: str, key: str):
-    return _ke_auth_code(txt, key, 'ENCODE')
+    return _ke_auth_code(txt, key, 'encode')
     
 def ke_decrypt(txt: str, key: str):
-    return _ke_auth_code(txt, key, 'DECODE')
+    return _ke_auth_code(txt, key, 'decode')
 
-def _ke_auth_code(txt: str, key: str, operation: str='DECODE'):
+def _ke_auth_code(txt: str, key: str, act: str='decode'):
     if not txt:
         return ''
         
@@ -103,7 +103,7 @@ def _ke_auth_code(txt: str, key: str, operation: str='DECODE'):
     cryptKey = keyA + hashlib.md5(keyA.encode('utf-8')).hexdigest()
     keyLength = len(cryptKey)
     
-    if operation == 'DECODE':
+    if act == 'decode':
         try:
             txt = base64.urlsafe_b64decode(txt).decode('utf-8')
         except:
@@ -133,7 +133,7 @@ def _ke_auth_code(txt: str, key: str, operation: str='DECODE'):
         box[j] = tmp
         result += chr(ord(txt[i]) ^ (box[(box[a] + box[j]) % 256]))
 
-    if operation == 'DECODE':
+    if act == 'decode':
         if result[:16] == hashlib.md5((result[16:] + keyB).encode('utf-8')).hexdigest()[:16]:
             return result[16:]
         else:

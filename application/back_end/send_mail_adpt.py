@@ -30,13 +30,15 @@ except ImportError:
 
 #返回当前可用的发送邮件服务列表
 def avaliable_sm_services():
-    sm = ['local']
+    sm = []
     if gae_mail:
         sm.append('gae')
     if SendGridAPIClient:
         sm.append('sendgrid')
     if smtp_send_mail:
         sm.append('smtp')
+    if not os.getenv('HIDE_MAIL_TO_LOCAL'):
+        sm.append('local')
     return sm
 
 #发送邮件

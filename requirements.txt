@@ -15,17 +15,20 @@ flask-babel>=4.0.0,<=4.99.0
 six>=1.0.0,<=1.99.0
 feedparser>=6.0.0,<=6.99.0
 
-peewee>=3.0.0,<=3.99.0
-pymysql>=1.0.0,<=1.99.0
-#weedata>=0.1.0,<=0.99.0
+weedata>=0.1.0,<=0.99.0
+redis>=4.5.0,<=5.99.0
 #google-cloud-datastore>=2.19.0,<=2.99.0
+#peewee>=3.0.0,<=3.99.0
+#pymysql>=1.0.0,<=1.99.0
 #psycopg2>=2.0.0,<=2.99.0
 #pymongo>=3.0.0,<=3.99.0
 
-flask-rq2>=18.0,<=18.99
+flask-apscheduler>=1.0.0,<=1.99.0
 #google-cloud-tasks>=2.0.0,<=2.99.0
-#flask-apscheduler>=1.0.0,<=1.99.0
 #celery>=5.0.0,<=5.99.0
 #eventlet>=0.30.0,<=0.99.0
+#flask-rq2>=18.0,<=18.99
 
 appengine-python-standard>=1.1.0,<=1.99.0
+
+sqlalchemy

@@ -23,22 +23,13 @@ def set_env():
     else:
         os.environ['TEMP_DIR'] = os.path.join(appDir, TEMP_DIR)
     os.environ['DOWNLOAD_THREAD_NUM'] = str(int(DOWNLOAD_THREAD_NUM))
-    os.environ['DATABASE_NAME'] = DATABASE_NAME
-    if '://' in DATABASE_NAME:
-        os.environ['DATABASE_ENGINE'] = DATABASE_NAME.split('://', 1)[0]
-    else:
-        os.environ['DATABASE_ENGINE'] = DATABASE_ENGINE
-    os.environ['DATABASE_HOST'] = DATABASE_HOST
-    os.environ['DATABASE_PORT'] = str(int(DATABASE_PORT))
-    os.environ['DATABASE_USERNAME'] = DATABASE_USERNAME
-    os.environ['DATABASE_PASSWORD'] = DATABASE_PASSWORD
-
+    os.environ['DATABASE_URL'] = DATABASE_URL
     os.environ['TASK_QUEUE_SERVICE'] = TASK_QUEUE_SERVICE
     os.environ['TASK_QUEUE_BROKER_URL'] = TASK_QUEUE_BROKER_URL
-    os.environ['TASK_QUEUE_RESULT_BACKEND'] = TASK_QUEUE_RESULT_BACKEND
     os.environ['APP_DOMAIN'] = 'http://127.0.0.1:5000/' #APP_DOMAIN
     os.environ['SRC_EMAIL'] = SRC_EMAIL
     os.environ['ADMIN_NAME'] = ADMIN_NAME
+    os.environ['HIDE_MAIL_TO_LOCAL'] = '1' if HIDE_MAIL_TO_LOCAL else ''
 
 set_env()
 
@@ -74,7 +65,7 @@ def main():
             print(result)
             return 0
 
-    print('\nKindleEar Application')
+    print(f'\nKindleEar Application {appVer}')
     print('\nUsage: main.py [debug | deliver check | deliver now]')
     print('\ncommands:')
     print('  debug        \t    Run the application in debug mode')

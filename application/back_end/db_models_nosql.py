@@ -6,28 +6,19 @@
 import os, json, datetime
 from weedata import *
 
-__DB_ENGINE = os.getenv('DATABASE_ENGINE')
-__DB_NAME = os.getenv('DATABASE_NAME', '')
-__APP_ID = os.getenv('APP_ID', 'kindleear')
+dbUrl = os.getenv('DATABASE_URL')
+appId = os.getenv('APP_ID', 'kindleear')
 
-if __DB_NAME.startswith('mongodb://'):
-    dbInstance = MongoDbClient(__APP_ID, __DB_NAME)
-elif __DB_NAME.startswith('redis://'):
-    dbInstance = RedisDbClient(__APP_ID, __DB_NAME)
-elif __DB_ENGINE == "datastore":
-    dbInstance = DatastoreClient(project=__APP_ID)
-elif __DB_ENGINE == "mongodb":
-    dbInstance = MongoDbClient(__APP_ID, host=os.getenv('DATABASE_HOST'), port=int(os.getenv('DATABASE_PORT')), 
-        username=(os.getenv('DATABASE_USERNAME') or None), password=(os.getenv('DATABASE_PASSWORD') or None))
-elif __DB_ENGINE == "redis":
-    try:
-        db_no = int(os.getenv('DATABASE_NAME') or '0')
-    except:
-        db_no = 0
-    dbInstance = RedisDbClient(__APP_ID, host=os.getenv('DATABASE_HOST'), port=int(os.getenv('DATABASE_PORT')), 
-        db=db_no, password=(os.getenv('DATABASE_PASSWORD') or None))
+if dbUrl.startswith('mongodb://'):
+    dbInstance = MongoDbClient(appId, dbUrl)
+elif dbUrl.startswith('redis://'):
+    dbInstance = RedisDbClient(appId, dbUrl)
+elif dbUrl.startswith("datastore"):
+    dbInstance = DatastoreClient(project=appId)
+elif dbUrl.startswith("pickle://"):
+    dbInstance = PickleDbClient(dbUrl)
 else:
-    raise Exception("database engine '{}' not supported yet".format(__DB_ENGINE))
+    raise ValueError("database engine '{}' not supported yet".format(dbUrl.split(":", 1)[0]))
 
 #调用此函数正式连接到数据库（打开数据库）
 def connect_database():

@@ -14,7 +14,7 @@ def smtp_send_mail(sender, to, subject, body, host, username, password, port=Non
         host, port = host.split(':', 2)
         port = int(port)
     else:
-        port = 25
+        port = 587 #587-TLS, 465-SSL
     
     to = to if isinstance(to, list) else [to]
     message = MIMEMultipart('alternative') if html else MIMEMultipart()
@@ -32,7 +32,7 @@ def smtp_send_mail(sender, to, subject, body, host, username, password, port=Non
         part.add_header('Content-Disposition', f'attachment; filename="{filename}"')
         message.attach(part)
 
-    with smtplib.SMTP_SSL(host=host, port=port) as smtp_server:
+    with smtplib.SMTP(host=host, port=port) as smtp_server:
         smtp_server.connect(host, port)
         smtp_server.ehlo()
         smtp_server.starttls()

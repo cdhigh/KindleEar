@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #数据库结构定义，使用这个文件隔离sql和nosql的差异，尽量向外提供一致的接口
-#Visit https://github.com/cdhigh/KindleEar for the latest version
+#Visit <https://github.com/cdhigh/KindleEar> for the latest version
 #Author:
 # cdhigh <https://github.com/cdhigh>
 import os, sys, random
 from operator import attrgetter
 from ..utils import ke_encrypt, ke_decrypt, tz_now
 
-if os.getenv('DATABASE_ENGINE') in ("datastore", "mongodb", "redis"):
+if os.getenv('DATABASE_URL').startswith(("datastore", "mongodb", "redis", "pickle")):
     from .db_models_nosql import *
 else:
     from .db_models_sql import *
@@ -187,8 +187,8 @@ class WhiteList(MyBaseModel):
 
 #Shared RSS links from other users [for kindleear.appspot.com only]
 class SharedRss(MyBaseModel):
-    title = CharField()
-    url = CharField(default='')
+    title = CharField(index=True)
+    url = CharField(default='', index=True)
     isfulltext = BooleanField(default=False)
     language = CharField(default='')
     category = CharField(default='')
@@ -239,24 +239,11 @@ class AppInfo(MyBaseModel):
         cls.replace(name=name, value=value).execute()
         
 #创建数据库表格，一个数据库只需要创建一次
-#如果是sql数据库，可以使用force=True删掉之前的数据库文件(小心)
-def create_database_tables(force=False):
-    engine = os.getenv('DATABASE_ENGINE')
-    #if engine == "sqlite" and dbName:
-    #    if not force and os.path.exists(dbName):
-    #        #print(f'[Error] Database "{dbName}" already exists')
-    #        return
-    #    elif os.path.exists(dbName):
-    #        try:
-    #            os.remove(dbName)
-    #        except:
-    #            pass
-
-    if engine not in ["datastore", "mongodb"]:
-        #with dbInstance.connection_context():
-        #connect_database()
-        dbInstance.create_tables([KeUser, UserBlob, Recipe, BookedRecipe, DeliverLog, WhiteList,
-            SharedRss, SharedRssCategory, LastDelivered, AppInfo], safe=True)
-        #close_database()
+def create_database_tables():
+    #with dbInstance.connection_context():
+    #connect_database()
+    dbInstance.create_tables([KeUser, UserBlob, Recipe, BookedRecipe, DeliverLog, WhiteList,
+        SharedRss, SharedRssCategory, LastDelivered, AppInfo], safe=True)
+    #close_database()
         
     #print(f'Create database "{dbName}" finished')

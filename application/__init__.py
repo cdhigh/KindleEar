@@ -10,6 +10,7 @@ import os, builtins, datetime
 from flask import Flask, render_template, session, request, g
 from flask_babel import Babel, gettext
 builtins.__dict__['_'] = gettext
+builtins.__dict__['appVer'] = __Version__
 
 #创建并初始化Flask wsgi对象
 def init_app(name, debug=False):

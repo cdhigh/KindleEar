@@ -10,33 +10,8 @@ from playhouse.shortcuts import model_to_dict
 
 #用于在数据库结构升级后的兼容设计，数据库结构和前一版本不兼容则需要升级此版本号
 DB_VERSION = 1
-
-__DB_ENGINE = os.getenv('DATABASE_ENGINE')
-__DB_NAME = os.getenv('DATABASE_NAME', '')
-__DB_USERNAME = os.getenv('DATABASE_USERNAME') or None
-__DB_PASSWORD = os.getenv('DATABASE_PASSWORD') or None
-__DB_HOST = os.getenv('DATABASE_HOST')
-__DB_PORT = int(os.getenv('DATABASE_PORT'))
-
-dbName = ''
-if '://' in __DB_NAME:
-    dbInstance = connect(__DB_NAME)
-    __DB_ENGINE = __DB_NAME.split('://', 1)[0]
-elif __DB_ENGINE == "sqlite":
-    thisDir = os.path.dirname(os.path.abspath(__file__))
-    dbName = os.path.normpath(os.path.join(thisDir, "..", "..", __DB_NAME)) if __DB_NAME != ':memory:' else __DB_NAME
-    dbInstance = SqliteDatabase(dbName, check_same_thread=False)
-elif __DB_ENGINE == "mysql":
-    dbInstance = MySQLDatabase(__DB_NAME, user=__DB_USERNAME, password=__DB_PASSWORD,
-                         host=__DB_HOST, port=__DB_PORT)
-elif __DB_ENGINE == "postgresql":
-    dbInstance = PostgresqlDatabase(__DB_NAME, user=__DB_USERNAME, password=__DB_PASSWORD,
-                         host=__DB_HOST, port=__DB_PORT)
-elif __DB_ENGINE == "cockroachdb":
-    dbInstance = CockroachDatabase(__DB_NAME, user=__DB_USERNAME, password=__DB_PASSWORD,
-                         host=__DB_HOST, port=__DB_PORT)
-else:
-    raise Exception("database engine '{}' not supported yet".format(__DB_ENGINE))
+dbName = os.getenv('DATABASE_URL')
+dbInstance = connect(dbName)
 
 #调用此函数正式连接到数据库（打开数据库）
 def connect_database():
@@ -46,7 +21,7 @@ def connect_database():
 #关闭数据库连接
 def close_database():
     global dbInstance
-    if not dbInstance.is_closed() and dbName != ':memory:':
+    if not dbInstance.is_closed() and dbName != 'sqlite://:memory:':
         dbInstance.close()
         
 #自定义字段，在本应用用来保存列表

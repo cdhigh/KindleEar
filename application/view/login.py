@@ -21,8 +21,9 @@ def Login():
     # 第一次登陆时如果没有管理员帐号，
     # 则增加一个管理员帐号 ADMIN_NAME，密码 ADMIN_NAME，后续可以修改密码
     tips = ''
-    if CreateAccountIfNotExist(app.config['ADMIN_NAME']):
-        tips = (_("Please use {}/{} to login at first time.").format(app.config['ADMIN_NAME'], app.config['ADMIN_NAME']))
+    adminName = app.config['ADMIN_NAME']
+    if CreateAccountIfNotExist(adminName):
+        tips = (_("Please use {}/{} to login at first time.").format(adminName, adminName))
     
     session['login'] = 0
     session['userName'] = ''
@@ -44,7 +45,8 @@ def LoginPost():
     if tips:
         return render_template('login.html', tips=tips)
     
-    CreateAccountIfNotExist(app.config['ADMIN_NAME']) #确认管理员账号是否存在
+    adminName = app.config['ADMIN_NAME']
+    CreateAccountIfNotExist(adminName) #确认管理员账号是否存在
     
     u = KeUser.get_or_none(KeUser.name == name)
     if u:
@@ -56,7 +58,7 @@ def LoginPost():
     if u:
         session['login'] = 1
         session['userName'] = name
-        session['role'] = 'admin' if name == app.config['ADMIN_NAME'] else 'user'
+        session['role'] = 'admin' if name == adminName else 'user'
         if u.expires and u.expiration_days > 0: #用户登陆后自动续期
             u.expires = datetime.datetime.utcnow() + datetime.timedelta(days=u.expiration_days)
             u.save()
@@ -80,28 +82,30 @@ def LoginPost():
 
 #判断账号是否存在
 #如果账号不存在，创建一个，并返回True，否则返回False
-def CreateAccountIfNotExist(name, password=None, email=None):
+def CreateAccountIfNotExist(name, password=None, email=None, sm_service=None, expiration=0):
     if KeUser.get_or_none(KeUser.name == name):
         return False
 
     password = password if password else name
     email = email if email else app.config['SRC_EMAIL']
     secretKey = new_secret_key()
-    shareKey = new_secret_key()
+    shareKey = new_secret_key(length=4)
     try:
         password = hashlib.md5((password + secretKey).encode()).hexdigest()
     except Exception as e:
         default_log.warning('CreateAccountIfNotExist() failed to hash password: {}'.format(str(e)))
         return False
 
-    send_mail_service = {}
-    if name != app.config['ADMIN_NAME'] and AppInfo.get_value(AppInfo.newUserMailService, 'admin') == 'admin':
-        send_mail_service = {'service': 'admin'}
+    if sm_service is None:
+        sm_service = {}
+        if name != app.config['ADMIN_NAME'] and AppInfo.get_value(AppInfo.newUserMailService, 'admin') == 'admin':
+            sm_service = {'service': 'admin'}
         
-    KeUser.create(name=name, passwd=password, kindle_email='', enable_send=False, send_time=6, 
-        timezone=app.config['TIMEZONE'], book_type="epub", device='kindle', expires=None, secret_key=secretKey, 
-        expiration_days=0, share_links={'key': shareKey}, book_title='KindleEar', book_language='en',
-        email=email, send_mail_service=send_mail_service)
+    user = KeUser(name=name, passwd=password, timezone=app.config['TIMEZONE'], expires=None, secret_key=secretKey, 
+        expiration_days=expiration, share_links={'key': shareKey}, email=email, send_mail_service=sm_service)
+    if expiration:
+        user.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
+    user.save()
     return True
 
 @bpLogin.route("/logout", methods=['GET', 'POST'])

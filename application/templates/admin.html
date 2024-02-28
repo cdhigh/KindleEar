@@ -26,15 +26,15 @@
       </div>
       <div class="pure-control-group">
         <label for="sm_service">{{_("Signup type")}}</label>
-        <select class="pure-u-1 pure-u-sm-1-2" name="signup_type">
+        <select class="pure-u-1 pure-u-sm-1-2" name="signup_type" id="signup_type" onchange="SetInviteCodesVisualbility()" >
           <option value="public" {% if signupType == 'public' %} selected="selected" {% endif %}>{{_("Public")}}</option>
           <option value="oneTimeCode" {% if signupType == 'oneTimeCode' %} selected="selected" {% endif %}>{{_("One time code")}}</option>
           <option value="permanentCode" {% if signupType == 'permanentCode' %} selected="selected" {% endif %}>{{_("Permanent code")}}</option>
         </select>
       </div>
-      <div class="pure-control-group">
+      <div class="pure-control-group" id="invite_codes_group" style="display:none;">
         <label>{{_("Invitation codes")}}</label>
-        <textarea class="pure-u-1 pure-u-sm-1-2" name="invite_codes" placeholder="one code per line">{{inviteCodes}}</textarea>
+        <textarea class="pure-u-1 pure-u-sm-1-2" name="invite_codes" placeholder="{{_('one code per line')}}">{{inviteCodes}}</textarea>
       </div>
     </fieldset>
   </form>
@@ -82,7 +82,7 @@
           <td>{{u.expiration_days}} Days</td>
           {% endif -%}
           <td>
-            <button class="additional-btn btn-B" title="{{_('Change password')}}"><a href="/account/change/{{u.name}}"><i class="iconfont icon-upload"></i></a></button>
+            <button class="additional-btn btn-B" title="{{_('Change password')}}"><a href="/account/change/{{u.name}}"><i class="iconfont icon-edit"></i></a></button>
             {% if u.name == adminName -%}
             <button class="additional-btn btn-A additional-btn-disabled"><i class="iconfont icon-delete"></i></button>
             {% else -%}
@@ -96,4 +96,19 @@
   </div>
   {% endif -%}
 </div>
+{% endblock -%}
+{% block js -%}
+<script type="text/javascript">
+$(document).ready(function() {
+  SetInviteCodesVisualbility();
+});
+function SetInviteCodesVisualbility() {
+  var type_ = $('#signup_type').val();
+  if (type_ == 'public') {
+    $('#invite_codes_group').hide();
+  } else {
+    $('#invite_codes_group').show();
+  }
+}
+</script>
 {% endblock -%}
