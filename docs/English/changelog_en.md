@@ -1,4 +1,14 @@
+---
+sort: 5
+---
 # Changelog for KindleEar
+
+## 3.0.0b
+1. Supports Python 3
+2. Redesigned software framework
+3. Support for multiple platforms, no longer limited to the GAE platform
+4. Support for Calibre's recipe format directly
+5. Preset with over 1,000 Calibre builtin recipe files
 
 ## 1.26.9
   1. Add a field "Expiration" in page Edit account.

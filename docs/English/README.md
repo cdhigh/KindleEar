@@ -11,3 +11,4 @@ sort: 1
     - [Pythonanywhere (PaaS)](https://cdhigh.github.io/English/3.deployment.html#python-anywhere)
     
 - [FAQ](https://cdhigh.github.io/English/4.faq.html)
+- [changelog](https://cdhigh.github.io/English/changelog_en.html)
