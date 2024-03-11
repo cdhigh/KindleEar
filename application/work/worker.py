@@ -44,8 +44,7 @@ def WorkerImpl(userName: str, recipeId: list=None, log=None):
         return f"The user '{userName}' does not exist."
 
     if not log:
-        log = logging.getLogger('WorkerImpl')
-        log.setLevel(logging.WARN)
+        log = default_log
     
     if not recipeId:
         recipeId = [item.recipe_id for item in user.get_booked_recipe()]

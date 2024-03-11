@@ -1061,7 +1061,8 @@ function startUploadCoversToServer(url) {
     alert(i18n.imgSizeToLarge);
     return;
   }
-  
+
+  $("#up_cover_progress").show();
   $.ajax({
       type: "post",
       url: url,
@@ -1069,7 +1070,21 @@ function startUploadCoversToServer(url) {
       cache: false,
       contentType: false,
       processData: false,
+      xhr: function() {
+        var xhr = new window.XMLHttpRequest();
+        xhr.upload.addEventListener("progress", function(evt) {
+          if (evt.lengthComputable) {
+            var percent = Math.round((evt.loaded / evt.total) * 100);
+            $("#up_cover_progress_bar").css("width", String(percent) + "%");
+            $("#up_cover_progress_bar").html(String(percent) + "%");
+          }
+        }, false);
+        return xhr;
+      },
       success: function(resp, status, xhr) {
+        $("#up_cover_progress").hide();
+        $("#up_cover_progress_bar").css("width", "0px");
+        $("#up_cover_progress_bar").html('');
         if (resp.status == "ok") {
           ShowSimpleModalDialog('<p>' + i18n.uploadCoversOk + '</p>');
         } else {
@@ -1077,6 +1092,9 @@ function startUploadCoversToServer(url) {
         }
       },
       error: function(xhr, status, error) {
+        $("#up_cover_progress").hide();
+        $("#up_cover_progress_bar").css("width", "0px");
+        $("#up_cover_progress_bar").html('');
         alert(status);
       }
   });

@@ -24,7 +24,7 @@ class LogsTestCase(BaseTestCase):
 
         data['user'] = 'other'
         DeliverLog.create(**data)
-        KeUser.create(name='other', passwd='pwd', email='1@2')
+        KeUser.create(name='other', passwd='pwd', email='1@2', sender='1@2')
         resp = self.client.get('/logs')
         self.assertEqual(resp.status_code, 200)
         self.assertIn('Logs of other users', resp.text)
@@ -35,7 +35,7 @@ class LogsTestCase(BaseTestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn('lines delivery log removed.', resp.text)
 
-        KeUser.create(name='other', passwd='pwd', email='1@1', enable_send=True, expiration_days=7, 
+        KeUser.create(name='other', passwd='pwd', email='1@1', , sender='1@1', enable_send=True, expiration_days=7, 
                 expires=datetime.datetime.utcnow() - datetime.timedelta(days=30))
         resp = self.client.get('/removelogs')
         self.assertEqual(resp.status_code, 200)

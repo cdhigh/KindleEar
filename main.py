@@ -6,8 +6,10 @@
 import os, sys, builtins, logging
 
 appDir = os.path.dirname(os.path.abspath(__file__))
-log = logging.getLogger()
-log.setLevel(logging.DEBUG) #logging.DEBUG
+log = logging.getLogger('gunicorn.error')
+if log.level == logging.NOTSET:
+    log.setLevel(logging.WARNING)   #logging.DEBUG
+
 builtins.__dict__['default_log'] = log
 builtins.__dict__['appDir'] = appDir
 sys.path.insert(0, os.path.join(appDir, 'application', 'lib'))
@@ -26,8 +28,9 @@ def set_env():
     os.environ['DATABASE_URL'] = DATABASE_URL
     os.environ['TASK_QUEUE_SERVICE'] = TASK_QUEUE_SERVICE
     os.environ['TASK_QUEUE_BROKER_URL'] = TASK_QUEUE_BROKER_URL
-    os.environ['APP_DOMAIN'] = 'http://127.0.0.1:5000/' #APP_DOMAIN
-    os.environ['SRC_EMAIL'] = SRC_EMAIL
+    os.environ['APP_ID'] = APP_ID
+    os.environ['APP_DOMAIN'] = APP_DOMAIN
+    os.environ['SERVER_LOCATION'] = SERVER_LOCATION
     os.environ['ADMIN_NAME'] = ADMIN_NAME
     os.environ['HIDE_MAIL_TO_LOCAL'] = '1' if HIDE_MAIL_TO_LOCAL else ''
 
@@ -37,11 +40,8 @@ from application import init_app
 app = init_app(__name__, debug=False)
 celery_app = app.extensions.get("celery", None)
 
-from application.back_end.db_models import create_database_tables
-create_database_tables()
-
 def main():
-    if len(sys.argv) <= 1:
+    if len(sys.argv) == 2 and sys.argv[1] == 'debug':
         #os.environ['DATASTORE_DATASET'] = app.config['APP_ID']
         #os.environ['DATASTORE_EMULATOR_HOST'] = 'localhost:8081'
         #os.environ['DATASTORE_EMULATOR_HOST_PATH'] = 'localhost:8081/datastore'
@@ -52,25 +52,34 @@ def main():
         app.run(host='0.0.0.0', debug=False)
         return 0
     elif len(sys.argv) >= 3:
-        from application.view.deliver import MultiUserDelivery
-        from application.work.worker import WorkerAllNow
-        act = sys.argv[1].lower()
-        param = sys.argv[2].lower()
+        act = sys.argv[1]
+        param = sys.argv[2]
         if (act == 'deliver') and (param == 'check'):
-            result = MultiUserDelivery()
-            print(result)
+            from application.view.deliver import MultiUserDelivery
+            print(MultiUserDelivery())
             return 0
         elif (act == 'deliver') and (param == 'now'):
-            result = WorkerAllNow()
-            print(result)
+            from application.work.worker import WorkerAllNow
+            print(WorkerAllNow())
+            return 0
+        elif (act == 'db') and (param == 'create'):
+            from application.back_end.db_models import create_database_tables
+            print(create_database_tables())
+            return 0
+        elif (act == 'log') and (param == 'purge'):
+            from application.view.logs import RemoveLogs
+            print(RemoveLogs())
             return 0
 
+
     print(f'\nKindleEar Application {appVer}')
-    print('\nUsage: main.py [debug | deliver check | deliver now]')
+    print('\nUsage: main.py commands')
     print('\ncommands:')
     print('  debug        \t    Run the application in debug mode')
+    print('  db create    \t    Create database tables')
     print('  deliver check\t    Start delivery if time set is matched')
     print('  deliver now  \t    Force start delivery task')
+    print('  log purge    \t    remove logs older than one month')
     print('\n')
 
 if __name__ == "__main__":

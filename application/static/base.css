@@ -572,7 +572,7 @@ table.pure-table thead {
   color: #fff;
   text-align: center;
   padding: 3px 15px;
-  white-space: nowrap;
+  /*white-space: nowrap;*/
 }
 
 .logs .status.success {
@@ -879,4 +879,45 @@ div[class="schedule_daytimes"] input {
     border: 1px solid #ada802;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 9999;
+}
+
+#up_cover_progress {
+    width:300px;
+    height:25px;
+    border:1px solid #98AFB7;
+    border-radius:5px;
+    margin:0 auto;
+}
+#up_cover_progress_bar {
+    width:0px;
+    height:25px;
+    border-radius:5px;
+    background:#5EC4EA;
+    text-align: center;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+    cursor: help;
+}
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 500px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 10px;
+    position: absolute;
+    z-index: 1;
+    top: calc(-100%); /*calc(10% + 5px);*/
+    left: calc(50% - 500px);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
 }

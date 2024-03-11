@@ -20,8 +20,7 @@ supported_languages = ['zh', 'tr_TR', 'en']
 def Setting(tips=None):
     user = get_login_user()
     sm_services = avaliable_sm_services()
-    return render_template('setting.html', tab='set', user=user, tips=tips, src_mail=app.config['SRC_EMAIL'], 
-        langMap=LangMap(), sm_services=sm_services)
+    return render_template('setting.html', tab='set', user=user, tips=tips, langMap=LangMap(), sm_services=sm_services)
 
 @bpSetting.post("/setting", endpoint='SettingPost')
 @login_required()
@@ -38,13 +37,14 @@ def SettingPost():
         sm_srv_need = True
         sm_srv_type = form.get('sm_service')
         sm_apikey = form.get('sm_apikey', '')
+        sm_secret_key = form.get('sm_secret_key', '')
         sm_host = form.get('sm_host', '')
         sm_port = str_to_int(form.get('sm_port'))
-        sm_username = form.get('sm_username', '')
+        #sm_username = form.get('sm_username', '') #replace by sender field
         sm_password = form.get('sm_password', '')
         sm_save_path = form.get('sm_save_path', '')
-        send_mail_service = {'service': sm_srv_type, 'apikey': sm_apikey, 'host': sm_host,
-            'port': sm_port, 'username': sm_username, 'password': '', 
+        send_mail_service = {'service': sm_srv_type, 'apikey': sm_apikey, 'secret_key': sm_secret_key,
+            'host': sm_host, 'port': sm_port, 'username': '', 'password': '', 
             'save_path': sm_save_path}
         #只有处于smtp模式并且密码存在才更新，空或几个星号则不更新
         if sm_srv_type == 'smtp':
@@ -59,7 +59,7 @@ def SettingPost():
         tips = _("Title is requied!")
     elif sm_srv_type == 'sendgrid' and not sm_apikey:
         tips = _("Some parameters are missing or wrong.")
-    elif sm_srv_type == 'smtp' and not all((sm_host, sm_port, sm_username, sm_password)):
+    elif sm_srv_type == 'smtp' and not all((sm_host, sm_port, sm_password)):
         tips = _("Some parameters are missing or wrong.")
     elif sm_srv_type == 'local' and not sm_save_path:
         tips = _("Some parameters are missing or wrong.")
@@ -76,7 +76,7 @@ def SettingPost():
             user.enable_custom_rss = False
 
         user.kindle_email = keMail
-        user.timezone = int(form.get('timezone', app.config['TIMEZONE']))
+        user.timezone = int(form.get('timezone', '0'))
         user.send_time = int(form.get('send_time', '0'))
         user.book_type = form.get('book_type', 'epub')
         user.device = form.get('device_type', 'kindle')
@@ -99,8 +99,7 @@ def SettingPost():
         UpdateBookedCustomRss(user)
     
     sm_services = avaliable_sm_services()
-    return render_template('setting.html', tab='set', user=user, tips=tips, src_mail=app.config['SRC_EMAIL'], 
-        langMap=LangMap(), sm_services=sm_services)
+    return render_template('setting.html', tab='set', user=user, tips=tips, langMap=LangMap(), sm_services=sm_services)
 
 #设置国际化语种
 @bpSetting.route("/setlocale/<langCode>")

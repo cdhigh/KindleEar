@@ -12,3 +12,4 @@ tests/rss/*
 tests/debug_mail/*
 tests/cov_html/*
 .idea/
+datastore/

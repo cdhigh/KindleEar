@@ -189,6 +189,9 @@
           {% if 'sendgrid' in sm_services -%}
           <option value="sendgrid" {% if sm_srv_type == 'sendgrid' %}selected="selected"{% endif %}>sendgrid</option>
           {% endif -%}
+          {% if 'mailjet' in sm_services -%}
+          <option value="mailjet" {% if sm_srv_type == 'mailjet' %}selected="selected"{% endif %}>mailjet</option>
+          {% endif -%}
           {% if 'smtp' in sm_services -%}
           <option value="smtp" {% if sm_srv_type == 'smtp' %}selected="selected"{% endif %}>SMTP</option>
           {% endif -%}
@@ -198,6 +201,10 @@
       <div class="pure-control-group" id="sm_apikey">
         <label>{{_("ApiKey")}}</label>
         <input type="text" name="sm_apikey" value="{{sm_srv.get('apikey', '')}}" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group" id="sm_secret_key">
+        <label>{{_("SecretKey")}}</label>
+        <input type="text" name="sm_secret_key" value="{{sm_srv.get('secret_key', '')}}" class="pure-u-1 pure-u-sm-1-2" />
       </div>
       <div class="pure-control-group" id="sm_host">
         <label>{{_("Host")}}</label>
@@ -209,11 +216,11 @@
       </div>
       <div class="pure-control-group" id="sm_username">
         <label>{{_("Username")}}</label>
-        <input type="text" name="sm_username" value="{{sm_srv.get('username', '')}}" class="pure-u-1 pure-u-sm-1-2" />
+        <input type="text" name="sm_username" value="{{user.sender}}" class="pure-u-1 pure-u-sm-1-2" readonly />
       </div>
       <div class="pure-control-group" id="sm_password">
         <label>{{_("Password")}}</label>
-        <input type="password" name="sm_password" value="{% if sm_srv.get('password', '') %}****{% endif %}" class="pure-u-1 pure-u-sm-1-2" />
+        <input type="password" name="sm_password" value="{% if sm_srv.get('password', '') %}********{% endif %}" class="pure-u-1 pure-u-sm-1-2" />
       </div>
       <div class="pure-control-group" id="sm_save_path">
         <label>{{_("Save path")}}</label>
@@ -221,11 +228,17 @@
       </div>
     </fieldset>
     {% endif -%}
+    {% if user.sender -%}
     <p>
       {% autoescape off -%}
-      {{_("Important: Please activate your kindle firstly, then goto %(personal)s Page and add %(sender)s to 'Approved Personal Document E-mail List'.", personal='<a href="https://www.amazon.com/hz/mycd/myx#/home/settings/payment" rel="external" target="_blank">' + _("Personal Document Settings") + '</a>', sender='<strong>' + src_mail + '</strong>')|safe}}
+      {{_("Important: Please activate your kindle firstly, then goto %(personal)s Page and add %(sender)s to 'Approved Personal Document E-mail List'.", personal='<a href="https://www.amazon.com/hz/mycd/myx#/home/settings/payment" rel="external" target="_blank">' + _("Personal Document Settings") + '</a>', sender='<strong>' + user.sender + '</strong>')|safe}}
       {% endautoescape -%}
     </p>
+    {% else -%}
+    <p style="color:red;">
+      {{_("You have not yet set up your email address. Please go to the 'Admin' page to add your email address firstly.")}}
+    </p>
+    {% endif %}
     <p style="text-align:center;">
       <input type="submit" class="pure-button pure-button-primary pure-input-rounded" value="{{_('Save settings')}}" />
     </p>
@@ -248,6 +261,7 @@ function SetSmOptiosVisualbility() {
   var svr = $('#sm_service').val();
   if (svr == 'gae') {
     $('#sm_apikey').hide();
+    $('#sm_secret_key').hide();
     $('#sm_host').hide();
     $('#sm_port').hide();
     $('#sm_username').hide();
@@ -255,6 +269,15 @@ function SetSmOptiosVisualbility() {
     $('#sm_save_path').hide();
   } else if (svr == 'sendgrid') {
     $('#sm_apikey').show();
+    $('#sm_secret_key').hide();
+    $('#sm_host').hide();
+    $('#sm_port').hide();
+    $('#sm_username').hide();
+    $('#sm_password').hide();
+    $('#sm_save_path').hide();
+  } else if (svr == 'mailjet') {
+    $('#sm_apikey').show();
+    $('#sm_secret_key').show();
     $('#sm_host').hide();
     $('#sm_port').hide();
     $('#sm_username').hide();
@@ -262,6 +285,7 @@ function SetSmOptiosVisualbility() {
     $('#sm_save_path').hide();
   } else if (svr == 'smtp') {
     $('#sm_apikey').hide();
+    $('#sm_secret_key').hide();
     $('#sm_host').show();
     $('#sm_port').show();
     $('#sm_username').show();
@@ -269,6 +293,7 @@ function SetSmOptiosVisualbility() {
     $('#sm_save_path').hide();
   } else if (svr == 'local') {
     $('#sm_apikey').hide();
+    $('#sm_secret_key').hide();
     $('#sm_host').hide();
     $('#sm_port').hide();
     $('#sm_username').hide();
@@ -276,6 +301,7 @@ function SetSmOptiosVisualbility() {
     $('#sm_save_path').show();
   } else {
     $('#sm_apikey').hide();
+    $('#sm_secret_key').hide();
     $('#sm_host').hide();
     $('#sm_port').hide();
     $('#sm_username').hide();

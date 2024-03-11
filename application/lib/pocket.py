@@ -60,7 +60,7 @@ class APIError(Exception):
 
 class Pocket(object):
     REQUEST_TOKEN_URL = 'https://getpocket.com/v3/oauth/request'
-    AUTH_TOKEN_URL = 'https://getpocket.com/auth/authorize?request_token=%(request_token)s&redirect_uri=%(redirect_uri)s'
+    AUTH_TOKEN_URL = 'https://getpocket.com/auth/authorize?request_token={}&redirect_uri={}'
     ACCESS_TOKEN_URL = 'https://getpocket.com/v3/oauth/authorize'
 
     POCKET_HEADERS = {
@@ -76,9 +76,13 @@ class Pocket(object):
         
     def _post(self, method_url, **kw):
         ret = self.opener.open(method_url, data=kw)
-        if ret.status_code != 200:
+        if ret.status_code > 399:
             raise APIError(ret.status_code, ret.headers.get('X-Error-Code',''), ret.headers.get('X-Error',''), 'Get access token')
-        return json.loads(ret.content)
+
+        try:
+            return json.loads(ret.content)
+        except:
+            return json.text
         
     def _authenticated_post(self, method_url, **kw):
         kw['consumer_key'] = self.consumer_key
@@ -88,19 +92,18 @@ class Pocket(object):
     def get_request_token(self):
         #此步仅用来直接通过一次http获取一个request_token(code)，pocket不会回调redirect_uri
         ret = self._post(self.REQUEST_TOKEN_URL, consumer_key=self.consumer_key, redirect_uri=self.redirect_uri)
-        return ret.get('code', '')
+        return ret.get('code', '') if isinstance(ret, dict) else ret.split('=')[-1]
         
     def get_authorize_url(self, code):
         if not self.redirect_uri:
             raise APIError(400, '140', 'Missing redirect url.', 'Get access token')
-        url = self.AUTH_TOKEN_URL % {'request_token' : code, 'redirect_uri' : self.redirect_uri}
-        return url
+        return self.AUTH_TOKEN_URL.format(code, self.redirect_uri)
         
     def get_access_token(self, code):
         # access token : {"access_token":"dcba4321-dcba-4321-dcba-4321dc","username":"pocketuser"}.
         ret = self._post(self.ACCESS_TOKEN_URL, consumer_key=self.consumer_key, code=code)
         self.access_token = ret.get('access_token', '')
-        return ret
+        return self.access_token
 
     def set_access_token(self, access_token):
         self.access_token = str(access_token)

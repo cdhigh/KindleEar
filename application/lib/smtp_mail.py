@@ -32,10 +32,12 @@ def smtp_send_mail(sender, to, subject, body, host, username, password, port=Non
         part.add_header('Content-Disposition', f'attachment; filename="{filename}"')
         message.attach(part)
 
-    with smtplib.SMTP(host=host, port=port) as smtp_server:
+    klass = smtplib.SMTP if port != 465 else smtplib.SMTP_SSL
+    with klass(host=host, port=port) as smtp_server:
         smtp_server.connect(host, port)
         smtp_server.ehlo()
         smtp_server.starttls()
         smtp_server.ehlo()
         smtp_server.login(user=username, password=password)
         smtp_server.sendmail(sender, to, message.as_string())
+

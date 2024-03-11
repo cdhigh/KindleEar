@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from flask import Blueprint, render_template, request, current_app as app
 from flask_babel import gettext as _
 from calibre.web.feeds.news import recursive_fetch_url
+import readability
 from ..base_handler import *
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import send_html_mail
@@ -59,7 +60,15 @@ def SaveToEvernoteWiz(user, action, url, title):
     fs = FsDictStub(None)
     res, paths, failures = recursive_fetch_url(url, fs)
     if res:
-        soup = BeautifulSoup(fs.read(res), 'lxml')
+        raw = fs.read(res)
+        positives = ['image-block', 'image-block-caption', 'image-block-ins']
+        try:
+            doc = readability.Document(raw, positive_keywords=positives, url=url)
+            summary = doc.summary(html_partial=False)
+        except:
+            summary = raw
+            
+        soup = BeautifulSoup(summary, 'lxml')
         p = soup.new_tag('p', style='font-size:80%;color:grey;') #插入源链接
         a = soup.new_tag('a', href=url)
         a.string = url

@@ -86,9 +86,11 @@ def AdminAddAccountPost():
         tips = _("The two new passwords are dismatch.")
     elif KeUser.get_or_none(KeUser.name == username):
         tips = _("Already exist the username.")
-    elif not CreateAccountIfNotExist(username, password1, email, 
-        {'service': 'admin'} if sm_service == 'admin' else {}, expiration):
-        tips = _("The password includes non-ascii chars.")
+    else:
+        sm_service = {'service': 'admin'} if sm_service == 'admin' else {}
+        sender = user.email if sm_service else email #和管理员一致则邮件发件地址也一致
+        if not CreateAccountIfNotExist(username, password1, email, sender, sm_service, expiration):
+            tips = _("The password includes non-ascii chars.")
 
     if tips:
         return render_template('user_account.html', tips=tips, formTitle=_('Add account'), submitTitle=_('Add'), 
@@ -204,6 +206,22 @@ def ChangePassword(user, orgPwd, p1, p2, email):
         else:
             user.passwd = newPwd
             user.email = email
+            if user.name == app.config['ADMIN_NAME']: #如果管理员修改email，也同步更新其他用户的发件地址
+                user.sender = email
+                SyncSenderAddress(user)
+            else: #其他人修改自己的email，根据设置确定是否要同步到发件地址
+                sm_service = user.send_mail_service
+                if not sm_service or sm_service.get('service', 'admin') != 'admin':
+                    user.sender = email
+                    
             user.save()
-            tips = _("Change password success.")
+            tips = _("Changes saved successfully.")
     return tips
+
+#将管理员的email同步到所有用户
+def SyncSenderAddress(adminUser):
+    for user in list(KeUser.get_all(KeUser.name != app.config['ADMIN_NAME'])):
+        sm_service = user.send_mail_service
+        if sm_service and sm_service.get('service', 'admin') == 'admin':
+            user.sender = adminUser.email
+            user.save()

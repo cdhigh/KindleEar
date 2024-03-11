@@ -49,9 +49,10 @@ def GenerateRecipeSource(title, feeds, user, max_articles=30, isfulltext=False, 
 
 #能使用点号访问的字典
 class DotDict(dict):
+    #__setattr__ = dict.__setitem__
+    #__getattr__ = dict.__getitem__
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
     def __getattr__(self, key):
         try:
             return self[key]

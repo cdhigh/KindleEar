@@ -4,7 +4,7 @@
 # Author: cdhigh <https://github.com/cdhigh>
 __Author__ = "cdhigh"
 
-__Version__ = '3.0.0'
+__Version__ = '3.0.0b'
 
 import os, builtins, datetime
 from flask import Flask, render_template, session, request, g
@@ -22,12 +22,8 @@ def init_app(name, debug=False):
     
     app = Flask(name, template_folder=template_folder, static_folder=static_folder)
     app.config.from_pyfile(os.path.join(rootDir, 'config.py'))
-    
-    from .utils import new_secret_key
-    
-    app.config['SECRET_KEY'] = '12345678' # if debug else new_secret_key()
     app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024 #32MB
-
+    
     from .view import setting
     app.config["BABEL_TRANSLATION_DIRECTORIES"] = i18n_folder
     babel = Babel(app)

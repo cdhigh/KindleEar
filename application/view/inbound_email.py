@@ -72,7 +72,7 @@ def IsSpamMail(sender, user):
 @bpInBoundEmail.post("/_ah/bounce")
 def ReceiveBounce():
     msg = mail.BounceNotification(dict(request.form.lists()))
-    #default_log.warning("Bounce original: {}, notification: {}".format(msg.original, msg.notification))
+    default_log.warning("Bounce original: {}, notification: {}".format(msg.original, msg.notification))
     return "OK", 200
 
 #有新的邮件到达, _ah=apphosting

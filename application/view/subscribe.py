@@ -161,7 +161,8 @@ def UpdateBookedCustomRss(user: KeUser):
                 'title': rss.title, 'description': rss.description, 'time': datetime.datetime.utcnow()})
     else: #删除订阅
         ids = [rss.recipe_id for rss in user.all_custom_rss()]
-        BookedRecipe.delete().where(BookedRecipe.recipe_id.in_(ids)).execute()
+        if ids:
+            BookedRecipe.delete().where(BookedRecipe.recipe_id.in_(ids)).execute()
 
 #通知共享服务器，有一个新的订阅
 def SendNewSubscription(title, url, recipeId):

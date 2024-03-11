@@ -78,7 +78,6 @@ def AdvArchive():
     appendStrs["Pocket"] = _("Append hyperlink '{}' to article").format(_('Save to {}').format(_('pocket')))
     appendStrs["Instapaper"] = _("Append hyperlink '{}' to article").format(_('Save to {}').format(_('instapaper')))
     appendStrs["Weibo"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format(_('weibo')))
-    appendStrs["TencentWeibo"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format(_('tencent weibo')))
     appendStrs["Facebook"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format(_('facebook')))
     appendStrs["X"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format('X'))
     appendStrs["Tumblr"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format(_('tumblr')))
@@ -87,7 +86,8 @@ def AdvArchive():
     shareLinks.pop('key', None)
     
     return render_template('adv_archive.html', tab='advset', user=user, advCurr='archive', appendStrs=appendStrs,
-        shareLinks=shareLinks, in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
+        shareLinks=shareLinks, in_email_service=app.config['INBOUND_EMAIL_SERVICE'],
+        ke_decrypt=ke_decrypt)
 
 @bpAdv.post("/adv/archive", endpoint='AdvArchivePost')
 @login_required()
@@ -117,7 +117,6 @@ def AdvArchivePost():
     shareLinks['Pocket'] = {'enable': '1' if pocket else '', 'access_token': accessToken}
     shareLinks['Instapaper'] = {'enable': '1' if instapaper else '', 'username': instaName, 'password': instaPwd}
     shareLinks['Weibo'] = str_to_bool(form.get('weibo'))
-    shareLinks['TencentWeibo'] = str_to_bool(form.get('tencentweibo'))
     shareLinks['Facebook'] = str_to_bool(form.get('facebook'))
     shareLinks['X'] = str_to_bool(form.get('x'))
     shareLinks['Tumblr'] = str_to_bool(form.get('tumblr'))
@@ -349,14 +348,14 @@ def AdvOAuth2(authType):
         return 'Auth Type ({}) Unsupported!'.format(authType)
         
     user = get_login_user()
-    cbUrl = urljoin(app.config['APP_DOMAIN'], '/oauth2cb/pocket?redirect=/adv/archive')
+    cbUrl = urljoin(app.config['APP_DOMAIN'], '/oauth2cb/pocket?redirect={}'.format(url_for("bpAdv.AdvArchive")))
     pocket = Pocket(app.config['POCKET_CONSUMER_KEY'], cbUrl)
     try:
         request_token = pocket.get_request_token()
         url = pocket.get_authorize_url(request_token)
     except Exception as e:
         return render_template('tipsback.html', title='Authorization Error', urltoback=url_for('bpAdv.AdvArchive'),
-            tips=_('Authorization Error!<br/>{}').format(e))
+            tips=_('Authorization Error!<br/>{}').format(str(e)))
 
     session['pocket_request_token'] = request_token
     return redirect(url)
@@ -370,18 +369,18 @@ def AdvOAuth2Callback(authType):
         
     user = get_login_user()
     
-    pocketInst = Pocket(app.config['POCKET_CONSUMER_KEY'])
+    pocket = Pocket(app.config['POCKET_CONSUMER_KEY'])
     request_token = session.get('pocket_request_token', '')
     shareLinks = user.share_links
     try:
-        resp = pocketInst.get_access_token(request_token)
-        pocket = shareLinks.get('pocket', {})
-        pocket['access_token'] = resp.get('access_token', '')
+        acToken = pocket.get_access_token(request_token)
+        shareLinks.setdefault('pocket', {})
+        shareLinks['pocket']['access_token'] = acToken
         user.share_links = shareLinks
         user.save()
         return render_template('tipsback.html', title='Success authorized', urltoback=url_for('bpAdv.AdvArchive'), tips=_('Success authorized by Pocket!'))
     except Exception as e:
-        shareLinks[pocket] = {'enable': '', 'access_token': ''}
+        shareLinks['pocket'] = {'enable': '', 'access_token': ''}
         user.share_links = shareLinks
         user.save()
         return render_template('tipsback.html', title='Failed to authorize', urltoback=url_for('bpAdv.AdvArchive'), 

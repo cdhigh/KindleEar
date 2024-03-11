@@ -69,7 +69,7 @@ def Url2BookImpl(userName: str, urls: str, subject: str, action: str):
             resp = opener.open(url)
             if resp.status_code == 200:
                 attachments = [('page.html', resp.content)]
-                send_mail(user, app.config['SRC_EMAIL'], 'DEBUG FETCH', 'DEBUG FETCH', attachments=attachments)
+                send_mail(user, user.email, 'DEBUG FETCH', 'DEBUG FETCH', attachments=attachments)
             else:
                 default_log.warning('debug_fetch failed: code:{}, url:{}'.format(resp.status_code, url))
             

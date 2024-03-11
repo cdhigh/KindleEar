@@ -17,7 +17,7 @@ def login_required(forAjax=False):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            if ((session.get('login') == 1) and get_login_user()):
+            if (session.get('login', '') == 1) and session.get('userName', ''):
                 return func(*args, **kwargs)
             else:
                 return redirect(url_for("bpLogin.NeedLoginAjax") if forAjax else url_for("bpLogin.Login"))
@@ -27,7 +27,8 @@ def login_required(forAjax=False):
 #查询当前登录用户名，在使用此函数前最好保证已经登录
 #返回一个数据库行实例，而不是一个字符串
 def get_login_user():
-    return KeUser.get_or_none(KeUser.name == session.get('userName', ''))
+    name = session.get('userName', '')
+    return KeUser.get_or_none(KeUser.name == name) if name else None
     
 #记录投递记录到数据库
 def save_delivery_log(user, book, size, status='ok', to=None):

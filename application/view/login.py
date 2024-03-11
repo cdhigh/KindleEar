@@ -25,9 +25,6 @@ def Login():
     if CreateAccountIfNotExist(adminName):
         tips = (_("Please use {}/{} to login at first time.").format(adminName, adminName))
     
-    session['login'] = 0
-    session['userName'] = ''
-    session['role'] = ''
     return render_template('login.html', tips=tips)
 
 @bpLogin.post("/login")
@@ -75,34 +72,39 @@ def LoginPost():
         tips = (_("The username does not exist or password is wrong.") +
             f'<br/><a href="/resetpwd?name={name}">' + _('Forgot password?') + '</a>')
         
-        session['login'] = 0
-        session['userName'] = ''
-        session['role'] = ''
+        session.pop('login', None)
+        session.pop('userName', None)
+        session.pop('role', None)
         return render_template('login.html', userName=name, tips=tips)
 
 #判断账号是否存在
 #如果账号不存在，创建一个，并返回True，否则返回False
-def CreateAccountIfNotExist(name, password=None, email=None, sm_service=None, expiration=0):
+def CreateAccountIfNotExist(name, password=None, email='', sender=None, sm_service=None, expiration=0):
     if KeUser.get_or_none(KeUser.name == name):
         return False
 
     password = password if password else name
-    email = email if email else app.config['SRC_EMAIL']
     secretKey = new_secret_key()
     shareKey = new_secret_key(length=4)
     try:
         password = hashlib.md5((password + secretKey).encode()).hexdigest()
     except Exception as e:
-        default_log.warning('CreateAccountIfNotExist() failed to hash password: {}'.format(str(e)))
+        default_log.warning('CreateAccountIfNotExist failed to hash password: {}'.format(str(e)))
         return False
 
+    adminName = app.config['ADMIN_NAME']
     if sm_service is None:
         sm_service = {}
-        if name != app.config['ADMIN_NAME'] and AppInfo.get_value(AppInfo.newUserMailService, 'admin') == 'admin':
+        if name != adminName and AppInfo.get_value(AppInfo.newUserMailService, 'admin') == 'admin':
             sm_service = {'service': 'admin'}
-        
-    user = KeUser(name=name, passwd=password, timezone=app.config['TIMEZONE'], expires=None, secret_key=secretKey, 
-        expiration_days=expiration, share_links={'key': shareKey}, email=email, send_mail_service=sm_service)
+            if sender is None:
+                adUser = KeUser.get_or_none(KeUser.name == adminName)
+                sender = adUser.email if adUser else email
+
+    sender = sender or email
+
+    user = KeUser(name=name, passwd=password, expires=None, secret_key=secretKey, expiration_days=expiration, 
+        share_links={'key': shareKey}, email=email, sender=sender, send_mail_service=sm_service)
     if expiration:
         user.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
     user.save()
@@ -110,9 +112,9 @@ def CreateAccountIfNotExist(name, password=None, email=None, sm_service=None, ex
 
 @bpLogin.route("/logout", methods=['GET', 'POST'])
 def Logout():
-    session['login'] = 0
-    session['userName'] = ''
-    session['role'] = ''
+    session.pop('login', None)
+    session.pop('userName', None)
+    session.pop('role', None)
     return redirect('/')
 
 #for ajax parser, if login required, retuan a dict 

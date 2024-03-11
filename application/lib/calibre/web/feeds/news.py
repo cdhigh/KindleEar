@@ -1099,7 +1099,7 @@ class BasicNewsRecipe(Recipe):
                 ashare.string = _('Save to {}').format(type_)
                 aTags.append(ashare)
 
-        for type_ in ['Weibo', 'TencentWeibo', 'Facebook', 'X', 'Tumblr']:
+        for type_ in ['Weibo', 'Facebook', 'X', 'Tumblr']:
             if shareLinks.get(type_):
                 ashare = soup.new_tag('a', href=self.make_share_link(type_, user, url, soup))
                 ashare.string =  _('Share on {}').format(type_)
@@ -1127,17 +1127,15 @@ class BasicNewsRecipe(Recipe):
         if shareType in ('Evernote', 'Wiz'):
             href = f"{appDomain}/share?act={shareType}&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}"
         elif shareType == 'Pocket':
-            href = f'{appDomain}/share?act=pocket&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
+            href = f'{appDomain}/share?act=Pocket&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
         elif shareType == 'Instapaper':
-            href = f'{appDomain}/share?act=instapaper&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
+            href = f'{appDomain}/share?act=Instapaper&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
         elif shareType == 'Weibo':
             href = f'https://service.weibo.com/share/share.php?url={quote_plus(url)}'
-        elif shareType == 'TencentWeibo':
-            href = f'https://share.v.t.qq.com/index.php?c=share&a=index&url={quote_plus(url)}'
         elif shareType == 'Facebook':
             href = f'https://www.facebook.com/share.php?u={quote_plus(url)}'
         elif shareType == 'X':
-            href = f'https://twitter.com/home?status={quote_plus(url)}'
+            href = f'https://twitter.com/intent/post?text={title}&url={quote_plus(url)}'
         elif shareType == 'Tumblr':
             href = f'https://www.tumblr.com/share/link?url={quote_plus(url)}'
         else:
@@ -1153,7 +1151,7 @@ class BasicNewsRecipe(Recipe):
         Calling it more than once will lead to undefined behavior.
         :return: Path to index.html
         '''
-        if 1:
+        try:
             res = self.build_index()
             if self.failed_downloads:
                 self.log.warning(_('Failed to download the following articles:'))
@@ -1171,8 +1169,8 @@ class BasicNewsRecipe(Recipe):
                         self.log.warning(l)
                         self.log.debug(tb)
             return res
-        #finally:
-        #    self.cleanup()
+        finally:
+            self.cleanup()
 
     @property
     def lang_for_html(self):

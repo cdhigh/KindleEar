@@ -1,0 +1,11 @@
+[Unit]
+Description=gunicorn daemon
+After=syslog.target network.target remote-fs.target nss-lookup.target
+[Service]
+# your username of system
+User=ubuntu
+WorkingDirectory=/home/ubuntu/site/kindleear
+ExecStart=/home/ubuntu/.local/bin/gunicorn -c /home/ubuntu/site/kindleear/tools/nginx/gunicorn.conf.py main:app
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target

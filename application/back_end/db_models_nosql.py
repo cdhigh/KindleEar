@@ -7,7 +7,7 @@ import os, json, datetime
 from weedata import *
 
 dbUrl = os.getenv('DATABASE_URL')
-appId = os.getenv('APP_ID', 'kindleear')
+appId = os.getenv('APP_ID')
 
 if dbUrl.startswith('mongodb://'):
     dbInstance = MongoDbClient(appId, dbUrl)

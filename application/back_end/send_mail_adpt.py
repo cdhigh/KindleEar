@@ -5,16 +5,21 @@
 #gae mail api
 #https://cloud.google.com/appengine/docs/standard/python3/reference/services/bundled/google/appengine/api/mail
 #https://cloud.google.com/appengine/docs/standard/python3/services/mail
-import os, datetime, zipfile
+import os, datetime, zipfile, base64
 from ..utils import local_time, ke_decrypt
 from ..base_handler import save_delivery_log
 from .db_models import KeUser
 
-try:
-    from google.appengine.api import mail as gae_mail
-    from google.appengine.api.mail_errors import InvalidSenderError, InvalidAttachmentTypeError, InvalidEmailError
-    from google.appengine.runtime.apiproxy_errors import OverQuotaError, DeadlineExceededError
-except ImportError:
+#google.appengine will apply patch for os.env module
+hideMailLocal = os.getenv('HIDE_MAIL_TO_LOCAL')
+
+#判断是否是部署在gae平台
+if os.getenv('DATABASE_URL') == 'datastore':
+    try:
+        from google.appengine.api import mail as gae_mail
+    except ImportError:
+        gae_mail = None
+else:
     gae_mail = None
 
 try:
@@ -22,6 +27,11 @@ try:
     from sendgrid.helpers.mail import Email, Content, Mail, Attachment
 except ImportError:
     SendGridAPIClient = None
+
+try:
+    from mailjet_rest import Client as MailjetClient
+except ImportError:
+    MailjetClient = None
 
 try:
     from smtp_mail import smtp_send_mail
@@ -35,9 +45,11 @@ def avaliable_sm_services():
         sm.append('gae')
     if SendGridAPIClient:
         sm.append('sendgrid')
+    if MailjetClient:
+        sm.append('mailjet')
     if smtp_send_mail:
         sm.append('smtp')
-    if not os.getenv('HIDE_MAIL_TO_LOCAL'):
+    if not hideMailLocal:
         sm.append('local')
     return sm
 
@@ -53,27 +65,28 @@ def send_to_kindle(user, title, attachment, fileWithTime=True):
         lcTime = "({})".format(lcTime) if fileWithTime else ""
         fileName = f"{title}{lcTime}.{user.book_type}"
         attachment = (fileName, attachment)
-
-    if not isinstance(attachment, list):
-        attachments = [attachment]
     
+    if not isinstance(attachment, list):
+        attachment = [attachment]
+
     status = 'ok'
     body = "Deliver from KindleEar"
     try:
-        send_mail(user, user.kindle_email, subject, body, attachments)
+        send_mail(user, user.kindle_email, subject, body, attachment)
     except Exception as e:
         status = str(e)
         default_log.warning(f'Failed to send mail "{title}": {status}')
     
-    save_delivery_log(user, title, len(attachment), status=status)
+    size = sum([len(a[1]) for a in attachment])
+    save_delivery_log(user, title, size, status=status)
 
 #统一的发送邮件函数
 def send_mail(user, to, subject, body, attachments=None, html=None):
-    if not isinstance(to, list) and (',' in to):
+    if not isinstance(to, list):
         to = to.split(',')
     sm_service = user.get_send_mail_service()
-    srv_type = sm_service.get('service', 'gae')
-    data = {'sender': os.getenv('SRC_EMAIL'), 'to': to, 'subject': subject, 'body': body}
+    srv_type = sm_service.get('service', '')
+    data = {'sender': user.sender, 'to': to, 'subject': subject, 'body': body}
     if attachments:
         data['attachments'] = attachments
     if html:
@@ -85,10 +98,14 @@ def send_mail(user, to, subject, body, attachments=None, html=None):
     elif srv_type == 'sendgrid':
         apikey = sm_service.get('apikey', '')
         grid_send_mail(apikey=apikey, **data)
+    elif srv_type == 'mailjet':
+        apikey = sm_service.get('apikey', '')
+        secret_key = sm_service.get('secret_key', '')
+        mailjet_send_mail(apikey=apikey, secret_key=secret_key, **data)
     elif srv_type == 'smtp':
         data['host'] = sm_service.get('host', '')
         data['port'] = sm_service.get('port', 587)
-        data['username'] = sm_service.get('username', '')
+        data['username'] = user.sender
         data['password'] = ke_decrypt(sm_service.get('password', ''), user.secret_key)
         smtp_send_mail(**data)
     elif srv_type == 'local':
@@ -98,7 +115,7 @@ def send_mail(user, to, subject, body, attachments=None, html=None):
 
 #发送一个HTML邮件
 #user: KeUser实例
-#to: 收件地址，可以是一个单独的字符串，或一个字符串列表，对应发送到多个地址
+#to: 收件地址列表
 #subject: 邮件标题
 #html: 邮件正文的HTML内容
 #attachments: 附件文件名和二进制内容，[(fileName, content),...]
@@ -120,12 +137,11 @@ def send_html_mail(user, to, subject, html, attachments=None, body=None):
 
 #SendGrid发送邮件
 #sender:: 发送者地址
-#to: 收件地址，可以是一个单独的字符串，或一个字符串列表，对应发送到多个地址
+#to: 收件地址列表
 #subject: 邮件标题
 #body: 邮件正文纯文本内容
 #html: 邮件正文HTML
 #attachment: [(fileName, attachment),]
-#tz: 时区
 def grid_send_mail(apikey, sender, to, subject, body, html=None, attachments=None):
     global default_log
     sgClient = SendGridAPIClient(apikey)
@@ -146,6 +162,43 @@ def grid_send_mail(apikey, sender, to, subject, body, html=None, attachments=Non
     response = sgClient.send(message)
     if response.status_code not in (200, 202):
         raise Exception(f'sendgrid failed: {response.status_code}')
+
+#Mailjet发送邮件
+#sender:: 发送者地址
+#to: 收件地址列表
+#subject: 邮件标题
+#body: 邮件正文纯文本内容
+#html: 邮件正文HTML
+#attachment: [(fileName, attachment),]
+def mailjet_send_mail(apikey, secret_key, sender, to, subject, body, html=None, attachments=None):
+    global default_log
+    mjClient = MailjetClient(auth=(apikey, secret_key), version='v3.1')
+    to = [{'Email': t, 'Name': t} for t in to]
+    data = {'Messages': [{
+          "From": {"Email": sender, "Name": sender},
+          "To": to,
+          "Subject": subject,
+          "TextPart": body,
+        }],}
+
+    dataDict = data['Messages'][0]
+    if html:
+        dataDict['HTMLPart'] = html
+    if attachments:
+        dataDict['Attachments'] = []
+        for fileName, content in (attachments or []):
+            dataDict['Attachments'].append({"ContentType": "text/plain", "Filename": fileName,
+                "Base64Content": base64.b64encode(content).decode()})
+
+        
+    resp = mjClient.send.create(data=data)
+    if resp.status_code in (200, 202):
+        status = resp.json()["Messages"][0]["Status"]
+        print(resp.json()) #TODO
+        if status != "success":
+            raise Exception(f'mailjet failed: {status}')
+    else:
+        raise Exception(f'mailjet failed: {resp.status_code}')
     
 def save_mail_to_local(dest_dir, subject, body, attachments=None, html=None, **kwargs):
     attachments = attachments or []

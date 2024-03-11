@@ -41,6 +41,8 @@
     <div style="text-align:center;">
       <input type="button" value="{{ _('Upload/Update') }}" id="fileSubmit" class="pure-button pure-button-primary pure-input-rounded" onclick="startUploadCoversToServer('{{uploadUrl}}')" />
     </div>
+    <br/>
+    <div id="up_cover_progress" style="display:none;"><div id="up_cover_progress_bar"></div></div>
   </fieldset>
 </form>
 {% endblock -%}

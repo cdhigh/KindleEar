@@ -452,17 +452,17 @@ class RecursiveFetcher:
                 tag['src'] = imgpath
             else:
                 from calibre.utils.img import image_from_data, image_to_data
-                if 1:
+                try:
                     # Ensure image is valid
                     img = image_from_data(data)
                     if itype not in {'png', 'jpg', 'jpeg'}:
                         itype = 'png' if itype == 'gif' else 'jpeg'
                         data = image_to_data(img, fmt=itype)
                     if self.compress_news_images and itype in {'jpg','jpeg'}:
-                        if 1:
+                        try:
                             data = self.rescale_image(data)
-                        #except Exception:
-                        #    self.log.exception('failed to compress image '+iurl)
+                        except Exception:
+                            self.log.exception('failed to compress image '+iurl)
                     # Moon+ apparently cannot handle .jpeg files
                     if itype == 'jpeg':
                         itype = 'jpg'
@@ -471,9 +471,9 @@ class RecursiveFetcher:
                         self.imagemap[iurl] = imgpath
                     self.fs.write(imgpath, data, 'wb')
                     tag['src'] = imgpath
-                    #except Exception:
-                    #traceback.print_exc()
-                    #continue
+                except Exception:
+                    traceback.print_exc()
+                    continue
 
     #如果需要，纠正或规则化soup里面的图片地址，比如延迟加载等
     def rectify_image_src(self, soup, baseurl=None):
@@ -546,7 +546,7 @@ class RecursiveFetcher:
         self.fs.mkdir(diskpath)
         
         prev_dir = self.current_dir
-        if 1:
+        try:
             self.current_dir = diskpath
             tags = list(soup.find_all('a', href=True))
 
@@ -632,7 +632,7 @@ class RecursiveFetcher:
                 finally:
                     self.current_dir = diskpath
                     self.files += 1
-            #finally:
+        finally:
             self.current_dir = prev_dir
         if self.show_progress:
             print()

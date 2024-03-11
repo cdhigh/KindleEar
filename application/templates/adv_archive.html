@@ -18,7 +18,7 @@
         {% if evernote.get('enable') %} checked="1" {% endif %} />
         {{appendStrs['Evernote']}}
       </label>
-      <input type="text" name="evernote_mail" placeholder="Evernote Email" value="{{evernote.get('email', '')}}" class="pure-u-1" />
+      <input type="text" name="evernote_mail" placeholder="@m.evernote.com" value="{{evernote.get('email', '')}}" class="pure-u-1" />
     </div>
 
     <div class="pure-control-group">
@@ -26,7 +26,7 @@
         <input id="enable_wiz" name="wiz" type="checkbox" {% if wiz.get('enable') %}checked="1"{% endif %} />
         {{appendStrs["Wiz"]}}
       </label>
-      <input type="text" name="wiz_mail" placeholder="Wiz Email" value="{{ wiz.get('email', '') }}" class="pure-u-1" />
+      <input type="text" name="wiz_mail" placeholder="@mywiz.cn" value="{{ wiz.get('email', '') }}" class="pure-u-1" />
     </div>
 
     <hr style="margin:1.5em 0;border:0;border-bottom:1px solid #e5e5e5" />
@@ -77,10 +77,6 @@
       <label for="enable_weibo" class="pure-checkbox">
         <input id="enable_weibo" name="weibo" type="checkbox" {% if shareLinks.get('Weibo') %}checked="1"{% endif %} />
         {{appendStrs["Weibo"]}}
-      </label>
-      <label for="enable_tweibo" class="pure-checkbox">
-        <input id="enable_tweibo" name="tencentweibo" type="checkbox" {% if shareLinks.get('TencentWeibo') %}checked="1"{% endif %} />
-        {{appendStrs["TencentWeibo"]}}
       </label>
       <label for="enable_browser" class="pure-checkbox">
         <input id="enable_browser" name="browser" type="checkbox" {% if shareLinks.get('Browser') %}checked="1"{% endif %} />

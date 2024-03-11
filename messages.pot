@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-02-27 22:09-0300\n"
+"POT-Creation-Date: 2024-03-10 21:31-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -75,15 +75,15 @@ msgstr ""
 #: application/templates/admin.html:43
 #: application/templates/adv_whitelist.html:29 application/templates/my.html:32
 #: application/view/admin.py:61 application/view/admin.py:69
-#: application/view/admin.py:94
+#: application/view/admin.py:96
 msgid "Add"
 msgstr ""
 
 #: application/templates/admin.html:54 application/templates/home.html:15
-#: application/templates/login.html:21 application/templates/logs.html:61
+#: application/templates/login.html:21 application/templates/logs.html:65
 #: application/templates/reset_password.html:19
 #: application/templates/reset_password.html:20
-#: application/templates/setting.html:211 application/templates/signup.html:21
+#: application/templates/setting.html:218 application/templates/signup.html:21
 #: application/templates/user_account.html:15
 msgid "Username"
 msgstr ""
@@ -189,7 +189,7 @@ msgstr ""
 
 #: application/templates/adv_archive.html:55 application/templates/base.html:47
 #: application/templates/home.html:16 application/templates/login.html:25
-#: application/templates/setting.html:215 application/templates/signup.html:25
+#: application/templates/setting.html:222 application/templates/signup.html:25
 #: application/templates/user_account.html:19
 msgid "Password"
 msgstr ""
@@ -198,8 +198,8 @@ msgstr ""
 msgid "Verify"
 msgstr ""
 
-#: application/templates/adv_archive.html:93
-#: application/templates/setting.html:230
+#: application/templates/adv_archive.html:89
+#: application/templates/setting.html:243
 msgid "Save settings"
 msgstr ""
 
@@ -477,8 +477,8 @@ msgstr ""
 msgid "Verified"
 msgstr ""
 
-#: application/templates/base.html:59 application/view/login.py:75
-#: application/view/share.py:145
+#: application/templates/base.html:59 application/view/login.py:72
+#: application/view/share.py:154
 msgid "The username does not exist or password is wrong."
 msgstr ""
 
@@ -574,14 +574,14 @@ msgstr ""
 msgid "The account have been deleted."
 msgstr ""
 
-#: application/templates/base.html:83 application/view/admin.py:199
-#: application/view/share.py:135
+#: application/templates/base.html:83 application/view/admin.py:201
+#: application/view/share.py:144
 msgid "The username or password is empty."
 msgstr ""
 
 #: application/templates/base.html:84 application/view/admin.py:86
-#: application/view/admin.py:163 application/view/admin.py:203
-#: application/view/login.py:211 application/view/login.py:271
+#: application/view/admin.py:165 application/view/admin.py:205
+#: application/view/login.py:213 application/view/login.py:273
 msgid "The two new passwords are dismatch."
 msgstr ""
 
@@ -593,7 +593,7 @@ msgstr ""
 msgid "Account added successfully."
 msgstr ""
 
-#: application/templates/base.html:87 application/view/login.py:121
+#: application/templates/base.html:87 application/view/login.py:123
 msgid "login required"
 msgstr ""
 
@@ -705,8 +705,8 @@ msgstr ""
 msgid "Search"
 msgstr ""
 
-#: application/templates/login.html:34 application/view/login.py:188
-#: application/view/login.py:195
+#: application/templates/login.html:34 application/view/login.py:190
+#: application/view/login.py:197
 msgid ""
 "The website does not allow registration. You can ask the owner for an "
 "account."
@@ -716,11 +716,11 @@ msgstr ""
 msgid "Only display last 10 logs"
 msgstr ""
 
-#: application/templates/logs.html:21 application/templates/logs.html:62
+#: application/templates/logs.html:21 application/templates/logs.html:66
 msgid "Time"
 msgstr ""
 
-#: application/templates/logs.html:22 application/templates/logs.html:63
+#: application/templates/logs.html:22 application/templates/logs.html:67
 #: application/templates/my.html:17 application/templates/setting.html:98
 #: application/templates/setting.html:99 application/templates/setting.html:100
 #: application/templates/setting.html:101
@@ -728,23 +728,23 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: application/templates/logs.html:23 application/templates/logs.html:64
+#: application/templates/logs.html:23 application/templates/logs.html:68
 msgid "Size"
 msgstr ""
 
-#: application/templates/logs.html:24 application/templates/logs.html:65
+#: application/templates/logs.html:24 application/templates/logs.html:69
 msgid "To"
 msgstr ""
 
-#: application/templates/logs.html:25 application/templates/logs.html:66
+#: application/templates/logs.html:25 application/templates/logs.html:70
 msgid "Status"
 msgstr ""
 
-#: application/templates/logs.html:45
+#: application/templates/logs.html:49
 msgid "There is no log"
 msgstr ""
 
-#: application/templates/logs.html:49
+#: application/templates/logs.html:53
 msgid "Logs of other users"
 msgstr ""
 
@@ -917,31 +917,41 @@ msgstr ""
 msgid "Service"
 msgstr ""
 
-#: application/templates/setting.html:199
+#: application/templates/setting.html:202
 msgid "ApiKey"
 msgstr ""
 
-#: application/templates/setting.html:203
+#: application/templates/setting.html:206
+msgid "SecretKey"
+msgstr ""
+
+#: application/templates/setting.html:210
 msgid "Host"
 msgstr ""
 
-#: application/templates/setting.html:207
+#: application/templates/setting.html:214
 msgid "Port"
 msgstr ""
 
-#: application/templates/setting.html:219
+#: application/templates/setting.html:226
 msgid "Save path"
 msgstr ""
 
-#: application/templates/setting.html:226
+#: application/templates/setting.html:234
 #, python-format
 msgid ""
 "Important: Please activate your kindle firstly, then goto %(personal)s "
 "Page and add %(sender)s to 'Approved Personal Document E-mail List'."
 msgstr ""
 
-#: application/templates/setting.html:226
+#: application/templates/setting.html:234
 msgid "Personal Document Settings"
+msgstr ""
+
+#: application/templates/setting.html:239
+msgid ""
+"You have not yet set up your email address. Please go to the 'Admin' page"
+" to add your email address firstly."
 msgstr ""
 
 #: application/templates/signup.html:38
@@ -957,70 +967,70 @@ msgid "Settings Saved!"
 msgstr ""
 
 #: application/view/admin.py:61 application/view/admin.py:69
-#: application/view/admin.py:94
+#: application/view/admin.py:96
 msgid "Add account"
 msgstr ""
 
-#: application/view/admin.py:68 application/view/admin.py:107
-#: application/view/admin.py:135
+#: application/view/admin.py:68 application/view/admin.py:109
+#: application/view/admin.py:137
 msgid "You do not have sufficient privileges."
 msgstr ""
 
-#: application/view/admin.py:82 application/view/admin.py:150
-#: application/view/login.py:207 application/view/login.py:236
+#: application/view/admin.py:82 application/view/admin.py:152
+#: application/view/login.py:209 application/view/login.py:238
 #: application/view/setting.py:61 application/view/setting.py:63
-#: application/view/setting.py:65 application/view/share.py:35
+#: application/view/setting.py:65 application/view/share.py:36
 msgid "Some parameters are missing or wrong."
 msgstr ""
 
-#: application/view/admin.py:84 application/view/login.py:43
-#: application/view/login.py:213
+#: application/view/admin.py:84 application/view/login.py:40
+#: application/view/login.py:215
 msgid "The username includes unsafe chars."
 msgstr ""
 
-#: application/view/admin.py:88 application/view/login.py:215
+#: application/view/admin.py:88 application/view/login.py:217
 msgid "Already exist the username."
 msgstr ""
 
-#: application/view/admin.py:91 application/view/admin.py:169
-#: application/view/admin.py:196 application/view/login.py:262
+#: application/view/admin.py:93 application/view/admin.py:171
+#: application/view/admin.py:198 application/view/login.py:264
 msgid "The password includes non-ascii chars."
 msgstr ""
 
-#: application/view/admin.py:111 application/view/admin.py:132
-#: application/view/admin.py:161
+#: application/view/admin.py:113 application/view/admin.py:134
+#: application/view/admin.py:163
 msgid "The username '{}' does not exist."
 msgstr ""
 
-#: application/view/admin.py:127
+#: application/view/admin.py:129
 msgid "The password will not be changed if the fields are empties."
 msgstr ""
 
-#: application/view/admin.py:128 application/view/admin.py:186
+#: application/view/admin.py:130 application/view/admin.py:188
 msgid "Change account"
 msgstr ""
 
-#: application/view/admin.py:129 application/view/admin.py:187
+#: application/view/admin.py:131 application/view/admin.py:189
 msgid "Change"
 msgstr ""
 
-#: application/view/admin.py:184
+#: application/view/admin.py:186
 msgid "Change success."
 msgstr ""
 
-#: application/view/admin.py:201
+#: application/view/admin.py:203
 msgid "The old password is wrong."
 msgstr ""
 
-#: application/view/admin.py:208
-msgid "Change password success."
+#: application/view/admin.py:218
+msgid "Changes saved successfully."
 msgstr ""
 
 #: application/view/adv.py:76 application/view/adv.py:77
 #: application/view/adv.py:78 application/view/adv.py:79
 #: application/view/adv.py:80 application/view/adv.py:81
 #: application/view/adv.py:82 application/view/adv.py:83
-#: application/view/adv.py:84 application/view/adv.py:85
+#: application/view/adv.py:84
 msgid "Append hyperlink '{}' to article"
 msgstr ""
 
@@ -1047,7 +1057,6 @@ msgstr ""
 
 #: application/view/adv.py:80 application/view/adv.py:81
 #: application/view/adv.py:82 application/view/adv.py:83
-#: application/view/adv.py:84
 msgid "Share on {}"
 msgstr ""
 
@@ -1056,45 +1065,41 @@ msgid "weibo"
 msgstr ""
 
 #: application/view/adv.py:81
-msgid "tencent weibo"
-msgstr ""
-
-#: application/view/adv.py:82
 msgid "facebook"
 msgstr ""
 
-#: application/view/adv.py:84
+#: application/view/adv.py:83
 msgid "tumblr"
 msgstr ""
 
-#: application/view/adv.py:85
+#: application/view/adv.py:84
 msgid "Open in browser"
 msgstr ""
 
-#: application/view/adv.py:359
+#: application/view/adv.py:358
 msgid "Authorization Error!<br/>{}"
 msgstr ""
 
-#: application/view/adv.py:382
+#: application/view/adv.py:381
 msgid "Success authorized by Pocket!"
 msgstr ""
 
-#: application/view/adv.py:388
+#: application/view/adv.py:387
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr ""
 
-#: application/view/adv.py:398
+#: application/view/adv.py:397
 msgid "Request type [{}] unsupported"
 msgstr ""
 
-#: application/view/adv.py:413
+#: application/view/adv.py:412
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 
-#: application/view/deliver.py:67 application/view/login.py:158
-#: application/view/share.py:39
+#: application/view/deliver.py:67 application/view/login.py:160
+#: application/view/share.py:40
 msgid "The username does not exist or the email is empty."
 msgstr ""
 
@@ -1110,9 +1115,9 @@ msgstr ""
 msgid "Cannot fetch data from {}, status: {}"
 msgstr ""
 
-#: application/view/library.py:48 application/view/subscribe.py:191
-#: application/view/subscribe.py:302 application/view/subscribe.py:331
-#: application/view/subscribe.py:339
+#: application/view/library.py:48 application/view/subscribe.py:192
+#: application/view/subscribe.py:303 application/view/subscribe.py:332
+#: application/view/subscribe.py:340
 msgid "The recipe does not exist."
 msgstr ""
 
@@ -1120,69 +1125,69 @@ msgstr ""
 msgid "Please use {}/{} to login at first time."
 msgstr ""
 
-#: application/view/login.py:39
+#: application/view/login.py:36
 msgid "Username is empty."
 msgstr ""
 
-#: application/view/login.py:41
+#: application/view/login.py:38
 msgid "The len of username reached the limit of 25 chars."
 msgstr ""
 
-#: application/view/login.py:76
+#: application/view/login.py:73
 msgid "Forgot password?"
 msgstr ""
 
-#: application/view/login.py:137 application/view/login.py:273
+#: application/view/login.py:139 application/view/login.py:275
 msgid "The token is wrong or expired."
 msgstr ""
 
-#: application/view/login.py:140
+#: application/view/login.py:142
 msgid "Please input the correct username and email to reset password."
 msgstr ""
 
-#: application/view/login.py:142
+#: application/view/login.py:144
 msgid "The email of account '{name}' is {email}."
 msgstr ""
 
-#: application/view/login.py:163
+#: application/view/login.py:165
 msgid "Reset password success, Please close this page and login again."
 msgstr ""
 
-#: application/view/login.py:166
+#: application/view/login.py:168
 msgid "The email you input is not associated with this account."
 msgstr ""
 
-#: application/view/login.py:177
+#: application/view/login.py:179
 msgid "The link to reset your password has been sent to your email."
 msgstr ""
 
-#: application/view/login.py:178
+#: application/view/login.py:180
 msgid "Please check your email inbox within 24 hours."
 msgstr ""
 
-#: application/view/login.py:209
+#: application/view/login.py:211
 msgid "The invitation code is invalid."
 msgstr ""
 
-#: application/view/login.py:217
+#: application/view/login.py:219
 msgid ""
 "Failed to create an account. Please contact the administrator for "
 "assistance."
 msgstr ""
 
-#: application/view/login.py:227
+#: application/view/login.py:229
 msgid "Successfully created account."
 msgstr ""
 
-#: application/view/login.py:238
+#: application/view/login.py:240
 msgid "Reset KindleEar password"
 msgstr ""
 
-#: application/view/login.py:239
+#: application/view/login.py:241
 msgid "This is an automated email. Please do not reply to it."
 msgstr ""
 
-#: application/view/login.py:240
+#: application/view/login.py:242
 msgid "You can click the following link to reset your KindleEar password."
 msgstr ""
 
@@ -1194,142 +1199,142 @@ msgstr ""
 msgid "Title is requied!"
 msgstr ""
 
-#: application/view/setting.py:124
+#: application/view/setting.py:123
 msgid "Chinese"
 msgstr ""
 
-#: application/view/setting.py:125
+#: application/view/setting.py:124
 msgid "English"
 msgstr ""
 
-#: application/view/setting.py:126
+#: application/view/setting.py:125
 msgid "French"
 msgstr ""
 
-#: application/view/setting.py:127
+#: application/view/setting.py:126
 msgid "Spanish"
 msgstr ""
 
-#: application/view/setting.py:128
+#: application/view/setting.py:127
 msgid "Portuguese"
 msgstr ""
 
-#: application/view/setting.py:129
+#: application/view/setting.py:128
 msgid "German"
 msgstr ""
 
-#: application/view/setting.py:130
+#: application/view/setting.py:129
 msgid "Italian"
 msgstr ""
 
-#: application/view/setting.py:131
+#: application/view/setting.py:130
 msgid "Japanese"
 msgstr ""
 
-#: application/view/setting.py:132
+#: application/view/setting.py:131
 msgid "Russian"
 msgstr ""
 
-#: application/view/setting.py:133
+#: application/view/setting.py:132
 msgid "Turkish"
 msgstr ""
 
-#: application/view/setting.py:134
+#: application/view/setting.py:133
 msgid "Korean"
 msgstr ""
 
-#: application/view/setting.py:135
+#: application/view/setting.py:134
 msgid "Arabic"
 msgstr ""
 
-#: application/view/setting.py:136
+#: application/view/setting.py:135
 msgid "Czech"
 msgstr ""
 
-#: application/view/setting.py:137
+#: application/view/setting.py:136
 msgid "Dutch"
 msgstr ""
 
-#: application/view/setting.py:138
+#: application/view/setting.py:137
 msgid "Greek"
 msgstr ""
 
-#: application/view/setting.py:139
+#: application/view/setting.py:138
 msgid "Hindi"
 msgstr ""
 
-#: application/view/setting.py:140
+#: application/view/setting.py:139
 msgid "Malaysian"
 msgstr ""
 
-#: application/view/setting.py:141
+#: application/view/setting.py:140
 msgid "Bengali"
 msgstr ""
 
-#: application/view/setting.py:142
+#: application/view/setting.py:141
 msgid "Persian"
 msgstr ""
 
-#: application/view/setting.py:143
+#: application/view/setting.py:142
 msgid "Urdu"
 msgstr ""
 
-#: application/view/setting.py:144
+#: application/view/setting.py:143
 msgid "Swahili"
 msgstr ""
 
-#: application/view/setting.py:145
+#: application/view/setting.py:144
 msgid "Vietnamese"
 msgstr ""
 
-#: application/view/setting.py:146
+#: application/view/setting.py:145
 msgid "Punjabi"
 msgstr ""
 
-#: application/view/setting.py:147
+#: application/view/setting.py:146
 msgid "Javanese"
 msgstr ""
 
-#: application/view/setting.py:148
+#: application/view/setting.py:147
 msgid "Tagalog"
 msgstr ""
 
-#: application/view/setting.py:149
+#: application/view/setting.py:148
 msgid "Hausa"
 msgstr ""
 
-#: application/view/share.py:50 application/view/subscribe.py:239
+#: application/view/share.py:51 application/view/subscribe.py:240
 msgid "Unknown command: {}"
 msgstr ""
 
-#: application/view/share.py:56
+#: application/view/share.py:57
 msgid "There is no {} email yet."
 msgstr ""
 
-#: application/view/share.py:96 application/view/share.py:121
-#: application/view/share.py:143
+#: application/view/share.py:105 application/view/share.py:130
+#: application/view/share.py:152
 msgid "Saved to your {} account."
 msgstr ""
 
-#: application/view/share.py:99 application/view/share.py:117
-#: application/view/share.py:146
+#: application/view/share.py:108 application/view/share.py:126
+#: application/view/share.py:155
 msgid "Failed save to {}."
 msgstr ""
 
-#: application/view/share.py:100 application/view/share.py:118
-#: application/view/share.py:147
+#: application/view/share.py:109 application/view/share.py:127
+#: application/view/share.py:156
 msgid "Reason :"
 msgstr ""
 
-#: application/view/share.py:109
+#: application/view/share.py:118
 msgid "Unauthorized {} account!"
 msgstr ""
 
-#: application/view/share.py:122
+#: application/view/share.py:131
 msgid "See details below:"
 msgstr ""
 
-#: application/view/share.py:145
+#: application/view/share.py:154
 msgid "Unknown: {}"
 msgstr ""
 
@@ -1353,41 +1358,41 @@ msgstr ""
 msgid "Failed to fetch the recipe."
 msgstr ""
 
-#: application/view/subscribe.py:123 application/view/subscribe.py:264
+#: application/view/subscribe.py:123 application/view/subscribe.py:265
 msgid "Failed to save the recipe. Error:"
 msgstr ""
 
-#: application/view/subscribe.py:220
+#: application/view/subscribe.py:221
 msgid "You can only delete the uploaded recipe."
 msgstr ""
 
-#: application/view/subscribe.py:224
+#: application/view/subscribe.py:225
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr ""
 
-#: application/view/subscribe.py:237
+#: application/view/subscribe.py:238
 msgid "This recipe has not been subscribed to yet."
 msgstr ""
 
-#: application/view/subscribe.py:251
+#: application/view/subscribe.py:252
 msgid "Can not read uploaded file, Error:"
 msgstr ""
 
-#: application/view/subscribe.py:259
+#: application/view/subscribe.py:260
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
 msgstr ""
 
-#: application/view/subscribe.py:279
+#: application/view/subscribe.py:280
 msgid "The recipe is already in the library."
 msgstr ""
 
-#: application/view/subscribe.py:309
+#: application/view/subscribe.py:310
 msgid "The login information for this recipe has been cleared."
 msgstr ""
 
-#: application/view/subscribe.py:313
+#: application/view/subscribe.py:314
 msgid "The login information for this recipe has been saved."
 msgstr ""
 

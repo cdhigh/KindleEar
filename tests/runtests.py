@@ -27,7 +27,6 @@ def set_env():
     os.environ['TASK_QUEUE_SERVICE'] = TASK_QUEUE_SERVICE
     os.environ['TASK_QUEUE_BROKER_URL'] = TASK_QUEUE_BROKER_URL
     os.environ['APP_DOMAIN'] = APP_DOMAIN
-    os.environ['SRC_EMAIL'] = SRC_EMAIL
     os.environ['ADMIN_NAME'] = ADMIN_NAME
     os.environ['HIDE_MAIL_TO_LOCAL'] = '1' if HIDE_MAIL_TO_LOCAL else ''
     

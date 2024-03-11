@@ -6,6 +6,7 @@
   3. 使用命令打开调试环境
      `c:\python38\python.exe "C:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin\dev_appserver.py" --runtime_python_path="python27=c:\python27\python.exe,python3=c:\python38\python.exe"  --skip_sdk_update_check=true app.yaml worker.yaml`
      `--support_datastore_emulator=true`
+     dev_appserver.py --runtime_python_path=c:\python38\python.exe --application=kindleear5 app.yaml
 
   2. 即使在本机，GAE应用也运行在一个沙箱内，无法读写本机文件，如果要突破，可以修改 stubs.py 里面的 FakeFile 类。
      * 删除__init__()

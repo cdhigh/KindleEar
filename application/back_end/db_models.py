@@ -17,11 +17,12 @@ class KeUser(MyBaseModel): # kindleEar User
     name = CharField(unique=True)
     passwd = CharField()
     email = CharField()
+    sender = CharField() #可能等于自己的email，也可能是管理员的email
     secret_key = CharField(default='')
     kindle_email = CharField(default='')
     enable_send = BooleanField(default=False)
     send_days = JSONField(default=JSONField.list_default)
-    send_time = IntegerField(default=0)
+    send_time = IntegerField(default=6)
     timezone = IntegerField(default=0)
     expiration_days = IntegerField(default=0) #账号超期设置值，0为永久有效
     expires = DateTimeField(null=True) #超过了此日期后账号自动停止推送
@@ -114,7 +115,7 @@ class UserBlob(MyBaseModel):
     name = CharField()
     user = CharField()
     time = DateTimeField(default=datetime.datetime.utcnow)
-    data = BlobField(null=True)
+    data = BlobField(null=True, index=False)
 
 #RSS订阅源，包括自定义RSS，上传的recipe，内置在zip里面的builtin_recipe不包括在内
 #每个Recipe的字符串表示为：custom:id, upload:id
@@ -125,7 +126,7 @@ class Recipe(MyBaseModel):
     isfulltext = BooleanField(default=False) #只有自定义RSS才有意义
     type_ = CharField() #'custom','upload'
     needs_subscription = BooleanField(default=False) #是否需要登陆网页，只有上传的recipe才有意义
-    src = TextField(default='') #保存上传的recipe的unicode字符串表示，已经解码
+    src = TextField(default='', index=False) #保存上传的recipe的unicode字符串表示，已经解码
     time = DateTimeField() #源被加入的时间，用于排序
     user = CharField() #哪个账号创建的，和nosql一致，保存用户名
     language = CharField(default='')
@@ -176,7 +177,7 @@ class DeliverLog(MyBaseModel):
     to = CharField()
     size = IntegerField(default=0)
     time_str = CharField() #每个用户的时区可能不同，为显示方便，创建记录时就生成推送时间字符串
-    datetime = DateTimeField(index=True)
+    datetime = DateTimeField()
     book = CharField(default='')
     status = CharField()
     
@@ -193,7 +194,7 @@ class SharedRss(MyBaseModel):
     language = CharField(default='')
     category = CharField(default='')
     recipe_url = CharField(default='') #客户端优先使用此字段获取recipe，为什么不用上面的url是要和以前的版本兼容
-    src = TextField(default='') #保存分享的recipe的unicode字符串表示，已经解码
+    src = TextField(default='', index=False) #保存分享的recipe的unicode字符串表示，已经解码
     description = CharField(default='')
     creator = CharField(default='') #保存贡献者的md5
     created_time = DateTimeField(default=datetime.datetime.utcnow)
@@ -246,4 +247,4 @@ def create_database_tables():
         SharedRss, SharedRssCategory, LastDelivered, AppInfo], safe=True)
     #close_database()
         
-    #print(f'Create database "{dbName}" finished')
+    return 'Created database tables successfully'
