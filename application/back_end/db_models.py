@@ -211,7 +211,7 @@ class SharedRss(MyBaseModel):
 #Buffer for category of shared rss [for kindleear.appspot.com only]
 class SharedRssCategory(MyBaseModel):
     name = CharField(unique=True)
-    last_updated = DateTimeField()
+    last_updated = DateTimeField(default=datetime.datetime.utcnow)
 
 class LastDelivered(MyBaseModel):
     user = CharField()

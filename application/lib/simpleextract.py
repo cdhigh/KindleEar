@@ -50,7 +50,7 @@ def simple_extract(content, html_partial=False):
     if not title_tag:
         title_tag = soup.new_tag('title')
         title_tag.string = title
-        head_tag.append(0, title_tag)
+        head_tag.append(title_tag)
 
     return soup
     

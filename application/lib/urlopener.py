@@ -12,7 +12,8 @@ class UrlOpener:
     def __init__(self, host=None, timeout=30, headers=None, **kwargs):
         self.host = host
         self.timeout = timeout
-        self.addheaders = [("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")]
+        self.addheaders = [("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"),
+            ("Accept-Encoding", "gzip, deflate"),]
         if headers:
             for key, value in (headers.items() if isinstance(headers, dict) else headers):
                 self.addheaders.append((key, value))

@@ -22,7 +22,7 @@ def get_exc_location():
 #字符串转整数，出错则返回0
 def str_to_int(txt, default=0):
     try:
-        return int(txt.strip())
+        return int(txt.split('.')[0].replace(',', '').strip())
     except:
         return default
 

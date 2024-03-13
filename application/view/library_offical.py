@@ -36,7 +36,6 @@ def SharedLibraryAppspot():
 
     dataType = args.get('data_type')
     if dataType == LIBRARY_GETLASTTIME: #获取分享库的最近更新
-        
         return {'status': 'ok', 'data': str_to_int(AppInfo.get_value(AppInfo.lastSharedRssTime, '0')), 'tips': ''}
     else:
         #本来想在服务器端分页的，但是好像CPU/数据库存取资源比带宽资源更紧张，所以干脆一次性提供给客户端，由客户端分页和分类
@@ -122,7 +121,7 @@ def SharedLibraryAppspotAjax():
 
 #更新共享库的最新时间信息(仅用于kindleear.appspot.com"官方"共享服务器)
 def UpdateLastSharedRssTime():
-    AppInfo.set_value(AppInfo.lastSharedRssTime, str(datetime.datetime.utcnow().timestamp()))
+    AppInfo.set_value(AppInfo.lastSharedRssTime, str(int(datetime.datetime.utcnow().timestamp())))
     
 #共享库的订阅源信息管理(仅用于kindleear.appspot.com"官方"共享服务器)
 @bpLibraryOffical.post(LIBRARY_MGR + "<mgrType>")

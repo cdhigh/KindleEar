@@ -216,13 +216,13 @@ function PopulateMyCustomRss() {
     if (isfulltext) {
       row_str.push('<sup> Emb</sup>');
     }
-    row_str.push('</div><div class="summaryRow">');
+    row_str.push('</div><div class="summaryRow"><a target="_blank" href="' + url + '">');
     if (url.length > 100) {
       row_str.push(url.substring(0, 100) + '...');
     } else {
       row_str.push(url);
     }
-    row_str.push('</div>');
+    row_str.push('</a></div>');
 
     hamb_arg = [];
     //汉堡按钮弹出菜单代码
@@ -499,6 +499,7 @@ function AddCustomRss() {
         PopulateMyCustomRss();
         title_to_add.val("");
         url_to_add.val("");
+        isfulltext.prop('checked', false);
       } else if (data.status == i18n.loginRequired) {
         window.location.href = '/login';
       } else {
@@ -599,34 +600,30 @@ function DisplayShareRssLang() {
 //点击分享自定义RSS
 function StartShareRss(id, title) {
   //从本地存储或服务器获取分类信息
-  if (!g_rss_categories) {
-    var now = getNowSeconds();
-    var needCat = false;
-    var fetchTime = parseInt(window.localStorage.getItem('cat_fetch_time'));
-    var catData = window.localStorage.getItem('rss_category');
+  var now = getNowSeconds();
+  var needCat = false;
+  var fetchTime = parseInt(window.localStorage.getItem('cat_fetch_time'));
+  var catData = window.localStorage.getItem('rss_category');
 
-    //一天内最多只从服务器获取一次分享的RSS列表
-    if (!fetchTime || !catData || ((fetchTime - now) > 60 * 60 * 24)) {
-      needCat = true;
-    }
-    if (needCat) {
-      $.get("/library/category", function(data) {
-        if (data.status == "ok") {
-          g_rss_categories = data.categories;
-          window.localStorage.setItem('rss_category', JSON.stringify(g_rss_categories));
-          window.localStorage.setItem('cat_fetch_time', now);
-          ShowShareDialog(id, title);
-        } else if (data.status == i18n.loginRequired) {
-          window.location.href = '/login';
-        } else {
-          alert(i18n.cannotAddRss + data.status);
-        }
-      });
-    } else {
-      g_rss_categories = JSON.parse(catData);
-      ShowShareDialog(id, title);
-    }
+  //一天内最多只从服务器获取一次分享的RSS列表
+  if (!fetchTime || !catData || ((now - fetchTime) > 60 * 60 * 24)) {
+    needCat = true;
+  }
+  if (needCat) {
+    $.get("/library/category", function(data) {
+      if (data.status == "ok") {
+        g_rss_categories = data.categories;
+        window.localStorage.setItem('rss_category', JSON.stringify(g_rss_categories));
+        window.localStorage.setItem('cat_fetch_time', now);
+        ShowShareDialog(id, title);
+      } else if (data.status == i18n.loginRequired) {
+        window.location.href = '/login';
+      } else {
+        alert(i18n.cannotAddRss + data.status);
+      }
+    });
   } else {
+    g_rss_categories = JSON.parse(catData);
     ShowShareDialog(id, title);
   }
 }
@@ -725,7 +722,7 @@ function insertBookmarkletGmailThis(subscribeUrl, mailPrefix) {
   var parent = $('#bookmarklet_content');
   var newElement = $('<a>', {
     class: 'actionButton',
-    href: "javascript:(function(){popw='';Q='';d=document;w=window;if(d.selection){Q=d.selection.createRange().text;}else if(w.getSelection){Q=w.getSelection();}else if(d.getSelection){Q=d.getSelection();}popw=w.open('http://mail.google.com/mail/s?view=cm&fs=1&tf=1&to=" + mailUrl +
+    href: "javascript:(function(){popw='';Q='';d=document;w=window;if(d.selection){Q=d.selection.createRange().text;}else if(w.getSelection){Q=w.getSelection();}else if(d.getSelection){Q=d.getSelection();}popw=w.open('http://mail.google.com/mail/s?view=cm&fs=1&tf=1&to=" + addr +
         "&su='+encodeURIComponent(d.title)+'&body='+encodeURIComponent(Q)+escape('%5Cn%5Cn')+encodeURIComponent(d.location)+'&zx=RANDOMCRAP&shva=1&disablechatbrowsercheck=1&ui=1','gmailForm','scrollbars=yes,width=550,height=400,top=100,left=75,status=no,resizable=yes');if(!d.all)setTimeout(function(){popw.focus();},50);})();",
     click: function() {
       return false;

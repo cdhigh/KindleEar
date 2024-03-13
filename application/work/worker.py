@@ -36,25 +36,29 @@ def Worker():
 #recipeId: 需要投递的Recipe ID，如果有多个，使用逗号分隔
 #返回执行结果字符串
 def WorkerImpl(userName: str, recipeId: list=None, log=None):
+    if not log:
+        log = default_log
+
     if not userName:
-        return "The userName is empty."
+        ret = "The userName is empty."
+        log.warning(ret)
+        return ret
 
     user = KeUser.get_or_none(KeUser.name == userName)
     if not user:
-        return f"The user '{userName}' does not exist."
+        ret = f"The user '{userName}' does not exist."
+        log.warning(ret)
+        return ret
 
-    if not log:
-        log = default_log
-    
     if not recipeId:
         recipeId = [item.recipe_id for item in user.get_booked_recipe()]
     elif not isinstance(recipeId, (list, tuple)):
         recipeId = recipeId.replace('__', ':').split(',')
     
     if not recipeId:
-        info = f"There are no feeds to push for user '{userName}'."
-        log.warning(info)
-        return info
+        ret = f"There are no feeds to push for user '{userName}'."
+        log.warning(ret)
+        return ret
 
     #编译recipe
     srcDict = GetAllRecipeSrc(user, recipeId)
@@ -101,7 +105,9 @@ def WorkerImpl(userName: str, recipeId: list=None, log=None):
         else:
             save_delivery_log(user, title, 0, status='nonews')
 
-    return '\n'.join(ret) if ret else "There are no new feeds available."
+    ret = '\n'.join(ret) if ret else "There are no new feeds available."
+    log.warning(ret)
+    return ret
 
 
 #在已订阅的Recipe或自定义RSS列表创建Recipe源码列表，最重要的作用是合并自定义RSS

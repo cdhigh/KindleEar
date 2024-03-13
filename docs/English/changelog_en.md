@@ -1,7 +1,7 @@
 ---
 sort: 5
 ---
-# Changelog for KindleEar
+# Changelog
 
 ## 3.0.0b
 1. Supports Python 3

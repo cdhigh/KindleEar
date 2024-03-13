@@ -421,7 +421,7 @@ function InitSharedRssData(lastRssTime) {
     if (!fetchTime || !sharedData || !latestTime) {
       needLatestTime = true;
       needData = true;
-    } else if ((fetchTime - now) > 60 * 60 * 24) {
+    } else if ((now - fetchTime) > 60 * 60 * 24) {
       needLatestTime = true;
     }
 
@@ -431,6 +431,7 @@ function InitSharedRssData(lastRssTime) {
         async: false, //阻塞式ajax
         success: function (resp) {
           if (resp.status == "ok") {
+            //console.log(resp);
             if (resp.tips) {
               $('#library_tips').html('<div class="notice-box">' + resp.tips + '</div>');
             }
@@ -439,6 +440,8 @@ function InitSharedRssData(lastRssTime) {
             }
             window.localStorage.setItem('rss_latest_time', resp.data);
             window.localStorage.setItem('rss_fetch_time', now);
+          } else {
+            alert(resp.status);
           }
         }
       });

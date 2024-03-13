@@ -2,7 +2,8 @@
 sort: 5
 ---
 
-# Changelog for KindleEar
+# Changelog
+
 ## 3.0.0b
 1. 支持Python 3
 2. 重新设计的软件架构

@@ -5,7 +5,7 @@
 import datetime, json, io, re, zipfile
 from operator import attrgetter
 from urllib.parse import urljoin
-from flask import Blueprint, render_template, request, redirect, url_for, send_file
+from flask import Blueprint, render_template, request, redirect, url_for, send_file, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
@@ -21,7 +21,7 @@ bpSubscribe = Blueprint('bpSubscribe', __name__)
 @login_required()
 def MySubscription(tips=None):
     user = get_login_user()
-    titleToAdd = request.args.get('title_to_add')
+    titleToAdd = request.args.get('title_to_add') #for Bookmarklet
     urlToAdd = request.args.get('url_to_add')
     myCustomRss = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.url, Recipe.isfulltext]) 
         for item in user.all_custom_rss()]
@@ -38,9 +38,10 @@ def MySubscription(tips=None):
         for item in user.get_booked_recipe() if not item.recipe_id.startswith('custom:')], 
         separators=(',', ':'))
 
+    subscribe_url = urljoin(app.config['APP_DOMAIN'], url_for("bpSubscribe.MySubscription"))
     return render_template("my.html", tab="my", user=user, my_custom_rss=json.dumps(myCustomRss), tips=tips, 
         my_uploaded_recipes=json.dumps(myUploadedRecipes), my_booked_recipes=myBookedRecipes, 
-        subscribe_url=url_for("bpSubscribe.MySubscription"), title_to_add=titleToAdd, url_to_add=urlToAdd)
+        subscribe_url=subscribe_url, title_to_add=titleToAdd, url_to_add=urlToAdd)
 
 #添加自定义RSS
 @bpSubscribe.post("/my", endpoint='MySubscriptionPost')
