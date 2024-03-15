@@ -15,7 +15,7 @@ import sys
 import time
 import traceback
 from collections import defaultdict, namedtuple
-from urllib.parse import urlparse, urlsplit, quote_plus
+from urllib.parse import urlparse, urlsplit, quote
 from urllib.error import HTTPError, URLError
 from calibre import __appname__, as_unicode, force_unicode, iswindows, preferred_encoding, strftime
 from calibre.ebooks.BeautifulSoup import BeautifulSoup, CData, NavigableString, Tag
@@ -29,7 +29,7 @@ from calibre.utils.localization import canonicalize_lang, ngettext
 from calibre.utils.logging import ThreadSafeWrapper
 from calibre.utils.threadpool import NoResultsPending, ThreadPool, WorkRequest
 from calibre.web import Recipe
-from calibre.web.feeds import Feed, feed_from_xml, feeds_from_index, templates
+from calibre.web.feeds import Feed, Article, feed_from_xml, feeds_from_index, templates
 from calibre.web.fetch.simple import AbortArticle, RecursiveFetcher
 from calibre.web.fetch.utils import prepare_masthead_image
 from polyglot.builtins import string_or_bytes
@@ -353,6 +353,11 @@ class BasicNewsRecipe(Recipe):
     #: By default, calibre will use a default image for the masthead (Kindle only).
     #: Override this in your recipe to provide a URL to use as a masthead.
     masthead_url = None
+
+    # = None, set default cover
+    # = False, no cover
+    # = url, download url
+    cover_url = None
 
     #: By default, the cover image returned by get_cover_url() will be used as
     #: the cover for the periodical.  Overriding this in your recipe instructs
@@ -1125,19 +1130,19 @@ class BasicNewsRecipe(Recipe):
         title = titleTag.string if titleTag else 'Untitled'
         appDomain = os.getenv('APP_DOMAIN')
         if shareType in ('Evernote', 'Wiz'):
-            href = f"{appDomain}/share?act={shareType}&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}"
+            href = f"{appDomain}/share?act={shareType}&u={user.name}&t={title}&k={share_key}&url={quote(url)}"
         elif shareType == 'Pocket':
-            href = f'{appDomain}/share?act=Pocket&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
+            href = f'{appDomain}/share?act=Pocket&u={user.name}&t={title}&k={share_key}&url={quote(url)}'
         elif shareType == 'Instapaper':
-            href = f'{appDomain}/share?act=Instapaper&u={user.name}&t={title}&k={share_key}&url={quote_plus(url)}'
+            href = f'{appDomain}/share?act=Instapaper&u={user.name}&t={title}&k={share_key}&url={quote(url)}'
         elif shareType == 'Weibo':
-            href = f'https://service.weibo.com/share/share.php?url={quote_plus(url)}'
+            href = f'https://service.weibo.com/share/share.php?url={quote(url)}'
         elif shareType == 'Facebook':
-            href = f'https://www.facebook.com/share.php?u={quote_plus(url)}'
+            href = f'https://www.facebook.com/share.php?u={quote(url)}'
         elif shareType == 'X':
-            href = f'https://twitter.com/intent/post?text={title}&url={quote_plus(url)}'
+            href = f'https://twitter.com/intent/post?text={title}&url={quote(url)}'
         elif shareType == 'Tumblr':
-            href = f'https://www.tumblr.com/share/link?url={quote_plus(url)}'
+            href = f'https://www.tumblr.com/share/link?url={quote(url)}'
         else:
             href = ''
 
@@ -1984,8 +1989,34 @@ class CustomIndexRecipe(BasicNewsRecipe):
 
 
 class AutomaticNewsRecipe(BasicNewsRecipe):
-
     auto_cleanup = True
+
+#保存的url为网页url，而不是RSS/ATOM
+class UrlNewsRecipe(BasicNewsRecipe):
+    auto_cleanup = True
+
+    #返回一个Feed实例列表
+    def parse_feeds(self):
+        urls = self.get_feeds()
+        if not urls:
+            self.log.warning(f'There are no urls in "{self.title}"')
+            return []
+        
+        feed = Feed()
+        feed.title = self.title
+        feed.description = ''
+        feed.image_url = None
+        feed.oldest_article = self.oldest_article
+        feed.articles = []
+        id_counter = 0
+        now = time.gmtime()
+        for obj in urls:
+            title, url = (self.title, obj) if isinstance(obj, str) else obj
+            id_counter += 1
+            feed.articles.append(Article(f'internal id#{id_counter}', title, url, 'KindleEar', '', now, ''))
+        feed.id_counter = id_counter
+
+        return [feed]
 
 
 class CalibrePeriodical(BasicNewsRecipe):

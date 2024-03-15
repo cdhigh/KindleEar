@@ -727,7 +727,7 @@ function insertBookmarkletGmailThis(subscribeUrl, mailPrefix) {
     click: function() {
       return false;
     },
-    text: i18n.readWithKindle
+    text: i18n.kindleifySelection
   });
   parent.prepend(newElement);
 }

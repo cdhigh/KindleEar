@@ -21,27 +21,28 @@ bpSubscribe = Blueprint('bpSubscribe', __name__)
 @login_required()
 def MySubscription(tips=None):
     user = get_login_user()
-    titleToAdd = request.args.get('title_to_add') #for Bookmarklet
-    urlToAdd = request.args.get('url_to_add')
-    myCustomRss = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.url, Recipe.isfulltext]) 
+    title_to_add = request.args.get('title_to_add') #from Bookmarklet
+    url_to_add = request.args.get('url_to_add')
+    my_custom_rss = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.url, Recipe.isfulltext]) 
         for item in user.all_custom_rss()]
-    myUploadedRecipes = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.description, Recipe.needs_subscription, Recipe.language]) 
+    my_uploaded_recipes = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.description, Recipe.needs_subscription, Recipe.language]) 
         for item in user.all_uploaded_recipe()]
     #使用不同的id前缀区分不同的rss类型
-    for item in myCustomRss:
+    for item in my_custom_rss:
         item['id'] = 'custom:{}'.format(item['id'])
-    for item in myUploadedRecipes:
+    for item in my_uploaded_recipes:
         item['id'] = 'upload:{}'.format(item['id'])
         item['language'] = item['language'].lower().replace('-', '_').split('_')[0]
 
-    myBookedRecipes = json.dumps([item.to_dict(exclude=[BookedRecipe.encrypted_pwd])
+    my_booked_recipes = json.dumps([item.to_dict(exclude=[BookedRecipe.encrypted_pwd])
         for item in user.get_booked_recipe() if not item.recipe_id.startswith('custom:')], 
         separators=(',', ':'))
 
+    my_custom_rss = json.dumps(my_custom_rss)
+    my_uploaded_recipes=json.dumps(my_uploaded_recipes)
     subscribe_url = urljoin(app.config['APP_DOMAIN'], url_for("bpSubscribe.MySubscription"))
-    return render_template("my.html", tab="my", user=user, my_custom_rss=json.dumps(myCustomRss), tips=tips, 
-        my_uploaded_recipes=json.dumps(myUploadedRecipes), my_booked_recipes=myBookedRecipes, 
-        subscribe_url=subscribe_url, title_to_add=titleToAdd, url_to_add=urlToAdd)
+    url2book_url = urljoin(app.config['APP_DOMAIN'], url_for("bpUrl2Book.Url2BookRoute"))
+    return render_template("my.html", tab="my", **locals())
 
 #添加自定义RSS
 @bpSubscribe.post("/my", endpoint='MySubscriptionPost')

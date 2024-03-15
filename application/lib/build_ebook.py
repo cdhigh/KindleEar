@@ -28,13 +28,15 @@ def recipes_to_ebook(recipes: list, user, options: dict=None, output_fmt: str=No
     return output.getvalue()
 
 #仅通过一个url列表构建一本电子书
-#urls: [(title, url),...]
+#urls: [(title, url),...] or [url,url,...]
+#title: 书籍标题
 #user: KeUser对象
 #output_fmt: 如果指定，则生成特定格式的书籍，否则使用user.book_type
 #options: 额外的一些参数，为一个字典
 def urls_to_book(urls: list, title: str, user, options: dict=None, output_fmt: str=None):
-    feeds = [(title, url) for url in urls]
-    src = GenerateRecipeSource(title, feeds, user)
+    if not isinstance(urls[0], (tuple, list)):
+        urls = [(title, url) for url in urls]
+    src = GenerateRecipeSource(title, urls, user, base='UrlNewsRecipe', max_articles=100, cover_url=False)
     try:
         ro = compile_recipe(src)
     except Exception as e:

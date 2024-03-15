@@ -11,6 +11,11 @@ from playhouse.shortcuts import model_to_dict
 #用于在数据库结构升级后的兼容设计，数据库结构和前一版本不兼容则需要升级此版本号
 DB_VERSION = 1
 dbName = os.getenv('DATABASE_URL')
+if dbName.startswith('sqlite:///'): #support sqlite relative path
+    fileName = dbName[10:]
+    if not fileName.startswith('/'):
+        dbName = 'sqlite:///{}'.format(os.path.join(appDir, fileName))
+
 dbInstance = connect(dbName)
 
 #调用此函数正式连接到数据库（打开数据库）

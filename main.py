@@ -5,16 +5,19 @@
 # Author: cdhigh <https://github.com/cdhigh>
 import os, sys, builtins, logging
 
+from config import *
+
 appDir = os.path.dirname(os.path.abspath(__file__))
-log = logging.getLogger('gunicorn.error')
+if DATABASE_URL == 'datastore' or TASK_QUEUE_SERVICE == 'datastore':
+    log = logging.getLogger()
+else:
+    log = logging.getLogger('gunicorn.error')
 if log.level == logging.NOTSET:
-    log.setLevel(logging.WARNING)   #logging.DEBUG
+    log.setLevel(logging.DEBUG)   #logging.DEBUG, WARNING
 
 builtins.__dict__['default_log'] = log
 builtins.__dict__['appDir'] = appDir
 sys.path.insert(0, os.path.join(appDir, 'application', 'lib'))
-
-from config import *
 
 #将config.py里面的部分配置信息写到 os.environ ，因为有些部分可能不依赖flask运行
 def set_env():

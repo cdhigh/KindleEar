@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-10 21:31-0300\n"
+"POT-Creation-Date: 2024-03-14 20:42-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -471,8 +471,8 @@ msgid "Your recipe have been deleted."
 msgstr "您的Recipe已经被删除。"
 
 #: application/templates/base.html:56
-msgid "Read with Kindle"
-msgstr "在Kindle阅读"
+msgid "Kindleify Selection"
+msgstr "选择内容发送到Kindle"
 
 #: application/templates/base.html:58
 msgid "Verified"
@@ -777,11 +777,15 @@ msgstr "已成功订阅您选择的 Recipe"
 msgid "Bookmarklet"
 msgstr "书签小应用"
 
-#: application/templates/my.html:77
-msgid "Add to KindleEar"
-msgstr "在KindleEar中订阅"
+#: application/templates/my.html:78
+msgid "Send to Kindle"
+msgstr "发送到Kindle"
 
-#: application/templates/my.html:80
+#: application/templates/my.html:82
+msgid "Subscribe with KindleEar"
+msgstr "在KindleEar订阅"
+
+#: application/templates/my.html:85
 msgid "Drag and drop this link to your bookmarks"
 msgstr "将链接拖动到书签栏"
 
@@ -1118,9 +1122,9 @@ msgstr "没有需要推送的Recipe。"
 msgid "Cannot fetch data from {}, status: {}"
 msgstr "无法从 {} 获取数据，状态： {}"
 
-#: application/view/library.py:48 application/view/subscribe.py:192
-#: application/view/subscribe.py:303 application/view/subscribe.py:332
-#: application/view/subscribe.py:340
+#: application/view/library.py:48 application/view/subscribe.py:194
+#: application/view/subscribe.py:305 application/view/subscribe.py:334
+#: application/view/subscribe.py:342
 msgid "The recipe does not exist."
 msgstr "此Recipe不存在。"
 
@@ -1306,7 +1310,7 @@ msgstr "他加禄语"
 msgid "Hausa"
 msgstr "豪萨语"
 
-#: application/view/share.py:51 application/view/subscribe.py:240
+#: application/view/share.py:51 application/view/subscribe.py:242
 msgid "Unknown command: {}"
 msgstr "未知命令：{}"
 
@@ -1341,61 +1345,60 @@ msgstr "下面是一些技术细节："
 msgid "Unknown: {}"
 msgstr "未知: {}"
 
-#: application/view/subscribe.py:55
+#: application/view/subscribe.py:57
 msgid "Title or url is empty!"
 msgstr "标题或 URL 为空！"
 
-#: application/view/subscribe.py:62 application/view/subscribe.py:132
+#: application/view/subscribe.py:64 application/view/subscribe.py:134
 msgid "Duplicated subscription!"
 msgstr "重复的订阅!"
 
-#: application/view/subscribe.py:85
+#: application/view/subscribe.py:87
 msgid "The Rss does not exist."
 msgstr "此RSS不存在。"
 
-#: application/view/subscribe.py:96
+#: application/view/subscribe.py:98
 msgid "The Title or Url is empty."
 msgstr "标题或URL为空。"
 
-#: application/view/subscribe.py:109
+#: application/view/subscribe.py:111
 msgid "Failed to fetch the recipe."
 msgstr "抓取Recipe失败。"
 
-#: application/view/subscribe.py:123 application/view/subscribe.py:265
+#: application/view/subscribe.py:125 application/view/subscribe.py:267
 msgid "Failed to save the recipe. Error:"
 msgstr "保存Recipe失败。错误："
 
-#: application/view/subscribe.py:221
+#: application/view/subscribe.py:223
 msgid "You can only delete the uploaded recipe."
 msgstr "您只能删除你自己上传的Recipe。"
 
-#: application/view/subscribe.py:225
+#: application/view/subscribe.py:227
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "此Recipe已经被订阅，请先取消订阅然后再删除。"
 
-#: application/view/subscribe.py:238
+#: application/view/subscribe.py:240
 msgid "This recipe has not been subscribed to yet."
 msgstr "此Recipe尚未被订阅。"
 
-#: application/view/subscribe.py:252
+#: application/view/subscribe.py:254
 msgid "Can not read uploaded file, Error:"
 msgstr "无法读取上传的文件，错误："
 
-#: application/view/subscribe.py:260
+#: application/view/subscribe.py:262
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
 msgstr "解码Recipe失败，请确保您的Recipe为utf-8编码。"
 
-#: application/view/subscribe.py:280
+#: application/view/subscribe.py:282
 msgid "The recipe is already in the library."
 msgstr "此Recipe已经在新闻源中。"
 
-#: application/view/subscribe.py:310
+#: application/view/subscribe.py:312
 msgid "The login information for this recipe has been cleared."
 msgstr "此Recipe的网站登录信息已经被删除。"
 
-#: application/view/subscribe.py:314
+#: application/view/subscribe.py:316
 msgid "The login information for this recipe has been saved."
 msgstr "此Recipe的网站登录信息已经保存。"
-

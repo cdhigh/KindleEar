@@ -3,7 +3,7 @@
 #一些高级设置功能页面
 
 import datetime, hashlib, io
-from urllib.parse import quote_plus, unquote_plus, urljoin
+from urllib.parse import quote, unquote, urljoin
 from flask import Blueprint, url_for, render_template, redirect, session, send_file, abort, current_app as app
 from flask_babel import gettext as _
 from PIL import Image
@@ -148,7 +148,7 @@ def AdvImportPost():
                 in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
         
         for o in walkOpmlOutline(rssList):
-            title, url, isfulltext = o.text, unquote_plus(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
+            title, url, isfulltext = o.text, unquote(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
             if isfulltext:
                 isfulltext = str_to_bool(isfulltext)
             else:
@@ -210,7 +210,7 @@ def AdvExport():
     outLines = []
     for feed in user.all_custom_rss():
         outLines.append('<outline type="rss" text="{}" xmlUrl="{}" isFulltext="{}" />'.format(
-            feed.title, quote_plus(feed.url), feed.isfulltext))
+            feed.title, quote(feed.url), feed.isfulltext))
     outLines = '\n'.join(outLines)
     
     opmlFile = opmlTpl.format(date=date, outLines=outLines)

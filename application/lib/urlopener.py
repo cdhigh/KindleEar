@@ -5,6 +5,7 @@
 """
 import sys, requests, weakref
 from urllib.request import urlopen #用来进行base64 data url解码
+from urllib.parse import quote, unquote
 from bs4 import BeautifulSoup
 from html_form import HTMLForm
 
@@ -35,6 +36,8 @@ class UrlOpener:
         self.prevRespRef = None
         self.form = None
         self.soup = None
+        
+        url = quote(unquote(url), ':/') #不管输入的url是否已经转义，在这里保证url转义
         
         #竟然实际中还碰到以//开头的URL，真是大千世界无奇不有
         if url.startswith(r"//"):

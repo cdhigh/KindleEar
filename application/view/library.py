@@ -24,7 +24,7 @@ def SharedLibrary():
     return render_template('library.html', tab='shared', user=user, tips=tips)
 
 def buildKeUrl(path, url=KINDLEEAR_SITE):
-    url = 'http://localhost:5000/' if app.debug or app.testing else url
+    #url = 'http://localhost:5000/' if app.debug or app.testing else url
     return urljoin(url, path)
     
 def srvErrStr(status_code, url=KINDLEEAR_SITE):

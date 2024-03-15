@@ -19,23 +19,25 @@ SERVER_LOCATION = "us-central1"
 #Supports: "datastore", "sqlite", "mysql", "postgresql", "cockroachdb", "mongodb", "redis", "pickle"
 #DATABASE_URL = "mongodb://127.0.0.1:27017/"
 #DATABASE_URL = 'sqlite:////home/ubuntu/site/kindleear/database.db'
-DATABASE_URL = 'sqlite:////d:/programer/project/kindleear/database.db'
+#DATABASE_URL = 'sqlite:///database.db'
+DATABASE_URL = os.getenv('DATABASE_URL') or 'datastore'
 
 #Email receiving service, "gae", ""
 INBOUND_EMAIL_SERVICE = ""
 
 #Select the type of task queue, "gae", "apscheduler", "celery", "rq", ""
-TASK_QUEUE_SERVICE = "apscheduler"
+TASK_QUEUE_SERVICE = os.getenv('TASK_QUEUE_SERVICE') or "apscheduler"
 
 #If task queue service is apscheduler, celery, rq
 #Options: 'redis://', 'mongodb://', 'sqlite://', 'mysql://', 'postgresql://'
 #For apscheduler, it can be a empty str '' if a memory store is used
 #For rq, only 'redis://' is supported
-TASK_QUEUE_BROKER_URL = "redis://127.0.0.1:6379/"
+TASK_QUEUE_BROKER_URL = os.getenv('TASK_QUEUE_BROKER_URL') or "redis://127.0.0.1:6379/"
+#TASK_QUEUE_BROKER_URL = ''
 
 #If this option is empty, temporary files will be stored in memory
 #Setting this option can reduce memory consumption, supports both relative and absolute paths
-TEMP_DIR = os.getenv("TEMP_DIR") or "/tmp"
+TEMP_DIR = "/tmp" if os.getenv("TEMP_DIR") is None else os.getenv("TEMP_DIR")
 
 #If the depolyment plataform supports multi-threads, set this option will boost the download speed
 DOWNLOAD_THREAD_NUM = 1
@@ -44,7 +46,7 @@ DOWNLOAD_THREAD_NUM = 1
 ALLOW_SIGNUP = False
 
 #For security reasons, it's suggested to change the secret key.
-SECRET_KEY = "n7ro8QJI1qff"
+SECRET_KEY = "n7ro8QJI1qfe"
 
 #------------------------------------------------------------------------------------
 #Configurations below this line generally do not need to be modified

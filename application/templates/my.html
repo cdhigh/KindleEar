@@ -73,8 +73,13 @@
   <legend><h3>{{ _("Bookmarklet") }}</h3></legend>
   <div id="bookmarklet" class="box-list">
     <div class="book box" id="bookmarklet_content">
-      <a class="actionButton" target="_blank" href="javascript:location.href='{{subscribe_url}}?title_to_add='+encodeURIComponent(document.title)+'&url_to_add='+encodeURIComponent(window.location.href);" onclick="return false;">
-        {{_("Add to KindleEar")}}
+      <a class="actionButton" target="_blank" href="
+javascript:void(open('{{url2book_url}}?userName={{user.name}}&subject='+encodeURIComponent(document.title)+'&urls='+encodeURIComponent(window.location.href)));" onclick="return false;">
+        {{_("Send to Kindle")}}
+      </a>
+      <a class="actionButton" target="_blank" href="
+javascript:void(open('{{subscribe_url}}?title_to_add='+encodeURIComponent(document.title)+'&url_to_add='+encodeURIComponent(window.location.href)));" onclick="return false;">
+        {{_("Subscribe with KindleEar")}}
       </a>
       <div style="padding-top:10px;text-align:center;">
         <small>- {{_("Drag and drop this link to your bookmarks")}} -</small>

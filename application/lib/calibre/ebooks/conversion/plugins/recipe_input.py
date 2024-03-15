@@ -162,7 +162,7 @@ class RecipeInput(InputFormatPlugin):
         mi = self.build_meta(recipe1, onlyRecipe)
         cover_data, cPath, mPath = self.get_cover_masthead(dir_, recipe1, user, fs)
         mi.cover = cPath
-        mi.cover_data = ('jpg', cover_data) # if cover_data else (None, None)
+        mi.cover_data = ('jpg', cover_data) if cover_data else (None, None)
 
         opf = OPFCreator(dir_, mi, fs)
         opf.cover = None
@@ -337,13 +337,17 @@ class RecipeInput(InputFormatPlugin):
 
     #获取封面和报头路径，如果没有，使用默认图像
     def get_cover_masthead(self, dir_, recipe1, user, fs):
-        cPath = getattr(recipe1, 'cover_path', None)
-        if cPath:
-            cover_data = fs.read(cPath, 'rb')
+        if recipe1.get_cover_url() != False:
+            cPath = getattr(recipe1, 'cover_path', None)
+            if cPath:
+                cover_data = fs.read(cPath, 'rb')
+            else:
+                cPath = os.path.join(dir_, 'cover.jpg')
+                cover_data = user.get_cover_data()
+                fs.write(cPath, cover_data)
         else:
-            cPath = os.path.join(dir_, 'cover.jpg')
-            cover_data = user.get_cover_data()
-            fs.write(cPath, cover_data)
+            cPath = None
+            cover_data = None
 
         mPath = getattr(recipe1, 'masthead_path', None)
         if not mPath:

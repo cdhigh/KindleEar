@@ -16,6 +16,9 @@ elif dbUrl.startswith('redis://'):
 elif dbUrl.startswith("datastore"):
     dbInstance = DatastoreClient(project=appId)
 elif dbUrl.startswith("pickle://"):
+    fileName = dbUrl[10:]
+    if not fileName.startswith('/'):
+        dbUrl = 'pickle:///{}'.format(os.path.join(appDir, fileName))
     dbInstance = PickleDbClient(dbUrl)
 else:
     raise ValueError("database engine '{}' not supported yet".format(dbUrl.split(":", 1)[0]))

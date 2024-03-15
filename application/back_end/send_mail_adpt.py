@@ -194,7 +194,7 @@ def mailjet_send_mail(apikey, secret_key, sender, to, subject, body, html=None, 
     resp = mjClient.send.create(data=data)
     if resp.status_code in (200, 202):
         status = resp.json()["Messages"][0]["Status"]
-        print(resp.json()) #TODO
+        #print(resp.json())
         if status != "success":
             raise Exception(f'mailjet failed: {status}')
     else:

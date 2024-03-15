@@ -12,39 +12,44 @@ def py3_repr(x):
     return ans
 
 #根据输入的一些信息，自动创建一个recipe的源码
-def GenerateRecipeSource(title, feeds, user, max_articles=30, isfulltext=False, language=None):
-    classname = 'BasicUserRecipe%d' % int(time.time())
-    title = str(title).strip() or classname
+def GenerateRecipeSource(title, feeds, user, isfulltext=False, language=None, max_articles=30, 
+    cover_url=None, base='AutomaticNewsRecipe'):
+    className = f'UserRecipe{int(time.time())}'
+    title = py3_repr(str(title).strip() or className)
     indent = ' ' * 8
     feedTitles = []
     feedsStr = []
     if feeds and isinstance(feeds[0], (tuple, list)):
-        for title, url in feeds:
-            feedsStr.append(f'{indent}({py3_repr(title)}, {py3_repr(url)}),')
-            feedTitles.append(title)
+        for t, url in feeds:
+            feedsStr.append(f'{indent}({py3_repr(t)}, {py3_repr(url)}),')
+            feedTitles.append(t)
     else:
         feedsStr = [f'{indent}{py3_repr(url)},' for url in feeds]
     
     feeds = 'feeds          = [\n{}\n    ]'.format('\n'.join(feedsStr)) if feedsStr else ''
     desc = 'News from {}'.format(', '.join(feedTitles)) if feedTitles else 'Deliver from KindleEar'
-        
+    desc = desc[:100]
+    oldest_article = user.oldest_article
     isfulltext = 'True' if isfulltext else 'None'
     language = language or user.book_language
-    src = textwrap.dedent('''\
+    timefmt = user.time_fmt
+    cover_url = f"'{cover_url}'" if isinstance(cover_url, str) else cover_url
+    src = textwrap.dedent(f'''\
     #!/usr/bin/env python3
     # -*- coding:utf-8 -*-
     from calibre.web.feeds.news import {base}
-    class {classname}({base}):
+    class {className}({base}):
         title          = {title}
         description    = '{desc}'
         language       = '{language}'
+        max_articles_per_feed = {max_articles}
         oldest_article = {oldest_article}
         use_embedded_content  = {isfulltext}
         timefmt               = '{timefmt}'
-        auto_cleanup   = True
-        {feeds}''').format(
-            classname=classname, title=py3_repr(title), desc=desc, oldest_article=user.oldest_article,
-            feeds=feeds, base='AutomaticNewsRecipe', isfulltext=isfulltext, language=language, timefmt=user.time_fmt)
+        cover_url             = {cover_url}
+        {feeds}''')
+    #with open('d:/reci.py', 'w', encoding='utf-8') as f:
+    #    f.write(src)
     return src
 
 #能使用点号访问的字典

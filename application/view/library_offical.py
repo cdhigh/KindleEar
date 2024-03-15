@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-#网友共享的订阅源数据
+#网友共享的订阅源数据，仅为 KINDLEEAR_SITE 使用
 import datetime, json, hashlib
 from operator import attrgetter
 from flask import Blueprint, render_template, request, Response
@@ -10,28 +10,30 @@ from ..utils import str_to_bool, str_to_int
 from ..back_end.db_models import *
 
 #几个"官方"服务的地址
-KINDLEEAR_SITE = "https://kindleear.appspot.com"
-LIBRARY_KINDLEEAR = "/kindleearappspotlibrary"
+KINDLEEAR_SITE = "http://kindleear.line.pm"
+LIBRARY_KINDLEEAR_OLD = "/kindleearappspotlibrary"
+LIBRARY_KINDLEEAR = "/kelibrary"
 LIBRARY_GETRSS = "getrss"
 LIBRARY_GETLASTTIME = "latesttime"
-LIBRARY_MGR = "/kindleearappspotlibrary/mgr/"
+LIBRARY_MGR_OLD = "/kindleearappspotlibrary/mgr/"
+LIBRARY_MGR = "/kelibrary/mgr/"
 LIBRARY_GETSRC = "getsrc"
 LIBRARY_REPORT_INVALID = "reportinvalid"
 SUBSCRIBED_FROM_LIBRARY = "subscribedfromshared"
-LIBRARY_CATEGORY = "/kindleearappspotlibrarycategory"
-KINDLEEAR_SITE_KEY = "kindleear.lucky!"
+LIBRARY_CATEGORY_OLD = "/kindleearappspotlibrarycategory"
+LIBRARY_CATEGORY = "/kelibrary/categories"
+KINDLEEAR_SITE_KEY_OLD = "kindleear.lucky!"
+KINDLEEAR_SITE_KEY = "cdhigh"
 
-#===========================================================================================================
-#             以下函数仅为 kindleear.appspot.com 使用
-#===========================================================================================================
 bpLibraryOffical = Blueprint('bpLibraryOffical', __name__)
 
-#提供共享库订阅源数据(仅用于kindleear.appspot.com"官方"共享服务器)
+#提供共享库订阅源数据
+@bpLibraryOffical.route(LIBRARY_KINDLEEAR_OLD)
 @bpLibraryOffical.route(LIBRARY_KINDLEEAR)
-def SharedLibraryAppspot():
+def SharedLibraryOffcial():
     args = request.args
     key = args.get('key') #避免爬虫消耗资源
-    if key != KINDLEEAR_SITE_KEY:
+    if key not in (KINDLEEAR_SITE_KEY, KINDLEEAR_SITE_KEY_OLD):
         return []
 
     dataType = args.get('data_type')
@@ -50,9 +52,10 @@ def SharedLibraryAppspot():
         #return sharedData
         return Response(json.dumps(sharedData, separators=(',', ':')), mimetype='application/json')
         
-#网友分享了一个订阅链接或recipe(仅用于kindleear.appspot.com"官方"共享服务器)
+#网友分享了一个订阅链接或recipe
+@bpLibraryOffical.post(LIBRARY_KINDLEEAR_OLD)
 @bpLibraryOffical.post(LIBRARY_KINDLEEAR)
-def SharedLibraryAppspotAjax():
+def SharedLibraryOfficalAjax():
     form = request.form
     key = form.get('key')
     if key != KINDLEEAR_SITE_KEY: #避免爬虫消耗资源
@@ -119,13 +122,14 @@ def SharedLibraryAppspotAjax():
         
     return respDict
 
-#更新共享库的最新时间信息(仅用于kindleear.appspot.com"官方"共享服务器)
+#更新共享库的最新时间信息
 def UpdateLastSharedRssTime():
     AppInfo.set_value(AppInfo.lastSharedRssTime, str(int(datetime.datetime.utcnow().timestamp())))
     
-#共享库的订阅源信息管理(仅用于kindleear.appspot.com"官方"共享服务器)
+#共享库的订阅源信息管理
+@bpLibraryOffical.post(LIBRARY_MGR_OLD + "<mgrType>")
 @bpLibraryOffical.post(LIBRARY_MGR + "<mgrType>")
-def SharedLibraryMgrAppspotPost(mgrType):
+def SharedLibraryMgrOffical(mgrType):
     now = datetime.datetime.utcnow()
     form = request.form
     #print(mgrType, LIBRARY_GETSRC)
@@ -212,12 +216,28 @@ def SharedLibraryMgrAppspotPost(mgrType):
     else:
         return {'status': '[KE] Unknown command: {}'.format(mgrType)}
 
-#共享库的订阅源数据分类信息(仅用于kindleear.appspot.com"官方"共享服务器)
+#共享库的订阅源数据分类信息
+@bpLibraryOffical.route(LIBRARY_CATEGORY_OLD)
 @bpLibraryOffical.route(LIBRARY_CATEGORY)
-def SharedLibraryCategoryAppspot():
+def SharedLibraryCategoryOffical():
     key = request.args.get('key') #避免爬虫消耗IO资源
-    if key != KINDLEEAR_SITE_KEY:
+    if key not in (KINDLEEAR_SITE_KEY, KINDLEEAR_SITE_KEY_OLD):
         return {}
 
     cats = sorted(SharedRssCategory.get_all(), key=attrgetter('last_updated'), reverse=True)
     return [item.name for item in cats]
+
+#@bpLibraryOffical.route('/translib')
+#def TransferLib():
+#    fileName = os.path.join(os.path.dirname(__file__), 'ke_final.json')
+#    with open(fileName, 'r', encoding='utf-8') as f:
+#        ke_final = json.loads(f.read())
+#    SharedRss.delete().execute()
+#    cats = set()
+#    for t in ke_final:
+#        cats.add(t['c'])
+#        SharedRss.create(title=t['t'], url=t['u'], isfulltext=t['f'], language=t['l'], category=t['c'],
+#            subscribed=t['s'], created_time=t['d'])
+#    for cat in cats:
+#        SharedRssCategory.create(name=cat)
+#    return f'Finished, data count={len(ke_final)}, category count={len(cats)}'

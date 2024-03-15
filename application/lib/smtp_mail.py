@@ -2,7 +2,7 @@
 # encoding: UTF-8
 #使用SMTP发送邮件
 
-import smtplib
+import smtplib, json
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.encoders import encode_base64
@@ -28,8 +28,8 @@ def smtp_send_mail(sender, to, subject, body, host, username, password, port=Non
     for filename, content in (attachments or []):
         part = MIMEBase('application', 'octet-stream')
         part.set_payload(content)
+        part.add_header('Content-Disposition', 'attachment', filename=('utf-8', '', filename))
         encode_base64(part)
-        part.add_header('Content-Disposition', f'attachment; filename="{filename}"')
         message.attach(part)
 
     klass = smtplib.SMTP if port != 465 else smtplib.SMTP_SSL

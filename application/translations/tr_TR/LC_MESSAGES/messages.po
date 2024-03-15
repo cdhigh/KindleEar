@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-10 21:31-0300\n"
+"POT-Creation-Date: 2024-03-14 20:42-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: tr_TR\n"
@@ -479,8 +479,8 @@ msgid "Your recipe have been deleted."
 msgstr "Tarifiniz silindi."
 
 #: application/templates/base.html:56
-msgid "Read with Kindle"
-msgstr "Kindle ile oku"
+msgid "Kindleify Selection"
+msgstr "Kindle'laştırma Seçimi"
 
 #: application/templates/base.html:58
 msgid "Verified"
@@ -795,11 +795,15 @@ msgstr "Seçilen tarife abonelik başarılı."
 msgid "Bookmarklet"
 msgstr "Kitap modu"
 
-#: application/templates/my.html:77
-msgid "Add to KindleEar"
-msgstr "KindleEar'a ekle"
+#: application/templates/my.html:78
+msgid "Send to Kindle"
+msgstr "Kindle'e Gönder"
 
-#: application/templates/my.html:80
+#: application/templates/my.html:82
+msgid "Subscribe with KindleEar"
+msgstr "KindleEar ile Abone Ol"
+
+#: application/templates/my.html:85
 msgid "Drag and drop this link to your bookmarks"
 msgstr "Bu bağlantıyı yer imlerinize sürükleyip bırakın"
 
@@ -1145,9 +1149,9 @@ msgstr "Teslim edilecek tarif yok."
 msgid "Cannot fetch data from {}, status: {}"
 msgstr "{}, durumundan veri alınamıyor: {}"
 
-#: application/view/library.py:48 application/view/subscribe.py:192
-#: application/view/subscribe.py:303 application/view/subscribe.py:332
-#: application/view/subscribe.py:340
+#: application/view/library.py:48 application/view/subscribe.py:194
+#: application/view/subscribe.py:305 application/view/subscribe.py:334
+#: application/view/subscribe.py:342
 msgid "The recipe does not exist."
 msgstr "Tarif mevcut değil."
 
@@ -1339,7 +1343,7 @@ msgstr "Tagalog"
 msgid "Hausa"
 msgstr "Hausa"
 
-#: application/view/share.py:51 application/view/subscribe.py:240
+#: application/view/share.py:51 application/view/subscribe.py:242
 msgid "Unknown command: {}"
 msgstr "Bilinmeyen komut: {}"
 
@@ -1374,47 +1378,47 @@ msgstr "Aşağıdaki ayrıntılara bakın:"
 msgid "Unknown: {}"
 msgstr "Bilinmeyen: {}"
 
-#: application/view/subscribe.py:55
+#: application/view/subscribe.py:57
 msgid "Title or url is empty!"
 msgstr "URL veya başlık hatalı"
 
-#: application/view/subscribe.py:62 application/view/subscribe.py:132
+#: application/view/subscribe.py:64 application/view/subscribe.py:134
 msgid "Duplicated subscription!"
 msgstr "Duplicated subscription!"
 
-#: application/view/subscribe.py:85
+#: application/view/subscribe.py:87
 msgid "The Rss does not exist."
 msgstr "Rss mevcut değil."
 
-#: application/view/subscribe.py:96
+#: application/view/subscribe.py:98
 msgid "The Title or Url is empty."
 msgstr "Başlık veya URL boş."
 
-#: application/view/subscribe.py:109
+#: application/view/subscribe.py:111
 msgid "Failed to fetch the recipe."
 msgstr "Tarif alınamadı."
 
-#: application/view/subscribe.py:123 application/view/subscribe.py:265
+#: application/view/subscribe.py:125 application/view/subscribe.py:267
 msgid "Failed to save the recipe. Error:"
 msgstr "Tarif kaydedilemedi. Hata:"
 
-#: application/view/subscribe.py:221
+#: application/view/subscribe.py:223
 msgid "You can only delete the uploaded recipe."
 msgstr "Yalnızca yüklenen tarifi silebilirsiniz."
 
-#: application/view/subscribe.py:225
+#: application/view/subscribe.py:227
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "Tarif abone olunmuş, silmeden önce aboneliği iptal edin."
 
-#: application/view/subscribe.py:238
+#: application/view/subscribe.py:240
 msgid "This recipe has not been subscribed to yet."
 msgstr "Bu tarife henüz abone olunmadı."
 
-#: application/view/subscribe.py:252
+#: application/view/subscribe.py:254
 msgid "Can not read uploaded file, Error:"
 msgstr "Yüklenen dosya okunamıyor, Hata:"
 
-#: application/view/subscribe.py:260
+#: application/view/subscribe.py:262
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
@@ -1422,15 +1426,14 @@ msgstr ""
 "Tarif çözümlenemedi. Lütfen tarifinizin utf-8 kodlamasında "
 "kaydedildiğinden emin olun."
 
-#: application/view/subscribe.py:280
+#: application/view/subscribe.py:282
 msgid "The recipe is already in the library."
 msgstr "Tarif zaten kütüphanede."
 
-#: application/view/subscribe.py:310
+#: application/view/subscribe.py:312
 msgid "The login information for this recipe has been cleared."
 msgstr "Bu tarifin giriş bilgileri temizlendi."
 
-#: application/view/subscribe.py:314
+#: application/view/subscribe.py:316
 msgid "The login information for this recipe has been saved."
 msgstr "Bu tarifin giriş bilgileri kaydedildi."
-

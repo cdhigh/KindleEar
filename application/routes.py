@@ -61,7 +61,7 @@ def register_routes(app):
         app.register_blueprint(subscribe.bpSubscribe)
         app.register_blueprint(worker.bpWorker)
         app.register_blueprint(url2book.bpUrl2Book)
-        if app.config['APP_DOMAIN'] == library_offical.KINDLEEAR_SITE:
+        if app.config['APP_DOMAIN'].startswith(library_offical.KINDLEEAR_SITE):
             app.register_blueprint(library_offical.bpLibraryOffical)
 
         #使用GAE来接收邮件

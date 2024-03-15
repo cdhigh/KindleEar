@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 #保存到evernote或分享到社交媒体功能
 
-from urllib.parse import unquote_plus
+from urllib.parse import unquote
 from bs4 import BeautifulSoup
 from flask import Blueprint, render_template, request, current_app as app
 from flask_babel import gettext as _
@@ -39,7 +39,7 @@ def Share():
     if not user or not user.kindle_email or user.share_links.get('key') != key:
         return _('The username does not exist or the email is empty.')
         
-    url = unquote_plus(url)
+    url = unquote(url)
     
     if action in ('Evernote', 'Wiz'):
         return SaveToEvernoteWiz(user, action, url, title)

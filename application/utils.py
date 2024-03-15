@@ -81,11 +81,30 @@ def hide_website(site):
         site = path[0] + '**'
     return site
 
+#将字节长度转换为人类友好的字符串，比如 2000 -> 2kB
+#value: 字节长度
+#binary: 进位是2进制还是10进制
+#suffix: 字符串后缀
+def filesizeformat(value, binary=False, suffix='B'):
+    value = abs(float(value))
+    if binary:
+        base = 1024
+        prefixes = ('', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi', 'Yi')
+    else:
+        base = 1000
+        prefixes = ('', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y')
+
+    for unit in prefixes:
+        if value < base:
+            return f"{value:3.1f} {unit}{suffix}" if unit else f"{int(value)} {suffix}"
+        value /= base
+    return f"{value:.1f} {unit}{suffix}"
+
 #-----------以下几个函数为安全相关的
 def new_secret_key(length=12):
     allchars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz'
     return ''.join([secrets.choice(allchars) for i in range(length)])
-    
+
 def ke_encrypt(txt: str, key: str):
     return _ke_auth_code(txt, key, 'encode')
     

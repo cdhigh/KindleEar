@@ -7,12 +7,12 @@ Builtin recipes.
 '''
 import re, time, io
 from calibre.web.feeds.news import (BasicNewsRecipe, CustomIndexRecipe,
-    AutomaticNewsRecipe, CalibrePeriodical)
+    AutomaticNewsRecipe, UrlNewsRecipe, CalibrePeriodical)
 from calibre.ebooks.BeautifulSoup import BeautifulSoup
 from calibre.utils.config import JSONConfig
 from polyglot.builtins import itervalues, codepoint_to_chr
 
-basic_recipes = (BasicNewsRecipe, AutomaticNewsRecipe, CustomIndexRecipe,
+basic_recipes = (BasicNewsRecipe, AutomaticNewsRecipe, UrlNewsRecipe, CustomIndexRecipe,
         CalibrePeriodical)
 
 custom_recipes = JSONConfig('custom_recipes/index.json')
@@ -44,6 +44,7 @@ def compile_recipe(src):
     namespace = {
             'BasicNewsRecipe':BasicNewsRecipe,
             'AutomaticNewsRecipe':AutomaticNewsRecipe,
+            'UrlNewsRecipe':UrlNewsRecipe,
             'time':time, 're':re,
             'BeautifulSoup':BeautifulSoup,
             'unicode': str,
