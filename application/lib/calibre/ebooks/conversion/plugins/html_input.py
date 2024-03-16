@@ -75,7 +75,7 @@ class HTMLInput(InputFormatPlugin):
         
         #manifest 资源列表
         manifest = ['/index.html']
-        for fileName, content in input_.get('imgs', []):
+        for fileName, content in (input_.get('imgs', None) or []):
             fileName = os.path.join(fs.path, fileName)
             fs.write(fileName, content)
             manifest.append(fileName)

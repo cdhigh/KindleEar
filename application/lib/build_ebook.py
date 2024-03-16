@@ -50,7 +50,13 @@ def urls_to_book(urls: list, title: str, user, options: dict=None, output_fmt: s
     return recipes_to_ebook(ro, user, options, output_fmt)
 
 #将一个html文件和其图像内容转换为一本电子书，返回电子书二进制内容，格式为user.book_type
-def html_to_book(html: str, title: str, imgs: list, user, options: dict=None, output_fmt: str=None):
+#html: html文本内容
+#title: 书籍标题
+#user: KeUser实例
+#imgs: 图像内容列表，[(fileName, content), ...]
+#options: 电子书制作的额外参数
+#output_fmt: 输出格式，这个参数会覆盖user的原本设置
+def html_to_book(html: str, title: str, user, imgs: list=None, options: dict=None, output_fmt: str=None):
     input_ = {'html': html, 'imgs': imgs, 'title': title}
     output = io.BytesIO()
     output_fmt=output_fmt if output_fmt else user.book_type

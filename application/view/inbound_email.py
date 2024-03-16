@@ -3,7 +3,7 @@
 #Author: cdhigh <https://github.com/cdhigh>
 #将发到string@appid.appspotmail.com的邮件正文转成附件发往kindle邮箱。
 
-import re, zlib, base64, io
+import re, io
 from urllib.parse import urljoin
 from email.header import decode_header
 from email.utils import parseaddr, collapse_rfc2231_value
@@ -91,7 +91,7 @@ def ReceiveMail(path):
         user = KeUser.get_or_none(KeUser.name == adminName)
     
     if not user or not user.kindle_email:
-        return "OK", 200
+        return "OK"
 
     #阻挡垃圾邮件
     sender = parseaddr(message.sender)[1]
@@ -219,11 +219,11 @@ def ReceiveMail(path):
         else:
             action = ''
         
-        #url需要压缩，避免URL太长
         params = {'userName': userName,
-                 'urls': base64.urlsafe_b64encode(zlib.compress('|'.join(links).encode('utf-8'))).decode(),
+                 'urls': '|'.join(links),
                  'action': action,
-                 'subject': subject[:SUBJECT_WORDCNT]}
+                 'key': user.share_links.get('key', ''),
+                 'title': subject[:SUBJECT_WORDCNT]}
         create_url2book_task(params)
     else: #直接转发邮件正文
         imageContents = []
@@ -257,7 +257,7 @@ def ReceiveMail(path):
                 if img['src'].lower().startswith('cid:'):
                     img['src'] = img['src'][4:]
 
-            book = html_to_book(str(soup), subject[:SUBJECT_WORDCNT], imageContents, user)
+            book = html_to_book(str(soup), subject[:SUBJECT_WORDCNT], user, imageContents)
         else: #没有图片则直接推送HTML文件，阅读体验更佳
             m = soup.find('meta', attrs={"http-equiv": "Content-Type"})
             if not m:

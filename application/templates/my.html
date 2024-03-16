@@ -73,8 +73,7 @@
   <legend><h3>{{ _("Bookmarklet") }}</h3></legend>
   <div id="bookmarklet" class="box-list">
     <div class="book box" id="bookmarklet_content">
-      <a class="actionButton" target="_blank" href="
-javascript:void(open('{{url2book_url}}?userName={{user.name}}&subject='+encodeURIComponent(document.title)+'&urls='+encodeURIComponent(window.location.href)));" onclick="return false;">
+      <a class="actionButton" target="_blank" href='javascript:void function(){var o={userName:"{{user.name}}",key:"{{share_key}}",title:document.title,urls:window.location.href},s=window.getSelection().rangeCount%3Fnew XMLSerializer().serializeToString(window.getSelection().getRangeAt(0).cloneContents()):"";s%3F(o.text=s,function(url,formData){var h=(tag,props)=>Object.assign(document.createElement(tag),props),form=h("form",{action:url,method:"post",hidden:!0,target:"_blank"});for(var[name,value]of Object.entries(formData))form.appendChild(h("input",{name,value}));document.body.appendChild(form),form.submit(),setTimeout(()=>{form.remove()},100),alert("The text you selected ("+s.length()+"Bytes) has been sent to KindleEar.")}("{{url2book_url}}",o)):open("{{url2book_url}}%3F"+new URLSearchParams(o).toString())}();' onclick="return false;">
         {{_("Send to Kindle")}}
       </a>
       <a class="actionButton" target="_blank" href="
