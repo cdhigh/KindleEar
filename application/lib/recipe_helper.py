@@ -82,9 +82,13 @@ def GetBuiltinRecipeInfo(id_: str):
 
     id_ = id_ if id_.startswith('builtin:') else f'builtin:{id_}'
     for child in root:
-        attrs = child.attrib
-        if attrs.get('id', '') == id_:
-            return DotDict(attrs) #方便上层使用点号访问
+        if child.attrib.get('id', '') == id_:
+            attrs = child.attrib.get
+            subs = attrs('needs_subscription', 'no')
+            subs = (subs in ('yes', 'optional'))
+            info = {'id': id_, 'title': attrs('title', ''), 'author': attrs('author', ''), 'description': attrs('description'),
+                'language': attrs('language', ''), 'needs_subscription': subs}
+            return DotDict(info) #方便上层使用点号访问
     return None
 
 #返回特定ID的内置Recipe源码字符串

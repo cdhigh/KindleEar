@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-14 20:42-0300\n"
+"POT-Creation-Date: 2024-03-19 20:51-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:138
+#: application/templates/admin.html:3 application/templates/base.html:139
 msgid "Admin"
 msgstr "账号管理"
 
@@ -27,6 +27,7 @@ msgid "Signup settings"
 msgstr "注册设置"
 
 #: application/templates/admin.html:19
+#: application/templates/adv_calibre_options.html:18
 msgid "Save"
 msgstr "保存"
 
@@ -200,6 +201,7 @@ msgid "Verify"
 msgstr "校验"
 
 #: application/templates/adv_archive.html:89
+#: application/templates/book_translator.html:72
 #: application/templates/setting.html:243
 msgid "Save settings"
 msgstr "保存设置"
@@ -233,6 +235,17 @@ msgstr "封面图像"
 #: application/templates/adv_uploadcss.html:3
 msgid "Stylesheet"
 msgstr "样式表"
+
+#: application/templates/adv_base.html:95
+#: application/templates/adv_base.html:99
+#: application/templates/adv_calibre_options.html:3
+#: application/templates/adv_calibre_options.html:12
+msgid "Calibre options"
+msgstr "Calibre配置"
+
+#: application/templates/adv_calibre_options.html:13
+msgid "Set the parameters for Calibre, in JSON dictionary format."
+msgstr "设置Calibre生成电子书的选项，要求为JSON字典格式。"
 
 #: application/templates/adv_delivernow.html:9
 msgid "Deliver selected recipes now"
@@ -608,41 +621,131 @@ msgid ""
 "image resolution or upload in batches."
 msgstr "您选择的文件总和超过16MB，请减小图像分辨率或分批上传。"
 
-#: application/templates/base.html:111 application/templates/home.html:12
+#: application/templates/base.html:90
+#: application/templates/book_translator.html:3
+#: application/templates/book_translator.html:16
+msgid "Translator"
+msgstr "书籍翻译器"
+
+#: application/templates/base.html:112 application/templates/home.html:12
 msgid "Logout"
 msgstr "退出"
 
-#: application/templates/base.html:113 application/templates/home.html:17
+#: application/templates/base.html:114 application/templates/home.html:17
 #: application/templates/login.html:3 application/templates/login.html:19
 #: application/templates/login.html:29
 msgid "Login"
 msgstr "登录"
 
-#: application/templates/base.html:115 application/templates/signup.html:3
+#: application/templates/base.html:116 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr "注册"
 
-#: application/templates/base.html:135 application/templates/home.html:11
+#: application/templates/base.html:136 application/templates/home.html:11
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr "我的订阅"
 
-#: application/templates/base.html:136 application/templates/setting.html:3
+#: application/templates/base.html:137 application/templates/setting.html:3
 msgid "Settings"
 msgstr "设置"
 
-#: application/templates/base.html:137 application/templates/logs.html:3
+#: application/templates/base.html:138 application/templates/logs.html:3
 msgid "Logs"
 msgstr "投递日志"
 
-#: application/templates/base.html:139
+#: application/templates/base.html:140
 msgid "Advanced"
 msgstr "高级设置"
 
-#: application/templates/base.html:140 application/templates/library.html:3
+#: application/templates/base.html:141 application/templates/library.html:3
 msgid "Shared"
 msgstr "网友分享"
+
+#: application/templates/book_translator.html:18
+msgid "State"
+msgstr "状态"
+
+#: application/templates/book_translator.html:20
+msgid "Enable"
+msgstr "启用"
+
+#: application/templates/book_translator.html:21
+msgid "Disable"
+msgstr "禁止"
+
+#: application/templates/book_translator.html:25
+msgid "Engine"
+msgstr "翻译引擎"
+
+#: application/templates/book_translator.html:31
+msgid "Api Key"
+msgstr "Api Key"
+
+#: application/templates/book_translator.html:32
+msgid "One key per line"
+msgstr "一行一码"
+
+#: application/templates/book_translator.html:35
+msgid "Source language"
+msgstr "源语言"
+
+#: application/templates/book_translator.html:41
+msgid "Target language"
+msgstr "目标语言"
+
+#: application/templates/book_translator.html:47
+msgid "Translation Position"
+msgstr "译文位置"
+
+#: application/templates/book_translator.html:49
+msgid "Below original"
+msgstr "原文下方"
+
+#: application/templates/book_translator.html:50
+msgid "Above original"
+msgstr "原文上方"
+
+#: application/templates/book_translator.html:51
+msgid "Left to original"
+msgstr "原文左边"
+
+#: application/templates/book_translator.html:52
+msgid "Right to original"
+msgstr "原文右边"
+
+#: application/templates/book_translator.html:53
+msgid "Translated text only"
+msgstr "仅保留译文"
+
+#: application/templates/book_translator.html:57
+msgid "Original text style"
+msgstr "原文样式"
+
+#: application/templates/book_translator.html:61
+msgid "Translated text style"
+msgstr "译文样式"
+
+#: application/templates/book_translator.html:67y
+msgid "Apply to all subscribed recipes"
+msgstr "应用到当前所有已订阅Recipe"
+
+#: application/templates/book_translator.html:78
+msgid "Test (Please save settings firstly)"
+msgstr "测试 (请先保存设置)"
+
+#: application/templates/book_translator.html:80
+msgid "Text"
+msgstr "原文"
+
+#: application/templates/book_translator.html:84
+msgid "Translation"
+msgstr "译文"
+
+#: application/templates/book_translator.html:89
+msgid "Test"
+msgstr "测试"
 
 #: application/templates/change_password.html:13
 msgid "Change Password"
@@ -777,15 +880,15 @@ msgstr "已成功订阅您选择的 Recipe"
 msgid "Bookmarklet"
 msgstr "书签小应用"
 
-#: application/templates/my.html:78
+#: application/templates/my.html:77
 msgid "Send to Kindle"
 msgstr "发送到Kindle"
 
-#: application/templates/my.html:82
+#: application/templates/my.html:81
 msgid "Subscribe with KindleEar"
 msgstr "在KindleEar订阅"
 
-#: application/templates/my.html:85
+#: application/templates/my.html:84
 msgid "Drag and drop this link to your bookmarks"
 msgstr "将链接拖动到书签栏"
 
@@ -969,7 +1072,8 @@ msgstr "邀请码"
 msgid "User account"
 msgstr "账号"
 
-#: application/view/admin.py:51 application/view/setting.py:96
+#: application/view/admin.py:51 application/view/adv.py:355
+#: application/view/setting.py:96 application/view/subscribe.py:241
 msgid "Settings Saved!"
 msgstr "恭喜，保存成功！"
 
@@ -1033,75 +1137,79 @@ msgstr "原密码错误。"
 msgid "Changes saved successfully."
 msgstr "账号设置已更新。"
 
-#: application/view/adv.py:76 application/view/adv.py:77
-#: application/view/adv.py:78 application/view/adv.py:79
-#: application/view/adv.py:80 application/view/adv.py:81
-#: application/view/adv.py:82 application/view/adv.py:83
-#: application/view/adv.py:84
+#: application/view/adv.py:81 application/view/adv.py:82
+#: application/view/adv.py:83 application/view/adv.py:84
+#: application/view/adv.py:85 application/view/adv.py:86
+#: application/view/adv.py:87 application/view/adv.py:88
+#: application/view/adv.py:89
 msgid "Append hyperlink '{}' to article"
 msgstr "在每篇文章后附加 '{}' 超链接"
 
-#: application/view/adv.py:76 application/view/adv.py:77
-#: application/view/adv.py:78 application/view/adv.py:79
+#: application/view/adv.py:81 application/view/adv.py:82
+#: application/view/adv.py:83 application/view/adv.py:84
 msgid "Save to {}"
 msgstr "保存到 {}"
 
-#: application/view/adv.py:76
+#: application/view/adv.py:81
 msgid "evernote"
 msgstr "evernote"
 
-#: application/view/adv.py:77
+#: application/view/adv.py:82
 msgid "wiz"
 msgstr "为知笔记"
 
-#: application/view/adv.py:78
+#: application/view/adv.py:83
 msgid "pocket"
 msgstr "pocket"
 
-#: application/view/adv.py:79
+#: application/view/adv.py:84
 msgid "instapaper"
 msgstr "instapaper"
 
-#: application/view/adv.py:80 application/view/adv.py:81
-#: application/view/adv.py:82 application/view/adv.py:83
+#: application/view/adv.py:85 application/view/adv.py:86
+#: application/view/adv.py:87 application/view/adv.py:88
 msgid "Share on {}"
 msgstr "分享到 {}"
 
-#: application/view/adv.py:80
+#: application/view/adv.py:85
 msgid "weibo"
 msgstr "微博"
 
-#: application/view/adv.py:81
+#: application/view/adv.py:86
 msgid "facebook"
 msgstr "facebook"
 
-#: application/view/adv.py:83
+#: application/view/adv.py:88
 msgid "tumblr"
 msgstr "tumblr"
 
-#: application/view/adv.py:84
+#: application/view/adv.py:89
 msgid "Open in browser"
 msgstr "在浏览器打开"
 
-#: application/view/adv.py:358
+#: application/view/adv.py:357
+msgid "The format is invalid."
+msgstr "格式非法。"
+
+#: application/view/adv.py:390
 msgid "Authorization Error!<br/>{}"
 msgstr "申请授权过程失败！<br/>{}"
 
-#: application/view/adv.py:381
+#: application/view/adv.py:413
 msgid "Success authorized by Pocket!"
 msgstr "已经成功获得Pocket的授权！"
 
-#: application/view/adv.py:387
+#: application/view/adv.py:419
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr "申请Pocket授权失败!<hr/>错误信息参考如下：<br/><br/>{}"
 
-#: application/view/adv.py:397
+#: application/view/adv.py:429
 msgid "Request type [{}] unsupported"
 msgstr "不支持你请求的命令类型 [{}]"
 
-#: application/view/adv.py:412
+#: application/view/adv.py:444
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr "Instapaper服务器异常，请稍候再试。"
 
@@ -1118,13 +1226,14 @@ msgstr "下列Recipe已经被添加到推送队列。"
 msgid "There are no recipes to deliver."
 msgstr "没有需要推送的Recipe。"
 
-#: application/view/library.py:31
+#: application/view/library.py:34
 msgid "Cannot fetch data from {}, status: {}"
 msgstr "无法从 {} 获取数据，状态： {}"
 
-#: application/view/library.py:48 application/view/subscribe.py:194
-#: application/view/subscribe.py:305 application/view/subscribe.py:334
-#: application/view/subscribe.py:342
+#: application/view/library.py:51 application/view/subscribe.py:195
+#: application/view/subscribe.py:221 application/view/subscribe.py:272
+#: application/view/subscribe.py:301 application/view/subscribe.py:421
+#: application/view/subscribe.py:450 application/view/subscribe.py:458
 msgid "The recipe does not exist."
 msgstr "此Recipe不存在。"
 
@@ -1310,7 +1419,7 @@ msgstr "他加禄语"
 msgid "Hausa"
 msgstr "豪萨语"
 
-#: application/view/share.py:51 application/view/subscribe.py:242
+#: application/view/share.py:51 application/view/subscribe.py:313
 msgid "Unknown command: {}"
 msgstr "未知命令：{}"
 
@@ -1345,17 +1454,13 @@ msgstr "下面是一些技术细节："
 msgid "Unknown: {}"
 msgstr "未知: {}"
 
-#: application/view/subscribe.py:57
+#: application/view/subscribe.py:59
 msgid "Title or url is empty!"
 msgstr "标题或 URL 为空！"
 
-#: application/view/subscribe.py:64 application/view/subscribe.py:134
+#: application/view/subscribe.py:66 application/view/subscribe.py:134
 msgid "Duplicated subscription!"
 msgstr "重复的订阅!"
-
-#: application/view/subscribe.py:87
-msgid "The Rss does not exist."
-msgstr "此RSS不存在。"
 
 #: application/view/subscribe.py:98
 msgid "The Title or Url is empty."
@@ -1365,40 +1470,54 @@ msgstr "标题或URL为空。"
 msgid "Failed to fetch the recipe."
 msgstr "抓取Recipe失败。"
 
-#: application/view/subscribe.py:125 application/view/subscribe.py:267
+#: application/view/subscribe.py:125 application/view/subscribe.py:383
 msgid "Failed to save the recipe. Error:"
 msgstr "保存Recipe失败。错误："
 
-#: application/view/subscribe.py:223
-msgid "You can only delete the uploaded recipe."
-msgstr "您只能删除你自己上传的Recipe。"
+#: application/view/subscribe.py:157
+msgid "The Rss does not exist."
+msgstr "此RSS不存在。"
 
-#: application/view/subscribe.py:227
-msgid "The recipe have been subscribed, please unsubscribe it before delete."
-msgstr "此Recipe已经被订阅，请先取消订阅然后再删除。"
-
-#: application/view/subscribe.py:240
+#: application/view/subscribe.py:204 application/view/subscribe.py:257
+#: application/view/subscribe.py:276 application/view/subscribe.py:358
 msgid "This recipe has not been subscribed to yet."
 msgstr "此Recipe尚未被订阅。"
 
-#: application/view/subscribe.py:254
+#: application/view/subscribe.py:237
+msgid "The api key is required."
+msgstr "需要填写api key."
+
+#: application/view/subscribe.py:280
+msgid "The text is empty."
+msgstr "文本为空。"
+
+#: application/view/subscribe.py:339
+msgid "You can only delete the uploaded recipe."
+msgstr "您只能删除你自己上传的Recipe。"
+
+#: application/view/subscribe.py:343
+msgid "The recipe have been subscribed, please unsubscribe it before delete."
+msgstr "此Recipe已经被订阅，请先取消订阅然后再删除。"
+
+#: application/view/subscribe.py:370
 msgid "Can not read uploaded file, Error:"
 msgstr "无法读取上传的文件，错误："
 
-#: application/view/subscribe.py:262
+#: application/view/subscribe.py:378
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
 msgstr "解码Recipe失败，请确保您的Recipe为utf-8编码。"
 
-#: application/view/subscribe.py:282
+#: application/view/subscribe.py:398
 msgid "The recipe is already in the library."
 msgstr "此Recipe已经在新闻源中。"
 
-#: application/view/subscribe.py:312
+#: application/view/subscribe.py:428
 msgid "The login information for this recipe has been cleared."
 msgstr "此Recipe的网站登录信息已经被删除。"
 
-#: application/view/subscribe.py:316
+#: application/view/subscribe.py:432
 msgid "The login information for this recipe has been saved."
 msgstr "此Recipe的网站登录信息已经保存。"
+

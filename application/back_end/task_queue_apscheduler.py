@@ -39,7 +39,7 @@ def init_task_queue_service(app):
     return scheduler
 
 #@scheduler.task('interval', id='check_deliver', hours=1, misfire_grace_time=20*60, coalesce=True)
-@scheduler.task('cron', minute=50, id='check_deliver', misfire_grace_time=20*60, coalesce=True)
+@scheduler.task('cron', minute=40, id='check_deliver', misfire_grace_time=20*60, coalesce=True)
 def check_deliver():
     from ..view.deliver import MultiUserDelivery
     MultiUserDelivery()

@@ -12,7 +12,8 @@ from ..back_end.db_models import *
 from ..utils import str_to_bool
 from ..lib.urlopener import UrlOpener
 from ..lib.recipe_helper import GetBuiltinRecipeInfo, GetBuiltinRecipeSource
-from .library import KINDLEEAR_SITE, LIBRARY_MGR, SUBSCRIBED_FROM_LIBRARY, LIBRARY_GETSRC, buildKeUrl
+from .library import LIBRARY_MGR, SUBSCRIBED_FROM_LIBRARY, LIBRARY_GETSRC, buildKeUrl
+from ebook_translator import get_trans_engines, HtmlTranslator
 
 bpSubscribe = Blueprint('bpSubscribe', __name__)
 
@@ -77,77 +78,83 @@ def FeedsAjaxPost(actType):
     actType = actType.lower()
 
     if actType == 'delete':
-        rssId = form.get('id', '')
-        recipeType, rssId = Recipe.type_and_id(rssId)
-        rss = Recipe.get_by_id_or_none(rssId)
-        if rss:
-            rss.delete_instance()
-            UpdateBookedCustomRss(user)
-            return {'status': 'ok'}
-        else:
-            return {'status': _('The Rss does not exist.')}
+        return DeleteCustomRss(user, form.get('id', ''))
     elif actType == 'add':
-        title = form.get('title', '')
-        url = form.get('url', '')
-        isfulltext = str_to_bool(form.get('fulltext', ''))
-        fromSharedLibrary = str_to_bool(form.get('fromsharedlibrary', ''))
-        recipeId = form.get('recipeId', '')
-
-        ret = {'status':'ok', 'title':title, 'url':url, 'isfulltext':isfulltext, 'recipeId': recipeId}
-
-        if not title or not (url or recipeId):
-            ret['status'] = _("The Title or Url is empty.")
-            return ret
-
-        #如果url不存在，则可能是分享的recipe，需要连接服务器获取recipe代码
-        if not url:
-            opener = UrlOpener()
-            if recipeId.startswith('http'):
-                resp = opener.open(recipeId)
-            else:
-                path = LIBRARY_MGR + LIBRARY_GETSRC
-                resp = opener.open(buildKeUrl(path), {'recipeId': recipeId})
-
-            if resp.status_code != 200:
-                ret['status'] = _("Failed to fetch the recipe.")
-                return ret
-
-            if recipeId.startswith('http'):
-                src = resp.text
-            else:
-                data = resp.json()
-                if data.get('status') != 'ok':
-                    ret['status'] = data.get('status', '')
-                    return ret
-                src = data.get('src', '')
-                try:
-                    params = SaveRecipeIfCorrect(user, src)
-                except Exception as e:
-                    return {'status': _("Failed to save the recipe. Error:") + str(e)}
-                ret.update(params)
-        else: #自定义RSS
-            if not url.lower().startswith('http'):
-                url = ('https:/' if url.startswith('/') else 'https://') + url
-                ret['url'] = url
-
-            #判断是否重复
-            if Recipe.get_or_none((Recipe.user == user.name) & (Recipe.title == title)):
-                ret['status'] = _("Duplicated subscription!")
-                return ret
-            else:
-                rss = Recipe.create(title=title, url=url, isfulltext=isfulltext, type_='custom', user=user.name,
-                    time=datetime.datetime.utcnow())
-                ret['id'] = rss.recipe_id
-                UpdateBookedCustomRss(user)
-        
-        #如果是从共享库中订阅的，则通知共享服务器，提供订阅数量信息，以便排序
-        if fromSharedLibrary:
-            SendNewSubscription(title, url, recipeId)
-
-        return ret
+        return AddCustomRss(user, form)
     else:
         return {'status': 'Unknown command: {}'.format(actType)}
 
+#添加自定义RSS
+def AddCustomRss(user, form):
+    title = form.get('title', '')
+    url = form.get('url', '')
+    isfulltext = str_to_bool(form.get('fulltext', ''))
+    fromSharedLibrary = str_to_bool(form.get('fromsharedlibrary', ''))
+    recipeId = form.get('recipeId', '')
+
+    ret = {'status':'ok', 'title':title, 'url':url, 'isfulltext':isfulltext, 'recipeId': recipeId}
+
+    if not title or not (url or recipeId):
+        ret['status'] = _("The Title or Url is empty.")
+        return ret
+
+    #如果url不存在，则可能是分享的recipe，需要连接服务器获取recipe代码
+    if not url:
+        opener = UrlOpener()
+        if recipeId.startswith('http'):
+            resp = opener.open(recipeId)
+        else:
+            path = LIBRARY_MGR + LIBRARY_GETSRC
+            resp = opener.open(buildKeUrl(path), {'recipeId': recipeId})
+
+        if resp.status_code != 200:
+            ret['status'] = _("Failed to fetch the recipe.")
+            return ret
+
+        if recipeId.startswith('http'):
+            src = resp.text
+        else:
+            data = resp.json()
+            if data.get('status') != 'ok':
+                ret['status'] = data.get('status', '')
+                return ret
+            src = data.get('src', '')
+            try:
+                params = SaveRecipeIfCorrect(user, src)
+            except Exception as e:
+                return {'status': _("Failed to save the recipe. Error:") + str(e)}
+            ret.update(params)
+    else: #自定义RSS
+        if not url.lower().startswith('http'):
+            url = ('https:/' if url.startswith('/') else 'https://') + url
+            ret['url'] = url
+
+        #判断是否重复
+        if Recipe.get_or_none((Recipe.user == user.name) & (Recipe.title == title)):
+            ret['status'] = _("Duplicated subscription!")
+            return ret
+        else:
+            rss = Recipe.create(title=title, url=url, isfulltext=isfulltext, type_='custom', user=user.name,
+                time=datetime.datetime.utcnow())
+            ret['id'] = rss.recipe_id
+            UpdateBookedCustomRss(user)
+    
+    #如果是从共享库中订阅的，则通知共享服务器，提供订阅数量信息，以便排序
+    if fromSharedLibrary:
+        SendNewSubscription(title, url, recipeId)
+
+    return ret
+
+#删除自定义RSS
+def DeleteCustomRss(user, rssId):
+    recipeType, rssId = Recipe.type_and_id(rssId)
+    rss = Recipe.get_by_id_or_none(rssId)
+    if rss:
+        rss.delete_instance()
+        UpdateBookedCustomRss(user)
+        return {'status': 'ok'}
+    else:
+        return {'status': _('The Rss does not exist.')}
 
 #根据特定用户的自定义RSS推送使能设置，更新已订阅列表
 def UpdateBookedCustomRss(user: KeUser):
@@ -161,7 +168,8 @@ def UpdateBookedCustomRss(user: KeUser):
     if user.enable_custom_rss: #添加订阅
         for rss in user.all_custom_rss()[::-1]:
             BookedRecipe.get_or_create(recipe_id=rss.recipe_id, defaults={'separated': False, 'user': userName, 
-                'title': rss.title, 'description': rss.description, 'time': datetime.datetime.utcnow()})
+                'title': rss.title, 'description': rss.description, 'time': datetime.datetime.utcnow(),
+                'translator': rss.translator})
     else: #删除订阅
         ids = [rss.recipe_id for rss in user.all_custom_rss()]
         if ids:
@@ -173,6 +181,108 @@ def SendNewSubscription(title, url, recipeId):
     path = LIBRARY_MGR + SUBSCRIBED_FROM_LIBRARY
     #只管杀不管埋，不用管能否成功了
     opener.open(buildKeUrl(path), {'title': title, 'url': url, 'recipeId': recipeId})
+
+#书籍翻译器
+@bpSubscribe.route("/translator/<recipeId>", endpoint='BookTranslatorRoute')
+@login_required()
+def BookTranslatorRoute(recipeId):
+    user = get_login_user()
+    tips = ''
+    recipeId = recipeId.replace('__', ':')
+    recipeType, dbId = Recipe.type_and_id(recipeId)
+    recipe = GetBuiltinRecipeInfo(recipeId) if recipeType == 'builtin' else Recipe.get_by_id_or_none(dbId)
+    if not recipe:
+        tips = _('The recipe does not exist.')
+        return render_template('tipsback.html', tips=tips, urltoback=url_for('bpSubscribe.MySubscription'))
+        
+    bkRecipe = user.get_booked_recipe(recipeId)
+    if recipeType == 'custom':
+        params = recipe.translator #自定义RSS的Recipe和BookedRecipe的translator属性一致
+    elif bkRecipe:
+        params = bkRecipe.translator
+    else:
+        tips = _('This recipe has not been subscribed to yet.')
+        params = {}
+
+    engines = json.dumps(get_trans_engines(), separators=(',', ':'))
+    return render_template('book_translator.html', tab="my", tips=tips, params=params, title=recipe.title,
+        recipeId=recipeId, engines=engines)
+
+#修改书籍翻译器的设置
+@bpSubscribe.post("/translator/<recipeId>", endpoint='BookTranslatorPost')
+@login_required()
+def BookTranslatorPost(recipeId):
+    user = get_login_user()
+    tips = ''
+    recipeId = recipeId.replace('__', ':')
+    recipeType, dbId = Recipe.type_and_id(recipeId)
+    recipe = GetBuiltinRecipeInfo(recipeId) if recipeType == 'builtin' else Recipe.get_by_id_or_none(dbId)
+    if not recipe:
+        tips = _('The recipe does not exist.')
+        return render_template('tipsback.html', tips=tips, urltoback=url_for('bpSubscribe.MySubscription'))
+    
+    #构建配置参数
+    form = request.form
+    engineName = form.get('engine', '')
+    apiKeys = form.get('api_keys', '')
+    apiKeys = apiKeys.split('\n') if apiKeys else []
+    params = {'enable': str_to_bool(form.get('enable', '')), 'engine': engineName,
+        'api_keys': apiKeys, 'src_lang': form.get('src_lang', ''), 
+        'dst_lang': form.get('dst_lang', 'en'), 'position': form.get('position', 'below'),
+        'orig_style': form.get('orig_style', ''), 'trans_style': form.get('trans_style', '')}
+
+    engines = get_trans_engines()
+    engine = engines.get(engineName, None)
+    if engine and engine.get('need_api_key') and not apiKeys:
+        tips = _('The api key is required.')
+        return render_template('book_translator.html', tab="my", tips=tips, params=params, title=recipe.title,
+            recipeId=recipeId, engines=json.dumps(engines, separators=(',', ':')))
+
+    tips = _("Settings Saved!")
+    apply_all = str_to_bool(form.get('apply_all', ''))
+    if apply_all: #所有的Recipe使用同样的配置
+        for item in [*user.all_custom_rss(), *user.get_booked_recipe()]:
+            item.translator = params
+            item.save()
+    else:
+        bkRecipe = user.get_booked_recipe(recipeId)
+        if recipeType == 'custom': #自定义RSS先保存到Recipe，需要的时候再同步到BookedRecipe
+            recipe.translator = params
+            recipe.save()
+
+        if bkRecipe:
+            bkRecipe.translator = params
+            bkRecipe.save()
+        elif recipeType != 'custom':
+            tips = _('This recipe has not been subscribed to yet.')
+        
+    return render_template('book_translator.html', tab="my", tips=tips, params=params, title=recipe.title,
+        recipeId=recipeId, engines=json.dumps(engines, separators=(',', ':')))
+
+#测试Recipe的翻译器设置是否正确
+@bpSubscribe.post("/translator/test", endpoint='BookTranslatorTestPost')
+@login_required(forAjax=True)
+def BookTranslatorTestPost():
+    user = get_login_user()
+    tips = ''
+    recipeId = request.form.get('recipeId', '')
+    recipeType, dbId = Recipe.type_and_id(recipeId)
+    recipe = GetBuiltinRecipeInfo(recipeId) if recipeType == 'builtin' else Recipe.get_by_id_or_none(dbId)
+    if not recipe:
+        return {'status': _('The recipe does not exist.')}
+
+    bkRecipe = recipe if recipeType == 'custom' else user.get_booked_recipe(recipeId)
+    if not bkRecipe:
+        return {'status': _('This recipe has not been subscribed to yet.')}
+
+    text = request.form.get('text')
+    if not text:
+        return {'status': _('The text is empty.')}
+
+    translator = HtmlTranslator(bkRecipe.translator)
+    data = translator.translate_text(text)
+    status = data['error'] if data['error'] else 'ok'
+    return {'status': status, 'text': data['translated']}
 
 #订阅/退订内置或上传Recipe的AJAX处理函数
 @bpSubscribe.post("/recipe/<actType>", endpoint='RecipeAjaxPost')
@@ -186,61 +296,66 @@ def RecipeAjaxPost(actType):
     
     recipeId = form.get('id', '')
     recipeType, dbId = Recipe.type_and_id(recipeId)
-    if recipeType == 'builtin':
-        recipe = GetBuiltinRecipeInfo(recipeId)
-    else:
-        recipe = Recipe.get_by_id_or_none(dbId)
-
+    recipe = GetBuiltinRecipeInfo(recipeId) if recipeType == 'builtin' else Recipe.get_by_id_or_none(dbId)
     if not recipe:
         return {'status': _('The recipe does not exist.')}
 
-    title = recipe.title
-    desc = recipe.description
-    needSubscription = recipe.needs_subscription or False
-
     if actType == 'unsubscribe': #退订
-        BookedRecipe.delete().where((BookedRecipe.user == user.name) & (BookedRecipe.recipe_id == recipeId)).execute()
-        return {'status':'ok', 'id': recipeId, 'title': title, 'desc': desc}
+        return UnsubscribeRecipe(user, recipeId, recipe)
     elif actType == 'subscribe': #订阅
         separated = str_to_bool(form.get('separated', ''))
-        respDict = {'status': 'ok'}
-        
-        dbInst = user.get_booked_recipe(recipeId)
-        if dbInst: #可以更新separated属性
-            dbInst.separated = separated
-            dbInst.save()
-        else:
-            BookedRecipe.create(recipe_id=recipeId, separated=separated, user=user.name, title=title, 
-                description=desc, needs_subscription=needSubscription,
-                time=datetime.datetime.utcnow())
-
-        respDict['title'] = title
-        respDict['desc'] = desc
-        respDict['needs_subscription'] = needSubscription
-        respDict['separated'] = separated
-        return respDict
+        return SubscribeRecipe(user, recipeId, recipe, separated)
     elif actType == 'delete': #删除已经上传的recipe
-        if recipeType == 'builtin':
-            return {'status': _('You can only delete the uploaded recipe.')}
-        else:
-            bkRecipe = user.get_booked_recipe(recipeId)
-            if bkRecipe:
-                return {'status': _('The recipe have been subscribed, please unsubscribe it before delete.')}
-            else:
-                recipe.delete_instance()
-                return {'status': 'ok', 'id': recipeId}
+        return DeleteRecipe(user, recipeId, recipeType, recipe)
     elif actType == 'schedule': #设置某个recipe的自定义推送时间
-        dbInst = BookedRecipe.get_or_none(BookedRecipe.recipe_id == recipeId)
-        if dbInst:
-            allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-            dbInst.send_days = [weekday for weekday, day in enumerate(allDays) if str_to_bool(form.get(day, ''))]
-            dbInst.send_times = [tm for tm in range(24) if str_to_bool(form.get(str(tm), ''))]
-            dbInst.save()
-            return {'status': 'ok', 'id': recipeId, 'send_days': dbInst.send_days, 'send_times': dbInst.send_times}
-        else:
-            return {'status': _('This recipe has not been subscribed to yet.')}
+        return ScheduleRecipe(recipeId, form)
     else:
         return {'status': _('Unknown command: {}').format(actType)}
+
+
+#订阅某个Recipe
+def SubscribeRecipe(user, recipeId, recipe, separated):
+    ret = {'recipe_id': recipeId, 'title': recipe.title, 'description': recipe.description,
+        'needs_subscription': recipe.needs_subscription, 'separated': separated}
+    
+    dbInst = user.get_booked_recipe(recipeId)
+    if dbInst: #不报错，更新separated属性
+        dbInst.separated = separated
+        dbInst.save()
+    else:
+        BookedRecipe.create(user=user.name, **ret)
+
+    ret['status'] = 'ok'
+    return ret
+
+#退订某个Recipe
+def UnsubscribeRecipe(user, recipeId, recipe):
+    BookedRecipe.delete().where((BookedRecipe.user == user.name) & (BookedRecipe.recipe_id == recipeId)).execute()
+    return {'status':'ok', 'id': recipeId, 'title': recipe.title, 'desc': recipe.description}
+
+#删除某个Recipe
+def DeleteRecipe(user, recipeId, recipeType, recipe):
+    if recipeType == 'builtin':
+        return {'status': _('You can only delete the uploaded recipe.')}
+    else:
+        bkRecipe = user.get_booked_recipe(recipeId)
+        if bkRecipe:
+            return {'status': _('The recipe have been subscribed, please unsubscribe it before delete.')}
+        else:
+            recipe.delete_instance()
+            return {'status': 'ok', 'id': recipeId}
+
+#设置某个Recipe的推送时间
+def ScheduleRecipe(recipeId, form):
+    dbInst = BookedRecipe.get_or_none(BookedRecipe.recipe_id == recipeId)
+    if dbInst:
+        allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        dbInst.send_days = [weekday for weekday, day in enumerate(allDays) if str_to_bool(form.get(day, ''))]
+        dbInst.send_times = [tm for tm in range(24) if str_to_bool(form.get(str(tm), ''))]
+        dbInst.save()
+        return {'status': 'ok', 'id': recipeId, 'send_days': dbInst.send_days, 'send_times': dbInst.send_times}
+    else:
+        return {'status': _('This recipe has not been subscribed to yet.')}
 
 #将上传的Recipe保存到数据库，返回一个结果字典，里面是一些recipe的元数据
 def SaveUploadedRecipe(user):

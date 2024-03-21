@@ -87,8 +87,8 @@ class RecipeInput(InputFormatPlugin):
                     ro.masthead_url = None
                 ro.download()
             except Exception as e:
-                #raise ValueError('Failed to execute recipe "{}": {}'.format(ro.title, e))
-                log.warning('Failed to execute recipe "{}": {}'.format(ro.title, e))
+                msg = 'Failed to execute recipe "{}": {}'.format(recipe.title, e)
+                log.warning(msg)
                 continue
 
             feed_index_start += len(ro.feed_objects)

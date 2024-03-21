@@ -701,6 +701,10 @@ select[id="shared_rss_lang_pick"] {
     background-color: #F0680B;
     background: linear-gradient(to bottom, #DF8F57 50%, #F0680B 50%);
 }
+.btn-F { /* F为棕色背景 */
+    background-color: #C76171;
+    background: linear-gradient(to bottom, #D2969F 50%, #C76171 50%);
+}
 
 .upload-recipe {
     display: inline-block;
@@ -755,12 +759,6 @@ div[class="schedule_daytimes"] input {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-as-tag {
-  font-size: 14px;
-  font-style: normal;
-  color: #FE7374;
-  margin-right: 10px;
-}
 .icon-add:before {
   content: "\e609";
 }
@@ -799,6 +797,9 @@ div[class="schedule_daytimes"] input {
 }
 .icon-edit:before {
   content: "\e60c";
+}
+.icon-translate:before {
+  content: "\e8b2";
 }
 
 /* upload cover images */
@@ -896,13 +897,52 @@ div[class="schedule_daytimes"] input {
     text-align: center;
 }
 
+/* Usage: <a class="tooltip " data-msg="tooltip text">Text</a> */
 .tooltip {
+    position: relative;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.tooltip:hover::before {
+    word-break: keep-all;
+    white-space: nowrap;
+    content: attr(data-msg);
+    position: absolute;
+    padding: 2px 6px;
+    display: block;
+    color: #333;
+    opacity: 1;
+    border: 1px solid #333;
+    border-radius: 5px;
+    font-size: 14px;
+    line-height：20px;
+    top: calc(-100%); /*calc(10% + 5px);*/
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.tooltip:hover::after {
+    content: "﹀";
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%);
+    background: #fff;
+    height: 7px;
+    line-height: 13px;
+}
+
+/* 用于推送记录异常信息太长的鼠标悬停指示 */
+.log_tooltip {
     position: relative;
     display: inline-block;
     border-bottom: 1px dotted black;
     cursor: help;
 }
-.tooltip .tooltiptext {
+.log_tooltip .log_tooltiptext {
     visibility: hidden;
     width: 500px;
     background-color: #555;
@@ -917,7 +957,7 @@ div[class="schedule_daytimes"] input {
     opacity: 0;
     transition: opacity 0.3s;
 }
-.tooltip:hover .tooltiptext {
+.log_tooltip:hover .log_tooltiptext {
     visibility: visible;
     opacity: 1;
 }

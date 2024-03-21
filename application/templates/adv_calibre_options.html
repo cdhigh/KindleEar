@@ -1,0 +1,22 @@
+{% extends "adv_base.html" %}
+{% block titleTag -%}
+<title>{{ _("Calibre options") }} - KindleEar</title>
+{% endblock -%}
+
+{% block advcontent -%}
+<form class="pure-form" action="" method="POST">
+  <fieldset>
+    {% if tips -%}
+    <div class="notice-box error">{{tips|safe}}</div>
+    {% endif -%}
+    <legend><h3>{{_("Calibre options")}}</h3></legend>
+    <p><small>{{_("Set the parameters for Calibre, in JSON dictionary format.")}}</small></p>
+    <div class="box-list">
+      <textarea name="options" rows="5" cols="50">{{options}}</textarea>
+    </div>
+    <div style="text-align:center;">
+      <input type="submit" value="{{_('Save')}}" class="pure-button pure-button-primary pure-input-rounded" />
+    </div>
+  </fieldset>
+</form>
+{% endblock -%}

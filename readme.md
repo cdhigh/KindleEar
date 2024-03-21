@@ -1,4 +1,6 @@
-中文readme请参考 [Readme_zh.md](https://github.com/cdhigh/KindleEar/blob/master/readme_zh.md)
+__English__ · [简体中文](readme_zh.md)
+
+---
 
 # Announcement
 March 10, 2024    
@@ -14,7 +16,7 @@ The author has successfully deployed it to GAE/Oracle Cloud/PythonAnywhere.
 
 
 
-# Brief Introduction
+# Introduction
 KindleEar is a web application which can be deployed on various Python-hosting platforms or VPS.   
 It automatically aggregates various web content into epub/mobi and delivers it to your Kindle or other e-book readers daily.   
 

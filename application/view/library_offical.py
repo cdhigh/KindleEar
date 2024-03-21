@@ -114,7 +114,12 @@ def SharedLibraryOfficalAjax():
 
     #更新分类信息，用于缓存
     if category:
-        SharedRssCategory.replace(name=category, last_updated=now).execute()
+        dbItem = SharedRssCategory.get_or_none(SharedRssCategory.name == category)
+        if dbItem:
+            dbItem.last_updated = now
+            dbItem.save()
+        else:
+            SharedRssCategory.create(name=category, language=lang, last_updated=now)
 
     #没有其他订阅源使用此分类了
     if prevCategory and not SharedRss.get_or_none(SharedRss.category == prevCategory):

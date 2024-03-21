@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-14 20:42-0300\n"
+"POT-Creation-Date: 2024-03-19 20:51-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: tr_TR\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:138
+#: application/templates/admin.html:3 application/templates/base.html:139
 msgid "Admin"
 msgstr "Yönetim"
 
@@ -27,6 +27,7 @@ msgid "Signup settings"
 msgstr "Kayıt Ayarları"
 
 #: application/templates/admin.html:19
+#: application/templates/adv_calibre_options.html:18
 msgid "Save"
 msgstr "Kaydet"
 
@@ -200,6 +201,7 @@ msgid "Verify"
 msgstr "Doğrulamak"
 
 #: application/templates/adv_archive.html:89
+#: application/templates/book_translator.html:72
 #: application/templates/setting.html:243
 msgid "Save settings"
 msgstr "Ayarları kaydet"
@@ -233,6 +235,17 @@ msgstr "Kapak resmi"
 #: application/templates/adv_uploadcss.html:3
 msgid "Stylesheet"
 msgstr "Stylesheet"
+
+#: application/templates/adv_base.html:95
+#: application/templates/adv_base.html:99
+#: application/templates/adv_calibre_options.html:3
+#: application/templates/adv_calibre_options.html:12
+msgid "Calibre options"
+msgstr "Calibre seçenekleri"
+
+#: application/templates/adv_calibre_options.html:13
+msgid "Set the parameters for Calibre, in JSON dictionary format."
+msgstr "Calibre için parametreleri JSON sözlük formatında ayarlayın."
 
 #: application/templates/adv_delivernow.html:9
 msgid "Deliver selected recipes now"
@@ -618,41 +631,131 @@ msgstr ""
 "Seçtiğiniz dosyaların toplam boyutu 16 MB yi aşıyor. Lütfen görüntü "
 "çözünürlüğünü azaltın veya toplu olarak yükleyin."
 
-#: application/templates/base.html:111 application/templates/home.html:12
+#: application/templates/base.html:90
+#: application/templates/book_translator.html:3
+#: application/templates/book_translator.html:16
+msgid "Translator"
+msgstr "Çevirmen"
+
+#: application/templates/base.html:112 application/templates/home.html:12
 msgid "Logout"
 msgstr "Çıkış"
 
-#: application/templates/base.html:113 application/templates/home.html:17
+#: application/templates/base.html:114 application/templates/home.html:17
 #: application/templates/login.html:3 application/templates/login.html:19
 #: application/templates/login.html:29
 msgid "Login"
 msgstr "Giriş"
 
-#: application/templates/base.html:115 application/templates/signup.html:3
+#: application/templates/base.html:116 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr "Kaydol"
 
-#: application/templates/base.html:135 application/templates/home.html:11
+#: application/templates/base.html:136 application/templates/home.html:11
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr "RSSler"
 
-#: application/templates/base.html:136 application/templates/setting.html:3
+#: application/templates/base.html:137 application/templates/setting.html:3
 msgid "Settings"
 msgstr "Ayarlar"
 
-#: application/templates/base.html:137 application/templates/logs.html:3
+#: application/templates/base.html:138 application/templates/logs.html:3
 msgid "Logs"
 msgstr "Kayıtlar"
 
-#: application/templates/base.html:139
+#: application/templates/base.html:140
 msgid "Advanced"
 msgstr "Gelişmiş"
 
-#: application/templates/base.html:140 application/templates/library.html:3
+#: application/templates/base.html:141 application/templates/library.html:3
 msgid "Shared"
 msgstr "Paylaşılan"
+
+#: application/templates/book_translator.html:18
+msgid "State"
+msgstr "Durum"
+
+#: application/templates/book_translator.html:20
+msgid "Enable"
+msgstr "Etkinleştir"
+
+#: application/templates/book_translator.html:21
+msgid "Disable"
+msgstr "Devre dışı bırak"
+
+#: application/templates/book_translator.html:25
+msgid "Engine"
+msgstr "Motor"
+
+#: application/templates/book_translator.html:31
+msgid "Api Key"
+msgstr "Api Key"
+
+#: application/templates/book_translator.html:32
+msgid "One key per line"
+msgstr "Satır başına bir tuş"
+
+#: application/templates/book_translator.html:35
+msgid "Source language"
+msgstr "Kaynak dil"
+
+#: application/templates/book_translator.html:41
+msgid "Target language"
+msgstr "Hedef dil"
+
+#: application/templates/book_translator.html:47
+msgid "Translation Position"
+msgstr "Çeviri Konumu"
+
+#: application/templates/book_translator.html:49
+msgid "Below original"
+msgstr "Orjinalin altında"
+
+#: application/templates/book_translator.html:50
+msgid "Above original"
+msgstr "Orjinalin üstünde"
+
+#: application/templates/book_translator.html:51
+msgid "Left to original"
+msgstr "Orjinalin solunda"
+
+#: application/templates/book_translator.html:52
+msgid "Right to original"
+msgstr "Orjinalin sağından"
+
+#: application/templates/book_translator.html:53
+msgid "Translated text only"
+msgstr "Sadece çevrilmiş metin"
+
+#: application/templates/book_translator.html:57
+msgid "Original text style"
+msgstr "Orijinal metin stili"
+
+#: application/templates/book_translator.html:61
+msgid "Translated text style"
+msgstr "Çevrilmiş metin stili"
+
+#: application/templates/book_translator.html:67
+msgid "Apply to all subscribed recipes"
+msgstr "Tüm abone olunan tarifelere uygula"
+
+#: application/templates/book_translator.html:78
+msgid "Test (Please save settings firstly)"
+msgstr "Test (Lütfen önce ayarları kaydedin)"
+
+#: application/templates/book_translator.html:80
+msgid "Text"
+msgstr "Metin"
+
+#: application/templates/book_translator.html:84
+msgid "Translation"
+msgstr "Çeviri"
+
+#: application/templates/book_translator.html:89
+msgid "Test"
+msgstr "Test"
 
 #: application/templates/change_password.html:13
 msgid "Change Password"
@@ -795,15 +898,15 @@ msgstr "Seçilen tarife abonelik başarılı."
 msgid "Bookmarklet"
 msgstr "Kitap modu"
 
-#: application/templates/my.html:78
+#: application/templates/my.html:77
 msgid "Send to Kindle"
 msgstr "Kindle'e Gönder"
 
-#: application/templates/my.html:82
+#: application/templates/my.html:81
 msgid "Subscribe with KindleEar"
 msgstr "KindleEar ile Abone Ol"
 
-#: application/templates/my.html:85
+#: application/templates/my.html:84
 msgid "Drag and drop this link to your bookmarks"
 msgstr "Bu bağlantıyı yer imlerinize sürükleyip bırakın"
 
@@ -992,7 +1095,8 @@ msgstr "Davetiye kodu"
 msgid "User account"
 msgstr "Kullanıcı hesabı"
 
-#: application/view/admin.py:51 application/view/setting.py:96
+#: application/view/admin.py:51 application/view/adv.py:355
+#: application/view/setting.py:96 application/view/subscribe.py:241
 msgid "Settings Saved!"
 msgstr "Ayarlar Kaydedildi!"
 
@@ -1056,65 +1160,69 @@ msgstr "Eski şifre yanlış."
 msgid "Changes saved successfully."
 msgstr "Değişiklikler başarıyla kaydedildi."
 
-#: application/view/adv.py:76 application/view/adv.py:77
-#: application/view/adv.py:78 application/view/adv.py:79
-#: application/view/adv.py:80 application/view/adv.py:81
-#: application/view/adv.py:82 application/view/adv.py:83
-#: application/view/adv.py:84
+#: application/view/adv.py:81 application/view/adv.py:82
+#: application/view/adv.py:83 application/view/adv.py:84
+#: application/view/adv.py:85 application/view/adv.py:86
+#: application/view/adv.py:87 application/view/adv.py:88
+#: application/view/adv.py:89
 msgid "Append hyperlink '{}' to article"
 msgstr "'{}' linkini makaleye ekle"
 
-#: application/view/adv.py:76 application/view/adv.py:77
-#: application/view/adv.py:78 application/view/adv.py:79
+#: application/view/adv.py:81 application/view/adv.py:82
+#: application/view/adv.py:83 application/view/adv.py:84
 msgid "Save to {}"
 msgstr "{} kaydedildi"
 
-#: application/view/adv.py:76
+#: application/view/adv.py:81
 msgid "evernote"
 msgstr "evernote"
 
-#: application/view/adv.py:77
+#: application/view/adv.py:82
 msgid "wiz"
 msgstr "wiz"
 
-#: application/view/adv.py:78
+#: application/view/adv.py:83
 msgid "pocket"
 msgstr "pocket"
 
-#: application/view/adv.py:79
+#: application/view/adv.py:84
 msgid "instapaper"
 msgstr "instapaper"
 
-#: application/view/adv.py:80 application/view/adv.py:81
-#: application/view/adv.py:82 application/view/adv.py:83
+#: application/view/adv.py:85 application/view/adv.py:86
+#: application/view/adv.py:87 application/view/adv.py:88
 msgid "Share on {}"
 msgstr "{} üzerinde paylaş"
 
-#: application/view/adv.py:80
+#: application/view/adv.py:85
 msgid "weibo"
 msgstr "weibo"
 
-#: application/view/adv.py:81
+#: application/view/adv.py:86
 msgid "facebook"
 msgstr "facebook"
 
-#: application/view/adv.py:83
+#: application/view/adv.py:88
 msgid "tumblr"
 msgstr "tumblr"
 
-#: application/view/adv.py:84
+#: application/view/adv.py:89
 msgid "Open in browser"
 msgstr "Tarayıcıda aç"
 
-#: application/view/adv.py:358
+#: application/view/adv.py:357
+msgid "The format is invalid."
+msgstr "Format geçersiz."
+
+#: application/view/adv.py:390
 msgid "Authorization Error!<br/>{}"
 msgstr "Yetkilendirme Hatası!<br/>{}"
 
-#: application/view/adv.py:381
+#: application/view/adv.py:413
 msgid "Success authorized by Pocket!"
 msgstr "Pocket tarafından yetkilendirilen başarı!"
 
-#: application/view/adv.py:387
+#: application/view/adv.py:419
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
@@ -1122,11 +1230,11 @@ msgstr ""
 "Pocket yetkilendirme isteği başarısız oldu!<hr/>Aşağıdaki ayrıntılara "
 "bakın:<br/><br/>{}"
 
-#: application/view/adv.py:397
+#: application/view/adv.py:429
 msgid "Request type [{}] unsupported"
 msgstr "İstek türü [{}] desteklenmiyor"
 
-#: application/view/adv.py:412
+#: application/view/adv.py:444
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 "Instapaper servisi bir hata ile karşılaştı. Lütfen daha sonra tekrar "
@@ -1145,13 +1253,14 @@ msgstr "Aşağıdaki tarifler itme kuyruğuna eklendi."
 msgid "There are no recipes to deliver."
 msgstr "Teslim edilecek tarif yok."
 
-#: application/view/library.py:31
+#: application/view/library.py:34
 msgid "Cannot fetch data from {}, status: {}"
 msgstr "{}, durumundan veri alınamıyor: {}"
 
-#: application/view/library.py:48 application/view/subscribe.py:194
-#: application/view/subscribe.py:305 application/view/subscribe.py:334
-#: application/view/subscribe.py:342
+#: application/view/library.py:51 application/view/subscribe.py:195
+#: application/view/subscribe.py:221 application/view/subscribe.py:272
+#: application/view/subscribe.py:301 application/view/subscribe.py:421
+#: application/view/subscribe.py:450 application/view/subscribe.py:458
 msgid "The recipe does not exist."
 msgstr "Tarif mevcut değil."
 
@@ -1343,7 +1452,7 @@ msgstr "Tagalog"
 msgid "Hausa"
 msgstr "Hausa"
 
-#: application/view/share.py:51 application/view/subscribe.py:242
+#: application/view/share.py:51 application/view/subscribe.py:313
 msgid "Unknown command: {}"
 msgstr "Bilinmeyen komut: {}"
 
@@ -1378,17 +1487,13 @@ msgstr "Aşağıdaki ayrıntılara bakın:"
 msgid "Unknown: {}"
 msgstr "Bilinmeyen: {}"
 
-#: application/view/subscribe.py:57
+#: application/view/subscribe.py:59
 msgid "Title or url is empty!"
 msgstr "URL veya başlık hatalı"
 
-#: application/view/subscribe.py:64 application/view/subscribe.py:134
+#: application/view/subscribe.py:66 application/view/subscribe.py:134
 msgid "Duplicated subscription!"
 msgstr "Duplicated subscription!"
-
-#: application/view/subscribe.py:87
-msgid "The Rss does not exist."
-msgstr "Rss mevcut değil."
 
 #: application/view/subscribe.py:98
 msgid "The Title or Url is empty."
@@ -1398,27 +1503,40 @@ msgstr "Başlık veya URL boş."
 msgid "Failed to fetch the recipe."
 msgstr "Tarif alınamadı."
 
-#: application/view/subscribe.py:125 application/view/subscribe.py:267
+#: application/view/subscribe.py:125 application/view/subscribe.py:383
 msgid "Failed to save the recipe. Error:"
 msgstr "Tarif kaydedilemedi. Hata:"
 
-#: application/view/subscribe.py:223
-msgid "You can only delete the uploaded recipe."
-msgstr "Yalnızca yüklenen tarifi silebilirsiniz."
+#: application/view/subscribe.py:157
+msgid "The Rss does not exist."
+msgstr "Rss mevcut değil."
 
-#: application/view/subscribe.py:227
-msgid "The recipe have been subscribed, please unsubscribe it before delete."
-msgstr "Tarif abone olunmuş, silmeden önce aboneliği iptal edin."
-
-#: application/view/subscribe.py:240
+#: application/view/subscribe.py:204 application/view/subscribe.py:257
+#: application/view/subscribe.py:276 application/view/subscribe.py:358
 msgid "This recipe has not been subscribed to yet."
 msgstr "Bu tarife henüz abone olunmadı."
 
-#: application/view/subscribe.py:254
+#: application/view/subscribe.py:237
+msgid "The api key is required."
+msgstr "API anahtarı gereklidir."
+
+#: application/view/subscribe.py:280
+msgid "The text is empty."
+msgstr "Metin boş."
+
+#: application/view/subscribe.py:339
+msgid "You can only delete the uploaded recipe."
+msgstr "Yalnızca yüklenen tarifi silebilirsiniz."
+
+#: application/view/subscribe.py:343
+msgid "The recipe have been subscribed, please unsubscribe it before delete."
+msgstr "Tarif abone olunmuş, silmeden önce aboneliği iptal edin."
+
+#: application/view/subscribe.py:370
 msgid "Can not read uploaded file, Error:"
 msgstr "Yüklenen dosya okunamıyor, Hata:"
 
-#: application/view/subscribe.py:262
+#: application/view/subscribe.py:378
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
@@ -1426,14 +1544,15 @@ msgstr ""
 "Tarif çözümlenemedi. Lütfen tarifinizin utf-8 kodlamasında "
 "kaydedildiğinden emin olun."
 
-#: application/view/subscribe.py:282
+#: application/view/subscribe.py:398
 msgid "The recipe is already in the library."
 msgstr "Tarif zaten kütüphanede."
 
-#: application/view/subscribe.py:312
+#: application/view/subscribe.py:428
 msgid "The login information for this recipe has been cleared."
 msgstr "Bu tarifin giriş bilgileri temizlendi."
 
-#: application/view/subscribe.py:316
+#: application/view/subscribe.py:432
 msgid "The login information for this recipe has been saved."
 msgstr "Bu tarifin giriş bilgileri kaydedildi."
+

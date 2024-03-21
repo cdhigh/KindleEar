@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block titleTag -%}
+<title>{{ _("Translator") }} - KindleEar</title>
+{% endblock -%}
+{% set src_lang = params.get('src_lang', '') %}
+{% set dst_lang = params.get('dst_lang', '') %}
+{% set api_keys = params.get('api_keys', [])|join('\n') %}
+{% set position = params.get('position', '') %}
+{% block content -%}
+<div class="main">
+  <form class="pure-form pure-form-aligned" action="" method="POST">
+    {% if tips -%}
+    <div class="notice-box error">{{tips|safe}}</div>
+    {% endif -%}
+    <fieldset>
+      <legend><h3>{{_("Translator")}} [{{title}}]</h3></legend>
+      <div class="pure-control-group">
+        <label>{{_("State")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="enable", id="translator_state">
+          <option value="1" {% if params.get('enable', '') %}selected="selected"{% endif %}>{{_('Enable')}}</option>
+          <option value="0" {% if not params.get('enable', '') %}selected="selected"{% endif %}>{{_('Disable')}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Engine")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="engine", id="translator_engine" onchange="TranslatorEngineFieldChanged('{{src_lang}}', '{{dst_lang}}')">
+          <!-- 由脚本填充 -->
+        </select>
+      </div>
+      <div class="pure-control-group" id="translator_api_key">
+        <label> {{_("Api Key")}}</label>
+        <textarea name="api_keys" placeholder="{{_('One key per line')}}" class="pure-u-1 pure-u-sm-1-2" >{{api_keys}}</textarea>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Source language")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="src_lang" id="translator_src_lang">
+          <!-- 由脚本填充 -->
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Target language")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="dst_lang" id="translator_dst_lang">
+          <!-- 由脚本填充 -->
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Translation Position")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="position">
+          <option value="below" {% if position == 'below' %}selected="selected"{% endif %}>{{_('Below original')}}</option>
+          <option value="above" {% if position == 'above' %}selected="selected"{% endif %}>{{_('Above original')}}</option>
+          <option value="left" {% if position == 'left' %}selected="selected"{% endif %}>{{_('Left to original')}}</option>
+          <option value="right" {% if position == 'right' %}selected="selected"{% endif %}>{{_('Right to original')}}</option>
+          <option value="replace" {% if position == 'replace' %}selected="selected"{% endif %}>{{_('Translated text only')}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Original text style")}}</label>
+        <input type="text" name="orig_style" value="{{params.get('orig_style', '')}}" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Translated text style")}}</label>
+        <input type="text" name="trans_style" value="{{params.get('trans_style', '')}}" placeholder="color:#2c1234" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <br/>
+      <label>
+        <input type="checkbox" name="apply_all" />
+        {{_("Apply to all subscribed recipes")}}
+      </label>
+      <input type="hidden" value="{{recipeId}}" name="recipeId" id="recipeId">
+    </fieldset>
+    <p style="text-align:center;">
+      <input type="submit" class="pure-button pure-button-primary pure-input-rounded" value="{{_('Save settings')}}" />
+    </p>
+  </form>
+  <hr/>
+  <form class="pure-form pure-form-aligned" action="" method="POST">
+    <fieldset>
+      <legend><h3>{{_("Test (Please save settings firstly)")}}</h3></legend>
+      <div class="pure-control-group">
+        <label>{{_("Text")}}</label>
+        <textarea class="pure-u-1 pure-u-sm-1-2" name="translator_test_src_text" id="translator_test_src_text">Hello world!</textarea>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Translation")}}</label>
+        <textarea class="pure-u-1 pure-u-sm-1-2" name="translator_test_dst_text" id="translator_test_dst_text" readonly></textarea>
+      </div>
+    </fieldset>
+    <p style="text-align:center;">
+      <input type="button" class="pure-button pure-button-primary pure-input-rounded" value="{{_('Test')}}" onclick="TestTranslator('{{recipeId}}')" />
+    </p>
+  </form>
+</div>
+{% endblock -%}
+
+{% block js -%}
+<script type="text/javascript">
+var g_trans_engines = {{engines|safe}};
+
+$(document).ready(function() {
+  PopulateTranslatorFields("{{params['engine']}}");
+  TranslatorEngineFieldChanged('{{src_lang}}', '{{dst_lang}}');
+});
+</script>
+{% endblock -%}

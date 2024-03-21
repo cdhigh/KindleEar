@@ -59,7 +59,7 @@ function BuildSharedRssByLang() {
     
     if (!g_rssByLang[lang]) {
       g_rssByLang[lang] = [];
-      var $newLangOpt = $('<option value="' + lang +'">' + g_languageNames.of(lang) + '</option>');
+      var $newLangOpt = $('<option value="{0}">{1}</option>'.format(lang, LanguageName(lang)));
       $("#shared_rss_lang_pick").append($newLangOpt);
     }
     g_rssByLang[lang].push(item);

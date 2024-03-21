@@ -87,7 +87,16 @@
           </li>
           {% else -%}
           <li class="pure-menu-item">
-            <a href="/adv/css" class="pure-menu-link">{{_("Stylesheet")}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
+            <a href="/adv/css" class="pure-menu-link">{{_("Stylesheet")}}</a>
+          </li>
+          {% endif -%}
+          {% if advCurr=='calibreOptions' -%}
+          <li class="pure-menu-item pure-menu-selected">
+            <span>{{_("Calibre options")}}</span>
+          </li>
+          {% else -%}
+          <li class="pure-menu-item">
+            <a href="/adv/calibre" class="pure-menu-link">{{_("Calibre options")}}</a>
           </li>
           {% endif -%}
         </ul>

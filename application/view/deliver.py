@@ -105,5 +105,5 @@ def flushQueueToPush(queueToPush: defaultdict):
     from ..back_end.task_queue_adpt import create_delivery_task
     for name in queueToPush:
         create_delivery_task({'userName': name, 'recipeId': ','.join(queueToPush[name])})
-
+    queueToPush.clear()
 

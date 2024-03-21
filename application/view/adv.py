@@ -9,11 +9,18 @@ from flask_babel import gettext as _
 from PIL import Image
 from ..base_handler import *
 from ..back_end.db_models import *
-from ..utils import local_time, ke_encrypt, ke_decrypt, str_to_bool
+from ..utils import local_time, ke_encrypt, ke_decrypt, str_to_bool, safe_eval
 from ..lib.pocket import Pocket
 from ..lib.urlopener import UrlOpener
 
 bpAdv = Blueprint('bpAdv', __name__)
+
+def adv_render_template(tpl, advCurr, **kwargs):
+    kwargs.setdefault('tab', 'advset')
+    kwargs.setdefault('tips', '')
+    kwargs.setdefault('adminName', app.config['ADMIN_NAME'])
+    kwargs.setdefault('in_email_service', app.config['INBOUND_EMAIL_SERVICE'])
+    return render_template(tpl, advCurr=advCurr, **kwargs)
 
 #现在推送
 @bpAdv.route("/adv", endpoint='AdvDeliverNowEntry')
@@ -22,8 +29,7 @@ bpAdv = Blueprint('bpAdv', __name__)
 def AdvDeliverNow():
     user = get_login_user()
     recipes = user.get_booked_recipe()
-    return render_template('adv_delivernow.html', tab='advset', user=user, 
-        advCurr='deliverNow', recipes=recipes, in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
+    return adv_render_template('adv_delivernow.html', 'deliverNow', user=user, recipes=recipes)
 
 #设置邮件白名单
 @bpAdv.route("/adv/whitelist", endpoint='AdvWhiteList')
@@ -31,8 +37,7 @@ def AdvDeliverNow():
 def AdvWhiteList():
     if app.config['INBOUND_EMAIL_SERVICE'] == 'gae':
         user = get_login_user()
-        return render_template('adv_whitelist.html', tab='advset',user=user, 
-            advCurr='whitelist', adminName=app.config['ADMIN_NAME'], in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
+        return adv_render_template('adv_whitelist.html', 'whitelist', user=user)
     else:
         abort(404)
 
@@ -85,9 +90,8 @@ def AdvArchive():
     shareLinks = user.share_links
     shareLinks.pop('key', None)
     
-    return render_template('adv_archive.html', tab='advset', user=user, advCurr='archive', appendStrs=appendStrs,
-        shareLinks=shareLinks, in_email_service=app.config['INBOUND_EMAIL_SERVICE'],
-        ke_decrypt=ke_decrypt)
+    return adv_render_template('adv_archive.html', 'archive', user=user, appendStrs=appendStrs,
+        shareLinks=shareLinks, ke_decrypt=ke_decrypt)
 
 @bpAdv.post("/adv/archive", endpoint='AdvArchivePost')
 @login_required()
@@ -130,8 +134,7 @@ def AdvArchivePost():
 @login_required()
 def AdvImport(tips=None):
     user = get_login_user()
-    return render_template('adv_import.html', tab='advset', user=user, advCurr='import', tips=tips,
-        in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
+    return adv_render_template('adv_import.html', 'import', user=user, tips=tips)
 
 @bpAdv.post("/adv/import", endpoint='AdvImportPost')
 @login_required()
@@ -144,8 +147,7 @@ def AdvImportPost():
         try:
             rssList = opml.from_string(upload.read())
         except Exception as e:
-            return render_template('adv_import.html', tab='advset', user=user, advCurr='import', tips=str(e),
-                in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
+            return adv_render_template('adv_import.html', 'import', user=user, tips=str(e))
         
         for o in walkOpmlOutline(rssList):
             title, url, isfulltext = o.text, unquote(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
@@ -231,9 +233,8 @@ def AdvUploadCoverImage(tips=None):
         coverName = f'cover{idx}'
         covers[coverName] = user.covers.get(coverName, f'/images/{coverName}.jpg')
     jsonCovers = json.dumps(covers)
-    return render_template('adv_uploadcover.html', tab='advset', user=user, advCurr='uploadCover', 
-        uploadUrl=url_for("bpAdv.AdvUploadCoverAjaxPost"), covers=covers, jsonCovers=jsonCovers,
-        tips=tips, in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
+    return adv_render_template('adv_uploadcover.html', 'uploadCover', user=user, tips=tips,
+        uploadUrl=url_for("bpAdv.AdvUploadCoverAjaxPost"), covers=covers, jsonCovers=jsonCovers)
 
 #AJAX接口的上传封面图片处理函数
 @bpAdv.post("/adv/cover", endpoint='AdvUploadCoverAjaxPost')
@@ -292,10 +293,9 @@ def AdvUploadCoverAjaxPost():
 def AdvUploadCss(tips=None):
     user = get_login_user()
     extra_css = user.get_extra_css()
-    return render_template('adv_uploadcss.html', tab='advset', extra_css=extra_css,
-        user=user, advCurr='uploadCss', uploadUrl=url_for("bpAdv.AdvUploadCssAjaxPost"), 
-        deleteUrl=url_for("bpAdv.AdvDeleteCssAjaxPost"), tips=tips, 
-        in_email_service=app.config['INBOUND_EMAIL_SERVICE'])
+    return adv_render_template('adv_uploadcss.html', 'uploadCss', extra_css=extra_css,
+        user=user, uploadUrl=url_for("bpAdv.AdvUploadCssAjaxPost"), 
+        deleteUrl=url_for("bpAdv.AdvDeleteCssAjaxPost"), tips=tips)
 
 #AJAX接口的上传CSS处理函数
 @bpAdv.post("/adv/css", endpoint='AdvUploadCssAjaxPost')
@@ -328,6 +328,38 @@ def AdvDeleteCssAjaxPost():
         UserBlob.delete().where((UserBlob.user == user.name) & (UserBlob.name=='css')).execute()
     
     return ret
+
+#设置calibre的参数
+@bpAdv.route("/adv/calibre", endpoint='AdvCalibreOptions')
+@login_required()
+def AdvCalibreOptions(tips=None):
+    user = get_login_user()
+    options = json.dumps(user.custom.get('calibre_options', {}), indent=2)
+    return adv_render_template('adv_calibre_options.html', 'calibreOptions', options=options, user=user)
+
+#设置calibre的参数
+@bpAdv.post("/adv/calibre", endpoint='AdvCalibreOptionsPost')
+@login_required()
+def AdvCalibreOptionsPost():
+    user = get_login_user()
+    tips = ''
+    txt = request.form.get('options', '').strip()
+    print(txt)
+    try:
+        options = safe_eval(txt) if txt else {}
+        if isinstance(options, dict):
+            custom = user.custom
+            custom['calibre_options'] = options
+            user.custom = custom
+            user.save()
+            tips = _("Settings Saved!")
+        else:
+            tips = _('The format is invalid.')
+    except Exception as e:
+        tips = str(e)
+
+    options = json.dumps(user.custom.get('calibre_options', {}), indent=2)
+    return adv_render_template('adv_calibre_options.html', 'calibreOptions', tips=tips, options=options, user=user)
 
 #读取数据库中的图像二进制数据，如果为dbimage/cover则返回当前用户的封面图片
 @bpAdv.route("/dbimage/<id_>", endpoint='DbImage')

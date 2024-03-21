@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 from flask import Blueprint, render_template, request, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
-from ..utils import str_to_bool
+from ..utils import str_to_bool, url_validator
 from ..back_end.db_models import *
 from ..lib.urlopener import UrlOpener
 from .library_offical import *
@@ -14,6 +14,7 @@ from .library_offical import *
 bpLibrary = Blueprint('bpLibrary', __name__)
 
 GITHUB_SHARED_RSS = 'https://github.com/cdhigh/KindleEar/blob/master/application/recipes/shared_rss.json'
+g_ke_url = KINDLEEAR_SITE
 
 #给网友提供共享的订阅源数据，初始只返回一个空白页，然后在页面内使用ajax获取数据，参加 SharedLibraryMgrPost()
 @bpLibrary.route("/library", endpoint='SharedLibrary')
@@ -23,9 +24,11 @@ def SharedLibrary():
     tips = ''
     return render_template('library.html', tab='shared', user=user, tips=tips)
 
-def buildKeUrl(path, url=KINDLEEAR_SITE):
+def buildKeUrl(path):
     #url = 'http://localhost:5000/' if app.debug or app.testing else url
-    return urljoin(url, path)
+    global g_ke_url
+    g_ke_url = AppInfo.get_value(AppInfo.sharedRssLibraryUrl, KINDLEEAR_SITE)
+    return urljoin(g_ke_url, path)
     
 def srvErrStr(status_code, url=KINDLEEAR_SITE):
     return _('Cannot fetch data from {}, status: {}').format(url, UrlOpener.CodeMap(status_code))
@@ -89,12 +92,19 @@ def SharedLibraryMgrPost(mgrType):
         ghStatus = ''
         resp = opener.open(GITHUB_SHARED_RSS)
         if resp.status_code == 200:
-            recipes = resp.json()
-            if isinstance(recipes, list): #去掉重复项
-                existingUrls = {item.get('u') for item in keRss}
-                for item in recipes:
-                    if item.get('u') not in existingUrls:
-                        keRss.append(item)
+            githubSharedRss = resp.json()
+            if isinstance(githubSharedRss, dict):
+                newLink = githubSharedRss.get('library_url', '')
+                if url_validator(newLink) and newLink != g_ke_url:
+                    AppInfo.set_value(AppInfo.sharedRssLibraryUrl, newLink)
+
+                recipes = githubSharedRss.get('rss', [])
+                #去掉重复项
+                if recipes:
+                    existingUrls = {item.get('u') for item in keRss}
+                    for item in recipes:
+                        if item.get('u') not in existingUrls:
+                            keRss.append(item)
         else:
             ghStatus = srvErrStr(resp.status_code, 'github')
         

@@ -6,5 +6,6 @@ accesslog = "/home/ubuntu/log/gunicorn.access.log"
 errorlog = "/home/ubuntu/log/gunicorn.error.log"
 capture_output = True
 loglevel = "info"
+preload_app = True
 #certfile = 'cert.pem'
 #keyfile = 'key.pem'

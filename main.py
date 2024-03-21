@@ -3,8 +3,10 @@
 # KindleEar web application entrance
 # Visit <https://github.com/cdhigh/KindleEar> for the latest version
 # Author: cdhigh <https://github.com/cdhigh>
-import os, sys, builtins, logging
 
+__Version__ = '3.0.0b'
+
+import os, sys, builtins, logging
 from config import *
 
 appDir = os.path.dirname(os.path.abspath(__file__))
@@ -13,10 +15,11 @@ if DATABASE_URL == 'datastore' or TASK_QUEUE_SERVICE == 'datastore':
 else:
     log = logging.getLogger('gunicorn.error')
 if log.level == logging.NOTSET:
-    log.setLevel(logging.DEBUG)   #logging.DEBUG, WARNING
+    log.setLevel(logging.INFO)   #logging.DEBUG, WARNING
 
 builtins.__dict__['default_log'] = log
 builtins.__dict__['appDir'] = appDir
+builtins.__dict__['appVer'] = __Version__
 sys.path.insert(0, os.path.join(appDir, 'application', 'lib'))
 
 #将config.py里面的部分配置信息写到 os.environ ，因为有些部分可能不依赖flask运行

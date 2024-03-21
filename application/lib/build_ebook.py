@@ -67,17 +67,20 @@ def html_to_book(html: str, title: str, user, imgs: list=None, options: dict=Non
 
 #获取KindleEar定制的电子书转换参数
 def ke_opts(user, options=None):
-    options = options or {}
-    options.setdefault('output_profile', user.device)
-    options.setdefault('input_profile', 'kindle')
-    options.setdefault('no_inline_toc', False)
-    options.setdefault('epub_inline_toc', True)
-    options.setdefault('dont_compress', True)
-    options.setdefault('dont_split_on_page_breaks', True)
-    options['user'] = user
+    opt = user.custom.get('calibre_options', {})
+    if not isinstance(opt, dict):
+        opt = {}
+    opt.update(options or {})
+    opt.setdefault('output_profile', user.device)
+    opt.setdefault('input_profile', 'kindle')
+    opt.setdefault('no_inline_toc', False)
+    opt.setdefault('epub_inline_toc', True)
+    opt.setdefault('dont_compress', True)
+    opt.setdefault('dont_split_on_page_breaks', True)
+    opt['user'] = user
 
-    #options.setdefault('debug_pipeline', os.getenv('TEMP_DIR'))
-    #options.setdefault('verbose', 1)
-    #options.setdefault('test', 1)
-    return options
+    #opt.setdefault('debug_pipeline', os.getenv('TEMP_DIR'))
+    #opt.setdefault('verbose', 1)
+    #opt.setdefault('test', 1)
+    return opt
 

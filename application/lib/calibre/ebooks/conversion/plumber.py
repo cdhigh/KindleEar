@@ -391,7 +391,7 @@ class Plumber:
         try:
             self.oeb = self.input_plugin(self.input_, self.opts, self.input_fmt, self.log, tdir, fs)
         except Exception as e:
-            self.log.warning('Failed to execute recipes: {}'.format(str(e)))
+            self.log.warning('Failed to execute input plugin: {}'.format(str(e)))
             fs.clear()
             return
 

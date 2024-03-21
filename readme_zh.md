@@ -1,3 +1,7 @@
+[English](readme.md) · __简体中文__
+
+---
+
 # 公告
 2024-03-10    
 正式发布3.0 beta版，代码库已经可以用来部署，作者已经将其成功部署到GAE/Oracle Cloud/pythonAnywhere。

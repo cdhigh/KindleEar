@@ -86,6 +86,8 @@ def ReceiveMail(path):
     userName, to = extractUsernameFromEmail(message.to) #从接收地址提取账号名和真实地址
     adminName = app.config['ADMIN_NAME']
 
+#实际实现接收邮件功能
+def ReceiveMailImpl():
     user = KeUser.get_or_none(KeUser.name == (userName or adminName))
     if not user and (userName != adminName):
         user = KeUser.get_or_none(KeUser.name == adminName)

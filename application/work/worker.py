@@ -61,8 +61,8 @@ def WorkerImpl(userName: str, recipeId: list=None, log=None):
         return ret
 
     #编译recipe
-    srcDict = GetAllRecipeSrc(user, recipeId)
-    recipes = defaultdict(list) #编译好的recipe代码对象
+    srcDict = GetAllRecipeSrc(user, recipeId) #返回一个字典，键名为title，元素为 [BookedRecipe, Recipe, src]
+    recipes = defaultdict(list) #用于保存编译好的recipe代码对象
     userCss = user.get_extra_css()
     combine_css = lambda c1, c2=userCss: f'{c1}\n\n{c2}' if c1 else c2
     for title, (bked, recipeDb, src) in srcDict.items():
@@ -70,18 +70,19 @@ def WorkerImpl(userName: str, recipeId: list=None, log=None):
             ro = compile_recipe(src)
         except Exception as e:
             log.warning('Failed to compile recipe {}: {}'.format(title, str(e)))
+            continue
 
         if not ro.language or ro.language == 'und':
             ro.language = user.book_language
 
-        #合并自定义css
-        ro.extra_css = combine_css(ro.extra_css)
+        ro.extra_css = combine_css(ro.extra_css) #合并自定义css
+        ro.translator = bked.translator #设置网页翻译器信息
         
         #如果需要登录网站
         if ro.needs_subscription:
             ro.username = bked.account
             ro.password = bked.password
-
+        
         if bked.separated:
             recipes[ro.title].append(ro)
         else:
@@ -110,8 +111,8 @@ def WorkerImpl(userName: str, recipeId: list=None, log=None):
     return ret
 
 
-#在已订阅的Recipe或自定义RSS列表创建Recipe源码列表，最重要的作用是合并自定义RSS
-#返回一个字典，键名为title，元素为 [BookedRecipe, recipe, src]
+#在已订阅的Recipe或自定义RSS列表创建Recipe源码列表
+#返回一个字典，键名为title，元素为 [BookedRecipe, Recipe, src]
 def GetAllRecipeSrc(user, idList):
     srcDict = {}
     rssList = []

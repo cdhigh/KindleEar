@@ -4,13 +4,10 @@
 # Author: cdhigh <https://github.com/cdhigh>
 __Author__ = "cdhigh"
 
-__Version__ = '3.0.0b'
-
 import os, builtins, datetime
 from flask import Flask, render_template, session, request, g
 from flask_babel import Babel, gettext
 builtins.__dict__['_'] = gettext
-builtins.__dict__['appVer'] = __Version__
 
 #创建并初始化Flask wsgi对象
 def init_app(name, debug=False):
@@ -38,7 +35,7 @@ def init_app(name, debug=False):
 
     @app.before_request
     def BeforeRequest():
-        g.version = __Version__
+        g.version = appVer
         g.now = datetime.datetime.utcnow
         g.allowSignup = app.config['ALLOW_SIGNUP']
         connect_database()

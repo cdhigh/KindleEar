@@ -5,6 +5,27 @@
 import os, sys, hashlib, base64, secrets, datetime
 from urllib.parse import urlparse
 
+#比较安全的eval
+#txt: 需要编译的字符串
+#gbl: 全局字典
+#local: 本地字典
+def safe_eval(txt, gbl=None, local=None):
+    gbl = gbl or {}
+    local = local or {}
+    code = compile(txt, '<user input>', 'eval')
+    reason = None
+    banned = ('eval', 'compile', 'exec', 'getattr', 'hasattr', 'setattr', 'delattr',
+        'classmethod', 'globals', 'help', 'input', 'isinstance', 'issubclass', 'locals',
+        'open', 'print', 'property', 'staticmethod', 'vars', 'os')
+    for name in code.co_names:
+        if re.search(r'^__\S*__$', name):
+            reason = 'dunder attributes not allowed' # pragma: no cover
+        elif name in banned:
+            reason = 'arbitrary code execution not allowed' # pragma: no cover
+        if reason:
+            raise NameError(f'{name} not allowed : {reason}') # pragma: no cover
+    return eval(code, gbl, local)
+
 #当异常出现时，使用此函数返回真实引发异常的文件名，函数名和行号
 def get_exc_location():
     #追踪到最终的异常引发点
@@ -28,7 +49,7 @@ def str_to_int(txt, default=0):
 
 #字符串转bool(txt)
 def str_to_bool(txt):
-    return (txt or '').lower().strip() in ('yes', 'true', 'on', 'enable', 'enabled', '1', 'checked')
+    return str(txt or '').lower().strip() in ('yes', 'true', 'on', 'enable', 'enabled', '1', 'checked')
 
 #返回字符串格式化时间
 def local_time(fmt="%Y-%m-%d %H:%M", tz=0):
@@ -80,6 +101,14 @@ def hide_website(site):
     else:
         site = path[0] + '**'
     return site
+
+#判断url是否合法
+def url_validator(url):
+    try:
+        parts = urlparse(url)
+        return all([parts.scheme, parts.netloc])
+    except AttributeError:
+        return False
 
 #将字节长度转换为人类友好的字符串，比如 2000 -> 2kB
 #value: 字节长度

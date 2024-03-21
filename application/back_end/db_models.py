@@ -130,6 +130,8 @@ class Recipe(MyBaseModel):
     time = DateTimeField() #源被加入的时间，用于排序
     user = CharField() #哪个账号创建的，和nosql一致，保存用户名
     language = CharField(default='')
+    translator = JSONField(default=JSONField.dict_default) #用于自定义RSS的备份，实际使用的是BookedRecipe
+    custom = JSONField(default=JSONField.dict_default) #留着扩展，避免后续一些小特性还需要升级数据表结构
 
     #在程序内其他地方使用的id，在数据库内则使用 self.id
     @property
@@ -159,8 +161,10 @@ class BookedRecipe(MyBaseModel):
     encrypted_pwd = CharField(default='')
     send_days = JSONField(default=JSONField.list_default)
     send_times = JSONField(default=JSONField.list_default)
-    time = DateTimeField() #源被订阅的时间，用于排序
-
+    time = DateTimeField(default=datetime.datetime.utcnow) #源被订阅的时间，用于排序
+    translator = JSONField(default=JSONField.dict_default)
+    custom = JSONField(default=JSONField.dict_default) #留着扩展，避免后续一些小特性还需要升级数据表结构
+    
     @property
     def password(self):
         userInst = KeUser.get_or_none(KeUser.name == self.user)
@@ -210,7 +214,8 @@ class SharedRss(MyBaseModel):
     
 #Buffer for category of shared rss [for kindleear.appspot.com only]
 class SharedRssCategory(MyBaseModel):
-    name = CharField(unique=True)
+    name = CharField()
+    language = CharField()
     last_updated = DateTimeField(default=datetime.datetime.utcnow)
 
 class LastDelivered(MyBaseModel):
@@ -225,13 +230,15 @@ class AppInfo(MyBaseModel):
     value = CharField(default='')
     description = CharField(default='')
 
+    dbSchemaVersion = 'dbSchemaVersion'
     lastSharedRssTime = 'lastSharedRssTime'
     newUserMailService = 'newUserMailService'
     signupType = 'signupType'
     inviteCodes = 'inviteCodes'
+    sharedRssLibraryUrl = 'sharedRssLibraryUrl'
     
     @classmethod
-    def get_value(cls, name, default):
+    def get_value(cls, name, default=''):
         dbItem = cls.get_or_none(AppInfo.name == name)
         return dbItem.value if dbItem else default
 
@@ -245,6 +252,8 @@ def create_database_tables():
     #connect_database()
     dbInstance.create_tables([KeUser, UserBlob, Recipe, BookedRecipe, DeliverLog, WhiteList,
         SharedRss, SharedRssCategory, LastDelivered, AppInfo], safe=True)
+    if not AppInfo.get_value(AppInfo.dbSchemaVersion):
+        AppInfo.set_value(AppInfo.dbSchemaVersion, appVer)
     #close_database()
         
     return 'Created database tables successfully'

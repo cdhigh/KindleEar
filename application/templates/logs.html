@@ -36,7 +36,7 @@
           {% if log.status == 'ok' -%}
             <span class="status success">ok</span>
           {% elif log.status|length > 15 -%}
-            <span class="tooltip status error">{{log.status[:12]}}...<span class="tooltiptext">{{log.status}}</span></span>
+            <span class="log_tooltip status error">{{log.status[:12]}}...<span class="log_tooltiptext">{{log.status}}</span></span>
           {% else -%}
             <span class="status error">{{ log.status }}</span>
           {% endif -%}

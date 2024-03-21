@@ -933,13 +933,13 @@ class BasicNewsRecipe(Recipe):
         self.test = options.test
         if self.test and not isinstance(self.test, tuple):
             self.test = (2, 2)
-        self.username = options.username
-        self.password = options.password
         self.lrf = options.lrf
         self.output_profile = options.output_profile
         self.touchscreen = getattr(self.output_profile, 'touchscreen', False)
         if self.touchscreen:
             self.template_css += self.output_profile.touchscreen_news_css
+
+        self.simultaneous_downloads = min(int(os.getenv('DOWNLOAD_THREAD_NUM', '1')), self.simultaneous_downloads)
 
         if self.test:
             self.max_articles_per_feed = self.test[1]
@@ -1076,6 +1076,10 @@ class BasicNewsRecipe(Recipe):
         for x in ans.find_all(['article', 'aside', 'header', 'footer', 'nav',
             'figcaption', 'figure', 'section', 'time']):
             x.name = 'div'
+
+        #If translation need, translator propery is set by WorkerImpl
+        if (getattr(self, 'translator', None) or {}).get('enable'):
+            self.translate_html(soup)
 
         if job_info:
             try:
@@ -1440,9 +1444,8 @@ class BasicNewsRecipe(Recipe):
                 self.jobs.append(req)
 
         self.jobs_done = 0
-        thread_num = min(int(os.environ.get('DOWNLOAD_THREAD_NUM', '1')), self.simultaneous_downloads)
-        if thread_num > 1:
-            tp = ThreadPool(thread_num)
+        if self.simultaneous_downloads > 1:
+            tp = ThreadPool(self.simultaneous_downloads)
             for req in self.jobs:
                 tp.putRequest(req, block=True, timeout=0)
 
@@ -1461,11 +1464,15 @@ class BasicNewsRecipe(Recipe):
                     req.exception = True
                     req.exc_callback(req, traceback.format_exc())
 
-        #统计看本Recipe的文章实际下载数量
+        #统计Recipe的文章实际下载数量
         article_num = sum(1 for feed in feeds for article in feed if article.downloaded)
         if not article_num:
             raise ValueError('No articles downloaded, aborting')
 
+        #翻译Feed的标题
+        if (getattr(self, 'translator', None) or {}).get('enable'):
+            self.translate_titles(feeds)
+        
         for f, feed in enumerate(feeds, self.feed_index_start):
             html = self.feed2index(f, feeds) #生成每个feed对应的html，都叫index.html
             feed_dir = os.path.join(self.output_dir, f'feed_{f}', 'index.html')
@@ -1558,7 +1565,7 @@ class BasicNewsRecipe(Recipe):
             self.download_masthead(murl)
 
         if self.masthead_path is None:
-            self.log.info("Synthesizing mastheadImage")
+            #self.log.info("Synthesizing mastheadImage")
             self.masthead_path = os.path.join(self.output_dir, DEFAULT_MASTHEAD_IMAGE)
             try:
                 masthead_raw_data = self.default_masthead_image()
@@ -1851,14 +1858,15 @@ class BasicNewsRecipe(Recipe):
                         max_articles_per_feed=self.max_articles_per_feed, get_article_url=self.get_article_url)
                     parsed_feeds.append(feed)
                 else:
-                    raise URLError(f'Cannot fetch {url}:{resp.status_code}')
-            except Exception as err:
+                    raise Exception(f'Cannot fetch {url}:{resp.status_code}')
+            except Exception as e:
+                msg = 'Failed feed: {} [Error: {}]'.format(title if title else url, str(e))
+                self.log.warning(msg)
                 feed = Feed() #创建一个空的Feed返回
-                msg = 'Failed feed: %s'%(title if title else url)
                 feed.populate_from_preparsed_feed(msg, [])
-                feed.description = as_unicode(err)
+                feed.description = str(e)
                 parsed_feeds.append(feed)
-                self.log.exception(msg)
+                
             delay = self.get_url_specific_delay(url)
             if delay > 0:
                 time.sleep(delay)
@@ -1952,6 +1960,31 @@ class BasicNewsRecipe(Recipe):
                             if url not in seen:
                                 log.debug(f'Resolved internal URL: {url} -> {arelpath}')
                                 seen.add(url)
+
+    #调用在线翻译服务平台，翻译html
+    def translate_html(self, soup):
+        from ebook_translator import HtmlTranslator
+        translator = HtmlTranslator(self.translator, self.simultaneous_downloads)
+        translator.translate_soup(soup)
+
+    #翻译Feed的title，toc时用到
+    def translate_titles(self, feeds):
+        from ebook_translator import HtmlTranslator
+        translator = HtmlTranslator(self.translator, self.simultaneous_downloads)
+        position = self.translator.get('position', 'below')
+        titles = []
+        for feed in feeds:
+            titles.append({'text': feed.title, 'obj': feed})
+            for article in feed:
+                titles.append({'text': article.title, 'obj': article})
+        newTitles = translator.translate_text(titles)
+        for item in [e for e in newTitles if not e['error']]:
+            if position in ('below', 'right'):
+                item['obj'].title = item['text'] + ' ' + item['translated']
+            elif position in ('above', 'left'):
+                item['obj'].title = item['translated'] + ' ' + item['text']
+            else: #replace
+                item['obj'].title = item['translated']
 
 
 class CustomIndexRecipe(BasicNewsRecipe):

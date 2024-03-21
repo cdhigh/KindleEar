@@ -1,100 +1,134 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-"""requests默认没有超时时间，使用此模块封装超时时间和一些表单功能
-为了尽量兼容mechanize，加了很多有用没用的接口
+"""requests默认没有使用超时时间，有时候会卡死，使用此模块封装超时时间和一些表单功能
+为了尽量兼容calibre使用的mechanize无头浏览器，加了很多有用没用的接口
 """
-import sys, requests, weakref
-from urllib.request import urlopen #用来进行base64 data url解码
-from urllib.parse import quote, unquote
+import sys, requests, weakref, re
+from types import MethodType
+from urllib.request import urlopen #仅用来进行base64 data url解码
+from urllib.parse import quote, unquote, urlunparse, urlparse, urlencode, parse_qs
 from bs4 import BeautifulSoup
 from html_form import HTMLForm
 
 class UrlOpener:
-    def __init__(self, host=None, timeout=30, headers=None, **kwargs):
+    #headers 可以传入一个字典或元祖列表
+    #file_stub 用于本地文件读取，如果为None，则使用python的open()函数
+    def __init__(self, *, host=None, timeout=30, headers=None, file_stub=None, user_agent=None, **kwargs):
         self.host = host
-        self.timeout = timeout
-        self.addheaders = [("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"),
+        self.timeout = timeout or 30
+        #addheaders不使用字典是为了和mechanize接口兼容
+        self.addheaders = [ #下面的代码假定第一个元素为 'User-Agent'
+            ('User-Agent', "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)"),
+            ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"),
             ("Accept-Encoding", "gzip, deflate"),]
-        if headers:
-            for key, value in (headers.items() if isinstance(headers, dict) else headers):
-                self.addheaders.append((key, value))
-        if 'user_agent' in kwargs:
-            self.addheaders.append(('User-Agent', kwargs.get('user_agent')))
-        else:
-            self.addheaders.append(('User-Agent', "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)"))
-        self.fs = kwargs.get('file_stub', None) #FsDictStub
+        headers = headers.items() if isinstance(headers, dict) else (headers or [])
+        self.addheaders.extend([(key, value) for key, value in headers])
+        if user_agent:
+            self.addheaders[0] = ('User-Agent', user_agent)
+
+        self.fs = file_stub #FsDictStub
         self.session = requests.session()
-        self.prevRespRef = None
+        self.prevRespRef = None #对Response实例的一个弱引用
         self.form = None
         self.soup = None
 
-    def open(self, url, data=None, headers=None, timeout=None, **kwargs):
-        #出现异常时response不是合法的对象，使用一个模拟的
-        r = requests.models.Response()
-        r.status_code = 555
-        timeout = timeout if timeout else self.timeout
+    #默认情况如果data!=None，则使用post，否则使用get，可以使用method参数覆盖此默认行为
+    #此函数不会抛出异常，判断 resp.status_code 即可
+    def open(self, url, data=None, headers=None, timeout=None, method=None, **kwargs):
         self.prevRespRef = None
         self.form = None
         self.soup = None
-        
-        url = quote(unquote(url), ':/') #不管输入的url是否已经转义，在这里保证url转义
-        
-        #竟然实际中还碰到以//开头的URL，真是大千世界无奇不有
-        if url.startswith(r"//"):
-            url = "https:" + url
-        elif url.startswith('www'):
-            url = "https://" + url
         
         if url.startswith('file:'): #本地文件
-            url = url[7:] if url.startswith('file://') else url[5:]
-            _plat = sys.platform.lower()
-            if ('win32' in _plat or 'win64' in _plat) and url.startswith('/'): #windows平台
-                url = url[1:]
-            return self.open_local_file(url)
+            resp = self.open_local_file(url)
         elif url.startswith("data:"): #网页内嵌内容data url
-            try:
-                r._content = urlopen(url).read()
-                r.status_code = 200
-            except Exception:
-                r.status_code = 404
+            resp = self.decode_data_url(url)
         else:
-            try:
-                if data:
-                    r = self.session.post(url, data=data, headers=self.get_headers(url, headers), timeout=timeout)
-                else:
-                    r = self.session.get(url, headers=self.get_headers(url, headers), timeout=timeout)
-            except Exception as e:
-                default_log.warning("url {} failed {}.".format(url, str(e)))
-        
-        #有些网页头部没有编码信息，则使用chardet检测编码，否则requests会认为text类型的编码为"ISO-8859-1"
-        if "charset" not in r.headers.get("Content-Type", "").lower():
-            r.encoding = None #r.apparent_encoding
+            resp = self.open_remote_url(url, data, headers, timeout, method, **kwargs)
 
-        #兼容mechanize接口，给response添加一个read()，避免其他人定义的recipe失效
-        r.read = lambda slf: slf.content if slf.status_code == 200 else b'' 
-        self.prevRespRef = weakref.ref(r) #用于可能的select_form()操作
-        return r
+        return self.patch_response(resp)
     
-    def open_local_file(self, fileName):
-        r = requests.models.Response()
-        r.status_code = 555
+    #远程连接互联网的url
+    def open_remote_url(self, url, data, headers, timeout, method, **kwargs):
+        timeout = timeout if timeout else self.timeout
+        headers = self.get_headers(url, headers)
+        method = 'POST' if data and (method != 'GET') else 'GET'
+        url = self.build_url(url, data, method)
+        if method == 'GET':
+            req_func = self.session.get
+            data = None
+        else:
+            req_func = self.session.post
+        
+        try:
+            resp = req_func(url, data=data, headers=headers, timeout=timeout, **kwargs)
+        except Exception as e:
+            resp = requests.models.Response()
+            resp.status_code = 555
+            default_log.warning(f"{method} {url} failed: {str(e)}")
+            
+        #有些网页头部没有编码信息，则使用chardet检测编码，否则requests会认为text类型的编码为"ISO-8859-1"
+        if "charset" not in resp.headers.get("Content-Type", "").lower():
+            resp.encoding = None #resp.apparent_encoding
+        return resp
+
+    #兼容mechanize接口，给response添加一个read()，避免其他人定义的recipe失效
+    def patch_response(self, resp):
+        resp_read_method = lambda self: self.content if self.status_code == 200 else b'' 
+        resp.read = MethodType(resp_read_method, resp)
+        self.prevRespRef = weakref.ref(resp) #用于可能的select_form()操作
+        return resp
+
+    #构建最终要使用的url
+    def build_url(self, url, data, method):
+        if url.startswith("//"):
+            url = f'http:{url}'
+        elif url.startswith('www'):
+            url = f'http://{url}'
+
+        parts = urlparse(url)._replace(fragment='')
+        if method == 'GET' and data:
+            query = parse_qs(parts.query)
+            query.update(data)
+            query = urlencode(query, doseq=True)
+            parts = parts._replace(query=query)
+
+        return urlunparse(parts)
+
+    #读取本地文件
+    def open_local_file(self, url):
+        url = url[7:] if url.startswith('file://') else url[5:]
+        plat = sys.platform.lower()
+        if ('win32' in plat or 'win64' in plat) and url.startswith('/'): #windows平台
+            url = url[1:]
+
+        resp = requests.models.Response()
         try:
             if self.fs:
-                r._content = self.fs.read(url, 'rb')
+                resp._content = self.fs.read(url, 'rb')
             else:
                 with read(url, 'rb') as f:
-                    r._content = f.read()
-            r.status_code = 200
-        except:
-            r.status_code = 404
+                    resp._content = f.read()
+            resp.status_code = 200
+        except Exception as e:
+            resp.status_code = 404
+            default_log.warning(f"open_local_file {url} failed: {str(e)}")
+        return resp
 
-        r.read = lambda slf: slf.content if slf.status_code == 200 else b'' 
-        self.prevRespRef = weakref.ref(r)
-        return r
+    #将data url解码为二进制数据
+    def decode_data_url(self, url):
+        resp = requests.models.Response()
+        try:
+            resp._content = urlopen(url).read()
+            resp.status_code = 200
+        except Exception:
+            resp.status_code = 404
+        return resp
 
     def open_novisit(self, *args, **kwargs):
         return self.open(*args, **kwargs)
 
+    #获取上次open()调用后的数据包的BeautifulSoup解析实例，不一定成功，如果数据包已经被垃圾回收则返回None
     def get_soup(self):
         if not self.soup:
             resp = self.prevRespRef()
@@ -109,7 +143,7 @@ class UrlOpener:
     #选择一个form，接下来可以用来登录
     #name: 表单的名字
     #predicate: 一个回调函数，参数为HTMLForm对象
-    #nr: 第几个表单
+    #nr: 第几个表单，序号从0开始
     def select_form(self, name=None, predicate=None, nr=None, **attrs):
         soup = self.get_soup()
         if not soup:
@@ -138,18 +172,16 @@ class UrlOpener:
     def submit(self, *args, **kwargs):
         resp = self.prevRespRef()
         if not resp or not self.soup or not self.form:
-            return
+            resp = requests.models.Response()
+            resp.status_code = 555
+            return self.patch_response(resp)
 
         action = self.form.get('action') or resp.url
-        #method = self.form.get('method')
-        payload = {}
-        for tag in self.form.find_all():
-            name = tag.get('name')
-            value = tag.get('value')
-            if name is not None and value is not None:
-                payload[name] = value
+        method = self.form.get('method', 'GET').upper()
+        payload = self.form.get_all_values()
+        return self.open(action, data=payload, method=method)
 
-        return self.open(action, data=payload)
+    submit_selected = submit
 
     #找到一个符合条件的url
     def find_link(self, text=None, text_regex=None, name=None, name_regex=None, url=None, 
@@ -157,23 +189,32 @@ class UrlOpener:
         soup = self.get_soup()
         if not soup:
             return None
-        links = soup.find_all('a')
+        links = soup.find_all('a', attrs={'href': True})
         if text:
-            links = [link for link in links if text in link.string]
-        if text_regex:
-            links = [link for link in links if text_regex.search(link.string)]
-        if name:
-            links = [link for link in links if link.get('name') == name]
-        if name_regex:
-            links = [link for link in links if link.get('name') and name_regex.search(link.get('name'))]
-        if url:
-            links = [link for link in links if url in link.get('href', '')]
-        if url_regex:
-            links = [link for link in links if link.get('href') and url_regex.search(link.get('href'))]
+            text = text.lower()
+            links = [link for link in links if text in (link.string or '').lower()]
+        elif text_regex:
+            if isinstance(text_regex, (str, bytes)):
+                text_regex = re.compile(text_regex, re.IGNORECASE)
+            links = [link for link in links if text_regex.search((link.string or ''))]
+        elif name:
+            links = [link for link in links if link.get('name', None) == name]
+        elif name_regex:
+            if isinstance(name_regex, (str, bytes)):
+                name_regex = re.compile(name_regex, re.IGNORECASE)
+            links = [link for link in links if name_regex.search(link.get('name', ''))]
+        elif url:
+            url = url.lower()
+            links = [link for link in links if url in link.get('href', '').lower()]
+        elif url_regex:
+            if isinstance(url_regex, (str, bytes)):
+                url_regex = re.compile(url_regex, re.IGNORECASE)
+            links = [link for link in links if url_regex.search(link.get('href', ''))]
+
         if nr and nr < len(links):
-            return links[nr]
+            return links[nr].get('href', None)
         elif links:
-            return links[0]
+            return links[0].get('href', None)
         else:
             return None
 
@@ -185,34 +226,30 @@ class UrlOpener:
         if link:
             return self.open(link)
         else:
-            r = requests.models.Response()
-            r.status_code = 555
-            r._content = b''
-            self.prevRespRef = None
+            resp = requests.models.Response()
+            resp.status_code = 555
+            resp._content = b''
             self.form = None
             self.soup = None
-            r.read = lambda slf: slf.content if slf.status_code == 200 else b'' 
-            self.prevRespRef = weakref.ref(r)
-            return r
+            self.prevRespRef = weakref.ref(resp)
+            return self.patch_response(resp)
 
+    #构建网络请求使用的header字典
     def get_headers(self, url=None, extra_headers=None):
-        headers = {}
-        for key, value in self.addheaders:
-            headers[key] = value
-        if (self.host or url) and 'Referer' not in headers:
-            headers["Referer"] = self.host if self.host else url
+        headers = {k: v for k, v in self.addheaders}
+        referer = self.host if self.host else url
+        if referer:
+            headers.setdefault('Referer', referer)
         if extra_headers:
             headers.update(extra_headers)
         return headers
 
+    #添加或修改一个headers值
     def set_current_header(self, key, value):
-        for idx in range(len(self.addheaders)):
-            if self.addheaders[idx][0] == key:
-                self.addheaders[idx] = (key, value)
-                break
-        else:
-            self.addheaders.append((key, value))
-
+        headers = {key: value for key, value in self.addheaders}
+        headers[key] = value
+        self.addheaders = [(k, v) for k, v in headers.items()]
+        
     def set_simple_cookie(self, name, value, domain, path='/'):
         self.session.cookies.set(name, value, domain)
 
@@ -228,6 +265,7 @@ class UrlOpener:
     def __exit__(self, *args):
         self.close()
 
+    #设置登录账号或密码信息
     def __setitem__(self, name, value):
         if self.form:
             self.form[name] = value
@@ -243,8 +281,8 @@ class UrlOpener:
 
     @classmethod
     def CodeMap(cls, errCode):
-        des = cls._codeMapDict.get(errCode, None)
-        return '{} {}'.format(errCode, des) if des else str(errCode)
+        return '{} {}'.format(errCode, cls._codeMapDict.get(errCode, ''))
+
     _codeMapDict = {
         200 : 'Ok',
         201 : 'Created',
@@ -278,6 +316,7 @@ class UrlOpener:
         415 : 'Unsupported Media Type',
         416 : 'Requested Range Not Satisfiable',
         417 : 'Expectation Failed',
+        429 : 'You exceeded your current quota',
         500 : 'Internal Server Error',
         501 : 'Not Implemented',
         502 : 'Bad Gateway',
@@ -286,13 +325,12 @@ class UrlOpener:
         505 : 'HTTP Version Not Supported',
         
         #------- Custom Code -----------------
-        529 : 'OverQuotaError',
+        529 : 'OverQuota Error',
         530 : 'Timeout',
-        531 : 'ResponseTooLargeError',
-        532 : 'SSLCertificateError',
-        533 : 'UnAuthorizedError',
-        534 : 'DownloadError',
-        535 : 'GeneralDownloadError',
+        531 : 'Response Too Large Error',
+        532 : 'SSLCertificate Error',
+        533 : 'UnAuthorized Error',
+        534 : 'Download Error',
+        535 : 'General Download Error',
+        555 : 'Unknown Error',
     }
-
-
