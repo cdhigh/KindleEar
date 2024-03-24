@@ -21,46 +21,49 @@ class InboundEmailTestCase(BaseTestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_ah_mail(self):
-        data = {'sender': 'Bill <ms@us.com>', 'subject': 'teardown', 'text': 'is text body', 'files': None}
-        resp = self.send('dl', data)
-        self.assertEqual(resp.status_code, 200)
-        self.assertIn('Spam mail!', resp.text)
+        for mType in ('gae', 'general'):
+            WhiteList.delete().execute()
+            data = {'sender': 'Bill <ms@us.com>', 'subject': 'teardown', 'text': 'is text body', 'files': None}
+            resp = self.send('dl', data, mType)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Spam mail', resp.text)
 
-        WhiteList.create(mail='*', user='admin')
-        resp = self.send('dl', data)
-        self.assertEqual(resp.status_code, 200)
-        
-        data['text'] = "www.google.com"
-        resp = self.send('dl', data)
-        self.assertEqual(resp.status_code, 200)
+            WhiteList.create(mail='*', user='admin')
+            resp = self.send('dl', data, mType)
+            self.assertEqual(resp.status_code, 200)
+            
+            data['text'] = "www.google.com"
+            resp = self.send('dl', data, mType)
+            self.assertEqual(resp.status_code, 200)
 
-        resp = self.send('trigger', data)
-        self.assertEqual(resp.status_code, 200)
-        self.assertIn('is triggered', resp.text)
+            resp = self.send('trigger', data, mType)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('is triggered', resp.text)
 
-        resp = self.send('book', data)
-        self.assertEqual(resp.status_code, 200)
+            resp = self.send('book', data, mType)
+            self.assertEqual(resp.status_code, 200)
 
-        resp = self.send('download', data)
-        self.assertEqual(resp.status_code, 200)
+            resp = self.send('download', data, mType)
+            self.assertEqual(resp.status_code, 200)
 
-        data['subject'] = 'Teardown!links'
-        resp = self.send('download', data)
-        self.assertEqual(resp.status_code, 200)
+            data['subject'] = 'Teardown!links'
+            resp = self.send('download', data, mType)
+            self.assertEqual(resp.status_code, 200)
 
-        data['subject'] = 'Teardown!article'
-        resp = self.send('download', data)
-        self.assertEqual(resp.status_code, 200)
+            data['subject'] = 'Teardown!article'
+            resp = self.send('download', data, mType)
+            self.assertEqual(resp.status_code, 200)
 
-        imgDir = os.path.join(appDir, 'application', 'images')
-        data['files'] = [os.path.join(imgDir, 'cover0.jpg'), os.path.join(imgDir, 'cover1.jpg')]
-        resp = self.send('d', data)
-        self.assertEqual(resp.status_code, 200)
+            imgDir = os.path.join(appDir, 'application', 'images')
+            data['files'] = [os.path.join(imgDir, 'cover0.jpg'), os.path.join(imgDir, 'cover1.jpg')]
+            resp = self.send('d', data, mType)
+            self.assertEqual(resp.status_code, 200)
 
-    def send(self, to, data):
+    def send(self, to, data, mType):
         to = f'{to}@kindleear.appspotmail.com'
         data['to'] = to
-        return self.client.post(f'/_ah/mail/{quote(to)}', data=self.build_mail(**data), content_type='multipart/alternative')
+        url = f'/_ah/mail/{quote(to)}' if mType == 'gae' else '/mail'
+        return self.client.post(url, data=self.build_mail(**data).encode('utf-8'), content_type='multipart/alternative')
 
     def build_mail(self, sender, to, subject, text, files=None):
         msg = MIMEMultipart()

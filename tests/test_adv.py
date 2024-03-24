@@ -17,13 +17,9 @@ class AdvTestCase(BaseTestCase):
 
     def test_whitelist(self):
         resp = self.client.get('/adv/whitelist')
-        if INBOUND_EMAIL_SERVICE == 'gae':
-            self.assertEqual(resp.status_code, 200)
-            self.assertTrue('White List' in resp.text)
-        else:
-            self.assertEqual(resp.status_code, 404)
-            return
-
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue('White List' in resp.text)
+        
         resp = self.client.post('/adv/whitelist', data={'wlist': ''})
         self.assertEqual(resp.status_code, 302)
 
@@ -63,7 +59,7 @@ class AdvTestCase(BaseTestCase):
         xml = """<?xml version="1.0" encoding="utf-8" ?><opml version="2.0"><head><title>KindleEar.opml</title>
               <dateCreated>Wed, 14 Feb 2024 02:18:32 GMT+0000</dateCreated><dateModified>Wed, 14 Feb 2024 02:18:32 GMT+0000</dateModified>
               <ownerName>KindleEar</ownerName></head><body>
-            <outline type="rss" text="bbc" xmlUrl="https%3A%2F%2Fwww.bbc.com/bbc.xml" isFulltext="True" />
+            <outline type="rss" text="bbc" xmlUrl="https://www.bbc.com/bbc.xml" isFulltext="True" />
             <outline type="rss" text="news" xmlUrl="www.news.com/news.xml" isFulltext="False" />
             </body></opml>"""
 
@@ -81,7 +77,7 @@ class AdvTestCase(BaseTestCase):
         self.assertEqual(resp.status_code, 200)
         content = resp.data
         self.assertIn(b'<ownerName>KindleEar</ownerName>', content)
-        self.assertIn(b'https%3A%2F%2Fwww.news.com%2Fnews.xml', content)
+        self.assertIn(b'https%3A//www.news.com/news.xml', content)
 
     def test_advuploadcover(self):
         resp = self.client.get('/adv/cover')

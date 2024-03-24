@@ -79,14 +79,14 @@ class AdminTestCase(BaseTestCase):
         data['password2'] = '1'
         resp = self.client.post('/account/change/admin', data=data)
         self.assertEqual(resp.status_code, 200)
-        self.assertIn("Change password success.", resp.text)
+        self.assertIn("Changes saved successfully.", resp.text)
         
         data['orgpwd'] = '1'
         data['password1'] = 'admin'
         data['password2'] = 'admin'
         resp = self.client.post('/account/change/admin', data=data)
         self.assertEqual(resp.status_code, 200)
-        self.assertIn("Change password success.", resp.text)
+        self.assertIn("Changes saved successfully.", resp.text)
 
     def test_change_user_password(self):
         data = {'username': '2', 'password1': '2', 'password2': '2', 'email': '1@1.com', 

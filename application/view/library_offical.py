@@ -232,17 +232,18 @@ def SharedLibraryCategoryOffical():
     cats = sorted(SharedRssCategory.get_all(), key=attrgetter('last_updated'), reverse=True)
     return [item.name for item in cats]
 
-#@bpLibraryOffical.route('/translib')
-#def TransferLib():
-#    fileName = os.path.join(os.path.dirname(__file__), 'ke_final.json')
-#    with open(fileName, 'r', encoding='utf-8') as f:
-#        ke_final = json.loads(f.read())
-#    SharedRss.delete().execute()
-#    cats = set()
-#    for t in ke_final:
-#        cats.add(t['c'])
-#        SharedRss.create(title=t['t'], url=t['u'], isfulltext=t['f'], language=t['l'], category=t['c'],
+# @bpLibraryOffical.route('/translib')
+# def TransferLib():
+#     fileName = os.path.join(os.path.dirname(__file__), 'ke_final.json')
+#     with open(fileName, 'r', encoding='utf-8') as f:
+#         ke_final = json.loads(f.read())
+#     SharedRss.delete().execute()
+#     SharedRssCategory.delete().execute()
+#     cats = set()
+#     for t in ke_final:
+#         cats.add(t['c'])
+#         SharedRss.create(title=t['t'], url=t['u'], isfulltext=t['f'], language=t['l'], category=t['c'],
 #            subscribed=t['s'], created_time=t['d'])
-#    for cat in cats:
-#        SharedRssCategory.create(name=cat)
-#    return f'Finished, data count={len(ke_final)}, category count={len(cats)}'
+#     for cat in cats:
+#         SharedRssCategory.create(name=cat, language='')
+#     return f'Finished, data count={len(ke_final)}, category count={len(cats)}'

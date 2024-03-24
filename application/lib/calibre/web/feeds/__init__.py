@@ -10,6 +10,8 @@ import copy
 import re
 import time
 import traceback
+import json
+import datetime
 
 from calibre import entity_to_unicode, force_unicode, strftime
 from calibre.utils.cleantext import clean_ascii_chars, clean_xml_chars
@@ -56,7 +58,7 @@ class Article:
         self.text_summary = clean_ascii_chars(summary)
         self.author = author
         self.content = content
-        self.date = published
+        self.date = published #time.struct_time
         self.utctime = dt_factory(self.date, assume_utc=True, as_utc=True)
         self.localtime = self.utctime.astimezone(local_tz)
         self._formatted_date = None
@@ -143,6 +145,27 @@ class Feed:
                 break
             self.parse_article(item)
 
+    #added by cdhigh
+    def populate_from_json(self, feed, title=None, oldest_article=7, max_articles_per_feed=100):
+        self.title        = feed.get('title', _('Unknown section')) if not title else title
+        self.description  = feed.get('description', '')
+        self.image_url    = feed.get('icon', None) or feed.get('favicon', None)
+        self.image_width  = 88
+        self.image_height = 31
+        self.image_alt    = ''
+
+        self.articles = []
+        self.id_counter = 0
+        self.added_articles = []
+
+        self.oldest_article = oldest_article
+
+        entries = feed.get('items')
+        for item in entries:
+            if len(self.articles) >= max_articles_per_feed:
+                break
+            self.parse_article_json(item)
+
     def populate_from_preparsed_feed(self, title, articles, oldest_article=7,
                            max_articles_per_feed=100):
         self.title      = str(title if title else _('Unknown feed'))
@@ -228,6 +251,50 @@ class Feed:
         if not link and not content:
             return
         article = Article(id, title, link, author, description, published, content)
+        delta = utcnow() - article.utctime
+        if (self.oldest_article == 0) or (delta.days*24*3600 + delta.seconds <= 24*3600*self.oldest_article):
+            self.articles.append(article)
+        else:
+            try:
+                self.logger.debug('Skipping article %s (%s) from feed %s as it is too old.'%
+                                  (title, article.localtime.strftime('%a, %d %b, %Y %H:%M'), self.title))
+            except UnicodeDecodeError:
+                if not isinstance(title, str):
+                    title = title.decode('utf-8', 'replace')
+                self.logger.debug('Skipping article %s as it is too old'%title)
+
+    #added by cdhigh
+    def parse_article_json(self, item):
+        self.id_counter += 1
+        id_ = item.get('id', None) or f'internal id#{self.id_counter}'
+        if id_ in self.added_articles:
+            return
+
+        self.added_articles.append(id_)
+        published = item.get('date_modified', None) or item.get('date_published', None)
+        if published:
+            import dateutil
+            try:
+                published = dateutil.parser.parse(published).timetuple()
+            except:
+                published = time.gmtime()
+        else:
+            published = time.gmtime()
+        
+        title = item.get('title', _('Untitled article'))
+        if title.startswith('<'):
+            title = re.sub(r'<.+?>', '', title)
+        link  = item.get('url', None) or item.get('external_url', None)
+        description = item.get('summary', None)
+        authors = item.get('authors', [])
+        author = ' '.join([aut.get('name', '') for aut in authors])
+        if not author:
+            author = item.get('author', {}).get('name', '')
+        content = item.get('content_html', None) or item.get('content_text', None)
+        if not link and not content:
+            return
+
+        article = Article(id_, title, link, author, description, published, content)
         delta = utcnow() - article.utctime
         if (self.oldest_article == 0) or (delta.days*24*3600 + delta.seconds <= 24*3600*self.oldest_article):
             self.articles.append(article)
@@ -343,11 +410,12 @@ def feed_from_xml(raw_xml, title=None, oldest_article=7,
                   max_articles_per_feed=100,
                   get_article_url=lambda item: item.get('link', None),
                   log=default_log):
+
     from feedparser import parse
 
     # Handle unclosed escaped entities. They trip up feedparser and HBR for one
     # generates them
-    raw_xml = re.sub(br'(&amp;#\d+)([^0-9;])', br'\1;\2', raw_xml)
+    raw_xml = re.sub(r'(&amp;#\d+)([^0-9;])', r'\1;\2', raw_xml)
     feed = parse(raw_xml)
     pfeed = Feed(get_article_url=get_article_url, log=log)
     pfeed.populate_from_feed(feed, title=title,
@@ -355,6 +423,24 @@ def feed_from_xml(raw_xml, title=None, oldest_article=7,
                             max_articles_per_feed=max_articles_per_feed)
     return pfeed
 
+#added by cdhigh
+def feed_from_json(raw_json, title=None, oldest_article=7,
+                  max_articles_per_feed=100,
+                  get_article_url=lambda item: item.get('link', None),
+                  log=default_log):
+
+    pfeed = Feed(get_article_url=get_article_url, log=log)
+
+    try:
+        feed = json.loads(raw_json)
+    except Exception as e:
+        log.warning('Parse json feed failed {}: {}'.format(title, str(e)))
+        return pfeed
+
+    pfeed.populate_from_json(feed, title=title,
+                            oldest_article=oldest_article,
+                            max_articles_per_feed=max_articles_per_feed)
+    return pfeed
 
 def feeds_from_index(index, oldest_article=7, max_articles_per_feed=100,
         log=default_log):

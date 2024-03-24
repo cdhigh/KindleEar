@@ -91,8 +91,7 @@ if __name__ == '__main__':
     db = cfg['DATABASE_URL'].split('://')[0]
     task = cfg['TASK_QUEUE_SERVICE']
     broker = cfg['TASK_QUEUE_BROKER_URL']
-    if (cfg['DATABASE_URL'].startswith('datastore') or cfg['INBOUND_EMAIL_SERVICE'] == 'gae' or 
-        cfg['TASK_QUEUE_SERVICE'] == 'gae'):
+    if (cfg['DATABASE_URL'].startswith('datastore') or cfg['TASK_QUEUE_SERVICE'] == 'gae'):
         plat = 'gae'
     else:
         plat = ''

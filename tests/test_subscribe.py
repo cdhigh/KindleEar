@@ -130,8 +130,7 @@ class SubscribeTestCase(BaseTestCase):
 
         resp = self.client.get('/viewsrc/{}'.format(upload_id.replace(':', '__')))
         self.assertEqual(resp.status_code, 200)
-        self.assertIn('class BasicUserRecipe', resp.text)
-        self.assertIn('auto_cleanup   = True', resp.text)
+        self.assertIn('class UserRecipe', resp.text)
 
         resp = self.client.post('/recipe/delete', data={'id': upload_id})
         self.assertEqual(resp.json['status'], 'ok')

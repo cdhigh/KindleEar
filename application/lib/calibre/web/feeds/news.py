@@ -29,7 +29,7 @@ from calibre.utils.localization import canonicalize_lang, ngettext
 from calibre.utils.logging import ThreadSafeWrapper
 from calibre.utils.threadpool import NoResultsPending, ThreadPool, WorkRequest
 from calibre.web import Recipe
-from calibre.web.feeds import Feed, Article, feed_from_xml, feeds_from_index, templates
+from calibre.web.feeds import Feed, Article, feed_from_xml, feeds_from_index, templates, feed_from_json
 from calibre.web.fetch.simple import AbortArticle, RecursiveFetcher
 from calibre.web.fetch.utils import prepare_masthead_image
 from polyglot.builtins import string_or_bytes
@@ -1853,9 +1853,10 @@ class BasicNewsRecipe(Recipe):
                 #        br.add_password(url, purl.username, purl.password)
                 resp = br.open(url, timeout=self.timeout)
                 if resp.status_code == 200:
-                    raw = resp.content
-                    feed = feed_from_xml(raw, title=title, log=self.log, oldest_article=self.oldest_article,
-                        max_articles_per_feed=self.max_articles_per_feed, get_article_url=self.get_article_url)
+                    raw = resp.text.lstrip()
+                    pFunc = feed_from_json if raw and raw[0] == '{' else feed_from_xml
+                    feed = pFunc(raw, title=title, log=self.log, oldest_article=self.oldest_article,
+                            max_articles_per_feed=self.max_articles_per_feed, get_article_url=self.get_article_url)
                     parsed_feeds.append(feed)
                 else:
                     raise Exception(f'Cannot fetch {url}:{resp.status_code}')

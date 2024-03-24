@@ -12,7 +12,7 @@
   <fieldset>
     <legend><h3>{{_("White List")}}</h3></legend>
     <p> <small>
-    {{_("Emails sent to %(name)sxxx@appid.appspotmail.com will be transferred to your email.", name='' if (user.name == adminName) else user.name + '__')}}
+    {{_("Emails sent to %(name)sxxx@%(mailHost)s will be transferred to your kindle email.", name='' if (user.name == adminName) else user.name + '__', mailHost=mailHost)}}
     </small></p>
     <div class="box-list">
       {%- for wl in user.white_lists() -%}

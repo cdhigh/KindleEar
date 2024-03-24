@@ -215,7 +215,7 @@ class SharedRss(MyBaseModel):
 #Buffer for category of shared rss [for kindleear.appspot.com only]
 class SharedRssCategory(MyBaseModel):
     name = CharField()
-    language = CharField()
+    language = CharField(default='')
     last_updated = DateTimeField(default=datetime.datetime.utcnow)
 
 class LastDelivered(MyBaseModel):
@@ -224,6 +224,16 @@ class LastDelivered(MyBaseModel):
     num = IntegerField(default=0)
     record = CharField(default='')
     datetime = DateTimeField(default=datetime.datetime.utcnow)
+
+class InBox(MyBaseModel):
+    user = CharField()
+    sender = CharField()
+    to = CharField()
+    subject = CharField()
+    size = IntegerField(default=0)
+    datetime = DateTimeField(default=datetime.datetime.utcnow)
+    body = TextField(default='', index=False)
+    attachments = CharField(default='') #存放UserBlob的数据库id，逗号分割
 
 class AppInfo(MyBaseModel):
     name = CharField(unique=True)
@@ -251,9 +261,9 @@ def create_database_tables():
     #with dbInstance.connection_context():
     #connect_database()
     dbInstance.create_tables([KeUser, UserBlob, Recipe, BookedRecipe, DeliverLog, WhiteList,
-        SharedRss, SharedRssCategory, LastDelivered, AppInfo], safe=True)
+        SharedRss, SharedRssCategory, LastDelivered, InBox, AppInfo], safe=True)
     if not AppInfo.get_value(AppInfo.dbSchemaVersion):
         AppInfo.set_value(AppInfo.dbSchemaVersion, appVer)
     #close_database()
-        
+    
     return 'Created database tables successfully'

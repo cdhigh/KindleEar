@@ -3,18 +3,9 @@
 #主页和其他路由
 import os
 from flask import Blueprint, render_template, send_from_directory, current_app
-from .view import login
-from .view import admin
-from .view import adv
-from .view import deliver
-from .view import library
-from .view import library_offical
-from .view import logs
-from .view import setting
-from .view import share
-from .view import subscribe
-from .work import worker
-from .work import url2book
+from .view import (login, admin, adv, deliver, library, library_offical, logs, setting, share, 
+    subscribe, inbound_email)
+from .work import worker, url2book
 
 bpHome = Blueprint('bpHome', __name__)
 
@@ -62,10 +53,10 @@ def register_routes(app):
         app.register_blueprint(worker.bpWorker)
         app.register_blueprint(url2book.bpUrl2Book)
         app.register_blueprint(library_offical.bpLibraryOffical)
+        app.register_blueprint(inbound_email.bpInBoundEmail)
 
-        #使用GAE来接收邮件
-        if app.config['INBOUND_EMAIL_SERVICE'] == 'gae':
+        #启用GAE邮件服务如果部署在GAE平台
+        if app.config['DATABASE_URL'] == 'datastore':
             from google.appengine.api import wrap_wsgi_app
-            from application.view.inbound_email import bpInBoundEmail
-            app.wsgi_app = wrap_wsgi_app(app.wsgi_app)  #启用GAE邮件服务
-            app.register_blueprint(bpInBoundEmail)
+            app.wsgi_app = wrap_wsgi_app(app.wsgi_app)
+        

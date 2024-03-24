@@ -16,7 +16,10 @@ if dbName.startswith('sqlite:///'): #support sqlite relative path
     if not fileName.startswith('/'):
         dbName = 'sqlite:///{}'.format(os.path.join(appDir, fileName))
 
-dbInstance = connect(dbName)
+if dbName == 'sqlite://:memory:':
+    dbInstance = SqliteDatabase(':memory:')
+else:
+    dbInstance = connect(dbName)
 
 #调用此函数正式连接到数据库（打开数据库）
 def connect_database():

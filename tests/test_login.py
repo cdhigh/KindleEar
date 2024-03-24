@@ -48,5 +48,5 @@ class LoginTestCase(BaseTestCase):
 
         resp = self.client.get('/resetpwd?name=admin')
         self.assertEqual(resp.status_code, 200)
-        self.assertIn('The email of account', resp.text)
+        self.assertIn('Reset password', resp.text)
         

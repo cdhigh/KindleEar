@@ -3,7 +3,7 @@
 #一些高级设置功能页面
 
 import datetime, hashlib, io
-from urllib.parse import quote, unquote, urljoin
+from urllib.parse import quote, unquote, urljoin, urlparse
 from flask import Blueprint, url_for, render_template, redirect, session, send_file, abort, current_app as app
 from flask_babel import gettext as _
 from PIL import Image
@@ -19,7 +19,6 @@ def adv_render_template(tpl, advCurr, **kwargs):
     kwargs.setdefault('tab', 'advset')
     kwargs.setdefault('tips', '')
     kwargs.setdefault('adminName', app.config['ADMIN_NAME'])
-    kwargs.setdefault('in_email_service', app.config['INBOUND_EMAIL_SERVICE'])
     return render_template(tpl, advCurr=advCurr, **kwargs)
 
 #现在推送
@@ -35,28 +34,27 @@ def AdvDeliverNow():
 @bpAdv.route("/adv/whitelist", endpoint='AdvWhiteList')
 @login_required()
 def AdvWhiteList():
-    if app.config['INBOUND_EMAIL_SERVICE'] == 'gae':
-        user = get_login_user()
-        return adv_render_template('adv_whitelist.html', 'whitelist', user=user)
+    user = get_login_user()
+    if app.config['DATABASE_URL'] == 'datastore':
+        mailHost = 'appid.appspotmail.com'
     else:
-        abort(404)
-
+        mailHost = urlparse(app.config['APP_DOMAIN']).netloc.split(':')[0]
+    
+    return adv_render_template('adv_whitelist.html', 'whitelist', user=user, mailHost=mailHost)
+    
 @bpAdv.post("/adv/whitelist", endpoint='AdvWhiteListPost')
 @login_required()
 def AdvWhiteListPost():
-    if app.config['INBOUND_EMAIL_SERVICE'] == 'gae':
-        user = get_login_user()
-        wlist = request.form.get('wlist')
+    user = get_login_user()
+    wlist = request.form.get('wlist')
+    if wlist:
+        wlist = wlist.replace('"', "").replace("'", "").strip()
+        if wlist.startswith('*@'): #输入*@xx.xx则修改为@xx.xx
+            wlist = wlist[1:]
         if wlist:
-            wlist = wlist.replace('"', "").replace("'", "").strip()
-            if wlist.startswith('*@'): #输入*@xx.xx则修改为@xx.xx
-                wlist = wlist[1:]
-            if wlist:
-                WhiteList.get_or_create(mail=wlist, user=user.name)
-        return redirect(url_for('bpAdv.AdvWhiteList'))
-    else:
-        abort(404)
-
+            WhiteList.get_or_create(mail=wlist, user=user.name)
+    return redirect(url_for('bpAdv.AdvWhiteList'))
+    
 #删除白名单项目
 @bpAdv.route("/advdel", endpoint='AdvDel')
 @login_required()

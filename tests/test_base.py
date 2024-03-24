@@ -29,8 +29,8 @@ class BaseTestCase(unittest.TestCase):
         self.temp_files = []
         
     def tearDown(self):
-        if self.login_required:
-            self.client.post('/logout')
+        #if self.login_required:
+        #    self.client.post('/logout')
         if self.temp_files:
             for f in self.temp_files:
                 try:

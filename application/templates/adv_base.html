@@ -36,14 +36,13 @@
         <ul class="pure-menu-list submenu-box">
           {% if advCurr=='deliverNow' -%}
           <li class="pure-menu-item pure-menu-selected">
-            <span>{{_("Deliver now")}}</span>
+            <span>{{_("Deliver Now")}}</span>
           </li>
           {% else -%}
           <li class="pure-menu-item">
-            <a href="/adv/delivernow" class="pure-menu-link">{{_("Deliver now")}} </a>
+            <a href="/adv/delivernow" class="pure-menu-link">{{_("Deliver Now")}} </a>
           </li>
           {% endif -%}
-          {% if in_email_service == 'gae' -%}
           {% if advCurr=='whitelist' -%}
           <li class="pure-menu-item pure-menu-selected">
             <span>{{_("White List")}}</span>
@@ -52,7 +51,6 @@
           <li class="pure-menu-item">
             <a href="/adv/whitelist" class="pure-menu-link">{{_("White List")}} </a>
           </li>
-          {% endif -%}
           {% endif -%}
           {% if advCurr=='archive' -%}
           <li class="pure-menu-item pure-menu-selected">
@@ -92,11 +90,11 @@
           {% endif -%}
           {% if advCurr=='calibreOptions' -%}
           <li class="pure-menu-item pure-menu-selected">
-            <span>{{_("Calibre options")}}</span>
+            <span>{{_("Calibre Options")}}</span>
           </li>
           {% else -%}
           <li class="pure-menu-item">
-            <a href="/adv/calibre" class="pure-menu-link">{{_("Calibre options")}}</a>
+            <a href="/adv/calibre" class="pure-menu-link">{{_("Calibre Options")}}</a>
           </li>
           {% endif -%}
         </ul>

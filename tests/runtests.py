@@ -11,6 +11,7 @@ log = logging.getLogger()
 log.setLevel(logging.INFO)
 builtins.__dict__['default_log'] = log
 builtins.__dict__['appDir'] = appDir
+builtins.__dict__['appVer'] = '3.0'
 
 from config import *
 
@@ -24,8 +25,8 @@ def set_env():
         os.environ['TEMP_DIR'] = os.path.join(appDir, TEMP_DIR)
     os.environ['DOWNLOAD_THREAD_NUM'] = str(int(DOWNLOAD_THREAD_NUM))
     os.environ['DATABASE_URL'] = 'sqlite://:memory:'
-    os.environ['TASK_QUEUE_SERVICE'] = TASK_QUEUE_SERVICE
-    os.environ['TASK_QUEUE_BROKER_URL'] = TASK_QUEUE_BROKER_URL
+    os.environ['TASK_QUEUE_SERVICE'] = ''
+    os.environ['TASK_QUEUE_BROKER_URL'] = ''
     os.environ['APP_DOMAIN'] = APP_DOMAIN
     os.environ['ADMIN_NAME'] = ADMIN_NAME
     os.environ['HIDE_MAIL_TO_LOCAL'] = '1' if HIDE_MAIL_TO_LOCAL else ''
@@ -56,7 +57,7 @@ def start_test(verbosity=1, failfast=0, testonly='', report=''):
         cov = coverage.coverage()
         cov.start()
 
-    runtests(collect_tests(), verbosity, failfast)
+    runtests(collect_tests(testonly), verbosity, failfast)
 
     if report:
         cov.stop()
@@ -69,15 +70,13 @@ def start_test(verbosity=1, failfast=0, testonly='', report=''):
     return 0
 
 TEST_MODULES = ['test_login', 'test_setting', 'test_admin', 'test_subscribe', 'test_adv', 
-     'test_logs'] #'test_share',
-if INBOUND_EMAIL_SERVICE == 'gae':
-    TEST_MODULES.append('test_inbound_email')
+     'test_logs', 'test_inbound_email'] #'test_share',
 
 if __name__ == '__main__':
     verbosity = 1 #Verbosity of output, 0 | 1 | 4
     failfast = 0 #Exit on first failure/error
     report = '' # '' | 'html' | 'console'
-    testonly = '' #module name, empty for testing all
+    testonly = 'test_inbound_email' #module name, empty for testing all
 
     os.environ['KE_TEST_VERBOSITY'] = str(verbosity)
     os.environ['KE_SLOW_TESTS'] = '1' #Run tests that may be slow
