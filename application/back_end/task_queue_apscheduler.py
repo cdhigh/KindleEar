@@ -22,8 +22,9 @@ elif _broker_url.startswith('mongodb://'):
 elif _broker_url.startswith(('sqlite://', 'mysql://', 'postgresql://')):
     from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
     jobstores = {"default": SQLAlchemyJobStore(url=_broker_url)}
-elif _broker_url == '':
-    jobstores = {} #default is memory store
+elif _broker_url == 'memory':
+    from apscheduler.jobstores.memory import MemoryJobStore
+    jobstores = {"default": MemoryJobStore()}
 else:
     raise ValueError('Unsupported TASK_QUEUE_BROKER_URL type: {_broker_url}')
 

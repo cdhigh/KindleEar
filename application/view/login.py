@@ -65,8 +65,14 @@ def LoginPost():
             u.custom = custom
             u.save()
         
-        return redirect(url_for("bpSubscribe.MySubscription") if u.kindle_email else url_for("bpSetting.Setting"))
-        #return redirect(url_for("bpSetting.Setting"))
+        if not u.sender:
+            url = url_for('bpAdmin.AdminAccountChange', name=name)
+        elif not u.kindle_email:
+            url = url_for("bpSetting.Setting")
+        else:
+            url = url_for("bpSubscribe.MySubscription")
+        default_log.info(f"Login event: {name}")
+        return redirect(url)
     else:  #账号或密码错
         time.sleep(5) #防止暴力破解
         tips = (_("The username does not exist or password is wrong.") +

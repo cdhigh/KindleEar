@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-19 20:51-0300\n"
+"POT-Creation-Date: 2024-03-25 21:13-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:139
+#: application/templates/admin.html:3 application/templates/base.html:144
 msgid "Admin"
 msgstr "账号管理"
 
@@ -168,8 +168,8 @@ msgstr "删除"
 
 #: application/templates/adv_archive.html:3
 #: application/templates/adv_archive.html:13
-#: application/templates/adv_base.html:59
-#: application/templates/adv_base.html:63
+#: application/templates/adv_base.html:57
+#: application/templates/adv_base.html:61
 msgid "Archive"
 msgstr "归档"
 
@@ -202,44 +202,46 @@ msgstr "校验"
 
 #: application/templates/adv_archive.html:89
 #: application/templates/book_translator.html:72
-#: application/templates/setting.html:243
+#: application/templates/setting.html:244
 msgid "Save settings"
 msgstr "保存设置"
 
 #: application/templates/adv_base.html:39
 #: application/templates/adv_base.html:43
-#: application/templates/adv_delivernow.html:3
 #: application/templates/adv_delivernow.html:8
-msgid "Deliver now"
+msgid "Deliver Now"
 msgstr "现在投递"
 
-#: application/templates/adv_base.html:49
-#: application/templates/adv_base.html:53
+#: application/templates/adv_base.html:48
+#: application/templates/adv_base.html:52
 #: application/templates/adv_whitelist.html:13
 msgid "White List"
 msgstr "邮件白名单"
 
-#: application/templates/adv_base.html:68
-#: application/templates/adv_base.html:72
+#: application/templates/adv_base.html:66
+#: application/templates/adv_base.html:70
 #: application/templates/adv_import.html:8
 msgid "Import Feeds"
 msgstr "导入订阅列表"
 
-#: application/templates/adv_base.html:77
-#: application/templates/adv_base.html:81
+#: application/templates/adv_base.html:75
+#: application/templates/adv_base.html:79
 msgid "Cover Image"
 msgstr "封面图像"
 
-#: application/templates/adv_base.html:86
-#: application/templates/adv_base.html:90
+#: application/templates/adv_base.html:84
+#: application/templates/adv_base.html:88
 #: application/templates/adv_uploadcss.html:3
 msgid "Stylesheet"
 msgstr "样式表"
 
-#: application/templates/adv_base.html:95
-#: application/templates/adv_base.html:99
-#: application/templates/adv_calibre_options.html:3
+#: application/templates/adv_base.html:93
+#: application/templates/adv_base.html:97
 #: application/templates/adv_calibre_options.html:12
+msgid "Calibre Options"
+msgstr "Calibre配置"
+
+#: application/templates/adv_calibre_options.html:3
 msgid "Calibre options"
 msgstr "Calibre配置"
 
@@ -247,8 +249,12 @@ msgstr "Calibre配置"
 msgid "Set the parameters for Calibre, in JSON dictionary format."
 msgstr "设置Calibre生成电子书的选项，要求为JSON字典格式。"
 
+#: application/templates/adv_delivernow.html:3
+msgid "Deliver now"
+msgstr "现在投递"
+
 #: application/templates/adv_delivernow.html:9
-msgid "Deliver selected recipes now"
+msgid "Deliver selected recipes now."
 msgstr "现在推送选择的Recipe"
 
 #: application/templates/adv_delivernow.html:12
@@ -329,11 +335,10 @@ msgid "White list"
 msgstr "邮件白名单"
 
 #: application/templates/adv_whitelist.html:15
-#, python-format
 msgid ""
-"Emails sent to %(name)sxxx@appid.appspotmail.com will be transferred to "
-"your email."
-msgstr "发送至 %(name)sxxx@appid.appspotmail.com 的邮件将被转发到您的邮箱。"
+"Emails sent to %(name)sxxx@%(mailHost)s will be transferred to your "
+"kindle email."
+msgstr "发送至 %(name)sxxx@%(mailHost)s 的邮件将被转发到您的邮箱。"
 
 #: application/templates/adv_whitelist.html:27
 msgid "Please input mail address"
@@ -491,7 +496,7 @@ msgstr "选择内容发送到Kindle"
 msgid "Verified"
 msgstr "已校验"
 
-#: application/templates/base.html:59 application/view/login.py:72
+#: application/templates/base.html:59 application/view/login.py:78
 #: application/view/share.py:154
 msgid "The username does not exist or password is wrong."
 msgstr "用户名不存在或密码错误。"
@@ -595,7 +600,7 @@ msgstr "用户名或密码为空。"
 
 #: application/templates/base.html:84 application/view/admin.py:86
 #: application/view/admin.py:165 application/view/admin.py:205
-#: application/view/login.py:213 application/view/login.py:273
+#: application/view/login.py:219 application/view/login.py:279
 msgid "The two new passwords are dismatch."
 msgstr "两个密码不匹配。"
 
@@ -607,7 +612,7 @@ msgstr "修改密码成功。"
 msgid "Account added successfully."
 msgstr "添加账号成功。"
 
-#: application/templates/base.html:87 application/view/login.py:123
+#: application/templates/base.html:87 application/view/login.py:129
 msgid "login required"
 msgstr "需要登录"
 
@@ -627,39 +632,62 @@ msgstr "您选择的文件总和超过16MB，请减小图像分辨率或分批�
 msgid "Translator"
 msgstr "书籍翻译器"
 
-#: application/templates/base.html:112 application/templates/home.html:12
+#: application/templates/base.html:91
+msgid "Upl"
+msgstr "Upl"
+
+#: application/templates/base.html:92
+msgid "Sep"
+msgstr "Sep"
+
+#: application/templates/base.html:93
+msgid "Log"
+msgstr "Log"
+
+#: application/templates/base.html:94
+msgid "Emb"
+msgstr "Emb"
+
+#: application/templates/base.html:95
+msgid ""
+"The test email has been successfully sent to [{0}]. Please check your "
+"inbox or spam folder to confirm its delivery. Depending on your email "
+"server, there may be a slight delay."
+msgstr "测试邮件已经成功发送到 [{0}]， 请打开收件箱或垃圾箱确认是否到达，根据服务器不同，可能稍有延迟。"
+
+#: application/templates/base.html:117 application/templates/home.html:12
 msgid "Logout"
 msgstr "退出"
 
-#: application/templates/base.html:114 application/templates/home.html:17
+#: application/templates/base.html:119 application/templates/home.html:17
 #: application/templates/login.html:3 application/templates/login.html:19
 #: application/templates/login.html:29
 msgid "Login"
 msgstr "登录"
 
-#: application/templates/base.html:116 application/templates/signup.html:3
+#: application/templates/base.html:121 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr "注册"
 
-#: application/templates/base.html:136 application/templates/home.html:11
+#: application/templates/base.html:141 application/templates/home.html:11
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr "我的订阅"
 
-#: application/templates/base.html:137 application/templates/setting.html:3
+#: application/templates/base.html:142 application/templates/setting.html:3
 msgid "Settings"
 msgstr "设置"
 
-#: application/templates/base.html:138 application/templates/logs.html:3
+#: application/templates/base.html:143 application/templates/logs.html:3
 msgid "Logs"
 msgstr "投递日志"
 
-#: application/templates/base.html:140
+#: application/templates/base.html:145
 msgid "Advanced"
 msgstr "高级设置"
 
-#: application/templates/base.html:141 application/templates/library.html:3
+#: application/templates/base.html:146 application/templates/library.html:3
 msgid "Shared"
 msgstr "网友分享"
 
@@ -727,7 +755,7 @@ msgstr "原文样式"
 msgid "Translated text style"
 msgstr "译文样式"
 
-#: application/templates/book_translator.html:67y
+#: application/templates/book_translator.html:67
 msgid "Apply to all subscribed recipes"
 msgstr "应用到当前所有已订阅Recipe"
 
@@ -809,8 +837,8 @@ msgstr "使用开源 %(kindleear)s 应用，您可以部署您自己的网站，
 msgid "Search"
 msgstr "搜索"
 
-#: application/templates/login.html:34 application/view/login.py:190
-#: application/view/login.py:197
+#: application/templates/login.html:34 application/view/login.py:196
+#: application/view/login.py:203
 msgid ""
 "The website does not allow registration. You can ask the owner for an "
 "account."
@@ -1058,11 +1086,15 @@ msgstr ""
 msgid "Personal Document Settings"
 msgstr "个人文档设置"
 
-#: application/templates/setting.html:239
+#: application/templates/setting.html:239 application/view/setting.py:130
 msgid ""
 "You have not yet set up your email address. Please go to the 'Admin' page"
 " to add your email address firstly."
 msgstr "您尚未设置您的email地址，请先到“账号管理”页面添加您的email地址。"
+
+#: application/templates/setting.html:246
+msgid "Send Test Email"
+msgstr "发送测试邮件"
 
 #: application/templates/signup.html:38
 msgid "Invitation code"
@@ -1072,7 +1104,7 @@ msgstr "邀请码"
 msgid "User account"
 msgstr "账号"
 
-#: application/view/admin.py:51 application/view/adv.py:355
+#: application/view/admin.py:51 application/view/adv.py:353
 #: application/view/setting.py:96 application/view/subscribe.py:241
 msgid "Settings Saved!"
 msgstr "恭喜，保存成功！"
@@ -1088,23 +1120,23 @@ msgid "You do not have sufficient privileges."
 msgstr "您没有足够的权限。"
 
 #: application/view/admin.py:82 application/view/admin.py:152
-#: application/view/login.py:209 application/view/login.py:238
+#: application/view/login.py:215 application/view/login.py:244
 #: application/view/setting.py:61 application/view/setting.py:63
 #: application/view/setting.py:65 application/view/share.py:36
 msgid "Some parameters are missing or wrong."
 msgstr "一些参数为空或错误。"
 
 #: application/view/admin.py:84 application/view/login.py:40
-#: application/view/login.py:215
+#: application/view/login.py:221
 msgid "The username includes unsafe chars."
 msgstr "用户名包含不安全字符。"
 
-#: application/view/admin.py:88 application/view/login.py:217
+#: application/view/admin.py:88 application/view/login.py:223
 msgid "Already exist the username."
 msgstr "此账号已经存在。"
 
 #: application/view/admin.py:93 application/view/admin.py:171
-#: application/view/admin.py:198 application/view/login.py:264
+#: application/view/admin.py:198 application/view/login.py:270
 msgid "The password includes non-ascii chars."
 msgstr "密码包含非ASCII字符。"
 
@@ -1137,83 +1169,83 @@ msgstr "原密码错误。"
 msgid "Changes saved successfully."
 msgstr "账号设置已更新。"
 
+#: application/view/adv.py:79 application/view/adv.py:80
 #: application/view/adv.py:81 application/view/adv.py:82
 #: application/view/adv.py:83 application/view/adv.py:84
 #: application/view/adv.py:85 application/view/adv.py:86
-#: application/view/adv.py:87 application/view/adv.py:88
-#: application/view/adv.py:89
+#: application/view/adv.py:87
 msgid "Append hyperlink '{}' to article"
 msgstr "在每篇文章后附加 '{}' 超链接"
 
+#: application/view/adv.py:79 application/view/adv.py:80
 #: application/view/adv.py:81 application/view/adv.py:82
-#: application/view/adv.py:83 application/view/adv.py:84
 msgid "Save to {}"
 msgstr "保存到 {}"
 
-#: application/view/adv.py:81
+#: application/view/adv.py:79
 msgid "evernote"
 msgstr "evernote"
 
-#: application/view/adv.py:82
+#: application/view/adv.py:80
 msgid "wiz"
 msgstr "为知笔记"
 
-#: application/view/adv.py:83
+#: application/view/adv.py:81
 msgid "pocket"
 msgstr "pocket"
 
-#: application/view/adv.py:84
+#: application/view/adv.py:82
 msgid "instapaper"
 msgstr "instapaper"
 
+#: application/view/adv.py:83 application/view/adv.py:84
 #: application/view/adv.py:85 application/view/adv.py:86
-#: application/view/adv.py:87 application/view/adv.py:88
 msgid "Share on {}"
 msgstr "分享到 {}"
 
-#: application/view/adv.py:85
+#: application/view/adv.py:83
 msgid "weibo"
 msgstr "微博"
 
-#: application/view/adv.py:86
+#: application/view/adv.py:84
 msgid "facebook"
 msgstr "facebook"
 
-#: application/view/adv.py:88
+#: application/view/adv.py:86
 msgid "tumblr"
 msgstr "tumblr"
 
-#: application/view/adv.py:89
+#: application/view/adv.py:87
 msgid "Open in browser"
 msgstr "在浏览器打开"
 
-#: application/view/adv.py:357
+#: application/view/adv.py:355
 msgid "The format is invalid."
 msgstr "格式非法。"
 
-#: application/view/adv.py:390
+#: application/view/adv.py:388
 msgid "Authorization Error!<br/>{}"
 msgstr "申请授权过程失败！<br/>{}"
 
-#: application/view/adv.py:413
+#: application/view/adv.py:411
 msgid "Success authorized by Pocket!"
 msgstr "已经成功获得Pocket的授权！"
 
-#: application/view/adv.py:419
+#: application/view/adv.py:417
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr "申请Pocket授权失败!<hr/>错误信息参考如下：<br/><br/>{}"
 
-#: application/view/adv.py:429
+#: application/view/adv.py:427
 msgid "Request type [{}] unsupported"
 msgstr "不支持你请求的命令类型 [{}]"
 
-#: application/view/adv.py:444
+#: application/view/adv.py:442
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr "Instapaper服务器异常，请稍候再试。"
 
-#: application/view/deliver.py:67 application/view/login.py:160
+#: application/view/deliver.py:67 application/view/login.py:166
 #: application/view/share.py:40
 msgid "The username does not exist or the email is empty."
 msgstr "用户名不存在或email为空。"
@@ -1249,61 +1281,61 @@ msgstr "账号名为空。"
 msgid "The len of username reached the limit of 25 chars."
 msgstr "用户名超过25字符。"
 
-#: application/view/login.py:73
+#: application/view/login.py:79
 msgid "Forgot password?"
 msgstr "忘记密码？"
 
-#: application/view/login.py:139 application/view/login.py:275
+#: application/view/login.py:145 application/view/login.py:281
 msgid "The token is wrong or expired."
 msgstr "Token码错误或已经逾期。"
 
-#: application/view/login.py:142
+#: application/view/login.py:148
 msgid "Please input the correct username and email to reset password."
 msgstr "请输入正确的用户名和Email来重置密码。"
 
-#: application/view/login.py:144
+#: application/view/login.py:150
 msgid "The email of account '{name}' is {email}."
 msgstr "账号 '{name}' 的Email为 {email}"
 
-#: application/view/login.py:165
+#: application/view/login.py:171
 msgid "Reset password success, Please close this page and login again."
 msgstr "修改密码成功，请关闭此页面重新登录。"
 
-#: application/view/login.py:168
+#: application/view/login.py:174
 msgid "The email you input is not associated with this account."
 msgstr "您输入的email不正确。"
 
-#: application/view/login.py:179
+#: application/view/login.py:185
 msgid "The link to reset your password has been sent to your email."
 msgstr "重置密码的邮件已经被发送至你的email。"
 
-#: application/view/login.py:180
+#: application/view/login.py:186
 msgid "Please check your email inbox within 24 hours."
 msgstr "请在24小时内检查你的email收件箱。"
 
-#: application/view/login.py:211
+#: application/view/login.py:217
 msgid "The invitation code is invalid."
 msgstr "邀请码无效。"
 
-#: application/view/login.py:219
+#: application/view/login.py:225
 msgid ""
 "Failed to create an account. Please contact the administrator for "
 "assistance."
 msgstr "创建账号失败，请联系管理员请求协助。"
 
-#: application/view/login.py:229
+#: application/view/login.py:235
 msgid "Successfully created account."
 msgstr "成功创建账号。"
 
-#: application/view/login.py:240
+#: application/view/login.py:246
 msgid "Reset KindleEar password"
 msgstr "重置KindleEar密码"
 
-#: application/view/login.py:241
+#: application/view/login.py:247
 msgid "This is an automated email. Please do not reply to it."
 msgstr "这个是自动发送的邮件，请勿直接回复。"
 
-#: application/view/login.py:242
+#: application/view/login.py:248
 msgid "You can click the following link to reset your KindleEar password."
 msgstr "你可以点击下面的链接来重置你的KindleEar密码。"
 
@@ -1315,107 +1347,107 @@ msgstr "Kindle E-mail必须填写！"
 msgid "Title is requied!"
 msgstr "书籍标题不能为空！"
 
-#: application/view/setting.py:123
+#: application/view/setting.py:153
 msgid "Chinese"
 msgstr "中文"
 
-#: application/view/setting.py:124
+#: application/view/setting.py:154
 msgid "English"
 msgstr "英语"
 
-#: application/view/setting.py:125
+#: application/view/setting.py:155
 msgid "French"
 msgstr "法语"
 
-#: application/view/setting.py:126
+#: application/view/setting.py:156
 msgid "Spanish"
 msgstr "西班牙语"
 
-#: application/view/setting.py:127
+#: application/view/setting.py:157
 msgid "Portuguese"
 msgstr "葡萄牙语"
 
-#: application/view/setting.py:128
+#: application/view/setting.py:158
 msgid "German"
 msgstr "德语"
 
-#: application/view/setting.py:129
+#: application/view/setting.py:159
 msgid "Italian"
 msgstr "意大利语"
 
-#: application/view/setting.py:130
+#: application/view/setting.py:160
 msgid "Japanese"
 msgstr "日语"
 
-#: application/view/setting.py:131
+#: application/view/setting.py:161
 msgid "Russian"
 msgstr "俄语"
 
-#: application/view/setting.py:132
+#: application/view/setting.py:162
 msgid "Turkish"
 msgstr "土耳其语"
 
-#: application/view/setting.py:133
+#: application/view/setting.py:163
 msgid "Korean"
 msgstr "韩语"
 
-#: application/view/setting.py:134
+#: application/view/setting.py:164
 msgid "Arabic"
 msgstr "阿拉伯语"
 
-#: application/view/setting.py:135
+#: application/view/setting.py:165
 msgid "Czech"
 msgstr "捷克语"
 
-#: application/view/setting.py:136
+#: application/view/setting.py:166
 msgid "Dutch"
 msgstr "荷兰语"
 
-#: application/view/setting.py:137
+#: application/view/setting.py:167
 msgid "Greek"
 msgstr "希腊语"
 
-#: application/view/setting.py:138
+#: application/view/setting.py:168
 msgid "Hindi"
 msgstr "印地语"
 
-#: application/view/setting.py:139
+#: application/view/setting.py:169
 msgid "Malaysian"
 msgstr "马来西亚语"
 
-#: application/view/setting.py:140
+#: application/view/setting.py:170
 msgid "Bengali"
 msgstr "孟加拉语"
 
-#: application/view/setting.py:141
+#: application/view/setting.py:171
 msgid "Persian"
 msgstr "波斯语"
 
-#: application/view/setting.py:142
+#: application/view/setting.py:172
 msgid "Urdu"
 msgstr "乌尔都语"
 
-#: application/view/setting.py:143
+#: application/view/setting.py:173
 msgid "Swahili"
 msgstr "斯瓦希里语"
 
-#: application/view/setting.py:144
+#: application/view/setting.py:174
 msgid "Vietnamese"
 msgstr "越南语"
 
-#: application/view/setting.py:145
+#: application/view/setting.py:175
 msgid "Punjabi"
 msgstr "旁遮普语"
 
-#: application/view/setting.py:146
+#: application/view/setting.py:176
 msgid "Javanese"
 msgstr "爪哇语"
 
-#: application/view/setting.py:147
+#: application/view/setting.py:177
 msgid "Tagalog"
 msgstr "他加禄语"
 
-#: application/view/setting.py:148
+#: application/view/setting.py:178
 msgid "Hausa"
 msgstr "豪萨语"
 

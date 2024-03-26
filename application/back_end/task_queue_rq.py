@@ -4,8 +4,9 @@
 #Author: cdhigh <https://github.com/cdhigh>
 import os, sys, json
 
-#启动rq
-#set FLASK_APP=main.py
+#启动rq的worker命令，在shell下执行
+#windows: set FLASK_APP=main.py
+#linux: export FLASK_APP=main.py
 #flask rq worker
 
 from flask_rq2 import RQ
@@ -15,9 +16,9 @@ rq = RQ()
 def init_task_queue_service(app):
     app.config['RQ_REDIS_URL'] = app.config['TASK_QUEUE_BROKER_URL']
     rq.init_app(app)
-    #windows不支持，暂时屏蔽，正式版本需要取消注释
-    #check_deliver.cron('0 */1 * * *', 'check_deliver') #每隔一个小时执行一次
-    #remove_logs.cron('0 0 */1 * *', 'remove_logs') #每隔24小时执行一次
+    #windows不支持，暂时屏蔽，正式版本需要取消注释, TODO
+    check_deliver.cron('40 */1 * * *', 'check_deliver') #每隔一个小时执行一次
+    remove_logs.cron('0 0 */1 * *', 'remove_logs') #每隔24小时执行一次
     return rq
 
 @rq.job

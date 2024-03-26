@@ -10,12 +10,8 @@ import os, sys, builtins, logging
 from config import *
 
 appDir = os.path.dirname(os.path.abspath(__file__))
-if DATABASE_URL == 'datastore' or TASK_QUEUE_SERVICE == 'datastore':
-    log = logging.getLogger()
-else:
-    log = logging.getLogger('gunicorn.error')
-if log.level == logging.NOTSET:
-    log.setLevel(logging.INFO)   #logging.DEBUG, WARNING
+#logName = None if (DATABASE_URL == 'datastore') else 'gunicorn.error'
+log = logging.getLogger()
 
 builtins.__dict__['default_log'] = log
 builtins.__dict__['appDir'] = appDir
@@ -45,6 +41,7 @@ set_env()
 from application import init_app
 app = init_app(__name__, debug=False)
 celery_app = app.extensions.get("celery", None)
+log.setLevel(logging.INFO)   #logging.DEBUG, WARNING
 
 def main():
     if len(sys.argv) == 2 and sys.argv[1] == 'debug':

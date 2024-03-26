@@ -230,6 +230,7 @@ class InBox(MyBaseModel):
     sender = CharField()
     to = CharField()
     subject = CharField()
+    status = CharField()
     size = IntegerField(default=0)
     datetime = DateTimeField(default=datetime.datetime.utcnow)
     body = TextField(default='', index=False)

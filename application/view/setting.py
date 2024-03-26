@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #设置页面
-import locale, os
+import locale, os, textwrap
 from flask import Blueprint, render_template, request, redirect, session
 from flask import current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..utils import str_to_bool, str_to_int, ke_encrypt
 from ..back_end.db_models import *
-from ..back_end.send_mail_adpt import avaliable_sm_services
+from ..back_end.send_mail_adpt import avaliable_sm_services, send_mail
 from .subscribe import UpdateBookedCustomRss
 
 bpSetting = Blueprint('bpSetting', __name__)
@@ -100,6 +100,36 @@ def SettingPost():
     
     sm_services = avaliable_sm_services()
     return render_template('setting.html', tab='set', user=user, tips=tips, langMap=LangMap(), sm_services=sm_services)
+
+@bpSetting.post("/send_test_email", endpoint='SendTestEmailPost')
+@login_required()
+def SendTestEmailPost():
+    user = get_login_user()
+    srcUrl = request.form.get('url', '')
+    body = textwrap.dedent(f"""\
+    Dear {user.name}, 
+
+    This is a test email from KindleEar, sent to verify the accuracy of the email sending configuration.  
+    Please ignore it and do not reply.   
+
+    Receiving this email confirms that your KindleEar web application can send emails successfully.   
+    Thank you for your attention to this matter.   
+
+    Best regards,
+    [KindleEar]
+    [From {srcUrl}]
+    """)
+
+    if user.email:
+        status = 'ok'
+        try:
+            send_mail(user, user.email, 'Test email from KindleEar', body)
+        except Exception as e:
+            status = str(e)
+    else:
+        status = _("You have not yet set up your email address. Please go to the 'Admin' page to add your email address firstly.")
+
+    return {'status': status, 'email': user.email}
 
 #设置国际化语种
 @bpSetting.route("/setlocale/<langCode>")

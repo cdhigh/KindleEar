@@ -239,8 +239,11 @@
       {{_("You have not yet set up your email address. Please go to the 'Admin' page to add your email address firstly.")}}
     </p>
     {% endif %}
+    <hr/>
     <p style="text-align:center;">
-      <input type="submit" class="pure-button pure-button-primary pure-input-rounded" value="{{_('Save settings')}}" />
+      <button type="submit" class="pure-button pure-button-primary pure-input-rounded">{{_('Save settings')}} </button>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <button type="button" class="pure-button pure-input-rounded" onclick="SendTestEmail()"> {{_("Send Test Email")}}</button>
     </p>
   </form>
 </div>
@@ -308,6 +311,18 @@ function SetSmOptiosVisualbility() {
     $('#sm_password').hide();
     $('#sm_save_path').hide();
   }
+}
+
+//发送测试邮件
+function SendTestEmail() {
+  $.post("/send_test_email", {url: window.location.href}, function (data) {
+    if (data.status == "ok") {
+      ShowSimpleModalDialog('<p>{0}</p>'.format(i18n.testEmailOk.format(data.email)));
+    } else {
+      alert(data.status);
+    }
+  });
+  return false;
 }
 </script>
 {% endblock -%}

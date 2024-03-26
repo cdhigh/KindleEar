@@ -7,5 +7,6 @@ User=ubuntu
 WorkingDirectory=/home/ubuntu/site/kindleear
 ExecStart=/home/ubuntu/.local/bin/gunicorn -c /home/ubuntu/site/kindleear/tools/nginx/gunicorn.conf.py main:app
 Restart=on-failure
+Environment="PYTHONUNBUFFERED=True"
 [Install]
 WantedBy=multi-user.target
