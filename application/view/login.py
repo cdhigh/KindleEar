@@ -189,7 +189,7 @@ def ResetPasswordPost():
 #注册表单
 @bpLogin.route("/signup")
 def Signup():
-    if app.config['ALLOW_SIGNUP']:
+    if app.config['ALLOW_SIGNUP'] == 'yes':
         inviteNeed = AppInfo.get_value(AppInfo.signupType, 'oneTimeCode') != 'public'
         return render_template('signup.html', tips='', inviteNeed=inviteNeed)
     else:
@@ -199,7 +199,7 @@ def Signup():
 #注册验证
 @bpLogin.post("/signup")
 def SignupPost():
-    if not app.config['ALLOW_SIGNUP']:
+    if not app.config['ALLOW_SIGNUP'] == 'yes':
         tips = _("The website does not allow registration. You can ask the owner for an account.")
         return render_template('tipsback.html', title='not allow', urltoback='/', tips=tips)
 

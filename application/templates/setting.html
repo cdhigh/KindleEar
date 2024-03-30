@@ -216,7 +216,7 @@
       </div>
       <div class="pure-control-group" id="sm_username">
         <label>{{_("Username")}}</label>
-        <input type="text" name="sm_username" value="{{user.sender}}" class="pure-u-1 pure-u-sm-1-2" readonly />
+        <input type="text" name="sm_username" value="{{sm_srv.get('username', '')}}" class="pure-u-1 pure-u-sm-1-2" />
       </div>
       <div class="pure-control-group" id="sm_password">
         <label>{{_("Password")}}</label>
@@ -317,7 +317,7 @@ function SetSmOptiosVisualbility() {
 function SendTestEmail() {
   $.post("/send_test_email", {url: window.location.href}, function (data) {
     if (data.status == "ok") {
-      ShowSimpleModalDialog('<p>{0}</p>'.format(i18n.testEmailOk.format(data.email)));
+      ShowSimpleModalDialog('<p>{0}<br/><hr/>{1}</p>'.format(i18n.testEmailOk, data.emails.join('<br/>')));
     } else {
       alert(data.status);
     }

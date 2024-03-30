@@ -259,12 +259,9 @@ class AppInfo(MyBaseModel):
         
 #创建数据库表格，一个数据库只需要创建一次
 def create_database_tables():
-    #with dbInstance.connection_context():
-    #connect_database()
     dbInstance.create_tables([KeUser, UserBlob, Recipe, BookedRecipe, DeliverLog, WhiteList,
         SharedRss, SharedRssCategory, LastDelivered, InBox, AppInfo], safe=True)
     if not AppInfo.get_value(AppInfo.dbSchemaVersion):
         AppInfo.set_value(AppInfo.dbSchemaVersion, appVer)
-    #close_database()
     
     return 'Created database tables successfully'

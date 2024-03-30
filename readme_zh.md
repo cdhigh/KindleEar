@@ -4,7 +4,7 @@
 
 # 公告
 2024-03-10    
-正式发布3.0 beta版，代码库已经可以用来部署，作者已经将其成功部署到GAE/Oracle Cloud/pythonAnywhere。
+正式发布3.0 beta版，代码库已经可以用来部署，作者已经将其成功部署到GAE/Docker/Oracle Cloud/pythonAnywhere。
 
 **主要新特性:**
 * 支持Python 3
@@ -12,6 +12,7 @@
 * 多平台支持，不再受限于gae平台
 * 支持不用修改的Calibre的recipe格式
 * 预置Calibre的一千多个recipe文件
+* 内置双语对照翻译功能，打破语言障碍，获取信息和学习外语同步进行
 
 
 
@@ -22,8 +23,8 @@
 
 此应用目前的主要功能有：  
 
-* 支持Calibre的recipe格式的不限量RSS/ATOM或网页内容收集
-* 不限量自定义RSS，直接输入RSS/ATOM链接和标题即可自动推送
+* 支持Calibre的recipe格式的不限量RSS/ATOM/JSON或网页内容收集
+* 不限量自定义RSS，直接输入RSS/ATOM/JSON链接和标题即可自动推送
 * 多账号管理，支持多用户和多Kindle
 * 生成带图像有目录的epub/mobi
 * 自动每天定时推送
@@ -32,12 +33,14 @@
 * 和Evernote/Pocket/Instapaper等系统的集成
 
 
+其他细节请参考 **[项目文档](https://cdhigh.github.io/KindleEar)**
+
+
 
 ![Screenshot](https://raw.githubusercontent.com/cdhigh/KindleEar/master/docs/scrshot.gif)
 
 
 
-其他细节请参考 [项目文档](https://cdhigh.github.io/KindleEar)
 
 
 

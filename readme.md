@@ -5,7 +5,7 @@ __English__ · [简体中文](readme_zh.md)
 # Announcement
 March 10, 2024    
 Official release of 3.0 beta, KindleEar is ready for deployment now.   
-The author has successfully deployed it to GAE/Oracle Cloud/PythonAnywhere.  
+The author has successfully deployed it to GAE/Docker/Oracle Cloud/PythonAnywhere.  
 
 **Significant Updates:**
 * Supports Python 3
@@ -13,6 +13,7 @@ The author has successfully deployed it to GAE/Oracle Cloud/PythonAnywhere.
 * Support for multiple platforms, no longer limited to the GAE platform
 * Support for Calibre's recipe format directly
 * Preset with over 1,000 Calibre builtin recipe files
+* Built-in bilingual translation feature
 
 
 
@@ -22,8 +23,8 @@ It automatically aggregates various web content into epub/mobi and delivers it t
 
 
 ## The features included:
-* Unlimited RSS/ATOM or web content collection with support for Calibre's recipe format
-* Unlimited custom RSS, directly enter RSS/ATOM link and title for automatic push
+* Unlimited RSS/ATOM/JSON or web content collection with support for Calibre's recipe format
+* Unlimited custom feeds, directly enter RSS/ATOM/JSON link and title for automatic push
 * Multiple account management, supporting multiple users and multiple Kindles
 * Generate epub/mobi with images and table of contents
 * Automatic daily scheduled push
@@ -33,11 +34,13 @@ It automatically aggregates various web content into epub/mobi and delivers it t
 
 
 
+For other details, please refer to the **[project documentation](https://cdhigh.github.io/KindleEar)**.
+
+
+
 ![Screenshot](https://raw.githubusercontent.com/cdhigh/KindleEar/master/docs/scrshot.gif)
 
 
-
-For other details, please refer to the [project documentation](https://cdhigh.github.io/KindleEar).
 
 
 # License

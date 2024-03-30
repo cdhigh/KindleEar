@@ -15,21 +15,15 @@ builtins.__dict__['appVer'] = '3.0'
 
 from config import *
 
-#将config.py里面的部分配置信息写到 os.environ，因为有些部分可能不依赖flask运行
 def set_env():
-    if not TEMP_DIR:
-        os.environ['TEMP_DIR'] = ''
-    elif os.path.isabs(TEMP_DIR):
-        os.environ['TEMP_DIR'] = TEMP_DIR
-    else:
-        os.environ['TEMP_DIR'] = os.path.join(appDir, TEMP_DIR)
-    os.environ['DOWNLOAD_THREAD_NUM'] = str(int(DOWNLOAD_THREAD_NUM))
-    os.environ['DATABASE_URL'] = 'sqlite://:memory:'
-    os.environ['TASK_QUEUE_SERVICE'] = ''
-    os.environ['TASK_QUEUE_BROKER_URL'] = ''
-    os.environ['APP_DOMAIN'] = APP_DOMAIN
-    os.environ['ADMIN_NAME'] = ADMIN_NAME
-    os.environ['HIDE_MAIL_TO_LOCAL'] = '1' if HIDE_MAIL_TO_LOCAL else ''
+    cfgMap = {}
+    keys = ['APP_ID', 'APP_DOMAIN', 'SERVER_LOCATION', 'DATABASE_URL', 'TASK_QUEUE_SERVICE',
+        'TASK_QUEUE_BROKER_URL', 'KE_TEMP_DIR', 'DOWNLOAD_THREAD_NUM', 'ALLOW_SIGNUP',
+        'SECRET_KEY', 'ADMIN_NAME', 'POCKET_CONSUMER_KEY', 'HIDE_MAIL_TO_LOCAL']
+    for key in keys:
+        cfgMap[key] = os.getenv(key) if key in os.environ else getattr(config, key)
+        os.environ[key] = cfgMap[key]
+    return cfgMap
     
 set_env()
 

@@ -14,7 +14,7 @@ def smtp_send_mail(sender, to, subject, body, host, username, password, port=Non
         host, port = host.split(':', 2)
         port = int(port)
     else:
-        port = 587 #587-TLS, 465-SSL
+        port = 587 #587-TLS, 465-SSL, 25-Nocrpt
     
     to = to if isinstance(to, list) else [to]
     message = MIMEMultipart('alternative') if html else MIMEMultipart()
@@ -33,11 +33,13 @@ def smtp_send_mail(sender, to, subject, body, host, username, password, port=Non
         message.attach(part)
 
     klass = smtplib.SMTP if port != 465 else smtplib.SMTP_SSL
-    with klass(host=host, port=port) as smtp_server:
-        smtp_server.connect(host, port)
-        smtp_server.ehlo()
-        smtp_server.starttls()
-        smtp_server.ehlo()
-        smtp_server.login(user=username, password=password)
-        smtp_server.sendmail(sender, to, message.as_string())
+    with klass(host=host, port=port) as server:
+        server.set_debuglevel(0) #0-no debug info, 1-base, 2- verbose
+        server.connect(host, port)
+        server.ehlo()
+        if port == 587:
+            server.starttls()
+            server.ehlo()
+        server.login(user=username, password=password)
+        server.sendmail(sender, to, message.as_string())
 

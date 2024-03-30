@@ -13,7 +13,7 @@ from .library_offical import *
 
 bpLibrary = Blueprint('bpLibrary', __name__)
 
-GITHUB_SHARED_RSS = 'https://github.com/cdhigh/KindleEar/blob/master/application/recipes/shared_rss.json'
+GITHUB_SHARED_RSS = 'https://raw.githubusercontent.com/cdhigh/KindleEar/master/application/recipes/shared_rss.json'
 g_ke_url = KINDLEEAR_SITE
 
 #给网友提供共享的订阅源数据，初始只返回一个空白页，然后在页面内使用ajax获取数据，参加 SharedLibraryMgrPost()

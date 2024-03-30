@@ -2,14 +2,14 @@
 # -*- coding:utf-8 -*-
 #一些高级设置功能页面
 
-import datetime, hashlib, io
+import datetime, hashlib, io, textwrap
 from urllib.parse import quote, unquote, urljoin, urlparse
 from flask import Blueprint, url_for, render_template, redirect, session, send_file, abort, current_app as app
 from flask_babel import gettext as _
 from PIL import Image
 from ..base_handler import *
 from ..back_end.db_models import *
-from ..utils import local_time, ke_encrypt, ke_decrypt, str_to_bool, safe_eval
+from ..utils import local_time, ke_encrypt, ke_decrypt, str_to_bool, safe_eval, xml_escape, xml_unescape
 from ..lib.pocket import Pocket
 from ..lib.urlopener import UrlOpener
 
@@ -148,7 +148,7 @@ def AdvImportPost():
             return adv_render_template('adv_import.html', 'import', user=user, tips=str(e))
         
         for o in walkOpmlOutline(rssList):
-            title, url, isfulltext = o.text, unquote(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
+            title, url, isfulltext = xml_unescape(o.text), xml_unescape(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
             if isfulltext:
                 isfulltext = str_to_bool(isfulltext)
             else:
@@ -190,7 +190,8 @@ def AdvExport():
     user = get_login_user()
     
     #为了简单起见，就不用其他库生成xml，而直接使用字符串格式化生成
-    opmlTpl = """<?xml version="1.0" encoding="utf-8" ?>
+    opmlTpl = textwrap.dedent("""\
+    <?xml version="1.0" encoding="utf-8" ?>
     <opml version="2.0">
     <head>
       <title>KindleEar.opml</title>
@@ -201,7 +202,7 @@ def AdvExport():
     <body>
     {outLines}
     </body>
-    </opml>"""
+    </opml>""")
 
     date = local_time('%a, %d %b %Y %H:%M:%S GMT', user.timezone)
     #添加时区信息
@@ -210,14 +211,10 @@ def AdvExport():
     outLines = []
     for feed in user.all_custom_rss():
         outLines.append('<outline type="rss" text="{}" xmlUrl="{}" isFulltext="{}" />'.format(
-            feed.title, quote(feed.url), feed.isfulltext))
+            xml_escape(feed.title), xml_escape(feed.url), feed.isfulltext))
     outLines = '\n'.join(outLines)
     
-    opmlFile = opmlTpl.format(date=date, outLines=outLines)
-    outLines = []
-    for line in opmlFile.split('\n'):
-        outLines.append(line[4:] if line.startswith('  ') else line)
-    opmlFile = '\n'.join(outLines).encode('utf-8')
+    opmlFile = opmlTpl.format(date=date, outLines=outLines).encode('utf-8')
     return send_file(io.BytesIO(opmlFile), mimetype="text/xml", as_attachment=True, download_name="KindleEar_subscription.xml")
     
 #在本地选择一个图片上传做为自定义RSS书籍的封面

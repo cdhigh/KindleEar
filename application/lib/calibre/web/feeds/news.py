@@ -397,7 +397,7 @@ class BasicNewsRecipe(Recipe):
     #: parameters are left at their default values, JPEG images will be scaled to fit
     #: in the screen dimensions set by the output profile and compressed to size at
     #: most (w * h)/16 where w x h are the scaled image dimensions.
-    compress_news_images = False
+    compress_news_images = True
 
     #: The factor used when auto compressing JPEG images. If set to None,
     #: auto compression is disabled. Otherwise, the images will be reduced in size to
@@ -410,7 +410,7 @@ class BasicNewsRecipe(Recipe):
     #: first be scaled and then its quality lowered until its size is less than
     #: (w * h)/factor where w and h are now the *scaled* image dimensions. In
     #: other words, this compression happens after scaling.
-    compress_news_images_auto_size = 16
+    compress_news_images_auto_size = None #16
 
     #: Set JPEG quality so images do not exceed the size given (in KBytes).
     #: If set, this parameter overrides auto compression via compress_news_images_auto_size.

@@ -79,7 +79,7 @@ def ke_opts(user, options=None):
     opt.setdefault('dont_split_on_page_breaks', True)
     opt['user'] = user
 
-    #opt.setdefault('debug_pipeline', os.getenv('TEMP_DIR'))
+    #opt.setdefault('debug_pipeline', os.getenv('KE_TEMP_DIR'))
     #opt.setdefault('verbose', 1)
     #opt.setdefault('test', 1)
     return opt

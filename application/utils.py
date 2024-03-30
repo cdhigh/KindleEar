@@ -129,6 +129,24 @@ def filesizeformat(value, binary=False, suffix='B'):
         value /= base
     return f"{value:.1f} {unit}{suffix}"
 
+
+#将字符串安全转义到xml格式，有标准库函数xml.sax.saxutils.escape()，但是简单的功能就简单的函数就好
+def xml_escape(txt):
+    txt = txt.replace("&", "&amp;")
+    txt = txt.replace("<", "&lt;")
+    txt = txt.replace(">", "&gt;")
+    txt = txt.replace('"', "&quot;")
+    txt = txt.replace("'", "&apos;")
+    return txt
+
+def xml_unescape(txt):
+    txt = txt.replace("&amp;", "&")
+    txt = txt.replace("&lt;", "<")
+    txt = txt.replace("&gt;", ">")
+    txt = txt.replace("&quot;", '"')
+    txt = txt.replace("&apos;", "'")
+    return txt
+
 #-----------以下几个函数为安全相关的
 def new_secret_key(length=12):
     allchars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz'

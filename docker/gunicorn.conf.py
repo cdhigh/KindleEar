@@ -1,10 +1,10 @@
 # gunicorn.conf.py
-pythonpath = "/home/ubuntu/.local/lib/python3.10/site-packages"
-bind = "127.0.0.1:8000"
+pythonpath = "/usr/local/lib/python3.10/site-packages"
+bind = "0.0.0.0:8000"
 workers = 1
 threads = 3
-accesslog = "/var/log/gunicorn/error.log"
-errorlog = "/var/log/gunicorn/access.log"
+accesslog = "/data/gunicorn.access.log"
+errorlog = "/data/gunicorn.error.log"
 capture_output = True
 enable_stdio_inheritance = True
 loglevel = "info"

@@ -40,11 +40,11 @@ def SettingPost():
         sm_secret_key = form.get('sm_secret_key', '')
         sm_host = form.get('sm_host', '')
         sm_port = str_to_int(form.get('sm_port'))
-        #sm_username = form.get('sm_username', '') #replace by sender field
+        sm_username = form.get('sm_username', '')
         sm_password = form.get('sm_password', '')
         sm_save_path = form.get('sm_save_path', '')
         send_mail_service = {'service': sm_srv_type, 'apikey': sm_apikey, 'secret_key': sm_secret_key,
-            'host': sm_host, 'port': sm_port, 'username': '', 'password': '', 
+            'host': sm_host, 'port': sm_port, 'username': sm_username, 'password': '', 
             'save_path': sm_save_path}
         #只有处于smtp模式并且密码存在才更新，空或几个星号则不更新
         if sm_srv_type == 'smtp':
@@ -110,7 +110,7 @@ def SendTestEmailPost():
     Dear {user.name}, 
 
     This is a test email from KindleEar, sent to verify the accuracy of the email sending configuration.  
-    Please ignore it and do not reply.   
+    Please do not reply it.   
 
     Receiving this email confirms that your KindleEar web application can send emails successfully.   
     Thank you for your attention to this matter.   
@@ -120,16 +120,20 @@ def SendTestEmailPost():
     [From {srcUrl}]
     """)
 
-    if user.email:
+    emails = user.kindle_email.split(',') if user.kindle_email else []
+    if user.email and user.email not in emails:
+        emails.append(user.email)
+    
+    if emails:
         status = 'ok'
         try:
-            send_mail(user, user.email, 'Test email from KindleEar', body)
+            send_mail(user, emails, 'Test email from KindleEar', body, attachments=[('test.txt', body.encode('utf-8'))])
         except Exception as e:
             status = str(e)
     else:
         status = _("You have not yet set up your email address. Please go to the 'Admin' page to add your email address firstly.")
 
-    return {'status': status, 'email': user.email}
+    return {'status': status, 'emails': emails}
 
 #设置国际化语种
 @bpSetting.route("/setlocale/<langCode>")

@@ -308,8 +308,13 @@ class Plumber:
 
         self.opts.no_inline_navbars = self.opts.output_profile.supports_mobi_indexing \
                 and self.output_fmt == 'mobi'
-        if self.opts.verbose:
-            self.log.filter_level = self.log.DEBUG
+
+        levelNames = {'CRITICAL': self.log.ERROR, 'FATAL': self.log.ERROR, 'ERROR': self.log.ERROR, 
+                'WARN': self.log.WARN, 'WARNING': self.log.WARN, 'INFO': self.log.INFO,
+                'DEBUG': self.log.DEBUG}
+        level = levelNames.get(os.getenv('LOG_LEVEL', '').upper(), self.log.WARN)
+        self.log.filter_level = self.log.DEBUG if self.opts.verbose else level
+        
         if self.opts.verbose > 1:
             self.log.debug('Resolved conversion options')
             try:
@@ -358,8 +363,6 @@ class Plumber:
         '''
         # Setup baseline option values
         self.setup_options()
-        if self.opts.verbose:
-            self.log.filter_level = self.log.DEBUG
         
         css_parser.log.setLevel(logging.WARN)
         #get_types_map()  # Ensure the mimetypes module is initialized
@@ -378,7 +381,7 @@ class Plumber:
                     
         self.output_plugin.specialize_options(self.log, self.opts, self.input_fmt)
         #根据需要，创建临时目录或创建内存缓存
-        system_temp_dir = os.environ.get('TEMP_DIR')
+        system_temp_dir = os.environ.get('KE_TEMP_DIR')
         if system_temp_dir and self.input_fmt != 'html':
             tdir = PersistentTemporaryDirectory(prefix='plumber_', dir=system_temp_dir)
             fs = FsDictStub(tdir)

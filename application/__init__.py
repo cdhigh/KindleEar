@@ -10,7 +10,7 @@ from flask_babel import Babel, gettext
 builtins.__dict__['_'] = gettext
 
 #创建并初始化Flask wsgi对象
-def init_app(name, debug=False):
+def init_app(name, cfgMap, debug=False):
     thisDir = os.path.dirname(os.path.abspath(__file__))
     rootDir = os.path.abspath(os.path.join(thisDir, '..'))
     template_folder = os.path.join(thisDir, 'templates')
@@ -18,7 +18,7 @@ def init_app(name, debug=False):
     i18n_folder = os.path.join(thisDir, 'translations')
     
     app = Flask(name, template_folder=template_folder, static_folder=static_folder)
-    app.config.from_pyfile(os.path.join(rootDir, 'config.py'))
+    app.config.from_mapping(cfgMap)
     app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024 #32MB
     
     from .view import setting
@@ -31,13 +31,14 @@ def init_app(name, debug=False):
     from .back_end.task_queue_adpt import init_task_queue_service
     init_task_queue_service(app)
 
-    from .back_end.db_models import connect_database, close_database
+    from .back_end.db_models import create_database_tables, connect_database, close_database
+    create_database_tables()
 
     @app.before_request
     def BeforeRequest():
         g.version = appVer
         g.now = datetime.datetime.utcnow
-        g.allowSignup = app.config['ALLOW_SIGNUP']
+        g.allowSignup = app.config['ALLOW_SIGNUP'] == 'yes'
         connect_database()
 
     @app.teardown_request

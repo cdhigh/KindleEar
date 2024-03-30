@@ -3,7 +3,7 @@
 #网友共享的订阅源数据，仅为 KINDLEEAR_SITE 使用
 import datetime, json, hashlib
 from operator import attrgetter
-from flask import Blueprint, render_template, request, Response
+from flask import Blueprint, render_template, request, Response, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..utils import str_to_bool, str_to_int
@@ -232,18 +232,63 @@ def SharedLibraryCategoryOffical():
     cats = sorted(SharedRssCategory.get_all(), key=attrgetter('last_updated'), reverse=True)
     return [item.name for item in cats]
 
-# @bpLibraryOffical.route('/translib')
-# def TransferLib():
-#     fileName = os.path.join(os.path.dirname(__file__), 'ke_final.json')
-#     with open(fileName, 'r', encoding='utf-8') as f:
-#         ke_final = json.loads(f.read())
-#     SharedRss.delete().execute()
-#     SharedRssCategory.delete().execute()
-#     cats = set()
-#     for t in ke_final:
-#         cats.add(t['c'])
-#         SharedRss.create(title=t['t'], url=t['u'], isfulltext=t['f'], language=t['l'], category=t['c'],
-#            subscribed=t['s'], created_time=t['d'])
-#     for cat in cats:
-#         SharedRssCategory.create(name=cat, language='')
-#     return f'Finished, data count={len(ke_final)}, category count={len(cats)}'
+#一次性导入共享库数据
+@bpLibraryOffical.post('/translib', endpoint='TransferLibPost')
+@login_required()
+def TransferLibPost():
+    user = get_login_user()
+    key = request.form.get('key')
+    if user.name != app.config['ADMIN_NAME'] or key != user.share_links.get('key', ''):
+        return {}
+
+    act = request.form.get('act')
+    src = request.form.get('src')
+    try:
+        if src == 'json':
+            sharedData = json.loads(request.form.get('data'))
+        else:
+            upload = request.files.get('data_file')
+            sharedData = json.loads(upload.read())
+    except Exception as e:
+        return {'status': str(e)}
+
+    if act == 'init':
+        SharedRss.delete().execute()
+        SharedRssCategory.delete().execute()
+
+    cats = set()
+    for t in sharedData:
+        title = t.get('t', '')
+        url = t.get('u', '')
+        if not title or not url:
+            continue
+        
+        isfulltext = t.get('f', False)
+        language = t.get('l', '')
+        category = t.get('c', '')
+        subscribed = t.get('s', 1)
+        created_time = t.get('d', 0)
+        cats.add(category)
+        try:
+            created_time = datetime.datetime.utcfromtimestamp(created_time)
+        except:
+            created_time = None
+
+        dbItem = SharedRss.get_or_none(SharedRss.title == title) or SharedRss(title=title, url=url)
+        dbItem.url = url
+        dbItem.isfulltext = isfulltext
+        if language:
+            dbItem.language = language
+        if category:
+            dbItem.category = category
+        if subscribed:
+            dbItem.subscribed = subscribed
+        if created_time:
+            dbItem.created_time = created_time
+        dbItem.save()
+
+    for cat in cats:
+        if not SharedRssCategory.get_or_none(SharedRssCategory.name == cat):
+            SharedRssCategory.create(name=cat, language='')
+    UpdateLastSharedRssTime()
+    return f'Finished, data count={len(sharedData)}, category count={len(cats)}'

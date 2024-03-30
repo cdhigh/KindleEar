@@ -184,20 +184,29 @@ class Base:
 
     def _get_api_key(self):
         if self.need_api_key and self.api_keys:
-            return self.api_keys.pop(0)
+            return self.api_keys.pop(0).strip()
         return None
 
-    def get_result(self, url, data=None, headers={}, method='GET',
+    def get_result(self, url, data=None, headers=None, method='GET',
                    stream=False, silence=False, callback=None):
         result = ''
         br = UrlOpener(headers=headers, timeout=self.request_timeout)
         resp = br.open(url, data=data, method=method, stream=stream)
         if resp.status_code == 200:
-            text = resp.text
+            text = []
+            if stream:
+                for line in resp.iter_content(chunk_size=None, decode_unicode=True):
+                    text.append(line)
+                text = ''.join(text)
+            else:
+                text = resp.text
+
             try:
                 return callback(text) if callback else text
             except:
                 raise Exception('Can not parse translation. Raw data: {text}')
+            finally:
+                resp.close()
         elif silence:
             return None
         else:

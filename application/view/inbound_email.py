@@ -62,7 +62,7 @@ def ReceiveGaeMail(path):
 @bpInBoundEmail.post("/mail")
 def ReceiveMail():
     msg = email.message_from_bytes(request.get_data())
-    
+
     txtBodies = []
     htmlBodies = []
     attachments = []
@@ -77,6 +77,29 @@ def ReceiveMail():
             htmlBodies.append(body.decode(part.get_content_charset('us-ascii')))
 
     return ReceiveMailImpl(sender=msg.get('From'), to=msg.get_all('To'), subject=msg.get('Subject'), txtBodies=txtBodies,
+        htmlBodies=htmlBodies, attachments=attachments)
+
+#postfix的一个内容过滤器 mailglove 转发的邮件
+#<https://github.com/thingless/mailglove>
+@bpInBoundEmail.post("/mailglove")
+def ReceiveMailGlove():
+    msg = request.get_json(silent=True)
+    if not msg or not isinstance(msg, dict):
+        return "The content is invalid"
+    
+    sender = msg.get('envelopeSender', '')
+    to = msg.get('envelopeRecipient', '')
+    if not sender:
+        sender = msg.get('from', {}).get('text', '')
+    if not to:
+        to = msg.get('to', {}).get('text', '')
+        
+    subject = msg.get('subject', '')
+    txtBodies = msg.get('text', '')
+    htmlBodies = msg.get('html', '')
+    attachments = msg.get('attachments', '')
+
+    return ReceiveMailImpl(sender=sender, to=to, subject=subject, txtBodies=txtBodies,
         htmlBodies=htmlBodies, attachments=attachments)
 
 #实际实现接收邮件功能
@@ -102,7 +125,7 @@ def ReceiveMailImpl(sender, to, subject, txtBodies, htmlBodies, attachments):
         default_log.warning(f'Spam mail from : {sender}')
         return "Spam mail"
     
-    subject = DecodeSubject(subject)
+    subject = DecodeSubject(subject or 'NoSubject')
 
     #通过邮件触发一次“现在投递”
     if to.lower() == 'trigger':
@@ -222,6 +245,11 @@ def ConvertTextToHtml(subject, text):
 
 #根据邮件内容，创建一个 BeautifulSoup 实例
 def CreateMailSoup(subject, txtBodies, htmlBodies):
+    if txtBodies and not isinstance(txtBodies, list):
+        txtBodies = [str(txtBodies)]
+    if htmlBodies and not isinstance(htmlBodies, list):
+        htmlBodies = [str(htmlBodies)]
+
     if not htmlBodies: #此邮件为纯文本邮件，将文本信息转换为HTML格式
         html = ConvertTextToHtml(subject, '\n'.join(txtBodies or []))
         htmlBodies = [html] if html else []

@@ -77,16 +77,54 @@ def config_to_dict(cfgFile):
         exec(code, globals(), config_dict)
     return config_dict
 
-if __name__ == '__main__':
-    print('\nThis script can help you to generate requirements.txt.\n')
-    usrInput = input('Press y to continue :')
-    if usrInput.lower() != 'y':
-        sys.exit(0)
+#prepare config.py to build docker
+def dockered_config_py(cfgFile):
+    default_cfg = {'APP_ID': 'kindleear', 'DATABASE_URL': 'sqlite:////data/kindleear.db',
+        'TASK_QUEUE_SERVICE': 'apscheduler', 'TASK_QUEUE_BROKER_URL': 'memory',
+        'KE_TEMP_DIR': '/tmp', 'DOWNLOAD_THREAD_NUM': '3', 'ALLOW_SIGNUP': 'no',
+        'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning'}
+    ret = []
+    inDocComment = False
+    pattern = r"^([_A-Z]+)\s*=\s*(.+)$"
+    with open(cfgFile, 'r', encoding='utf-8') as f:
+        lines = f.read().splitlines()
+    for line in lines:
+        line = line.strip()
+        if '"""' in line or "'''" in line:
+            inDocComment = not inDocComment
+            ret.append(line)
+            continue
+        elif not line or line.startswith('#') or inDocComment:
+            ret.append(line)
+            continue
 
+        match = re.match(pattern, line)
+        if match:
+            name = match.group(1)
+            value = default_cfg.get(name, match.group(2))
+            ret.append(f'{name} = "{value}"')
+        else:
+            ret.append(line)
+    
+    with open(cfgFile, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(ret))
+
+if __name__ == '__main__':
     thisDir = os.path.abspath(os.path.dirname(__file__))
     cfgFile = os.path.normpath(os.path.join(thisDir, '..', 'config.py'))
     reqFile = os.path.normpath(os.path.join(thisDir, '..', 'requirements.txt'))
+    if not os.path.exists(cfgFile):
+        cfgFile = os.path.normpath(os.path.join(thisDir, 'config.py'))
+        reqFile = os.path.normpath(os.path.join(thisDir, 'requirements.txt'))
 
+    if len(sys.argv) == 2 and sys.argv[1] == 'docker':
+        dockered_config_py(cfgFile)
+    else:
+        print('\nThis script can help you to update requirements.txt.\n')
+        usrInput = input('Press y to continue :')
+        if usrInput.lower() != 'y':
+            sys.exit(1)
+        
     cfg = config_to_dict(cfgFile)
     db = cfg['DATABASE_URL'].split('://')[0]
     task = cfg['TASK_QUEUE_SERVICE']
@@ -104,3 +142,5 @@ if __name__ == '__main__':
         extras.add('sqlalchemy')
     write_req(reqFile, db, task, plat, *extras)
     print(f'Finished create {reqFile}')
+    sys.exit(0)
+    

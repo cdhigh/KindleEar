@@ -6,12 +6,12 @@
 #https://cloud.google.com/appengine/docs/standard/python3/reference/services/bundled/google/appengine/api/mail
 #https://cloud.google.com/appengine/docs/standard/python3/services/mail
 import os, datetime, zipfile, base64
-from ..utils import local_time, ke_decrypt
+from ..utils import local_time, ke_decrypt, str_to_bool
 from ..base_handler import save_delivery_log
 from .db_models import KeUser
 
 #google.appengine will apply patch for os.env module
-hideMailLocal = os.getenv('HIDE_MAIL_TO_LOCAL')
+hideMailLocal = str_to_bool(os.getenv('HIDE_MAIL_TO_LOCAL'))
 
 #判断是否是部署在gae平台
 if os.getenv('DATABASE_URL') == 'datastore':
@@ -105,7 +105,7 @@ def send_mail(user, to, subject, body, attachments=None, html=None):
     elif srv_type == 'smtp':
         data['host'] = sm_service.get('host', '')
         data['port'] = sm_service.get('port', 587)
-        data['username'] = user.sender
+        data['username'] = sm_service.get('username', '')
         data['password'] = ke_decrypt(sm_service.get('password', ''), user.secret_key)
         smtp_send_mail(**data)
     elif srv_type == 'local':

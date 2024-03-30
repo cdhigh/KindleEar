@@ -1,4 +1,4 @@
-# KindleEar面向开发者备忘录
+# KindleEar开发者备忘录
 
 # 本地环境构建和调试
   1. 安装标准环境google cloud SDK/gloud CLI，并且执行 gcloud init
@@ -63,6 +63,28 @@ gcloud app deploy queue.yaml
 # 关于翻译的注意事项
 * javascript的翻译没有采用其他复杂或引入其他依赖的方案，而是简单粗暴的在base.html里面将要翻译的字段预先翻译，
 然后保存到一个全局字典
+
+
+# Docker
+## 构建镜像
+1. 将docker/Dockerfile文件拷贝到根目录
+2. 执行 
+```bash
+sudo docker build -t kindleear/kindleear .
+#or
+sudo docker build --no-cache -t kindleear/kindleear .
+```
+
+## 常用Docker命令
+```bash
+sudo docker images
+sudo docker rmi id
+sudo docker stop name
+sudo docker rm name
+sudo docker ps -a
+sudo docker compose up -d
+sudo docker run -d
+```
 
 # Python托管平台的一些了解
 * [appengine](https://cloud.google.com)：必须绑定信用卡，但有免费额度，有收发邮件服务，任务队列，后台进程

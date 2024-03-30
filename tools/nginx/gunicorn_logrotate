@@ -1,0 +1,9 @@
+/var/log/gunicorn/*.log {
+    daily
+    dateext
+    dateformat -%Y-%m-%d
+    dateyesterday
+    rotate 90
+    missingok
+    notifempty
+}

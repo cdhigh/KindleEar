@@ -9,7 +9,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, send_f
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
-from ..utils import str_to_bool
+from ..utils import str_to_bool, xml_escape
 from ..lib.urlopener import UrlOpener
 from ..lib.recipe_helper import GetBuiltinRecipeInfo, GetBuiltinRecipeSource
 from .library import LIBRARY_MGR, SUBSCRIBED_FROM_LIBRARY, LIBRARY_GETSRC, buildKeUrl
@@ -444,15 +444,13 @@ def ViewRecipeSourceCode(id_):
     if recipeType == 'upload':
         recipe = Recipe.get_by_id_or_none(dbId)
         if recipe and recipe.src:
-            src = recipe.src.replace('<', '&lt').replace('>', '&gt')
-            return htmlTpl.format(title=recipe.title, body=src)
+            return htmlTpl.format(title=recipe.title, body=xml_escape(recipe.src))
         else:
             return htmlTpl.format(title="Error", body=_('The recipe does not exist.'))
     else: #内置recipe
         recipe = GetBuiltinRecipeInfo(recipeId)
         src = GetBuiltinRecipeSource(recipeId)
         if recipe and src:
-            src = src.replace('<', '&lt').replace('>', '&gt')
-            return htmlTpl.format(title=recipe.get('title'), body=src)
+            return htmlTpl.format(title=recipe.get('title'), body=xml_escape(src))
         else:
             return htmlTpl.format(title="Error", body=_('The recipe does not exist.'))
