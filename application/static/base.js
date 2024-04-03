@@ -672,9 +672,11 @@ function OpenUploadRecipeDialog() {
           modal.close();
           //更新本地数据
           delete data.status;
+          let language = data.language;
           my_uploaded_recipes.unshift(data);
           PopulateLibrary('');
-          ShowSimpleModalDialog('<h2>{0}</h2><p>{1}</p>'.format(i18n.congratulations, i18n.recipeUploadedTips));
+          ShowSimpleModalDialog('<h2>{0}</h2><p>{1}</p>'.format(i18n.congratulations, 
+            i18n.recipeUploadedTips.format(LanguageName(language))));
         } else if (data.status == i18n.loginRequired) {
           window.location.href = '/login';
         } else {
@@ -718,16 +720,14 @@ function DeleteUploadRecipe(id, title) {
 
 //在页面下发插入bookmarklet
 function insertBookmarkletGmailThis(subscribeUrl, mailPrefix) {
-  var parser = $('<a>', {
-    href: subscribeUrl
-  });
+  var parser = $('<a>', {href: subscribeUrl});
   var host = parser.prop('hostname');
   var length = host.length;
   var addr = '';
   if ((length > 12) && host.substr(length - 12, 12) == '.appspot.com') {
     addr = '{0}read@{1}.appspotmail.com'.format(mailPrefix, host.substr(0, length - 12));
   } else {
-    return;
+    addr = '{0}read@{1}'.format(mailPrefix, host);
   }
   
   var parent = $('#bookmarklet_content');

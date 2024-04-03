@@ -148,7 +148,7 @@ def AdvImportPost():
             return adv_render_template('adv_import.html', 'import', user=user, tips=str(e))
         
         for o in walkOpmlOutline(rssList):
-            title, url, isfulltext = xml_unescape(o.text), xml_unescape(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
+            title, url, isfulltext = xml_unescape(o.text), unquote(xml_unescape(o.xmlUrl)), o.isFulltext #isFulltext为非标准属性
             if isfulltext:
                 isfulltext = str_to_bool(isfulltext)
             else:

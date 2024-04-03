@@ -42,6 +42,7 @@ def RemoveLogs():
     #清理30天之前的推送记录
     time30 = datetime.datetime.utcnow() - datetime.timedelta(days=30)
     cnt = DeliverLog.delete().where(DeliverLog.datetime < time30).execute()
+    cnt += LastDelivered.delete().where(LastDelivered.datetime < time30).execute()
     return "{} lines delivery log removed.".format(cnt)
 
 #查询推送记录，按时间倒排

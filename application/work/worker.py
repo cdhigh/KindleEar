@@ -60,6 +60,8 @@ def WorkerImpl(userName: str, recipeId: list=None, log=None):
         log.warning(ret)
         return ret
 
+    startTime = time.time()
+
     #编译recipe
     srcDict = GetAllRecipeSrc(user, recipeId) #返回一个字典，键名为title，元素为 [BookedRecipe, Recipe, src]
     recipes = defaultdict(list) #用于保存编译好的recipe代码对象
@@ -106,7 +108,12 @@ def WorkerImpl(userName: str, recipeId: list=None, log=None):
         else:
             save_delivery_log(user, title, 0, status='nonews')
 
-    ret = '\n'.join(ret) if ret else "There are no new feeds available."
+    elaspTime = time.time() - startTime
+    if ret:
+        ret = '\n'.join(ret)
+        ret += f'\nTime: {elaspTime} seconds.'
+    else:
+        ret = "There are no new feeds available."
     log.warning(ret)
     return ret
 

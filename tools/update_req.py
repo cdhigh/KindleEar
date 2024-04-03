@@ -99,15 +99,16 @@ def dockered_config_py(cfgFile):
             continue
 
         match = re.match(pattern, line)
-        if match:
-            name = match.group(1)
-            value = default_cfg.get(name, match.group(2))
+        name = match.group(1) if match else None
+        value = default_cfg.get(name, None)
+        if name is not None and value is not None:
             ret.append(f'{name} = "{value}"')
         else:
             ret.append(line)
     
     with open(cfgFile, 'w', encoding='utf-8') as f:
         f.write('\n'.join(ret))
+    print(f'Finished update {cfgFile}')
 
 if __name__ == '__main__':
     thisDir = os.path.abspath(os.path.dirname(__file__))

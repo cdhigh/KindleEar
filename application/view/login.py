@@ -43,7 +43,7 @@ def LoginPost():
         return render_template('login.html', tips=tips)
     
     adminName = app.config['ADMIN_NAME']
-    CreateAccountIfNotExist(adminName) #确认管理员账号是否存在
+    isFirstTime = CreateAccountIfNotExist(adminName) #确认管理员账号是否存在
     
     u = KeUser.get_or_none(KeUser.name == name)
     if u:
@@ -74,9 +74,12 @@ def LoginPost():
         default_log.info(f"Login event: {name}")
         return redirect(url)
     else:  #账号或密码错
-        time.sleep(5) #防止暴力破解
-        tips = (_("The username does not exist or password is wrong.") +
-            f'<br/><a href="/resetpwd?name={name}">' + _('Forgot password?') + '</a>')
+        if isFirstTime:
+            tips = (_("Please use {}/{} to login at first time.").format(adminName, adminName))
+        else:
+            time.sleep(5) #防止暴力破解
+            tips = (_("The username does not exist or password is wrong.") +
+                f'<br/><a href="/resetpwd?name={name}">' + _('Forgot password?') + '</a>')
         
         session.pop('login', None)
         session.pop('userName', None)

@@ -8,14 +8,9 @@ Defines various abstract base classes that can be subclassed to create powerful 
 __docformat__ = "restructuredtext en"
 
 
-import io
-import os
-import re
-import sys
-import time
-import traceback
+import io, os, re, sys, time, datetime, traceback
 from collections import defaultdict, namedtuple
-from urllib.parse import urlparse, urlsplit, quote
+from urllib.parse import urlparse, urlsplit, quote, urljoin
 from urllib.error import HTTPError, URLError
 from calibre import __appname__, as_unicode, force_unicode, iswindows, preferred_encoding, strftime
 from calibre.ebooks.BeautifulSoup import BeautifulSoup, CData, NavigableString, Tag
@@ -39,6 +34,7 @@ from simpleextract import simple_extract
 from urlopener import UrlOpener
 from requests_file import LocalFileAdapter
 from filesystem_dict import FsDictStub
+from application.back_end.db_models import LastDelivered
 
 MASTHEAD_SIZE = (600, 60)
 DEFAULT_MASTHEAD_IMAGE = 'mastheadImage.gif'
@@ -925,6 +921,7 @@ class BasicNewsRecipe(Recipe):
             self.title = str(self.title, 'utf-8', 'replace')
 
         self.options = options
+        self.user = self.options.user
         self.debug = options.verbose > 1
         self.output_dir = output_dir
         self.fs = fs
@@ -1045,7 +1042,7 @@ class BasicNewsRecipe(Recipe):
             del img['srcset']
 
         #如果需要，去掉正文中的超链接(使用斜体下划线标识)，以避免误触
-        remove_hyperlinks = self.options.user.remove_hyperlinks
+        remove_hyperlinks = self.user.remove_hyperlinks
         if remove_hyperlinks in ('text', 'all'):
             for a_ in soup.find_all('a'):
                 a_.name = 'i'
@@ -1099,18 +1096,17 @@ class BasicNewsRecipe(Recipe):
         if not soup:
             return
         
-        user = self.options.user
-        shareLinks = user.share_links
+        shareLinks = self.user.share_links
         aTags = []
         for type_ in ['Evernote', 'Wiz', 'Pocket', 'Instapaper']:
             if shareLinks.get(type_, {}).get('enable'):
-                ashare = soup.new_tag('a', href=self.make_share_link(type_, user, url, soup))
+                ashare = soup.new_tag('a', href=self.make_share_link(type_, self.user, url, soup))
                 ashare.string = _('Save to {}').format(type_)
                 aTags.append(ashare)
 
         for type_ in ['Weibo', 'Facebook', 'X', 'Tumblr']:
             if shareLinks.get(type_):
-                ashare = soup.new_tag('a', href=self.make_share_link(type_, user, url, soup))
+                ashare = soup.new_tag('a', href=self.make_share_link(type_, self.user, url, soup))
                 ashare.string =  _('Share on {}').format(type_)
                 aTags.append(ashare)
 
@@ -1284,8 +1280,8 @@ class BasicNewsRecipe(Recipe):
         if preloaded is not None:
             fetcher.preloaded_urls[url] = preloaded
         
-        #res为对应url的一个html文件名
-        res = fetcher.start_fetch(url)
+        res = fetcher.start_fetch(url)  #res为对应url的一个html文件名
+
         path = fetcher.downloaded_paths
         failures = fetcher.failed_links
         if not res or not self.fs.exists(res):
@@ -2051,6 +2047,129 @@ class UrlNewsRecipe(BasicNewsRecipe):
         feed.id_counter = id_counter
 
         return [feed]
+
+
+#保存的url为网页url，给定一个规则，从网页url里面提取链接，每个链接一篇文章
+#一般用于新闻类的网页，即使新闻网站不提供RSS，也可以每天去获取新闻
+#这个类建议搭配KindleEar chrome插件使用，插件可以自动生成抓取脚本
+class WebPageUrlNewsRecipe(BasicNewsRecipe):
+    max_articles_per_feed = 30
+
+    #为一个二维列表，可以保存多个标签规则，每个规则都很灵活，只要是BeautifulSoup的合法规则即可(字典或CSS选择器字符串)
+    #每个顶层元素为一个html标签的查找规则列表，从父节点到子节点，依次往下一直到最后一个元素为止
+    #最后一个元素必须为链接，或其子节点有链接，则此链接为文章最终链接，链接的文本为文章标题
+    #比如：url_extract_rules = [[{'name': 'div', 'attrs': {'class': 'art', 'data': True}}, {'name': 'a'}],]
+    #或:url_extract_rules = [['div.art[data]', 'a'],]
+    url_extract_rules = []
+
+    #格式和 url_extract_rules 一致，在文章的网页中提取文章正文，为空则使用自动提取
+    content_extract_rules = []
+
+    #返回一个Feed实例列表
+    def parse_feeds(self):
+        main_urls = self.get_feeds()
+        if not main_urls:
+            self.log.warning(f'There are no urls in "{self.title}"')
+            return []
+        
+        feeds = []
+        id_counter = 0
+        added = set();
+        for obj in main_urls:
+            main_title, main_url = (self.title, obj) if isinstance(obj, str) else obj
+            feed = Feed()
+            feed.title = main_title
+            feed.description = ''
+            feed.image_url = None
+            feed.oldest_article = self.oldest_article
+            feed.articles = []
+            now = time.gmtime()
+
+            for title, url in self.extract_urls(main_title, main_url):
+                if len(feed) >= self.max_articles_per_feed:
+                    break
+                if url in added: #避免重复添加
+                    continue
+
+                added.add(url)
+                lastTime = LastDelivered.get_or_none(user=self.user.name, url=url)
+                delta = (datetime.datetime.utcnow() - lastTime.datetime) if lastTime else None
+                #这里oldest_article和其他的recipe不一样，这个参数表示在这个区间内不会重复推送
+                if ((not lastTime) or (not self.oldest_article) or 
+                    (delta.days * 24 * 3600 + delta.seconds > 24 * 3600 * self.oldest_article)):
+                    id_counter += 1
+                    feed.articles.append(Article(f'internal id#{id_counter}', title, url, 'KindleEar', '', now, ''))
+
+                    if lastTime:
+                        lastTime.datetime = datetime.datetime.utcnow()
+                        lastTime.save()
+                    else:
+                        LastDelivered.create(user=self.user.name, url=url)
+                else:
+                    self.log.debug(f'Skipping article {title}({url}) as it is too old.')
+
+            feed.id_counter = id_counter
+            if len(feed) > 0:
+                feeds.append(feed)
+
+        return feeds
+
+    #在一个soup对象中查找所有满足条件的tag
+    def _soup_find_all(self, tag, rule):
+        return tag.find_all(**rule) if isinstance(rule, dict) else tag.select(rule)
+
+    #从一个网页中根据指定的规则，提取文章链接
+    def extract_urls(self, main_title, main_url):
+        resp = self.browser.open(main_url, timeout=self.timeout)
+        if resp.status_code != 200:
+            self.log.warning(f'Failed to fetch {main_url}: {UrlOpener.CodeMap(resp.status_code)}')
+            return []
+
+        soup = BeautifulSoup(resp.text, 'lxml')
+        
+        articles = []
+        for rule in self.url_extract_rules:
+            resultTags = self._soup_find_all(soup, rule[0])
+            for flt in rule[1:]:
+                resultTags = [self._soup_find_all(tag, flt) for tag in resultTags]
+                resultTags = [tag for sublist in resultTags for tag in sublist] #二级列表展开为一级列表
+
+            for item in resultTags:
+                #如果最终tag不是链接，则在子节点中查找
+                item = item.find_all('a') if item.name.lower() != 'a' else [item]
+                for tag in item:
+                    title = ' '.join(tag.stripped_strings) or main_title
+                    url = tag.attrs.get('href', None)
+                    if not url.startswith('http'):
+                        url = urljoin(main_url, url)
+                    if title and url:
+                        articles.append((title, url))
+
+        self.log.debug(f'Found {len(articles)} articles in {self.title}\n')
+        self.log.debug(str(articles))
+        return articles
+
+    #提取文章内容，这个函数在文章被下载解码为unicode后，转换为DOM树前被调用
+    def preprocess_raw_html(self, raw_html, url):
+        if self.auto_cleanup or not self.content_extract_rules: #由readability自动提取
+            return raw_html
+
+        soup = BeautifulSoup(raw_html, 'lxml')
+        oldBody = soup.find('body')
+        if not oldBody:
+            return raw_html
+
+        newBody = soup.new_tag('body')
+        for rule in self.content_extract_rules:
+            resultTags = self._soup_find_all(soup, rule[0])
+            for flt in rule[1:]:
+                resultTags = [self._soup_find_all(tag, flt) for tag in resultTags]
+                resultTags = [tag for sublist in resultTags for tag in sublist] #二级列表展开为一级列表
+
+            newBody.extend(resultTags)
+
+        oldBody.replace_with(newBody)
+        return str(soup)
 
 
 class CalibrePeriodical(BasicNewsRecipe):

@@ -7,13 +7,13 @@ Builtin recipes.
 '''
 import re, time, io
 from calibre.web.feeds.news import (BasicNewsRecipe, CustomIndexRecipe,
-    AutomaticNewsRecipe, UrlNewsRecipe, CalibrePeriodical)
+    AutomaticNewsRecipe, UrlNewsRecipe, CalibrePeriodical, WebPageUrlNewsRecipe)
 from calibre.ebooks.BeautifulSoup import BeautifulSoup
 from calibre.utils.config import JSONConfig
 from polyglot.builtins import itervalues, codepoint_to_chr
 
 basic_recipes = (BasicNewsRecipe, AutomaticNewsRecipe, UrlNewsRecipe, CustomIndexRecipe,
-        CalibrePeriodical)
+        CalibrePeriodical, WebPageUrlNewsRecipe)
 
 custom_recipes = JSONConfig('custom_recipes/index.json')
 
@@ -42,11 +42,13 @@ def compile_recipe(src):
     src = io.StringIO(src, newline=None).getvalue()
 
     namespace = {
-            'BasicNewsRecipe':BasicNewsRecipe,
-            'AutomaticNewsRecipe':AutomaticNewsRecipe,
-            'UrlNewsRecipe':UrlNewsRecipe,
-            'time':time, 're':re,
-            'BeautifulSoup':BeautifulSoup,
+            'BasicNewsRecipe': BasicNewsRecipe,
+            'AutomaticNewsRecipe': AutomaticNewsRecipe,
+            'UrlNewsRecipe': UrlNewsRecipe,
+            'WebPageUrlNewsRecipe': WebPageUrlNewsRecipe,
+            'time': time,
+            're': re,
+            'BeautifulSoup': BeautifulSoup,
             'unicode': str,
             'unichr': codepoint_to_chr,
             'xrange': range,
@@ -55,8 +57,7 @@ def compile_recipe(src):
     ua = namespace.get('calibre_most_common_ua')
 
     for x in itervalues(namespace):
-        if (isinstance(x, type) and issubclass(x, BasicNewsRecipe) and x not
-                in basic_recipes):
+        if (isinstance(x, type) and issubclass(x, BasicNewsRecipe) and x not in basic_recipes):
             x.calibre_most_common_ua = ua
             return x
 

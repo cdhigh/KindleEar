@@ -220,7 +220,8 @@ class SharedRssCategory(MyBaseModel):
 
 class LastDelivered(MyBaseModel):
     user = CharField()
-    bookname = CharField()
+    bookname = CharField(default='')
+    url = CharField(default='')
     num = IntegerField(default=0)
     record = CharField(default='')
     datetime = DateTimeField(default=datetime.datetime.utcnow)

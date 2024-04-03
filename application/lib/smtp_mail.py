@@ -13,7 +13,7 @@ def smtp_send_mail(sender, to, subject, body, host, username, password, port=Non
     if ':' in host:
         host, port = host.split(':', 2)
         port = int(port)
-    else:
+    elif not port:
         port = 587 #587-TLS, 465-SSL, 25-Nocrpt
     
     to = to if isinstance(to, list) else [to]
