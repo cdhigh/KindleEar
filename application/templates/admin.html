@@ -65,7 +65,7 @@
           <td>{{_("Yes") if u.enable_send else _("No")}}</td>
           <td>{{u.email}}</td>
           {% if u.expiration_days == 0 -%}
-          <td>{{_("Never expire")}}</td>
+          <td>{{_("Never")}}</td>
           {% elif u.expiration_days == 7 -%}
           <td>{{_("7 Days")}}</td>
           {% elif u.expiration_days == 30 -%}
@@ -82,7 +82,7 @@
           <td>{{u.expiration_days}} Days</td>
           {% endif -%}
           <td>
-            <button class="additional-btn btn-B" title="{{_('Change password')}}"><a href="/account/change/{{u.name}}"><i class="iconfont icon-edit"></i></a></button>
+            <button class="additional-btn btn-B" title="{{_('Edit account')}}"><a href="/account/change/{{u.name}}"><i class="iconfont icon-edit"></i></a></button>
             {% if u.name == adminName -%}
             <button class="additional-btn btn-A additional-btn-disabled"><i class="iconfont icon-delete"></i></button>
             {% else -%}

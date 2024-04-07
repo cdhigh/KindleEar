@@ -916,7 +916,7 @@ div[class="schedule_daytimes"] input {
     border: 1px solid #333;
     border-radius: 5px;
     font-size: 14px;
-    line-height：20px;
+    line-height: 18px;
     top: calc(-100%); /*calc(10% + 5px);*/
     left: 50%;
     transform: translateX(-50%);

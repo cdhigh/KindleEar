@@ -10,6 +10,7 @@ def get_trans_engines():
     info = {}
     for engine in builtin_translate_engines:
         info[engine.name] = {'alias': engine.alias, 'need_api_key': engine.need_api_key, 
+            'default_api_host': engine.default_api_host, 'api_key_hint': engine.api_key_hint,
             'source': engine.lang_codes.get('source', {}),
             'target': engine.lang_codes.get('target', {}),}
     return info
@@ -22,18 +23,17 @@ class HtmlTranslator:
         self.engineName = self.params.get('engine')
         self.src = self.params.get('src_lang', '')
         self.dst = self.params.get('dst_lang', 'en')
-        self.translator = self.create_engine(self.engineName)
-        self.translator.set_config(params)
+        self.translator = self.create_engine(self.engineName, params)
         self.translator.set_source_code(self.src)
         self.translator.set_target_code(self.dst)
         
-    def create_engine(self, name):
+    def create_engine(self, name, params):
         engines = {engine.name: engine for engine in builtin_translate_engines}
         if name in engines:
             engine_class = engines.get(name)
         else:
             engine_class = GoogleFreeTranslate
-        return engine_class()
+        return engine_class(params)
 
     #翻译文本
     #data: 文本/字典/列表 {'text': text, ...}, [{},{}]
@@ -55,11 +55,11 @@ class HtmlTranslator:
             item['error'] = ''
             item['translated'] = ''
             if text:
-                try:
+                if 1:
                     item['translated'] = self.translator.translate(text)
-                except Exception as e:
-                    default_log.warning(str(e))
-                    item['error'] = str(e)
+                    #except Exception as e:
+                    #default_log.warning('translate_text() failed: ' + str(e))
+                    #item['error'] = str(e)
             else:
                 item['error'] = _('The input text is empty')
             ret.append(item)
@@ -89,7 +89,7 @@ class HtmlTranslator:
                 else:
                     failed += 1
             except Exception as e:
-                default_log.warning(str(e))
+                default_log.warning('translate_soup failed: ' + str(e))
                 failed += 1
             if (idx < count - 1) and (self.translator.request_interval > 0.01):
                 time.sleep(self.translator.request_interval)

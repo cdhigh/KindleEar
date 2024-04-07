@@ -74,24 +74,24 @@ class Pocket(object):
         self.access_token = None
         self.opener = UrlOpener(headers=self.POCKET_HEADERS)
         
-    def _post(self, method_url, **kw):
+    def _post(self, method_url, act, **kw):
         ret = self.opener.open(method_url, data=kw)
         if ret.status_code > 399:
-            raise APIError(ret.status_code, ret.headers.get('X-Error-Code',''), ret.headers.get('X-Error',''), 'Get access token')
+            raise APIError(ret.status_code, ret.headers.get('X-Error-Code',''), ret.headers.get('X-Error',''), act)
 
         try:
             return json.loads(ret.content)
         except:
             return json.text
         
-    def _authenticated_post(self, method_url, **kw):
+    def _authenticated_post(self, method_url, act, **kw):
         kw['consumer_key'] = self.consumer_key
         kw['access_token'] = self.access_token
-        return self._post(method_url, **kw)
+        return self._post(method_url, act, **kw)
 
     def get_request_token(self):
         #此步仅用来直接通过一次http获取一个request_token(code)，pocket不会回调redirect_uri
-        ret = self._post(self.REQUEST_TOKEN_URL, consumer_key=self.consumer_key, redirect_uri=self.redirect_uri)
+        ret = self._post(self.REQUEST_TOKEN_URL, 'get request token', consumer_key=self.consumer_key, redirect_uri=self.redirect_uri)
         return ret.get('code', '') if isinstance(ret, dict) else ret.split('=')[-1]
         
     def get_authorize_url(self, code):
@@ -101,7 +101,7 @@ class Pocket(object):
         
     def get_access_token(self, code):
         # access token : {"access_token":"dcba4321-dcba-4321-dcba-4321dc","username":"pocketuser"}.
-        ret = self._post(self.ACCESS_TOKEN_URL, consumer_key=self.consumer_key, code=code)
+        ret = self._post(self.ACCESS_TOKEN_URL, 'get access token', consumer_key=self.consumer_key, code=code)
         self.access_token = ret.get('access_token', '')
         return self.access_token
 
@@ -115,10 +115,10 @@ class Pocket(object):
         #tags : 可选，逗号分隔的字符串列表
         #tweet_id  ： 可选，用于发推的ID
         #返回一个字典，包含的键可能有：https://getpocket.com/developer/docs/v3/add
-        return self._authenticated_post('https://getpocket.com/v3/add', **kw)
+        return self._authenticated_post('https://getpocket.com/v3/add', 'add an entry', **kw)
 
     def get(self, **kw):
-        return self._authenticated_post('https://getpocket.com/v3/get', **kw)
+        return self._authenticated_post('https://getpocket.com/v3/get', 'get an entry', **kw)
 
     def modify(self, **kw):
         pass

@@ -733,7 +733,7 @@ function insertBookmarkletGmailThis(subscribeUrl, mailPrefix) {
   var parent = $('#bookmarklet_content');
   var newElement = $('<a>', {
     class: 'actionButton',
-    href: "javascript:(function(){popw='';Q='';d=document;w=window;if(d.selection){Q=d.selection.createRange().text;}else if(w.getSelection){Q=w.getSelection();}else if(d.getSelection){Q=d.getSelection();}popw=w.open('http://mail.google.com/mail/s?view=cm&fs=1&tf=1&to=" + addr +
+    href: "javascript:(function(){popw='';Q='';d=document;w=window;if(d.selection){Q=d.selection.createRange().text;}else if(w.getSelection){Q=w.getSelection();}else if(d.getSelection){Q=d.getSelection();}popw=w.open('https://mail.google.com/mail/s?view=cm&fs=1&tf=1&to=" + addr +
         "&su='+encodeURIComponent(d.title)+'&body='+encodeURIComponent(Q)+escape('%5Cn%5Cn')+encodeURIComponent(d.location)+'&zx=RANDOMCRAP&shva=1&disablechatbrowsercheck=1&ui=1','gmailForm','scrollbars=yes,width=550,height=400,top=100,left=75,status=no,resizable=yes');if(!d.all)setTimeout(function(){popw.focus();},50);})();",
     click: function() {
       return false;
@@ -774,14 +774,9 @@ function SelectDeliverNone() {
 ///[end] adv_delivernow.html
 
 ///[start] adv_archive.html
-function verifyInstapaper() {
-  var notifyInstapaperVerify = function () {
-    $("#averInstapaper").html(i18n.verify);
-  };
+function VerifyInstapaper() {
   var instauser = $("#instapaper_username").val();
   var instapass = $("#instapaper_password").val();
-
-  notifyInstapaperVerify();
 
   $.ajax({
     url: "/verifyajax/instapaper",
@@ -790,18 +785,41 @@ function verifyInstapaper() {
     success: function (data, textStatus, jqXHR) {
       if (data.status != "ok") {
         alert("Error:" + data.status);
-        notifyInstapaperVerify();
       } else if (data.correct == 1) {
-        alert(i18n.congratulations);
-        $("#averInstapaper").html(i18n.verified);
+        ShowSimpleModalDialog('<h2>{0}</h2><p>{1}</p>'.format(i18n.congratulations, i18n.configOk));
       } else {
         alert(i18n.passwordWrong);
-        notifyInstapaperVerify();
       }
     },
     error: function (status) {
       alert(status);
-      notifyInstapaperVerify();
+    }
+  });
+}
+
+//测试wallabag的配置信息是否正确
+function VerifyWallaBag() {
+  let host = $("#wallabag_host").val();
+  let name = $("#wallabag_username").val();
+  let passwd = $("#wallabag_password").val();
+  let id_ = $("#wallabag_client_id").val();
+  let secret = $("#wallabag_client_secret").val();
+  let data = {'host': host, 'username': name, 'password': passwd, 'client_id': id_, 
+    'client_secret': secret};
+
+  $.ajax({
+    url: "/verifyajax/wallabag",
+    type: "POST",
+    data: data,
+    success: function (data, textStatus, jqXHR) {
+      if (data.status == "ok") {
+        ShowSimpleModalDialog('<h2>{0}</h2><p>{1}</p>'.format(i18n.congratulations, i18n.configOk));
+      } else {
+        alert(data.status);
+      }
+    },
+    error: function (status) {
+      alert(status.toString());
     }
   });
 }
@@ -1123,12 +1141,18 @@ function PopulateTranslatorFields(currEngineName) {
 //选择一个翻译引擎后显示或隐藏ApiKey文本框，语种列表也同步更新
 //src_lang/dst_lang: 当前recipe的语种代码
 function TranslatorEngineFieldChanged(src_lang, dst_lang) {
-  //显示或隐藏ApiKey文本框
+  //显示或隐藏ApiHost/ApiKey文本框
   var engineName = $('#translator_engine').val();
   var engine = g_trans_engines[engineName];
   if (!engine || engine.need_api_key) {
+    $('#api_host_input').attr('placeholder', engine.default_api_host);
+    $('#api_keys_textarea').attr('placeholder', engine.api_key_hint);
+    $('#api_keys_textarea').prop("required", true);
+    $('#translator_api_host').show();
     $('#translator_api_key').show();
   } else {
+    $('#api_keys_textarea').prop("required", false);
+    $('#translator_api_host').hide();
     $('#translator_api_key').hide();
   }
 
@@ -1177,14 +1201,16 @@ function TranslatorEngineFieldChanged(src_lang, dst_lang) {
 //测试Recipe的翻译器设置是否正确
 function TestTranslator(recipeId) {
   var text = $('#translator_test_src_text').val();
-  console.log(text);
+  //console.log(text);
   var divDst = $('#translator_test_dst_text');
+  divDst.val(i18n.translating);
   $.post("/translator/test", {recipeId: recipeId, text: text}, function (data) {
     if (data.status == "ok") {
       divDst.val(data.text);
     } else if (data.status == i18n.loginRequired) {
       window.location.href = '/login';
     } else {
+      divDst.val('');
       alert(data.status);
     }
   });

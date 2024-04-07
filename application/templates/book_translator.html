@@ -4,6 +4,7 @@
 {% endblock -%}
 {% set src_lang = params.get('src_lang', '') %}
 {% set dst_lang = params.get('dst_lang', '') %}
+{% set api_host = params.get('api_host', '') %}
 {% set api_keys = params.get('api_keys', [])|join('\n') %}
 {% set position = params.get('position', '') %}
 {% block content -%}
@@ -27,9 +28,13 @@
           <!-- 由脚本填充 -->
         </select>
       </div>
+      <div class="pure-control-group" id="translator_api_host">
+        <label> {{_("Api Host")}}</label>
+        <input type="text" name="api_host" id="api_host_input" value="{{api_host}}" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
       <div class="pure-control-group" id="translator_api_key">
         <label> {{_("Api Key")}}</label>
-        <textarea name="api_keys" placeholder="{{_('One key per line')}}" class="pure-u-1 pure-u-sm-1-2" >{{api_keys}}</textarea>
+        <textarea name="api_keys" id="api_keys_textarea" placeholder="{{_('One key per line')}}" class="pure-u-1 pure-u-sm-1-2" >{{api_keys}}</textarea>
       </div>
       <div class="pure-control-group">
         <label>{{_("Source language")}}</label>

@@ -45,29 +45,35 @@ def LoginPost():
     adminName = app.config['ADMIN_NAME']
     isFirstTime = CreateAccountIfNotExist(adminName) #确认管理员账号是否存在
     
-    u = KeUser.get_or_none(KeUser.name == name)
-    if u:
-        secret_key = u.secret_key or ''
-        pwdhash = hashlib.md5((passwd + secret_key).encode()).hexdigest()
-        if u.passwd != pwdhash:
-            u = None
+    user = KeUser.get_or_none(KeUser.name == name)
+    if user:
+        secret_key = user.secret_key
+        try:
+            pwdHash = hashlib.md5((passwd + secret_key).encode('utf-8')).hexdigest()
+            nameHash = hashlib.md5((name + secret_key).encode('utf-8')).hexdigest()
+        except Exception as e:
+            default_log.warning(f"Failed to hash password and username: {str(e)}")
+            user = None
+        else:
+            if user.passwd != pwdHash:
+                user = None
     
-    if u:
+    if user:
         session['login'] = 1
         session['userName'] = name
         session['role'] = 'admin' if name == adminName else 'user'
-        if u.expires and u.expiration_days > 0: #用户登陆后自动续期
-            u.expires = datetime.datetime.utcnow() + datetime.timedelta(days=u.expiration_days)
-            u.save()
-        if 'resetpwd' in u.custom:
-            custom = u.custom
+        if user.expires and user.expiration_days > 0: #用户登陆后自动续期
+            user.expires = datetime.datetime.utcnow() + datetime.timedelta(days=user.expiration_days)
+            user.save()
+        if 'resetpwd' in user.custom: #成功登录后清除复位密码的设置
+            custom = user.custom
             custom.pop('resetpwd', None)
-            u.custom = custom
-            u.save()
+            user.custom = custom
+            user.save()
         
-        if not u.sender:
+        if not user.sender or (nameHash == pwdHash):
             url = url_for('bpAdmin.AdminAccountChange', name=name)
-        elif not u.kindle_email:
+        elif not user.kindle_email:
             url = url_for("bpSetting.Setting")
         else:
             url = url_for("bpSubscribe.MySubscription")
@@ -96,9 +102,10 @@ def CreateAccountIfNotExist(name, password=None, email='', sender=None, sm_servi
     secretKey = new_secret_key()
     shareKey = new_secret_key(length=4)
     try:
-        password = hashlib.md5((password + secretKey).encode()).hexdigest()
+        pwdHash = hashlib.md5((password + secretKey).encode('utf-8')).hexdigest()
+        nameHash = hashlib.md5((name + secretKey).encode('utf-8')).hexdigest() #避免名字非法
     except Exception as e:
-        default_log.warning('CreateAccountIfNotExist failed to hash password: {}'.format(str(e)))
+        default_log.warning(f'CreateAccountIfNotExist failed to hash password and name: {str(e)}')
         return False
 
     adminName = app.config['ADMIN_NAME']
@@ -112,7 +119,7 @@ def CreateAccountIfNotExist(name, password=None, email='', sender=None, sm_servi
 
     sender = sender or email
 
-    user = KeUser(name=name, passwd=password, expires=None, secret_key=secretKey, expiration_days=expiration, 
+    user = KeUser(name=name, passwd=pwdHash, expires=None, secret_key=secretKey, expiration_days=expiration, 
         share_links={'key': shareKey}, email=email, sender=sender, send_mail_service=sm_service)
     if expiration:
         user.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
@@ -268,7 +275,7 @@ def reset_pwd_final_step(user, token, new_p1, new_p2):
     if (token == pre_set.get('token')) and (now < pre_time):
         if new_p1 == new_p2:
             try:
-                pwd = hashlib.md5((new_p1 + user.secret_key).encode()).hexdigest()
+                pwd = hashlib.md5((new_p1 + user.secret_key).encode('utf-8')).hexdigest()
             except:
                 tips = _("The password includes non-ascii chars.")
             else:

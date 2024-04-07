@@ -3,7 +3,7 @@
 import ssl
 import os.path
 import traceback
-
+from urllib.parse import urljoin
 from urlopener import UrlOpener
 
 class Base:
@@ -12,6 +12,7 @@ class Base:
     lang_codes = {}
     endpoint = None
     need_api_key = True
+    default_api_host = ''
     api_key_hint = _('API Keys')
     api_key_pattern = r'^[^\s]+$'
     api_key_errors = ['401']
@@ -25,7 +26,7 @@ class Base:
     request_timeout = 10.0
     max_error_count = 10
 
-    def __init__(self):
+    def __init__(self, config=None):
         self.source_lang = None #语种显示的名字
         self.target_lang = None
         self.source_code = None #语种代码
@@ -35,7 +36,7 @@ class Base:
 
         self.merge_enabled = False
 
-        self.set_config()
+        self.set_config(config)
 
     @classmethod
     def load_lang_codes(cls, codes):
@@ -81,6 +82,7 @@ class Base:
     def set_config(self, config=None):
         self.config = config or {}
         self.api_keys = self.config.get('api_keys', [])[:]
+        self.api_host = self.config.get('api_host', self.default_api_host)
         self.bad_api_keys = []
         self.api_key = self._get_api_key()
 
@@ -195,8 +197,8 @@ class Base:
         if resp.status_code == 200:
             text = []
             if stream:
-                for line in resp.iter_content(chunk_size=None, decode_unicode=True):
-                    text.append(line)
+                for line in resp.iter_content(chunk_size=None):
+                    text.append(line if isinstance(line, str) else line.decode('utf-8'))
                 text = ''.join(text)
             else:
                 text = resp.text

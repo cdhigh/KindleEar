@@ -1,21 +1,16 @@
 import json
 import base64
 from datetime import datetime
-
+from urllib.parse import urljoin, urlencode
 from .languages import microsoft
 from .base import Base
-
-
-try:
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib import urlencode
 
 class MicrosoftEdgeTranslate(Base):
     name = 'MicrosoftEdge(Free)'
     alias = 'Microsoft Edge (Free)'
     lang_codes = Base.load_lang_codes(microsoft)
-    endpoint = 'https://api-edge.cognitive.microsofttranslator.com/translate'
+    default_api_host = 'https://api-edge.cognitive.microsofttranslator.com'
+    endpoint = '/translate'
     need_api_key = False
     access_info = None
 
@@ -27,7 +22,8 @@ class MicrosoftEdgeTranslate(Base):
         }
         if not self._is_auto_lang():
             query['from'] = self._get_source_code()
-        return '%s?%s' % (self.endpoint, urlencode(query))
+        endpoint = urljoin(self.default_api_host, self.endpoint)
+        return f'{endpoint}?{urlencode(query)}'
 
     def _parse_jwt(self, token):
         parts = token.split(".")

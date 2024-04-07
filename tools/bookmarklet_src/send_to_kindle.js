@@ -9,8 +9,8 @@ if(s){
   (function(url, formData){
     var h = (tag, props)=>Object.assign(document.createElement(tag), props);
     var form = h("form", {action:url, method:"post", hidden:true, target:"_blank"});
-    for (var [name,value] of Object.entries(formData)){
-      form.appendChild(h("input", {name, value}));
+    for (var [name, value] of Object.entries(formData)){
+      form.appendChild(h("input", {name: value}));
     }
     document.body.appendChild(form);
     form.submit();

@@ -11,6 +11,7 @@ from ..base_handler import *
 from ..back_end.db_models import *
 from ..utils import local_time, ke_encrypt, ke_decrypt, str_to_bool, safe_eval, xml_escape, xml_unescape
 from ..lib.pocket import Pocket
+from ..lib.wallabag import WallaBag
 from ..lib.urlopener import UrlOpener
 
 bpAdv = Blueprint('bpAdv', __name__)
@@ -80,6 +81,7 @@ def AdvArchive():
     appendStrs["Wiz"] = _("Append hyperlink '{}' to article").format(_('Save to {}').format(_('wiz')))
     appendStrs["Pocket"] = _("Append hyperlink '{}' to article").format(_('Save to {}').format(_('pocket')))
     appendStrs["Instapaper"] = _("Append hyperlink '{}' to article").format(_('Save to {}').format(_('instapaper')))
+    appendStrs["wallabag"] = _("Append hyperlink '{}' to article").format(_('Save to {}').format(_('wallabag')))
     appendStrs["Weibo"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format(_('weibo')))
     appendStrs["Facebook"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format(_('facebook')))
     appendStrs["X"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format('X'))
@@ -104,20 +106,43 @@ def AdvArchivePost():
     instapaper = str_to_bool(form.get('instapaper'))
     instaName = form.get('instapaper_username', '').strip()
     instaPwd = form.get('instapaper_password', '')
-    #将instapaper的密码加密
+
+    wallabag = str_to_bool(form.get('wallabag'))
+    wallaHost = form.get('wallabag_host', '')
+    wallaUsername = form.get('wallabag_username', '')
+    wallaPassword = form.get('wallabag_password', '')
+    wallaId = form.get('wallabag_client_id', '')
+    wallaSecret = form.get('wallabag_client_secret', '')
+    if not all((wallaHost, wallaUsername, wallaPassword, wallaId, wallaSecret)):
+        wallabag = False
+
+    #将instapaper/wallabag的密码加密
     if instaName and instaPwd:
         instaPwd = ke_encrypt(instaPwd, user.secret_key)
     else:
         instaName = ''
         instaPwd = ''
+    if wallaUsername and wallaPassword:
+        wallaPassword = ke_encrypt(wallaPassword, user.secret_key)
+    else:
+        wallaUsername = ''
+        wallaPassword = ''
     
     shareLinks = user.share_links
-    oldPocket = shareLinks.get('pocket', {})
-    accessToken = oldPocket.get('access_token', '') if oldPocket else ''
+    pocketToken = shareLinks.get('pocket', {}).get('access_token', '')
+    oldWalla = shareLinks.get('wallabag', {})
+    newWalla = oldWalla.copy()
+    newWalla.update({'enable': '1' if wallabag else '', 'host': wallaHost, 'username': wallaUsername,
+        'password': wallaPassword, 'client_id': wallaId, 'client_secret': wallaSecret})
+    if newWalla != oldWalla: #如果任何数据有变化，清除之前的token
+        newWalla['access_token'] = ''
+        newWalla['refresh_token'] = ''
+    
     shareLinks['Evernote'] = {'enable': '1' if evernote else '', 'email': evernoteMail}
     shareLinks['Wiz'] = {'enable': '1' if wiz else '', 'email': wizMail}
-    shareLinks['Pocket'] = {'enable': '1' if pocket else '', 'access_token': accessToken}
+    shareLinks['Pocket'] = {'enable': '1' if pocket else '', 'access_token': pocketToken}
     shareLinks['Instapaper'] = {'enable': '1' if instapaper else '', 'username': instaName, 'password': instaPwd}
+    shareLinks['wallabag'] = newWalla
     shareLinks['Weibo'] = str_to_bool(form.get('weibo'))
     shareLinks['Facebook'] = str_to_bool(form.get('facebook'))
     shareLinks['X'] = str_to_bool(form.get('x'))
@@ -414,29 +439,38 @@ def AdvOAuth2Callback(authType):
             tips=_('Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>{}').format(e))
 
 #通过AJAX验证密码等信息的函数
-@bpAdv.post("/verifyajax/verifType", endpoint='VerifyAjaxPost')
+@bpAdv.post("/verifyajax/<verifType>", endpoint='VerifyAjaxPost')
 @login_required()
 def VerifyAjaxPost(verifType):
-    INSTAPAPER_API_AUTH_URL = "https://www.instapaper.com/api/authenticate"
-    
-    respDict = {'status': 'ok', 'correct': 0}
-    if verifType.lower() != 'instapaper':
-        respDict['status'] = _('Request type [{}] unsupported').format(verifType)
-        return respDict
-    
     user = get_login_user()
-    
-    userName = request.form.get('username', '')
-    password = request.form.get('password', '')
-    opener = UrlOpener()
-    apiParameters = {'username': userName, 'password':password}
-    ret = opener.open(INSTAPAPER_API_AUTH_URL, data=apiParameters)
-    if ret.status_code in (200, 201):
-        respDict['correct'] = 1
-    elif ret.status_code == 403:
-        respDict['correct'] = 0
+    form = request.form
+    respDict = {'status': 'ok'}
+    if verifType == 'instapaper':
+        INSTAPAPER_API_AUTH_URL = "https://www.instapaper.com/api/authenticate"
+        userName = form.get('username', '')
+        password = form.get('password', '')
+        opener = UrlOpener()
+        apiParameters = {'username': userName, 'password':password}
+        ret = opener.open(INSTAPAPER_API_AUTH_URL, data=apiParameters)
+        if ret.status_code in (200, 201):
+            respDict['correct'] = 1
+        elif ret.status_code == 403:
+            respDict['correct'] = 0
+        else:
+            respDict['correct'] = 0
+            respDict['status'] = _("The Instapaper service encountered an error. Please try again later.")
+    elif verifType == 'wallabag':
+        host = form.get('host', '')
+        name = form.get('username', '')
+        passwd = form.get('password', '')
+        id_ = form.get('client_id', '')
+        secret = form.get('client_secret', '')
+        config = {'host': host, 'username': name, 'password': passwd, 'client_id': id_, 
+            'client_secret': secret}
+        wallabag = WallaBag(config, default_log)
+        msg = wallabag.update_token()
+        return {'status': msg or 'ok'}
     else:
-        respDict['status'] = _("The Instapaper service encountered an error. Please try again later.")
-    
+        respDict['status'] = _('Request type [{}] unsupported').format(verifType)
     return respDict
     

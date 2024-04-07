@@ -3,7 +3,7 @@ import json
 import time
 import uuid
 import hashlib
-
+from urllib.parse import urljoin
 from .base import Base
 from .languages import youdao
 
@@ -11,7 +11,8 @@ class YoudaoTranslate(Base):
     name = 'Youdao'
     alias = 'Youdao'
     lang_codes = Base.load_lang_codes(youdao)
-    endpoint = 'https://openapi.youdao.com/api'
+    default_api_host = 'https://openapi.youdao.com'
+    endpoint = '/api'
     api_key_hint = 'appid|appsecret'
     api_key_pattern = r'^[^\s:\|]+?[:\|][^\s:\|]+$'
     api_key_errors = ['401']
@@ -53,6 +54,6 @@ class YoudaoTranslate(Base):
             'vocabId': False,
         }
 
-        return self.get_result(
-            self.endpoint, data, headers, method='POST',
+        endpoint = urljoin(self.api_host or self.default_api_host, self.endpoint)
+        return self.get_result(endpoint, data, headers, method='POST',
             callback=lambda r: json.loads(r)['translation'][0])

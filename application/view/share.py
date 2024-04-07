@@ -13,6 +13,7 @@ from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import send_html_mail
 from ..utils import hide_email, ke_decrypt
 from ..lib.pocket import Pocket
+from ..lib.wallabag import WallaBag
 from ..lib.urlopener import UrlOpener
 from filesystem_dict import FsDictStub
 
@@ -47,6 +48,8 @@ def Share():
         return SaveToPocket(user, action, url, title)
     elif action == 'Instapaper':
         return SaveToInstapaper(user, action, url, title)
+    elif action == 'wallabag':
+        return SaveToWallabag(user, action, url, title)
     else:
         return _('Unknown command: {}').format(action)
     
@@ -157,4 +160,24 @@ def SaveToInstapaper(user, action, url, title):
         info.append(reason)
         
     return SHARE_INFO_TPL.format(title=html_title, info='<br/>'.join(info))
-    
+
+def SaveToWallabag(user, action, url, title):
+    config = user.share_links.get('wallabag', {})
+    config['password'] = ke_decrypt(config.get('password', ''), user.secret_key)
+    wallabag = WallaBag(config, default_log)
+    ret = wallabag.add(url, title=title)
+    if ret['changed']: #保存新的token
+        shareLinks = user.share_links
+        shareLinks['wallabag'] = wallabag.config
+        user.share_links = shareLinks
+        user.save()
+
+    info = [title, '<br/>']
+    if ret['resp']:
+        info.append(_("Saved to your {} account.").format('wallabag'))
+    else:
+        info.append(_("Failed save to {}.").format('wallabag'))
+        info.append(_('Reason :'))
+        info.append(ret['msg'])
+        
+    return SHARE_INFO_TPL.format(title='Share to wallabag', info='<br/>'.join(info))

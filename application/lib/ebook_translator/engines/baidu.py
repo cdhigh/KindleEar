@@ -2,7 +2,7 @@ import re
 import json
 import random
 import hashlib
-
+from urllib.parse import urljoin
 from .base import Base
 from .languages import baidu
 
@@ -10,7 +10,8 @@ class BaiduTranslate(Base):
     name = 'Baidu'
     alias = 'Baidu'
     lang_codes = Base.load_lang_codes(baidu)
-    endpoint = 'https://fanyi-api.baidu.com/api/trans/vip/translate'
+    default_api_host = 'https://fanyi-api.baidu.com'
+    endpoint = '/api/trans/vip/translate'
     api_key_hint = 'appid|appkey'
     api_key_pattern = r'^[^\s:\|]+?[:\|][^\s:\|]+$'
     api_key_errors = ['54004']
@@ -34,7 +35,7 @@ class BaiduTranslate(Base):
             'salt': salt,
             'sign': sign
         }
-
-        return self.get_result(
-            self.endpoint, data, headers, method='POST',
+        
+        endpoint = urljoin(self.api_host or self.default_api_host, self.endpoint)
+        return self.get_result(endpoint, data, headers, method='POST',
             callback=lambda r: json.loads(r)['trans_result'][0]['dst'])

@@ -1,7 +1,7 @@
 import json
 import time
 import random
-
+from urllib.parse import urljoin
 from .base import Base
 from .languages import deepl
 
@@ -9,9 +9,10 @@ class DeeplTranslate(Base):
     name = 'DeepL'
     alias = 'DeepL'
     lang_codes = Base.load_lang_codes(deepl)
+    default_api_host = 'https://api-free.deepl.com'
     endpoint = {
-        'translate': 'https://api-free.deepl.com/v2/translate',
-        'usage': 'https://api-free.deepl.com/v2/usage',
+        'translate': '/v2/translate',
+        'usage': '/v2/usage',
     }
     # api_key_hint = 'xxx-xxx-xxx:fx'
     placeholder = ('<m id={} />', r'<m\s+id={}\s+/>')
@@ -20,8 +21,8 @@ class DeeplTranslate(Base):
     def get_usage(self):
         # See: https://www.deepl.com/docs-api/general/get-usage/
         headers = {'Authorization': 'DeepL-Auth-Key %s' % self.api_key}
-        usage = self.get_result(
-            self.endpoint.get('usage'), headers=headers, silence=True,
+        endpoint = urljoin(self.api_host or self.default_api_host, self.endpoint.get('usage'))
+        usage = self.get_result(endpoint, headers=headers, silence=True,
             callback=lambda r: json.loads(r))
         if usage is None:
             return None
@@ -42,8 +43,8 @@ class DeeplTranslate(Base):
         if not self._is_auto_lang():
             data.update(source_lang=self._get_source_code())
 
-        return self.get_result(
-            self.endpoint.get('translate'), data, headers, method='POST',
+        endpoint = urljoin(self.api_host or self.default_api_host, self.endpoint.get('translate'))
+        return self.get_result(endpoint, data, headers, method='POST',
             callback=lambda r: json.loads(r)['translations'][0]['text'])
 
 

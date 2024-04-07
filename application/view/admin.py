@@ -29,7 +29,7 @@ def Admin():
         return render_template('admin.html', title='Admin', tab='admin', users=users, adminName=adminName,
             mailSrv=mailSrv, signupType=signupType, inviteCodes=inviteCodes, tips='')
     else:
-        return render_template('change_password.html', tips='', tab='admin', user=user)
+        return render_template('change_password.html', tips='', tab='admin', user=user, shareKey=user.share_links.get('key'))
 
 @bpAdmin.post("/admin", endpoint='AdminPost')
 @login_required()
@@ -108,12 +108,12 @@ def AdminDeleteAccountAjax():
     if user.name != adminName or not name or name == adminName:
         return {'status': _("You do not have sufficient privileges.")}
     
-    u = KeUser.get_or_none(KeUser.name == name)
-    if not u:
+    dbItem = KeUser.get_or_none(KeUser.name == name)
+    if not dbItem:
         return {'status': _("The username '{}' does not exist.").format(name)}
     else:
-        u.erase_traces() #删除账号订阅的书，白名单，过滤器等，完全的清理其痕迹
-        u.delete_instance()
+        dbItem.erase_traces() #删除账号订阅的书，白名单，过滤器等，完全的清理其痕迹
+        dbItem.delete_instance()
         return {'status': 'ok'}
     
 #修改密码，可能是修改自己的密码或管理员修改其他用户的密码
@@ -121,20 +121,20 @@ def AdminDeleteAccountAjax():
 @login_required()
 def AdminAccountChange(name):
     user = get_login_user()
-    if user.name == name:
-        return render_template('change_password.html', tips='', tab='admin', user=user)
-    elif user.name == app.config['ADMIN_NAME']:
-        u = KeUser.get_or_none(KeUser.name == name)
-        if u:
-            tips = _('The password will not be changed if the fields are empties.')
-            return render_template('user_account.html', tips=tips, formTitle=_('Change account'), 
-                submitTitle=_('Change'), user=u, tab='admin')
+    tips = _('The password will not be changed if the fields are empties.')
+    if user.name == name: #修改自己的密码和一些设置
+        return render_template('change_password.html', tips=tips, tab='admin', user=user, shareKey=user.share_links.get('key'))
+    elif user.name == app.config['ADMIN_NAME']: #管理员修改其他人的密码和其他设置
+        dbItem = KeUser.get_or_none(KeUser.name == name)
+        if dbItem:
+            return render_template('user_account.html', tips=tips, formTitle=_('Edit account'), 
+                submitTitle=_('Change'), user=dbItem, tab='admin')
         else:
-            return render_template('tipsback.html', title='error', urltoback=url_for('bpAdmin.Admin'), 
-                tips=_("The username '{}' does not exist.").format(name))
+            tips=_("The username '{}' does not exist.").format(name)
+            return render_template('tipsback.html', title='error', urltoback=url_for('bpAdmin.Admin'), tips=tips)
     else:
-        return render_template('tipsback.html', title='privileges', urltoback=url_for('bpAdmin.Admin'), 
-            tips=_('You do not have sufficient privileges.'))
+        tips=_('You do not have sufficient privileges.')
+        return render_template('tipsback.html', title='privileges', urltoback=url_for('bpAdmin.Admin'), tips=tips)
 
 @bpAdmin.post("/account/change/<name>", endpoint='AdminAccountChangePost')
 @login_required()
@@ -142,70 +142,80 @@ def AdminAccountChangePost(name):
     user = get_login_user()
     form = request.form
     username = form.get('username')
-    orgpwd = form.get('orgpwd')
-    p1 = form.get('password1')
-    p2 = form.get('password2')
+    orgPwd = form.get('orgpwd', '')
+    p1 = form.get('password1', '')
+    p2 = form.get('password2', '')
     email = form.get('email')
-    u = None
+    shareKey = form.get('shareKey')
+    dbItem = None
     if name != username:
         return render_template('tipsback.html', title='error', urltoback=url_for('bpAdmin.Admin'), 
             tips=_('Some parameters are missing or wrong.'))
     elif user.name == name: #修改自己的密码
-        tips = ChangePassword(user, orgpwd, p1, p2, email)
-        return render_template('change_password.html', tips=tips, tab='admin', user=user)
+        tips = ChangePassword(user, orgPwd, p1, p2, email, shareKey)
+        return render_template('change_password.html', tips=tips, tab='admin', user=user, shareKey=user.share_links.get('key'))
     elif user.name == app.config['ADMIN_NAME']: #管理员修改其他账号
         email = form.get('email', '')
         sm_service = form.get('sm_service')
         expiration = str_to_int(form.get('expiration', '0'))
 
-        u = KeUser.get_or_none(KeUser.name == username)
-        if not u:
+        dbItem = KeUser.get_or_none(KeUser.name == username)
+        if not dbItem:
             tips = _("The username '{}' does not exist.").format(username)
         elif (p1 or p2) and (p1 != p2):
             tips = _("The two new passwords are dismatch.")
         else:
             try:
                 if p1 or p2:
-                    u.passwd = hashlib.md5((p1 + u.secret_key).encode()).hexdigest()
+                    dbItem.passwd = hashlib.md5((p1 + dbItem.secret_key).encode('utf-8')).hexdigest()
             except:
                 tips = _("The password includes non-ascii chars.")
             else:
-                u.expiration_days = expiration
+                dbItem.expiration_days = expiration
                 if expiration:
-                    u.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
+                    dbItem.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
                 else:
-                    u.expires = None
+                    dbItem.expires = None
                 if sm_service == 'admin':
-                    u.send_mail_service = {'service': 'admin'}
-                elif u.send_mail_service.get('service', 'admin') == 'admin':
+                    dbItem.send_mail_service = {'service': 'admin'}
+                elif dbItem.send_mail_service.get('service', 'admin') == 'admin':
                     send_mail_service = user.send_mail_service
                     send_mail_service['service'] = ''
-                    u.send_mail_service = send_mail_service
-                u.email = email
-                u.save()
+                    dbItem.send_mail_service = send_mail_service
+                dbItem.email = email
+                dbItem.save()
                 tips = _("Change success.")
     
-    return render_template('user_account.html', tips=tips, formTitle=_('Change account'), 
-        submitTitle=_('Change'), user=u, tab='admin')
+    return render_template('user_account.html', tips=tips, formTitle=_('Edit account'), 
+        submitTitle=_('Change'), user=dbItem, tab='admin')
 
 #修改一个账号的密码，返回执行结果字符串
-def ChangePassword(user, orgPwd, p1, p2, email):
+def ChangePassword(user, orgPwd, p1, p2, email, shareKey):
     secret_key = user.secret_key
     try:
-        oldPwd = hashlib.md5((orgPwd + secret_key).encode()).hexdigest()
-        newPwd = hashlib.md5((p1 + secret_key).encode()).hexdigest()
+        oldPwd = hashlib.md5((orgPwd + secret_key).encode('utf-8')).hexdigest()
+        newPwd = hashlib.md5((p1 + secret_key).encode('utf-8')).hexdigest()
     except:
-        tips = _("The password includes non-ascii chars.")
+        return _("The password includes non-ascii chars.")
+
+    tips = _("Changes saved successfully.")
+    if not email or not shareKey:
+        tips = _("Some parameters are missing or wrong.")
+    elif p1 != p2:
+        tips = _("The two new passwords are dismatch.")
     else:
-        if not all((orgPwd, p1, p2, email)):
-            tips = _("The username or password is empty.")
-        elif user.passwd != oldPwd:
+        if not (orgPwd or p1 or p2): # 如果不修改密码，则三个密码都必须为空
+            newPwd = user.passwd
+            oldPwd = user.passwd
+
+        if user.passwd != oldPwd:
             tips = _("The old password is wrong.")
-        elif p1 != p2:
-            tips = _("The two new passwords are dismatch.")
         else:
             user.passwd = newPwd
             user.email = email
+            shareLinks = user.share_links
+            shareLinks['key'] = shareKey
+            user.share_links = shareLinks
             if user.name == app.config['ADMIN_NAME']: #如果管理员修改email，也同步更新其他用户的发件地址
                 user.sender = email
                 SyncSenderAddress(user)
@@ -215,7 +225,6 @@ def ChangePassword(user, orgPwd, p1, p2, email):
                     user.sender = email
                     
             user.save()
-            tips = _("Changes saved successfully.")
     return tips
 
 #将管理员的email同步到所有用户

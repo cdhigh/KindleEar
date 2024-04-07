@@ -8,6 +8,7 @@
 {% set wiz = shareLinks.get('Wiz', {}) %}
 {% set instapaper = shareLinks.get('Instapaper', {}) %}
 {% set pocket = shareLinks.get('Pocket', {}) %}
+{% set wallabag = shareLinks.get('wallabag', {}) %}
 <form class="pure-form" action="" method="POST">
   <fieldset>
     <legend><h3>{{_("Archive")}}</h3></legend>
@@ -49,13 +50,38 @@
         {{appendStrs["Instapaper"]}}
       </label>
       <div class="pure-u-1 pure-u-sm-9-24">
-        <input type="text" name="instapaper_username" id="instapaper_username" placeholder="{{ _('Email or Username') }}" value="{{ instapaper.get('username', '') }}" onchange="notifyInstapaperVerify();" class="pure-u-1 pure-u-sm-23-24" />
+        <input type="text" name="instapaper_username" id="instapaper_username" placeholder="{{ _('Email or Username') }}" value="{{ instapaper.get('username', '') }}" class="pure-u-1 pure-u-sm-23-24" />
       </div>
       <div class="pure-u-1 pure-u-sm-9-24">
-        <input type="password" name="instapaper_password" id="instapaper_password" placeholder="{{ _('Password') }}" value="{% if instapaper.get('password') %}{{ ke_decrypt(instapaper.get('password', ''), user.secret_key) }}{% endif %}" onchange="notifyInstapaperVerify();" class="pure-u-1 pure-u-sm-23-24" />
+        <input type="password" name="instapaper_password" id="instapaper_password" placeholder="{{ _('Password') }}" value="{% if instapaper.get('password') %}{{ ke_decrypt(instapaper.get('password', ''), user.secret_key) }}{% endif %}" class="pure-u-1 pure-u-sm-23-24" />
       </div>
       <div class="pure-u-1 pure-u-sm-6-24" style="text-align:center;">
-        <a href="javascript:;" id="averInstapaper" onclick="verifyInstapaper();return false;" class="pure-u-1 pure-button">{{_("Verify")}}</a>
+        <a href="javascript:;" onclick="VerifyInstapaper();return false;" class="pure-u-1 pure-button">{{_("Verify")}}</a>
+      </div>
+    </div>
+    <div class="pure-control-group pure-g">
+      <label for="enable_wallabag" class="pure-u-1 pure-checkbox">
+        <input id="enable_wallabag" name="wallabag" type="checkbox"
+        {% if wallabag.get('enable') %} checked="1"{% endif %} />
+        {{appendStrs["wallabag"]}}
+      </label>
+      <div class="pure-u-1 pure-u-sm-9-24" style="margin-bottom: 5px">
+        <input type="text" name="wallabag_username" id="wallabag_username" placeholder="{{ _('Username') }}" value="{{ wallabag.get('username', '') }}" class="pure-u-1 pure-u-sm-23-24" />
+      </div>
+      <div class="pure-u-1 pure-u-sm-9-24" style="margin-bottom: 5px">
+        <input type="password" name="wallabag_password" id="wallabag_password" placeholder="{{ _('Password') }}" value="{% if wallabag.get('password') %}{{ ke_decrypt(wallabag.get('password', ''), user.secret_key) }}{% endif %}" class="pure-u-1 pure-u-sm-23-24" />
+      </div>
+      <div class="pure-u-1 pure-u-sm-6-24" style="text-align:center;">
+        <a href="javascript:;" onclick="VerifyWallaBag();return false;" class="pure-u-1 pure-button">{{_("Verify")}}</a>
+      </div>
+      <div class="pure-u-1 pure-u-sm-9-24" style="margin-bottom: 5px">
+        <input type="text" name="wallabag_client_id" id="wallabag_client_id" placeholder="{{ _('client_id') }}" value="{{wallabag.get('client_id', '')}}" class="pure-u-1 pure-u-sm-23-24" />
+      </div>
+      <div class="pure-u-1 pure-u-sm-9-24" style="margin-bottom: 5px">
+        <input type="text" name="wallabag_client_secret" id="wallabag_client_secret" placeholder="{{ _('client_secret') }}" value="{{wallabag.get('client_secret', '')}}" class="pure-u-1 pure-u-sm-23-24" />
+      </div>
+      <div class="pure-u-1 pure-u-sm-9-24">
+        <input type="text" name="wallabag_host" id="wallabag_host" placeholder="{{ _('Host') }}" value="{{ wallabag.get('host', '') }}" class="pure-u-1 pure-u-sm-23-24" />
       </div>
     </div>
 

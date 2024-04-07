@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-04-02 17:17-0300\n"
+"POT-Creation-Date: 2024-04-06 20:42-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:144
+#: application/templates/admin.html:3 application/templates/base.html:146
 msgid "Admin"
 msgstr ""
 
@@ -80,7 +80,8 @@ msgstr ""
 msgid "Add"
 msgstr ""
 
-#: application/templates/admin.html:54 application/templates/home.html:15
+#: application/templates/admin.html:54
+#: application/templates/adv_archive.html:69 application/templates/home.html:15
 #: application/templates/login.html:21 application/templates/logs.html:65
 #: application/templates/reset_password.html:19
 #: application/templates/reset_password.html:20
@@ -119,8 +120,7 @@ msgid "No"
 msgstr ""
 
 #: application/templates/admin.html:68
-#: application/templates/user_account.html:42
-msgid "Never expire"
+msgid "Never"
 msgstr ""
 
 #: application/templates/admin.html:70 application/templates/setting.html:150
@@ -155,7 +155,9 @@ msgstr ""
 
 #: application/templates/admin.html:85
 #: application/templates/change_password.html:3
-msgid "Change password"
+#: application/templates/change_password.html:13 application/view/admin.py:130
+#: application/view/admin.py:189
+msgid "Edit account"
 msgstr ""
 
 #: application/templates/admin.html:89
@@ -166,41 +168,60 @@ msgid "Delete"
 msgstr ""
 
 #: application/templates/adv_archive.html:3
-#: application/templates/adv_archive.html:13
+#: application/templates/adv_archive.html:14
 #: application/templates/adv_base.html:57
 #: application/templates/adv_base.html:61
 msgid "Archive"
 msgstr ""
 
-#: application/templates/adv_archive.html:14
+#: application/templates/adv_archive.html:15
 msgid "Append hyperlinks for archiving or sharing."
 msgstr ""
 
-#: application/templates/adv_archive.html:39
+#: application/templates/adv_archive.html:40
 msgid "Authorized"
 msgstr ""
 
-#: application/templates/adv_archive.html:41
+#: application/templates/adv_archive.html:42
 msgid "Authorize"
 msgstr ""
 
-#: application/templates/adv_archive.html:52
+#: application/templates/adv_archive.html:53
 msgid "Email or Username"
 msgstr ""
 
-#: application/templates/adv_archive.html:55 application/templates/base.html:47
+#: application/templates/adv_archive.html:56
+#: application/templates/adv_archive.html:72 application/templates/base.html:47
 #: application/templates/home.html:16 application/templates/login.html:25
 #: application/templates/setting.html:222 application/templates/signup.html:25
 #: application/templates/user_account.html:19
 msgid "Password"
 msgstr ""
 
-#: application/templates/adv_archive.html:58 application/templates/base.html:57
+#: application/templates/adv_archive.html:59 application/templates/base.html:57
 msgid "Verify"
 msgstr ""
 
-#: application/templates/adv_archive.html:89
-#: application/templates/book_translator.html:72
+#: application/templates/adv_archive.html:75
+#: application/templates/book_translator.html:94
+msgid "Test"
+msgstr ""
+
+#: application/templates/adv_archive.html:78
+msgid "client_id"
+msgstr ""
+
+#: application/templates/adv_archive.html:81
+msgid "client_secret"
+msgstr ""
+
+#: application/templates/adv_archive.html:84
+#: application/templates/setting.html:210
+msgid "Host"
+msgstr ""
+
+#: application/templates/adv_archive.html:115
+#: application/templates/book_translator.html:77
 #: application/templates/setting.html:244
 msgid "Save settings"
 msgstr ""
@@ -496,8 +517,8 @@ msgstr ""
 msgid "Verified"
 msgstr ""
 
-#: application/templates/base.html:59 application/view/login.py:81
-#: application/view/share.py:154
+#: application/templates/base.html:59 application/view/login.py:87
+#: application/view/share.py:157
 msgid "The username does not exist or password is wrong."
 msgstr ""
 
@@ -593,14 +614,13 @@ msgstr ""
 msgid "The account have been deleted."
 msgstr ""
 
-#: application/templates/base.html:83 application/view/admin.py:201
-#: application/view/share.py:144
+#: application/templates/base.html:83 application/view/share.py:147
 msgid "The username or password is empty."
 msgstr ""
 
 #: application/templates/base.html:84 application/view/admin.py:86
-#: application/view/admin.py:165 application/view/admin.py:205
-#: application/view/login.py:222 application/view/login.py:282
+#: application/view/admin.py:166 application/view/admin.py:205
+#: application/view/login.py:229 application/view/login.py:289
 msgid "The two new passwords are dismatch."
 msgstr ""
 
@@ -612,7 +632,7 @@ msgstr ""
 msgid "Account added successfully."
 msgstr ""
 
-#: application/templates/base.html:87 application/view/login.py:132
+#: application/templates/base.html:87 application/view/login.py:139
 msgid "login required"
 msgstr ""
 
@@ -628,7 +648,7 @@ msgstr ""
 
 #: application/templates/base.html:90
 #: application/templates/book_translator.html:3
-#: application/templates/book_translator.html:16
+#: application/templates/book_translator.html:17
 msgid "Translator"
 msgstr ""
 
@@ -655,128 +675,132 @@ msgid ""
 " on your email server, there may be a slight delay."
 msgstr ""
 
-#: application/templates/base.html:117 application/templates/home.html:12
+#: application/templates/base.html:96
+msgid "Translating..."
+msgstr ""
+
+#: application/templates/base.html:97
+msgid "The configuration validation is correct."
+msgstr ""
+
+#: application/templates/base.html:119 application/templates/home.html:12
 msgid "Logout"
 msgstr ""
 
-#: application/templates/base.html:119 application/templates/home.html:17
+#: application/templates/base.html:121 application/templates/home.html:17
 #: application/templates/login.html:3 application/templates/login.html:19
 #: application/templates/login.html:29
 msgid "Login"
 msgstr ""
 
-#: application/templates/base.html:121 application/templates/signup.html:3
+#: application/templates/base.html:123 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr ""
 
-#: application/templates/base.html:141 application/templates/home.html:11
+#: application/templates/base.html:143 application/templates/home.html:11
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr ""
 
-#: application/templates/base.html:142 application/templates/setting.html:3
+#: application/templates/base.html:144 application/templates/setting.html:3
 msgid "Settings"
 msgstr ""
 
-#: application/templates/base.html:143 application/templates/logs.html:3
+#: application/templates/base.html:145 application/templates/logs.html:3
 msgid "Logs"
 msgstr ""
 
-#: application/templates/base.html:145
+#: application/templates/base.html:147
 msgid "Advanced"
 msgstr ""
 
-#: application/templates/base.html:146 application/templates/library.html:3
+#: application/templates/base.html:148 application/templates/library.html:3
 msgid "Shared"
 msgstr ""
 
-#: application/templates/book_translator.html:18
+#: application/templates/book_translator.html:19
 msgid "State"
 msgstr ""
 
-#: application/templates/book_translator.html:20
+#: application/templates/book_translator.html:21
 msgid "Enable"
 msgstr ""
 
-#: application/templates/book_translator.html:21
+#: application/templates/book_translator.html:22
 msgid "Disable"
 msgstr ""
 
-#: application/templates/book_translator.html:25
+#: application/templates/book_translator.html:26
 msgid "Engine"
 msgstr ""
 
-#: application/templates/book_translator.html:31
+#: application/templates/book_translator.html:32
+msgid "Api Host"
+msgstr ""
+
+#: application/templates/book_translator.html:36
 msgid "Api Key"
 msgstr ""
 
-#: application/templates/book_translator.html:32
+#: application/templates/book_translator.html:37
 msgid "One key per line"
 msgstr ""
 
-#: application/templates/book_translator.html:35
+#: application/templates/book_translator.html:40
 msgid "Source language"
 msgstr ""
 
-#: application/templates/book_translator.html:41
+#: application/templates/book_translator.html:46
 msgid "Target language"
 msgstr ""
 
-#: application/templates/book_translator.html:47
+#: application/templates/book_translator.html:52
 msgid "Translation Position"
 msgstr ""
 
-#: application/templates/book_translator.html:49
+#: application/templates/book_translator.html:54
 msgid "Below original"
 msgstr ""
 
-#: application/templates/book_translator.html:50
+#: application/templates/book_translator.html:55
 msgid "Above original"
 msgstr ""
 
-#: application/templates/book_translator.html:51
+#: application/templates/book_translator.html:56
 msgid "Left to original"
 msgstr ""
 
-#: application/templates/book_translator.html:52
+#: application/templates/book_translator.html:57
 msgid "Right to original"
 msgstr ""
 
-#: application/templates/book_translator.html:53
+#: application/templates/book_translator.html:58
 msgid "Translated text only"
 msgstr ""
 
-#: application/templates/book_translator.html:57
+#: application/templates/book_translator.html:62
 msgid "Original text style"
 msgstr ""
 
-#: application/templates/book_translator.html:61
+#: application/templates/book_translator.html:66
 msgid "Translated text style"
 msgstr ""
 
-#: application/templates/book_translator.html:67
+#: application/templates/book_translator.html:72
 msgid "Apply to all subscribed recipes"
 msgstr ""
 
-#: application/templates/book_translator.html:78
+#: application/templates/book_translator.html:83
 msgid "Test (Please save settings firstly)"
 msgstr ""
 
-#: application/templates/book_translator.html:80
+#: application/templates/book_translator.html:85
 msgid "Text"
 msgstr ""
 
-#: application/templates/book_translator.html:84
-msgid "Translation"
-msgstr ""
-
 #: application/templates/book_translator.html:89
-msgid "Test"
-msgstr ""
-
-#: application/templates/change_password.html:13
-msgid "Change Password"
+msgid "Translation"
 msgstr ""
 
 #: application/templates/change_password.html:15
@@ -797,7 +821,11 @@ msgstr ""
 msgid "Confirm password"
 msgstr ""
 
-#: application/templates/change_password.html:32
+#: application/templates/change_password.html:31
+msgid "Share key"
+msgstr ""
+
+#: application/templates/change_password.html:37
 msgid "Confirm Change"
 msgstr ""
 
@@ -837,8 +865,8 @@ msgstr ""
 msgid "Search"
 msgstr ""
 
-#: application/templates/login.html:34 application/view/login.py:199
-#: application/view/login.py:206
+#: application/templates/login.html:34 application/view/login.py:206
+#: application/view/login.py:213
 msgid ""
 "The website does not allow registration. You can ask the owner for an "
 "account."
@@ -1061,10 +1089,6 @@ msgstr ""
 msgid "SecretKey"
 msgstr ""
 
-#: application/templates/setting.html:210
-msgid "Host"
-msgstr ""
-
 #: application/templates/setting.html:214
 msgid "Port"
 msgstr ""
@@ -1102,8 +1126,12 @@ msgstr ""
 msgid "User account"
 msgstr ""
 
-#: application/view/admin.py:51 application/view/adv.py:350
-#: application/view/setting.py:96 application/view/subscribe.py:241
+#: application/templates/user_account.html:42
+msgid "Never expire"
+msgstr ""
+
+#: application/view/admin.py:51 application/view/adv.py:376
+#: application/view/setting.py:96 application/view/subscribe.py:245
 msgid "Settings Saved!"
 msgstr ""
 
@@ -1113,138 +1141,140 @@ msgid "Add account"
 msgstr ""
 
 #: application/view/admin.py:68 application/view/admin.py:109
-#: application/view/admin.py:137
+#: application/view/admin.py:136
 msgid "You do not have sufficient privileges."
 msgstr ""
 
-#: application/view/admin.py:82 application/view/admin.py:152
-#: application/view/login.py:218 application/view/login.py:247
-#: application/view/setting.py:61 application/view/setting.py:63
-#: application/view/setting.py:65 application/view/share.py:36
+#: application/view/admin.py:82 application/view/admin.py:153
+#: application/view/admin.py:203 application/view/login.py:225
+#: application/view/login.py:254 application/view/setting.py:61
+#: application/view/setting.py:63 application/view/setting.py:65
+#: application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr ""
 
 #: application/view/admin.py:84 application/view/login.py:40
-#: application/view/login.py:224
+#: application/view/login.py:231
 msgid "The username includes unsafe chars."
 msgstr ""
 
-#: application/view/admin.py:88 application/view/login.py:226
+#: application/view/admin.py:88 application/view/login.py:233
 msgid "Already exist the username."
 msgstr ""
 
-#: application/view/admin.py:93 application/view/admin.py:171
-#: application/view/admin.py:198 application/view/login.py:273
+#: application/view/admin.py:93 application/view/admin.py:172
+#: application/view/admin.py:199 application/view/login.py:280
 msgid "The password includes non-ascii chars."
 msgstr ""
 
-#: application/view/admin.py:113 application/view/admin.py:134
-#: application/view/admin.py:163
+#: application/view/admin.py:113 application/view/admin.py:133
+#: application/view/admin.py:164
 msgid "The username '{}' does not exist."
 msgstr ""
 
-#: application/view/admin.py:129
+#: application/view/admin.py:124
 msgid "The password will not be changed if the fields are empties."
 msgstr ""
 
-#: application/view/admin.py:130 application/view/admin.py:188
-msgid "Change account"
-msgstr ""
-
-#: application/view/admin.py:131 application/view/admin.py:189
+#: application/view/admin.py:131 application/view/admin.py:190
 msgid "Change"
 msgstr ""
 
-#: application/view/admin.py:186
+#: application/view/admin.py:187
 msgid "Change success."
 msgstr ""
 
-#: application/view/admin.py:203
-msgid "The old password is wrong."
-msgstr ""
-
-#: application/view/admin.py:218
+#: application/view/admin.py:201
 msgid "Changes saved successfully."
 msgstr ""
 
-#: application/view/adv.py:79 application/view/adv.py:80
-#: application/view/adv.py:81 application/view/adv.py:82
-#: application/view/adv.py:83 application/view/adv.py:84
-#: application/view/adv.py:85 application/view/adv.py:86
-#: application/view/adv.py:87
+#: application/view/admin.py:212
+msgid "The old password is wrong."
+msgstr ""
+
+#: application/view/adv.py:80 application/view/adv.py:81
+#: application/view/adv.py:82 application/view/adv.py:83
+#: application/view/adv.py:84 application/view/adv.py:85
+#: application/view/adv.py:86 application/view/adv.py:87
+#: application/view/adv.py:88 application/view/adv.py:89
 msgid "Append hyperlink '{}' to article"
 msgstr ""
 
-#: application/view/adv.py:79 application/view/adv.py:80
-#: application/view/adv.py:81 application/view/adv.py:82
+#: application/view/adv.py:80 application/view/adv.py:81
+#: application/view/adv.py:82 application/view/adv.py:83
+#: application/view/adv.py:84
 msgid "Save to {}"
 msgstr ""
 
-#: application/view/adv.py:79
+#: application/view/adv.py:80
 msgid "evernote"
 msgstr ""
 
-#: application/view/adv.py:80
+#: application/view/adv.py:81
 msgid "wiz"
 msgstr ""
 
-#: application/view/adv.py:81
+#: application/view/adv.py:82
 msgid "pocket"
 msgstr ""
 
-#: application/view/adv.py:82
+#: application/view/adv.py:83
 msgid "instapaper"
 msgstr ""
 
-#: application/view/adv.py:83 application/view/adv.py:84
+#: application/view/adv.py:84
+msgid "wallabag"
+msgstr ""
+
 #: application/view/adv.py:85 application/view/adv.py:86
+#: application/view/adv.py:87 application/view/adv.py:88
 msgid "Share on {}"
 msgstr ""
 
-#: application/view/adv.py:83
+#: application/view/adv.py:85
 msgid "weibo"
 msgstr ""
 
-#: application/view/adv.py:84
+#: application/view/adv.py:86
 msgid "facebook"
 msgstr ""
 
-#: application/view/adv.py:86
+#: application/view/adv.py:88
 msgid "tumblr"
 msgstr ""
 
-#: application/view/adv.py:87
+#: application/view/adv.py:89
 msgid "Open in browser"
 msgstr ""
 
-#: application/view/adv.py:352
+#: application/view/adv.py:378
 msgid "The format is invalid."
 msgstr ""
 
-#: application/view/adv.py:385
+#: application/view/adv.py:411
 msgid "Authorization Error!<br/>{}"
 msgstr ""
 
-#: application/view/adv.py:408
+#: application/view/adv.py:434
 msgid "Success authorized by Pocket!"
 msgstr ""
 
-#: application/view/adv.py:414
+#: application/view/adv.py:440
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr ""
 
-#: application/view/adv.py:424
-msgid "Request type [{}] unsupported"
-msgstr ""
-
-#: application/view/adv.py:439
+#: application/view/adv.py:462
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 
-#: application/view/deliver.py:67 application/view/login.py:169
-#: application/view/share.py:40
+#: application/view/adv.py:475
+msgid "Request type [{}] unsupported"
+msgstr ""
+
+#: application/view/deliver.py:67 application/view/login.py:176
+#: application/view/share.py:41
 msgid "The username does not exist or the email is empty."
 msgstr ""
 
@@ -1261,13 +1291,13 @@ msgid "Cannot fetch data from {}, status: {}"
 msgstr ""
 
 #: application/view/library.py:51 application/view/subscribe.py:195
-#: application/view/subscribe.py:221 application/view/subscribe.py:272
-#: application/view/subscribe.py:301 application/view/subscribe.py:421
-#: application/view/subscribe.py:449 application/view/subscribe.py:456
+#: application/view/subscribe.py:221 application/view/subscribe.py:276
+#: application/view/subscribe.py:305 application/view/subscribe.py:425
+#: application/view/subscribe.py:453 application/view/subscribe.py:460
 msgid "The recipe does not exist."
 msgstr ""
 
-#: application/view/login.py:26 application/view/login.py:78
+#: application/view/login.py:26 application/view/login.py:84
 msgid "Please use {}/{} to login at first time."
 msgstr ""
 
@@ -1279,61 +1309,61 @@ msgstr ""
 msgid "The len of username reached the limit of 25 chars."
 msgstr ""
 
-#: application/view/login.py:82
+#: application/view/login.py:88
 msgid "Forgot password?"
 msgstr ""
 
-#: application/view/login.py:148 application/view/login.py:284
+#: application/view/login.py:155 application/view/login.py:291
 msgid "The token is wrong or expired."
 msgstr ""
 
-#: application/view/login.py:151
+#: application/view/login.py:158
 msgid "Please input the correct username and email to reset password."
 msgstr ""
 
-#: application/view/login.py:153
+#: application/view/login.py:160
 msgid "The email of account '{name}' is {email}."
 msgstr ""
 
-#: application/view/login.py:174
+#: application/view/login.py:181
 msgid "Reset password success, Please close this page and login again."
 msgstr ""
 
-#: application/view/login.py:177
+#: application/view/login.py:184
 msgid "The email you input is not associated with this account."
 msgstr ""
 
-#: application/view/login.py:188
+#: application/view/login.py:195
 msgid "The link to reset your password has been sent to your email."
 msgstr ""
 
-#: application/view/login.py:189
+#: application/view/login.py:196
 msgid "Please check your email inbox within 24 hours."
 msgstr ""
 
-#: application/view/login.py:220
+#: application/view/login.py:227
 msgid "The invitation code is invalid."
 msgstr ""
 
-#: application/view/login.py:228
+#: application/view/login.py:235
 msgid ""
 "Failed to create an account. Please contact the administrator for "
 "assistance."
 msgstr ""
 
-#: application/view/login.py:238
+#: application/view/login.py:245
 msgid "Successfully created account."
 msgstr ""
 
-#: application/view/login.py:249
+#: application/view/login.py:256
 msgid "Reset KindleEar password"
 msgstr ""
 
-#: application/view/login.py:250
+#: application/view/login.py:257
 msgid "This is an automated email. Please do not reply to it."
 msgstr ""
 
-#: application/view/login.py:251
+#: application/view/login.py:258
 msgid "You can click the following link to reset your KindleEar password."
 msgstr ""
 
@@ -1449,38 +1479,38 @@ msgstr ""
 msgid "Hausa"
 msgstr ""
 
-#: application/view/share.py:51 application/view/subscribe.py:313
+#: application/view/share.py:54 application/view/subscribe.py:317
 msgid "Unknown command: {}"
 msgstr ""
 
-#: application/view/share.py:57
+#: application/view/share.py:60
 msgid "There is no {} email yet."
 msgstr ""
 
-#: application/view/share.py:105 application/view/share.py:130
-#: application/view/share.py:152
+#: application/view/share.py:108 application/view/share.py:133
+#: application/view/share.py:155 application/view/share.py:177
 msgid "Saved to your {} account."
 msgstr ""
 
-#: application/view/share.py:108 application/view/share.py:126
-#: application/view/share.py:155
+#: application/view/share.py:111 application/view/share.py:129
+#: application/view/share.py:158 application/view/share.py:179
 msgid "Failed save to {}."
 msgstr ""
 
-#: application/view/share.py:109 application/view/share.py:127
-#: application/view/share.py:156
+#: application/view/share.py:112 application/view/share.py:130
+#: application/view/share.py:159 application/view/share.py:180
 msgid "Reason :"
 msgstr ""
 
-#: application/view/share.py:118
+#: application/view/share.py:121
 msgid "Unauthorized {} account!"
 msgstr ""
 
-#: application/view/share.py:131
+#: application/view/share.py:134
 msgid "See details below:"
 msgstr ""
 
-#: application/view/share.py:154
+#: application/view/share.py:157
 msgid "Unknown: {}"
 msgstr ""
 
@@ -1500,7 +1530,7 @@ msgstr ""
 msgid "Failed to fetch the recipe."
 msgstr ""
 
-#: application/view/subscribe.py:125 application/view/subscribe.py:383
+#: application/view/subscribe.py:125 application/view/subscribe.py:387
 msgid "Failed to save the recipe. Error:"
 msgstr ""
 
@@ -1508,46 +1538,46 @@ msgstr ""
 msgid "The Rss does not exist."
 msgstr ""
 
-#: application/view/subscribe.py:204 application/view/subscribe.py:257
-#: application/view/subscribe.py:276 application/view/subscribe.py:358
+#: application/view/subscribe.py:204 application/view/subscribe.py:261
+#: application/view/subscribe.py:280 application/view/subscribe.py:362
 msgid "This recipe has not been subscribed to yet."
 msgstr ""
 
-#: application/view/subscribe.py:237
+#: application/view/subscribe.py:239
 msgid "The api key is required."
 msgstr ""
 
-#: application/view/subscribe.py:280
+#: application/view/subscribe.py:284
 msgid "The text is empty."
 msgstr ""
 
-#: application/view/subscribe.py:339
+#: application/view/subscribe.py:343
 msgid "You can only delete the uploaded recipe."
 msgstr ""
 
-#: application/view/subscribe.py:343
+#: application/view/subscribe.py:347
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr ""
 
-#: application/view/subscribe.py:370
+#: application/view/subscribe.py:374
 msgid "Can not read uploaded file, Error:"
 msgstr ""
 
-#: application/view/subscribe.py:378
+#: application/view/subscribe.py:382
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
 msgstr ""
 
-#: application/view/subscribe.py:398
+#: application/view/subscribe.py:402
 msgid "The recipe is already in the library."
 msgstr ""
 
-#: application/view/subscribe.py:428
+#: application/view/subscribe.py:432
 msgid "The login information for this recipe has been cleared."
 msgstr ""
 
-#: application/view/subscribe.py:432
+#: application/view/subscribe.py:436
 msgid "The login information for this recipe has been saved."
 msgstr ""
 

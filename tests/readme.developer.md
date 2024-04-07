@@ -67,9 +67,8 @@ gcloud app deploy queue.yaml
 
 # Docker
 ## 构建镜像
-1. 将docker/Dockerfile文件拷贝到根目录
-2. 执行 
 ```bash
+cp ./docker/Dockerfile .
 sudo docker build -t kindleear/kindleear .
 #or
 sudo docker build --no-cache -t kindleear/kindleear .
@@ -84,6 +83,8 @@ sudo docker rm name
 sudo docker ps -a
 sudo docker compose up -d
 sudo docker run -d
+sudo docker run -it id /bin/bash
+
 ```
 
 # Python托管平台的一些了解

@@ -1,5 +1,5 @@
 import json
-
+from urllib.parse import urljoin
 from .base import Base
 from .languages import google
 
@@ -12,8 +12,9 @@ class ChatgptTranslate(Base):
     name = 'ChatGPT'
     alias = 'ChatGPT (OpenAI)'
     lang_codes = Base.load_lang_codes(google)
-    endpoint = 'https://api.openai.com/v1/chat/completions'
-    # api_key_hint = 'sk-xxx...xxx'
+    default_api_host = 'https://api.openai.com'
+    endpoint = '/v1/chat/completions'
+    api_key_hint = 'sk-xxx...xxx'
     # https://help.openai.com/en/collections/3808446-api-error-codes-explained
     api_key_errors = ['401', 'unauthorized', 'quota']
 
@@ -39,8 +40,8 @@ class ChatgptTranslate(Base):
     top_p = 1
     stream = True
 
-    def __init__(self):
-        Base.__init__(self)
+    def __init__(self, config=None):
+        Base.__init__(self, config)
         self.endpoint = self.config.get('endpoint', self.endpoint)
         self.prompt = self.config.get('prompt', self.prompt)
         if self.model is None:
@@ -91,9 +92,9 @@ class ChatgptTranslate(Base):
         data = self._get_data(text)
         sampling_value = getattr(self, self.sampling)
         data.update({self.sampling: sampling_value})
+        endpoint = urljoin(self.api_host or self.default_api_host, self.endpoint)
 
-        return self.get_result(
-            self.endpoint, json.dumps(data), self._get_headers(),
+        return self.get_result(endpoint, json.dumps(data), self._get_headers(),
             method='POST', stream=self.stream, callback=self._parse)
 
     def _parse(self, data):
@@ -102,30 +103,25 @@ class ChatgptTranslate(Base):
         return json.loads(data)['choices'][0]['message']['content']
 
     def _parse_stream(self, data):
-        while True:
-            try:
-                line = data.readline().decode('utf-8').strip()
-            except IncompleteRead:
+        ret = []
+        for line in data.split('\n'):
+            line = line.strip()
+            if not line or not line.startswith('data:'):
                 continue
-            except Exception as e:
-                raise Exception(
-                    _('Can not parse returned response. Raw data: {}')
-                    .format(str(e)))
-            if line.startswith('data:'):
-                chunk = line.split('data: ')[1]
-                if chunk == '[DONE]':
-                    break
-                delta = json.loads(chunk)['choices'][0]['delta']
-                if 'content' in delta:
-                    yield str(delta['content'])
 
+            chunk = line.split('data: ')[1].strip()
+            if chunk == '[DONE]':
+                break
+            delta = json.loads(chunk)['choices'][0]['delta']
+            if 'content' in delta:
+                ret.append(str(delta['content']))
+        return ''.join(ret)
 
 class AzureChatgptTranslate(ChatgptTranslate):
     name = 'ChatGPT(Azure)'
     alias = 'ChatGPT (Azure)'
-    endpoint = (
-        '$AZURE_OPENAI_ENDPOINT/openai/deployments/gpt-35-turbo/chat/'
-        'completions?api-version=2023-05-15')
+    default_api_host = ''
+    endpoint = '/openai/deployments/gpt-35-turbo/chat/completions?api-version=2023-05-15'
     model = None
 
     def _get_headers(self):

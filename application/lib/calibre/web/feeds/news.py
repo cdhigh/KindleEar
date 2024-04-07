@@ -1076,7 +1076,7 @@ class BasicNewsRecipe(Recipe):
 
         #If translation need, translator propery is set by WorkerImpl
         if (getattr(self, 'translator', None) or {}).get('enable'):
-            self.translate_html(soup)
+            self.translate_html(soup, title)
 
         if job_info:
             try:
@@ -1098,7 +1098,7 @@ class BasicNewsRecipe(Recipe):
         
         shareLinks = self.user.share_links
         aTags = []
-        for type_ in ['Evernote', 'Wiz', 'Pocket', 'Instapaper']:
+        for type_ in ['Evernote', 'Wiz', 'Pocket', 'Instapaper', 'wallabag']:
             if shareLinks.get(type_, {}).get('enable'):
                 ashare = soup.new_tag('a', href=self.make_share_link(type_, self.user, url, soup))
                 ashare.string = _('Save to {}').format(type_)
@@ -1125,7 +1125,7 @@ class BasicNewsRecipe(Recipe):
 
     #生成保存内容或分享文章链接的KindleEar调用链接
     def make_share_link(self, shareType, user, url, soup):
-        share_key = user.share_links.get('key', '123')
+        share_key = user.share_links.get('key', '')
         titleTag = soup.find('title')
         title = titleTag.string if titleTag else 'Untitled'
         appDomain = os.getenv('APP_DOMAIN')
@@ -1135,6 +1135,8 @@ class BasicNewsRecipe(Recipe):
             href = f'{appDomain}/share?act=Pocket&u={user.name}&t={title}&k={share_key}&url={quote(url)}'
         elif shareType == 'Instapaper':
             href = f'{appDomain}/share?act=Instapaper&u={user.name}&t={title}&k={share_key}&url={quote(url)}'
+        elif shareType == 'wallabag':
+            href = f'{appDomain}/share?act=wallabag&u={user.name}&t={title}&k={share_key}&url={quote(url)}'
         elif shareType == 'Weibo':
             href = f'https://service.weibo.com/share/share.php?url={quote(url)}'
         elif shareType == 'Facebook':
@@ -1959,9 +1961,10 @@ class BasicNewsRecipe(Recipe):
                                 seen.add(url)
 
     #调用在线翻译服务平台，翻译html
-    def translate_html(self, soup):
+    def translate_html(self, soup, title):
         from ebook_translator import HtmlTranslator
         translator = HtmlTranslator(self.translator, self.simultaneous_downloads)
+        self.log.debug(f'Translating [{title}]')
         translator.translate_soup(soup)
 
     #翻译Feed的title，toc时用到
@@ -2074,7 +2077,7 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
         
         feeds = []
         id_counter = 0
-        added = set();
+        added = set()
         for obj in main_urls:
             main_title, main_url = (self.title, obj) if isinstance(obj, str) else obj
             feed = Feed()
@@ -2114,10 +2117,6 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
 
         return feeds
 
-    #在一个soup对象中查找所有满足条件的tag
-    def _soup_find_all(self, tag, rule):
-        return tag.find_all(**rule) if isinstance(rule, dict) else tag.select(rule)
-
     #从一个网页中根据指定的规则，提取文章链接
     def extract_urls(self, main_title, main_url):
         resp = self.browser.open(main_url, timeout=self.timeout)
@@ -2128,14 +2127,9 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
         soup = BeautifulSoup(resp.text, 'lxml')
         
         articles = []
-        for rule in self.url_extract_rules:
-            resultTags = self._soup_find_all(soup, rule[0])
-            for flt in rule[1:]:
-                resultTags = [self._soup_find_all(tag, flt) for tag in resultTags]
-                resultTags = [tag for sublist in resultTags for tag in sublist] #二级列表展开为一级列表
-
-            for item in resultTags:
-                #如果最终tag不是链接，则在子节点中查找
+        for rules in self.url_extract_rules:
+            for item in self.get_tags_from_rules(soup, rules):
+                #如果最终tag不是链接，则在子节点中查找，并且添加所有找到的链接
                 item = item.find_all('a') if item.name.lower() != 'a' else [item]
                 for tag in item:
                     title = ' '.join(tag.stripped_strings) or main_title
@@ -2160,17 +2154,23 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
             return raw_html
 
         newBody = soup.new_tag('body')
-        for rule in self.content_extract_rules:
-            resultTags = self._soup_find_all(soup, rule[0])
-            for flt in rule[1:]:
-                resultTags = [self._soup_find_all(tag, flt) for tag in resultTags]
-                resultTags = [tag for sublist in resultTags for tag in sublist] #二级列表展开为一级列表
-
-            newBody.extend(resultTags)
+        for rules in self.content_extract_rules:
+            newBody.extend(self.get_tags_from_rules(soup, rules))
 
         oldBody.replace_with(newBody)
         return str(soup)
 
+    #根据一个规则列表，从soup中获取符合条件的tag列表
+    #rules: 字符串列表或字典列表
+    def get_tags_from_rules(self, soup, rules):
+        if isinstance(rules[0], dict): #使用Tag字典查找
+            resultTags = soup.find_all(**rules[0])
+            for idx, flt in enumerate(rules[1:]):
+                resultTags = [tag.find_all(**flt) for tag in resultTags]
+                resultTags = [tag for sublist in resultTags for tag in sublist] #二级列表展开为一级列表
+        else: #使用CSS选择器，每个选择器的总共最长允许字符长度：1366
+            resultTags = soup.select(' '.join(rules))
+        return resultTags
 
 class CalibrePeriodical(BasicNewsRecipe):
 

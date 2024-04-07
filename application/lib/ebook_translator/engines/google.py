@@ -5,7 +5,7 @@ import time
 import json
 import os.path
 import traceback
-
+from urllib.parse import urljoin
 from .base import Base
 from .languages import google, gemini
 
@@ -13,7 +13,8 @@ class GoogleFreeTranslate(Base):
     name = 'Google(Free)'
     alias = 'Google (Free)'
     lang_codes = Base.load_lang_codes(google)
-    endpoint = 'https://translate.googleapis.com/translate_a/single'
+    default_api_host = 'https://translate.googleapis.com'
+    endpoint = '/translate_a/single'
     need_api_key = False
 
     def translate(self, text):
@@ -39,8 +40,8 @@ class GoogleFreeTranslate(Base):
         # The POST method is unstable, despite its ability to send more text.
         # However, it can be used occasionally with an unacceptable length.
         method = 'GET' if len(text) <= 1800 else 'POST'
-        return self.get_result(
-            self.endpoint, data, headers, method=method, callback=self._parse)
+        endpoint = urljoin(self.default_api_host, self.endpoint)
+        return self.get_result(endpoint, data, headers, method=method, callback=self._parse)
 
     def _parse(self, data):
         # return ''.join(i[0] for i in json.loads(data)[0])
@@ -144,7 +145,8 @@ class GoogleBasicTranslateADC(GoogleTranslate, Base):
     name = 'Google(Basic)ADC'
     alias = 'Google (Basic) ADC'
     lang_codes = Base.load_lang_codes(google)
-    endpoint = 'https://translation.googleapis.com/language/translate/v2'
+    default_api_host = 'https://translation.googleapis.com'
+    endpoint = '/language/translate/v2'
     api_key_hint = 'API key'
     need_api_key = False
 
@@ -168,8 +170,8 @@ class GoogleBasicTranslateADC(GoogleTranslate, Base):
 
         if not self._is_auto_lang():
             data.update(source=self._get_source_code())
-        return self.get_result(
-            self.endpoint, self.get_data(data), self.get_headers(),
+        endpoint = urljoin(self.api_host or self.default_api_host, self.endpoint)
+        return self.get_result(endpoint, self.get_data(data), self.get_headers(),
             method='POST', callback=self._parse)
 
     def _parse(self, data):
@@ -195,13 +197,15 @@ class GoogleAdvancedTranslate(GoogleTranslate, Base):
     name = 'Google(Advanced)'
     alias = 'Google (Advanced) ADC'
     lang_codes = Base.load_lang_codes(google)
-    endpoint = 'https://translation.googleapis.com/v3/projects/{}'
+    default_api_host = 'https://translation.googleapis.com'
+    endpoint = '/v3/projects/{}'
     api_key_hint = 'PROJECT_ID'
     need_api_key = False
 
     def translate(self, text):
         project_id = self._get_project_id()
         endpoint = self.endpoint.format('%s:translateText' % project_id)
+        endpoint = urljoin(self.api_host or self.default_api_host, endpoint)
         headers = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer %s' % self._get_credential(),
@@ -230,8 +234,8 @@ class GeminiPro(Base):
     name = 'GeminiPro'
     alias = 'Gemini Pro'
     lang_codes = Base.load_lang_codes(gemini)
-    endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' \
-        'gemini-pro:{}?key={}'
+    default_api_host = 'https://generativelanguage.googleapis.com'
+    endpoint = '/v1beta/models/gemini-pro:{}?key={}'
     need_api_key = True
 
     concurrency_limit = 1
@@ -247,8 +251,8 @@ class GeminiPro(Base):
     top_p = 1
     stream = True
 
-    def __init__(self):
-        Base.__init__(self)
+    def __init__(self, config=None):
+        Base.__init__(self, config)
         self.prompt = self.config.get('prompt', self.prompt)
         self.temperature = self.config.get('temperature', self.temperature)
         self.top_k = self.config.get('top_k', self.top_k)
@@ -257,7 +261,8 @@ class GeminiPro(Base):
 
     def _endpoint(self):
         method = 'streamGenerateContent' if self.stream else 'generateContent'
-        return self.endpoint.format(method, self.api_key)
+        endpoint = self.endpoint.format(method, self.api_key)
+        return urljoin(self.api_host or self.default_api_host, self.endpoint)
 
     def _prompt(self, text):
         prompt = self.prompt.replace('<tlang>', self.target_lang)
@@ -267,8 +272,8 @@ class GeminiPro(Base):
             prompt = prompt.replace('<slang>', self.source_lang)
         # Recommend setting temperature to 0.5 for retaining the placeholder.
         if self.merge_enabled:
-            prompt += ' Ensure that placeholders matching the pattern' \
-                '{{id_\\d+}} in the content are retained.'
+            prompt += (' Ensure that placeholders matching the pattern'
+                '{{id_\\d+}} in the content are retained.')
         return prompt + ' Start translating: ' + text
 
     def _headers(self):

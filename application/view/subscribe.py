@@ -224,19 +224,23 @@ def BookTranslatorPost(recipeId):
     #构建配置参数
     form = request.form
     engineName = form.get('engine', '')
+    apiHost = form.get('api_host', '')
     apiKeys = form.get('api_keys', '')
     apiKeys = apiKeys.split('\n') if apiKeys else []
     params = {'enable': str_to_bool(form.get('enable', '')), 'engine': engineName,
-        'api_keys': apiKeys, 'src_lang': form.get('src_lang', ''), 
+        'api_host': apiHost, 'api_keys': apiKeys, 'src_lang': form.get('src_lang', ''), 
         'dst_lang': form.get('dst_lang', 'en'), 'position': form.get('position', 'below'),
         'orig_style': form.get('orig_style', ''), 'trans_style': form.get('trans_style', '')}
 
     engines = get_trans_engines()
     engine = engines.get(engineName, None)
-    if engine and engine.get('need_api_key') and not apiKeys:
-        tips = _('The api key is required.')
-        return render_template('book_translator.html', tab="my", tips=tips, params=params, title=recipe.title,
-            recipeId=recipeId, engines=json.dumps(engines, separators=(',', ':')))
+    if engine and engine.get('need_api_key'):
+        if not apiKeys:
+            tips = _('The api key is required.')
+            return render_template('book_translator.html', tab="my", tips=tips, params=params, title=recipe.title,
+                recipeId=recipeId, engines=json.dumps(engines, separators=(',', ':')))
+    else:
+        params['api_host'] = ''
 
     tips = _("Settings Saved!")
     apply_all = str_to_bool(form.get('apply_all', ''))
