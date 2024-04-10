@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-04-06 20:42-0300\n"
+"POT-Creation-Date: 2024-04-09 11:48-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:146
+#: application/templates/admin.html:3 application/templates/base.html:149
 msgid "Admin"
 msgstr ""
 
@@ -191,20 +191,16 @@ msgid "Email or Username"
 msgstr ""
 
 #: application/templates/adv_archive.html:56
-#: application/templates/adv_archive.html:72 application/templates/base.html:47
+#: application/templates/adv_archive.html:72 application/templates/base.html:49
 #: application/templates/home.html:16 application/templates/login.html:25
 #: application/templates/setting.html:222 application/templates/signup.html:25
 #: application/templates/user_account.html:19
 msgid "Password"
 msgstr ""
 
-#: application/templates/adv_archive.html:59 application/templates/base.html:57
+#: application/templates/adv_archive.html:59
+#: application/templates/adv_archive.html:75 application/templates/base.html:59
 msgid "Verify"
-msgstr ""
-
-#: application/templates/adv_archive.html:75
-#: application/templates/book_translator.html:94
-msgid "Test"
 msgstr ""
 
 #: application/templates/adv_archive.html:78
@@ -379,343 +375,360 @@ msgid "Click to back"
 msgstr ""
 
 #: application/templates/base.html:23
-msgid "View Source Code"
+msgid "Delete (Ctrl for no confirm)"
 msgstr ""
 
 #: application/templates/base.html:24
-msgid "Subscribe (Deliver Separately)"
+msgid "View Source Code"
 msgstr ""
 
 #: application/templates/base.html:25
-msgid "Subscribe"
+msgid "Subscribe (Deliver Separately)"
 msgstr ""
 
 #: application/templates/base.html:26
-msgid "Cannot add this custom rss, Error:"
+msgid "Subscribe"
 msgstr ""
 
 #: application/templates/base.html:27
-msgid "Cannot delete this feed, Error:"
+msgid "Cannot add this custom rss, Error:"
 msgstr ""
 
 #: application/templates/base.html:28
+msgid "Cannot delete this feed, Error:"
+msgstr ""
+
+#: application/templates/base.html:29
 msgid "Fulltext"
 msgstr ""
 
-#: application/templates/base.html:29 application/templates/base.html:36
+#: application/templates/base.html:30 application/templates/base.html:38
 msgid "Share"
 msgstr ""
 
-#: application/templates/base.html:30
+#: application/templates/base.html:31
 msgid "Are you sure to delete ({0})?"
 msgstr ""
 
-#: application/templates/base.html:31
+#: application/templates/base.html:32
+msgid "Are you sure to REMOVE ALL CUSTOM RSS?"
+msgstr ""
+
+#: application/templates/base.html:33
 msgid "Share links, share happiness"
 msgstr ""
 
-#: application/templates/base.html:32
+#: application/templates/base.html:34
 msgid "Category"
 msgstr ""
 
-#: application/templates/base.html:33 application/templates/setting.html:129
+#: application/templates/base.html:35 application/templates/setting.html:129
 msgid "Language"
 msgstr ""
 
-#: application/templates/base.html:34
+#: application/templates/base.html:36
 msgid ""
 "Please write a category in text field if the one you wish is not in the "
 "list."
 msgstr ""
 
-#: application/templates/base.html:35
+#: application/templates/base.html:37
 msgid "Cancel"
 msgstr ""
 
-#: application/templates/base.html:37
+#: application/templates/base.html:39
 msgid "Language code invalid"
 msgstr ""
 
-#: application/templates/base.html:38
+#: application/templates/base.html:40
 msgid "Thank you for sharing."
 msgstr ""
 
-#: application/templates/base.html:39
+#: application/templates/base.html:41
 msgid "Close"
 msgstr ""
 
-#: application/templates/base.html:40
+#: application/templates/base.html:42
 msgid "Unsubscribe"
 msgstr ""
 
-#: application/templates/base.html:41
+#: application/templates/base.html:43
 msgid "Cannot subscribe this recipe, Error:"
 msgstr ""
 
-#: application/templates/base.html:42
+#: application/templates/base.html:44
 msgid "Are you sure to Unsubscribe ({0})?"
 msgstr ""
 
-#: application/templates/base.html:43
+#: application/templates/base.html:45
 msgid "Cannot unsubscribe this recipe, Error:"
 msgstr ""
 
-#: application/templates/base.html:44
+#: application/templates/base.html:46
 msgid "The recipe is already subscribed."
 msgstr ""
 
-#: application/templates/base.html:45
+#: application/templates/base.html:47
 msgid "Website login lnformation"
 msgstr ""
 
-#: application/templates/base.html:46
+#: application/templates/base.html:48
 msgid "Account"
 msgstr ""
 
-#: application/templates/base.html:48
+#: application/templates/base.html:50
 msgid "Submit"
 msgstr ""
 
-#: application/templates/base.html:49
+#: application/templates/base.html:51
 msgid ""
 "If any field is left blank, the server will clear the saved login "
 "information."
 msgstr ""
 
-#: application/templates/base.html:50
+#: application/templates/base.html:52
 msgid "Cannot set the website login information, Error:"
 msgstr ""
 
-#: application/templates/base.html:51
+#: application/templates/base.html:53
 msgid "Choose a recipe file to upload"
 msgstr ""
 
-#: application/templates/base.html:52
+#: application/templates/base.html:54
 msgid "Congratulations"
 msgstr ""
 
-#: application/templates/base.html:53
+#: application/templates/base.html:55
 msgid "Thanks"
 msgstr ""
 
-#: application/templates/base.html:54
+#: application/templates/base.html:56
 msgid ""
 "Your recipe has been uploaded, and it can be found in the Library "
 "section. If you dont see it, please make sure to switch to the correct "
-"language ({0})."
+"language."
 msgstr ""
 
-#: application/templates/base.html:55
+#: application/templates/base.html:57
 msgid "Your recipe have been deleted."
 msgstr ""
 
-#: application/templates/base.html:56
+#: application/templates/base.html:58
 msgid "Kindleify Selection"
 msgstr ""
 
-#: application/templates/base.html:58
+#: application/templates/base.html:60
 msgid "Verified"
 msgstr ""
 
-#: application/templates/base.html:59 application/view/login.py:87
+#: application/templates/base.html:61 application/view/login.py:87
 #: application/view/share.py:157
 msgid "The username does not exist or password is wrong."
 msgstr ""
 
-#: application/templates/base.html:60
+#: application/templates/base.html:62
 msgid "The file you chosen is not an acceptable type."
 msgstr ""
 
-#: application/templates/base.html:61
+#: application/templates/base.html:63
 msgid "The file have been uploaded successfully."
 msgstr ""
 
-#: application/templates/base.html:62
+#: application/templates/base.html:64
 msgid "This feed has been successfully subscribed."
 msgstr ""
 
-#: application/templates/base.html:63
+#: application/templates/base.html:65
 msgid "Thank you for your feedback, this feed will be reviewed soon."
 msgstr ""
 
-#: application/templates/base.html:64
+#: application/templates/base.html:66
 msgid "Are you confirming to share the recipe ({0})?"
 msgstr ""
 
-#: application/templates/base.html:65
+#: application/templates/base.html:67
 msgid "[All]"
 msgstr ""
 
-#: application/templates/base.html:66
+#: application/templates/base.html:68
 msgid "[By Time]"
 msgstr ""
 
-#: application/templates/base.html:67
+#: application/templates/base.html:69
 msgid "[Uncategoried]"
 msgstr ""
 
-#: application/templates/base.html:68
+#: application/templates/base.html:70
 msgid "There are no links found."
 msgstr ""
 
-#: application/templates/base.html:69
+#: application/templates/base.html:71
 msgid "Invalid report"
 msgstr ""
 
-#: application/templates/base.html:70
+#: application/templates/base.html:72
 msgid "Are you confirming that this link is invalid or off the cloud?"
 msgstr ""
 
-#: application/templates/base.html:71
+#: application/templates/base.html:73
 msgid "Customize delivery time"
 msgstr ""
 
-#: application/templates/base.html:72 application/templates/setting.html:49
+#: application/templates/base.html:74 application/templates/setting.html:49
 msgid "Delivery days"
 msgstr ""
 
-#: application/templates/base.html:73 application/templates/setting.html:51
+#: application/templates/base.html:75 application/templates/setting.html:51
 msgid "Mon"
 msgstr ""
 
-#: application/templates/base.html:74 application/templates/setting.html:53
+#: application/templates/base.html:76 application/templates/setting.html:53
 msgid "Tue"
 msgstr ""
 
-#: application/templates/base.html:75 application/templates/setting.html:55
+#: application/templates/base.html:77 application/templates/setting.html:55
 msgid "Wed"
 msgstr ""
 
-#: application/templates/base.html:76 application/templates/setting.html:57
+#: application/templates/base.html:78 application/templates/setting.html:57
 msgid "Thu"
 msgstr ""
 
-#: application/templates/base.html:77 application/templates/setting.html:59
+#: application/templates/base.html:79 application/templates/setting.html:59
 msgid "Fri"
 msgstr ""
 
-#: application/templates/base.html:78 application/templates/setting.html:61
+#: application/templates/base.html:80 application/templates/setting.html:61
 msgid "Sat"
 msgstr ""
 
-#: application/templates/base.html:79 application/templates/setting.html:63
+#: application/templates/base.html:81 application/templates/setting.html:63
 msgid "Sun"
 msgstr ""
 
-#: application/templates/base.html:80
+#: application/templates/base.html:82
 msgid "Delivery times"
 msgstr ""
 
-#: application/templates/base.html:81
+#: application/templates/base.html:83
 msgid "The customized delivery time for the recipe has been successfully saved."
 msgstr ""
 
-#: application/templates/base.html:82
+#: application/templates/base.html:84
 msgid "The account have been deleted."
 msgstr ""
 
-#: application/templates/base.html:83 application/view/share.py:147
+#: application/templates/base.html:85 application/view/share.py:147
 msgid "The username or password is empty."
 msgstr ""
 
-#: application/templates/base.html:84 application/view/admin.py:86
+#: application/templates/base.html:86 application/view/admin.py:86
 #: application/view/admin.py:166 application/view/admin.py:205
 #: application/view/login.py:229 application/view/login.py:289
 msgid "The two new passwords are dismatch."
 msgstr ""
 
-#: application/templates/base.html:85
+#: application/templates/base.html:87
 msgid "Password changed successfully."
 msgstr ""
 
-#: application/templates/base.html:86
+#: application/templates/base.html:88
 msgid "Account added successfully."
 msgstr ""
 
-#: application/templates/base.html:87 application/view/login.py:139
+#: application/templates/base.html:89 application/view/login.py:139
 msgid "login required"
 msgstr ""
 
-#: application/templates/base.html:88
+#: application/templates/base.html:90
 msgid "Upload cover files successfully."
 msgstr ""
 
-#: application/templates/base.html:89
+#: application/templates/base.html:91
 msgid ""
 "Total size of the files you selected exceeds 16MB. Please reduce the "
 "image resolution or upload in batches."
 msgstr ""
 
-#: application/templates/base.html:90
+#: application/templates/base.html:92
 #: application/templates/book_translator.html:3
 #: application/templates/book_translator.html:17
 msgid "Translator"
 msgstr ""
 
-#: application/templates/base.html:91
+#: application/templates/base.html:93
 msgid "Upl"
 msgstr ""
 
-#: application/templates/base.html:92
+#: application/templates/base.html:94
 msgid "Sep"
 msgstr ""
 
-#: application/templates/base.html:93
+#: application/templates/base.html:95
 msgid "Log"
 msgstr ""
 
-#: application/templates/base.html:94
+#: application/templates/base.html:96
 msgid "Emb"
 msgstr ""
 
-#: application/templates/base.html:95
+#: application/templates/base.html:97
 msgid ""
 "The test email has been successfully sent to the following addresses. "
 "Please check your inbox or spam folder to confirm its delivery. Depending"
 " on your email server, there may be a slight delay."
 msgstr ""
 
-#: application/templates/base.html:96
+#: application/templates/base.html:98
 msgid "Translating..."
 msgstr ""
 
-#: application/templates/base.html:97
+#: application/templates/base.html:99
 msgid "The configuration validation is correct."
 msgstr ""
 
-#: application/templates/base.html:119 application/templates/home.html:12
+#: application/templates/base.html:100 application/templates/logs.html:22
+#: application/templates/logs.html:67 application/templates/my.html:17
+#: application/templates/setting.html:98 application/templates/setting.html:99
+#: application/templates/setting.html:100
+#: application/templates/setting.html:101
+#: application/templates/setting.html:125
+msgid "Title"
+msgstr ""
+
+#: application/templates/base.html:122 application/templates/home.html:12
 msgid "Logout"
 msgstr ""
 
-#: application/templates/base.html:121 application/templates/home.html:17
+#: application/templates/base.html:124 application/templates/home.html:17
 #: application/templates/login.html:3 application/templates/login.html:19
 #: application/templates/login.html:29
 msgid "Login"
 msgstr ""
 
-#: application/templates/base.html:123 application/templates/signup.html:3
+#: application/templates/base.html:126 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr ""
 
-#: application/templates/base.html:143 application/templates/home.html:11
+#: application/templates/base.html:146 application/templates/home.html:11
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr ""
 
-#: application/templates/base.html:144 application/templates/setting.html:3
+#: application/templates/base.html:147 application/templates/setting.html:3
 msgid "Settings"
 msgstr ""
 
-#: application/templates/base.html:145 application/templates/logs.html:3
+#: application/templates/base.html:148 application/templates/logs.html:3
 msgid "Logs"
 msgstr ""
 
-#: application/templates/base.html:147
+#: application/templates/base.html:150
 msgid "Advanced"
 msgstr ""
 
-#: application/templates/base.html:148 application/templates/library.html:3
+#: application/templates/base.html:151 application/templates/library.html:3
 msgid "Shared"
 msgstr ""
 
@@ -803,6 +816,10 @@ msgstr ""
 msgid "Translation"
 msgstr ""
 
+#: application/templates/book_translator.html:94
+msgid "Test"
+msgstr ""
+
 #: application/templates/change_password.html:15
 msgid "Old password"
 msgstr ""
@@ -880,14 +897,6 @@ msgstr ""
 msgid "Time"
 msgstr ""
 
-#: application/templates/logs.html:22 application/templates/logs.html:67
-#: application/templates/my.html:17 application/templates/setting.html:98
-#: application/templates/setting.html:99 application/templates/setting.html:100
-#: application/templates/setting.html:101
-#: application/templates/setting.html:125
-msgid "Title"
-msgstr ""
-
 #: application/templates/logs.html:23 application/templates/logs.html:68
 msgid "Size"
 msgstr ""
@@ -925,7 +934,7 @@ msgid "Library"
 msgstr ""
 
 #: application/templates/my.html:57
-msgid "Upload your custom recipe"
+msgid "Upload custom recipe"
 msgstr ""
 
 #: application/templates/my.html:70
@@ -1130,8 +1139,8 @@ msgstr ""
 msgid "Never expire"
 msgstr ""
 
-#: application/view/admin.py:51 application/view/adv.py:376
-#: application/view/setting.py:96 application/view/subscribe.py:245
+#: application/view/admin.py:51 application/view/adv.py:373
+#: application/view/setting.py:96 application/view/subscribe.py:250
 msgid "Settings Saved!"
 msgstr ""
 
@@ -1247,29 +1256,29 @@ msgstr ""
 msgid "Open in browser"
 msgstr ""
 
-#: application/view/adv.py:378
+#: application/view/adv.py:375
 msgid "The format is invalid."
 msgstr ""
 
-#: application/view/adv.py:411
+#: application/view/adv.py:408
 msgid "Authorization Error!<br/>{}"
 msgstr ""
 
-#: application/view/adv.py:434
+#: application/view/adv.py:431
 msgid "Success authorized by Pocket!"
 msgstr ""
 
-#: application/view/adv.py:440
+#: application/view/adv.py:437
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr ""
 
-#: application/view/adv.py:462
+#: application/view/adv.py:459
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 
-#: application/view/adv.py:475
+#: application/view/adv.py:472
 msgid "Request type [{}] unsupported"
 msgstr ""
 
@@ -1290,10 +1299,10 @@ msgstr ""
 msgid "Cannot fetch data from {}, status: {}"
 msgstr ""
 
-#: application/view/library.py:51 application/view/subscribe.py:195
-#: application/view/subscribe.py:221 application/view/subscribe.py:276
-#: application/view/subscribe.py:305 application/view/subscribe.py:425
-#: application/view/subscribe.py:453 application/view/subscribe.py:460
+#: application/view/library.py:51 application/view/subscribe.py:200
+#: application/view/subscribe.py:226 application/view/subscribe.py:281
+#: application/view/subscribe.py:310 application/view/subscribe.py:430
+#: application/view/subscribe.py:458 application/view/subscribe.py:465
 msgid "The recipe does not exist."
 msgstr ""
 
@@ -1479,7 +1488,7 @@ msgstr ""
 msgid "Hausa"
 msgstr ""
 
-#: application/view/share.py:54 application/view/subscribe.py:317
+#: application/view/share.py:54 application/view/subscribe.py:322
 msgid "Unknown command: {}"
 msgstr ""
 
@@ -1530,54 +1539,54 @@ msgstr ""
 msgid "Failed to fetch the recipe."
 msgstr ""
 
-#: application/view/subscribe.py:125 application/view/subscribe.py:387
+#: application/view/subscribe.py:125 application/view/subscribe.py:392
 msgid "Failed to save the recipe. Error:"
 msgstr ""
 
-#: application/view/subscribe.py:157
+#: application/view/subscribe.py:161
 msgid "The Rss does not exist."
 msgstr ""
 
-#: application/view/subscribe.py:204 application/view/subscribe.py:261
-#: application/view/subscribe.py:280 application/view/subscribe.py:362
+#: application/view/subscribe.py:209 application/view/subscribe.py:266
+#: application/view/subscribe.py:285 application/view/subscribe.py:367
 msgid "This recipe has not been subscribed to yet."
 msgstr ""
 
-#: application/view/subscribe.py:239
+#: application/view/subscribe.py:244
 msgid "The api key is required."
 msgstr ""
 
-#: application/view/subscribe.py:284
+#: application/view/subscribe.py:289
 msgid "The text is empty."
 msgstr ""
 
-#: application/view/subscribe.py:343
+#: application/view/subscribe.py:348
 msgid "You can only delete the uploaded recipe."
 msgstr ""
 
-#: application/view/subscribe.py:347
+#: application/view/subscribe.py:352
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr ""
 
-#: application/view/subscribe.py:374
+#: application/view/subscribe.py:379
 msgid "Can not read uploaded file, Error:"
 msgstr ""
 
-#: application/view/subscribe.py:382
+#: application/view/subscribe.py:387
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
 msgstr ""
 
-#: application/view/subscribe.py:402
+#: application/view/subscribe.py:407
 msgid "The recipe is already in the library."
 msgstr ""
 
-#: application/view/subscribe.py:432
+#: application/view/subscribe.py:437
 msgid "The login information for this recipe has been cleared."
 msgstr ""
 
-#: application/view/subscribe.py:436
+#: application/view/subscribe.py:441
 msgid "The login information for this recipe has been saved."
 msgstr ""
 

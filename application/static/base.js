@@ -230,9 +230,11 @@ function PopulateMyCustomRss() {
     hamb_arg = [];
     //汉堡按钮弹出菜单代码
     var fTpl = "{0}('{1}','{2}')";
+    var fTplAll = "{0}(event,'{1}','{2}','{3}',{4})"; //id,title,url,isfulltext
     hamb_arg.push({klass: 'btn-F', title: i18n.translator, icon: 'icon-translate', act: "/translator/" + id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', id, title)});
-    hamb_arg.push({klass: 'btn-A', title: i18n.delete, icon: 'icon-delete', act: fTpl.format('DeleteCustomRss', id, title)});
+    hamb_arg.push({klass: 'btn-A', title: i18n.deleteCtrlNoConfirm, icon: 'icon-delete', 
+      act: fTplAll.format('DeleteCustomRss', id, title, url, isfulltext)});
     row_str.push(AddHamburgerButton(hamb_arg));
     row_str.push('</div>');
     //console.log(row_str.join(''));
@@ -474,12 +476,12 @@ function AskForSubscriptionInfo(id, account){
   modal.open();
 }
 
-//用户点击了删除自定义RSS按钮
-function DeleteCustomRss(rssid, title) {
-  if (!confirm(i18n.areYouSureDelete.format(title))) {
+//用户点击了删除自定义RSS按钮，如果按住ctrl键再点击删除，则不需要确认
+function DeleteCustomRss(event, rssid, title, url, isfulltext) {
+  if (!event.ctrlKey && !confirm(i18n.areYouSureDelete.format(title))) {
     return;
   }
-  
+
   $.post("/customrss/delete", {id: rssid}, function (data) {
     if (data.status == "ok") {
       for (var idx = 0; idx < my_custom_rss_list.length; idx++) {
@@ -489,6 +491,9 @@ function DeleteCustomRss(rssid, title) {
         }
       }
       PopulateMyCustomRss();
+      $('#title_to_add').val(title);
+      $('#url_to_add').val(url);
+      $('#isfulltext').prop('checked', isfulltext);
     } else if (data.status == i18n.loginRequired) {
       window.location.href = '/login';
     } else {
@@ -497,12 +502,41 @@ function DeleteCustomRss(rssid, title) {
   });
 }
 
+//一次性删除所有的自定义RSS
+function RemoveAllCustomRss() {
+  $.post("/customrss/delete", {id: '#all_custom_rss#'}, function (data) {
+    if (data.status == "ok") {
+      my_custom_rss_list.length = 0;
+      PopulateMyCustomRss();
+      $('#title_to_add').val('');
+      $('#url_to_add').val('');
+      $('#isfulltext').prop('checked', false);
+    } else if (data.status == i18n.loginRequired) {
+      window.location.href = '/login';
+    } else {
+      alert(resp.status);
+    }
+  });
+  return false;
+}
+
 //用户点击了添加自定义RSS按钮
 function AddCustomRss() {
-  var title_to_add = $('#title_to_add');
-  var isfulltext = $('#isfulltext');
-  var url_to_add = $('#url_to_add');
-  $.post("/customrss/add", {title: title_to_add.val(), fulltext: isfulltext.prop('checked'), url: url_to_add.val()},
+  let title_to_add = $('#title_to_add');
+  let isfulltext = $('#isfulltext');
+  let url_to_add = $('#url_to_add');
+  let title = title_to_add.val();
+  let url = url_to_add.val();
+  if ((title == '#removeall#') && !url) {
+    let msg = i18n.areYouSureRemoveAll + '\n' + i18n.areYouSureRemoveAll + '\n' + i18n.areYouSureRemoveAll;
+    if (confirm(msg)) {
+      return RemoveAllCustomRss();
+    } else {
+      return false;
+    }
+  }
+
+  $.post("/customrss/add", {title: title, url: url, fulltext: isfulltext.prop('checked')},
     function (data) {
       if (data.status == "ok") {
         my_custom_rss_list.unshift({title: data.title, url: data.url, 'id': data.id, isfulltext: data.isfulltext});
@@ -672,11 +706,12 @@ function OpenUploadRecipeDialog() {
           modal.close();
           //更新本地数据
           delete data.status;
-          let language = data.language;
+          let lang = data.language;
+          let title = data.title;
           my_uploaded_recipes.unshift(data);
           PopulateLibrary('');
-          ShowSimpleModalDialog('<h2>{0}</h2><p>{1}</p>'.format(i18n.congratulations, 
-            i18n.recipeUploadedTips.format(LanguageName(language))));
+          ShowSimpleModalDialog('<h2>{0}</h2><p>{1}<hr/>{2}<br/>{3}</p>'.format(i18n.congratulations, 
+            i18n.recipeUploadedTips, i18n.title + ': ' + title, i18n.language + ': ' + (LanguageName(lang))));
         } else if (data.status == i18n.loginRequired) {
           window.location.href = '/login';
         } else {

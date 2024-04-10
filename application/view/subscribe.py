@@ -147,14 +147,19 @@ def AddCustomRss(user, form):
 
 #删除自定义RSS
 def DeleteCustomRss(user, rssId):
-    recipeType, rssId = Recipe.type_and_id(rssId)
-    rss = Recipe.get_by_id_or_none(rssId)
-    if rss:
-        rss.delete_instance()
+    tips = {'status': 'ok'}
+    if rssId == '#all_custom_rss#': #删除所有当前的自定义RSS
+        Recipe.delete().where((Recipe.user == user.name) & (Recipe.type_ == 'custom')).execute()
         UpdateBookedCustomRss(user)
-        return {'status': 'ok'}
     else:
-        return {'status': _('The Rss does not exist.')}
+        recipeType, rssId = Recipe.type_and_id(rssId)
+        rss = Recipe.get_by_id_or_none(rssId)
+        if (recipeType == 'custom') and rss:
+            rss.delete_instance()
+            UpdateBookedCustomRss(user)
+        else:
+            tips = {'status': _('The Rss does not exist.')}
+    return tips
 
 #根据特定用户的自定义RSS推送使能设置，更新已订阅列表
 def UpdateBookedCustomRss(user: KeUser):

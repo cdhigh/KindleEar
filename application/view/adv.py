@@ -173,11 +173,8 @@ def AdvImportPost():
             return adv_render_template('adv_import.html', 'import', user=user, tips=str(e))
         
         for o in walkOpmlOutline(rssList):
-            title, url, isfulltext = xml_unescape(o.text), unquote(xml_unescape(o.xmlUrl)), o.isFulltext #isFulltext为非标准属性
-            if isfulltext:
-                isfulltext = str_to_bool(isfulltext)
-            else:
-                isfulltext = defaultIsFullText
+            title, url, isfulltext = xml_unescape(o.text or o.title), xml_unescape(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
+            isfulltext = str_to_bool(isfulltext) if isfulltext else defaultIsFullText
             
             if not url.startswith('http'):
                 url = ('https:/' if url.startswith('/') else 'https://') + url
@@ -235,8 +232,9 @@ def AdvExport():
         date += '+{:02d}00'.format(user.timezone) if (user.timezone > 0) else '-{:02d}00'.format(abs(user.timezone))
     outLines = []
     for feed in user.all_custom_rss():
-        outLines.append('<outline type="rss" text="{}" xmlUrl="{}" isFulltext="{}" />'.format(
-            xml_escape(feed.title), xml_escape(feed.url), feed.isfulltext))
+        isfulltext = 'yes' if feed.isfulltext else 'no'
+        outLines.append('<outline type="rss" text="{0}" title="{0}" xmlUrl="{1}" isFulltext="{2}" />'.format(
+            xml_escape(feed.title), xml_escape(feed.url), isfulltext))
     outLines = '\n'.join(outLines)
     
     opmlFile = opmlTpl.format(date=date, outLines=outLines).encode('utf-8')

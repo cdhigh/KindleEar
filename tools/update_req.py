@@ -41,7 +41,11 @@ REQ_TASK = {
     'rq': [('flask-rq2', '>=18.3,<19.0'),],
 }
 
-REQ_PLAT = {'gae': [('appengine-python-standard', '>=1.1.6,<2.0.0'),],}
+REQ_PLAT = {'gae': [('appengine-python-standard', '>=1.1.6,<2.0.0'),],
+    'docker': [('weedata', '>=0.2.1,<1.0.0'),('pymysql', '>=1.1.0,<2.0.0'), #docker install all libs
+    ('psycopg2', '>=2.9.9,<3.0.0'),('pymongo', '>=3.7.2,<4.0.0'),('redis', '>=4.5.0,<6.0.0'),
+    ('celery', '>=5.3.6,<6.0.0'),('flask-rq2', '>=18.3,<19.0'),('sqlalchemy', '>=2.0.28,<3.0.0')],
+}
 
 EXTRA = {
     'sqlalchemy': [('sqlalchemy', '>=2.0.28,<3.0.0')],
@@ -78,10 +82,45 @@ def config_to_dict(cfgFile):
     return config_dict
 
 #prepare config.py to build docker
-def dockered_config_py(cfgFile):
+def dockerize_config_py(cfgFile):
     default_cfg = {'APP_ID': 'kindleear', 'DATABASE_URL': 'sqlite:////data/kindleear.db',
         'TASK_QUEUE_SERVICE': 'apscheduler', 'TASK_QUEUE_BROKER_URL': 'memory',
         'KE_TEMP_DIR': '/tmp', 'DOWNLOAD_THREAD_NUM': '3', 'ALLOW_SIGNUP': 'no',
+        'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning'}
+    ret = []
+    inDocComment = False
+    pattern = r"^([_A-Z]+)\s*=\s*(.+)$"
+    with open(cfgFile, 'r', encoding='utf-8') as f:
+        lines = f.read().splitlines()
+    for line in lines:
+        line = line.strip()
+        if '"""' in line or "'''" in line:
+            inDocComment = not inDocComment
+            ret.append(line)
+            continue
+        elif not line or line.startswith('#') or inDocComment:
+            ret.append(line)
+            continue
+
+        match = re.match(pattern, line)
+        name = match.group(1) if match else None
+        value = default_cfg.get(name, None)
+        if name is not None and value is not None:
+            ret.append(f'{name} = "{value}"')
+        else:
+            ret.append(line)
+    
+    with open(cfgFile, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(ret))
+    print(f'Finished update {cfgFile}')
+
+#prepare config.py to deploy in gae
+def gaeify_config_py(cfgFile):
+    appId = os.getenv('GOOGLE_CLOUD_PROJECT', 'kindleear')
+    domain = f"https://{appId}.appspot.com"
+    default_cfg = {'APP_ID': appId, 'APP_DOMAIN': domain, 'SERVER_LOCATION': 'us-central1',
+        'DATABASE_URL': 'datastore', 'TASK_QUEUE_SERVICE': 'gae', 'TASK_QUEUE_BROKER_URL': '',
+        'KE_TEMP_DIR': '', 'DOWNLOAD_THREAD_NUM': '3', 'ALLOW_SIGNUP': 'no',
         'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning'}
     ret = []
     inDocComment = False
@@ -118,8 +157,14 @@ if __name__ == '__main__':
         cfgFile = os.path.normpath(os.path.join(thisDir, 'config.py'))
         reqFile = os.path.normpath(os.path.join(thisDir, 'requirements.txt'))
 
+    dockerize = False
+    gaeify = False
     if len(sys.argv) == 2 and sys.argv[1] == 'docker':
-        dockered_config_py(cfgFile)
+        dockerize_config_py(cfgFile)
+        dockerize = True
+    elif len(sys.argv) == 2 and sys.argv[1] == 'gae':
+        gaeify_config_py(cfgFile)
+        gaeify = True
     else:
         print('\nThis script can help you to update requirements.txt.\n')
         usrInput = input('Press y to continue :')
@@ -130,10 +175,12 @@ if __name__ == '__main__':
     db = cfg['DATABASE_URL'].split('://')[0]
     task = cfg['TASK_QUEUE_SERVICE']
     broker = cfg['TASK_QUEUE_BROKER_URL']
-    if (cfg['DATABASE_URL'].startswith('datastore') or cfg['TASK_QUEUE_SERVICE'] == 'gae'):
+    plat = ''
+    if dockerize:
+        plat = 'docker'
+    elif (cfg['DATABASE_URL'].startswith('datastore') or cfg['TASK_QUEUE_SERVICE'] == 'gae'):
         plat = 'gae'
-    else:
-        plat = ''
+    
     extras = set()
     if broker.startswith('redis://'):
         extras.add('redis')

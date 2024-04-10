@@ -368,9 +368,23 @@ function ReportInvalid(title, feedurl, dbId) {
   });
 }
 
+//xml的转义函数
+function escapeXml(xmlStr) {
+  return xmlStr.replace(/[<>&'"]/g, function(char) {
+    switch (char) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '&': return '&amp;';
+      case "'": return '&apos;';
+      case '"': return '&quot;';
+      default: return char;
+    }
+  });
+}
+
 //将内容全部下载到本地一个xml文件内
 function DownAllRssToFile() {
-  var title, url, ftext, cat, rssd, fmtdate, nowdate;
+  var title, url, ftext, cat, rssd, fmtdate, nowdate, lang;
   var elementA = document.createElement('a');
   var aTxt = new Array();
   aTxt.push("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
@@ -383,24 +397,21 @@ function DownAllRssToFile() {
   aTxt.push("</head>");
   aTxt.push("<body>");
   for (var i = 0; i < g_SharedRss.length; i++) {
-    title = g_SharedRss[i].t;
-    url = g_SharedRss[i].u;
-    title = title.replace(/<[^<>]+?>/g,'');
-    cat = g_SharedRss[i].c;
-    if (g_SharedRss[i].f == "false") {
-      ftext = "0";
-    } else {
-      ftext = "1";
-    }
-    aTxt.push("  <outline type=\"rss\" text=\"" + title + "\" xmlUrl=\"" + url + "\" isFulltext=\"" + ftext + "\" category=\"" + cat + "\" />");
+    title = escapeXml(g_SharedRss[i].t);
+    url = escapeXml(g_SharedRss[i].u);
+    cat = escapeXml(g_SharedRss[i].c);
+    lang = g_SharedRss[i].l || '';
+    ftext = (g_SharedRss[i].f == "false") ? "no" : "yes";
+    aTxt.push('  <outline type="rss" text="{0}" title="{0}" xmlUrl="{1}" isFulltext="{2}" category="{3}" language="{4}" />'
+      .format(title, url, ftext, cat, lang));
   }
   aTxt.push("</body>");
-  aTxt.push("</opml>");
+  aTxt.push("</opml>\n");
 
   nowdate = new Date();
   fmtdate = "KindleEar_library_" + nowdate.getFullYear() + "_" + ((nowdate.getMonth() + 1)) + "_" + nowdate.getDate() + ".xml";
 
-  elementA.setAttribute("href", "data:text/plain;charset=utf-8," + aTxt.join("\n"));
+  elementA.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(aTxt.join("\n")));
   elementA.setAttribute("download", fmtdate);
   elementA.style.display = 'none';
   document.body.appendChild(elementA);

@@ -20,6 +20,7 @@
   <script type="text/javascript">
   var i18n = {
     delete: '{{_("Delete")|safe}}',
+    deleteCtrlNoConfirm: '{{_("Delete (Ctrl for no confirm)")|safe}}',
     viewSrc: '{{_("View Source Code")|safe}}',
     subscriSep: '{{_("Subscribe (Deliver Separately)")|safe}}',
     subscribe: '{{_("Subscribe")|safe}}',
@@ -28,6 +29,7 @@
     fulltext: '{{_("Fulltext")|safe}}',
     share: '{{_("Share")|safe}}',
     areYouSureDelete: '{{_("Are you sure to delete ({0})?")|safe}}',
+    areYouSureRemoveAll: '{{_("Are you sure to REMOVE ALL CUSTOM RSS?")|safe}}',
     shareLinksHappiness: '{{_("Share links, share happiness")|safe}}',
     category: '{{_("Category")|safe}}',
     language: '{{_("Language")|safe}}',
@@ -51,7 +53,7 @@
     chooseRecipeFile: '{{_("Choose a recipe file to upload")|safe}}',
     congratulations: '{{_("Congratulations")|safe}}',
     thanks: '{{_("Thanks")|safe}}',
-    recipeUploadedTips: '{{_("Your recipe has been uploaded, and it can be found in the Library section. If you dont see it, please make sure to switch to the correct language ({0}).")|safe}}',
+    recipeUploadedTips: '{{_("Your recipe has been uploaded, and it can be found in the Library section. If you dont see it, please make sure to switch to the correct language.")|safe}}',
     recipeDeleted: '{{_("Your recipe have been deleted.")|safe}}',
     kindleifySelection: '{{_("Kindleify Selection")|safe}}',
     verify: '{{_("Verify")|safe}}',
@@ -94,7 +96,8 @@
     abbrEmb: '{{_("Emb")|safe}}',
     testEmailOk: '{{_("The test email has been successfully sent to the following addresses. Please check your inbox or spam folder to confirm its delivery. Depending on your email server, there may be a slight delay.")|safe}}',
     translating: '{{_("Translating...")|safe}}',
-    configOk: '{{_("The configuration validation is correct.")|safe}}'
+    configOk: '{{_("The configuration validation is correct.")|safe}}',
+    title: '{{_("Title")|safe}}'
   };
   </script>
   {% block javascript_inhead %}
