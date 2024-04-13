@@ -22,10 +22,10 @@ RUN pip install --upgrade pip
 COPY --from=req_builder /usr/site/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY ./docker/gunicorn.conf.py .
 COPY ./main.py .
 COPY --from=req_builder /usr/site/config.py .
 COPY ./application/ ./application/
-COPY ./docker/gunicorn.conf.py .
 
 EXPOSE 8000
 

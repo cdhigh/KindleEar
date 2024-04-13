@@ -1,6 +1,6 @@
 # gunicorn.conf.py
 import os
-pythonpath = "/usr/local/lib/python3.10/site-packages"
+pythonpath = "/usr/local/lib/python3.9/site-packages"
 bind = "0.0.0.0:8000"
 workers = 1
 threads = 3
@@ -16,18 +16,18 @@ keyfile = os.getenv('GUNI_KEY')
 logconfig_dict = {
     'version': 1,
     'disable_existing_loggers': False,
-    "root": {"level": "INFO", "handlers": ["error_file", "access_file"]},
+    "root": {"level": "INFO", "handlers": ["error_file"]},
     'loggers': {
         "gunicorn.error": {
             "level": "INFO", 
             "handlers": ["error_file"],
-            "propagate": 1,
+            "propagate": False,
             "qualname": "gunicorn.error"
         },
         "gunicorn.access": {
             "level": "INFO",
             "handlers": ["access_file"],
-            "propagate": 0,
+            "propagate": False,
             "qualname": "gunicorn.access"
         }
     },
@@ -37,25 +37,25 @@ logconfig_dict = {
             "maxBytes": 50*1024*1024, #50M
             "backupCount": 1,
             "formatter": "generic",
-            #'mode': 'w+',
             "filename": "/data/gunicorn.error.log"
         },
         "access_file": {
             "class": "logging.handlers.RotatingFileHandler",
             "maxBytes": 10*1024*1024, #10M
             "backupCount": 1,
-            "formatter": "generic",
+            "formatter": "access",
             "filename": "/data/gunicorn.access.log"
         }
     },
     'formatters':{
         "generic": {
-            "format": "'[%(asctime)s] %(levelname)s [%(filename)s:%(lineno)s] %(message)s'",
+            "format": "%(asctime)s %(levelname)s [%(filename)s:%(lineno)s] %(message)s",
             "datefmt": "[%Y-%m-%d %H:%M:%S %z]",
             "class": "logging.Formatter"
         },
         "access": {
-            "format": "'[%(asctime)s] %(levelname)s [%(filename)s:%(lineno)s] %(message)s'",
+            "format": "%(message)s",
+            "datefmt": "[%Y-%m-%d %H:%M:%S %z]",
             "class": "logging.Formatter"
         }
     }

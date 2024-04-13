@@ -2,12 +2,13 @@
 # -*- coding:utf-8 -*-
 """create/update requirments.txt of KindleEar
 """
-import re, os, sys, shutil
+import re, os, sys, shutil, subprocess
 
 REQ_COMM = [('requests', '>=2.31.0,<3.0.0'),
     ('chardet', '>=5.2.0,<6.0.0'),
     ('pillow', '>=10.2.0,<11.0.0'),
     ('lxml', '>=5.0.0,<6.0.0'),
+    ('lxml_html_clean', '>=0.1.1,<1.0.0'),
     ('sendgrid', '>=6.11.0,<7.0.0'),
     ('mailjet_rest', '>=1.3.4,<2.0.0'),
     ('python-dateutil', '>=2.8.2,<3.0.0'),
@@ -26,12 +27,12 @@ REQ_COMM = [('requests', '>=2.31.0,<3.0.0'),
 REQ_DB = {
     'sqlite': [('peewee', '>=3.1.7,<4.0.0'),],
     'mysql': [('peewee', '>=3.1.7,<4.0.0'), ('pymysql', '>=1.1.0,<2.0.0'),],
-    'postgresql': [('peewee', '>=3.1.7,<4.0.0'), ('psycopg2', '>=2.9.9,<3.0.0'),],
-    'cockroachdb': [('peewee', '>=3.1.7,<=4.0.0'), ('psycopg2', '>=2.9.9,<3.0.0'),],
-    'datastore': [('weedata', '>=0.2.1,<1.0.0'), ('google-cloud-datastore', '>=2.19.0,<3.0.0'),],
-    'mongodb': [('weedata', '>=0.2.1,<1.0.0'), ('pymongo', '>=3.7.2,<4.0.0'),],
-    'redis': [('weedata', '>=0.2.1,<1.0.0'), ('redis', '>=4.5.0,<6.0.0'),],
-    'pickle': [('weedata', '>=0.2.1,<1.0.0'),],
+    'postgresql': [('peewee', '>=3.1.7,<4.0.0'), ('psycopg2-binary', '>=2.9.9,<3.0.0'),],
+    'cockroachdb': [('peewee', '>=3.1.7,<=4.0.0'), ('psycopg2-binary', '>=2.9.9,<3.0.0'),],
+    'datastore': [('weedata', '>=0.2.2,<1.0.0'), ('google-cloud-datastore', '>=2.19.0,<3.0.0'),],
+    'mongodb': [('weedata', '>=0.2.2,<1.0.0'), ('pymongo', '>=3.7.2,<4.0.0'),],
+    'redis': [('weedata', '>=0.2.2,<1.0.0'), ('redis', '>=4.5.0,<6.0.0'),],
+    'pickle': [('weedata', '>=0.2.2,<1.0.0'),],
 }
 
 REQ_TASK = {
@@ -42,8 +43,8 @@ REQ_TASK = {
 }
 
 REQ_PLAT = {'gae': [('appengine-python-standard', '>=1.1.6,<2.0.0'),],
-    'docker': [('weedata', '>=0.2.1,<1.0.0'),('pymysql', '>=1.1.0,<2.0.0'), #docker install all libs
-    ('psycopg2', '>=2.9.9,<3.0.0'),('pymongo', '>=3.7.2,<4.0.0'),('redis', '>=4.5.0,<6.0.0'),
+    'docker': [('weedata', '>=0.2.2,<1.0.0'),('pymysql', '>=1.1.0,<2.0.0'), #docker install all libs
+    ('psycopg2-binary', '>=2.9.9,<3.0.0'),('pymongo', '>=3.7.2,<4.0.0'),('redis', '>=4.5.0,<6.0.0'),
     ('celery', '>=5.3.6,<6.0.0'),('flask-rq2', '>=18.3,<19.0'),('sqlalchemy', '>=2.0.28,<3.0.0')],
 }
 
@@ -114,11 +115,24 @@ def dockerize_config_py(cfgFile):
         f.write('\n'.join(ret))
     print(f'Finished update {cfgFile}')
 
+def gae_location():
+    try:
+        output = subprocess.check_output(['gcloud', 'beta', 'app', 'describe'], universal_newlines=True)
+        lines = output.split('\n')
+        for line in lines:
+            if 'locationId:' in line:
+                loc = line[11:].strip()
+                return {'us-central': 'us-central1', 'europe-west': 'europe-west1'}.get(loc, loc)
+        return ''
+    except subprocess.CalledProcessError as e:
+        print(f"Subprocess error: {e}")
+        return ''
+
 #prepare config.py to deploy in gae
 def gaeify_config_py(cfgFile):
-    appId = os.getenv('GOOGLE_CLOUD_PROJECT', 'kindleear')
+    appId = os.getenv('GOOGLE_CLOUD_PROJECT')
     domain = f"https://{appId}.appspot.com"
-    default_cfg = {'APP_ID': appId, 'APP_DOMAIN': domain, 'SERVER_LOCATION': 'us-central1',
+    default_cfg = {'APP_ID': appId, 'APP_DOMAIN': domain, 'SERVER_LOCATION': gae_location(),
         'DATABASE_URL': 'datastore', 'TASK_QUEUE_SERVICE': 'gae', 'TASK_QUEUE_BROKER_URL': '',
         'KE_TEMP_DIR': '', 'DOWNLOAD_THREAD_NUM': '3', 'ALLOW_SIGNUP': 'no',
         'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning'}
@@ -160,9 +174,11 @@ if __name__ == '__main__':
     dockerize = False
     gaeify = False
     if len(sys.argv) == 2 and sys.argv[1] == 'docker':
+        print('\nGenerating config.py and requirements.txt for Docker deployment.\n')
         dockerize_config_py(cfgFile)
         dockerize = True
     elif len(sys.argv) == 2 and sys.argv[1] == 'gae':
+        print('\nGenerating config.py and requirements.txt for GAE deployment.\n')
         gaeify_config_py(cfgFile)
         gaeify = True
     else:
