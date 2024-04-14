@@ -13,13 +13,6 @@ bpHome = Blueprint('bpHome', __name__)
 def Home():
     return render_template('home.html')
 
-@bpHome.route('/env')
-def Test():
-    strEnv = []
-    for d in os.environ:
-        strEnv.append("<pre><p>" + str(d).rjust(28) + " | " + str(os.environ[d]) + "</p></pre>")
-    return ''.join(strEnv)
-
 @bpHome.route('/images/<path:image_file>')
 def ImageFileRoute(image_file):
     imgDir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'images'))

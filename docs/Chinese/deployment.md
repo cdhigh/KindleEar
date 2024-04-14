@@ -53,12 +53,10 @@ gcloud beta app deploy --version=1 app.yaml
 ### 其他说明    
 1. 初始账号和密码为 admin/admin。
 2. 部署时出现下面的几个提示时记得按 y，因为光标自动下移到了下一行，往往会忘记按 y，否则会一直卡在这里。    
-
 ```
 Updating config [cron]...API [cloudscheduler.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)
 Updating config [queue]...API [cloudtasks.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)
-``` 
-
+```
 
 3. 如果出现部署失败并且多次尝试后仍然无法解决，比如"Timed out fetching pod."之类的错误，可以关停此id，然后重建一个，部署时选择其他区域。   
 

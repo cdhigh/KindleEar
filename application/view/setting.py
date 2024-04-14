@@ -135,6 +135,15 @@ def SendTestEmailPost():
 
     return {'status': status, 'emails': emails}
 
+#显示环境变量的值
+@bpSetting.route('/env')
+@login_required()
+def DisplayEnv():
+    strEnv = []
+    for d in os.environ:
+        strEnv.append("<pre><p>" + str(d).rjust(28) + " | " + str(os.environ[d]) + "</p></pre>")
+    return ''.join(strEnv)
+
 #设置国际化语种
 @bpSetting.route("/setlocale/<langCode>")
 def SetLang(langCode):

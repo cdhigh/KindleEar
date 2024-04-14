@@ -195,7 +195,9 @@
           {% if 'smtp' in sm_services -%}
           <option value="smtp" {% if sm_srv_type == 'smtp' %}selected="selected"{% endif %}>SMTP</option>
           {% endif -%}
+          {% if 'local' in sm_services -%}
           <option value="local" {% if sm_srv_type == 'local' %}selected="selected"{% endif %}>local (debug)</option>
+          {% endif -%}
         </select>
       </div>
       <div class="pure-control-group" id="sm_apikey">

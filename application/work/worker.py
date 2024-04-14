@@ -108,10 +108,13 @@ def WorkerImpl(userName: str, recipeId: list=None, log=None):
         else:
             save_delivery_log(user, title, 0, status='nonews')
 
-    elaspTime = time.time() - startTime
+    elaspTime = (time.time() - startTime) / 60.0
     if ret:
         ret = '\n'.join(ret)
-        ret += f'\nTime: {elaspTime} seconds.'
+        if '\n' in ret:
+            ret += f'\nConsumed time: {elaspTime:.1f} minutes.'
+        else:
+            ret += f' [Consumed time: {elaspTime:.1f} minutes].'
     else:
         ret = "There are no new feeds available."
     log.warning(ret)

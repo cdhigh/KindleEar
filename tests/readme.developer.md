@@ -31,6 +31,7 @@
 
 gcloud app deploy cron.yaml
 gcloud app deploy queue.yaml
+gcloud services list | grep datastore.googleapis.com
 
 # Windows 安装celery
 * 安装并启动redis服务，(Windows只能安装redis3 <https://github.com/MicrosoftArchive/redis/releases>)
@@ -60,9 +61,17 @@ gcloud app deploy queue.yaml
 # KindleEar额外自带的Python库，这些库不用pip安装，不在requirements.txt里面
 * readability-lxml: 修改了其htmls.py|shorten_title()
 
-# 关于翻译的注意事项
+# 关于i18n翻译
 * javascript的翻译没有采用其他复杂或引入其他依赖的方案，而是简单粗暴的在base.html里面将要翻译的字段预先翻译，
 然后保存到一个全局字典
+* 文本字符串有修改后，逐个执行三个脚本。
+第一个脚本提取文本到messages.pot，第二个将文本更新到messages.po，翻译后使用第三个脚本编译为messages.mo
+```bat
+tools\pybabel_extract.bat
+tools\pybabel_update.bat
+tools\pybabel_compile.bat
+```
+* 在po后查找fuzzy，更新翻译后，将fuzzy标识行删除
 
 
 # Docker
@@ -72,6 +81,7 @@ cp ./docker/Dockerfile .
 sudo docker build -t kindleear/kindleear .
 #or
 sudo docker build --no-cache -t kindleear/kindleear .
+sudo docker tag id kindleear/kindleear:version
 ```
 
 ## 常用Docker命令
@@ -84,8 +94,16 @@ sudo docker ps -a
 sudo docker compose up -d
 sudo docker run -d
 sudo docker run -it id /bin/bash
-
+sudo docker login
+sudo docker push kindleear/kindleear:tag
+sudo docker push kindleear/kindleear
 ```
+
+
+# 申请Let’s Encrypt ssl证书
+* sudo apt update && sudo apt install certbot
+* sudo certbot certonly --manual --preferred-challenges=dns --email xx@xx.com -d www.yourdomain.com
+* 添加txt记录
 
 # Python托管平台的一些了解
 * [appengine](https://cloud.google.com)：必须绑定信用卡，但有免费额度，有收发邮件服务，任务队列，后台进程

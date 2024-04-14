@@ -91,12 +91,13 @@ class RecipeInput(InputFormatPlugin):
                 log.warning(msg)
                 continue
 
-            feed_index_start += len(ro.feed_objects)
-            self.feeds.extend(ro.feed_objects)
-            self.aborted_articles.extend(ro.aborted_articles)
-            self.failed_downloads.extend(ro.failed_downloads)
-            self.index_htmls.append((ro.title, ro.get_root_index_html_name()))
-            self.recipe_objects.append(ro)
+            if ro.feed_objects:
+                feed_index_start += len(ro.feed_objects)
+                self.feeds.extend(ro.feed_objects)
+                self.aborted_articles.extend(ro.aborted_articles)
+                self.failed_downloads.extend(ro.failed_downloads)
+                self.index_htmls.append((ro.title, ro.get_root_index_html_name()))
+                self.recipe_objects.append(ro)
 
             #可能会有些副作用，前面的conversion_options会影响后面的recipe
             for key, val in ro.conversion_options.items():
