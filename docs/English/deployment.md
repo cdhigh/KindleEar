@@ -10,42 +10,64 @@ This GitHub repository [heroku-free-alternatives](https://github.com/anandrmedia
 
 <a id="gae"></a>
 ## Google Cloud (PaaS)
-Note: If you have previously deployed the Python 2 version of KindleEar, you can directly overwrite the deployment without deleting the original project. However, due to some changes in the database structure, you will need to confirm whether each configuration item is correct after the deployment is completed.   
 
-1. config.py Key Parameter Example
-```python
-APP_ID = "kindleear"
-APP_DOMAIN = "https://kindleear.appspot.com"
-SERVER_LOCATION = "us-central1"
-DATABASE_URL = "datastore"
-TASK_QUEUE_SERVICE = "gae"
-TASK_QUEUE_BROKER_URL = ""
+### Direct cloud shell deployment method (Recommended)
+1. Create a project   
+Open [google cloud](https://console.cloud.google.com/appengine) and create a new project.    
+
+2. Shell deployment   
+On the same page, in the top right corner, there is an icon labeled "Activate Cloud Shell". Click on it to open the cloud shell. Copy and paste the following commands, and follow the prompts by pressing "y" continuously to complete the deployment.   
+```bash
+git clone --depth 1 https://github.com/cdhigh/kindleear.git && \
+chmod +x kindleear/tools/gae_deploy.sh && \
+kindleear/tools/gae_deploy.sh
 ```
 
-2. Download the latest version of KindleEar from the GitHub page. In the bottom right corner of the page, there's a button labeled "Download ZIP". Clicking it will download a ZIP document containing all the source code. Then, unzip it to a directory of your choice, such as D:\KindleEar.   
+3. Finish deployment   
+After deployment, wait a few minutes for GAE backend to create various resources. If it's still not working, manually enable various APIs based on the error logs in the backend.    
+For example, you may need to manually enable the [Cloud Datastore API](https://console.cloud.google.com/apis/library/datastore.googleapis.com).    
 
-3. Install [gloud CLI](https://cloud.google.com/sdk/docs/install), and then execute:   
+
+
+### Local GLI Command Deployment Method
+
+1. Download the latest version of KindleEar from the GitHub page. In the bottom right corner of the page, there's a button labeled "Download ZIP". Clicking it will download a ZIP document containing all the source code. Then, unzip it to a directory of your choice, such as D:\KindleEar.   
+
+2. Install [gloud CLI](https://cloud.google.com/sdk/docs/install), and then execute:   
 ```bash
 gcloud components install app-engine-python app-engine-python-extras # Run as Administrator
 gcloud init
 gcloud auth login
 gcloud auth application-default set-quota-project your_app_id
 gcloud config set project your_app_id
+python kindleear/tools/update_req.py gae
 gcloud beta app deploy --version=1 app.yaml
 gcloud beta app deploy --version=1 cron.yaml
 gcloud beta app deploy --version=1 queue.yaml
 ```
 
-4. For version updates, simply execute one line of code:  
+3. For version updates, simply execute one line of code:  
 ```bash
 gcloud beta app deploy --version=1 app.yaml
 ```
 
-5. If encountering errors like "Timed out fetching pod", you have the option to delete this app id, recreate a new one and select a different region during deployment.   
+### Other Instructions
+1. The initial username and password are admin/admin.   
 
-6. After successful deployment, go to the [GAE console](https://console.cloud.google.com/appengine/settings/emailsenders) and add your sender address to "Mail API Authorized Senders" to prevent "Unauthorized sender" errors during delivery.
+2. When prompted during deployment with the following messages, remember to press "y". The cursor automatically moves to the next line, and it's easy to forget to press "y". Otherwise, it will remain stuck at this step.    
+```bash
+Updating config [cron]...API [cloudscheduler.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)? 
 
-7. If you have previously deployed Python2 version of KindleEar, it is advisable to create a new project to deploy the Python3 version. Since GAE no longer supports Python 2 deployment, reverting to the original version after overwriting is not possible.    
+Updating config [queue]...API [cloudtasks.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)?
+```
+
+3. If encountering errors like "Timed out fetching pod", you have the option to delete this app id, recreate a new one and select a different region during deployment.   
+
+4. After successful deployment, go to the [GAE console](https://console.cloud.google.com/appengine/settings/emailsenders) and add your sender address to "Mail API Authorized Senders" to prevent "Unauthorized sender" errors during delivery.
+
+5. If you have previously deployed Python2 version of KindleEar, it is advisable to create a new project to deploy the Python3 version. Since GAE no longer supports Python 2 deployment, reverting to the original version after overwriting is not possible.    
+
+6. If various issues arise, you can always check the [logs](https://console.cloud.google.com/logs) resolve them one by one based on the error messages.    
 
 
 
@@ -53,10 +75,6 @@ gcloud beta app deploy --version=1 app.yaml
 <a id="docker"></a>
 ## Docker (VPS)
 What is Docker? just think of it as an enhanced version of portable software.   
-
-The KindleEar image published on Docker Hub follows the principle of simplicity. If you need other configurations, you can modify the Dockerfile and rebuild it yourself.  
-- Utilizes SQLite database and APScheduler's memory job store.   
-- Database and log files are stored in the same directory `/data`.  
 
 1. [Install Docker](https://docs.docker.com/engine/install/) (Skip if already installed)    
 Installation methods vary for each platform. KindleEar provides a script for Ubuntu.   
@@ -67,9 +85,16 @@ wget -O - https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/ubunt
 2. Execute a command to start the service (replace `yourid/yourdomain` with your own values).  
 Confirm if the service is running properly by visiting http://ip in a browser.   
 The service will automatically restart after system reboot due to the `restart` parameter.  
+Note: This command uses the default configuration:   
+* SQLite database   
+* APScheduler, memory job store   
+* Database and log files are saved to the same directory `/data`  
+
+If you need a different configuration combination, simply pass the corresponding environment variables based on the variable names in `config.py` (-e parameter).  
+
 ```bash
 mkdir data #for database and logs, you can use any folder (change ./data to your folder)
-sudo docker run -d -p 80:8000 -v ./data:/data --restart always -e APP_ID=yourid -e APP_DOMAIN=yourdomain kindleear/kindleear
+sudo docker run -d -p 80:8000 -v ./data:/data --restart always -e APP_DOMAIN=yourdomain kindleear/kindleear
 ```
 
 If unable to connect, ensure port 80 is open. Methods to open port 80 vary across platforms, such as iptables or ufw.

@@ -10,41 +10,61 @@ KindleEar支持多种平台部署，我只在这里列出一些我测试通过�
 <a id="gae"></a>
 ## google cloud (PaaS)
 
-1. config.py关键参数样例
-```python
-APP_ID = "kindleear"
-APP_DOMAIN = "https://kindleear.appspot.com"
-SERVER_LOCATION = "us-central1"
-DATABASE_URL = "datastore"
-TASK_QUEUE_SERVICE = "gae"
-TASK_QUEUE_BROKER_URL = ""
+### 直接云端Shell部署方法(推荐)
+1.  创建项目     
+打开 [google cloud](https://console.cloud.google.com/appengine) ，创建一个项目。
+
+2. Shell部署    
+在同一个页面的右上角有一个图标 "激活 Cloud shell"， 点击它，打开 cloud shell， 拷贝粘贴以下命令，根据提示不停的按 "y" 即可完成部署。
+```bash
+git clone --depth 1 https://github.com/cdhigh/kindleear.git && \
+chmod +x kindleear/tools/gae_deploy.sh && \
+kindleear/tools/gae_deploy.sh
 ```
 
-2. github页面上下载KindleEar的最新版本，在页面的右下角有一个按钮"Download ZIP"，点击即可下载一个包含全部源码的ZIP文档，然后解压到你喜欢的目录，比如D:\KindleEar。   
+3. 部署后动作    
+部署完成后稍等几分钟等GAE后台创建各种资源。如果还不行，根据后台log错误记录手动去使能各种API。    
+比如，可能需要手动使能 [Cloud Datastore API
+](https://console.cloud.google.com/apis/library/datastore.googleapis.com) 。    
 
-3. 安装 [gloud CLI](https://cloud.google.com/sdk/docs/install)，并且执行 
+
+### 本地GLI命令部署方法
+1. github页面上下载KindleEar的最新版本，在页面的右下角有一个按钮"Download ZIP"，点击即可下载一个包含全部源码的ZIP文档，然后解压到你喜欢的目录，比如D:\KindleEar。   
+
+2. 安装 [gloud CLI](https://cloud.google.com/sdk/docs/install)，并且执行 
 ```bash
 gcloud components install app-engine-python app-engine-python-extras # Run as Administrator
 gcloud init
 gcloud auth login
 gcloud auth application-default set-quota-project your_app_id
 gcloud config set project your_app_id
+python kindleear/tools/update_req.py gae
 gcloud beta app deploy --version=1 app.yaml
 gcloud beta app deploy --version=1 cron.yaml
 gcloud beta app deploy --version=1 queue.yaml
 ```
 
-4. 版本更新，只需要执行一行代码即可
+3. 版本更新，只需要执行一行代码即可
 ```bash
 gcloud beta app deploy --version=1 app.yaml
 ```
 
-5. 如果出现部署失败并且多次尝试后仍然无法解决，比如"Timed out fetching pod."之类的错误，可以关停此id，然后重建一个，部署时选择其他区域。   
+### 其他说明    
+1. 初始账号和密码为 admin/admin。
+2. 部署时出现下面的几个提示时记得按 y，因为光标自动下移到了下一行，往往会忘记按 y，否则会一直卡在这里。    
+```bash
+Updating config [cron]...API [cloudscheduler.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)? 
 
-6. 部署成功后先到 [GAE后台](https://console.cloud.google.com/appengine/settings/emailsenders) 将你的发件地址添加到 "Mail API Authorized Senders"，否则投递会出现 "Unauthorized sender" 错误。
+Updating config [queue]...API [cloudtasks.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)?
+```
 
-7. 如果你之前已经部署过Python2版本的KindleEar，建议新建一个项目来部署Python3版本，因GAE不再支持Python2部署，所以覆盖后无法恢复原先的版本。   
+3. 如果出现部署失败并且多次尝试后仍然无法解决，比如"Timed out fetching pod."之类的错误，可以关停此id，然后重建一个，部署时选择其他区域。   
 
+4. 部署成功后先到 [GAE后台](https://console.cloud.google.com/appengine/settings/emailsenders) 将你的发件地址添加到 "Mail API Authorized Senders"，否则投递会出现 "Unauthorized sender" 错误。
+
+5. 如果你之前已经部署过Python2版本的KindleEar，建议新建一个项目来部署Python3版本，因GAE不再支持Python2部署，所以覆盖后无法恢复原先的版本。   
+
+6. 出现各种问题后，随时可以到 [后台](https://console.cloud.google.com/logs) 查看log记录，根据错误信息来逐一解决。   
 
 
 
@@ -52,9 +72,6 @@ gcloud beta app deploy --version=1 app.yaml
 ## Docker (VPS)
 Docker是什么？如果你不了解，就把它类比为Windows平台的绿色软件的增强版。   
 Docker不限平台，只要目标平台支持Docker，资源足够就可以部署。   
-发布在docker hub的KindleEar映像采用最简原则，如果你需要其他配置，可以自己修改Dockerfile重新创建。   
-- 使用sqlite数据库和apscheduler的内存队列。   
-- 数据库文件和log文件保存到同一目录 /data 。   
 
 1. [安装Docker](https://docs.docker.com/engine/install/) （已安装则跳过）
 每个平台的安装方法不一样，KindleEar提供了一个ubuntu的脚本。   
@@ -62,12 +79,18 @@ Docker不限平台，只要目标平台支持Docker，资源足够就可以部�
 wget -O - https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/ubuntu_docker.sh | bash
 ```
 
-2. 安装完Docker后，执行一条命令就可以让服务运行起来（yourid/yourdomain修改为你自己的值）。  
+2. 安装完Docker后，执行一条命令就可以让服务运行起来（yourdomain修改为你自己的值）。  
 命令执行后就使用浏览器 http://ip 确认服务是否正常运行。   
-因为使用了 restart 参数，所以系统重启后会自动重启此服务。   
+因为使用了 restart 参数，所以系统重启后会自动重启此服务。    
+注：这条命令采用默认配置：    
+* sqlite数据库    
+* apscheduler，内存队列   
+* 数据库文件和log文件保存到同一目录 /data   
+如果你需要其他配置组合，根据config.py的变量名传入对应的环境变量即可(-e 参数)。   
+
 ```bash
 mkdir data #for database and logs, you can use any folder (change ./data to your folder)
-sudo docker run -d -p 80:8000 -v ./data:/data --restart always -e APP_ID=yourid -e APP_DOMAIN=yourdomain -e LOG_LEVEL=warning kindleear/kindleear
+sudo docker run -d -p 80:8000 -v ./data:/data --restart always -e APP_DOMAIN=yourdomain kindleear/kindleear
 ```
 
 如果连不上，请确认80端口是否已经开放，不同的平台开放80端口的方法不一样，可能为iptables或ufw。
@@ -103,8 +126,7 @@ tail -n 100 ./data/gunicorn.access.log
 
 <a id="oracle-cloud"></a>
 ## Oracle cloud (VPS)
-这是手动在一个VPS上部署的步骤，比较复杂，一般不建议，如果没有特殊要求，推荐使用docker映像。   
-
+这是手动在一个VPS上部署的步骤，比较复杂，一般不建议，如果没有特殊要求，推荐使用docker镜像。   
 1. config.py关键参数样例
 ```python
 DATABASE_URL = "sqlite:////home/ubuntu/site/kindleear/database.db"
@@ -114,7 +136,7 @@ KE_TEMP_DIR = "/tmp"
 DOWNLOAD_THREAD_NUM = "3"
 ```
 
-2. 创建一个计算实例，选择的配置建议"符合始终免费条件"，映像选择自己熟悉的，我选择的是ubuntu minimal。    
+2. 创建一个计算实例，选择的配置建议"符合始终免费条件"，镜像选择自己熟悉的，我选择的是ubuntu minimal。    
 记得下载和保存私钥。    
 创建完成后在"实例信息"点击"子网"链接，在"安全列表"中修改或创建入站规则，将TCP的端口删除，ICMP的类型和代码删除，然后测试ping对应的IP，能ping通说明实例配置完成。    
 

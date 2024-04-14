@@ -10,7 +10,11 @@ from flask_babel import Babel, gettext
 builtins.__dict__['_'] = gettext
 
 #创建并初始化Flask wsgi对象
-def init_app(name, cfgMap, debug=False):
+#name: 创建Flask的名字
+#cfgMap: 配置字典
+#set_env: 重新设置环境变量的函数
+#debug: 是否调式Flask
+def init_app(name, cfgMap, set_env, debug=False):
     thisDir = os.path.dirname(os.path.abspath(__file__))
     rootDir = os.path.abspath(os.path.join(thisDir, '..'))
     template_folder = os.path.join(thisDir, 'templates')
@@ -29,6 +33,7 @@ def init_app(name, cfgMap, debug=False):
     app.config.from_prefixed_env()
 
     from .back_end.task_queue_adpt import init_task_queue_service
+    set_env() #如果部署在gae平台，重新设置被gae模块覆盖的环境变量
     init_task_queue_service(app)
 
     from .back_end.db_models import create_database_tables, connect_database, close_database
@@ -38,7 +43,7 @@ def init_app(name, cfgMap, debug=False):
     def BeforeRequest():
         g.version = appVer
         g.now = datetime.datetime.utcnow
-        g.allowSignup = app.config['ALLOW_SIGNUP'] == 'yes'
+        g.allowSignup = (app.config['ALLOW_SIGNUP'] == 'yes')
         connect_database()
 
     @app.teardown_request

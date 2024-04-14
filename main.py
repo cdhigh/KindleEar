@@ -4,10 +4,9 @@
 # Visit <https://github.com/cdhigh/KindleEar> for the latest version
 # Author: cdhigh <https://github.com/cdhigh>
 
-__Version__ = '3.0.0b'
+__Version__ = '3.0.0d'
 
 import os, sys, builtins, logging
-import config
 
 appDir = os.path.dirname(os.path.abspath(__file__))
 #logName = None if (DATABASE_URL == 'datastore') else 'gunicorn.error'
@@ -20,6 +19,7 @@ sys.path.insert(0, os.path.join(appDir, 'application', 'lib'))
 
 #合并config.py配置信息到os.environ，如果对应环境变量存在，则不会覆盖
 def set_env():
+    import config
     cfgMap = {}
     keys = ['APP_ID', 'APP_DOMAIN', 'SERVER_LOCATION', 'DATABASE_URL', 'TASK_QUEUE_SERVICE',
         'TASK_QUEUE_BROKER_URL', 'KE_TEMP_DIR', 'DOWNLOAD_THREAD_NUM', 'ALLOW_SIGNUP',
@@ -38,7 +38,7 @@ def set_log_level(level):
 cfgMap = set_env()
 
 from application import init_app
-app = init_app(__name__, cfgMap, debug=False)
+app = init_app(__name__, cfgMap, set_env, debug=False)
 celery_app = app.extensions.get("celery", None)
 set_log_level(cfgMap.get('LOG_LEVEL'))
 

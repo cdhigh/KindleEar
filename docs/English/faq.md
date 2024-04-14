@@ -115,5 +115,10 @@ You should select some webpage's contents, then click this Bookmarklet. It will 
 
 
 
+## How do I bulk delete too many accidentally imported custom RSS feeds?   
+* You can write '#removeall#' in the "Title" field, then click "Add" to delete all custom RSS feeds at once.   
+
+
+
 ## I have more questions, where can I ask?
 If you have more questions, you can submit an issue at [https://github.com/cdhigh/KindleEar/issues](https://github.com/cdhigh/KindleEar/issues) and wait for a reply. Before submitting a question, it's recommended to search for previously submitted issues first. Maybe someone has already submitted a similar issue? If no one has submitted a similar issue, when you submit a new one, it's recommended to attach the Logs information of [GAE backend](https://console.cloud.google.com/appengine) or the platform you deployed to for problem location, which can also get you a faster reply.

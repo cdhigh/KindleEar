@@ -1,56 +1,59 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 """create/update requirments.txt of KindleEar
+[Version Specification](https://peps.python.org/pep-0440)
+~=2.31.0 : >=2.31.0,==2.31.*
+>=0.2.3,<1.0.0
 """
 import re, os, sys, shutil, subprocess
 
-REQ_COMM = [('requests', '>=2.31.0,<3.0.0'),
-    ('chardet', '>=5.2.0,<6.0.0'),
-    ('pillow', '>=10.2.0,<11.0.0'),
-    ('lxml', '>=5.0.0,<6.0.0'),
-    ('lxml_html_clean', '>=0.1.1,<1.0.0'),
-    ('sendgrid', '>=6.11.0,<7.0.0'),
-    ('mailjet_rest', '>=1.3.4,<2.0.0'),
-    ('python-dateutil', '>=2.8.2,<3.0.0'),
-    ('css_parser', '>=1.0.10,<=2.0.0'),
-    ('beautifulsoup4', '>=4.12.2,<5.0.0'),
-    ('html2text', '>=2020.1.16'),
-    ('html5lib', '>=1.1,<2.0'),
+REQ_COMM = [('requests', '~=2.31.0'),
+    ('chardet', '~=5.2.0'),
+    ('pillow', '~=10.3.0'),
+    ('lxml', '~=5.2.0'),
+    ('lxml_html_clean', '~=0.1.1'),
+    ('sendgrid', '~=6.11.0'),
+    ('mailjet_rest', '~=1.3.4'),
+    ('python-dateutil', '~=2.9.0'),
+    ('css_parser', '~=1.0.10'),
+    ('beautifulsoup4', '~=4.12.2'),
+    ('html2text', '~=2024.2.26'),
+    ('html5lib', '~=1.1'),
     ('#html5-parser', '~=0.4.0'),
-    ('gunicorn', '>=21.2.0,<22.0.0'),
-    ('Flask', '>=3.0.0,<4.0.0'),
-    ('flask-babel', '>=4.0.0,<5.0.0'),
-    ('six', '>=1.16.0,<2.0.0'),
-    ('feedparser', '>=6.0.11,<7.0.0'),
+    ('gunicorn', '~=21.2.0'),
+    ('Flask', '~=3.0.3'),
+    ('flask-babel', '~=4.0.0'),
+    ('six', '~=1.16.0'),
+    ('feedparser', '~=6.0.11'),
 ]
 
 REQ_DB = {
-    'sqlite': [('peewee', '>=3.1.7,<4.0.0'),],
-    'mysql': [('peewee', '>=3.1.7,<4.0.0'), ('pymysql', '>=1.1.0,<2.0.0'),],
-    'postgresql': [('peewee', '>=3.1.7,<4.0.0'), ('psycopg2-binary', '>=2.9.9,<3.0.0'),],
-    'cockroachdb': [('peewee', '>=3.1.7,<=4.0.0'), ('psycopg2-binary', '>=2.9.9,<3.0.0'),],
-    'datastore': [('weedata', '>=0.2.2,<1.0.0'), ('google-cloud-datastore', '>=2.19.0,<3.0.0'),],
-    'mongodb': [('weedata', '>=0.2.2,<1.0.0'), ('pymongo', '>=3.7.2,<4.0.0'),],
-    'redis': [('weedata', '>=0.2.2,<1.0.0'), ('redis', '>=4.5.0,<6.0.0'),],
-    'pickle': [('weedata', '>=0.2.2,<1.0.0'),],
+    'sqlite': [('peewee', '~=3.17.1'),],
+    'mysql': [('peewee', '~=3.17.1'), ('pymysql', '~=1.1.0'),],
+    'postgresql': [('peewee', '~=3.17.1'), ('psycopg2-binary', '~=2.9.9'),],
+    'cockroachdb': [('peewee', '~=3.17.1'), ('psycopg2-binary', '~=2.9.9'),],
+    'datastore': [('weedata', '>=0.2.3,<1.0.0'), ('google-cloud-datastore', '~=2.19.0'),],
+    'mongodb': [('weedata', '>=0.2.3,<1.0.0'), ('pymongo', '~=4.6.3'),],
+    'redis': [('weedata', '>=0.2.3,<1.0.0'), ('redis', '~=5.0.3'),],
+    'pickle': [('weedata', '>=0.2.3,<1.0.0'),],
 }
 
 REQ_TASK = {
-    'gae': [('google-cloud-tasks', '>=2.15.0,<3.0.0'),],
-    'apscheduler': [('flask-apscheduler', '>=1.13.1,<2.0.0')],
-    'celery': [('celery', '>=5.3.6,<6.0.0'), ('eventlet', '>=0.35.1,<1.0.0')],
-    'rq': [('flask-rq2', '>=18.3,<19.0'),],
+    'gae': [('google-cloud-tasks', '~=2.16.3'),],
+    'apscheduler': [('flask-apscheduler', '~=1.13.1')],
+    'celery': [('celery', '~=5.3.6'), ('eventlet', '~=0.36.1')],
+    'rq': [('flask-rq2', '~=18.3'),],
 }
 
-REQ_PLAT = {'gae': [('appengine-python-standard', '>=1.1.6,<2.0.0'),],
-    'docker': [('weedata', '>=0.2.2,<1.0.0'),('pymysql', '>=1.1.0,<2.0.0'), #docker install all libs
-    ('psycopg2-binary', '>=2.9.9,<3.0.0'),('pymongo', '>=3.7.2,<4.0.0'),('redis', '>=4.5.0,<6.0.0'),
-    ('celery', '>=5.3.6,<6.0.0'),('flask-rq2', '>=18.3,<19.0'),('sqlalchemy', '>=2.0.28,<3.0.0')],
+REQ_PLAT = {'gae': [('appengine-python-standard', '~=1.1.6'),],
+    'docker': [('weedata', '>=0.2.3,<1.0.0'),('pymysql', '~=1.1.0'), #docker install all libs
+    ('psycopg2-binary', '~=2.9.9'),('pymongo', '~=4.6.3'),('redis', '~=5.0.3'),
+    ('celery', '~=5.3.6'),('flask-rq2', '~=18.3'),('sqlalchemy', '~=2.0.29')],
 }
 
 EXTRA = {
-    'sqlalchemy': [('sqlalchemy', '>=2.0.28,<3.0.0')],
-    'redis': [('redis', '>=4.5.0,<6.0.0')],
+    'sqlalchemy': [('sqlalchemy', '~=2.0.29')],
+    'redis': [('redis', '~=5.0.3')],
 }
 
 def write_req(reqFile, db, task, plat, *extra):
@@ -131,7 +134,17 @@ def gae_location():
 #prepare config.py to deploy in gae
 def gaeify_config_py(cfgFile):
     appId = os.getenv('GOOGLE_CLOUD_PROJECT')
+    loc = gae_location()
     domain = f"https://{appId}.appspot.com"
+    print('------------------------')
+    print(f'   AppId: {appId}')
+    print(f'Location: {loc}')
+    print(f'  Domain: {domain}')
+    print('------------------------')
+    usrInput = input('Confirm the above information, then press y to continue: ')
+    if usrInput.lower() != 'y':
+        sys.exit(1)
+
     default_cfg = {'APP_ID': appId, 'APP_DOMAIN': domain, 'SERVER_LOCATION': gae_location(),
         'DATABASE_URL': 'datastore', 'TASK_QUEUE_SERVICE': 'gae', 'TASK_QUEUE_BROKER_URL': '',
         'KE_TEMP_DIR': '', 'DOWNLOAD_THREAD_NUM': '3', 'ALLOW_SIGNUP': 'no',

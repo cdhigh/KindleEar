@@ -10,30 +10,25 @@ from ..utils import str_to_bool, str_to_int
 from ..back_end.db_models import *
 
 #几个"官方"服务的地址
-KINDLEEAR_SITE = "http://kindleear.line.pm"
-LIBRARY_KINDLEEAR_OLD = "/kindleearappspotlibrary"
+KINDLEEAR_SITE = "https://reador.appspot.com"
 LIBRARY_KINDLEEAR = "/kelibrary"
 LIBRARY_GETRSS = "getrss"
 LIBRARY_GETLASTTIME = "latesttime"
-LIBRARY_MGR_OLD = "/kindleearappspotlibrary/mgr/"
 LIBRARY_MGR = "/kelibrary/mgr/"
 LIBRARY_GETSRC = "getsrc"
 LIBRARY_REPORT_INVALID = "reportinvalid"
 SUBSCRIBED_FROM_LIBRARY = "subscribedfromshared"
-LIBRARY_CATEGORY_OLD = "/kindleearappspotlibrarycategory"
 LIBRARY_CATEGORY = "/kelibrary/categories"
-KINDLEEAR_SITE_KEY_OLD = "kindleear.lucky!"
 KINDLEEAR_SITE_KEY = "cdhigh"
 
 bpLibraryOffical = Blueprint('bpLibraryOffical', __name__)
 
 #提供共享库订阅源数据
-@bpLibraryOffical.route(LIBRARY_KINDLEEAR_OLD)
 @bpLibraryOffical.route(LIBRARY_KINDLEEAR)
 def SharedLibraryOffcial():
     args = request.args
     key = args.get('key') #避免爬虫消耗资源
-    if key not in (KINDLEEAR_SITE_KEY, KINDLEEAR_SITE_KEY_OLD):
+    if key != KINDLEEAR_SITE_KEY:
         return []
 
     dataType = args.get('data_type')
@@ -53,7 +48,6 @@ def SharedLibraryOffcial():
         return Response(json.dumps(sharedData, separators=(',', ':')), mimetype='application/json')
         
 #网友分享了一个订阅链接或recipe
-@bpLibraryOffical.post(LIBRARY_KINDLEEAR_OLD)
 @bpLibraryOffical.post(LIBRARY_KINDLEEAR)
 def SharedLibraryOfficalAjax():
     form = request.form
@@ -132,7 +126,6 @@ def UpdateLastSharedRssTime():
     AppInfo.set_value(AppInfo.lastSharedRssTime, str(int(datetime.datetime.utcnow().timestamp())))
     
 #共享库的订阅源信息管理
-@bpLibraryOffical.post(LIBRARY_MGR_OLD + "<mgrType>")
 @bpLibraryOffical.post(LIBRARY_MGR + "<mgrType>")
 def SharedLibraryMgrOffical(mgrType):
     now = datetime.datetime.utcnow()
@@ -222,11 +215,10 @@ def SharedLibraryMgrOffical(mgrType):
         return {'status': '[KE] Unknown command: {}'.format(mgrType)}
 
 #共享库的订阅源数据分类信息
-@bpLibraryOffical.route(LIBRARY_CATEGORY_OLD)
 @bpLibraryOffical.route(LIBRARY_CATEGORY)
 def SharedLibraryCategoryOffical():
     key = request.args.get('key') #避免爬虫消耗IO资源
-    if key not in (KINDLEEAR_SITE_KEY, KINDLEEAR_SITE_KEY_OLD):
+    if key != KINDLEEAR_SITE_KEY:
         return {}
 
     cats = sorted(SharedRssCategory.get_all(), key=attrgetter('last_updated'), reverse=True)
