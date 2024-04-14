@@ -18,6 +18,7 @@ Open [google cloud](https://console.cloud.google.com/appengine) and create a new
 2. Shell deployment   
 On the same page, in the top right corner, there is an icon labeled "Activate Cloud Shell". Click on it to open the cloud shell. Copy and paste the following commands, and follow the prompts by pressing "y" continuously to complete the deployment.   
 ```bash
+rm -rf kindleear && \
 git clone --depth 1 https://github.com/cdhigh/kindleear.git && \
 chmod +x kindleear/tools/gae_deploy.sh && \
 kindleear/tools/gae_deploy.sh
@@ -55,11 +56,11 @@ gcloud beta app deploy --version=1 app.yaml
 1. The initial username and password are admin/admin.   
 
 2. When prompted during deployment with the following messages, remember to press "y". The cursor automatically moves to the next line, and it's easy to forget to press "y". Otherwise, it will remain stuck at this step.    
-```bash
-Updating config [cron]...API [cloudscheduler.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)? 
-
-Updating config [queue]...API [cloudtasks.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)?
 ```
+Updating config [cron]...API [cloudscheduler.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)
+Updating config [queue]...API [cloudtasks.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)
+```  
+
 
 3. If encountering errors like "Timed out fetching pod", you have the option to delete this app id, recreate a new one and select a different region during deployment.   
 
