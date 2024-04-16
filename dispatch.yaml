@@ -1,0 +1,6 @@
+dispatch:
+  - url: "*/worker*"
+    service: worker
+
+  - url: "*/url2book*"
+    service: worker

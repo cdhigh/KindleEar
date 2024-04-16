@@ -22,7 +22,7 @@ SERVER_LOCATION = "us-central1"
 #DATABASE_URL = "mongodb://127.0.0.1:27017/"
 #DATABASE_URL = 'sqlite:////home/ubuntu/site/kindleear/database.db'
 #DATABASE_URL = 'sqlite:///database.db'
-DATABASE_URL = 'datastore'
+DATABASE_URL = "sqlite:////data/kindleear.db"
 
 #Select the type of task queue, "gae", "apscheduler", "celery", "rq", ""
 TASK_QUEUE_SERVICE = "apscheduler"
@@ -36,7 +36,7 @@ TASK_QUEUE_BROKER_URL = "memory"
 
 #If this option is empty, temporary files will be stored in memory
 #Setting this option can reduce memory consumption, supports both relative and absolute paths
-KE_TEMP_DIR = ""
+KE_TEMP_DIR = "/tmp"
 
 #If the depolyment plataform supports multi-threads, set this option will boost the download speed
 DOWNLOAD_THREAD_NUM = "3"
