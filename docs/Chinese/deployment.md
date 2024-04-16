@@ -82,51 +82,68 @@ wget -O - https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/ubunt
 2. 安装完Docker后，执行一条命令就可以让服务运行起来（yourdomain修改为你自己的值）。  
 命令执行后就使用浏览器 http://ip 确认服务是否正常运行。   
 因为使用了 restart 参数，所以系统重启后会自动重启此服务。    
-注：这条命令采用默认配置：    
-* sqlite数据库    
-* apscheduler，内存队列   
-* 数据库文件和log文件保存到同一目录 /data   
-如果你需要其他配置组合，根据config.py的变量名传入对应的环境变量即可(-e 参数)。   
-
 ```bash
 mkdir data #for database and logs, you can use any folder (change ./data to your folder)
 sudo docker run -d -p 80:8000 -v ./data:/data --restart always -e APP_DOMAIN=yourdomain kindleear/kindleear
 ```
+注：默认镜像的配置：    
+* sqlite数据库    
+* apscheduler，内存队列   
+* 数据库文件和log文件保存到同一目录 /data   
+如果你需要使用其他数据库或任务队列，可以使用Dockerfile直接构建镜像。   
 
 如果连不上，请确认80端口是否已经开放，不同的平台开放80端口的方法不一样，可能为iptables或ufw。
 比如：
 ```bash
 sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
-sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+sudo iptables -I INPUT 7 -m state --state NEW -p tcp --dport 443 -j ACCEPT
 sudo netfilter-persistent save
 ```
 
-3. 上面的命令直接使用gunicorn为web服务器，尽管对于我们的应用来说，绰绰有余，而且还能省点资源。      
-但是你感觉有些不专业，希望使用更强大的nginx，并且也想启用邮件中转功能（需要开放25端口并且申请域名）：  
+如果需要https支持，可以申请一个SSL证书，然后通过环境变量传递给gunicorn，比如到 let's encrypt 申请一个免费证书，然后将 fullchain.pem/privkey.pem拷贝到data目录，再执行此命令   
+```bash
+sudo docker run -d -p 80:8000 -p 443:8000 -v ./data:/data --restart always -e APP_DOMAIN=https://kindleear.line.pm -e GUNI_CERT=/data/fullchain.pem -e GUNI_KEY=/data/privkey.pem kindleear/kindleear
+```
 
+3. 如果需要使用https，更推荐的是使用caddy做为web服务器，可以自动申请和续期ssl证书（一定要正确填写DOMAIN）：    
 ```bash
 mkdir data #for database and logs
 wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/docker-compose.yml
-wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/default.conf
+wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/Caddyfile
 
-#Change the environ variables APP_ID/APP_DOMAIN
-#If the email feature is needed, uncomment the section mailglove and change the DOMAIN.
+#important!!!  Change the environ variables APP_DOMAIN/DOMAIN
 vim ./docker-compose.yml
 
 sudo docker compose up -d
 ```
 
-4. 需要查询日志文件
+
+4. 如果更喜欢nginx：  
 ```bash
-tail -n 100 ./data/gunicorn.error.log
-tail -n 100 ./data/gunicorn.access.log
+mkdir data #for database and logs
+wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/docker-compose-nginx.yml
+wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/default.conf
+
+#Change the environ variables APP_DOMAIN/DOMAIN
+vim ./docker-compose-nginx.yml
+
+sudo docker compose -f docker-compose-nginx.yml up -d
+```
+
+使用nginx时如果需要https，预先将ssl证书 fullchain.pem/privkey.pem 拷贝到data目录，取消default.conf/docker-compose-nginx.yml里面对应的注释即可。      
+
+
+5. 需要查询日志文件
+```bash
+tail -n 50 ./data/gunicorn.error.log
+tail -n 50 ./data/gunicorn.access.log
 ```
 
 
 
 <a id="oracle-cloud"></a>
 ## Oracle cloud (VPS)
-这是手动在一个VPS上部署的步骤，比较复杂，一般不建议，如果没有特殊要求，推荐使用docker镜像。   
+这是手动在一个 [Oracle VPS](https://cloud.oracle.com/) 上部署的步骤，比较复杂，一般不建议，如果没有特殊要求，推荐使用docker镜像。   
 1. config.py关键参数样例
 ```python
 DATABASE_URL = "sqlite:////home/ubuntu/site/kindleear/database.db"
@@ -138,7 +155,13 @@ DOWNLOAD_THREAD_NUM = "3"
 
 2. 创建一个计算实例，选择的配置建议"符合始终免费条件"，镜像选择自己熟悉的，我选择的是ubuntu minimal。    
 记得下载和保存私钥。    
-创建完成后在"实例信息"点击"子网"链接，在"安全列表"中修改或创建入站规则，将TCP的端口删除，ICMP的类型和代码删除，然后测试ping对应的IP，能ping通说明实例配置完成。    
+创建完成后在"实例信息"点击"子网"链接，在"安全列表"中修改或创建入站规则，将TCP的端口删除，ICMP的类型和代码删除，
+只保留一个入站规则：
+源类型：CIDR
+源CIDR：0.0.0.0/0
+IP协议：所有协议
+
+然后测试ping对应的IP，能ping通说明实例配置完成。    
 
 3. 使用自己喜欢的SSH工具远程连接对应IP。
 3.1 如果使用puTTY，需要先使用puttyGen将key格式的私钥转换为ppk格式。
@@ -186,7 +209,7 @@ python3 ./main.py db create #create database tables
 
 #open port 80/443
 sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
-sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+sudo iptables -I INPUT 7 -m state --state NEW -p tcp --dport 443 -j ACCEPT
 sudo netfilter-persistent save
 
 mkdir -p /var/log/gunicorn/

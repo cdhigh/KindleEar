@@ -176,6 +176,11 @@ def gaeify_config_py(cfgFile):
         f.write('\n'.join(ret))
     print(f'Finished update {cfgFile}')
 
+#command arugments:
+#  update_req docker     : prepare for build docker image
+#  update_req docker-all : prepare for build docker image, install all libs
+#  update_req gae        : prepare for deploying in gae
+#  update_req            : do not modify config.py, only update requirements.txt
 if __name__ == '__main__':
     thisDir = os.path.abspath(os.path.dirname(__file__))
     cfgFile = os.path.normpath(os.path.join(thisDir, '..', 'config.py'))
@@ -186,10 +191,10 @@ if __name__ == '__main__':
 
     dockerize = False
     gaeify = False
-    if len(sys.argv) == 2 and sys.argv[1] == 'docker':
+    if len(sys.argv) == 2 and sys.argv[1] in ('docker', 'docker-all'):
         print('\nGenerating config.py and requirements.txt for Docker deployment.\n')
         dockerize_config_py(cfgFile)
-        dockerize = True
+        dockerize = (sys.argv[1] == 'docker-all')
     elif len(sys.argv) == 2 and sys.argv[1] == 'gae':
         print('\nGenerating config.py and requirements.txt for GAE deployment.\n')
         gaeify_config_py(cfgFile)

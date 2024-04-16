@@ -12,23 +12,22 @@ services:
       - web_network
     environment:
        APP_ID: kindleear
-       #DOMAIN with http or https prefix
        APP_DOMAIN: http://example.com
        LOG_LEVEL: warning
        
-  caddy:
-    container_name: caddy
-    image: caddy:alpine
+  nginx:
+    container_name: nginx
+    image: nginx:stable-alpine3.17-slim
     restart: always
     ports:
       - "80:80"
       - "443:443"
-    environment:
-      #DOMAIN without http and https prefix
-      DOMAIN: example.com
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./caddy/:/data/caddy/
+      - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./data/:/var/log/nginx/
+      # uncomment this two lines if https is need
+      #- ./data/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
+      #- ./data/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
     depends_on:
       - kindleear
     networks:

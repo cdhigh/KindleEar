@@ -1,0 +1,8 @@
+{$DOMAIN} {
+  log {
+    output stdout
+    format console
+    level  ERROR
+  }
+  reverse_proxy kindleear:8000
+}

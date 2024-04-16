@@ -86,50 +86,67 @@ wget -O - https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/ubunt
 2. Execute a command to start the service (replace `yourid/yourdomain` with your own values).  
 Confirm if the service is running properly by visiting http://ip in a browser.   
 The service will automatically restart after system reboot due to the `restart` parameter.  
+```bash
+mkdir data #for database and logs, you can use any folder (change ./data to your folder)
+sudo docker run -d -p 80:8000 -v ./data:/data --restart always -e APP_DOMAIN=yourdomain kindleear/kindleear
+```
 Note: This command uses the default configuration:   
 * SQLite database   
 * APScheduler, memory job store   
 * Database and log files are saved to the same directory `/data`  
 
-If you need a different configuration combination, simply pass the corresponding environment variables based on the variable names in `config.py` (-e parameter).  
+If you need to use other databases or task queues, you can build the custom image using Dockerfile.    
 
-```bash
-mkdir data #for database and logs, you can use any folder (change ./data to your folder)
-sudo docker run -d -p 80:8000 -v ./data:/data --restart always -e APP_DOMAIN=yourdomain kindleear/kindleear
-```
 
 If unable to connect, ensure port 80 is open. Methods to open port 80 vary across platforms, such as iptables or ufw.
 For example:
 ```bash
 sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
-sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+sudo iptables -I INPUT 7 -m state --state NEW -p tcp --dport 443 -j ACCEPT
 sudo netfilter-persistent save
 ```
 
-3. The above command directly uses Gunicorn as the web server, which is more than sufficient for our application and saves resources.   
-However, if you feel it's unprofessional and want to use the more powerful Nginx, and also enable email forwarding (requires opening port 25 and registering a domain):   
+If HTTPS support is needed, you can apply for an SSL certificate, then pass it to Gunicorn through environment variables. For example, you can apply for a free certificate from "Let's Encrypt", then copy `fullchain.pem/privkey.pem` to the data directory, and execute this command.   
+```bash
+sudo docker run -d -p 80:8000 -p 443:8000 -v ./data:/data --restart always -e APP_DOMAIN=yourdomain -e GUNI_CERT=/data/fullchain.pem -e GUNI_KEY=/data/privkey.pem kindleear/kindleear
+```
+
+3. If HTTPS is needed, it is more recommended to use Caddy as the web server, which can automatically request and renew SSL certificates.    
 ```bash
 mkdir data #for database and logs
 wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/docker-compose.yml
-wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/default.conf
+wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/Caddyfile
 
-# Change the environment variables APP_ID/APP_DOMAIN
-# If the email feature is needed, uncomment the section mailglove and change the DOMAIN.
+#important!!!  Change the environ variables APP_DOMAIN/DOMAIN
 vim ./docker-compose.yml
 
 sudo docker compose up -d
 ```
 
-4. To check log files:
+4. If you perfer nginx.    
 ```bash
-tail -n 100 ./data/gunicorn.error.log
-tail -n 100 ./data/gunicorn.access.log
+mkdir data #for database and logs
+wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/docker-compose-nginx.yml
+wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/default.conf
+
+# Change the environment variables APP_DOMAIN/DOMAIN
+vim ./docker-compose-nginx.yml
+
+sudo docker compose -f docker-compose-nignx.yml up -d
+```
+
+If HTTPS for nginx is needed, copy the SSL certificate fullchain.pem/privkey.pem to the data directory, and uncomment the corresponding lines in default.conf/docker-compose-nginx.yml.   
+
+5. To check log files:
+```bash
+tail -n 50 ./data/gunicorn.error.log
+tail -n 50 ./data/gunicorn.access.log
 ```
 
 
 <a id="oracle-cloud"></a>
 ## Oracle cloud (VPS)   
-These are manual deployment steps on a VPS, which can be quite complex. Generally, it's not recommended.     
+These are manual deployment steps on [Oracle VPS](https://cloud.oracle.com/) , which can be quite complex. Generally, it's not recommended.     
 If there are no specific requirements, it's advisable to use Docker images instead.    
 
 1. config.py Key Parameter Example
@@ -144,6 +161,11 @@ DOWNLOAD_THREAD_NUM = "3"
 2. Create a compute instance, with the recommended configuration being "Always Free".  
 Choose an image that you are familiar with, I selected Ubuntu minimal.   
 Remember to download and save the private ssh key. Once created, click on the "Subnet" link on "Instance Details" page then modify or create inbound rules in the "Security Lists" by removing TCP ports and ICMP types and codes.   
+Keep only one Ingress Rule: 
+Source Type: CIDR
+Source CIDR: 0.0.0.0/0
+IP Protocol: All protocols
+
 Test ping the corresponding IP, if successful, it indicates that the instance configuration is complete.   
 
 3. Connect remotely to the instance using your preferred SSH tool.   
@@ -190,8 +212,9 @@ source ./venv/bin/activate  #activate virtual environ
 pip install -r requirements.txt #install dependencies
 python3 ./main.py db create #create database tables
 
-#open port 80
+#open port 80/443
 sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+sudo iptables -I INPUT 7 -m state --state NEW -p tcp --dport 443 -j ACCEPT
 sudo netfilter-persistent save
 
 #modify nginx configuration
