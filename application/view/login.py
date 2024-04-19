@@ -47,15 +47,14 @@ def LoginPost():
     
     user = KeUser.get_or_none(KeUser.name == name)
     if user:
-        secret_key = user.secret_key
         try:
-            pwdHash = hashlib.md5((passwd + secret_key).encode('utf-8')).hexdigest()
-            nameHash = hashlib.md5((name + secret_key).encode('utf-8')).hexdigest()
+            pwdHash = user.hash_text(passwd)
+            nameHash = user.hash_text(name)
         except Exception as e:
             default_log.warning(f"Failed to hash password and username: {str(e)}")
             user = None
         else:
-            if user.passwd != pwdHash:
+            if user.passwd_hash != pwdHash:
                 user = None
     
     if user:
@@ -71,9 +70,9 @@ def LoginPost():
             user.custom = custom
             user.save()
         
-        if not user.sender or (nameHash == pwdHash):
+        if not user.cfg('sender') or (nameHash == pwdHash):
             url = url_for('bpAdmin.AdminAccountChange', name=name)
-        elif not user.kindle_email:
+        elif not user.cfg('kindle_email'):
             url = url_for("bpSetting.Setting")
         else:
             url = url_for("bpSubscribe.MySubscription")
@@ -115,12 +114,12 @@ def CreateAccountIfNotExist(name, password=None, email='', sender=None, sm_servi
             sm_service = {'service': 'admin'}
             if sender is None:
                 adUser = KeUser.get_or_none(KeUser.name == adminName)
-                sender = adUser.email if adUser else email
+                sender = adUser.cfg('email') if adUser else email
 
     sender = sender or email
-
-    user = KeUser(name=name, passwd=pwdHash, expires=None, secret_key=secretKey, expiration_days=expiration, 
-        share_links={'key': shareKey}, email=email, sender=sender, send_mail_service=sm_service)
+    base_config = {'email': email, 'sender': sender, 'secret_key': secretKey}
+    user = KeUser(name=name, passwd_hash=pwdHash, expires=None, expiration_days=expiration, 
+        share_links={'key': shareKey}, base_config=base_config, send_mail_service=sm_service)
     if expiration:
         user.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
     user.save()
@@ -156,9 +155,9 @@ def ResetPasswordRoute():
             return render_template('tipsback.html', tips=tips, urltoback=url_for('bpLogin.ResetPasswordRoute'))
 
     tips = [_('Please input the correct username and email to reset password.')]
-    if user and user.email:
+    if user and user.cfg('email'):
         tips.append(_("The email of account '{name}' is {email}.").format(name=name, 
-            email=hide_email(user.email)))
+            email=hide_email(user.cfg('email'))))
 
     return render_template('reset_password.html', tips='<br/>'.join(tips), 
         userName=name, firstStep=True)
@@ -172,7 +171,7 @@ def ResetPasswordPost():
     new_p1 = form.get('new_p1')
     new_p2 = form.get('new_p2')
     user = KeUser.get_or_none(KeUser.name == name) if name else None
-    if not user or not user.email:
+    if not user or not user.cfg('email'):
         tips = _('The username does not exist or the email is empty.')
         return render_template('reset_password.html', tips=tips, userName=name, firstStep=True)
     elif token: #重置密码的最后一步
@@ -180,15 +179,13 @@ def ResetPasswordPost():
         if tips == 'ok':
             tips = _('Reset password success, Please close this page and login again.')
             return render_template('reset_password.html', tips=tips, userName=name, firstStep=True)
-    elif user.email != email:
+    elif user.cfg('email') != email:
         tips = _("The email you input is not associated with this account.")
         return render_template('reset_password.html', tips=tips, userName=name, firstStep=True)
     else:
         token = new_secret_key(length=24)
-        custom = user.custom
         expires = (datetime.datetime.utcnow() + datetime.timedelta(days=1)).timestamp()
-        custom['resetpwd'] = {'token': token, 'expires': expires}
-        user.custom = custom
+        user.set_custom('resetpwd', {'token': token, 'expires': expires})
         user.save()
         tips = send_resetpwd_email(user, token)
         if tips == 'ok':
@@ -250,7 +247,7 @@ def SignupPost():
 #发送重设密码邮件
 #返回 'ok' 表示成功
 def send_resetpwd_email(user, token):
-    if not user or not user.email or not token:
+    if not user or not user.cfg('email') or not token:
         return _("Some parameters are missing or wrong.")
 
     subject = _('Reset KindleEar password')
@@ -265,7 +262,7 @@ def send_resetpwd_email(user, token):
         <title>{subject}</title></head><body><p style="text-align:center;font-size:1.5em;">
         {info}</p><br/><br/><p style="text-align:right;color:silver;">Sent from KindleEar &nbsp;</p></body></html>"""
 
-    return send_html_mail(user, user.email, subject, html)
+    return send_html_mail(user, user.cfg('email'), subject, html)
 
 #重置密码的最后一步，校验密码，写入数据库
 def reset_pwd_final_step(user, token, new_p1, new_p2):
@@ -275,14 +272,12 @@ def reset_pwd_final_step(user, token, new_p1, new_p2):
     if (token == pre_set.get('token')) and (now < pre_time):
         if new_p1 == new_p2:
             try:
-                pwd = hashlib.md5((new_p1 + user.secret_key).encode('utf-8')).hexdigest()
+                pwd = user.hash_text(new_p1)
             except:
                 tips = _("The password includes non-ascii chars.")
             else:
-                custom = user.custom
-                custom.pop('resetpwd', None)
-                user.custom = custom
-                user.passwd = pwd
+                user.set_custom('resetpwd', None)
+                user.passwd_hash = pwd
                 user.save()
                 return 'ok'
         else:

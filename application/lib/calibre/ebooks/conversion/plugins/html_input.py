@@ -70,7 +70,7 @@ class HTMLInput(InputFormatPlugin):
         mi.author_sort = 'KindleEar'
         mi.authors = ['KindleEar']
         mi.publication_type = f'book:book:{title}'
-        mi.timestamp = datetime.datetime.utcnow() + datetime.timedelta(hours=user.timezone)
+        mi.timestamp = user.local_time()
         opf = OPFCreator(fs.path, mi, fs)
         
         #manifest 资源列表

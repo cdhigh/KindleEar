@@ -2,13 +2,13 @@
 # -*- coding:utf-8 -*-
 #账号管理页面
 
-import hashlib, datetime
+import datetime
 from operator import attrgetter
 from flask import Blueprint, request, url_for, render_template, redirect, session, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
-from ..utils import new_secret_key, str_to_int
+from ..utils import str_to_int
 from .login import CreateAccountIfNotExist
 
 bpAdmin = Blueprint('bpAdmin', __name__)
@@ -88,7 +88,7 @@ def AdminAddAccountPost():
         tips = _("Already exist the username.")
     else:
         sm_service = {'service': 'admin'} if sm_service == 'admin' else {}
-        sender = user.email if sm_service else email #和管理员一致则邮件发件地址也一致
+        sender = user.cfg('email') if sm_service else email #和管理员一致则邮件发件地址也一致
         if not CreateAccountIfNotExist(username, password1, email, sender, sm_service, expiration):
             tips = _("The password includes non-ascii chars.")
 
@@ -167,7 +167,7 @@ def AdminAccountChangePost(name):
         else:
             try:
                 if p1 or p2:
-                    dbItem.passwd = hashlib.md5((p1 + dbItem.secret_key).encode('utf-8')).hexdigest()
+                    dbItem.passwd_hash = dbItem.hash_text(p1)
             except:
                 tips = _("The password includes non-ascii chars.")
             else:
@@ -182,7 +182,7 @@ def AdminAccountChangePost(name):
                     send_mail_service = user.send_mail_service
                     send_mail_service['service'] = ''
                     dbItem.send_mail_service = send_mail_service
-                dbItem.email = email
+                dbItem.set_cfg('email', email)
                 dbItem.save()
                 tips = _("Change success.")
     
@@ -191,10 +191,9 @@ def AdminAccountChangePost(name):
 
 #修改一个账号的密码，返回执行结果字符串
 def ChangePassword(user, orgPwd, p1, p2, email, shareKey):
-    secret_key = user.secret_key
     try:
-        oldPwd = hashlib.md5((orgPwd + secret_key).encode('utf-8')).hexdigest()
-        newPwd = hashlib.md5((p1 + secret_key).encode('utf-8')).hexdigest()
+        oldPwd = user.hash_text(orgPwd)
+        newPwd = user.hash_text(p1)
     except:
         return _("The password includes non-ascii chars.")
 
@@ -205,24 +204,24 @@ def ChangePassword(user, orgPwd, p1, p2, email, shareKey):
         tips = _("The two new passwords are dismatch.")
     else:
         if not (orgPwd or p1 or p2): # 如果不修改密码，则三个密码都必须为空
-            newPwd = user.passwd
-            oldPwd = user.passwd
+            newPwd = user.passwd_hash
+            oldPwd = user.passwd_hash
 
-        if user.passwd != oldPwd:
+        if user.passwd_hash != oldPwd:
             tips = _("The old password is wrong.")
         else:
-            user.passwd = newPwd
-            user.email = email
+            user.passwd_hash = newPwd
+            user.set_cfg('email', email)
             shareLinks = user.share_links
             shareLinks['key'] = shareKey
             user.share_links = shareLinks
             if user.name == app.config['ADMIN_NAME']: #如果管理员修改email，也同步更新其他用户的发件地址
-                user.sender = email
+                user.set_cfg('sender', email)
                 SyncSenderAddress(user)
             else: #其他人修改自己的email，根据设置确定是否要同步到发件地址
                 sm_service = user.send_mail_service
                 if not sm_service or sm_service.get('service', 'admin') != 'admin':
-                    user.sender = email
+                    user.set_cfg('sender', email)
                     
             user.save()
     return tips
@@ -232,5 +231,5 @@ def SyncSenderAddress(adminUser):
     for user in list(KeUser.get_all(KeUser.name != app.config['ADMIN_NAME'])):
         sm_service = user.send_mail_service
         if sm_service and sm_service.get('service', 'admin') == 'admin':
-            user.sender = adminUser.email
+            user.set_cfg('sender', adminUser.cfg('email'))
             user.save()

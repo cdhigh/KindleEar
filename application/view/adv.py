@@ -2,14 +2,14 @@
 # -*- coding:utf-8 -*-
 #一些高级设置功能页面
 
-import datetime, hashlib, io, textwrap
+import datetime, io, textwrap
 from urllib.parse import quote, unquote, urljoin, urlparse
 from flask import Blueprint, url_for, render_template, redirect, session, send_file, abort, current_app as app
 from flask_babel import gettext as _
 from PIL import Image
 from ..base_handler import *
 from ..back_end.db_models import *
-from ..utils import local_time, ke_encrypt, ke_decrypt, str_to_bool, safe_eval, xml_escape, xml_unescape
+from ..utils import ke_encrypt, ke_decrypt, str_to_bool, safe_eval, xml_escape, xml_unescape
 from ..lib.pocket import Pocket
 from ..lib.wallabag import WallaBag
 from ..lib.urlopener import UrlOpener
@@ -87,6 +87,7 @@ def AdvArchive():
     appendStrs["X"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format('X'))
     appendStrs["Tumblr"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format(_('tumblr')))
     appendStrs["Browser"] = _("Append hyperlink '{}' to article").format(_('Open in browser'))
+    appendStrs["Qrcode"] = _("Append qrcode of url to article")
     shareLinks = user.share_links
     shareLinks.pop('key', None)
     
@@ -118,12 +119,12 @@ def AdvArchivePost():
 
     #将instapaper/wallabag的密码加密
     if instaName and instaPwd:
-        instaPwd = ke_encrypt(instaPwd, user.secret_key)
+        instaPwd = user.encrypt(instaPwd)
     else:
         instaName = ''
         instaPwd = ''
     if wallaUsername and wallaPassword:
-        wallaPassword = ke_encrypt(wallaPassword, user.secret_key)
+        wallaPassword = user.encrypt(wallaPassword)
     else:
         wallaUsername = ''
         wallaPassword = ''
@@ -148,6 +149,7 @@ def AdvArchivePost():
     shareLinks['X'] = str_to_bool(form.get('x'))
     shareLinks['Tumblr'] = str_to_bool(form.get('tumblr'))
     shareLinks['Browser'] = str_to_bool(form.get('browser'))
+    shareLinks['Qrcode'] = str_to_bool(form.get('qrcode'))
     user.share_links = shareLinks
     user.save()
     return redirect(url_for("bpAdv.AdvArchive"))
@@ -226,10 +228,7 @@ def AdvExport():
     </body>
     </opml>""")
 
-    date = local_time('%a, %d %b %Y %H:%M:%S GMT', user.timezone)
-    #添加时区信息
-    if user.timezone != 0:
-        date += '+{:02d}00'.format(user.timezone) if (user.timezone > 0) else '-{:02d}00'.format(abs(user.timezone))
+    date = user.local_time('%a, %d %b %Y %H:%M:%S UTC%z')
     outLines = []
     for feed in user.all_custom_rss():
         isfulltext = 'yes' if feed.isfulltext else 'no'

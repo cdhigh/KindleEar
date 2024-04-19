@@ -13,7 +13,7 @@ from recipe_helper import GenerateRecipeSource
 #从输入格式生成对应的输出格式
 #recipes: 编译后的recipe，为一个列表
 #user: KeUser对象
-#output_fmt: 如果指定，则生成特定格式的书籍，否则使用user.book_type
+#output_fmt: 如果指定，则生成特定格式的书籍，否则使用user.book_cfg('type')
 #options: 额外的一些参数，为一个字典
 # 如: options={'debug_pipeline': path, 'verbose': 1}
 #返回电子书二进制内容
@@ -21,7 +21,7 @@ def recipes_to_ebook(recipes: list, user, options: dict=None, output_fmt: str=No
     if not isinstance(recipes, list):
         recipes = [recipes]
     output = io.BytesIO()
-    output_fmt=output_fmt if output_fmt else user.book_type
+    output_fmt=output_fmt if output_fmt else user.book_cfg('type')
     plumber = Plumber(recipes, output, input_fmt='recipe', output_fmt=output_fmt)
     plumber.merge_ui_recommendations(ke_opts(user, options))
     plumber.run()
@@ -31,7 +31,7 @@ def recipes_to_ebook(recipes: list, user, options: dict=None, output_fmt: str=No
 #urls: [(title, url),...] or [url,url,...]
 #title: 书籍标题
 #user: KeUser对象
-#output_fmt: 如果指定，则生成特定格式的书籍，否则使用user.book_type
+#output_fmt: 如果指定，则生成特定格式的书籍，否则使用user.book_cfg('type')
 #options: 额外的一些参数，为一个字典
 def urls_to_book(urls: list, title: str, user, options: dict=None, output_fmt: str=None):
     if not isinstance(urls[0], (tuple, list)):
@@ -49,7 +49,7 @@ def urls_to_book(urls: list, title: str, user, options: dict=None, output_fmt: s
 
     return recipes_to_ebook(ro, user, options, output_fmt)
 
-#将一个html文件和其图像内容转换为一本电子书，返回电子书二进制内容，格式为user.book_type
+#将一个html文件和其图像内容转换为一本电子书，返回电子书二进制内容，格式为user.book_cfg('type')
 #html: html文本内容
 #title: 书籍标题
 #user: KeUser实例
@@ -59,7 +59,7 @@ def urls_to_book(urls: list, title: str, user, options: dict=None, output_fmt: s
 def html_to_book(html: str, title: str, user, imgs: list=None, options: dict=None, output_fmt: str=None):
     input_ = {'html': html, 'imgs': imgs, 'title': title}
     output = io.BytesIO()
-    output_fmt=output_fmt if output_fmt else user.book_type
+    output_fmt=output_fmt if output_fmt else user.book_cfg('type')
     plumber = Plumber(input_, output, input_fmt='html', output_fmt=output_fmt)
     plumber.merge_ui_recommendations(ke_opts(user, options))
     plumber.run()
@@ -71,7 +71,7 @@ def ke_opts(user, options=None):
     if not isinstance(opt, dict):
         opt = {}
     opt.update(options or {})
-    opt.setdefault('output_profile', user.device)
+    opt.setdefault('output_profile', user.book_cfg('device'))
     opt.setdefault('input_profile', 'kindle')
     opt.setdefault('no_inline_toc', False)
     opt.setdefault('epub_inline_toc', True)

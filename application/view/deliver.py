@@ -7,7 +7,6 @@ from flask import Blueprint, render_template, request
 from flask_babel import gettext as _
 from ..back_end.db_models import *
 from ..base_handler import *
-from ..utils import local_time, tz_now
 
 bpDeliver = Blueprint('bpDeliver', __name__)
 
@@ -29,8 +28,11 @@ def Deliver():
 def MultiUserDelivery():
     bkQueue = defaultdict(list)
     sentCnt = 0
-    for user in KeUser.select().where(KeUser.enable_send == True):
-        now = tz_now(user.timezone)
+    for user in KeUser.select():
+        if not user.cfg('enable_send'):
+            continue
+
+        now = user.local_time()
         for book in user.get_booked_recipe():
             #先判断当天是否需要推送
             day = now.weekday()
@@ -63,7 +65,7 @@ def MultiUserDelivery():
 #idList: recipe id列表，id格式：custom:xx,upload:xx,builtin:xx，为空则推送指定账号下所有订阅
 def SingleUserDelivery(userName: str, idList: list=None):
     user = KeUser.get_or_none(KeUser.name == userName)
-    if not user or not user.kindle_email:
+    if not user or not user.cfg('kindle_email'):
         return render_template('autoback.html', tips=_('The username does not exist or the email is empty.'))
 
     sent = []

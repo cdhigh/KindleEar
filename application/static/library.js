@@ -320,12 +320,7 @@ function SubscribeSharedFeed(title, feedurl, isfulltext, dbId) {
     data: {title: title, fulltext: isfulltext, url: feedurl, fromsharedlibrary: 'true', 'recipeId': dbId},
     success: function (resp, textStatus, xhr) {
       if (resp.status == "ok") {
-        var modal = new tingle.modal({footer: true});
-        modal.setContent('<h2>' + i18n.congratulations + '</h2><p>' + i18n.feedSubscribed + '</p>');
-        modal.addFooterBtn(i18n.close, 'actionButton', function () {
-          modal.close();
-        });
-        modal.open();
+        ShowSimpleModalDialog('<h2>' + i18n.congratulations + '</h2><p>' + i18n.feedSubscribed + '</p>');
       } else {
         alert(resp.status);
       }
@@ -352,12 +347,7 @@ function ReportInvalid(title, feedurl, dbId) {
     data: {title: title, url: feedurl, recipeId: dbId},
     success: function (resp, textStatus, xhr) {
       if (resp.status == "ok") {
-        var modal = new tingle.modal({footer: true});
-        modal.setContent('<h2>' + i18n.thanks + '</h2><p>' + i18n.thank4RssFeedback + '</p>');
-        modal.addFooterBtn(i18n.close, 'actionButton', function () {
-          modal.close();
-        });
-        modal.open();
+        ShowSimpleModalDialog('<h2>' + i18n.thanks + '</h2><p>' + i18n.thank4RssFeedback + '</p>');
       } else {
         alert(resp.status);
       }

@@ -34,9 +34,9 @@ def RemoveLogsRoute():
 def RemoveLogs():
     #停止过期用户的推送
     now = datetime.datetime.utcnow()
-    for user in KeUser.get_all(KeUser.enable_send == True):
-        if user.expires and (user.expires < now):
-            user.enable_send = False
+    for user in KeUser.select():
+        if user.cfg('enable_send') and user.expires and (user.expires < now):
+            user.set_cfg('enable_send', '')
             user.save()
 
     #清理30天之前的推送记录

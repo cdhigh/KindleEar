@@ -232,9 +232,10 @@ function PopulateMyCustomRss() {
     var fTpl = "{0}('{1}','{2}')";
     var fTplAll = "{0}(event,'{1}','{2}','{3}',{4})"; //id,title,url,isfulltext
     hamb_arg.push({klass: 'btn-F', title: i18n.translator, icon: 'icon-translate', act: "/translator/" + id.replace(':', '__')});
+    //hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', id, title)});
     hamb_arg.push({klass: 'btn-A', title: i18n.deleteCtrlNoConfirm, icon: 'icon-delete', 
-      act: fTplAll.format('DeleteCustomRss', id, title, url, isfulltext)});
+      act: fTplAll.format('ShowDeleteCustomRssDialog', id, title, url, isfulltext)});
     row_str.push(AddHamburgerButton(hamb_arg));
     row_str.push('</div>');
     //console.log(row_str.join(''));
@@ -281,6 +282,7 @@ function PopulateMySubscribed() {
         hamb_arg.push({klass: 'btn-C', title: i18n.subscriptionInfo, icon: 'icon-key', act: fTpl.format('AskForSubscriptionInfo', recipe_id, recipe.account)});
     }
     hamb_arg.push({klass: 'btn-F', title: i18n.translator, icon: 'icon-translate', act: "/translator/" + recipe_id.replace(':', '__')});
+    //hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + recipe_id.replace(':', '__')});
     if (recipe_id.startsWith("upload:")) { //只有自己上传的recipe才能分享，内置的不用分享
       hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', recipe_id, title)});
     }
@@ -369,7 +371,6 @@ function ScheduleRecipe(id, title) {
   }
   var days = item.send_days || [];
   var times = item.send_times || [];
-  var modal = new tingle.modal({footer: true});
   var ostr = ['<h2>' + i18n.customizeDelivTime + '</h2>'];
   ostr.push('<form class="pure-form" action="" method="POST" id="custom_schedule">');
   ostr.push('<input type="text" name="id" value="' + id + '" hidden />');
@@ -393,11 +394,7 @@ function ScheduleRecipe(id, title) {
     }
   }
   ostr.push('</div></div></form>');
-  modal.setContent(ostr.join(''));
-  modal.addFooterBtn(i18n.cancel, 'actionButton', function() {
-    modal.close();
-  });
-  modal.addFooterBtn(i18n.submit, 'actionButton act', function() {
+  showH5Dialog(ostr.join('')).then(function (idx) {
     var formData = $("#custom_schedule").serialize();
     $.ajax({
       url: "/recipe/schedule",
@@ -411,15 +408,12 @@ function ScheduleRecipe(id, title) {
         } else {
           alert(resp.status);
         }
-        modal.close();
       },
       error: function (error) {
         alert(error);
-        modal.close();
       }
     });
-  });
-  modal.open();
+  }).catch(function(){});
 }
 
 //根据id获取对应recipe的信息，返回一个字典
@@ -445,19 +439,13 @@ function GetRecipeInfo(id) {
 
 //弹出对话框，输入Recipe的登录信息，然后保存到服务器
 function AskForSubscriptionInfo(id, account){
-  var modal = new tingle.modal({footer:true});
   var ostr = ['<h2>' + i18n.subscriptionInfo + '</h2>'];
   ostr.push('<form class="pure-form"><fieldset>');
   ostr.push('<input type="text" id="recipe_account" placeholder="' + i18n.account + '" value="' + account + '" style="margin-left: 10px;" />');
   ostr.push('<input type="password" id="recipe_password" placeholder="' + i18n.password + '" style="margin-left: 10px;" />');
   ostr.push('</fieldset></form>');
   ostr.push('<p>' + i18n.recipeLoginTips + '</p>')
-
-  modal.setContent(ostr.join(''));
-  modal.addFooterBtn(i18n.cancel, 'actionButton', function() {
-    modal.close();
-  });
-  modal.addFooterBtn(i18n.submit, 'actionButton act', function() {
+  showH5Dialog(ostr.join('')).then(function (idx) {
     var account = $('#recipe_account');
     var password = $('#recipe_password');
     $.post("/recipelogininfo", {id: id, account: account.val(), password: password.val()},
@@ -469,19 +457,30 @@ function AskForSubscriptionInfo(id, account){
         } else {
           alert(i18n.cannotSetSubsInfo + data.status);
         }
-        modal.close();
       },
     );
-  });
-  modal.open();
+  }).catch(function(){});
 }
 
 //用户点击了删除自定义RSS按钮，如果按住ctrl键再点击删除，则不需要确认
-function DeleteCustomRss(event, rssid, title, url, isfulltext) {
-  if (!event.ctrlKey && !confirm(i18n.areYouSureDelete.format(title))) {
-    return;
+function ShowDeleteCustomRssDialog(event, rssid, title, url, isfulltext) {
+  if (!(event.ctrlKey || event.metaKey)) {
+    let msg = i18n.areYouSureDelete.format(title);
+    if (!('show' in HTMLDialogElement.prototype)) { //校验兼容性
+      if (confirm(msg)) {
+        DeleteCustomRss(rssid, title, url, isfulltext, false);
+      }
+    } else {
+      msg += '<p><label><input id="chkReportInvalid" type="checkbox" /> {0}</label>'.format(i18n.reportThisFeedInvalid);
+      showH5Dialog(msg).then(function (idx) {
+        DeleteCustomRss(rssid, title, url, isfulltext, $('#chkReportInvalid').prop('checked'));
+      }).catch(function(){});
+    }
   }
+}
 
+//删除自定义RSS
+function DeleteCustomRss(rssid, title, url, isfulltext, reportInvalid) {
   $.post("/customrss/delete", {id: rssid}, function (data) {
     if (data.status == "ok") {
       for (var idx = 0; idx < my_custom_rss_list.length; idx++) {
@@ -494,6 +493,10 @@ function DeleteCustomRss(event, rssid, title, url, isfulltext) {
       $('#title_to_add').val(title);
       $('#url_to_add').val(url);
       $('#isfulltext').prop('checked', isfulltext);
+      if (reportInvalid) { //报告源失效
+        console.log('report invalid');
+        $.post("/library/mgr/reportinvalid", {title: title, url: url, recipeId: ''});
+      }
     } else if (data.status == i18n.loginRequired) {
       window.location.href = '/login';
     } else {
@@ -580,14 +583,60 @@ function ShareRssToServer(id, title, category, lang) {
   });
 }
 
+//显示html5新增的dialog
+//content: 对话框html内容
+//buttons: 按钮列表，为空则为默认的ok/cancel，否则为[['title', 'class'],]
+//last_btn_act: 最后一个按钮的动作，'reject'-调用reject(默认)，'resolve'-调用resolve
+//返回一个Promise，then函数的参数为按钮索引，showH5Dialog().then(function (btnIdx){});
+function showH5Dialog(content, buttons, last_btn_act) {
+  return new Promise(function(resolve, reject) {
+    if ((last_btn_act !== 'resolve') && (last_btn_act !== 'reject')) {
+      last_btn_act = 'reject';
+    }
+    if (!buttons) { //默认button，一个ok，一个cancel
+      buttons = [[i18n.ok, 'actionButton act h5-dialog-ok'], [i18n.cancel, 'actionButton h5-dialog-cancel']];
+    }
+
+    let modal = $('#h5-dialog');
+    $('#h5-dialog-content').html(content);
+
+    let btns = $('#h5-dialog-buttons');
+    btns.empty();
+    btns.append('<hr/>');
+    buttons.forEach(function(item, idx) {
+      let btn = $('<button class="' + item[1] + '">' + item[0] + '</button>');
+      if ((idx === buttons.length - 1) && (last_btn_act === 'reject')) {
+        btn.on('click', function() {modal[0].close();reject();});
+      } else {
+        btn.on('click', function() {modal[0].close();resolve(idx);});
+      }
+      btns.append(btn);
+    });
+
+    //点击遮罩层关闭对话框
+    modal.on('click', function(event) {
+      if (event.target === modal[0]) {
+        modal[0].close();
+        if (last_btn_act === 'reject') {
+          reject();
+        } else {
+          resolve(buttons.length - 1);
+        }
+      }
+    });
+
+    // 计算对话框的垂直位置（屏幕中央）
+    const windowHeight = $(window).height();
+    const dialogHeight = modal.outerHeight();
+    const pos = parseInt((windowHeight - dialogHeight) / 3);
+    modal.css('top', pos + 'px');
+    modal[0].showModal();
+  });
+}
+
 //显示一个简单的modal对话框，只有一个关闭按钮
 function ShowSimpleModalDialog(content) {
-  var modal = new tingle.modal({footer: true});
-  modal.setContent(content);
-  modal.addFooterBtn(i18n.close, 'actionButton', function() {
-    modal.close();
-  });
-  modal.open();
+  showH5Dialog(content, [[i18n.ok, 'actionButton h5-dialog-cancel']]).then(()=>{}).catch(()=>{});
 }
 
 //显示一个分享自定义RSS的对话框
@@ -604,7 +653,6 @@ function ShowShareDialog(id, title){
   var languages = ['en','fr','zh','es','pt','de','it','ja','ru','tr','ko','ar','cs','nl','el','hi','ms','bn','fa','ur',
     'sw','vi','pa','jv','tl','ha','da','in','no','pl','ro','sv','th'];
   var userLang = BrowserLanguage();
-  var modal = new tingle.modal({footer: true});
   var ostr = ['<h2>' + i18n.shareLinksHappiness + '</h2>'];
   ostr.push('<div class="pure-g">');
   ostr.push('<div class="pure-u-1 pure-u-md-1-2">');
@@ -623,22 +671,15 @@ function ShowShareDialog(id, title){
   ostr.push('</select><input type="text" name="category" oninput="DisplayShareRssLang()" value="' + userLang + '" id="txt_share_rss_lang" /></div></div>');
   ostr.push('</div></div>');
   ostr.push('<p>' + i18n.shareCatTips + '</p>');
-  
-  modal.setContent(ostr.join(''));
-  modal.addFooterBtn(i18n.cancel, 'actionButton', function() {
-    modal.close();
-  });
-  modal.addFooterBtn(i18n.share, 'actionButton act', function() {
+  showH5Dialog(ostr.join('')).then(function (idx) {
     var category = $("#txt_share_rss_category").val();
     var lang = $("#txt_share_rss_lang").val().toLowerCase();
     if (all_languages.indexOf(lang) != -1) {
       ShareRssToServer(id, title, category, lang);
-      modal.close();
     } else {
       alert(i18n.langInvalid);
     }
-  });
-  modal.open();
+  }).catch(function(){});
 }
 
 //在ShowShareDialog()里面的语言文本框有输入语言代码时自动在上面显示可读的语言名称
@@ -684,21 +725,15 @@ function StartShareRss(id, title) {
 
 //打开上传Recipe对话框，选择一个文件后上传
 function OpenUploadRecipeDialog() {
-  var modal = new tingle.modal({footer:true});
   var ostr = ['<h2>{0}</h2>'.format(i18n.chooseRecipeFile)];
   ostr.push('<form class="pure-form"><fieldset>');
-  ostr.push('<input type="file" id="recipe_file" />');
+  ostr.push('<input type="file" id="recipe_file" style="outline:none;"/>');
   ostr.push('</fieldset></form>');
-  modal.setContent(ostr.join(''));
-  modal.addFooterBtn(i18n.cancel, 'actionButton', function() {
-    modal.close();
-  });
-  modal.addFooterBtn(i18n.submit, 'actionButton act', function() {
+  showH5Dialog(ostr.join('')).then(function (idx) {
     var recipeFile = $('#recipe_file');
     var formData = new FormData();
     var fileData = recipeFile.prop("files")[0];
     if (!fileData) {
-      modal.close();
       return;
     }
     formData.append("recipe_file", fileData);
@@ -712,15 +747,21 @@ function OpenUploadRecipeDialog() {
       processData: false,
       success: function (data) {
         if (data.status == "ok") {
-          modal.close();
           //更新本地数据
           delete data.status;
           let lang = data.language;
           let title = data.title;
           my_uploaded_recipes.unshift(data);
+          $("#language_pick").val(lang);
           PopulateLibrary('');
-          ShowSimpleModalDialog('<h2>{0}</h2><p>{1}<hr/>{2}<br/>{3}</p>'.format(i18n.congratulations, 
-            i18n.recipeUploadedTips, i18n.title + ': ' + title, i18n.language + ': ' + (LanguageName(lang))));
+          let msg = `<p>${i18n.recipeUploadedTips}</p>
+          <table>
+            <tr><td style="text-align:right;padding-right:30px;font-weight:bold;">
+            ${i18n.title}</td><td>${title}</td></tr>
+            <tr><td style="text-align:right;padding-right:30px;font-weight:bold;">
+            ${i18n.language}</td><td>${LanguageName(lang)}</td></tr>
+          </table>`;
+          ShowSimpleModalDialog(msg);
         } else if (data.status == i18n.loginRequired) {
           window.location.href = '/login';
         } else {
@@ -728,8 +769,7 @@ function OpenUploadRecipeDialog() {
         }
       }
     });
-  });
-  modal.open();
+  }).catch(function(){});
 }
 
 //删除一个已经上传的Recipe
@@ -1248,7 +1288,8 @@ function TestTranslator(recipeId) {
   //console.log(text);
   var divDst = $('#translator_test_dst_text');
   divDst.val(i18n.translating);
-  $.post("/translator/test", {recipeId: recipeId, text: text}, function (data) {
+  recipeId = recipeId.replace(':', '__');
+  $.post("/translator/test/" + recipeId, {recipeId: recipeId, text: text}, function (data) {
     if (data.status == "ok") {
       divDst.val(data.text);
     } else if (data.status == i18n.loginRequired) {
@@ -1260,3 +1301,84 @@ function TestTranslator(recipeId) {
   });
 }
 ///[end] book_translator.html
+
+///[start] book_audiolator.html
+//根据当前可选的TTS引擎列表 g_tts_engines 填充下拉框，currEngineName为Recipe的当前配置
+function PopulateTTSFields(currEngineName) {
+  var engineSel = $('#tts_engine');
+  for (var name in g_tts_engines) {
+    var selected = (currEngineName == name) ? 'selected="selected"' : '';
+    var txt = '<option value="{0}" {1}>{2}</option>'.format(name, selected, g_tts_engines[name].alias);
+    engineSel.append($(txt));
+  }
+}
+
+//选择一个TTS引擎后显示或隐藏ApiKey文本框，语种列表也同步更新
+//language: 当前recipe的语种代码
+function TTSEngineFieldChanged(language) {
+  //显示或隐藏ApiHost/ApiKey文本框
+  var engineName = $('#tts_engine').val();
+  var engine = g_tts_engines[engineName];
+  if (!engine || engine.need_api_key) {
+    $('#tts_api_host_input').attr('placeholder', engine.default_api_host);
+    $('#tts_api_key_input').attr('placeholder', engine.api_key_hint);
+    $('#tts_api_key_input').prop("required", true);
+    $('#tts_api_host').show();
+    $('#tts_api_key').show();
+  } else {
+    $('#tts_api_key_input').prop("required", false);
+    $('#tts_api_host').hide();
+    $('#tts_api_key').hide();
+  }
+
+  //更新语种代码
+  var tts_language = $('#tts_language');
+  tts_language.empty();
+  var languages = engine['languages'] || {};
+  var hasSelected = false;
+  var enName = 'en';
+  for (const [code, name] of Object.entries(languages)) {
+    var selected = (code == language) ? 'selected="selected"' : '';
+    if (selected) {
+      hasSelected = true;
+    } else if (code.startsWith('en')) {
+      enName = code;
+    }
+    var txt = '<option value="{0}" {1}>{2}</option>'.format(code, selected, LanguageName(code, name));
+    tts_language.append($(txt));
+  }
+  if (!hasSelected) { //如果没有匹配的语种，选择英语
+    tts_language.val(enName);
+  }
+}
+
+//一个base64字符串转换为一个blob对象
+function b64toBlob(data, type) {    
+    var byteString = atob(data);
+    var ab = new ArrayBuffer(byteString.length);
+    var ia = new Uint8Array(ab);
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab], { type: type });
+}
+
+//测试TTS设置
+function TestTTS(recipeId) {
+  var text = $('#tts_test_src_text').val();
+  var ttsAudio = $('#tts_audio_player');
+  recipeId = recipeId.replace(':', '__');
+  $.post("/tts/test/" + recipeId, {recipeId: recipeId, text: text}, function (data) {
+    if (data.status == "ok") {
+      let blob = b64toBlob(data.audiofied, data.mime);
+      let audioUrl = URL.createObjectURL(blob);
+      ttsAudio.attr('src', audioUrl);
+      ttsAudio[0].play();
+    } else if (data.status == i18n.loginRequired) {
+      window.location.href = '/login';
+    } else {
+      alert(data.status);
+    }
+  });
+}
+///[end] book_audiolator.html

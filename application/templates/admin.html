@@ -59,34 +59,34 @@
         </tr>
       </thead>
       <tbody>
-        {% for u in users -%}
+        {% for other in users -%}
         <tr>
-          <td>{{u.name}}</td>
-          <td>{{_("Yes") if u.enable_send else _("No")}}</td>
-          <td>{{u.email}}</td>
-          {% if u.expiration_days == 0 -%}
+          <td>{{other.name}}</td>
+          <td>{{_("Yes") if other.cfg('enable_send') else _("No")}}</td>
+          <td>{{other.cfg('email')}}</td>
+          {% if other.expiration_days == 0 -%}
           <td>{{_("Never")}}</td>
-          {% elif u.expiration_days == 7 -%}
+          {% elif other.expiration_days == 7 -%}
           <td>{{_("7 Days")}}</td>
-          {% elif u.expiration_days == 30 -%}
+          {% elif other.expiration_days == 30 -%}
           <td>{{_("1 Month")}}</td>
-          {% elif u.expiration_days == 90 -%}
+          {% elif other.expiration_days == 90 -%}
           <td>{{_("3 Months")}}</td>
-          {% elif u.expiration_days == 180 -%}
+          {% elif other.expiration_days == 180 -%}
           <td>{{_("6 Months")}}</td>
-          {% elif u.expiration_days == 365 -%}
+          {% elif other.expiration_days == 365 -%}
           <td>{{_("1 Year")}}</td>
-          {% elif u.expiration_days == 730 -%}
+          {% elif other.expiration_days == 730 -%}
           <td>{{_("2 Years")}}</td>
           {% else -%}
-          <td>{{u.expiration_days}} Days</td>
+          <td>{{other.expiration_days}} Days</td>
           {% endif -%}
           <td>
-            <button class="additional-btn btn-B" title="{{_('Edit account')}}"><a href="/account/change/{{u.name}}"><i class="iconfont icon-edit"></i></a></button>
-            {% if u.name == adminName -%}
+            <button class="additional-btn btn-B" title="{{_('Edit account')}}"><a href="/account/change/{{other.name}}"><i class="iconfont icon-edit"></i></a></button>
+            {% if other.name == adminName -%}
             <button class="additional-btn btn-A additional-btn-disabled"><i class="iconfont icon-delete"></i></button>
             {% else -%}
-            <button class="additional-btn btn-A" title="{{_('Delete')}}" onclick="DeleteAccount('{{u.name}}')"><i class="iconfont icon-delete"></i></button>
+            <button class="additional-btn btn-A" title="{{_('Delete')}}" onclick="DeleteAccount('{{other.name}}')"><i class="iconfont icon-delete"></i></button>
             {% endif -%}
           </td>
         </tr>

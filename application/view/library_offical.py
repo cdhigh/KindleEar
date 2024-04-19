@@ -164,7 +164,7 @@ def SharedLibraryMgrOffical(mgrType):
             return respDict
 
         #希望能做到“免维护”，在一定数量的失效报告之后，自动删除对应的源，假定前提是人性本善
-        delta = abs(now - dbItem.last_invalid_report_time)
+        delta = abs(now - dbItem.last_invalid_report_time.replace(tzinfo=None))
         deltaDays = delta.days
 
         if deltaDays > 180: #半年内没有人报告失效则重新计数

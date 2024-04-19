@@ -7,7 +7,6 @@ from functools import wraps
 from urllib.parse import urlparse
 from flask import request, redirect, render_template, session, url_for
 from .back_end.db_models import *
-from .utils import local_time
 
 #一些共同的工具函数，工具函数都是小写+下划线形式
 
@@ -34,13 +33,12 @@ def get_login_user():
 def save_delivery_log(user, book, size, status='ok', to=None):
     global default_log
     name = user.name
-    to = to or user.kindle_email
-    tz = user.timezone
+    to = to or user.cfg('kindle_email')
     if isinstance(to, list):
         to = ','.join(to)
     
     try:
-        DeliverLog.create(user=name, to=to, size=size, time_str=local_time(tz=tz), 
+        DeliverLog.create(user=name, to=to, size=size, time_str=user.local_time("%Y-%m-%d %H:%M"), 
            datetime=datetime.datetime.utcnow(), book=book, status=status)
     except Exception as e:
         default_log.warning('DeliverLog failed to save: {}'.format(e))

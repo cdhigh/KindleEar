@@ -496,7 +496,7 @@ table.pure-table thead {
     font-size:14px;
     border:none;
     width:250px;
-    height:34px;
+    height:35px;
     margin:0;
  }
 
@@ -504,12 +504,13 @@ table.pure-table thead {
     position:absolute;
     top:0px;
     left:0px;
-    width:230px;
+    width:225px;
     height:34px;
     padding:1px;
     font-size:14px;
     font-weight: bold;
     border:solid gray 1px;
+    margin:0;
  }
 
  .select-editable select:focus, .select-editable input:focus {
@@ -705,6 +706,10 @@ select[id="shared_rss_lang_pick"] {
     background-color: #C76171;
     background: linear-gradient(to bottom, #D2969F 50%, #C76171 50%);
 }
+.btn-G { /* G为深绿色背景 */
+    background-color: #185718;
+    background: linear-gradient(to bottom, #4CAB05 50%, #185718 50%);
+}
 
 .upload-recipe {
     display: inline-block;
@@ -800,6 +805,9 @@ div[class="schedule_daytimes"] input {
 }
 .icon-translate:before {
   content: "\e8b2";
+}
+.icon-tts:before {
+  content: "\e692";
 }
 
 /* upload cover images */
@@ -960,4 +968,49 @@ div[class="schedule_daytimes"] input {
 .log_tooltip:hover .log_tooltiptext {
     visibility: visible;
     opacity: 1;
+}
+
+dialog#h5-dialog {
+    min-width: 300px;
+    max-width: 80%;
+    border: solid 1px #ccc;
+    border-radius: 10px;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    background-color: canvas; /*#fafafa;*/
+    position: relative;
+    /*top: 50%;
+    transform: translateY(-50%);*/
+}
+dialog#h5-dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+#h5-dialog-closebutton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  color: white;
+  background-color: #d32f2f;
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: bolder;
+  transition: background-color 0.3s;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+#h5-dialog-closebutton:hover {
+  background-color: #b71c1c;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.7);
+}
+.h5-dialog-ok {
+    min-width: 150px;
+    min-height: 40px;
+}
+.h5-dialog-cancel {
+    min-width: 150px;
+    margin-left: 25px;
+    min-height: 40px;
 }

@@ -4,7 +4,7 @@
 import os
 from flask import Blueprint, render_template, send_from_directory, current_app
 from .view import (login, admin, adv, deliver, library, library_offical, logs, setting, share, 
-    subscribe, inbound_email)
+    subscribe, inbound_email, translator)
 from .work import worker, url2book
 
 bpHome = Blueprint('bpHome', __name__)
@@ -43,12 +43,13 @@ def register_routes(app):
         app.register_blueprint(setting.bpSetting)
         app.register_blueprint(share.bpShare)
         app.register_blueprint(subscribe.bpSubscribe)
+        app.register_blueprint(translator.bpTranslator)
         app.register_blueprint(worker.bpWorker)
         app.register_blueprint(url2book.bpUrl2Book)
         app.register_blueprint(library_offical.bpLibraryOffical)
         app.register_blueprint(inbound_email.bpInBoundEmail)
 
-        #启用GAE邮件服务如果部署在GAE平台
+        #如果部署在GAE平台，启用GAE邮件服务
         if app.config['DATABASE_URL'] == 'datastore':
             from google.appengine.api import wrap_wsgi_app
             app.wsgi_app = wrap_wsgi_app(app.wsgi_app)

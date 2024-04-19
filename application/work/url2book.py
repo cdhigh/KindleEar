@@ -41,7 +41,7 @@ def Url2BookImpl(userName, urls, title, key, action='', text=''):
         return "Some parameter missing!"
 
     user = KeUser.get_or_none(KeUser.name == userName)
-    if not user or not user.kindle_email or user.share_links.get('key', '') != key:
+    if not user or not user.cfg('kindle_email') or user.share_links.get('key', '') != key:
         return "The user does not exist."
     
     urls = urls.split('|') if urls else []
@@ -87,18 +87,18 @@ def u2lDebugFetch(user, urls, title, text):
 
     if text:
         attachments = [(fileName, text.encode('utf-8'))]
-        send_mail(user, user.email, 'DEBUG FETCH', 'DEBUG FETCH', attachments=attachments)
+        send_mail(user, user.cfg('email'), 'DEBUG FETCH', 'DEBUG FETCH', attachments=attachments)
     else:
         opener = UrlOpener()
         for url in urls:
             resp = opener.open(url)
             if resp.status_code == 200:
                 attachments = [(fileName, resp.content)]
-                send_mail(user, user.email, 'DEBUG FETCH', 'DEBUG FETCH', attachments=attachments)
+                send_mail(user, user.cfg('email'), 'DEBUG FETCH', 'DEBUG FETCH', attachments=attachments)
             else:
                 default_log.warning(f'debug fetch failed: code:{resp.status_code}, url:{url}')
     
-    info = f'The debug file have been sent to {hide_email(user.kindle_email)}.'
+    info = f"The debug file have been sent to {hide_email(user.cfg('kindle_email'))}."
     default_log.info(info)
     return info
 
@@ -137,7 +137,7 @@ def u2lFetchUrl2(user, urls, title, text):
     if book:
         send_to_kindle(user, title, book, fileWithTime=False)
         size = filesizeformat(len(book), suffix='Bytes')
-        email = hide_email(user.kindle_email)
+        email = hide_email(user.cfg('kindle_email'))
         rs = f"The {target} have been sent to {email}:<br/>Title: {title}<br/>Size: {size}"
     else:
         save_delivery_log(user, title, 0, status='fetch failed')

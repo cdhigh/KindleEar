@@ -55,11 +55,11 @@ class HtmlTranslator:
             item['error'] = ''
             item['translated'] = ''
             if text:
-                if 1:
+                try:
                     item['translated'] = self.translator.translate(text)
-                    #except Exception as e:
-                    #default_log.warning('translate_text() failed: ' + str(e))
-                    #item['error'] = str(e)
+                except Exception as e:
+                    default_log.warning('translate_text failed: ' + str(e))
+                    item['error'] = str(e)
             else:
                 item['error'] = _('The input text is empty')
             ret.append(item)
@@ -111,7 +111,8 @@ class HtmlTranslator:
             for child in tag.find_all(recursive=False):
                 if _contains_text(child):
                     text = str(child).strip()
-                    if text and child.name not in ('pre', 'code', 'abbr'):
+                    if text and child.name not in ('pre', 'code', 'abbr', 'style', 'script', 'textarea',
+                        'input', 'select', 'link', 'img', 'option', 'datalist'):
                         elements.append((child, text))
                 else:
                     _extract(child)

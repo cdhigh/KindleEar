@@ -15,12 +15,22 @@ bpSetting = Blueprint('bpSetting', __name__)
 
 supported_languages = ['zh', 'tr_TR', 'en']
 
+all_timezones = {'UTC-12:00': -12, 'UTC-11:00': -11, 'UTC-10:00': -10, 'UTC-9:30': -9.5,
+    'UTC-9:00': -9, 'UTC-8:00': -8, 'UTC-7:00': -7, 'UTC-6:00': -6, 'UTC-5:00': -5,
+    'UTC-4:00': -4, 'UTC-3:30': -3.5, 'UTC-3:00': -3, 'UTC-2:00': -2, 'UTC-1:00': -1,
+    'UTC': 0, 'UTC+1:00': 1, 'UTC+2:00': 2, 'UTC+3:00': 3, 'UTC+3:30': 3.5,
+    'UTC+4:00': 4, 'UTC+4:30': 4.5, 'UTC+5:00': 5, 'UTC+5:30': 5.5, 'UTC+5:45': 5.75, 
+    'UTC+6:00': 6, 'UTC+6:30': 6.5, 'UTC+7:00': 7, 'UTC+8:00': 8, 'UTC+8:45': 8.75, 
+    'UTC+9:00': 9, 'UTC+9:30': 9.5, 'UTC+10:00': 10, 'UTC+10:30': 10.5, 'UTC+11:00': 11,
+    'UTC+12:00': 12, 'UTC+12:45': 12.75, 'UTC+13:00': 13, 'UTC+14:00': 14}
+
 @bpSetting.route("/setting", endpoint='Setting')
 @login_required()
 def Setting(tips=None):
     user = get_login_user()
     sm_services = avaliable_sm_services()
-    return render_template('setting.html', tab='set', user=user, tips=tips, langMap=LangMap(), sm_services=sm_services)
+    return render_template('setting.html', tab='set', user=user, tips=tips, langMap=LangMap(), 
+        sm_services=sm_services, all_timezones=all_timezones)
 
 @bpSetting.post("/setting", endpoint='SettingPost')
 @login_required()
@@ -49,7 +59,7 @@ def SettingPost():
         #只有处于smtp模式并且密码存在才更新，空或几个星号则不更新
         if sm_srv_type == 'smtp':
             if sm_password and sm_password.strip('*'):
-                send_mail_service['password'] = ke_encrypt(sm_password, user.secret_key)
+                send_mail_service['password'] = user.encrypt(sm_password)
             else:
                 send_mail_service['password'] = user.send_mail_service.get('password', '')
     
@@ -64,32 +74,28 @@ def SettingPost():
     elif sm_srv_type == 'local' and not sm_save_path:
         tips = _("Some parameters are missing or wrong.")
     else:
-        enable_send = form.get('enable_send', '')
-        if enable_send == 'all':
-            user.enable_send = True
-            user.enable_custom_rss = True
-        elif enable_send == 'recipes':
-            user.enable_send = True
-            user.enable_custom_rss = False
-        else:
-            user.enable_send = False
-            user.enable_custom_rss = False
+        base_config = user.base_config
+        book_config = user.book_config
 
-        user.kindle_email = keMail
-        user.timezone = int(form.get('timezone', '0'))
+        enable_send = form.get('enable_send')
+        base_config['enable_send'] = enable_send if enable_send in ('all', 'recipes') else ''
+        base_config['kindle_email'] = keMail
+        base_config['timezone'] = float(form.get('timezone', '0'))
         user.send_time = int(form.get('send_time', '0'))
-        user.book_type = form.get('book_type', 'epub')
-        user.device = form.get('device_type', 'kindle')
-        user.title_fmt = form.get('title_fmt', '')
+        book_config['type'] = form.get('book_type', 'epub')
+        book_config['device'] = form.get('device_type', 'kindle')
+        book_config['title_fmt'] = form.get('title_fmt', '')
         allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         user.send_days = [weekday for weekday, day in enumerate(allDays) if str_to_bool(form.get(day, ''))]
-        user.book_mode = form.get('book_mode', '')
-        user.remove_hyperlinks = form.get('remove_hyperlinks', '')
-        user.author_format = form.get('author_format', '')
-        user.book_title = myTitle
-        user.book_language = form.get("book_language", "en")
-        user.oldest_article = int(form.get('oldest', 7))
-        user.time_fmt = form.get('time_fmt', '')
+        book_config['mode'] = form.get('book_mode', '')
+        book_config['rm_links'] = form.get('remove_hyperlinks', '')
+        book_config['author_fmt'] = form.get('author_format', '') #修正Kindle 5.9.x固件的bug【将作者显示为日期】
+        book_config['title'] = myTitle
+        book_config['language'] = form.get("book_language", "en")
+        book_config['oldest_article'] = int(form.get('oldest', 7))
+        book_config['time_fmt'] = form.get('time_fmt', '')
+        user.base_config = base_config
+        user.book_config = book_config
         if sm_srv_need:
             user.send_mail_service = send_mail_service
         user.save()
@@ -99,7 +105,8 @@ def SettingPost():
         UpdateBookedCustomRss(user)
     
     sm_services = avaliable_sm_services()
-    return render_template('setting.html', tab='set', user=user, tips=tips, langMap=LangMap(), sm_services=sm_services)
+    return render_template('setting.html', tab='set', user=user, tips=tips, langMap=LangMap(), 
+        sm_services=sm_services, all_timezones=all_timezones)
 
 @bpSetting.post("/send_test_email", endpoint='SendTestEmailPost')
 @login_required()
@@ -120,9 +127,10 @@ def SendTestEmailPost():
     [From {srcUrl}]
     """)
 
-    emails = user.kindle_email.split(',') if user.kindle_email else []
-    if user.email and user.email not in emails:
-        emails.append(user.email)
+    emails = user.cfg('kindle_email').split(',') if user.cfg('kindle_email') else []
+    userEmail = user.cfg('email')
+    if userEmail and userEmail not in emails:
+        emails.append(userEmail)
     
     if emails:
         status = 'ok'

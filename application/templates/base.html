@@ -13,7 +13,6 @@
   <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
   <link rel="stylesheet" href="/static/pure-min.css" type="text/css" charset="utf-8"/>
   <link rel="stylesheet" href="/static/grids-responsive-min.css" type="text/css" charset="utf-8"/>
-  <link rel="stylesheet" href="/static/tingle.min.css" type="text/css" charset="utf-8"/>
   <link rel="stylesheet" href="/static/base.css" type="text/css" charset="utf-8"/>
 
   {% autoescape off %}
@@ -29,11 +28,13 @@
     fulltext: '{{_("Fulltext")|safe}}',
     share: '{{_("Share")|safe}}',
     areYouSureDelete: '{{_("Are you sure to delete ({0})?")|safe}}',
+    reportThisFeedInvalid: '{{_("Report to the server that this feed is invalid.")|safe}}',
     areYouSureRemoveAll: '{{_("Are you sure to REMOVE ALL CUSTOM RSS?")|safe}}',
     shareLinksHappiness: '{{_("Share links, share happiness")|safe}}',
     category: '{{_("Category")|safe}}',
     language: '{{_("Language")|safe}}',
     shareCatTips: '{{_("Please write a category in text field if the one you wish is not in the list.")|safe}}',
+    ok: '{{_("Ok")|safe}}',
     cancel: '{{_("Cancel")|safe}}',
     share: '{{_("Share")|safe}}',
     langInvalid: '{{_("Language code invalid")|safe}}',
@@ -97,7 +98,8 @@
     testEmailOk: '{{_("The test email has been successfully sent to the following addresses. Please check your inbox or spam folder to confirm its delivery. Depending on your email server, there may be a slight delay.")|safe}}',
     translating: '{{_("Translating...")|safe}}',
     configOk: '{{_("The configuration validation is correct.")|safe}}',
-    title: '{{_("Title")|safe}}'
+    title: '{{_("Title")|safe}}',
+    tts: '{{_("Text to Speech")|safe}}'
   };
   </script>
   {% block javascript_inhead %}
@@ -156,6 +158,15 @@
 
     {% block content -%}
     {% endblock -%}
+    <!-- general h5 dialog -->
+    <dialog id="h5-dialog">
+      <div id="h5-dialog-closebutton" onclick="this.parentNode.close();">X</div>
+      <div class="h5-dialog-container">
+        <div id="h5-dialog-toolbar"></div>
+        <div id="h5-dialog-content"></div>
+        <div id="h5-dialog-buttons"></div>
+      </div>
+    </dialog>
     <div class="footer-sticker"></div>
   </div>
 
@@ -173,9 +184,8 @@
   </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-<script>window.jQuery || document.write('<script src="/static/jquery-3.7.1.min.js"></script>');</script>
+<script>window.jQuery || document.write('<script src="/static/jquery-3.7.1.min.js"><\/script>');</script>
 <!--<script type="text/javascript" src="/static/jquery-3.7.1.min.js"></script>-->
-<script type="text/javascript" src="/static/tingle.min.js"></script>
 <script type="text/javascript" src="/static/base.js" charset="utf-8"></script>
 {% block jsfiles %}{% endblock -%}
 {% block js %}{% endblock -%}

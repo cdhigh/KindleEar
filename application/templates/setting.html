@@ -24,24 +24,21 @@
       <div class="pure-control-group">
         <label>{{_("Auto Delivery")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="enable_send">
-          <option value="all" {% if user.enable_send and user.enable_custom_rss %}selected="selected"{% endif %}>{{_("Recipes and custom RSS")}}</option>
-          <option value="recipes" {% if user.enable_send and not user.enable_custom_rss %}selected="selected"{% endif %}>{{_("Recipes only")}}</option>
-          <option value="no" {% if not user.enable_send %}selected="selected"{% endif %}>{{_("Disable all")}}</option>
+          {% set enable_send = user.cfg('enable_send') %}
+          <option value="all" {% if enable_send=='all' %}selected="selected"{% endif %}>{{_("Recipes and custom RSS")}}</option>
+          <option value="recipes" {% if enable_send=='recipes' %}selected="selected"{% endif %}>{{_("Recipes only")}}</option>
+          <option value="no" {% if not enable_send %}selected="selected"{% endif %}>{{_("Disable all")}}</option>
         </select>
       </div>
       <div class="pure-control-group">
         <label><em class="required">*</em> {{_("Kindle E-mail")}}</label>
-        <input type="email" name="kindle_email" value="{{user.kindle_email}}" placeholder="{{_('Seperated by comma')}}" class="pure-u-1 pure-u-sm-1-2" required multiple />
+        <input type="email" name="kindle_email" value="{{user.cfg('kindle_email')}}" placeholder="{{_('Seperated by comma')}}" class="pure-u-1 pure-u-sm-1-2" required multiple />
       </div>
       <div class="pure-control-group">
         <label>{{_("Time zone")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="timezone">
-          {% for i in range(-12, 0) -%}
-          <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT%d:00" % i }}</option>
-          {% endfor -%}
-          <option value="0" {% if user.timezone|int==0 %}selected="selected"{% endif %}>GMT</option>
-          {% for i in range(1, 14) -%}
-          <option value="{{ i }}" {% if user.timezone|int==i %}selected="selected"{% endif %}>{{ "GMT+%d:00" % i }}</option>
+          {% for (name, offset) in all_timezones.items() -%}
+          <option value="{{offset}}" {% if user.cfg('timezone')==offset %}selected="selected"{% endif %}>{{name}}</option>
           {% endfor -%}
         </select>
       </div>
@@ -73,48 +70,52 @@
       <div class="pure-control-group">
         <label>{{_("Book type")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="book_type">
-          <option value="epub" {% if user.book_type == 'epub' %}selected="selected"{% endif %}>epub</option>
-          <option value="mobi" {% if user.book_type != 'epub' %}selected="selected"{% endif %}>mobi</option>
+          <option value="epub" {% if user.book_cfg('type') == 'epub' %}selected="selected"{% endif %}>epub</option>
+          <option value="mobi" {% if user.book_cfg('type') != 'epub' %}selected="selected"{% endif %}>mobi</option>
         </select>
       </div>
       <div class="pure-control-group">
         <label>{{_("Device type")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="device_type">
-          <option value="kindle" {% if user.device == 'kindle' %}selected="selected"{% endif %}>Kindle</option>
-          <option value="kindle_dx" {% if user.device == 'kindle_dx' %}selected="selected"{% endif %}>Kindle DX</option>
-          <option value="kindle_pw" {% if user.device == 'kindle_pw' %}selected="selected"{% endif %}>Kindle PaperWhite</option>
-          <option value="kindle_fire" {% if user.device == 'kindle_fire' %}selected="selected"{% endif %}>Kindle Fire</option>
-          <option value="kindle_voyage" {% if user.device == 'kindle_voyage' %}selected="selected"{% endif %}>Kindle Voyage</option>
-          <option value="kindle_pw3" {% if user.device == 'kindle_pw3' %}selected="selected"{% endif %}>Kindle PaperWhite 3</option>
-          <option value="kindle_oasis" {% if user.device == 'kindle_oasis' %}selected="selected"{% endif %}>Kindle Oasis</option>
-          <option value="kindle_scribe" {% if user.device == 'kindle_scribe' %}selected="selected"{% endif %}>Kindle Scribe</option>
-          <option value="others" {% if user.device == 'others' %}selected="selected"{% endif %}>{{_("Others")}}</option>
+          {% set device = user.book_cfg('device') %}
+          <option value="kindle" {% if device == 'kindle' %}selected="selected"{% endif %}>Kindle</option>
+          <option value="kindle_dx" {% if device == 'kindle_dx' %}selected="selected"{% endif %}>Kindle DX</option>
+          <option value="kindle_pw" {% if device == 'kindle_pw' %}selected="selected"{% endif %}>Kindle PaperWhite</option>
+          <option value="kindle_fire" {% if device == 'kindle_fire' %}selected="selected"{% endif %}>Kindle Fire</option>
+          <option value="kindle_voyage" {% if device == 'kindle_voyage' %}selected="selected"{% endif %}>Kindle Voyage</option>
+          <option value="kindle_pw3" {% if device == 'kindle_pw3' %}selected="selected"{% endif %}>Kindle PaperWhite 3</option>
+          <option value="kindle_oasis" {% if device == 'kindle_oasis' %}selected="selected"{% endif %}>Kindle Oasis</option>
+          <option value="kindle_scribe" {% if device == 'kindle_scribe' %}selected="selected"{% endif %}>Kindle Scribe</option>
+          <option value="others" {% if device == 'others' %}selected="selected"{% endif %}>{{_("Others")}}</option>
         </select>
       </div>
       <div class="pure-control-group">
         <label>{{_("Title format")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="title_fmt">
-          <option value="" {% if not user.title_fmt %}selected="selected"{% endif %}>{{_("Title Only")}}</option>
-          <option value="%Y-%m-%d" {% if user.title_fmt=='%Y-%m-%d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%Y-%m-%d")}}</option>
-          <option value="%m-%d" {% if user.title_fmt=='%m-%d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%m-%d")}}</option>
-          <option value="%b %d" {% if user.title_fmt=='%b %d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%b %d")}}</option>
-          <option value="%a, %b %d" {% if user.title_fmt=='%a, %b %d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%a, %b %d")}}</option>
+          {% set title_fmt = user.book_cfg('title_fmt') %}
+          <option value="" {% if not title_fmt %}selected="selected"{% endif %}>{{_("Title Only")}}</option>
+          <option value="%Y-%m-%d" {% if title_fmt=='%Y-%m-%d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%Y-%m-%d")}}</option>
+          <option value="%m-%d" {% if title_fmt=='%m-%d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%m-%d")}}</option>
+          <option value="%b %d" {% if title_fmt=='%b %d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%b %d")}}</option>
+          <option value="%a, %b %d" {% if title_fmt=='%a, %b %d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%a, %b %d")}}</option>
         </select>
       </div>
       {#<div class="pure-control-group">
         <label>{{_("Book mode")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="book_mode">
-          <option value="periodical" {% if not user.book_mode or user.book_mode=='periodical' %}selected="selected"{% endif %}>{{_("Periodical")}}</option>
-          <option value="comic" {% if user.book_mode=='comic' %}selected="selected"{% endif %}>{{_("Comic")}}</option>
+          {% set book_mode = user.book_cfg('mode') %}
+          <option value="periodical" {% if not book_mode or book_mode=='periodical' %}selected="selected"{% endif %}>{{_("Periodical")}}</option>
+          <option value="comic" {% if book_mode=='comic' %}selected="selected"{% endif %}>{{_("Comic")}}</option>
         </select>
       </div>#}
       <div class="pure-control-group">
         <label>{{_("Remove hyperlinks")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="remove_hyperlinks">
-          <option value="" {% if not user.remove_hyperlinks %}selected="selected"{% endif %}>{{_("Do not remove hyperlinks")}}</option>
-          <option value="image" {% if user.remove_hyperlinks=='image' %}selected="selected"{% endif %}>{{_("Remove image links")}}</option>
-          <option value="text" {% if user.remove_hyperlinks=='text' %}selected="selected"{% endif %}>{{_("Remove text links")}}</option>
-          <option value="all" {% if user.remove_hyperlinks=='all' %}selected="selected"{% endif %}>{{_("Remove all hyperlinks")}}</option>
+          {% set rm_links = user.book_cfg('rm_links') %}
+          <option value="" {% if not rm_links %}selected="selected"{% endif %}>{{_("Do not remove hyperlinks")}}</option>
+          <option value="image" {% if rm_links=='image' %}selected="selected"{% endif %}>{{_("Remove image links")}}</option>
+          <option value="text" {% if rm_links=='text' %}selected="selected"{% endif %}>{{_("Remove text links")}}</option>
+          <option value="all" {% if rm_links=='all' %}selected="selected"{% endif %}>{{_("Remove all hyperlinks")}}</option>
         </select>
       </div>
     </fieldset>
@@ -123,13 +124,13 @@
       <legend><h3>{{_("Custom RSS")}}</h3></legend>
       <div class="pure-control-group">
         <label><em class="required">*</em> {{_("Title")}}</label>
-        <input type="text" name="rss_title" value="{{ user.book_title }}" required class="pure-u-1 pure-u-sm-1-2" />
+        <input type="text" name="rss_title" value="{{ user.book_cfg('title') }}" required class="pure-u-1 pure-u-sm-1-2" />
       </div>
       <div class="pure-control-group">
         <label>{{_("Language")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="book_language">
         {% for langCode in langMap -%}
-        {% if user.book_language == langCode -%}
+        {% if user.book_cfg('language') == langCode -%}
         <option value="{{langCode}}" selected="selected">{{langMap[langCode]}}</option>
         {% else -%}
         <option value="{{langCode}}">{{langMap[langCode]}}</option>
@@ -140,38 +141,41 @@
       <div class="pure-control-group">
         <label>{{_("Oldest article")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="oldest">
-          <option value="0" {% if not user.oldest_article %}selected="selected"{% endif %}>{{_("No limit")}}</option>
-          <option value="1" {% if user.oldest_article==1 %}selected="selected"{% endif %}>{{_("1 Day")}}</option>
-          <option value="2" {% if user.oldest_article==2 %}selected="selected"{% endif %}>{{_("2 Days")}}</option>
-          <option value="3" {% if user.oldest_article==3 %}selected="selected"{% endif %}>{{_("3 Days")}}</option>
-          <option value="4" {% if user.oldest_article==4 %}selected="selected"{% endif %}>{{_("4 Days")}}</option>
-          <option value="5" {% if user.oldest_article==5 %}selected="selected"{% endif %}>{{_("5 Days")}}</option>
-          <option value="6" {% if user.oldest_article==6 %}selected="selected"{% endif %}>{{_("6 Days")}}</option>
-          <option value="7" {% if user.oldest_article>=7 %}selected="selected"{% endif %}>{{_("7 Days")}}</option>
+          {% set oldest = user.book_cfg('oldest_article') %}
+          <option value="0" {% if not oldest %}selected="selected"{% endif %}>{{_("No limit")}}</option>
+          <option value="1" {% if oldest==1 %}selected="selected"{% endif %}>{{_("1 Day")}}</option>
+          <option value="2" {% if oldest==2 %}selected="selected"{% endif %}>{{_("2 Days")}}</option>
+          <option value="3" {% if oldest==3 %}selected="selected"{% endif %}>{{_("3 Days")}}</option>
+          <option value="4" {% if oldest==4 %}selected="selected"{% endif %}>{{_("4 Days")}}</option>
+          <option value="5" {% if oldest==5 %}selected="selected"{% endif %}>{{_("5 Days")}}</option>
+          <option value="6" {% if oldest==6 %}selected="selected"{% endif %}>{{_("6 Days")}}</option>
+          <option value="7" {% if oldest==7 %}selected="selected"{% endif %}>{{_("7 Days")}}</option>
         </select>
       </div>
       <div class="pure-control-group">
         <label>{{_("Time format")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="time_fmt">
-          <option value="%Y-%m-%d" {% if user.time_fmt=="%Y-%m-%d" %}selected="selected"{% endif %}>{{now.strftime("%Y-%m-%d")}}</option>
-          <option value="%a, %d %b %Y" {% if user.time_fmt=="%a, %d %b %Y" %}selected="selected"{% endif %}>{{now.strftime("%a, %d %b %Y")}}</option>
-          <option value="%a, %b %d" {% if user.time_fmt=="%a, %b %d" %}selected="selected"{% endif %}>{{now.strftime("%a, %b %d")}}</option>
-          <option value="%b %d" {% if user.time_fmt=="%b %d" %}selected="selected"{% endif %}>{{now.strftime("%b %d")}}</option>
-          <option value="%m-%d" {% if user.time_fmt=="%m-%d" %}selected="selected"{% endif %}>{{now.strftime("%m-%d")}}</option>
-          <option value="%m/%d" {% if user.time_fmt=="%m/%d" %}selected="selected"{% endif %}>{{now.strftime("%m/%d")}}</option>
-          <option value="%d/%m" {% if user.time_fmt=="%d/%m" %}selected="selected"{% endif %}>{{now.strftime("%d/%m")}}</option>
+          {% set time_fmt = user.book_cfg('time_fmt') %}
+          <option value="%Y-%m-%d" {% if time_fmt=="%Y-%m-%d" %}selected="selected"{% endif %}>{{now.strftime("%Y-%m-%d")}}</option>
+          <option value="%a, %d %b %Y" {% if time_fmt=="%a, %d %b %Y" %}selected="selected"{% endif %}>{{now.strftime("%a, %d %b %Y")}}</option>
+          <option value="%a, %b %d" {% if time_fmt=="%a, %b %d" %}selected="selected"{% endif %}>{{now.strftime("%a, %b %d")}}</option>
+          <option value="%b %d" {% if time_fmt=="%b %d" %}selected="selected"{% endif %}>{{now.strftime("%b %d")}}</option>
+          <option value="%m-%d" {% if time_fmt=="%m-%d" %}selected="selected"{% endif %}>{{now.strftime("%m-%d")}}</option>
+          <option value="%m/%d" {% if time_fmt=="%m/%d" %}selected="selected"{% endif %}>{{now.strftime("%m/%d")}}</option>
+          <option value="%d/%m" {% if time_fmt=="%d/%m" %}selected="selected"{% endif %}>{{now.strftime("%d/%m")}}</option>
         </select>
       </div>
       <div class="pure-control-group">
         <label>{{_("Author format")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="author_format">
-          <option value="" {% if not user.author_format %}selected="selected"{% endif %}>KindleEar</option>
-          <option value="%Y-%m-%d" {% if user.author_format=='%Y-%m-%d' %}selected="selected"{% endif %}>{{now.strftime("%Y-%m-%d")}}</option>
-          <option value="%m-%d" {% if user.author_format=='%m-%d' %}selected="selected"{% endif %}>{{now.strftime("%m-%d")}}</option>
-          <option value="%m/%d" {% if user.author_format=='%m/%d' %}selected="selected"{% endif %}>{{now.strftime("%m/%d")}}</option>
-          <option value="%d/%m" {% if user.author_format=='%d/%m' %}selected="selected"{% endif %}>{{now.strftime("%d/%m")}}</option>
-          <option value="%b %d" {% if user.author_format=='%b %d' %}selected="selected"{% endif %}>{{now.strftime("%b %d")}}</option>
-          <option value="%a, %b %d" {% if user.author_format=='%a, %b %d' %}selected="selected"{% endif %}>{{now.strftime("%a, %b %d")}}</option>
+          {% set author_fmt = user.book_cfg('author_fmt') %}
+          <option value="" {% if not author_fmt %}selected="selected"{% endif %}>KindleEar</option>
+          <option value="%Y-%m-%d" {% if author_fmt=='%Y-%m-%d' %}selected="selected"{% endif %}>{{now.strftime("%Y-%m-%d")}}</option>
+          <option value="%m-%d" {% if author_fmt=='%m-%d' %}selected="selected"{% endif %}>{{now.strftime("%m-%d")}}</option>
+          <option value="%m/%d" {% if author_fmt=='%m/%d' %}selected="selected"{% endif %}>{{now.strftime("%m/%d")}}</option>
+          <option value="%d/%m" {% if author_fmt=='%d/%m' %}selected="selected"{% endif %}>{{now.strftime("%d/%m")}}</option>
+          <option value="%b %d" {% if author_fmt=='%b %d' %}selected="selected"{% endif %}>{{now.strftime("%b %d")}}</option>
+          <option value="%a, %b %d" {% if author_fmt=='%a, %b %d' %}selected="selected"{% endif %}>{{now.strftime("%a, %b %d")}}</option>
         </select>
       </div>
     </fieldset>
@@ -230,10 +234,10 @@
       </div>
     </fieldset>
     {% endif -%}
-    {% if user.sender -%}
+    {% if user.cfg('sender') -%}
     <p>
       {% autoescape off -%}
-      {{_("Important: Please activate your kindle firstly, then goto %(personal)s Page and add %(sender)s to 'Approved Personal Document E-mail List'.", personal='<a href="https://www.amazon.com/hz/mycd/myx#/home/settings/payment" rel="external" target="_blank">' + _("Personal Document Settings") + '</a>', sender='<strong>' + user.sender + '</strong>')|safe}}
+      {{_("Important: Please activate your kindle firstly, then goto %(personal)s Page and add %(sender)s to 'Approved Personal Document E-mail List'.", personal='<a href="https://www.amazon.com/hz/mycd/myx#/home/settings/payment" rel="external" target="_blank">' + _("Personal Document Settings") + '</a>', sender='<strong>' + user.cfg('sender') + '</strong>')|safe}}
       {% endautoescape -%}
     </p>
     {% else -%}

@@ -8,7 +8,7 @@ Defines various abstract base classes that can be subclassed to create powerful 
 __docformat__ = "restructuredtext en"
 
 
-import io, os, re, sys, time, datetime, traceback
+import io, os, re, sys, time, datetime, traceback, base64
 from collections import defaultdict, namedtuple
 from urllib.parse import urlparse, urlsplit, quote, urljoin
 from urllib.error import HTTPError, URLError
@@ -1042,7 +1042,7 @@ class BasicNewsRecipe(Recipe):
             del img['srcset']
 
         #如果需要，去掉正文中的超链接(使用斜体下划线标识)，以避免误触
-        remove_hyperlinks = self.user.remove_hyperlinks
+        remove_hyperlinks = self.user.book_cfg('rm_links')
         if remove_hyperlinks in ('text', 'all'):
             for a_ in soup.find_all('a'):
                 a_.name = 'i'
@@ -1115,6 +1115,7 @@ class BasicNewsRecipe(Recipe):
             ashare.string = _('Open in browser')
             aTags.append(ashare)
 
+        #将上面创建的链接都添加到body
         bodyTag = soup.find("body")
         for idx, a in enumerate(aTags):
             bodyTag.append(a)
@@ -1122,6 +1123,19 @@ class BasicNewsRecipe(Recipe):
                 span = soup.new_tag("span")
                 span.string = ' | '
                 bodyTag.append(span)
+
+        #如果有需要二维码功能，最后添加
+        if shareLinks.get('Qrcode'):
+            import qrcode
+            qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+            qr.add_data(url)
+            qr.make(fit=True)
+            img = qr.make_image()
+            buffer = io.BytesIO()
+            img.save(buffer, 'PNG')
+            qrBase64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            bodyTag.append(soup.new_tag('br'))
+            bodyTag.append(soup.new_tag('img', src=f"data:image/png;base64,{qrBase64}"))
 
     #生成保存内容或分享文章链接的KindleEar调用链接
     def make_share_link(self, shareType, user, url, soup):

@@ -13,7 +13,6 @@ from ..utils import str_to_bool, xml_escape
 from ..lib.urlopener import UrlOpener
 from ..lib.recipe_helper import GetBuiltinRecipeInfo, GetBuiltinRecipeSource
 from .library import LIBRARY_MGR, SUBSCRIBED_FROM_LIBRARY, LIBRARY_GETSRC, buildKeUrl
-from ebook_translator import get_trans_engines, HtmlTranslator
 
 bpSubscribe = Blueprint('bpSubscribe', __name__)
 
@@ -165,20 +164,20 @@ def DeleteCustomRss(user, rssId):
 def UpdateBookedCustomRss(user: KeUser):
     userName = user.name
     #删除孤立的BookedRecipe
-    for dbInst in list(BookedRecipe.get_all()):
+    for dbInst in list(BookedRecipe.select()):
         recipeType, recipeId = Recipe.type_and_id(dbInst.recipe_id)
         if recipeType != 'builtin' and not Recipe.get_by_id_or_none(recipeId):
             dbInst.delete_instance()
-            
-    if user.enable_custom_rss: #添加订阅
-        for rss in user.all_custom_rss()[::-1]:
+    
+    custom_rss = user.all_custom_rss()[::-1]
+    if user.cfg('enable_send') == 'all': #添加自定义RSS的订阅
+        for rss in custom_rss:
             BookedRecipe.get_or_create(recipe_id=rss.recipe_id, defaults={'separated': False, 'user': userName, 
                 'title': rss.title, 'description': rss.description, 'time': datetime.datetime.utcnow(),
                 'translator': rss.translator})
-    else: #删除订阅
-        ids = [rss.recipe_id for rss in user.all_custom_rss()]
-        if ids:
-            BookedRecipe.delete().where(BookedRecipe.recipe_id.in_(ids)).execute()
+    elif custom_rss: #删除订阅
+        ids = [rss.recipe_id for rss in custom_rss]
+        BookedRecipe.delete().where(BookedRecipe.recipe_id.in_(ids)).execute()
 
 #通知共享服务器，有一个新的订阅
 def SendNewSubscription(title, url, recipeId):
@@ -186,112 +185,6 @@ def SendNewSubscription(title, url, recipeId):
     path = LIBRARY_MGR + SUBSCRIBED_FROM_LIBRARY
     #只管杀不管埋，不用管能否成功了
     opener.open(buildKeUrl(path), {'title': title, 'url': url, 'recipeId': recipeId})
-
-#书籍翻译器
-@bpSubscribe.route("/translator/<recipeId>", endpoint='BookTranslatorRoute')
-@login_required()
-def BookTranslatorRoute(recipeId):
-    user = get_login_user()
-    tips = ''
-    recipeId = recipeId.replace('__', ':')
-    recipeType, dbId = Recipe.type_and_id(recipeId)
-    recipe = GetBuiltinRecipeInfo(recipeId) if recipeType == 'builtin' else Recipe.get_by_id_or_none(dbId)
-    if not recipe:
-        tips = _('The recipe does not exist.')
-        return render_template('tipsback.html', tips=tips, urltoback=url_for('bpSubscribe.MySubscription'))
-        
-    bkRecipe = user.get_booked_recipe(recipeId)
-    if recipeType == 'custom':
-        params = recipe.translator #自定义RSS的Recipe和BookedRecipe的translator属性一致
-    elif bkRecipe:
-        params = bkRecipe.translator
-    else:
-        tips = _('This recipe has not been subscribed to yet.')
-        params = {}
-
-    engines = json.dumps(get_trans_engines(), separators=(',', ':'))
-    return render_template('book_translator.html', tab="my", tips=tips, params=params, title=recipe.title,
-        recipeId=recipeId, engines=engines)
-
-#修改书籍翻译器的设置
-@bpSubscribe.post("/translator/<recipeId>", endpoint='BookTranslatorPost')
-@login_required()
-def BookTranslatorPost(recipeId):
-    user = get_login_user()
-    tips = ''
-    recipeId = recipeId.replace('__', ':')
-    recipeType, dbId = Recipe.type_and_id(recipeId)
-    recipe = GetBuiltinRecipeInfo(recipeId) if recipeType == 'builtin' else Recipe.get_by_id_or_none(dbId)
-    if not recipe:
-        tips = _('The recipe does not exist.')
-        return render_template('tipsback.html', tips=tips, urltoback=url_for('bpSubscribe.MySubscription'))
-    
-    #构建配置参数
-    form = request.form
-    engineName = form.get('engine', '')
-    apiHost = form.get('api_host', '')
-    apiKeys = form.get('api_keys', '')
-    apiKeys = apiKeys.split('\n') if apiKeys else []
-    params = {'enable': str_to_bool(form.get('enable', '')), 'engine': engineName,
-        'api_host': apiHost, 'api_keys': apiKeys, 'src_lang': form.get('src_lang', ''), 
-        'dst_lang': form.get('dst_lang', 'en'), 'position': form.get('position', 'below'),
-        'orig_style': form.get('orig_style', ''), 'trans_style': form.get('trans_style', '')}
-
-    engines = get_trans_engines()
-    engine = engines.get(engineName, None)
-    if engine and engine.get('need_api_key'):
-        if not apiKeys:
-            tips = _('The api key is required.')
-            return render_template('book_translator.html', tab="my", tips=tips, params=params, title=recipe.title,
-                recipeId=recipeId, engines=json.dumps(engines, separators=(',', ':')))
-    else:
-        params['api_host'] = ''
-
-    tips = _("Settings Saved!")
-    apply_all = str_to_bool(form.get('apply_all', ''))
-    if apply_all: #所有的Recipe使用同样的配置
-        for item in [*user.all_custom_rss(), *user.get_booked_recipe()]:
-            item.translator = params
-            item.save()
-    else:
-        bkRecipe = user.get_booked_recipe(recipeId)
-        if recipeType == 'custom': #自定义RSS先保存到Recipe，需要的时候再同步到BookedRecipe
-            recipe.translator = params
-            recipe.save()
-
-        if bkRecipe:
-            bkRecipe.translator = params
-            bkRecipe.save()
-        elif recipeType != 'custom':
-            tips = _('This recipe has not been subscribed to yet.')
-        
-    return render_template('book_translator.html', tab="my", tips=tips, params=params, title=recipe.title,
-        recipeId=recipeId, engines=json.dumps(engines, separators=(',', ':')))
-
-#测试Recipe的翻译器设置是否正确
-@bpSubscribe.post("/translator/test", endpoint='BookTranslatorTestPost')
-@login_required(forAjax=True)
-def BookTranslatorTestPost():
-    user = get_login_user()
-    tips = ''
-    recipeId = request.form.get('recipeId', '')
-    recipeType, dbId = Recipe.type_and_id(recipeId)
-    recipe = GetBuiltinRecipeInfo(recipeId) if recipeType == 'builtin' else Recipe.get_by_id_or_none(dbId)
-    if not recipe:
-        return {'status': _('The recipe does not exist.')}
-
-    bkRecipe = recipe if recipeType == 'custom' else user.get_booked_recipe(recipeId)
-    if not bkRecipe:
-        return {'status': _('This recipe has not been subscribed to yet.')}
-
-    text = request.form.get('text')
-    if not text:
-        return {'status': _('The text is empty.')}
-
-    translator = HtmlTranslator(bkRecipe.translator)
-    data = translator.translate_text(text)
-    status = data['error'] if data['error'] else 'ok'
-    return {'status': status, 'text': data['translated']}
 
 #订阅/退订内置或上传Recipe的AJAX处理函数
 @bpSubscribe.post("/recipe/<actType>", endpoint='RecipeAjaxPost')

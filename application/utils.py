@@ -52,8 +52,8 @@ def str_to_bool(txt):
     return str(txt or '').lower().strip() in ('yes', 'true', 'on', 'enable', 'enabled', '1', 'checked')
 
 #返回字符串格式化时间
-def local_time(fmt="%Y-%m-%d %H:%M", tz=0):
-    return (datetime.datetime.utcnow() + datetime.timedelta(hours=tz)).strftime(fmt)
+def time_str(fmt="%Y-%m-%d %H:%M", tz=0):
+    return tz_now(tz).strftime(fmt)
 
 #返回datetime实例
 def tz_now(tz):

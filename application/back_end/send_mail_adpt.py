@@ -6,7 +6,7 @@
 #https://cloud.google.com/appengine/docs/standard/python3/reference/services/bundled/google/appengine/api/mail
 #https://cloud.google.com/appengine/docs/standard/python3/services/mail
 import os, datetime, zipfile, base64
-from ..utils import local_time, ke_decrypt, str_to_bool
+from ..utils import ke_decrypt, str_to_bool
 from ..base_handler import save_delivery_log
 from .db_models import KeUser
 
@@ -58,12 +58,12 @@ def avaliable_sm_services():
 #attachment: 附件二进制内容，或元祖 (filename, content)
 #fileWithTime: 发送的附件文件名是否附带当前时间
 def send_to_kindle(user, title, attachment, fileWithTime=True):
-    lcTime = local_time('%Y-%m-%d_%H-%M', user.timezone)
+    lcTime = user.local_time('%Y-%m-%d_%H-%M')
     subject = f"KindleEar {lcTime}"
 
     if not isinstance(attachment, tuple):
         lcTime = "({})".format(lcTime) if fileWithTime else ""
-        fileName = f"{title}{lcTime}.{user.book_type}"
+        fileName = f"{title}{lcTime}.{user.book_cfg('type')}"
         attachment = (fileName, attachment)
     
     if not isinstance(attachment, list):
@@ -72,7 +72,7 @@ def send_to_kindle(user, title, attachment, fileWithTime=True):
     status = 'ok'
     body = "Deliver from KindleEar"
     try:
-        send_mail(user, user.kindle_email, subject, body, attachment)
+        send_mail(user, user.cfg('kindle_email'), subject, body, attachment)
     except Exception as e:
         status = str(e)
         default_log.warning(f'Failed to send mail "{title}": {status}')
@@ -86,7 +86,7 @@ def send_mail(user, to, subject, body, attachments=None, html=None):
         to = to.split(',')
     sm_service = user.get_send_mail_service()
     srv_type = sm_service.get('service', '')
-    data = {'sender': user.sender, 'to': to, 'subject': subject, 'body': body}
+    data = {'sender': user.cfg('sender'), 'to': to, 'subject': subject, 'body': body}
     if attachments:
         data['attachments'] = attachments
     if html:
@@ -106,7 +106,7 @@ def send_mail(user, to, subject, body, attachments=None, html=None):
         data['host'] = sm_service.get('host', '')
         data['port'] = sm_service.get('port', 587)
         data['username'] = sm_service.get('username', '')
-        data['password'] = ke_decrypt(sm_service.get('password', ''), user.secret_key)
+        data['password'] = user.decrypt(sm_service.get('password'))
         smtp_send_mail(**data)
     elif srv_type == 'local':
         save_mail_to_local(sm_service.get('save_path', 'tests/debug_mail'), **data)

@@ -298,8 +298,8 @@ class RecipeInput(InputFormatPlugin):
         mi = MetaInformation(title, ['KindleEar'])
         mi.publisher = 'KindleEar'
         #修正Kindle固件5.9.x将作者显示为日期的BUG
-        authorFmt = self.user.author_format
-        now = datetime.datetime.utcnow() + datetime.timedelta(hours=self.user.timezone)
+        authorFmt = self.user.book_cfg('author_fmt')
+        now = self.user.local_time()
         if authorFmt:
             snow = now.strftime(authorFmt)
             mi.author_sort = snow
@@ -329,7 +329,7 @@ class RecipeInput(InputFormatPlugin):
             desc = desc.decode('utf-8', 'replace')
         mi.comments = (_('Articles in this issue:') + '\n' + '\n'.join(article_titles)) + '\n\n' + desc
 
-        language = canonicalize_lang(recipe1.language if onlyRecipe else self.user.book_language)
+        language = canonicalize_lang(recipe1.language if onlyRecipe else self.user.book_cfg('language'))
         if language is not None:
             mi.language = language
         mi.pubdate = pdate

@@ -29,10 +29,10 @@ def GenerateRecipeSource(title, feeds, user, isfulltext=False, language=None, ma
     feeds = 'feeds          = [\n{}\n    ]'.format('\n'.join(feedsStr)) if feedsStr else ''
     desc = 'News from {}'.format(', '.join(feedTitles)) if feedTitles else 'Deliver from KindleEar'
     desc = desc[:100]
-    oldest_article = user.oldest_article
+    oldest_article = user.book_cfg('oldest_article')
     isfulltext = 'True' if isfulltext else 'None'
-    language = language or user.book_language
-    timefmt = user.time_fmt
+    language = language or user.book_cfg('language')
+    timefmt = user.book_cfg('time_fmt')
     cover_url = f"'{cover_url}'" if isinstance(cover_url, str) else cover_url
     src = textwrap.dedent(f'''\
     #!/usr/bin/env python3

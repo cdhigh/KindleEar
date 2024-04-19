@@ -12,7 +12,6 @@ from ..back_end.task_queue_adpt import create_delivery_task, create_url2book_tas
 from ..back_end.db_models import KeUser
 from ..back_end.send_mail_adpt import send_to_kindle
 from ..base_handler import *
-from ..utils import local_time
 from build_ebook import html_to_book
 
 try:
@@ -116,7 +115,7 @@ def ReceiveMailImpl(sender, to, subject, txtBodies, htmlBodies, attachments):
     if not user and (userName != adminName):
         user = KeUser.get_or_none(KeUser.name == adminName)
     
-    if not user or not user.kindle_email:
+    if not user or not user.cfg('kindle_email'):
         return "The user does not exists"
 
     #阻挡垃圾邮件
@@ -178,7 +177,7 @@ def ReceiveMailImpl(sender, to, subject, txtBodies, htmlBodies, attachments):
         if imgs:
             book = html_to_book(str(soup), subject[:SUBJECT_WORDCNT], user, imgs)
         else:
-            book = (f'KindleEar_{local_time("%Y-%m-%d_%H-%M", user.timezone)}.html', str(soup).encode('utf-8'))
+            book = (f'KindleEar_{user.local_time("%Y-%m-%d_%H-%M")}.html', str(soup).encode('utf-8'))
 
         send_to_kindle(user, subject[:SUBJECT_WORDCNT], book, fileWithTime=False)
     

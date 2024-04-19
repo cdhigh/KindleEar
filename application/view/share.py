@@ -37,7 +37,7 @@ def Share():
         return _("Some parameters are missing or wrong.")
     
     user = KeUser.get_or_none(KeUser.name == userName)
-    if not user or not user.kindle_email or user.share_links.get('key') != key:
+    if not user or not user.cfg('kindle_email') or user.share_links.get('key') != key:
         return _('The username does not exist or the email is empty.')
         
     url = unquote(url)
@@ -147,7 +147,7 @@ def SaveToInstapaper(user, action, url, title):
         return SHARE_INFO_TPL.format(title=html_title, info=_('The username or password is empty.'))
     
     opener = UrlOpener()
-    password = ke_decrypt(password, user.secret_key)
+    password = user.decrypt(password)
     data = {'username': userName, 'password': password, 'title': title.encode('utf-8'), 'selection': 'KindleEar', 'url': url}
     ret = opener.open(INSTAPAPER_API_ADD_URL, data=data)
     info = [title, '<br/>']
@@ -163,7 +163,7 @@ def SaveToInstapaper(user, action, url, title):
 
 def SaveToWallabag(user, action, url, title):
     config = user.share_links.get('wallabag', {})
-    config['password'] = ke_decrypt(config.get('password', ''), user.secret_key)
+    config['password'] = user.decrypt(config.get('password'))
     wallabag = WallaBag(config, default_log)
     ret = wallabag.add(url, title=title)
     if ret['changed']: #保存新的token

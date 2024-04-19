@@ -20,11 +20,13 @@ REQ_COMM = [('requests', '~=2.31.0'),
     ('html2text', '~=2024.2.26'),
     ('html5lib', '~=1.1'),
     ('#html5-parser', '~=0.4.0'),
-    ('gunicorn', '~=21.2.0'),
+    ('gunicorn', '~=22.0.0'),
     ('Flask', '~=3.0.3'),
     ('flask-babel', '~=4.0.0'),
     ('six', '~=1.16.0'),
     ('feedparser', '~=6.0.11'),
+    ('qrcode', '~=7.4.2'),
+    ('#gtts', '~=2.5.1'),
 ]
 
 REQ_DB = {
@@ -45,10 +47,11 @@ REQ_TASK = {
     'rq': [('flask-rq2', '~=18.3'),],
 }
 
-REQ_PLAT = {'gae': [('appengine-python-standard', '~=1.1.6'),],
+REQ_PLAT = {'gae': [('appengine-python-standard', '~=1.1.6'),
+        ('#google-cloud-texttospeech', '~=2.16.3')],
     'docker': [('weedata', '>=0.2.3,<1.0.0'),('pymysql', '~=1.1.0'), #docker install all libs
-    ('psycopg2-binary', '~=2.9.9'),('pymongo', '~=4.6.3'),('redis', '~=5.0.3'),
-    ('celery', '~=5.3.6'),('flask-rq2', '~=18.3'),('sqlalchemy', '~=2.0.29')],
+        ('psycopg2-binary', '~=2.9.9'),('pymongo', '~=4.6.3'),('redis', '~=5.0.3'),
+        ('celery', '~=5.3.6'),('flask-rq2', '~=18.3'),('sqlalchemy', '~=2.0.29')],
 }
 
 EXTRA = {

@@ -4,7 +4,7 @@
 #Visit <https://github.com/cdhigh/KindleEar> for the latest version
 #Author:
 # cdhigh <https://github.com/cdhigh>
-import os, sys, random
+import os, sys, random, hashlib, datetime
 from operator import attrgetter
 from ..utils import ke_encrypt, ke_decrypt, tz_now
 
@@ -15,36 +15,52 @@ else:
 
 class KeUser(MyBaseModel): # kindleEar User
     name = CharField(unique=True)
-    passwd = CharField()
-    email = CharField()
-    sender = CharField() #可能等于自己的email，也可能是管理员的email
-    secret_key = CharField(default='')
-    kindle_email = CharField(default='')
-    enable_send = BooleanField(default=False)
+    passwd_hash = CharField()
+    
     send_days = JSONField(default=JSONField.list_default)
     send_time = IntegerField(default=6)
-    timezone = IntegerField(default=0)
     expiration_days = IntegerField(default=0) #账号超期设置值，0为永久有效
     expires = DateTimeField(null=True) #超过了此日期后账号自动停止推送
     created_time = DateTimeField(default=datetime.datetime.utcnow)
 
-    device = CharField(default='')
-    book_type = CharField(default='epub') #mobi,epub
-    book_title = CharField(default='KindleEar')
-    title_fmt = CharField(default='') #在元数据标题中添加日期的格式
-    author_format = CharField(default='') #修正Kindle 5.9.x固件的bug【将作者显示为日期】
-    book_mode = CharField(default='') #书籍模式，'periodical'|'comic'，漫画模式可以直接全屏
-    remove_hyperlinks = CharField(default='') #去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
-    time_fmt = CharField(default='%Y-%m-%d')
-    oldest_article = IntegerField(default=7)
-    book_language = CharField(default='en') #自定义RSS的语言
-    enable_custom_rss = BooleanField(default=False)
+    #email,kindle_email,secret_key,enable_send,timezone
+    #sender: 可能等于自己的email，也可能是管理员的email
+    base_config = JSONField(default=JSONField.dict_default)
+    
+    #device,type,title,title_fmt,author_fmt,mode,time_fmt,oldest_article,language
+    #rm_links: 去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
+    book_config = JSONField(default=JSONField.dict_default)
     
     share_links = JSONField(default=JSONField.dict_default) #evernote/wiz/pocket/instapaper包含子字典，微博/facebook/twitter等仅包含0/1
     covers = JSONField(default=JSONField.dict_default) #保存封面图片数据库ID {'order':,'cover0':,...'cover6':}
     send_mail_service = JSONField(default=JSONField.dict_default) #{'service':,...}
     custom = JSONField(default=JSONField.dict_default) #留着扩展，避免后续一些小特性还需要升级数据表结构
     
+    #通过这两个基本配置信息的函数，提供一些合理的初始化值
+    def cfg(self, item):
+        value = self.base_config.get(item, '')
+        if not value:
+            return {'timezone': 0}.get(item, value)
+        else:
+            return value
+    def set_cfg(self, item, value):
+        cfg = self.base_config
+        cfg[item] = value
+        self.base_config = cfg
+
+    #通过这两个关于书籍的配置信息的函数，提供一些合理的初始化值
+    def book_cfg(self, item):
+        value = self.book_config.get(item, '')
+        if not value:
+            return {'type': 'epub', 'title': 'KindleEar', 'time_fmt': '%Y-%m-%d', 'oldest_article': 7,
+                'language': 'en'}.get(item, value)
+        else:
+            return value
+    def set_book_cfg(self, item, value):
+        cfg = self.book_config
+        cfg[item] = value
+        self.book_config = cfg
+
     #自己直接所属的自定义RSS列表，返回[Recipe,]
     def all_custom_rss(self):
         return sorted(Recipe.select().where((Recipe.user == self.name) & (Recipe.type_ == 'custom')), 
@@ -80,7 +96,7 @@ class KeUser(MyBaseModel): # kindleEar User
         data = b''
         covers = self.covers or {}
         order = covers.get('order', 'random')
-        idx = random.randint(0, 6) if (order == 'random') else tz_now(self.timezone).weekday()
+        idx = random.randint(0, 6) if (order == 'random') else self.local_time().weekday()
         coverName = f'cover{idx}'
         cover = covers.get(coverName, f'/images/{coverName}.jpg')
         if cover.startswith('/images/'):
@@ -109,6 +125,29 @@ class KeUser(MyBaseModel): # kindleEar User
         else:
             dbItem = KeUser.get_or_none(KeUser.name == adminName)
             return dbItem.send_mail_service if dbItem else {}
+
+    #使用自身的密钥加密和解密字符串
+    def encrypt(self, txt):
+        return ke_encrypt((txt or ''), self.cfg('secret_key'))
+    def decrypt(self, txt):
+        return ke_decrypt((txt or ''), self.cfg('secret_key'))
+    def hash_text(self, txt):
+        return hashlib.md5((txt + self.cfg('secret_key')).encode('utf-8')).hexdigest()
+
+    #自定义字典的设置
+    def set_custom(self, item, value):
+        custom = self.custom
+        if value is None:
+            custom.pop(item, None)
+        else:
+            custom[item] = value
+        self.custom = custom
+        return self
+
+    #返回用户的本地时间，如果参数 fmt 非空，则返回字符串表达，否则返回datetime实例
+    def local_time(self, fmt=None):
+        tm = datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=self.cfg('timezone'))))
+        return tm.strftime(fmt) if fmt else tm
         
 #用户的一些二进制内容，比如封面之类的
 class UserBlob(MyBaseModel):
@@ -131,6 +170,7 @@ class Recipe(MyBaseModel):
     user = CharField() #哪个账号创建的，和nosql一致，保存用户名
     language = CharField(default='')
     translator = JSONField(default=JSONField.dict_default) #用于自定义RSS的备份，实际使用的是BookedRecipe
+    tts = JSONField(default=JSONField.dict_default) #用于自定义RSS的备份，实际使用的是BookedRecipe
     custom = JSONField(default=JSONField.dict_default) #留着扩展，避免后续一些小特性还需要升级数据表结构
 
     #在程序内其他地方使用的id，在数据库内则使用 self.id
@@ -163,17 +203,18 @@ class BookedRecipe(MyBaseModel):
     send_times = JSONField(default=JSONField.list_default)
     time = DateTimeField(default=datetime.datetime.utcnow) #源被订阅的时间，用于排序
     translator = JSONField(default=JSONField.dict_default)
+    tts = JSONField(default=JSONField.dict_default)
     custom = JSONField(default=JSONField.dict_default) #留着扩展，避免后续一些小特性还需要升级数据表结构
     
     @property
     def password(self):
-        userInst = KeUser.get_or_none(KeUser.name == self.user)
-        return ke_decrypt(self.encrypted_pwd, userInst.secret_key if userInst else '')
+        dbItem = KeUser.get_or_none(KeUser.name == self.user)
+        return dbItem.decrypt(self.encrypted_pwd) if dbItem else ''
         
     @password.setter
     def password(self, pwd):
-        userInst = KeUser.get_or_none(KeUser.name == self.user)
-        self.encrypted_pwd = ke_encrypt(pwd, userInst.secret_key if userInst else '')
+        dbItem = KeUser.get_or_none(KeUser.name == self.user)
+        self.encrypted_pwd = dbItem.encrypt(pwd) if dbItem else ''
 
 #书籍的推送历史记录
 class DeliverLog(MyBaseModel):
@@ -206,6 +247,7 @@ class SharedRss(MyBaseModel):
     last_subscribed_time = DateTimeField(default=datetime.datetime.utcnow, index=True)
     invalid_report_days = IntegerField(default=0) #some one reported it is a invalid link
     last_invalid_report_time = DateTimeField(default=datetime.datetime.utcnow) #a rss will be deleted after some days of reported_invalid
+    custom = JSONField(default=JSONField.dict_default)
 
     #返回数据库中所有的分类
     @classmethod

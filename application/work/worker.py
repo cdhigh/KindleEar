@@ -8,7 +8,6 @@ from flask import Blueprint, request
 from ..base_handler import *
 from ..back_end.send_mail_adpt import send_to_kindle
 from ..back_end.db_models import *
-from ..utils import local_time
 from calibre.web.feeds.recipes import compile_recipe
 from ..lib.recipe_helper import *
 from ..lib.build_ebook import recipes_to_ebook
@@ -75,10 +74,11 @@ def WorkerImpl(userName: str, recipeId: list=None, log=None):
             continue
 
         if not ro.language or ro.language == 'und':
-            ro.language = user.book_language
+            ro.language = user.book_cfg('language')
 
         ro.extra_css = combine_css(ro.extra_css) #合并自定义css
         ro.translator = bked.translator #设置网页翻译器信息
+        #ro.tts = bked.tts #文本转语音设置
         
         #如果需要登录网站
         if ro.needs_subscription:
@@ -88,11 +88,11 @@ def WorkerImpl(userName: str, recipeId: list=None, log=None):
         if bked.separated:
             recipes[ro.title].append(ro)
         else:
-            recipes[user.book_title].append(ro)
+            recipes[user.book_cfg('title')].append(ro)
     
     #逐个生成电子书推送
     lastSendTime = 0
-    bookType = user.book_type
+    bookType = user.book_cfg('type')
     ret = []
     for title, ro in recipes.items():
         book = recipes_to_ebook(ro, user)

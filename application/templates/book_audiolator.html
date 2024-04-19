@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block titleTag -%}
+<title>{{ _("Text to Speech") }} - KindleEar</title>
+{% endblock -%}
+{% set language = params.get('language', '') %}
+{% set api_host = params.get('api_host', '') %}
+{% set api_key = params.get('api_key', '') %}
+{% block content -%}
+<div class="main">
+  <form class="pure-form pure-form-aligned" action="" method="POST">
+    {% if tips -%}
+    <div class="notice-box error">{{tips|safe}}</div>
+    {% endif -%}
+    <fieldset>
+      <legend><h3>{{_("Text to Speech")}} [{{title}}]</h3></legend>
+      <div class="pure-control-group">
+        <label>{{_("State")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="enable", id="tts_state">
+          <option value="both" {% if params.get('enable')=='both' %}selected="selected"{% endif %}>{{_('Send Ebook and Audio')}}</option>
+          <option value="audio_only" {% if params.get('enable')=='audio_only' %}selected="selected"{% endif %}>{{_('Send Audio only')}}</option>
+          <option value="" {% if not params.get('enable') %}selected="selected"{% endif %}>{{_('Disable TTS')}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group" id="tts_send_to">
+        <label>{{_("Send Audio To")}}</label>
+        <input type="text" name="send_to" id="tts_send_to_input" value="{{params.get('send_to', '')}}" class="pure-u-1 pure-u-sm-1-2" placeholder="{{_('Empty to use Kindle_email')}}" />
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("TTS Engine")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="engine", id="tts_engine" onchange="TTSEngineFieldChanged('{{language}}')">
+          <!-- 由脚本填充 -->
+        </select>
+      </div>
+      <div class="pure-control-group" id="tts_api_host">
+        <label>{{_("Api Host")}}</label>
+        <input type="text" name="api_host" id="tts_api_host_input" value="{{api_host}}" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group" id="tts_api_key">
+        <label>{{_("Api Key")}}</label>
+        <input type="text" name="api_key" id="tts_api_key_input" value="{{api_key}}" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Language")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="language" id="tts_language">
+          <!-- 由脚本填充 -->
+        </select>
+      </div>
+      <div class="pure-control-group" id="tts_role">
+        <label>{{_("Voice Role")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="role", id="tts_role_select">
+          <option value="male" {% if params.get('role')=='Male' %}selected="selected"{% endif %}>{{_('Male')}}</option>
+          <option value="female" {% if params.get('role')=='Female' %}selected="selected"{% endif %}>{{_('Female')}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Speed")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="speed", id="tts_speed">
+          <option value="normal" {% if params.get('speed')=='normal' %}selected="selected"{% endif %}>{{_('Normal')}}</option>
+          <option value="slow" {% if params.get('speed')=='slow' %}selected="selected"{% endif %}>{{_('Slow')}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group" id="tts_style">
+        <label>{{_("Voice Style")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="style", id="tts_style_select">
+          <option value="chat" {% if params.get('style')=='chat' %}selected="selected"{% endif %}>{{_('Chat')}}</option>
+          <option value="cheerful" {% if params.get('style')=='cheerful' %}selected="selected"{% endif %}>{{_('Cheerful')}}</option>
+        </select>
+      </div>
+      <br/>
+      <label>
+        <input type="checkbox" name="apply_all" />
+        {{_("Apply to all subscribed recipes")}}
+      </label>
+      <input type="hidden" value="{{recipeId}}" name="recipeId" id="recipeId">
+    </fieldset>
+    <p style="text-align:center;">
+      <input type="submit" class="pure-button pure-button-primary pure-input-rounded" value="{{_('Save settings')}}" />
+    </p>
+  </form>
+  <hr/>
+  <form class="pure-form pure-form-aligned" action="" method="POST">
+    <fieldset>
+      <legend><h3>{{_("Test (Please save settings firstly)")}}</h3></legend>
+      <div class="pure-control-group">
+        <label>{{_("Text")}}</label>
+        <textarea class="pure-u-1 pure-u-sm-1-2" name="tts_test_src_text" id="tts_test_src_text">Hello world!</textarea>
+      </div>
+      <div class="pure-control-group">
+        <label></label>
+        <audio controls id="tts_audio_player">
+          {{_("Your browser does not support the audio element.")}}
+        </audio>
+      </div>
+    </fieldset>
+    <p style="text-align:center;">
+      <input type="button" class="pure-button pure-button-primary pure-input-rounded" value="{{_('Test')}}" onclick="TestTTS('{{recipeId}}')" />
+    </p>
+  </form>
+</div>
+{% endblock -%}
+
+{% block js -%}
+<script type="text/javascript">
+var g_tts_engines = {{engines|safe}};
+
+$(document).ready(function() {
+  PopulateTTSFields("{{params['engine']}}");
+  TTSEngineFieldChanged('{{language}}');
+});
+</script>
+{% endblock -%}
