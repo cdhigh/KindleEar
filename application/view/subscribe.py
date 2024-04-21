@@ -174,7 +174,7 @@ def UpdateBookedCustomRss(user: KeUser):
         for rss in custom_rss:
             BookedRecipe.get_or_create(recipe_id=rss.recipe_id, defaults={'separated': False, 'user': userName, 
                 'title': rss.title, 'description': rss.description, 'time': datetime.datetime.utcnow(),
-                'translator': rss.translator})
+                'translator': rss.translator, 'tts': rss.tts, 'custom': rss.custom})
     elif custom_rss: #删除订阅
         ids = [rss.recipe_id for rss in custom_rss]
         BookedRecipe.delete().where(BookedRecipe.recipe_id.in_(ids)).execute()

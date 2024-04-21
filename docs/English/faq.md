@@ -120,5 +120,15 @@ You should select some webpage's contents, then click this Bookmarklet. It will 
 
 
 
+## How to save new recipe files to the builtin recipe library?
+KindleEar provides a feature to upload recipe files through the web page.    
+However, if you wish to merge recipe files into the built-in library,     
+for example, when a new version of Calibre is released and there may be some updated recipes included, you can merge the recipes as follows:       
+1. Copy the recipe files to the application/recipes directory. There is no need to delete builtin_recipes.zip/builtin_recipes.xml unless you want to create a brand new built-in library containing only the recipes you have selected.       
+2. Run tools/archive_builtin_recipes.py.      
+3. Delete the recipe files.          
+
+
+
 ## I have more questions, where can I ask?
 If you have more questions, you can submit an issue at [https://github.com/cdhigh/KindleEar/issues](https://github.com/cdhigh/KindleEar/issues) and wait for a reply. Before submitting a question, it's recommended to search for previously submitted issues first. Maybe someone has already submitted a similar issue? If no one has submitted a similar issue, when you submit a new one, it's recommended to attach the Logs information of [GAE backend](https://console.cloud.google.com/appengine) or the platform you deployed to for problem location, which can also get you a faster reply.

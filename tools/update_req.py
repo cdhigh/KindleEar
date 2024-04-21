@@ -6,6 +6,7 @@
 >=0.2.3,<1.0.0
 """
 import re, os, sys, shutil, subprocess
+from itertools import chain
 
 REQ_COMM = [('requests', '~=2.31.0'),
     ('chardet', '~=5.2.0'),
@@ -34,10 +35,10 @@ REQ_DB = {
     'mysql': [('peewee', '~=3.17.1'), ('pymysql', '~=1.1.0'),],
     'postgresql': [('peewee', '~=3.17.1'), ('psycopg2-binary', '~=2.9.9'),],
     'cockroachdb': [('peewee', '~=3.17.1'), ('psycopg2-binary', '~=2.9.9'),],
-    'datastore': [('weedata', '>=0.2.3,<1.0.0'), ('google-cloud-datastore', '~=2.19.0'),],
-    'mongodb': [('weedata', '>=0.2.3,<1.0.0'), ('pymongo', '~=4.6.3'),],
-    'redis': [('weedata', '>=0.2.3,<1.0.0'), ('redis', '~=5.0.3'),],
-    'pickle': [('weedata', '>=0.2.3,<1.0.0'),],
+    'datastore': [('weedata', '>=0.2.5,<1.0.0'), ('google-cloud-datastore', '~=2.19.0'),],
+    'mongodb': [('weedata', '>=0.2.5,<1.0.0'), ('pymongo', '~=4.6.3'),],
+    'redis': [('weedata', '>=0.2.5,<1.0.0'), ('redis', '~=5.0.3'),],
+    'pickle': [('weedata', '>=0.2.5,<1.0.0'),],
 }
 
 REQ_TASK = {
@@ -49,36 +50,40 @@ REQ_TASK = {
 
 REQ_PLAT = {'gae': [('appengine-python-standard', '~=1.1.6'),
         ('#google-cloud-texttospeech', '~=2.16.3')],
-    'docker': [('weedata', '>=0.2.3,<1.0.0'),('pymysql', '~=1.1.0'), #docker install all libs
+    'docker': [('weedata', '>=0.2.5,<1.0.0'),('pymysql', '~=1.1.0'), #docker install all libs
         ('psycopg2-binary', '~=2.9.9'),('pymongo', '~=4.6.3'),('redis', '~=5.0.3'),
         ('celery', '~=5.3.6'),('flask-rq2', '~=18.3'),('sqlalchemy', '~=2.0.29')],
 }
 
-EXTRA = {
-    'sqlalchemy': [('sqlalchemy', '~=2.0.29')],
-    'redis': [('redis', '~=5.0.3')],
-}
+#a dict contains all libs, {'name': [(name, version)],}
+def all_supported_libs():
+    ret = {}
+    for item in chain(REQ_COMM, *REQ_DB.values(), *REQ_TASK.values(), *REQ_PLAT.values()):
+        ret[item[0].lstrip('#')] = [(item[0].lstrip('#'), item[1]),] #get rid of hashtag
+    return ret
+
+ALL_LIBS = all_supported_libs()
 
 def write_req(reqFile, db, task, plat, *extra):
+    EXTRAS = [ALL_LIBS for idx in range(len(extra))]
     with open(reqFile, 'w', encoding='utf-8') as f:
         f.write('\n'.join([''.join(item) for item in REQ_COMM]))
         f.write('\n')
-        EXTRAS = [EXTRA for idx in range(len(extra))]
-        seen = set()
+        seen = set([item[0].lstrip('#') for item in REQ_COMM])
         for req, opt in zip([REQ_DB, REQ_TASK, REQ_PLAT, *EXTRAS], [db, task, plat, *extra]):
-            #f.write('\n')
-            items = req.get(opt, None)
-            for item in (items or []):
-                if item[0] not in seen:
+            items = req.get(opt, [])
+            for item in items:
+                if item[0].lstrip('#') not in seen:
                     f.write(''.join(item) + '\n')
-                seen.add(item[0])
+                seen.add(item[0].lstrip('#'))
         f.write('\n')
-        for req, opt in zip([REQ_DB, REQ_TASK, REQ_PLAT, *EXTRAS], [db, task, plat, *extra]):
-            items = req.get(opt, None)
-            for key, items in req.items():
-                for item in filter(lambda x: x[0] not in seen, (items or [])):
-                    seen.add(item[0])
-                    f.write('#' + ''.join(item) + '\n')
+        
+        #Output currently unused libraries and add hashtag
+        for name, items in ALL_LIBS.items():
+            name = name.lstrip('#')
+            if name not in seen:
+                seen.add(name)
+                f.write('#' + ''.join(items[0]).lstrip('#') + '\n')
 
 #parse config.py to a string with format symbols
 def config_to_dict(cfgFile):
@@ -89,7 +94,7 @@ def config_to_dict(cfgFile):
     return config_dict
 
 #prepare config.py to build docker
-def dockerize_config_py(cfgFile):
+def dockerize_config_py(cfgFile, arg):
     default_cfg = {'APP_ID': 'kindleear', 'DATABASE_URL': 'sqlite:////data/kindleear.db',
         'TASK_QUEUE_SERVICE': 'apscheduler', 'TASK_QUEUE_BROKER_URL': 'memory',
         'KE_TEMP_DIR': '/tmp', 'DOWNLOAD_THREAD_NUM': '3', 'ALLOW_SIGNUP': 'no',
@@ -130,7 +135,7 @@ def gae_location():
                 loc = line[11:].strip()
                 return {'us-central': 'us-central1', 'europe-west': 'europe-west1'}.get(loc, loc)
         return ''
-    except subprocess.CalledProcessError as e:
+    except Exception as e:
         print(f"Subprocess error: {e}")
         return ''
 
@@ -179,11 +184,6 @@ def gaeify_config_py(cfgFile):
         f.write('\n'.join(ret))
     print(f'Finished update {cfgFile}')
 
-#command arugments:
-#  update_req docker     : prepare for build docker image
-#  update_req docker-all : prepare for build docker image, install all libs
-#  update_req gae        : prepare for deploying in gae
-#  update_req            : do not modify config.py, only update requirements.txt
 if __name__ == '__main__':
     thisDir = os.path.abspath(os.path.dirname(__file__))
     cfgFile = os.path.normpath(os.path.join(thisDir, '..', 'config.py'))
@@ -192,14 +192,23 @@ if __name__ == '__main__':
         cfgFile = os.path.normpath(os.path.join(thisDir, 'config.py'))
         reqFile = os.path.normpath(os.path.join(thisDir, 'requirements.txt'))
 
-    dockerize = False
+    dockerArgs = ''
     gaeify = False
-    if len(sys.argv) == 2 and sys.argv[1] in ('docker', 'docker-all'):
-        print('\nGenerating config.py and requirements.txt for Docker deployment.\n')
-        dockerize_config_py(cfgFile)
-        dockerize = (sys.argv[1] == 'docker-all')
+    if len(sys.argv) == 2 and sys.argv[1] == '--help':
+        print('This script can help you to update config.py and requirements.txt.')
+        print('Command arguments:')
+        print('  docker              : prepare for docker image')
+        print('  docker[all]         : prepare for docker image, install all libs')
+        print('  docker[name1,name2] : prepare for docker image, install name1,name2')
+        print('  gae                 : prepare for deploying in gae')
+        print('  empty               : do not modify config.py, only update requirements.txt')
+        sys.exit(1)
+    elif len(sys.argv) == 2 and sys.argv[1].startswith('docker'):
+        print('\nUpdating config.py and requirements.txt for Docker deployment.\n')
+        dockerize_config_py(cfgFile, sys.argv[1])
+        dockerArgs = sys.argv[1]
     elif len(sys.argv) == 2 and sys.argv[1] == 'gae':
-        print('\nGenerating config.py and requirements.txt for GAE deployment.\n')
+        print('\nUpdating config.py and requirements.txt for GAE deployment.\n')
         gaeify_config_py(cfgFile)
         gaeify = True
     else:
@@ -213,7 +222,7 @@ if __name__ == '__main__':
     task = cfg['TASK_QUEUE_SERVICE']
     broker = cfg['TASK_QUEUE_BROKER_URL']
     plat = ''
-    if dockerize:
+    if dockerArgs == 'docker[all]':
         plat = 'docker'
     elif (cfg['DATABASE_URL'].startswith('datastore') or cfg['TASK_QUEUE_SERVICE'] == 'gae'):
         plat = 'gae'
@@ -225,7 +234,9 @@ if __name__ == '__main__':
         extras.add('pymongo')
     elif broker.startswith(('sqlite://', 'mysql://', 'postgresql://')):
         extras.add('sqlalchemy')
+    if '[' in dockerArgs and dockerArgs != 'docker[all]': #add libs in square brackets
+        extras.update(dockerArgs.split('[')[-1].rstrip(']').split(','))
+
     write_req(reqFile, db, task, plat, *extras)
     print(f'Finished create {reqFile}')
     sys.exit(0)
-    

@@ -31,6 +31,7 @@ class UrlOpener:
         self.prevRespRef = None #对Response实例的一个弱引用
         self.form = None
         self.soup = None
+        self.history = []
 
     #默认情况如果data!=None，则使用post，否则使用get，可以使用method参数覆盖此默认行为
     #此函数不会抛出异常，判断 resp.status_code 即可
@@ -38,7 +39,18 @@ class UrlOpener:
         self.prevRespRef = None
         self.form = None
         self.soup = None
-        
+
+        if isinstance(url, UrlRequest):
+            req = url
+            url = req.url
+            data = req.data
+            headers = req.headers
+            timeout = req.timeout
+            method = req.method
+            self.history.append(req)
+        else:
+            self.history.append(UrlRequest(url=url, data=data, headers=headers, method=method, timeout=self.timeout))
+
         if url.startswith('file:'): #本地文件
             resp = self.open_local_file(url)
         elif url.startswith("data:"): #网页内嵌内容data url
@@ -72,10 +84,18 @@ class UrlOpener:
             resp.encoding = None #resp.apparent_encoding
         return resp
 
-    #兼容mechanize接口，给response添加一个read()，避免其他人定义的recipe失效
+    #兼容mechanize接口，给response添加一个几个方法和属性，避免其他人定义的recipe失效
     def patch_response(self, resp):
         resp_read_method = lambda self: self.content if self.status_code == 200 else b'' 
         resp.read = MethodType(resp_read_method, resp)
+        resp.geturl = MethodType(lambda self: self.url, resp)
+        resp.getcode = MethodType(lambda self: self.status_code, resp)
+        resp.code = resp.status_code
+        resp.get_all_header_names = MethodType(lambda self, normalize=True: self.headers.keys(), resp)
+        resp.get_all_header_values = MethodType(lambda self, name, normalize=True: [self.headers.get(name)], resp)
+        resp.info = MethodType(lambda self: self.headers, resp)
+        resp.__getitem__ = MethodType(lambda self, name: self.headers.get(name), resp)
+        resp.get = MethodType(lambda self, name, default=None: self.headers.get(name, default), resp)
         self.prevRespRef = weakref.ref(resp) #用于可能的select_form()操作
         return resp
 
@@ -131,7 +151,7 @@ class UrlOpener:
     #获取上次open()调用后的数据包的BeautifulSoup解析实例，不一定成功，如果数据包已经被垃圾回收则返回None
     def get_soup(self):
         if not self.soup:
-            resp = self.prevRespRef()
+            resp = self.prevRespRef() if self.prevRespRef else None
             if resp and resp.status_code == 200:
                 self.soup = BeautifulSoup(resp.text, 'lxml')
         return self.soup
@@ -170,7 +190,7 @@ class UrlOpener:
 
     #提交之前选择出来的表单
     def submit(self, *args, **kwargs):
-        resp = self.prevRespRef()
+        resp = self.prevRespRef() if self.prevRespRef else None
         if not resp or not self.soup or not self.form:
             resp = requests.models.Response()
             resp.status_code = 555
@@ -278,6 +298,21 @@ class UrlOpener:
         pass
     def set_handle_gzip(self, h):
         pass
+    def add_client_certificate(self, *args, **kwargs):
+        pass
+    def geturl(self):
+        return self.history[-1].url if self.history else ''
+    def back(self, n=1):
+        n = abs(n)
+        while self.history and n:
+            self.history.pop()
+            n -= 1
+        return self.open(self.history[-1]) if self.history else None
+        
+    def reload(self):
+        pass
+    def response(self):
+        return self.prevRespRef() if self.prevRespRef else None
 
     @classmethod
     def CodeMap(cls, errCode):
@@ -334,3 +369,38 @@ class UrlOpener:
         535 : 'General Download Error',
         555 : 'Unknown Error',
     }
+
+#只是为兼容 mechanize
+class UrlRequest:
+    def __init__(self, url, data=None, headers=None, origin_req_host=None, unverifiable=False, 
+        visit=None, timeout=30, method=None, **kwargs):
+        self.url = url
+        self.data = data
+        self.headers = headers or {}
+        self.origin_req_host = origin_req_host
+        self.unverifiable = unverifiable
+        self.visit = visit
+        self.timeout = timeout
+        self.method = method
+    def set_data(self, data):
+        self.data = data
+    def add_data(self, data):
+        self.data = data
+    def get_data(self):
+        return self.data
+    def add_header(self, key, val=None):
+        self.headers[key] = val
+    def get_header(self, key, default=None):
+        return self.headers.get(key, default)
+    def has_header(self, key):
+        return key in self.headers
+    add_unredirected_header = add_header
+    def get_method(self):
+        return self.method
+    def has_data(self):
+        return self.data is not None
+    def has_proxy(self):
+        return False
+    def header_items(self):
+        return list(self.headers.items())
+

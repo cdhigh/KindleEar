@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #后台实际的推送任务，由任务队列触发
-
+import os, datetime, time, io, logging
 from collections import defaultdict
-import datetime, time, io, logging
 from flask import Blueprint, request
 from ..base_handler import *
 from ..back_end.send_mail_adpt import send_to_kindle
@@ -78,7 +77,7 @@ def WorkerImpl(userName: str, recipeId: list=None, log=None):
 
         ro.extra_css = combine_css(ro.extra_css) #合并自定义css
         ro.translator = bked.translator #设置网页翻译器信息
-        #ro.tts = bked.tts #文本转语音设置
+        ro.tts = bked.tts #文本转语音设置
         
         #如果需要登录网站
         if ro.needs_subscription:
@@ -94,8 +93,17 @@ def WorkerImpl(userName: str, recipeId: list=None, log=None):
     lastSendTime = 0
     bookType = user.book_cfg('type')
     ret = []
-    for title, ro in recipes.items():
-        book = recipes_to_ebook(ro, user)
+    for title, roList in recipes.items():
+        book = recipes_to_ebook(roList, user)
+
+        #如果有TTS音频，先推送音频
+        ext, audio = MergeAudioSegment(roList)
+        if audio:
+            audioName = f'{title}.{ext}'
+            to = roList[0].tts.get('send_to') or user.cfg('kindle_email')
+            send_to_kindle(user, audioName, (audioName, audio), to=to)
+            lastSendTime = time.time()
+
         if book:
             #避免触发垃圾邮件机制，最短10s发送一次
             now = time.time() #单位为s
@@ -146,3 +154,72 @@ def GetAllRecipeSrc(user, idList):
                 src = GenerateRecipeSource(title, [(title, recipe.url)], user, isfulltext=recipe.isfulltext)
                 srcDict[title] = [bked, recipe, src]
     return srcDict
+
+#返回可用的mp3cat执行文件路径
+def mp3cat_path():
+    import subprocess, platform
+    mp3Cat = 'mp3cat'
+    try: #优先使用系统安装的mp3cat
+        subprocess.run(["mp3cat", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        default_log.debug('Using system mp3cat')
+    except: #subprocess.CalledProcessError:
+        execFile = 'mp3cat.exe' if 'Windows' in platform.system() else 'mp3cat'
+        mp3Cat = os.path.join(appDir, 'tools', 'mp3cat', execFile)
+        try:
+            subprocess.run([mp3Cat, "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            default_log.debug('Using app mp3cat')
+        except Exception as e:
+            default_log.warning(f"Can't execute mp3cat. Please check file exists and permissions: {e}")
+            mp3Cat = ''
+    return mp3Cat
+
+#合并TTS生成的音频片段
+def MergeAudioSegment(roList):
+    audioDirs = [ro.tts.get('audio_dir') for ro in roList if ro.tts.get('audio_dir')]
+    ret = ('', None)
+    if not audioDirs:
+        return ret
+
+    mp3Cat = mp3cat_path()
+    if not mp3Cat:
+        return ret
+
+    import shutil, subprocess
+
+    chapters = []
+    #先合并每个recipe生成的片段
+    for idx, audioDir in enumerate(audioDirs):
+        mp3Files = os.path.join(audioDir, '*.mp3')
+        outputFile = os.path.join(audioDir, f'output_{idx:03d}.mp3')
+        ret = subprocess.run(f'{mp3Cat} {mp3Files} -o {outputFile}', shell=True)
+        if (ret.returnValue == 0) and os.path.exists(outputFile):
+            chapters.append(outputFile)
+
+    #再将所有recipe的音频合并为一个大的文件
+    if len(chapters) == 1:
+        try:
+            with open(chapters[0], 'rb') as f:
+                data = f.read()
+            ret = ('mp3', data)
+        except Exception as e:
+            default_log.warning(f'Failed to read "{chapters[0]}"')
+    elif chapters:
+        mp3Files = ' '.join(chapters)
+        outputFile = os.path.join(audioDir, 'final.mp3') #使用最后一个recipe的输出目录
+        ret = subprocess.run(f'{mp3Cat} {mp3Files} -o {outputFile}', shell=True)
+        if (ret.returnValue == 0) and os.path.exists(outputFile):
+            try:
+                with open(outputFile, 'rb') as f:
+                    data = f.read()
+                ret = ('mp3', data)
+            except Exception as e:
+                default_log.warning(f'Failed to read "{outputFile}"')
+
+    #清理临时文件
+    for dir_ in audioDirs:
+        try:
+            shutil.rmtree(dir_)
+        except Exception as e:
+            default.log.debug(f"An error occurred while deleting '{item}': {e}")
+
+    return ret

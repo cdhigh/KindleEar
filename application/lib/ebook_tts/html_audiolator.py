@@ -19,11 +19,11 @@ class HtmlAudiolator:
         self.params = params
         self.engineName = self.params.get('engine')
         self.language = self.params.get('language', 'en')
-        self.audiolator = builtin_tts_engines.get(self.engineName, GoogleTtsFree)(params)
+        self.audiolator = builtin_tts_engines.get(self.engineName, GoogleWebTTSFree)(params)
         
-    #翻译文本
+    #语音化文本，注意文本不要太长，一般几百个字符以内
     #data: 文本/字典/列表 {'text': text, ...}, [{},{}]
-    #返回：{'mime':, 'audiofied': , 'text':, ..., 'error':,}
+    #返回：{'mime':, 'audio': , 'text':, ..., 'error':,}
     #如果输入是列表，返回也是列表，否则返回字典
     def audiofy_text(self, data):
         retList = True
@@ -39,14 +39,14 @@ class HtmlAudiolator:
         for idx, item in enumerate(data):
             text = item['text']
             item['error'] = ''
-            item['audiofied'] = b''
+            item['audio'] = ''
             item['mime'] = ''
             if text:
-                if 1:
-                    item['mime'], item['audiofied'] = self.audiolator.tts(text)
-                    #except Exception as e:
-                    #default_log.warning('audiofy_text failed: ' + str(e))
-                    #item['error'] = str(e)
+                try:
+                    item['mime'], item['audio'] = self.audiolator.tts(text)
+                except Exception as e:
+                    default_log.warning('audiofy_text failed: ' + str(e))
+                    item['error'] = str(e)
             else:
                 item['error'] = _('The input text is empty')
             ret.append(item)
@@ -58,23 +58,35 @@ class HtmlAudiolator:
         elif ret:
             return ret[0]
         else:
-            return {'error': 'unknown error', 'audiofied': b'', 'mime':'', 'text': ''}
+            return {'error': 'unknown error', 'audio': '', 'mime':'', 'text': ''}
 
-    #语音化BeautifulSoup实例，返回 {'error':, 'audiofied':, 'mime':, 'text':}
+    #语音化BeautifulSoup实例，返回 {'error':, 'mime':, 'audio':[], 'texts':[]}
     def audiofy_soup(self, soup):
-        text = self.extract_soup_text(soup)
-        ret = {'text': text, 'error': '', 'audiofied': b'', 'mime': ''}
-        if text:
-            if 1:
-                ret['mime'], ret['audiofied'] = self.audiolator.tts(text)
-                #except Exception as e:
-                #default_log.warning('audiofy_text failed: ' + str(e))
-                ret['error'] = str(e)
-        else:
+        ret = {'error': '', 'audios': [], 'mime': '', 'texts':[]}
+        texts = self.extract_soup_text(soup)
+        if not texts:
             ret['error'] = _('The input text is empty')
+            return ret
+
+        try:
+            title = soup.find('title').string
+        except:
+            title = 'Untitled'
+
+        for text in self.split_strings(texts, self.audiolator.max_len_per_request):
+            try:
+                mime, audio = self.audiolator.tts(text)
+                ret['mime'] = ret['mime'] or mime
+                if audio:
+                    ret['texts'].append(text)
+                    ret['audios'].append(audio)
+                else:
+                    default_log.warning(f'audiofy_soup got empty audio for "{title}": {text[:30]}')
+            except Exception as e:
+                ret['error'] = str(e)
         return ret
 
-    #提取soup适合语音化的文本，直接返回文本内容
+    #提取soup适合语音化的文本，返回文本内容列表
     def extract_soup_text(self, soup):
         texts = []
 
@@ -100,4 +112,53 @@ class HtmlAudiolator:
                 else:
                     _extract(child)
         _extract(soup.body)
-        return '\n'.join(texts)
+        return texts
+
+    #将字符串数组合并或拆分重组为每个字符串不超过max_len的新数组
+    def split_strings(self, strings, max_len):
+        step1 = []
+        current = []
+        currLen = 0
+        for text in strings: #第一步，先合并短字符串
+            thisLen = len(text)
+            if current and (currLen + thisLen + 1 >= max_len):
+                step1.append(' '.join(current))
+                current = [text]
+                currLen = thisLen
+            else:
+                current.append(text)
+                currLen += thisLen + 1
+
+        if current:
+            step1.append(' '.join(current))
+
+        #第二步，拆分超长字符串
+        result = []
+        for item in step1:
+            if len(item) > max_len + 1: #拆分
+                subItems = []
+                for line in item.split('\n'): #按照回车进行分割
+                    if len(line) > max_len:
+                        #再按照空格进行分割
+                        words = line.split()
+                        current_line = ''
+                        current = []
+                        currLen = 0
+                        for word in words:
+                            thisLen = len(word)
+                            if current and (currLen + thisLen + 1 >= max_len):
+                                subItems.append(' '.join(current))
+                                current = [word]
+                                currLen = thisLen
+                            else:
+                                current.append(word)
+                                currLen += thisLen + 1
+                        if current:
+                            subItems.append(' '.join(current))
+                    else:
+                        subItems.append(line)
+                result.extend(subItems)
+            else:
+                result.append(item)
+            
+        return result

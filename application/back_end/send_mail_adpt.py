@@ -57,9 +57,11 @@ def avaliable_sm_services():
 #title: 邮件标题
 #attachment: 附件二进制内容，或元祖 (filename, content)
 #fileWithTime: 发送的附件文件名是否附带当前时间
-def send_to_kindle(user, title, attachment, fileWithTime=True):
+#to: 目标邮件地址，可以为列表或逗号分隔的字符串，如果为空，则使用kindle_email
+def send_to_kindle(user, title, attachment, fileWithTime=True, to=None):
     lcTime = user.local_time('%Y-%m-%d_%H-%M')
     subject = f"KindleEar {lcTime}"
+    to = to or user.cfg('kindle_email')
 
     if not isinstance(attachment, tuple):
         lcTime = "({})".format(lcTime) if fileWithTime else ""
@@ -72,13 +74,13 @@ def send_to_kindle(user, title, attachment, fileWithTime=True):
     status = 'ok'
     body = "Deliver from KindleEar"
     try:
-        send_mail(user, user.cfg('kindle_email'), subject, body, attachment)
+        send_mail(user, to, subject, body, attachment)
     except Exception as e:
         status = str(e)
         default_log.warning(f'Failed to send mail "{title}": {status}')
     
     size = sum([len(a[1]) for a in attachment])
-    save_delivery_log(user, title, size, status=status)
+    save_delivery_log(user, title, size, status=status, to=to)
 
 #统一的发送邮件函数
 def send_mail(user, to, subject, body, attachments=None, html=None):

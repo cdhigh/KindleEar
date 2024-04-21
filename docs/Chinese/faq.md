@@ -115,6 +115,13 @@ GAE平台专用，因为只有GAE平台直接有收邮件功能。
 * 可以在 "标题" 里面写 '#removeall#'，然后点击 "添加" 即可全部删除自定义RSS。   
 
 
+## 如何将新的recipe文件保存到内置recipe库？
+KindleEar提供了一个通过网页上传recipe文件的功能，但是如果你希望将recipe文件合并如内置库，比如如果有新的calibre版本发布，里面可能有一些recipe已经更新，这时可以合并recipe。
+1. 将recipe文件拷贝到application/recipes目录，不需要删除 builtin_recipes.zip/builtin_recipes.xml，除非你希望制作一个全新的只包含你选择的recipe的内置库。     
+2. 执行tools/archive_builtin_recipes.py。    
+3. 删除recipe文件。    
+
+
 ## 我还有更多问题，到哪里去问？
 如果你碰到更多问题，可以到 [https://github.com/cdhigh/KindleEar/issues](https://github.com/cdhigh/KindleEar/issues) 去提交一个issue，然后等待答复，不过在提交问题之前，还是建议先搜索一下别人先前提交的issues，说不定已经有人重复提过了相关问题呢？   
 如果没有别人提过类似问题，你在提交新问题的时候，建议附上 [GAE后台](https://console.cloud.google.com/appengine) 或你部署的平台的的Logs信息，以便定位问题，也可以得到更快的答复。   

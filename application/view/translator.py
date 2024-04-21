@@ -145,6 +145,7 @@ def BookTTSRoute(recipeType, recipe, user, recipeId):
 def BookTTSPost(recipeType, recipe, user, recipeId):
     #构建配置参数
     form = request.form
+    #enable: 'both'/'audio_only'/''
     paramNames = ['engine', 'enable', 'api_host', 'api_key', 'language', 'style', 'role', 'speed', 'send_to']
     params = {item: form.get(item, '') for item in paramNames}
 
@@ -198,6 +199,6 @@ def BookTTSTestPost(recipeType, recipe, user, recipeId):
         data['status'] = data['error']
     else:
         data['status'] = 'ok'
-        data['audiofied'] = base64.b64encode(data['audiofied']).decode('utf-8')
+        data['audio'] = base64.b64encode(data['audio']).decode('utf-8')
         
     return data

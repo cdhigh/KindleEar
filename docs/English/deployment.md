@@ -17,6 +17,8 @@ Open [google cloud](https://console.cloud.google.com/appengine) and create a new
 
 2. Shell deployment   
 On the same page, in the top right corner, there is an icon labeled "Activate Cloud Shell". Click on it to open the cloud shell. Copy and paste the following commands, and follow the prompts by pressing "y" continuously to complete the deployment.   
+Deployment and updating are both done with the same command.     
+
 ```bash
 rm -rf kindleear && \
 git clone --depth 1 https://github.com/cdhigh/kindleear.git && \
@@ -34,7 +36,8 @@ For example, you may need to manually enable the [Cloud Datastore API](https://c
 
 1. Download the latest version of KindleEar from the GitHub page. In the bottom right corner of the page, there's a button labeled "Download ZIP". Clicking it will download a ZIP document containing all the source code. Then, unzip it to a directory of your choice, such as D:\KindleEar.   
 
-2. Install [gloud CLI](https://cloud.google.com/sdk/docs/install), and then execute:   
+2. Install [gloud CLI](https://cloud.google.com/sdk/docs/install), and then execute: 
+
 ```bash
 gcloud components install app-engine-python app-engine-python-extras # Run as Administrator
 gcloud init
@@ -48,6 +51,7 @@ gcloud beta app deploy --version=1 queue.yaml
 ```
 
 3. For version updates, simply execute one line of code:  
+
 ```bash
 gcloud beta app deploy --version=1 app.yaml
 ```
@@ -56,6 +60,7 @@ gcloud beta app deploy --version=1 app.yaml
 1. The initial username and password are admin/admin.   
 
 2. When prompted during deployment with the following messages, remember to press "y". The cursor automatically moves to the next line, and it's easy to forget to press "y". Otherwise, it will remain stuck at this step.    
+
 ```
 Updating config [cron]...API [cloudscheduler.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)
 Updating config [queue]...API [cloudtasks.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)
@@ -79,6 +84,7 @@ What is Docker? just think of it as an enhanced version of portable software.
 
 1. [Install Docker](https://docs.docker.com/engine/install/) (Skip if already installed)    
 Installation methods vary for each platform. KindleEar provides a script for Ubuntu.   
+
 ```bash
 wget -O - https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/ubuntu_docker.sh | bash
 ```
@@ -96,10 +102,11 @@ Note: This command uses the default configuration:
 * Database and log files are saved to the same directory `/data`  
 
 If you need to use other databases or task queues, you can build the custom image using Dockerfile.    
-
+Especially if you need to enable multi-process feature, you must replace the memory job store with Redis or other alternatives, and at the same time modify `gunicorn.conf.py` or `default.conf`.    
 
 If unable to connect, ensure port 80 is open. Methods to open port 80 vary across platforms, such as iptables or ufw.
 For example:
+
 ```bash
 sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
 sudo iptables -I INPUT 7 -m state --state NEW -p tcp --dport 443 -j ACCEPT
@@ -107,11 +114,13 @@ sudo netfilter-persistent save
 ```
 
 If HTTPS support is needed, you can apply for an SSL certificate, then pass it to Gunicorn through environment variables. For example, you can apply for a free certificate from "Let's Encrypt", then copy `fullchain.pem/privkey.pem` to the data directory, and execute this command.   
+
 ```bash
 sudo docker run -d -p 80:8000 -p 443:8000 -v ./data:/data --restart always -e APP_DOMAIN=yourdomain -e GUNI_CERT=/data/fullchain.pem -e GUNI_KEY=/data/privkey.pem kindleear/kindleear
 ```
 
 3. If HTTPS is needed, it is more recommended to use Caddy as the web server, which can automatically request and renew SSL certificates.    
+
 ```bash
 mkdir data #for database and logs
 wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/docker-compose.yml
@@ -124,6 +133,7 @@ sudo docker compose up -d
 ```
 
 4. If you perfer nginx.    
+
 ```bash
 mkdir data #for database and logs
 wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/docker-compose-nginx.yml
@@ -138,6 +148,7 @@ sudo docker compose -f docker-compose-nignx.yml up -d
 If HTTPS for nginx is needed, copy the SSL certificate fullchain.pem/privkey.pem to the data directory, and uncomment the corresponding lines in default.conf/docker-compose-nginx.yml.   
 
 5. To check log files:
+
 ```bash
 tail -n 50 ./data/gunicorn.error.log
 tail -n 50 ./data/gunicorn.access.log
@@ -150,6 +161,7 @@ These are manual deployment steps on [Oracle VPS](https://cloud.oracle.com/) , w
 If there are no specific requirements, it's advisable to use Docker images instead.    
 
 1. config.py Key Parameter Example
+
 ```python
 DATABASE_URL = "sqlite:////home/ubuntu/site/kindleear/database.db"
 TASK_QUEUE_SERVICE = "apscheduler"
@@ -161,10 +173,10 @@ DOWNLOAD_THREAD_NUM = "3"
 2. Create a compute instance, with the recommended configuration being "Always Free".  
 Choose an image that you are familiar with, I selected Ubuntu minimal.   
 Remember to download and save the private ssh key. Once created, click on the "Subnet" link on "Instance Details" page then modify or create inbound rules in the "Security Lists" by removing TCP ports and ICMP types and codes.   
-Keep only one Ingress Rule: 
-Source Type: CIDR
-Source CIDR: 0.0.0.0/0
-IP Protocol: All protocols
+Keep only one Ingress Rule:     
+Source Type: CIDR         
+Source CIDR: 0.0.0.0/0           
+IP Protocol: All protocols          
 
 Test ping the corresponding IP, if successful, it indicates that the instance configuration is complete.   
 
@@ -174,6 +186,7 @@ Open puTTY, the Host format as username@IP, port 22. You can find the username i
 3.2 If using Xshell, choose "Public Key" for authentication method and import the previously saved private key file.  
 
 4. Upon login, it is recommended to first change the root password.  
+
 ```bash
 sudo -i
 passwd
@@ -181,6 +194,7 @@ passwd
 
 
 5. Talk is cheap, show me commands.   
+
 ```bash
 sudo apt update
 sudo apt upgrade
@@ -237,6 +251,7 @@ sudo systemctl status nginx
 ```
 
 6. Version Update Method
+
 ```bash
 # First, update the code using git/ftp/scp, etc. Ensure to preserve the database files.
 sudo systemctl restart gunicorn
@@ -247,6 +262,7 @@ sudo systemctl status gunicorn  # Confirm it is running
 If you already have a domain name, you can bind it to your instance. If not, you can easily apply for one from a free domain registrar like [FreeDomain.One](https://freedomain.one/) or [Freenom](https://www.freenom.com/) etc. I applied for a domain name at FreeDomain.One, which was very simple. After successfully applying, you just need to enter the IP address of your Oracle Cloud instance on the page, without any complicated configurations.   
 
 8. To check for errors, use the following commands to query the backend logs:   
+
 ```bash
 cat /var/log/nginx/error.log | tail -n 100
 cat /home/ubuntu/log/gunicorn.error.log | tail -n 100
@@ -262,6 +278,7 @@ cat /home/ubuntu/log/gunicorn.access.log | tail -n 100
 <a id="pythonany-where"></a>
 ## PythonAnywhere (PaaS)
 1. config.py Key Parameter Example
+
 ```python
 DATABASE_URL = "mysql://name:pass@name.mysql.pythonanywhere-services.com/name$default"
 TASK_QUEUE_SERVICE = ""

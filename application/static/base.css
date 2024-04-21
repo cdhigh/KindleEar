@@ -667,7 +667,7 @@ select[id="shared_rss_lang_pick"] {
     cursor: pointer;
     border: none;
     border-radius: 50%;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 5px rgba(155, 155, 155, 0.5);
     transition: background-color 0.3s, box-shadow 0.3s;
 }
 .additional-btn-disabled {
@@ -675,7 +675,7 @@ select[id="shared_rss_lang_pick"] {
     background: silver !important;
 }
 .additional-btn:hover {
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px rgba(155, 155, 155, 0.8);
 }
 
 .additional-btn a {
@@ -683,32 +683,25 @@ select[id="shared_rss_lang_pick"] {
 }
 
 .btn-A { /* A按钮为红色背景 */
-    background-color: #F70187;
-    background: linear-gradient(to bottom, #DB77AD 50%, #F70187 50%);
+    background: linear-gradient(to bottom, rgba(219, 119, 173, 0.6) 50%, rgba(247, 1, 135, 0.8) 50%);
 }
 .btn-B { /* B为紫色背景 */
-    background-color: #9b59b6;
-    background: linear-gradient(to bottom, #B99FC3 50%, #9b59b6 50%);
+    background: linear-gradient(to bottom, rgba(185, 159, 195, 0.6) 50%, rgba(155, 89, 182, 0.8) 50%);
 }
 .btn-C { /* C为浅绿色背景 */
-    background-color: #6DC66E;
-    background: linear-gradient(to bottom, #A7CDA7 50%, #6DC66E 50%);
+    background: linear-gradient(to bottom, rgba(167, 205, 167, 0.6) 50%, rgba(109, 198, 110, 0.8) 50%);
 }
 .btn-D { /* D为浅蓝色背景 */
-    background-color: #3498db;
-    background: linear-gradient(to bottom, #85B4D3 50%, #3498db 50%);
+    background: linear-gradient(to bottom, rgba(133, 180, 211, 0.6) 50%, rgba(52, 152, 219, 0.8) 50%);
 }
 .btn-E { /* E为橙色背景 */
-    background-color: #F0680B;
-    background: linear-gradient(to bottom, #DF8F57 50%, #F0680B 50%);
+    background: linear-gradient(to bottom, rgba(223, 143, 87, 0.6) 50%, rgba(240, 104, 11, 0.8) 50%);
 }
 .btn-F { /* F为棕色背景 */
-    background-color: #C76171;
-    background: linear-gradient(to bottom, #D2969F 50%, #C76171 50%);
+    background: linear-gradient(to bottom, rgba(210, 150, 159, 0.6) 50%, rgba(199, 97, 113, 0.8) 50%);
 }
 .btn-G { /* G为深绿色背景 */
-    background-color: #185718;
-    background: linear-gradient(to bottom, #4CAB05 50%, #185718 50%);
+    background: linear-gradient(to bottom, rgba(76, 171, 5, 0.6) 50%, rgba(24, 87, 24, 0.8) 50%);
 }
 
 .upload-recipe {
@@ -971,6 +964,7 @@ div[class="schedule_daytimes"] input {
 }
 
 dialog#h5-dialog {
+    padding: 0px;
     min-width: 300px;
     max-width: 80%;
     border: solid 1px #ccc;
@@ -984,6 +978,9 @@ dialog#h5-dialog {
 dialog#h5-dialog::backdrop {
   background-color: rgba(0, 0, 0, 0.5);
 }
+#h5-dialog-content {
+    padding: 40px 40px 20px 40px;
+}
 #h5-dialog-closebutton {
   position: absolute;
   top: 10px;
@@ -994,23 +991,32 @@ dialog#h5-dialog::backdrop {
   text-align: center;
   line-height: 30px;
   color: white;
-  background-color: #d32f2f;
+  /*background-color: #d32f2f;*/
+  background: linear-gradient(to bottom, #D26B6B, #d32f2f);
   border-radius: 50%;
   font-size: 20px;
   font-weight: bolder;
   transition: background-color 0.3s;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
 }
 #h5-dialog-closebutton:hover {
-  background-color: #b71c1c;
+  /*background-color: #b71c1c;*/
+  background: linear-gradient(to bottom, #D04242, #b71c1c);
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.7);
+}
+#h5-dialog-buttons {
+    margin: 0px;
+    text-align: center;
+    background-color: #f5f5f5;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.7);
 }
 .h5-dialog-ok {
     min-width: 150px;
     min-height: 40px;
+    margin: 25px;
 }
 .h5-dialog-cancel {
     min-width: 150px;
-    margin-left: 25px;
     min-height: 40px;
+    margin: 25px;
 }

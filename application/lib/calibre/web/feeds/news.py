@@ -17,7 +17,7 @@ from calibre.ebooks.BeautifulSoup import BeautifulSoup, CData, NavigableString, 
 from calibre.ebooks.metadata import MetaInformation
 from calibre.ebooks.metadata.opf2 import OPFCreator
 from calibre.ebooks.metadata.toc import TOC
-from calibre.ptempfile import PersistentTemporaryFile
+from calibre.ptempfile import PersistentTemporaryFile, PersistentTemporaryDirectory
 from calibre.utils.img import save_cover_data_to
 from calibre.utils.date import now as nowf
 from calibre.utils.localization import canonicalize_lang, ngettext
@@ -432,6 +432,10 @@ class BasicNewsRecipe(Recipe):
 
     #: Set to False if you do not want to use gzipped transfers. Note that some old servers flake out with gzip
     handle_gzip = True
+
+    # set by worker.py
+    translator = {}
+    tts = {}
 
     # See the built-in recipes for examples of these settings.
 
@@ -960,7 +964,7 @@ class BasicNewsRecipe(Recipe):
         elif self.scale_news_images_to_device:
             self.scale_news_images = options.output_profile.screen_size
 
-        self.w2d_opts = wOpts = Web2diskOptions()
+        self.web2disk_options = wOpts = Web2diskOptions()
         for attr in ('keep_only_tags', 'remove_tags', 'preprocess_regexps', 'skip_ad_pages', 'preprocess_html', 
             'remove_tags_after', 'remove_tags_before', 'is_link_wanted', 'compress_news_images', 
             'compress_news_images_max_size', 'compress_news_images_auto_size', 'scale_news_images', 'filter_regexps',
@@ -1063,6 +1067,10 @@ class BasicNewsRecipe(Recipe):
             h_tag = soup.new_tag('h2')
             h_tag.string = title
             body_tag.insert(0, h_tag)
+        elif h_tag: #去掉标题前面的部分内容
+            for tag in h_tag.previous_siblings:
+                if len(tag.get_text(strip=True)) < 20:
+                    tag.extract()
 
         #job_info.article.url才是真实的url，对于内嵌内容RSS，job_info.url为一个临时文件名
         self.append_share_links(soup, url=job_info.article.url)
@@ -1074,8 +1082,12 @@ class BasicNewsRecipe(Recipe):
             'figcaption', 'figure', 'section', 'time']):
             x.name = 'div'
 
+        #If tts need, tts propery is set by WorkerImpl
+        if self.tts.get('enable'):
+            self.audiofy_html(soup, title, job_info)
+
         #If translation need, translator propery is set by WorkerImpl
-        if (getattr(self, 'translator', None) or {}).get('enable'):
+        if self.translator.get('enable'):
             self.translate_html(soup, title)
 
         if job_info:
@@ -1284,10 +1296,10 @@ class BasicNewsRecipe(Recipe):
     def _fetch_article(self, job_info, preloaded=None):
         url = job_info.url
         br = self.browser
-        self.w2d_opts.browser = br
-        self.w2d_opts.dir = job_info.art_dir
+        self.web2disk_options.browser = br
+        self.web2disk_options.dir = job_info.art_dir
         
-        fetcher = RecursiveFetcher(self.w2d_opts, self.fs, self.log, job_info, self.image_map, self.css_map)
+        fetcher = RecursiveFetcher(self.web2disk_options, self.fs, self.log, job_info, self.image_map, self.css_map)
         fetcher.browser = br
         fetcher.base_dir = job_info.art_dir
         fetcher.current_dir = job_info.art_dir
@@ -1456,7 +1468,9 @@ class BasicNewsRecipe(Recipe):
                 self.jobs.append(req)
 
         self.jobs_done = 0
-        if self.simultaneous_downloads > 1:
+        trans_enable = self.translator.get('enable') or self.tts.get('enable')
+        #如果翻译使能，则不能使用多线程，否则容易触发流量告警导致IP被封锁
+        if (self.simultaneous_downloads > 1) and not trans_enable:
             tp = ThreadPool(self.simultaneous_downloads)
             for req in self.jobs:
                 tp.putRequest(req, block=True, timeout=0)
@@ -1482,7 +1496,7 @@ class BasicNewsRecipe(Recipe):
             raise ValueError('No articles downloaded, aborting')
 
         #翻译Feed的标题
-        if (getattr(self, 'translator', None) or {}).get('enable'):
+        if self.translator.get('enable'):
             self.translate_titles(feeds)
         
         for f, feed in enumerate(feeds, self.feed_index_start):
@@ -1558,8 +1572,8 @@ class BasicNewsRecipe(Recipe):
     def download_masthead(self, url):
         try:
             self._download_masthead(url)
-        except:
-            self.log.exception("Failed to download supplied masthead_url")
+        except Exception as e:
+            self.log.exception(f"Failed to download supplied masthead_url: {e}")
 
     def resolve_masthead(self):
         self.masthead_path = None
@@ -2000,6 +2014,31 @@ class BasicNewsRecipe(Recipe):
             else: #replace
                 item['obj'].title = item['translated']
 
+    #调用在线TTS服务平台，将html转为语音
+    #每个音频片段都会调用一次callback(audioDict, title, feed_index, article_index)
+    def audiofy_html(self, soup, title, job_info):
+        default_log.info(f'audiofy_html {title}')
+        from ebook_tts import HtmlAudiolator
+        audiolator = HtmlAudiolator(self.tts)
+        self.log.debug(f'Translating [{title}]')
+        ret = audiolator.audiofy_soup(soup)
+        if not ret['error']: #保存音频到磁盘，这个地方就不能使用fs了，因为最后合并mp3时无法使用虚拟文件系统
+            if not self.tts.get('audio_dir'):
+                system_temp_dir = os.environ.get('KE_TEMP_DIR')
+                self.tts['audio_dir'] = PersistentTemporaryDirectory(prefix='tts_', dir=system_temp_dir)
+            audio_dir = self.tts['audio_dir']
+            ext = ret['mime'].split('/')[-1]
+            ext = {'mpeg': 'mp3'}.get(ext, ext)
+            for idx, audio in enumerate(ret['audios']):
+                filename = f'{job_info.f_idx:04d}_{job_info.a_idx:04d}_{idx:04d}.{ext}'
+                filename = os.path.join(audio_dir, filename)
+                try:
+                    with open(filename, 'wb') as f:
+                        f.write(audio)
+                except Exception as e:
+                    self.log.warning(f'Failed to write "{filename}": {e}')
+        else:
+            self.log.warning(f'Failed to audiofy "{title}": {ret["error"]}')
 
 class CustomIndexRecipe(BasicNewsRecipe):
 
@@ -2025,8 +2064,8 @@ class CustomIndexRecipe(BasicNewsRecipe):
     def download(self):
         index = self.custom_index()
         url = 'file:'+index if iswindows else 'file://'+index
-        self.w2d_opts.browser = self.clone_browser(self.browser)
-        fetcher = RecursiveFetcher(self.w2d_opts, self.fs, self.log)
+        self.web2disk_options.browser = self.clone_browser(self.browser)
+        fetcher = RecursiveFetcher(self.web2disk_options, self.fs, self.log)
         fetcher.base_dir = self.output_dir
         fetcher.current_dir = self.output_dir
         fetcher.show_progress = False
@@ -2109,7 +2148,7 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
                     continue
 
                 added.add(url)
-                lastTime = LastDelivered.get_or_none(user=self.user.name, url=url)
+                lastTime = LastDelivered.get_or_none((LastDelivered.user==self.user.name) & (LastDelivered.url==url))
                 delta = (datetime.datetime.utcnow() - lastTime.datetime) if lastTime else None
                 #这里oldest_article和其他的recipe不一样，这个参数表示在这个区间内不会重复推送
                 if ((not lastTime) or (not self.oldest_article) or 

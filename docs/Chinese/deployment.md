@@ -15,7 +15,9 @@ KindleEar支持多种平台部署，我只在这里列出一些我测试通过�
 打开 [google cloud](https://console.cloud.google.com/appengine) ，创建一个项目。
 
 2. Shell部署    
-在同一个页面的右上角有一个图标 "激活 Cloud shell"， 点击它，打开 cloud shell， 拷贝粘贴以下命令，根据提示不停的按 "y" 即可完成部署。
+在同一个页面的右上角有一个图标 "激活 Cloud shell"， 点击它，打开 cloud shell， 拷贝粘贴以下命令，根据提示不停的按 "y" 即可完成部署。    
+部署和更新都使用同样一条命令。     
+
 ```bash
 rm -rf kindleear && \
 git clone --depth 1 https://github.com/cdhigh/kindleear.git && \
@@ -32,7 +34,8 @@ kindleear/tools/gae_deploy.sh
 ### 本地GLI命令部署方法
 1. github页面上下载KindleEar的最新版本，在页面的右下角有一个按钮"Download ZIP"，点击即可下载一个包含全部源码的ZIP文档，然后解压到你喜欢的目录，比如D:\KindleEar。   
 
-2. 安装 [gloud CLI](https://cloud.google.com/sdk/docs/install)，并且执行 
+2. 安装 [gloud CLI](https://cloud.google.com/sdk/docs/install)，并且执行    
+
 ```bash
 gcloud components install app-engine-python app-engine-python-extras # Run as Administrator
 gcloud init
@@ -46,13 +49,15 @@ gcloud beta app deploy --version=1 queue.yaml
 ```
 
 3. 版本更新，只需要执行一行代码即可
+
 ```bash
 gcloud beta app deploy --version=1 app.yaml
 ```
 
 ### 其他说明    
 1. 初始账号和密码为 admin/admin。
-2. 部署时出现下面的几个提示时记得按 y，因为光标自动下移到了下一行，往往会忘记按 y，否则会一直卡在这里。    
+2. 部署时出现下面的几个提示时记得按 y，因为光标自动下移到了下一行，往往会忘记按 y，否则会一直卡在这里。  
+
 ```
 Updating config [cron]...API [cloudscheduler.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)
 Updating config [queue]...API [cloudtasks.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)
@@ -75,6 +80,7 @@ Docker不限平台，只要目标平台支持Docker，资源足够就可以部�
 
 1. [安装Docker](https://docs.docker.com/engine/install/) （已安装则跳过）
 每个平台的安装方法不一样，KindleEar提供了一个ubuntu的脚本。   
+
 ```bash
 wget -O - https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/ubuntu_docker.sh | bash
 ```
@@ -82,6 +88,7 @@ wget -O - https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/ubunt
 2. 安装完Docker后，执行一条命令就可以让服务运行起来（yourdomain修改为你自己的值）。  
 命令执行后就使用浏览器 http://ip 确认服务是否正常运行。   
 因为使用了 restart 参数，所以系统重启后会自动重启此服务。    
+
 ```bash
 mkdir data #for database and logs, you can use any folder (change ./data to your folder)
 sudo docker run -d -p 80:8000 -v ./data:/data --restart always -e APP_DOMAIN=yourdomain kindleear/kindleear
@@ -91,9 +98,11 @@ sudo docker run -d -p 80:8000 -v ./data:/data --restart always -e APP_DOMAIN=you
 * apscheduler，内存队列   
 * 数据库文件和log文件保存到同一目录 /data   
 如果你需要使用其他数据库或任务队列，可以使用Dockerfile直接构建镜像。   
+特别是如果你需要启用多进程，则必须将内存队列更换为redis或其他，同时要修改gunicorn.conf.py或default.conf。     
 
 如果连不上，请确认80端口是否已经开放，不同的平台开放80端口的方法不一样，可能为iptables或ufw。
 比如：
+
 ```bash
 sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
 sudo iptables -I INPUT 7 -m state --state NEW -p tcp --dport 443 -j ACCEPT
@@ -101,11 +110,13 @@ sudo netfilter-persistent save
 ```
 
 如果需要https支持，可以申请一个SSL证书，然后通过环境变量传递给gunicorn，比如到 let's encrypt 申请一个免费证书，然后将 fullchain.pem/privkey.pem拷贝到data目录，再执行此命令   
+
 ```bash
 sudo docker run -d -p 80:8000 -p 443:8000 -v ./data:/data --restart always -e APP_DOMAIN=https://kindleear.line.pm -e GUNI_CERT=/data/fullchain.pem -e GUNI_KEY=/data/privkey.pem kindleear/kindleear
 ```
 
 3. 如果需要使用https，更推荐的是使用caddy做为web服务器，可以自动申请和续期ssl证书（一定要正确填写DOMAIN）：    
+
 ```bash
 mkdir data #for database and logs
 wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/docker-compose.yml
@@ -118,7 +129,8 @@ sudo docker compose up -d
 ```
 
 
-4. 如果更喜欢nginx：  
+4. 如果更喜欢nginx：    
+
 ```bash
 mkdir data #for database and logs
 wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/docker-compose-nginx.yml
@@ -134,6 +146,7 @@ sudo docker compose -f docker-compose-nginx.yml up -d
 
 
 5. 需要查询日志文件
+
 ```bash
 tail -n 50 ./data/gunicorn.error.log
 tail -n 50 ./data/gunicorn.access.log
@@ -145,6 +158,7 @@ tail -n 50 ./data/gunicorn.access.log
 ## Oracle cloud (VPS)
 这是手动在一个 [Oracle VPS](https://cloud.oracle.com/) 上部署的步骤，比较复杂，一般不建议，如果没有特殊要求，推荐使用docker镜像。   
 1. config.py关键参数样例
+
 ```python
 DATABASE_URL = "sqlite:////home/ubuntu/site/kindleear/database.db"
 TASK_QUEUE_SERVICE = "apscheduler"
@@ -169,6 +183,7 @@ IP协议：所有协议
 3.2 如果使用Xshell，身份验证选择Public Key，并导入之前保存的私钥文件。
 
 4. 登录进去后建议先修改root密码
+
 ```bash
 sudo -i
 passwd
@@ -176,6 +191,7 @@ passwd
 
 
 5. 然后就是命令行时间
+
 ```bash
 sudo apt update
 sudo apt upgrade
@@ -233,6 +249,7 @@ sudo systemctl status nginx
 ```
 
 6. 版本更新方法
+
 ```bash
 #先更新代码，不管是git/ftp/scp等，注意要保留数据库文件
 sudo systemctl restart gunicorn
@@ -243,6 +260,7 @@ sudo systemctl status gunicorn  #确认running
 如果已有域名，也可以绑定自己的域名，没有的话，随便找一个免费域名注册商申请一个就好，比如 [FreeDomain.One](https://freedomain.one/) 或 [freenom](https://www.freenom.com/) 等，我就在 FreeDomain.One 申请了一个域名，特别简单，在申请成功后的页面直接填入Oracle cloud的instance对应的IP就行，没有复杂的配置。    
 
 8. 出现错误后，查询后台log的命令
+
 ```bash
 tail -n 100 /var/log/nginx/error.log
 tail -n 100 /var/log/gunicorn/error.log
@@ -256,6 +274,7 @@ tail -n 100 /var/log/gunicorn/access.log
 <a id="python-anywhere"></a>
 ## PythonAnywhere (PaaS)
 1. config.py关键参数样例
+
 ```python
 DATABASE_URL = "mysql://name:pass@name.mysql.pythonanywhere-services.com/name$default"
 TASK_QUEUE_SERVICE = ""

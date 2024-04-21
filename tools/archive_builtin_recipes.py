@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-#To generate builtin_recipes.zip and builtin_recipes.xml, execute this script
+#To generate builtin_recipes.zip and builtin_recipes.xml, put recipe files in application/recipes
+#and execute this script.
+#The script merges individual recipe files into builtin_recipes.zip/builtin_recipes.xml 
+#without altering the existing contents of the zip/xml file.
+#If there are files with the same name inside the archive, they will be directly overwritten.
 
 import os, sys, re, io, glob, zipfile, tempfile, builtins, shutil
 from xml.sax.saxutils import quoteattr
 
 builtins.__dict__['_'] = lambda x: x
 thisDir = os.path.dirname(__file__)
+sys.path.insert(0, os.path.abspath(os.path.join(thisDir, '..')))
 sys.path.insert(0, os.path.abspath(os.path.join(thisDir, '..', 'application', 'lib')))
-
+import main
 from calibre import force_unicode
 from calibre.web.feeds.recipes import compile_recipe
 
@@ -176,7 +181,8 @@ def archive_builtin_recipes(recipes_dir):
 
 def main():
     print('\n---------------------------------------------------')
-    print('The script will create the "builtin_recipes.xml" and "builtin_recipes.zip"\nfrom the recipes directory.')
+    print('The script will create the "builtin_recipes.xml" and "builtin_recipes.zip"\n'
+        'from the recipes directory.')
     print('---------------------------------------------------')
     confirm = input('Press Y to continue, or N to exit : ')
     if confirm.strip().lower() == 'y':

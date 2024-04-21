@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=utf-8
 from __future__ import (unicode_literals, division, absolute_import,
                         print_function)
@@ -18,6 +18,7 @@ from html5lib.constants import namespaces, tableInsertModeElements, EOF
 from html5lib.treebuilders.base import TreeBuilder as BaseTreeBuilder
 from html5lib._ihatexml import InfosetFilter, DataLossWarning
 from html5lib.html5parser import HTMLParser
+import html5lib
 
 from calibre import xml_replace_entities
 from calibre.ebooks.chardet import xml_to_unicode, strip_encoding_declarations
@@ -57,9 +58,9 @@ class Element(ElementBase):
     def __str__(self):
         attrs = ''
         if self.attrib:
-            attrs = ' ' + ' '.join('%s="%s"' % (k, v) for k, v in self.attrib.iteritems())
+            attrs = ' ' + ' '.join('%s="%s"' % (k, v) for k, v in self.attrib.items())
         ns = self.tag.rpartition('}')[0][1:]
-        prefix = {v:k for k, v in self.nsmap.iteritems()}[ns] or ''
+        prefix = {v:k for k, v in self.nsmap.items()}[ns] or ''
         if prefix:
             prefix += ':'
         return '<%s%s%s (%s)>' % (prefix, getattr(self, 'name', self.tag), attrs, hex(id(self)))
@@ -227,7 +228,7 @@ def clean_attrib(name, val, nsmap, attrib, namespaced_attribs):
             return None, True
         nsmap_changed = False
         if ns == xlink_ns and 'xlink' not in nsmap:
-            for prefix, nns in tuple(nsmap.iteritems()):
+            for prefix, nns in tuple(nsmap.items()):
                 if nns == xlink_ns:
                     del nsmap[prefix]
             nsmap['xlink'] = xlink_ns
@@ -239,7 +240,7 @@ def clean_attrib(name, val, nsmap, attrib, namespaced_attribs):
         if prefix == 'xmlns':
             # Use an existing prefix for this namespace, if
             # possible
-            existing = {x:k for k, x in nsmap.iteritems()}.get(val, False)
+            existing = {x:k for k, x in nsmap.items()}.get(val, False)
             if existing is not False:
                 name = existing
             nsmap[name] = val
@@ -270,7 +271,7 @@ def makeelement_ns(ctx, namespace, prefix, name, attrib, nsmap):
     # constructor, therefore they have to be set one by one.
     nsmap_changed = False
     namespaced_attribs = {}
-    for k, v in attrib.iteritems():
+    for k, v in attrib.items():
         try:
             elem.set(k, v)
         except (ValueError, TypeError):
@@ -285,7 +286,7 @@ def makeelement_ns(ctx, namespace, prefix, name, attrib, nsmap):
         nelem = ctx.makeelement(elem.tag, nsmap=nsmap)
         for k, v in elem.items():  # Only elem.items() preserves attrib order
             nelem.set(k, v)
-        for (prefix, name), v in namespaced_attribs.iteritems():
+        for (prefix, name), v in namespaced_attribs.items():
             ns = nsmap.get(prefix, None)
             if ns is not None:
                 try:
@@ -307,7 +308,7 @@ def makeelement_ns(ctx, namespace, prefix, name, attrib, nsmap):
 
     # Ensure that svg and mathml elements get no namespace prefixes
     if elem.prefix is not None and namespace in known_namespaces:
-        for k, v in tuple(nsmap.iteritems()):
+        for k, v in tuple(nsmap.items()):
             if v == namespace:
                 del nsmap[k]
         nsmap[None] = namespace
@@ -420,7 +421,7 @@ class TreeBuilder(BaseTreeBuilder):
         if not attrs:
             return
         html = self.openElements[0]
-        for k, v in attrs.iteritems():
+        for k, v in attrs.items():
             if k not in html.attrib and k != 'xmlns':
                 try:
                     html.set(k, v)
@@ -448,7 +449,7 @@ class TreeBuilder(BaseTreeBuilder):
         if not attrs:
             return
         body = self.openElements[1]
-        for k, v in attrs.iteritems():
+        for k, v in attrs.items():
             if k not in body.attrib and k !='xmlns':
                 try:
                     body.set(k, v)
@@ -473,7 +474,7 @@ def makeelement(ctx, name, attrib):
         elem = ctx.makeelement(name)
     except ValueError:
         elem = ctx.makeelement(to_xml_name(name))
-    for k, v in attrib.iteritems():
+    for k, v in attrib.items():
         try:
             elem.set(k, v)
         except TypeError:
@@ -517,7 +518,7 @@ class NoNamespaceTreeBuilder(TreeBuilder):
         if not attrs:
             return
         html = self.openElements[0]
-        for k, v in attrs.iteritems():
+        for k, v in attrs.items():
             if k not in html.attrib and k != 'xmlns':
                 try:
                     html.set(k, v)
@@ -530,7 +531,7 @@ class NoNamespaceTreeBuilder(TreeBuilder):
         if not attrs:
             return
         body = self.openElements[1]
-        for k, v in attrs.iteritems():
+        for k, v in attrs.items():
             if k not in body.attrib and k != 'xmlns':
                 try:
                     body.set(k, v)
@@ -630,35 +631,14 @@ def html5_parse(raw, decoder=None, log=None, discard_namespaces=False, line_numb
 
 def parse_html5(raw, decoder=None, log=None, discard_namespaces=False, line_numbers=True, linenumber_attribute=None, replace_entities=True, fix_newlines=True):
     if isinstance(raw, bytes):
-        raw = xml_to_unicode(raw)[0] if decoder is None else decoder(raw)
+        raw = decoder(raw) if decoder else xml_to_unicode(raw)[0]
     if replace_entities:
         raw = xml_replace_entities(raw)
     if fix_newlines:
         raw = raw.replace('\r\n', '\n').replace('\r', '\n')
     raw = replace_chars.sub('', raw)
-
-    stream_class = partial(FastStream, track_position=line_numbers)
-    stream = stream_class(raw)
-    builder = partial(NoNamespaceTreeBuilder if discard_namespaces else TreeBuilder, linenumber_attribute=linenumber_attribute)
-    while True:
-        try:
-            parser = HTMLParser(tree=builder, track_positions=line_numbers, namespaceHTMLElements=not discard_namespaces)
-            with warnings.catch_warnings():
-                warnings.simplefilter('ignore', category=DataLossWarning)
-                try:
-                    parser.parse(stream, parseMeta=False, useChardet=False)
-                finally:
-                    parser.tree.proxy_cache = None
-        except NamespacedHTMLPresent as err:
-            raw = re.sub(r'<\s*/{0,1}(%s:)' % err.prefix, lambda m: m.group().replace(m.group(1), ''), raw, flags=re.I)
-            stream = stream_class(raw)
-            continue
-        break
-    root = parser.tree.getDocument()
-    if (discard_namespaces and root.tag != 'html') or (
-        not discard_namespaces and (root.tag != '{%s}%s' % (namespaces['html'], 'html') or root.prefix)):
-        raise ValueError('Failed to parse correctly, root has tag: %s and prefix: %s' % (root.tag, root.prefix))
-    return root
+    doc = html5lib.parse(raw, treebuilder="lxml", namespaceHTMLElements=False)
+    return doc.getroot()
 
 def parse(raw, decoder=None, log=None, line_numbers=True, linenumber_attribute=None, replace_entities=True, force_html5_parse=False):
     if isinstance(raw, bytes):

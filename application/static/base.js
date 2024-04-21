@@ -232,7 +232,7 @@ function PopulateMyCustomRss() {
     var fTpl = "{0}('{1}','{2}')";
     var fTplAll = "{0}(event,'{1}','{2}','{3}',{4})"; //id,title,url,isfulltext
     hamb_arg.push({klass: 'btn-F', title: i18n.translator, icon: 'icon-translate', act: "/translator/" + id.replace(':', '__')});
-    //hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + id.replace(':', '__')});
+    hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', id, title)});
     hamb_arg.push({klass: 'btn-A', title: i18n.deleteCtrlNoConfirm, icon: 'icon-delete', 
       act: fTplAll.format('ShowDeleteCustomRssDialog', id, title, url, isfulltext)});
@@ -282,7 +282,7 @@ function PopulateMySubscribed() {
         hamb_arg.push({klass: 'btn-C', title: i18n.subscriptionInfo, icon: 'icon-key', act: fTpl.format('AskForSubscriptionInfo', recipe_id, recipe.account)});
     }
     hamb_arg.push({klass: 'btn-F', title: i18n.translator, icon: 'icon-translate', act: "/translator/" + recipe_id.replace(':', '__')});
-    //hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + recipe_id.replace(':', '__')});
+    hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + recipe_id.replace(':', '__')});
     if (recipe_id.startsWith("upload:")) { //只有自己上传的recipe才能分享，内置的不用分享
       hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', recipe_id, title)});
     }
@@ -602,7 +602,6 @@ function showH5Dialog(content, buttons, last_btn_act) {
 
     let btns = $('#h5-dialog-buttons');
     btns.empty();
-    btns.append('<hr/>');
     buttons.forEach(function(item, idx) {
       let btn = $('<button class="' + item[1] + '">' + item[0] + '</button>');
       if ((idx === buttons.length - 1) && (last_btn_act === 'reject')) {
@@ -622,6 +621,15 @@ function showH5Dialog(content, buttons, last_btn_act) {
         } else {
           resolve(buttons.length - 1);
         }
+      }
+    });
+    //右上角的关闭按钮
+    $('#h5-dialog-closebutton').on('click', function () {
+      modal[0].close();
+      if (last_btn_act === 'reject') {
+        reject();
+      } else {
+        resolve(buttons.length - 1);
       }
     });
 
@@ -1370,8 +1378,14 @@ function TestTTS(recipeId) {
   recipeId = recipeId.replace(':', '__');
   $.post("/tts/test/" + recipeId, {recipeId: recipeId, text: text}, function (data) {
     if (data.status == "ok") {
-      let blob = b64toBlob(data.audiofied, data.mime);
-      let audioUrl = URL.createObjectURL(blob);
+      let blob = b64toBlob(data.audio, data.mime);
+      let audioUrl = ttsAudio.attr('src');
+      if (audioUrl) {
+        try {
+          URL.revokeObjectURL(audioUrl);
+        } catch (e) {}
+      }
+      audioUrl = URL.createObjectURL(blob);
       ttsAudio.attr('src', audioUrl);
       ttsAudio[0].play();
     } else if (data.status == i18n.loginRequired) {

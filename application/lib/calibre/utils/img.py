@@ -214,8 +214,11 @@ def save_cover_data_to(
             ratio = min(newWidth / width, newHeight / height)
             img = img.resize((int(width * ratio), int(height * ratio)), Image.Resampling.LANCZOS)
 
-    if (grayscale or eink) and img.mode != "L":
-        img = img.convert("L")
+    if (grayscale or eink) and img.mode != 'L':
+        img = img.convert('L')
+        changed = True
+    elif img.mode == 'LA' or (img.mode == 'P' and 'transparency' in img.info):
+        img = img.convert('RGBA').convert('RGB')
         changed = True
     elif img.mode != 'RGB':
         img = img.convert('RGB')

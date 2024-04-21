@@ -81,7 +81,8 @@ class GoogleWebTTSFree:
     api_key_hint = ''
     default_api_host = 'https://translate.google.com'
     default_timeout = 60
-    request_interval = 0
+    request_interval = 10
+    max_len_per_request = 500
     languages = gtts_languages
     
     def __init__(self, params):
@@ -111,7 +112,8 @@ class GoogleTextToSpeech:
     api_key_hint = ''
     default_api_host = ''
     default_timeout = 60
-    request_interval = 0
+    request_interval = 0.5
+    max_len_per_request = 500
     languages = gtts_languages
     
     def __init__(self, params):
@@ -127,6 +129,7 @@ class GoogleTextToSpeech:
     #Limit is 5000 bytes per request
     #https://cloud.google.com/text-to-speech/quotas
     def tts(self, text):
+        client = texttospeech.TextToSpeechClient()
         input_text = texttospeech.SynthesisInput(text=text)
 
         # Note: the voice can also be specified by name.
@@ -137,12 +140,11 @@ class GoogleTextToSpeech:
             ssml_gender=texttospeech.SsmlVoiceGender.FEMALE,
         )
 
-        audio_config = texttospeech.AudioConfig(
-            audio_encoding=texttospeech.AudioEncoding.MP3
-        )
+        audio_config = texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEncoding.MP3)
 
         response = client.synthesize_speech(
             request={"input": input_text, "voice": voice, "audio_config": audio_config}
         )
         
         return ('audio/mpeg', response.audio_content)
+

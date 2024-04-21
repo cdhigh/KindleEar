@@ -376,8 +376,10 @@ class Plumber:
             #    f.write(DEBUG_README)
             for x in ('input', '0.parsed', '1.structure', '2.processed'):
                 x = os.path.join(self.opts.debug_pipeline, x)
-                if os.path.exists(x):
+                try:
                     shutil.rmtree(x)
+                except:
+                    pass
                     
         self.output_plugin.specialize_options(self.log, self.opts, self.input_fmt)
         #根据需要，创建临时目录或创建内存缓存
