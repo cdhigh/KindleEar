@@ -361,7 +361,6 @@ def AdvCalibreOptionsPost():
     user = get_login_user()
     tips = ''
     txt = request.form.get('options', '').strip()
-    print(txt)
     try:
         options = safe_eval(txt) if txt else {}
         if isinstance(options, dict):

@@ -180,6 +180,7 @@ class RecursiveFetcher:
         self.scale_news_images = getattr(options, 'scale_news_images', None)
         self.get_delay = getattr(options, 'get_delay', None)
         self.download_stylesheets = not options.no_stylesheets
+        self.keep_image = options.keep_image
         self.show_progress = False
         self.failed_links = []
         self.job_info = job_info
@@ -401,6 +402,11 @@ class RecursiveFetcher:
         return rescale_image(data, self.scale_news_images, self.compress_news_images_max_size, self.compress_news_images_auto_size)
 
     def process_images(self, soup, baseurl):
+        if not self.keep_image:
+            for tag in soup.find_all('img'):
+                tag.decompose()
+            return
+            
         diskpath = unicode_path(os.path.join(self.current_dir, 'images'))
         self.fs.mkdir(diskpath)
 

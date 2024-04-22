@@ -3,8 +3,13 @@
 <title>{{ _("Text to Speech") }} - KindleEar</title>
 {% endblock -%}
 {% set language = params.get('language', '') %}
+{% set voice = params.get('voice', '') %}
+{% set region = params.get('region', '') %}
 {% set api_host = params.get('api_host', '') %}
 {% set api_key = params.get('api_key', '') %}
+{% set rate = params.get('rate', '') %}
+{% set volume = params.get('volume', '') %}
+{% set pitch = params.get('pitch', '') %}
 {% block content -%}
 <div class="main">
   <form class="pure-form pure-form-aligned" action="" method="POST">
@@ -15,7 +20,7 @@
       <legend><h3>{{_("Text to Speech")}} [{{title}}]</h3></legend>
       <div class="pure-control-group">
         <label>{{_("State")}}</label>
-        <select class="pure-u-1 pure-u-sm-1-2" name="enable", id="tts_state">
+        <select class="pure-u-1 pure-u-sm-1-2" name="enable" id="tts_state">
           <option value="both" {% if params.get('enable')=='both' %}selected="selected"{% endif %}>{{_('Send Ebook and Audio')}}</option>
           <option value="audio_only" {% if params.get('enable')=='audio_only' %}selected="selected"{% endif %}>{{_('Send Audio only')}}</option>
           <option value="" {% if not params.get('enable') %}selected="selected"{% endif %}>{{_('Disable TTS')}}</option>
@@ -27,13 +32,21 @@
       </div>
       <div class="pure-control-group">
         <label>{{_("TTS Engine")}}</label>
-        <select class="pure-u-1 pure-u-sm-1-2" name="engine", id="tts_engine" onchange="TTSEngineFieldChanged('{{language}}')">
+        <select class="pure-u-1 pure-u-sm-1-2" name="engine" id="tts_engine" onchange="TTSEngineFieldChanged('{{language}}', '{{region}}');TTSLanguageFieldChanged('{{voice}}')">
           <!-- 由脚本填充 -->
         </select>
       </div>
       <div class="pure-control-group" id="tts_api_host">
         <label>{{_("Api Host")}}</label>
-        <input type="text" name="api_host" id="tts_api_host_input" value="{{api_host}}" class="pure-u-1 pure-u-sm-1-2" />
+        <input type="text" name="api_host" id="tts_api_host_input" value="{{api_host}}" placeholder="{{_('Empty to use default endpoint')}}" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group" id="tts_region_div">
+        <label>
+          <a id="tts_region_a" href="" target="_blank" style="color:rgb(0,0,0,0.8)">{{_("Region")}}</a>
+        </label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="region" id="tts_region_sel">
+          <!-- 由脚本填充 -->
+        </select>
       </div>
       <div class="pure-control-group" id="tts_api_key">
         <label>{{_("Api Key")}}</label>
@@ -41,29 +54,47 @@
       </div>
       <div class="pure-control-group">
         <label>{{_("Language")}}</label>
-        <select class="pure-u-1 pure-u-sm-1-2" name="language" id="tts_language">
+        <select class="pure-u-1 pure-u-sm-1-2" name="language" id="tts_language_sel" onchange="TTSLanguageFieldChanged('{{voice}}')">
           <!-- 由脚本填充 -->
         </select>
       </div>
-      <div class="pure-control-group" id="tts_role">
-        <label>{{_("Voice Role")}}</label>
-        <select class="pure-u-1 pure-u-sm-1-2" name="role", id="tts_role_select">
-          <option value="male" {% if params.get('role')=='Male' %}selected="selected"{% endif %}>{{_('Male')}}</option>
-          <option value="female" {% if params.get('role')=='Female' %}selected="selected"{% endif %}>{{_('Female')}}</option>
+      <div class="pure-control-group" id="tts_voice_div">
+        <label>
+          <a id="tts_voice_a" href="" target="_blank" style="color:rgb(0,0,0,0.8)">
+          {{_("Voice name")}}</a>
+        </label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="voice" id="tts_voice_sel">
+          <!-- 由脚本填充 -->
         </select>
       </div>
       <div class="pure-control-group">
-        <label>{{_("Speed")}}</label>
-        <select class="pure-u-1 pure-u-sm-1-2" name="speed", id="tts_speed">
-          <option value="normal" {% if params.get('speed')=='normal' %}selected="selected"{% endif %}>{{_('Normal')}}</option>
-          <option value="slow" {% if params.get('speed')=='slow' %}selected="selected"{% endif %}>{{_('Slow')}}</option>
+        <label>{{_("Voice speed")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="rate" id="tts_rate">
+          <option value="x-slow" {% if rate=='x-slow' %}selected="selected"{% endif %}>{{_('Extra slow')}}</option>
+          <option value="slow" {% if rate=='slow' %}selected="selected"{% endif %}>{{_('Slow')}}</option>
+          <option value="medium" {% if not rate or rate=='medium' %}selected="selected"{% endif %}>{{_('Medium')}}</option>
+          <option value="fast" {% if rate=='fast' %}selected="selected"{% endif %}>{{_('Fast')}}</option>
+          <option value="x-fast" {% if rate=='x-fast' %}selected="selected"{% endif %}>{{_('Extra fast')}}</option>
         </select>
       </div>
       <div class="pure-control-group" id="tts_style">
-        <label>{{_("Voice Style")}}</label>
-        <select class="pure-u-1 pure-u-sm-1-2" name="style", id="tts_style_select">
-          <option value="chat" {% if params.get('style')=='chat' %}selected="selected"{% endif %}>{{_('Chat')}}</option>
-          <option value="cheerful" {% if params.get('style')=='cheerful' %}selected="selected"{% endif %}>{{_('Cheerful')}}</option>
+        <label>{{_("Voice pitch")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="pitch" id="tts_pitch">
+          <option value="x-low" {% if pitch=='x-low' %}selected="selected"{% endif %}>{{_('Extra low')}}</option>
+          <option value="low" {% if pitch=='low' %}selected="selected"{% endif %}>{{_('Low')}}</option>
+          <option value="medium" {% if not pitch or pitch=='medium' %}selected="selected"{% endif %}>{{_('Medium')}}</option>
+          <option value="high" {% if pitch=='high' %}selected="selected"{% endif %}>{{_('High')}}</option>
+          <option value="x-high" {% if pitch=='x-high' %}selected="selected"{% endif %}>{{_('Extra high')}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group" id="tts_style">
+        <label>{{_("Voice volume")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="volume" id="tts_volume">
+          <option value="x-soft" {% if volume=='x-soft' %}selected="selected"{% endif %}>{{_('Extra soft')}}</option>
+          <option value="soft" {% if volume=='soft' %}selected="selected"{% endif %}>{{_('Soft')}}</option>
+          <option value="medium" {% if not volume or volume=='medium' %}selected="selected"{% endif %}>{{_('Medium')}}</option>
+          <option value="loud" {% if volume=='loud' %}selected="selected"{% endif %}>{{_('Loud')}}</option>
+          <option value="x-loud" {% if volume=='x-loud' %}selected="selected"{% endif %}>{{_('Extra loud')}}</option>
         </select>
       </div>
       <br/>
@@ -73,6 +104,9 @@
       </label>
       <input type="hidden" value="{{recipeId}}" name="recipeId" id="recipeId">
     </fieldset>
+    <p style="text-align:center;color:red;margin:20px 0px 30px 0px;border:solid 1px silver;">
+      {{_("Note: Enabling this feature will significantly increase consumed CPU instance hours.")}}
+    </p>
     <p style="text-align:center;">
       <input type="submit" class="pure-button pure-button-primary pure-input-rounded" value="{{_('Save settings')}}" />
     </p>
@@ -105,7 +139,8 @@ var g_tts_engines = {{engines|safe}};
 
 $(document).ready(function() {
   PopulateTTSFields("{{params['engine']}}");
-  TTSEngineFieldChanged('{{language}}');
+  TTSEngineFieldChanged('{{language}}', '{{region}}');
+  TTSLanguageFieldChanged('{{voice}}');
 });
 </script>
 {% endblock -%}

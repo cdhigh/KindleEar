@@ -17,14 +17,14 @@
       <legend><h3>{{_("Translator")}} [{{title}}]</h3></legend>
       <div class="pure-control-group">
         <label>{{_("State")}}</label>
-        <select class="pure-u-1 pure-u-sm-1-2" name="enable", id="translator_state">
+        <select class="pure-u-1 pure-u-sm-1-2" name="enable" id="translator_state">
           <option value="1" {% if params.get('enable', '') %}selected="selected"{% endif %}>{{_('Enable')}}</option>
           <option value="0" {% if not params.get('enable', '') %}selected="selected"{% endif %}>{{_('Disable')}}</option>
         </select>
       </div>
       <div class="pure-control-group">
         <label>{{_("Engine")}}</label>
-        <select class="pure-u-1 pure-u-sm-1-2" name="engine", id="translator_engine" onchange="TranslatorEngineFieldChanged('{{src_lang}}', '{{dst_lang}}')">
+        <select class="pure-u-1 pure-u-sm-1-2" name="engine" id="translator_engine" onchange="TranslatorEngineFieldChanged('{{src_lang}}', '{{dst_lang}}')">
           <!-- 由脚本填充 -->
         </select>
       </div>
@@ -73,6 +73,9 @@
       </label>
       <input type="hidden" value="{{recipeId}}" name="recipeId" id="recipeId">
     </fieldset>
+    <p style="text-align:center;color:red;margin:20px 0px 30px 0px;border:solid 1px silver;">
+      {{_("Note: Enabling this feature will significantly increase consumed CPU instance hours.")}}
+    </p>
     <p style="text-align:center;">
       <input type="submit" class="pure-button pure-button-primary pure-input-rounded" value="{{_('Save settings')}}" />
     </p>

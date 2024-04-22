@@ -7,11 +7,13 @@ USER root
 RUN mkdir -p /usr/kindleear /data
 WORKDIR /usr/kindleear
 COPY ./config.py ./tools/update_req.py ./docker/gunicorn.conf.py ./main.py ./
+COPY ./tools/mp3cat/mp3cat /usr/local/bin/mp3cat
 
-#RUN python update_req.py docker-all
-RUN python update_req.py docker && \
+#RUN python update_req.py docker[all]
+RUN python update_req.py docker[redis] && \
     pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    chmod +x /usr/local/bin/mp3cat
 
 COPY ./application/ ./application/
 

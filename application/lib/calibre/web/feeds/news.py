@@ -90,6 +90,7 @@ class Web2diskOptions:
         self.preprocess_raw_html = None
         self.get_delay = None
         self.max_files = None
+        self.keep_image = True
 
 
 #每篇文章的下载任务参数
@@ -162,7 +163,7 @@ class BasicNewsRecipe(Recipe):
     #: that have overly complex stylesheets unsuitable for conversion
     #: to e-book formats.
     #: If True stylesheets are not downloaded and processed
-    no_stylesheets         = False
+    no_stylesheets         = True
 
     #: Convenient flag to strip all JavaScript tags from the downloaded HTML
     remove_javascript      = True
@@ -432,6 +433,8 @@ class BasicNewsRecipe(Recipe):
 
     #: Set to False if you do not want to use gzipped transfers. Note that some old servers flake out with gzip
     handle_gzip = True
+
+    keep_image = True
 
     # set by worker.py
     translator = {}
@@ -966,7 +969,7 @@ class BasicNewsRecipe(Recipe):
 
         self.web2disk_options = wOpts = Web2diskOptions()
         for attr in ('keep_only_tags', 'remove_tags', 'preprocess_regexps', 'skip_ad_pages', 'preprocess_html', 
-            'remove_tags_after', 'remove_tags_before', 'is_link_wanted', 'compress_news_images', 
+            'remove_tags_after', 'remove_tags_before', 'is_link_wanted', 'compress_news_images', 'keep_image',
             'compress_news_images_max_size', 'compress_news_images_auto_size', 'scale_news_images', 'filter_regexps',
             'match_regexps', 'no_stylesheets', 'verbose', 'delay', 'timeout', 'recursions', 'encoding'):
             setattr(wOpts, attr, getattr(self, attr))
@@ -1083,11 +1086,12 @@ class BasicNewsRecipe(Recipe):
             x.name = 'div'
 
         #If tts need, tts propery is set by WorkerImpl
-        if self.tts.get('enable'):
+        tts_enable = self.tts.get('enable')
+        if tts_enable:
             self.audiofy_html(soup, title, job_info)
 
         #If translation need, translator propery is set by WorkerImpl
-        if self.translator.get('enable'):
+        if self.translator.get('enable') and (tts_enable != 'audio_only'):
             self.translate_html(soup, title)
 
         if job_info:
@@ -1204,6 +1208,9 @@ class BasicNewsRecipe(Recipe):
             return res
         finally:
             self.cleanup()
+            #如果设置为仅推送音频，则删掉feed实例
+            if self.tts.get('enable') == 'audio_only':
+                self.feed_objects = []
 
     @property
     def lang_for_html(self):
@@ -1298,6 +1305,8 @@ class BasicNewsRecipe(Recipe):
         br = self.browser
         self.web2disk_options.browser = br
         self.web2disk_options.dir = job_info.art_dir
+        if self.tts.get('enable') == 'audio_only':
+            self.web2disk_options.keep_image = False
         
         fetcher = RecursiveFetcher(self.web2disk_options, self.fs, self.log, job_info, self.image_map, self.css_map)
         fetcher.browser = br
@@ -1992,7 +2001,7 @@ class BasicNewsRecipe(Recipe):
     def translate_html(self, soup, title):
         from ebook_translator import HtmlTranslator
         translator = HtmlTranslator(self.translator, self.simultaneous_downloads)
-        self.log.debug(f'Translating [{title}]')
+        self.log.info(f'Translating html [{title}]')
         translator.translate_soup(soup)
 
     #翻译Feed的title，toc时用到
@@ -2017,24 +2026,26 @@ class BasicNewsRecipe(Recipe):
     #调用在线TTS服务平台，将html转为语音
     #每个音频片段都会调用一次callback(audioDict, title, feed_index, article_index)
     def audiofy_html(self, soup, title, job_info):
-        default_log.info(f'audiofy_html {title}')
         from ebook_tts import HtmlAudiolator
         audiolator = HtmlAudiolator(self.tts)
-        self.log.debug(f'Translating [{title}]')
+        self.log.info(f'Audiofying html [{title}]')
         ret = audiolator.audiofy_soup(soup)
         if not ret['error']: #保存音频到磁盘，这个地方就不能使用fs了，因为最后合并mp3时无法使用虚拟文件系统
             if not self.tts.get('audio_dir'):
                 system_temp_dir = os.environ.get('KE_TEMP_DIR')
                 self.tts['audio_dir'] = PersistentTemporaryDirectory(prefix='tts_', dir=system_temp_dir)
+            if not self.tts.get('audios'):
+                self.tts['audios'] = []
             audio_dir = self.tts['audio_dir']
             ext = ret['mime'].split('/')[-1]
             ext = {'mpeg': 'mp3'}.get(ext, ext)
             for idx, audio in enumerate(ret['audios']):
-                filename = f'{job_info.f_idx:04d}_{job_info.a_idx:04d}_{idx:04d}.{ext}'
+                filename = f'{job_info.f_idx:03d}_{job_info.a_idx:03d}_{idx:04d}.{ext}'
                 filename = os.path.join(audio_dir, filename)
                 try:
                     with open(filename, 'wb') as f:
                         f.write(audio)
+                    self.tts['audios'].append(filename)
                 except Exception as e:
                     self.log.warning(f'Failed to write "{filename}": {e}')
         else:

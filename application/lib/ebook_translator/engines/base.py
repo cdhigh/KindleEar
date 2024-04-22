@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-import ssl
-import os.path
-import traceback
+import os, traceback
 from urllib.parse import urljoin
 from urlopener import UrlOpener
 

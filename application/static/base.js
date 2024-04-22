@@ -1321,42 +1321,109 @@ function PopulateTTSFields(currEngineName) {
   }
 }
 
-//选择一个TTS引擎后显示或隐藏ApiKey文本框，语种列表也同步更新
-//language: 当前recipe的语种代码
-function TTSEngineFieldChanged(language) {
-  //显示或隐藏ApiHost/ApiKey文本框
+//选择一个TTS引擎后显示或隐藏各种文本框
+//language: 当前recipe的TTS语种代码
+//region: 当前recipe的region代码
+function TTSEngineFieldChanged(language, region) {
   var engineName = $('#tts_engine').val();
   var engine = g_tts_engines[engineName];
-  if (!engine || engine.need_api_key) {
-    $('#tts_api_host_input').attr('placeholder', engine.default_api_host);
+  if (engine.need_api_key) { //设置apikey是否可见
     $('#tts_api_key_input').attr('placeholder', engine.api_key_hint);
     $('#tts_api_key_input').prop("required", true);
-    $('#tts_api_host').show();
     $('#tts_api_key').show();
   } else {
     $('#tts_api_key_input').prop("required", false);
-    $('#tts_api_host').hide();
     $('#tts_api_key').hide();
   }
-
+  let hasSelected = false;
+  if (engine.regions && Object.keys(engine.regions).length > 0) { //填充region
+    $('#tts_region_div').show();
+    let region_sel = $('#tts_region_sel');
+    for (const [code, name] of Object.entries(engine.regions)) {
+      let selected = (code == region) ? 'selected="selected"' : '';
+      if (selected) {
+        hasSelected = true;
+      }
+      let txt = '<option value="{0}" {1}>{2}</option>'.format(code, selected, name + ' (' + code + ')');
+      region_sel.append($(txt));
+    }
+  } else {
+    $('#tts_region_div').hide();
+  }
+  
+  //设置提示的链接
+  let region_a = $('#tts_region_a');
+  if (engine.region_url) {
+    region_a.attr('href', engine.region_url);
+    region_a.removeAttr('onclick');
+    region_a.css('text-decoration', 'underline dotted');
+  } else {
+    region_a.attr('href', 'javascript:void(0)');
+    region_a.attr('onclick', 'return false;');
+    region_a.css('text-decoration', 'none');
+  }
+  let voice_a = $('#tts_voice_a');
+  if (engine.voice_url) {
+    voice_a.attr('href', engine.voice_url);
+    voice_a.removeAttr('onclick');
+    voice_a.css('text-decoration', 'underline dotted');
+  } else {
+    voice_a.attr('href', 'javascript:void(0)');
+    voice_a.attr('onclick', 'return false;');
+    voice_a.css('text-decoration', 'none');
+  }
+  
   //更新语种代码
-  var tts_language = $('#tts_language');
-  tts_language.empty();
-  var languages = engine['languages'] || {};
-  var hasSelected = false;
-  var enName = 'en';
-  for (const [code, name] of Object.entries(languages)) {
-    var selected = (code == language) ? 'selected="selected"' : '';
+  let tts_language_sel = $('#tts_language_sel');
+  let languages = engine.languages || {}; //键为语种代码，值为语音名字列表
+  tts_language_sel.empty();
+  let enName = 'en';
+  hasSelected = false;
+  for (const code of Object.keys(languages)) {
+    let selected = (code == language) ? 'selected="selected"' : '';
     if (selected) {
       hasSelected = true;
     } else if (code.startsWith('en')) {
       enName = code;
     }
-    var txt = '<option value="{0}" {1}>{2}</option>'.format(code, selected, LanguageName(code, name));
-    tts_language.append($(txt));
+    let txt = '<option value="{0}" {1}>{2}</option>'.format(code, selected, LanguageName(code, code));
+    tts_language_sel.append($(txt));
   }
   if (!hasSelected) { //如果没有匹配的语种，选择英语
-    tts_language.val(enName);
+    tts_language_sel.val(enName);
+  }
+}
+
+//选择一个TTS语种后填充可选的语音列表
+//currVoice: 当前recipe的TTS语音名字
+function TTSLanguageFieldChanged(currVoice) {
+  var engineName = $('#tts_engine').val();
+  var engine = g_tts_engines[engineName]; //当前选择的TTS引擎
+  let code = $('#tts_language_sel').val(); //当前选择的语种代码
+  let voice_sel = $('#tts_voice_sel');
+  voice_sel.empty();
+  if (!engine || !code) {
+    return;
+  }
+  let languages = engine.languages || {}; //键为语种代码，值为语音名字列表
+  let voices = languages[code];
+  if (!voices || voices.length == 0) {
+    $('#tts_voice_div').hide();
+    voice_sel.val('');
+  } else {
+    $('#tts_voice_div').show();
+    let hasSelected = false;
+    for (const voice of voices) {
+      let selected = (voice == currVoice) ? 'selected="selected"' : '';
+      if (selected) {
+        hasSelected = true;
+      }
+      let txt = '<option value="{0}" {1}>{0}</option>'.format(voice, selected);
+      voice_sel.append($(txt));
+    }
+    if (!hasSelected) { //如果没有匹配的语种，选择第一个
+      voice_sel.val(voices[0] || '');
+    }
   }
 }
 

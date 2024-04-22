@@ -146,7 +146,8 @@ def BookTTSPost(recipeType, recipe, user, recipeId):
     #构建配置参数
     form = request.form
     #enable: 'both'/'audio_only'/''
-    paramNames = ['engine', 'enable', 'api_host', 'api_key', 'language', 'style', 'role', 'speed', 'send_to']
+    paramNames = ['engine', 'enable', 'api_host', 'api_key', 'language', 'speed', 'send_to',
+        'region', 'voice', 'rate', 'pitch', 'volume']
     params = {item: form.get(item, '') for item in paramNames}
 
     engines = get_tts_engines()
