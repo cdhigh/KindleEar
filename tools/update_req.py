@@ -5,8 +5,12 @@
 ~=2.31.0 : >=2.31.0,==2.31.*
 >=0.2.3,<1.0.0
 """
-import re, os, sys, shutil, subprocess
+import re, os, sys, shutil, subprocess, secrets
 from itertools import chain
+
+def new_secret_key(length=12):
+    allchars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz'
+    return ''.join([secrets.choice(allchars) for i in range(length)])
 
 REQ_COMM = [('requests', '~=2.31.0'),
     ('chardet', '~=5.2.0'),
@@ -49,7 +53,7 @@ REQ_TASK = {
 }
 
 REQ_PLAT = {'gae': [('appengine-python-standard', '~=1.1.6'),
-        ('#google-cloud-texttospeech', '~=2.16.3')],
+        ('google-cloud-texttospeech', '~=2.16.3')],
     'docker': [('weedata', '>=0.2.5,<1.0.0'),('pymysql', '~=1.1.0'), #docker install all libs
         ('psycopg2-binary', '~=2.9.9'),('pymongo', '~=4.6.3'),('redis', '~=5.0.3'),
         ('celery', '~=5.3.6'),('flask-rq2', '~=18.3'),('sqlalchemy', '~=2.0.29')],
@@ -98,7 +102,7 @@ def dockerize_config_py(cfgFile, arg):
     default_cfg = {'APP_ID': 'kindleear', 'DATABASE_URL': 'sqlite:////data/kindleear.db',
         'TASK_QUEUE_SERVICE': 'apscheduler', 'TASK_QUEUE_BROKER_URL': 'memory',
         'KE_TEMP_DIR': '/tmp', 'DOWNLOAD_THREAD_NUM': '3', 'ALLOW_SIGNUP': 'no',
-        'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning'}
+        'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning', 'SECRET_KEY': new_secret_key}
     ret = []
     inDocComment = False
     pattern = r"^([_A-Z]+)\s*=\s*(.+)$"
@@ -118,6 +122,7 @@ def dockerize_config_py(cfgFile, arg):
         name = match.group(1) if match else None
         value = default_cfg.get(name, None)
         if name is not None and value is not None:
+            value = value() if callable(value) else value
             ret.append(f'{name} = "{value}"')
         else:
             ret.append(line)
@@ -156,7 +161,7 @@ def gaeify_config_py(cfgFile):
     default_cfg = {'APP_ID': appId, 'APP_DOMAIN': domain, 'SERVER_LOCATION': gae_location(),
         'DATABASE_URL': 'datastore', 'TASK_QUEUE_SERVICE': 'gae', 'TASK_QUEUE_BROKER_URL': '',
         'KE_TEMP_DIR': '', 'DOWNLOAD_THREAD_NUM': '3', 'ALLOW_SIGNUP': 'no',
-        'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning'}
+        'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning', 'SECRET_KEY': new_secret_key}
     ret = []
     inDocComment = False
     pattern = r"^([_A-Z]+)\s*=\s*(.+)$"
@@ -176,6 +181,7 @@ def gaeify_config_py(cfgFile):
         name = match.group(1) if match else None
         value = default_cfg.get(name, None)
         if name is not None and value is not None:
+            value = value() if callable(value) else value
             ret.append(f'{name} = "{value}"')
         else:
             ret.append(line)

@@ -150,6 +150,7 @@ def DisplayEnv():
     strEnv = []
     for d in os.environ:
         strEnv.append("<pre><p>" + str(d).rjust(28) + " | " + str(os.environ[d]) + "</p></pre>")
+    strEnv.append("<pre><p>" + 'appDir'.rjust(28) + " | " + appDir + "</p></pre>")
     return ''.join(strEnv)
 
 #设置国际化语种

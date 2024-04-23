@@ -764,7 +764,7 @@ class BasicNewsRecipe(Recipe):
             return parse(_raw)
         return BeautifulSoup(_raw, 'lxml')
 
-    #提取正文
+    #使用自动算法提取正文
     def extract_readable_article(self, html, url):
         try:
             doc = readability.Document(html, positive_keywords=self.auto_cleanup_keep, url=url)
@@ -780,7 +780,7 @@ class BasicNewsRecipe(Recipe):
         body_tag = soup.find('body')
 
         #如果readability解析失败，则启用备用算法（不够好，但有全天候适应能力）
-        if not body_tag or len(body_tag.contents) == 0:
+        if not body_tag or len(body_tag.get_text(strip=True)) < 100:
             soup = simple_extract(html)
             body_tag = soup.find('body')
             if not body_tag or len(body_tag.contents) == 0: #再次失败
@@ -2034,8 +2034,8 @@ class BasicNewsRecipe(Recipe):
             if not self.tts.get('audio_dir'):
                 system_temp_dir = os.environ.get('KE_TEMP_DIR')
                 self.tts['audio_dir'] = PersistentTemporaryDirectory(prefix='tts_', dir=system_temp_dir)
-            if not self.tts.get('audios'):
-                self.tts['audios'] = []
+            if not self.tts.get('audio_files'):
+                self.tts['audio_files'] = []
             audio_dir = self.tts['audio_dir']
             ext = ret['mime'].split('/')[-1]
             ext = {'mpeg': 'mp3'}.get(ext, ext)
@@ -2045,7 +2045,7 @@ class BasicNewsRecipe(Recipe):
                 try:
                     with open(filename, 'wb') as f:
                         f.write(audio)
-                    self.tts['audios'].append(filename)
+                    self.tts['audio_files'].append(filename)
                 except Exception as e:
                     self.log.warning(f'Failed to write "{filename}": {e}')
         else:
@@ -2221,8 +2221,17 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
         for rules in self.content_extract_rules:
             newBody.extend(self.get_tags_from_rules(soup, rules))
 
-        oldBody.replace_with(newBody)
-        return str(soup)
+        #提取失败，尝试自动提取
+        if len(newBody.get_text(strip=True)) < 100:
+            self.log.warning(f'Failed to extract content using content_extract_rules, try readability algorithm: {url}')
+            try:
+                raw_html = self.extract_readable_article(raw_html, url)
+            except:
+                self.log.warning(f'Failed to auto cleanup URL: {url}')
+            return raw_html
+        else:
+            oldBody.replace_with(newBody)
+            return str(soup)
 
     #根据一个规则列表，从soup中获取符合条件的tag列表
     #rules: 字符串列表或字典列表

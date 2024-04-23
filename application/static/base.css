@@ -303,6 +303,10 @@ button {
     color: red;
     font-weight: normal;
     font-style: italic;
+    margin-left: 10px;
+    padding: 4px;
+    border: dotted 1px #C785C8;
+    border-radius: 10px;
 }
 
 .box-list .book .summaryRow {

@@ -170,7 +170,7 @@ def mp3cat_path():
             subprocess.run([mp3Cat, "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True, shell=True)
             default_log.debug('Using app mp3cat')
         except Exception as e:
-            default_log.warning(f"Can't execute mp3cat. Please check file exists and permissions: {e}")
+            #default_log.warning(f"Cannot execute mp3cat. Please check file exists and permissions: {e}")
             mp3Cat = ''
     return mp3Cat
 
@@ -182,8 +182,10 @@ def MergeAudioSegment(roList):
         return ret
 
     mp3Cat = mp3cat_path()
+    pymp3cat = None
     if not mp3Cat:
-        return ret
+        import pymp3cat
+        default_log.info('Using python version mp3cat')
 
     import shutil, subprocess
     from calibre.ptempfile import PersistentTemporaryDirectory
@@ -192,13 +194,23 @@ def MergeAudioSegment(roList):
     chapters = []
     #先合并每个recipe生成的片段
     for idx, ro in enumerate(roList):
-        mp3Files = ' '.join([mp3 for mp3 in (ro.tts.get('audios') or [])])
+        mp3Files = [mp3 for mp3 in (ro.tts.get('audio_files') or [])]
         if not mp3Files:
             continue
         outputFile = os.path.join(tempDir, f'output_{idx:04d}.mp3')
-        runRet = subprocess.run(f'{mp3Cat} {mp3Files} -o {outputFile}', shell=True)
-        if (runRet.returncode == 0) and os.path.exists(outputFile):
-            chapters.append(outputFile)
+        if mp3Cat:
+            mp3Files = ' '.join(mp3Files)
+            runRet = subprocess.run(f'{mp3Cat} {mp3Files} -f -q -o {outputFile}', shell=True)
+            if (runRet.returncode == 0) and os.path.exists(outputFile):
+                chapters.append(outputFile)
+        else:
+            try:
+                pymp3cat.merge(outputFile, mp3Files, quiet=True)
+                if os.path.exists(outputFile):
+                    chapters.append(outputFile)
+            except Exception as e:
+                default_log.warning('Failed to merge mp3 by pymp3cat: {e}')
+
 
     #再将所有recipe的音频合并为一个大的文件
     if len(chapters) == 1:
@@ -209,16 +221,28 @@ def MergeAudioSegment(roList):
         except Exception as e:
             default_log.warning(f'Failed to read "{chapters[0]}"')
     elif chapters:
-        mp3Files = ' '.join(chapters)
         outputFile = os.path.join(tempDir, 'final.mp3')
-        runRet = subprocess.run(f'{mp3Cat} {mp3Files} -o {outputFile}', shell=True)
-        if (runRet.returncode == 0) and os.path.exists(outputFile):
+        info = ''
+        if mp3Cat:
+            mp3Files = ' '.join(chapters)
+            runRet = subprocess.run(f'{mp3Cat} {mp3Files} -f -q -o {outputFile}', shell=True)
+            if runRet.returncode != 0:
+                info = f'mp3cat return code : {runRet.returncode}'
+        else:
+            try:
+                pymp3cat.merge(outputFile, chapters, quiet=True)
+            except Exception as e:
+                info = 'Failed merge mp3 by pymp3cat: {e}'
+
+        if not info and os.path.exists(outputFile):
             try:
                 with open(outputFile, 'rb') as f:
                     data = f.read()
-                runRet = ('mp3', data)
+                ret = ('mp3', data)
             except Exception as e:
-                default_log.warning(f'Failed to read "{outputFile}"')
+                default_log.warning(f'Failed to read "{outputFile}": {e}')
+        else:
+            default_log.warning(info if info else 'Failed merge mp3')
 
     #清理临时文件
     for dir_ in [*audioDirs, tempDir]:

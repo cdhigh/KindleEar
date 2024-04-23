@@ -147,7 +147,7 @@ function AppendRecipeToLibrary(div, id) {
   var row_str = ['<div class="book box"><div class="titleRow">'];
   row_str.push(title);
   if (id.startsWith("upload:")) {
-    row_str.push('<sup> {0}</sup>'.format(i18n.abbrUpl));
+    row_str.push('<sup>{0}</sup>'.format(i18n.abbrUpl));
   }
   row_str.push('</div><div class="summaryRow">');
   row_str.push(recipe.description);
@@ -217,7 +217,13 @@ function PopulateMyCustomRss() {
     var row_str = ['<div class="book box"><div class="titleRow">'];
     row_str.push(title);
     if (isfulltext) {
-      row_str.push('<sup> {0}</sup>'.format(i18n.abbrEmb));
+      row_str.push('<sup>{0}</sup>'.format(i18n.abbrEmb));
+    }
+    if (rss.tr_enable) {
+      row_str.push('<sup>{0}</sup>'.format(i18n.abbrTr));
+    }
+    if (rss.tts_enable) {
+      row_str.push('<sup>{0}</sup>'.format(i18n.abbrTts));
     }
     row_str.push('</div><div class="summaryRow"><a target="_blank" href="{0}">'.format(url));
     if (url.length > 100) {
@@ -254,18 +260,23 @@ function PopulateMySubscribed() {
     var title = recipe.title;
     var desc = recipe.description;
     var need_subs = recipe.needs_subscription;
-    var separated = recipe.separated;
     var recipe_id = recipe.recipe_id;
     var row_str = ['<div class="book box"><div class="titleRow">'];
     row_str.push(title);
     if (recipe_id.startsWith("upload:")) {
-      row_str.push('<sup> {0}</sup>'.format(i18n.abbrUpl));
+      row_str.push('<sup>{0}</sup>'.format(i18n.abbrUpl));
     }
-    if (separated) {
-      row_str.push('<sup> {0}</sup>'.format(i18n.abbrSep));
+    if (recipe.separated) {
+      row_str.push('<sup>{0}</sup>'.format(i18n.abbrSep));
     }
     if (need_subs) {
-      row_str.push('<sup> {0}</sup>'.format(i18n.abbrLog));
+      row_str.push('<sup>{0}</sup>'.format(i18n.abbrLog));
+    }
+    if (recipe.tr_enable) {
+      row_str.push('<sup>{0}</sup>'.format(i18n.abbrTr));
+    }
+    if (recipe.tts_enable) {
+      row_str.push('<sup>{0}</sup>'.format(i18n.abbrTts));
     }
     row_str.push('</div><div class="summaryRow">');
     if (desc.length > 100) {

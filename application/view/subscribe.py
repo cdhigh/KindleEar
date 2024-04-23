@@ -24,23 +24,32 @@ def MySubscription(tips=None):
     share_key = user.share_links.get('key', '')
     title_to_add = request.args.get('title_to_add') #from Bookmarklet
     url_to_add = request.args.get('url_to_add')
-    my_custom_rss = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.url, Recipe.isfulltext]) 
-        for item in user.all_custom_rss()]
-    my_uploaded_recipes = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.description, Recipe.needs_subscription, Recipe.language]) 
-        for item in user.all_uploaded_recipe()]
-    #使用不同的id前缀区分不同的rss类型
+    my_custom_rss = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.url, Recipe.isfulltext, 
+        Recipe.translator, Recipe.tts]) for item in user.all_custom_rss()]
+
+    my_uploaded_recipes = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.description, Recipe.needs_subscription, 
+        Recipe.language, Recipe.translator, Recipe.tts]) for item in user.all_uploaded_recipe()]
+
+    my_booked_recipes = [item.to_dict(exclude=[BookedRecipe.encrypted_pwd])
+        for item in user.get_booked_recipe() if not item.recipe_id.startswith('custom:')]
+
+    #使用不同的id前缀区分不同的rss类型，同时对其他数据进行适当处理
     for item in my_custom_rss:
         item['id'] = 'custom:{}'.format(item['id'])
+        item['tr_enable'] = item['translator'].get('enable')
+        item['tts_enable'] = item['tts'].get('enable')
     for item in my_uploaded_recipes:
         item['id'] = 'upload:{}'.format(item['id'])
         item['language'] = item['language'].lower().replace('-', '_').split('_')[0]
-
-    my_booked_recipes = json.dumps([item.to_dict(exclude=[BookedRecipe.encrypted_pwd])
-        for item in user.get_booked_recipe() if not item.recipe_id.startswith('custom:')], 
-        separators=(',', ':'))
-
-    my_custom_rss = json.dumps(my_custom_rss)
-    my_uploaded_recipes=json.dumps(my_uploaded_recipes)
+        item['tr_enable'] = item['translator'].get('enable')
+        item['tts_enable'] = item['tts'].get('enable')
+    for item in my_booked_recipes:
+        item['tr_enable'] = item['translator'].get('enable')
+        item['tts_enable'] = item['tts'].get('enable')
+        
+    my_custom_rss = json.dumps(my_custom_rss, separators=(',', ':'))
+    my_uploaded_recipes=json.dumps(my_uploaded_recipes, separators=(',', ':'))
+    my_booked_recipes = json.dumps(my_booked_recipes, separators=(',', ':'))
     subscribe_url = urljoin(app.config['APP_DOMAIN'], url_for("bpSubscribe.MySubscription"))
     url2book_url = urljoin(app.config['APP_DOMAIN'], url_for("bpUrl2Book.Url2BookRoute"))
     return render_template("my.html", tab="my", **locals())
