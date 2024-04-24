@@ -207,6 +207,7 @@ class AzureTTS(TTSBase):
     max_len_per_request = 1000
     languages = azuretts_languages
     regions = azure_regions
+    engine_url = 'https://azure.microsoft.com/en-us/products/ai-services/text-to-speech'
     region_url = 'https://learn.microsoft.com/en-us/azure/ai-services/speech-service/regions'
     voice_url = 'https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts'
     language_url = 'https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts'

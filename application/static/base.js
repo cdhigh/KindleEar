@@ -1362,27 +1362,24 @@ function TTSEngineFieldChanged(language, region) {
     $('#tts_region_div').hide();
   }
   
+  let setTtsHref = function (target_id, url) {
+    let target = $(target_id);
+    if (url) {
+      target.attr('href', url);
+      target.removeAttr('onclick');
+      target.css('text-decoration', 'underline dotted');
+    } else {
+      target.attr('href', 'javascript:void(0)');
+      target.attr('onclick', 'return false;');
+      target.css('text-decoration', 'none');
+    }
+  };
+
   //设置提示的链接
-  let region_a = $('#tts_region_a');
-  if (engine.region_url) {
-    region_a.attr('href', engine.region_url);
-    region_a.removeAttr('onclick');
-    region_a.css('text-decoration', 'underline dotted');
-  } else {
-    region_a.attr('href', 'javascript:void(0)');
-    region_a.attr('onclick', 'return false;');
-    region_a.css('text-decoration', 'none');
-  }
-  let voice_a = $('#tts_voice_a');
-  if (engine.voice_url) {
-    voice_a.attr('href', engine.voice_url);
-    voice_a.removeAttr('onclick');
-    voice_a.css('text-decoration', 'underline dotted');
-  } else {
-    voice_a.attr('href', 'javascript:void(0)');
-    voice_a.attr('onclick', 'return false;');
-    voice_a.css('text-decoration', 'none');
-  }
+  setTtsHref('#tts_engine_a', engine.engine_url);
+  setTtsHref('#tts_region_a', engine.region_url);
+  setTtsHref('#tts_voice_a', engine.voice_url);
+  setTtsHref('#tts_language_a', engine.language_url);
   
   //更新语种代码
   let tts_language_sel = $('#tts_language_sel');

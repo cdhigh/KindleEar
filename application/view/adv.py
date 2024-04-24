@@ -173,9 +173,18 @@ def AdvImportPost():
             rssList = opml.from_string(upload.read())
         except Exception as e:
             return adv_render_template('adv_import.html', 'import', user=user, tips=str(e))
+
+        #兼容老版本的转义
+        isKindleEarOpml = False
+        ownerElem = rssList._tree.xpath('/opml/head/ownerName')
+        if ownerElem and ownerElem[0].text == 'KindleEar':
+            isKindleEarOpml = True
         
         for o in walkOpmlOutline(rssList):
-            title, url, isfulltext = xml_unescape(o.text or o.title), xml_unescape(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
+            if o.text and not o.title and isKindleEarOpml: #老版本只有text属性，没有title属性
+                title, url, isfulltext = o.text, unquote_plus(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
+            else:
+                title, url, isfulltext = xml_unescape(o.text or o.title), xml_unescape(o.xmlUrl), o.isFulltext
             isfulltext = str_to_bool(isfulltext) if isfulltext else defaultIsFullText
             
             if not url.startswith('http'):
@@ -222,6 +231,7 @@ def AdvExport():
       <dateCreated>{date}</dateCreated>
       <dateModified>{date}</dateModified>
       <ownerName>KindleEar</ownerName>
+      <createdBy>KindleEar {appVer}</createdBy>
     </head>
     <body>
     {outLines}
@@ -236,7 +246,7 @@ def AdvExport():
             xml_escape(feed.title), xml_escape(feed.url), isfulltext))
     outLines = '\n'.join(outLines)
     
-    opmlFile = opmlTpl.format(date=date, outLines=outLines).encode('utf-8')
+    opmlFile = opmlTpl.format(date=date, appVer=appVer, outLines=outLines).encode('utf-8')
     return send_file(io.BytesIO(opmlFile), mimetype="text/xml", as_attachment=True, download_name="KindleEar_subscription.xml")
     
 #在本地选择一个图片上传做为自定义RSS书籍的封面

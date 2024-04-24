@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
+#Author: cdhigh<https://github.com/cdhigh>
 #合并mp3文件
-#来源：https://github.com/dmulholl/mp3cat
-#将go语言转换为python，方便类似GAE这样不能执行二进制文件的平台合并mp3
+#原始来源：https://github.com/dmulholl/mp3cat
+#将go语言转换为python，没有第三方依赖，方便类似GAE这样不能执行二进制文件的平台合并mp3
+#因为不需要解码，只是将源文件中的音乐帧逐个拷贝到目标文件，
+#速度尽管慢一些（大概是go版本的2到3倍时间），在可以接受的范围内
 import os, io, struct
 
 #版本
@@ -21,21 +24,21 @@ JointStereo = 1
 DualChannel = 2
 Mono = 3
 
-#位率对应表
-v1_br = {
-    3: (0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448), #layer1
-    2: (0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384), #layer2
-    1: (0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320), #layer3
-}
+#位率对应表[layer][bitRateIndex]
+v1_br = [(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    (0, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 160000, 192000, 224000, 256000, 320000, 0), #layer3
+    (0, 32000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 160000, 192000, 224000, 256000, 320000, 384000, 0), #layer2
+    (0, 32000, 64000, 96000, 128000, 160000, 192000, 224000, 256000, 288000, 320000, 352000, 384000, 416000, 448000, 0), #layer1
+]
 
-v2_br = {
-    3: (0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256),
-    2: (0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160),
-    1: (0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160),
-}
+v2_br = [(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    (0, 8000, 16000, 24000, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 144000, 160000, 0),
+    (0, 8000, 16000, 24000, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 144000, 160000, 0),
+    (0, 32000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 144000, 160000, 176000, 192000, 224000, 256000, 0),
+]
 
-#采样率对应表[ver][layer]
-samplingTable = ((11025, 12000, 8000), (0, 0, 0), (22050, 24000, 16000), (44100, 48000, 32000))
+#采样率对应表[ver][samplingRateIndex]
+samplingTable = ((11025, 12000, 8000, 0), (0, 0, 0, 0), (22050, 24000, 16000, 0), (44100, 48000, 32000, 0))
 
 #每帧的采样数对应表[ver][layer]
 sampleCountTable = ((0, 576, 1152, 384), (0, 0, 0, 0), (0, 576, 1152, 384), (0, 1152, 1152, 384))
@@ -77,7 +80,7 @@ def NextObject(stream):
         #ID3v1标识: 'TAG'，包括标签头在内，一共128字节
         if header1[0:3] == b'TAG':
             stream.seek(start + 128)
-            return {'type': 'TAG', 'start': start, 'end': stream.tell(), 'len': 128}
+            return {'type': 'TAG', 'len': 128} #'start': start, 'end': stream.tell(),
         elif header1[0:3] == b'ID3':
             #ID3V2头一共10个字节
             #char Header[3]; #ID3
@@ -94,17 +97,17 @@ def NextObject(stream):
             
             stream.seek(start)
             frame = {'type': 'ID3', 'len': length}
-            frame['start'] = start
+            #frame['start'] = start
             frame['raw'] = stream.read(length + 10) #长度不包含头部10个字节
-            frame['end'] = stream.tell()
+            #frame['end'] = stream.tell()
             return frame
         elif (header1[0] == 0xff) and ((header1[1] & 0xe0) == 0xe0): #11比特的1，一个音乐数据帧开始
             frame = ParseMusicHeader(header1)
             if frame:
                 stream.seek(start)
-                frame['start'] = start
+                #frame['start'] = start
                 frame['raw'] = stream.read(frame['len']) #帧长度包含头部4个字节
-                frame['end'] = stream.tell()
+                #frame['end'] = stream.tell()
                 return frame
 
         #出错，往后跳一个字节再重新尝试
@@ -153,38 +156,32 @@ def ParseMusicHeader(header):
     if mpegVer == MPEGVersionReserved:
         return None
     layer = (header[1] & 0x06) >> 1 #2位，层, 0-未使用，1-Layer3, 2-Layer2, 3-Layer3
-    if layer == 0:
-        return None
-    crcProt = (header[1] & 0x01) == 0x00 #是否有CRC校验，0-校验
+    #crcProt = (header[1] & 0x01) == 0x00 #是否有CRC校验，0-校验
     bitRateIndex = (header[2] & 0xf0) >> 4 #位率索引，共4位
-    if bitRateIndex == 0 or bitRateIndex == 15:
-        return None
-    
-    #查表得出位率
     if mpegVer == MPEGVersion1:
-        bitRate = v1_br.get(layer)[bitRateIndex] * 1000
+        bitRate = v1_br[layer][bitRateIndex]  #查表得出位率
     else:
-        bitRate = v2_br.get(layer)[bitRateIndex] * 1000
+        bitRate = v2_br[layer][bitRateIndex]
+    if bitRate == 0:
+        return None
 
     samplingRateIndex = (header[2] & 0x0c) >> 2 #采样率索引，2位
-    if samplingRateIndex == 3:
+    samplingRate = samplingTable[mpegVer][samplingRateIndex] #查表得出采样率
+    if samplingRate == 0:
         return None
-    
-    #查表得出采样率
-    samplingRate = samplingTable[mpegVer][samplingRateIndex]
     
     paddingBit = (header[2] & 0x02) == 0x02 #帧长调节 (1 bit)
-    privateBit = (header[2] & 0x01) == 0x01 #保留字 (1 bit)
+    #privateBit = (header[2] & 0x01) == 0x01 #保留字 (1 bit)
     channelMode = (header[3] & 0xc0) >> 6 #声道模式 (2 bits)
-    modeExtension = (header[3] & 0x30) >> 4 #扩充模式，仅用于 Joint Stereo mode. (2 bits)
-    if (channelMode != JointStereo) and (modeExtension != 0):
-        return None
+    #modeExtension = (header[3] & 0x30) >> 4 #扩充模式，仅用于 Joint Stereo mode. (2 bits)
+    #if (channelMode != JointStereo) and (modeExtension != 0):
+    #    return None
 
-    copyrightBit = (header[3] & 0x08) == 0x08 #版权 (1 bit)
-    originalBit = (header[3] & 0x04) == 0x04 #原版标志 (1 bit)
-    emphasis = (header[3] & 0x03) #强调标识 (2 bits)
-    if emphasis == 2:
-        return None
+    #copyrightBit = (header[3] & 0x08) == 0x08 #版权 (1 bit)
+    #originalBit = (header[3] & 0x04) == 0x04 #原版标志 (1 bit)
+    #emphasis = (header[3] & 0x03) #强调标识 (2 bits)
+    #if emphasis == 2:
+    #    return None
     
     #帧大小即每帧的采样数，表示一帧数据中采样的个数
     sampleCount = sampleCountTable[mpegVer][layer]
@@ -208,8 +205,12 @@ def ParseMusicHeader(header):
     # Experimentation on mp3 files captured from the wild indicates that it
     # includes the header at least.
     frameLength = int((sampleCount / 8) * bitRate / samplingRate + padding)
-    return {'type': 'FRAME', 'len': frameLength, 'bitRate': bitRate, 'samplingRate': samplingRate,
-        'sampleCount': sampleCount, 'mpegVer': mpegVer, 'layer': layer, 'channelMode': channelMode}
+
+    #每帧持续时间(毫秒) = 每帧采样数 / 采样频率 * 1000
+    #duration = sampleCount / samplingRate * 1000
+    
+    return {'type': 'FRAME', 'len': frameLength, 'bitRate': bitRate,
+        'mpegVer': mpegVer, 'layer': layer, 'channelMode': channelMode}
 
 #创建一个新的VBR帧
 def NewXingHeader(totalFrames, totalBytes):
@@ -274,21 +275,26 @@ def AddID3v2Tag(output, input_):
 
 #合并mp3文件
 #output: 输出文件名或流对象
-#inputs: 输入文件名列表或二进制内容类别
+#inputs: 输入文件名列表或二进制内容列表
 #tagIndex: 是否需要将第n个文件的ID3拷贝过来
+#useBuffer: 是否使用内存缓冲区，仅仅适用于传入的参数是文件名
 #force: 是否覆盖目标文件
 #quiet: 是否打印过程
-def merge(output: str, inputs: list, tagIndex: int=None, force: bool=True, quiet: bool=False):
+#返回合并的文件数
+def merge(output: str, inputs: list, tagIndex=None, useBuffer=True, force=False, quiet=False):
     if not force and isinstance(output, str) and os.path.exists(output):
         print(f"Error: the file '{output}' already exists.")
-        return
+        return 0
     if inputs and isinstance(inputs[0], str) and output in inputs:
         print(f'Error: the list of input files includes the output file.')
-        return
+        return 0
 
     printInfo = (lambda x: x) if quiet else (lambda x: print(x))
 
-    outputStream = open(output, 'wb') if isinstance(output, str) else output
+    if isinstance(output, str):
+        outputStream = io.BytesIO() if useBuffer else open(output, 'wb')
+    else:
+        outputStream = output
     
     totalFrames = 0
     totalBytes = 0
@@ -296,16 +302,19 @@ def merge(output: str, inputs: list, tagIndex: int=None, force: bool=True, quiet
     firstBitRate = 0
     isVBR = False
     for idx, input_ in enumerate(inputs):
-        needClose = False
         if isinstance(input_, str):
             printInfo(f' + {input_}')
-            input_ = open(input_, 'rb')
-            needClose = True
+            if useBuffer:
+                with open(input_, 'rb') as f:
+                    inputStream = io.BytesIO(f.read())
+            else:
+                inputStream = open(input_, 'rb')
         else:
             printInfo(f' + <stream {idx}>')
+            inputStream = input_
 
         isFirstFrame = True
-        for frame in IterFrame(input_):
+        for frame in IterFrame(inputStream):
             if isFirstFrame: #第一个帧如果是VBR，不包含音乐数据
                 isFirstFrame = False
                 if IsVBRHeader(frame):
@@ -320,34 +329,58 @@ def merge(output: str, inputs: list, tagIndex: int=None, force: bool=True, quiet
             totalFrames += 1
             totalBytes += frame['len']
         totalFiles += 1
-        if needClose:
-            input_.close()
+
+        if isinstance(input_, str) and not useBuffer:
+            inputStream.close()
 
     if isinstance(output, str):
-        outputStream.close()
+        if useBuffer:
+            outputStream.seek(0)
+        else:
+            outputStream.close()
 
     #如果不同的文件的比特率不同，则在前面添加一个VBR头
     if isVBR:
         printInfo("• Multiple bitrates detected. Adding VBR header.")
-        AddXingHeader(output, totalFrames, totalBytes)
-        if isinstance(output, str):
-            try:
-                tempStream.close()
-                os.remove(output + '.mp3cat.tmp')
-            except:
-                pass
-
-    if tagIndex is not None and tagIndex < len(inputs):
+        if isinstance(output, str) and not useBuffer:
+            AddXingHeader(output, totalFrames, totalBytes)
+        else:
+            AddXingHeader(outputStream, totalFrames, totalBytes)
+    
+    #拷贝ID3Tag
+    if tagIndex is not None and (0 < tagIndex < len(inputs)):
         input_ = inputs[tagIndex]
         needClose = False
         if isinstance(input_, str):
             printInfo(f"• Copying ID3 tag from: {input_}")
-            input_ = open(input_, 'rb')
-            needClose = True
+            if useBuffer:
+                with open(input_, 'rb') as f:
+                    inputStream = io.BytesIO(f.read())
+            else:
+                inputStream = open(input_, 'rb')
         else:
             printInfo(f'• Copying ID3 tag from: <stream {tagIndex}>')
-        AddID3v2Tag(output, input_)
-        if needClose:
-            input_.close()
+            inputStream = input_
+        if isinstance(output, str) and not useBuffer:
+            AddID3v2Tag(output, inputStream)
+        else:
+            AddID3v2Tag(outputStream, inputStream)
+        if isinstance(input_, str) and not useBuffer:
+            inputStream.close()
+
+    if isinstance(output, str) and useBuffer:
+        with open(output, 'wb') as f:
+            f.write(outputStream.getvalue())
 
     printInfo(f"• {totalFiles} files merged.")
+    return totalFiles
+
+if __name__ == '__main__':
+    import time
+    dir_ = 'd:/temp'
+    inputs = [os.path.join(dir_, f'Headspace{idx}.mp3') for idx in range(1, 9)]
+    inputs.append('d:/temp/na.mp3')
+    output = os.path.join(dir_, 'output.mp3')
+    startTime = time.time()
+    merge(output, inputs, force=True, useBuffer=True, tagIndex=8)
+    print(f'Consumed time: {time.time() - startTime:0.1f} seconds')

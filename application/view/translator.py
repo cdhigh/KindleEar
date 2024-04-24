@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #文本翻译器和文本转语音
-import json, base64
+import json, base64, secrets
 from functools import wraps
 from flask import Blueprint, render_template, request, url_for
 from flask_babel import gettext as _
@@ -52,7 +52,7 @@ def BookTranslatorRoute(recipeType, recipe, user, recipeId):
 
     engines = json.dumps(get_trans_engines(), separators=(',', ':'))
     return render_template('book_translator.html', tab="my", tips=tips, params=params, title=recipe.title,
-        recipeId=recipeId, engines=engines)
+        recipeId=recipeId, engines=engines, famous=secrets.choice(famous_quotes))
 
 #修改书籍文本翻译器的设置
 @bpTranslator.post("/translator/<recipeId>", endpoint='BookTranslatorPost')
@@ -99,7 +99,8 @@ def BookTranslatorPost(recipeType, recipe, user, recipeId):
             tips = _('This recipe has not been subscribed to yet.')
         
     return render_template('book_translator.html', tab="my", tips=tips, params=params, title=recipe.title,
-        recipeId=recipeId, engines=json.dumps(engines, separators=(',', ':')))
+        recipeId=recipeId, engines=json.dumps(engines, separators=(',', ':')),
+        famous=secrets.choice(famous_quotes))
 
 #测试Recipe的文本翻译器设置是否正确
 @bpTranslator.post("/translator/test/<recipeId>", endpoint='BookTranslatorTestPost')
@@ -136,7 +137,7 @@ def BookTTSRoute(recipeType, recipe, user, recipeId):
 
     engines = json.dumps(get_tts_engines(), separators=(',', ':'))
     return render_template('book_audiolator.html', tab="my", tips=tips, params=params, title=recipe.title,
-        recipeId=recipeId, engines=engines)
+        recipeId=recipeId, engines=engines, famous=secrets.choice(famous_quotes))
 
 #修改书籍TTS的设置
 @bpTranslator.post("/tts/<recipeId>", endpoint='BookTTSPost')
@@ -156,7 +157,8 @@ def BookTTSPost(recipeType, recipe, user, recipeId):
         if not params.get('api_key'):
             tips = _('The api key is required.')
             return render_template('book_audiolator.html', tab="my", tips=tips, params=params, title=recipe.title,
-                recipeId=recipeId, engines=json.dumps(engines, separators=(',', ':')))
+                recipeId=recipeId, engines=json.dumps(engines, separators=(',', ':')),
+                famous=secrets.choice(famous_quotes))
     else:
         params['api_host'] = ''
 
@@ -179,7 +181,8 @@ def BookTTSPost(recipeType, recipe, user, recipeId):
             tips = _('This recipe has not been subscribed to yet.')
         
     return render_template('book_audiolator.html', tab="my", tips=tips, params=params, title=recipe.title,
-        recipeId=recipeId, engines=json.dumps(engines, separators=(',', ':')))
+        recipeId=recipeId, engines=json.dumps(engines, separators=(',', ':')),
+        famous=secrets.choice(famous_quotes))
 
 #测试Recipe的文本转语音TTS设置是否正确
 @bpTranslator.post("/tts/test/<recipeId>", endpoint='BookTTSTestPost')
@@ -203,3 +206,36 @@ def BookTTSTestPost(recipeType, recipe, user, recipeId):
         data['audio'] = base64.b64encode(data['audio']).decode('utf-8')
         
     return data
+
+famous_quotes = [
+    "I have a dream. - Martin Luther King Jr.",
+    "Be the change that you wish to see in the world. - Mahatma Gandhi",
+    "To be, or not to be, that is the question. - William Shakespeare",
+    "I think, therefore I am. - René Descartes",
+    "Give me liberty, or give me death! - Patrick Henry",
+    "The only thing we have to fear is fear itself. - Franklin D. Roosevelt",
+    "Injustice anywhere is a threat to justice everywhere. - Martin Luther King Jr.",
+    "Ask not what your country can do for you; ask what you can do for your country. - John F. Kennedy",
+    "The only way to do great work is to love what you do. - Steve Jobs",
+    "Float like a butterfly, sting like a bee. - Muhammad Ali",
+    "I am the master of my fate, I am the captain of my soul. - William Ernest Henley",
+    "I have nothing to declare except my genius. - Oscar Wilde",
+    "You miss 100% of the shots you don't take. - Wayne Gretzky",
+    "All men are created equal. - Thomas Jefferson",
+    "The unexamined life is not worth living. - Socrates",
+    "To infinity and beyond! - Buzz Lightyear",
+    "The only thing that is constant is change. - Heraclitus",
+    "It does not do to dwell on dreams and forget to live. - J.K. Rowling",
+    "Love all, trust a few, do wrong to none. - William Shakespeare",
+    "Life is what happens when you're busy making other plans. - John Lennon",
+    "The greatest glory in living lies not in never falling, but in rising every time we fall. - Nelson Mandela",
+    "The only true wisdom is in knowing you know nothing. - Socrates",
+    "In the end, it's not the years in your life that count. It's the life in your years. - Abraham Lincoln",
+    "Darkness cannot drive out darkness; only light can do that. Hate cannot drive out hate; only love can do that. - Martin Luther King Jr.",
+    "The journey of a thousand miles begins with one step. - Lao Tzu",
+    "Imagination is more important than knowledge. - Albert Einstein",
+    "We must learn to live together as brothers or perish together as fools. - Martin Luther King Jr.",
+    "Do not dwell in the past, do not dream of the future, concentrate the mind on the present moment. - Buddha",
+    "Happiness is not something ready-made. It comes from your own actions. - Dalai Lama",
+    "Life is like riding a bicycle. To keep your balance, you must keep moving. - Albert Einstein"
+]

@@ -11,9 +11,9 @@ def get_tts_engines():
     for name, engine in builtin_tts_engines.items():
         info[name] = {'alias': engine.alias, 'need_api_key': engine.need_api_key, 
             'default_api_host': engine.default_api_host, 'api_key_hint': engine.api_key_hint,
-            'languages': engine.languages, 'region_url': engine.region_url,
-            'voice_url': engine.voice_url, 'language_url': engine.language_url,
-            'regions': engine.regions}
+            'languages': engine.languages, 'engine_url': engine.engine_url,
+            'region_url': engine.region_url, 'voice_url': engine.voice_url, 
+            'language_url': engine.language_url, 'regions': engine.regions}
     return info
 
 class HtmlAudiolator:

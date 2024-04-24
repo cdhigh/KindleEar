@@ -14,6 +14,7 @@ class TTSBase:
     max_len_per_request = 500
     languages = {}
     regions = {}
+    engine_url = '' #一个链接，关于引擎的介绍链接网页
     region_url = '' #一个链接，可以在这个链接网页上找到可用的区域
     voice_url = '' #一个链接，可以在这个网页上找到语音名称列表
     language_url = '' #一个链接，可以在这个网页上找到支持的语种列表

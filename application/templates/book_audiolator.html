@@ -31,7 +31,8 @@
         <input type="text" name="send_to" id="tts_send_to_input" value="{{params.get('send_to', '')}}" class="pure-u-1 pure-u-sm-1-2" placeholder="{{_('Empty to use Kindle_email')}}" />
       </div>
       <div class="pure-control-group">
-        <label>{{_("TTS Engine")}}</label>
+        <label><a id="tts_engine_a" href="" target="_blank" style="color:rgb(0,0,0,0.8)">
+        {{_("TTS Engine")}}</a></label>
         <select class="pure-u-1 pure-u-sm-1-2" name="engine" id="tts_engine" onchange="TTSEngineFieldChanged('{{language}}', '{{region}}');TTSLanguageFieldChanged('{{voice}}')">
           <!-- 由脚本填充 -->
         </select>
@@ -53,7 +54,8 @@
         <input type="text" name="api_key" id="tts_api_key_input" value="{{api_key}}" class="pure-u-1 pure-u-sm-1-2" />
       </div>
       <div class="pure-control-group">
-        <label>{{_("Language")}}</label>
+        <label><a id="tts_language_a" href="" target="_blank" style="color:rgb(0,0,0,0.8)">
+        {{_("Language")}}</a></label>
         <select class="pure-u-1 pure-u-sm-1-2" name="language" id="tts_language_sel" onchange="TTSLanguageFieldChanged('{{voice}}')">
           <!-- 由脚本填充 -->
         </select>
@@ -117,7 +119,7 @@
       <legend><h3>{{_("Test (Please save settings firstly)")}}</h3></legend>
       <div class="pure-control-group">
         <label>{{_("Text")}}</label>
-        <textarea class="pure-u-1 pure-u-sm-1-2" name="tts_test_src_text" id="tts_test_src_text">Hello world!</textarea>
+        <textarea class="pure-u-1 pure-u-sm-1-2" name="tts_test_src_text" id="tts_test_src_text">{{famous}}</textarea>
       </div>
       <div class="pure-control-group">
         <label></label>

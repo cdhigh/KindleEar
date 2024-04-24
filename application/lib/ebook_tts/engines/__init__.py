@@ -4,7 +4,7 @@ from .tts_base import TTSBase
 from .azure import AzureTTS
 from .google import GoogleWebTTSFree, GoogleTextToSpeech
 builtin_tts_engines = {
-    AzureTTS.name: AzureTTS,
     GoogleWebTTSFree.name: GoogleWebTTSFree,
     GoogleTextToSpeech.name: GoogleTextToSpeech,
+    AzureTTS.name: AzureTTS,
 }

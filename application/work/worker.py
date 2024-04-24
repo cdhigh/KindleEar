@@ -99,15 +99,18 @@ def WorkerImpl(userName: str, recipeId: list=None, log=None):
         #如果有TTS音频，先推送音频
         ext, audio = MergeAudioSegment(roList)
         if audio:
+            if lastSendTime and (time.time() - lastSendTime < 10):
+                time.sleep(10)
+
             audioName = f'{title}.{ext}'
             to = roList[0].tts.get('send_to') or user.cfg('kindle_email')
             send_to_kindle(user, audioName, (audioName, audio), to=to)
             lastSendTime = time.time()
+            ret.append(f"Sent {title}.mp3")
 
         if book:
             #避免触发垃圾邮件机制，最短10s发送一次
-            now = time.time() #单位为s
-            if lastSendTime and (now - lastSendTime < 10):
+            if lastSendTime and (time.time() - lastSendTime < 10): #单位为s
                 time.sleep(10)
 
             send_to_kindle(user, title, book)
@@ -157,22 +160,16 @@ def GetAllRecipeSrc(user, idList):
 
 #返回可用的mp3cat执行文件路径
 def mp3cat_path():
-    import subprocess, platform
-    mp3Cat = 'mp3cat'
-    isWindows = 'Windows' in platform.system()
-    execFile = 'mp3cat.exe' if isWindows else 'mp3cat'
-    try: #优先使用系统安装的mp3cat
-        subprocess.run([execFile, "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True, shell=True)
+    try:
+        import subprocess, platform
+        isWindows = 'Windows' in platform.system()
+        execFile = 'mp3cat.exe' if isWindows else 'mp3cat'
+        subprocess.run([execFile, "--version"], check=True, shell=True)
         default_log.debug('Using system mp3cat')
     except: #subprocess.CalledProcessError:
-        mp3Cat = os.path.join(appDir, 'tools', 'mp3cat', execFile)
-        try:
-            subprocess.run([mp3Cat, "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True, shell=True)
-            default_log.debug('Using app mp3cat')
-        except Exception as e:
-            #default_log.warning(f"Cannot execute mp3cat. Please check file exists and permissions: {e}")
-            mp3Cat = ''
-    return mp3Cat
+        #default_log.warning(f"Cannot execute mp3cat. Please check file exists and permissions: {e}")
+        execFile = ''
+    return execFile
 
 #合并TTS生成的音频片段
 def MergeAudioSegment(roList):
@@ -182,12 +179,12 @@ def MergeAudioSegment(roList):
         return ret
 
     mp3Cat = mp3cat_path()
-    pymp3cat = None
-    if not mp3Cat:
+    if mp3Cat:
+        import subprocess
+    else:
         import pymp3cat
         default_log.info('Using python version mp3cat')
 
-    import shutil, subprocess
     from calibre.ptempfile import PersistentTemporaryDirectory
     tempDir = PersistentTemporaryDirectory(prefix='ttsmerg_', dir=os.environ.get('KE_TEMP_DIR'))
 
@@ -198,18 +195,22 @@ def MergeAudioSegment(roList):
         if not mp3Files:
             continue
         outputFile = os.path.join(tempDir, f'output_{idx:04d}.mp3')
+        mergedFiles = 0
         if mp3Cat:
+            mergedFiles = len(mp3Files)
             mp3Files = ' '.join(mp3Files)
             runRet = subprocess.run(f'{mp3Cat} {mp3Files} -f -q -o {outputFile}', shell=True)
-            if (runRet.returncode == 0) and os.path.exists(outputFile):
-                chapters.append(outputFile)
+            if runRet.returncode != 0:
+                mergedFiles = 0
+                info = f'mp3cat return code : {runRet.returncode}'
         else:
             try:
-                pymp3cat.merge(outputFile, mp3Files, quiet=True)
-                if os.path.exists(outputFile):
-                    chapters.append(outputFile)
+                mergedFiles = pymp3cat.merge(outputFile, mp3Files, quiet=True)
             except Exception as e:
                 default_log.warning('Failed to merge mp3 by pymp3cat: {e}')
+
+        if mergedFiles and os.path.exists(outputFile):
+            chapters.append(outputFile)
 
 
     #再将所有recipe的音频合并为一个大的文件
@@ -223,18 +224,21 @@ def MergeAudioSegment(roList):
     elif chapters:
         outputFile = os.path.join(tempDir, 'final.mp3')
         info = ''
+        mergedFiles = 0
         if mp3Cat:
+            mergedFiles = len(chapters)
             mp3Files = ' '.join(chapters)
             runRet = subprocess.run(f'{mp3Cat} {mp3Files} -f -q -o {outputFile}', shell=True)
             if runRet.returncode != 0:
+                mergedFiles = 0
                 info = f'mp3cat return code : {runRet.returncode}'
         else:
             try:
-                pymp3cat.merge(outputFile, chapters, quiet=True)
+                mergedFiles = pymp3cat.merge(outputFile, chapters, quiet=True)
             except Exception as e:
                 info = 'Failed merge mp3 by pymp3cat: {e}'
 
-        if not info and os.path.exists(outputFile):
+        if not info and mergedFiles and os.path.exists(outputFile):
             try:
                 with open(outputFile, 'rb') as f:
                     data = f.read()
@@ -245,6 +249,7 @@ def MergeAudioSegment(roList):
             default_log.warning(info if info else 'Failed merge mp3')
 
     #清理临时文件
+    import shutil
     for dir_ in [*audioDirs, tempDir]:
         try:
             shutil.rmtree(dir_)

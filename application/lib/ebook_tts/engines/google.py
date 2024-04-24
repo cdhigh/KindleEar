@@ -150,6 +150,7 @@ class GoogleWebTTSFree(TTSBase):
     request_interval = 10 #额外的，好像每天只允许50个请求
     max_len_per_request = 1666
     languages = gtts_languages
+    engine_url = 'https://translate.google.com'
     
     def __init__(self, params):
         super().__init__(params)
@@ -184,6 +185,7 @@ class GoogleTextToSpeech(TTSBase):
     request_interval = 2
     max_len_per_request = 1666
     languages = googletts_languages
+    engine_url = 'https://console.cloud.google.com/apis/api/texttospeech.googleapis.com/overview'
     
     def __init__(self, params):
         super().__init__(params)

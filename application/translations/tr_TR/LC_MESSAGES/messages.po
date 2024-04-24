@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-04-18 21:52-0300\n"
+"POT-Creation-Date: 2024-04-23 10:39-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: tr_TR\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:151
+#: application/templates/admin.html:3 application/templates/base.html:153
 msgid "Admin"
 msgstr "Yönetim"
 
@@ -218,8 +218,8 @@ msgid "Host"
 msgstr "Ana bilgisayar"
 
 #: application/templates/adv_archive.html:119
-#: application/templates/book_audiolator.html:77
-#: application/templates/book_translator.html:77
+#: application/templates/book_audiolator.html:112
+#: application/templates/book_translator.html:80
 #: application/templates/setting.html:250
 msgid "Save settings"
 msgstr "Ayarları kaydet"
@@ -433,7 +433,7 @@ msgid "Category"
 msgstr "Kategori"
 
 #: application/templates/base.html:35
-#: application/templates/book_audiolator.html:43
+#: application/templates/book_audiolator.html:57
 #: application/templates/setting.html:130
 msgid "Language"
 msgstr "Dil"
@@ -695,6 +695,14 @@ msgid "Emb"
 msgstr "Emb"
 
 #: application/templates/base.html:98
+msgid "Tr"
+msgstr "Tr"
+
+#: application/templates/base.html:99
+msgid "Tts"
+msgstr "Tts"
+
+#: application/templates/base.html:100
 msgid ""
 "The test email has been successfully sent to the following addresses. "
 "Please check your inbox or spam folder to confirm its delivery. Depending"
@@ -704,15 +712,15 @@ msgstr ""
 "gelen kutunuzu veya spam klasörünüzü kontrol edin. E-posta sunucunuza "
 "bağlı olarak hafif bir gecikme olabilir."
 
-#: application/templates/base.html:99
+#: application/templates/base.html:101
 msgid "Translating..."
 msgstr "Translating..."
 
-#: application/templates/base.html:100
+#: application/templates/base.html:102
 msgid "The configuration validation is correct."
 msgstr "Konfigürasyon doğrulaması doğru."
 
-#: application/templates/base.html:101 application/templates/logs.html:22
+#: application/templates/base.html:103 application/templates/logs.html:22
 #: application/templates/logs.html:67 application/templates/my.html:17
 #: application/templates/setting.html:97 application/templates/setting.html:98
 #: application/templates/setting.html:99 application/templates/setting.html:100
@@ -720,144 +728,193 @@ msgstr "Konfigürasyon doğrulaması doğru."
 msgid "Title"
 msgstr "Başlık"
 
-#: application/templates/base.html:102
+#: application/templates/base.html:104
 #: application/templates/book_audiolator.html:3
-#: application/templates/book_audiolator.html:15
+#: application/templates/book_audiolator.html:20
 msgid "Text to Speech"
 msgstr "Metin Okuma"
 
-#: application/templates/base.html:124 application/templates/home.html:12
+#: application/templates/base.html:126 application/templates/home.html:12
 msgid "Logout"
 msgstr "Çıkış"
 
-#: application/templates/base.html:126 application/templates/home.html:17
+#: application/templates/base.html:128 application/templates/home.html:17
 #: application/templates/login.html:3 application/templates/login.html:19
 #: application/templates/login.html:29
 msgid "Login"
 msgstr "Giriş"
 
-#: application/templates/base.html:128 application/templates/signup.html:3
+#: application/templates/base.html:130 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr "Kaydol"
 
-#: application/templates/base.html:148 application/templates/home.html:11
+#: application/templates/base.html:150 application/templates/home.html:11
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr "RSSler"
 
-#: application/templates/base.html:149 application/templates/setting.html:3
+#: application/templates/base.html:151 application/templates/setting.html:3
 msgid "Settings"
 msgstr "Ayarlar"
 
-#: application/templates/base.html:150 application/templates/logs.html:3
+#: application/templates/base.html:152 application/templates/logs.html:3
 msgid "Logs"
 msgstr "Kayıtlar"
 
-#: application/templates/base.html:152
+#: application/templates/base.html:154
 msgid "Advanced"
 msgstr "Gelişmiş"
 
-#: application/templates/base.html:153 application/templates/library.html:3
+#: application/templates/base.html:155 application/templates/library.html:3
 msgid "Shared"
 msgstr "Paylaşılan"
 
-#: application/templates/book_audiolator.html:17
+#: application/templates/book_audiolator.html:22
 #: application/templates/book_translator.html:19
 msgid "State"
 msgstr "Durum"
 
-#: application/templates/book_audiolator.html:19
+#: application/templates/book_audiolator.html:24
 msgid "Send Ebook and Audio"
 msgstr "E-kitap ve Ses Gönder"
 
-#: application/templates/book_audiolator.html:20
+#: application/templates/book_audiolator.html:25
 msgid "Send Audio only"
 msgstr "Sadece Ses Gönder"
 
-#: application/templates/book_audiolator.html:21
+#: application/templates/book_audiolator.html:26
 msgid "Disable TTS"
 msgstr "TTS'yi Devre Dışı Bırak"
 
-#: application/templates/book_audiolator.html:25
+#: application/templates/book_audiolator.html:30
 msgid "Send Audio To"
 msgstr "Sesi Gönder"
 
-#: application/templates/book_audiolator.html:26
+#: application/templates/book_audiolator.html:31
 msgid "Empty to use Kindle_email"
 msgstr "Kindle_email kullanmak için boş bırakın"
 
-#: application/templates/book_audiolator.html:29
+#: application/templates/book_audiolator.html:35
 msgid "TTS Engine"
 msgstr "TTS Motoru"
 
-#: application/templates/book_audiolator.html:35
+#: application/templates/book_audiolator.html:41
 #: application/templates/book_translator.html:32
 msgid "Api Host"
 msgstr "Api Host"
 
-#: application/templates/book_audiolator.html:39
+#: application/templates/book_audiolator.html:42
+msgid "Empty to use default endpoint"
+msgstr "Varsayılan uç noktayı kullanmak için boş bırakın"
+
+#: application/templates/book_audiolator.html:46
+msgid "Region"
+msgstr "Bölge"
+
+#: application/templates/book_audiolator.html:53
 #: application/templates/book_translator.html:36
 msgid "Api Key"
 msgstr "Api Key"
 
-#: application/templates/book_audiolator.html:49
-msgid "Voice Role"
-msgstr "Ses Rolü"
+#: application/templates/book_audiolator.html:65
+msgid "Voice name"
+msgstr "Ses adı"
 
-#: application/templates/book_audiolator.html:51
-msgid "Male"
-msgstr "Erkek"
+#: application/templates/book_audiolator.html:72
+msgid "Voice speed"
+msgstr "Ses hızı"
 
-#: application/templates/book_audiolator.html:52
-msgid "Female"
-msgstr "Kadın"
+#: application/templates/book_audiolator.html:74
+msgid "Extra slow"
+msgstr "Ekstra yavaş"
 
-#: application/templates/book_audiolator.html:56
-msgid "Speed"
-msgstr "Hız"
-
-#: application/templates/book_audiolator.html:58
-msgid "Normal"
-msgstr "Normal"
-
-#: application/templates/book_audiolator.html:59
+#: application/templates/book_audiolator.html:75
 msgid "Slow"
 msgstr "Yavaş"
 
-#: application/templates/book_audiolator.html:63
-msgid "Voice Style"
-msgstr "Ses Stili"
+#: application/templates/book_audiolator.html:76
+#: application/templates/book_audiolator.html:86
+#: application/templates/book_audiolator.html:96
+msgid "Medium"
+msgstr "Orta"
 
-#: application/templates/book_audiolator.html:65
-msgid "Chat"
-msgstr "Sohbet"
+#: application/templates/book_audiolator.html:77
+msgid "Fast"
+msgstr "Hızlı"
 
-#: application/templates/book_audiolator.html:66
-msgid "Cheerful"
-msgstr "Neşeli"
+#: application/templates/book_audiolator.html:78
+msgid "Extra fast"
+msgstr "Ekstra hızlı"
 
-#: application/templates/book_audiolator.html:72
+#: application/templates/book_audiolator.html:82
+msgid "Voice pitch"
+msgstr "Ses tonu"
+
+#: application/templates/book_audiolator.html:84
+msgid "Extra low"
+msgstr "Ekstra düşük"
+
+#: application/templates/book_audiolator.html:85
+msgid "Low"
+msgstr "Düşük"
+
+#: application/templates/book_audiolator.html:87
+msgid "High"
+msgstr "Yüksek"
+
+#: application/templates/book_audiolator.html:88
+msgid "Extra high"
+msgstr "Ekstra yüksek"
+
+#: application/templates/book_audiolator.html:92
+msgid "Voice volume"
+msgstr "Ses hacmi"
+
+#: application/templates/book_audiolator.html:94
+msgid "Extra soft"
+msgstr "Ekstra yumuşak"
+
+#: application/templates/book_audiolator.html:95
+msgid "Soft"
+msgstr "Yumuşak"
+
+#: application/templates/book_audiolator.html:97
+msgid "Loud"
+msgstr "Yüksek sesli"
+
+#: application/templates/book_audiolator.html:98
+msgid "Extra loud"
+msgstr "Ekstra yüksek sesli"
+
+#: application/templates/book_audiolator.html:104
 #: application/templates/book_translator.html:72
 msgid "Apply to all subscribed recipes"
 msgstr "Tüm abone olunan tarifelere uygula"
 
-#: application/templates/book_audiolator.html:83
-#: application/templates/book_translator.html:83
+#: application/templates/book_audiolator.html:109
+#: application/templates/book_translator.html:77
+msgid ""
+"Note: Enabling this feature will significantly increase consumed CPU "
+"instance hours."
+msgstr "Not: Bu özelliği etkinleştirmek, kullanılan CPU örnek saatlerini önemli ölçüde artırır."
+
+#: application/templates/book_audiolator.html:118
+#: application/templates/book_translator.html:86
 msgid "Test (Please save settings firstly)"
 msgstr "Test (Lütfen önce ayarları kaydedin)"
 
-#: application/templates/book_audiolator.html:85
-#: application/templates/book_translator.html:85
+#: application/templates/book_audiolator.html:120
+#: application/templates/book_translator.html:88
 msgid "Text"
 msgstr "Metin"
 
-#: application/templates/book_audiolator.html:91
+#: application/templates/book_audiolator.html:126
 msgid "Your browser does not support the audio element."
 msgstr "Tarayıcınız ses öğesini desteklemiyor."
 
-#: application/templates/book_audiolator.html:96
-#: application/templates/book_translator.html:94
+#: application/templates/book_audiolator.html:131
+#: application/templates/book_translator.html:97
 msgid "Test"
 msgstr "Test"
 
@@ -917,7 +974,7 @@ msgstr "Orijinal metin stili"
 msgid "Translated text style"
 msgstr "Çevrilmiş metin stili"
 
-#: application/templates/book_translator.html:89
+#: application/templates/book_translator.html:92
 msgid "Translation"
 msgstr "Çeviri"
 
@@ -1076,8 +1133,8 @@ msgid "Edge extension"
 msgstr "Edge eklentisi"
 
 #: application/templates/my.html:91
-msgid "Browser extensions also available."
-msgstr "Tarayıcı eklentileri de mevcut."
+msgid "Browser extensions also available"
+msgstr "Tarayıcı eklentileri de mevcut"
 
 #: application/templates/reset_password.html:3
 #: application/templates/reset_password.html:41
@@ -1268,9 +1325,9 @@ msgstr "Kullanıcı hesabı"
 msgid "Never expire"
 msgstr "hiç sona ermeyen"
 
-#: application/view/admin.py:51 application/view/adv.py:372
+#: application/view/admin.py:51 application/view/adv.py:371
 #: application/view/setting.py:102 application/view/translator.py:83
-#: application/view/translator.py:161
+#: application/view/translator.py:163
 msgid "Settings Saved!"
 msgstr "Ayarlar Kaydedildi!"
 
@@ -1390,19 +1447,19 @@ msgstr "Tarayıcıda aç"
 msgid "Append qrcode of url to article"
 msgstr "Makaleye URL'nin QR kodunu ekle"
 
-#: application/view/adv.py:374
+#: application/view/adv.py:373
 msgid "The format is invalid."
 msgstr "Format geçersiz."
 
-#: application/view/adv.py:407
+#: application/view/adv.py:406
 msgid "Authorization Error!<br/>{}"
 msgstr "Yetkilendirme Hatası!<br/>{}"
 
-#: application/view/adv.py:430
+#: application/view/adv.py:429
 msgid "Success authorized by Pocket!"
 msgstr "Pocket tarafından yetkilendirilen başarı!"
 
-#: application/view/adv.py:436
+#: application/view/adv.py:435
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
@@ -1410,13 +1467,13 @@ msgstr ""
 "Pocket yetkilendirme isteği başarısız oldu!<hr/>Aşağıdaki ayrıntılara "
 "bakın:<br/><br/>{}"
 
-#: application/view/adv.py:458
+#: application/view/adv.py:457
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 "Instapaper servisi bir hata ile karşılaştı. Lütfen daha sonra tekrar "
 "deneyin."
 
-#: application/view/adv.py:471
+#: application/view/adv.py:470
 msgid "Request type [{}] unsupported"
 msgstr "İstek türü [{}] desteklenmiyor"
 
@@ -1437,9 +1494,9 @@ msgstr "Teslim edilecek tarif yok."
 msgid "Cannot fetch data from {}, status: {}"
 msgstr "{}, durumundan veri alınamıyor: {}"
 
-#: application/view/library.py:51 application/view/subscribe.py:203
-#: application/view/subscribe.py:323 application/view/subscribe.py:351
-#: application/view/subscribe.py:358 application/view/translator.py:29
+#: application/view/library.py:51 application/view/subscribe.py:212
+#: application/view/subscribe.py:332 application/view/subscribe.py:360
+#: application/view/subscribe.py:367 application/view/translator.py:29
 msgid "The recipe does not exist."
 msgstr "Tarif mevcut değil."
 
@@ -1527,111 +1584,111 @@ msgstr "Kindle E-mail adresi gerekli!"
 msgid "Title is requied!"
 msgstr "Başlık zorunlu!"
 
-#: application/view/setting.py:174
+#: application/view/setting.py:175
 msgid "Chinese"
 msgstr "Çince"
 
-#: application/view/setting.py:175
+#: application/view/setting.py:176
 msgid "English"
 msgstr "İngilizce"
 
-#: application/view/setting.py:176
+#: application/view/setting.py:177
 msgid "French"
 msgstr "Fransızca"
 
-#: application/view/setting.py:177
+#: application/view/setting.py:178
 msgid "Spanish"
 msgstr "İspanyolca"
 
-#: application/view/setting.py:178
+#: application/view/setting.py:179
 msgid "Portuguese"
 msgstr "Portekizce"
 
-#: application/view/setting.py:179
+#: application/view/setting.py:180
 msgid "German"
 msgstr "Almanca"
 
-#: application/view/setting.py:180
+#: application/view/setting.py:181
 msgid "Italian"
 msgstr "İtalyanca"
 
-#: application/view/setting.py:181
+#: application/view/setting.py:182
 msgid "Japanese"
 msgstr "Japonca"
 
-#: application/view/setting.py:182
+#: application/view/setting.py:183
 msgid "Russian"
 msgstr "Rusça"
 
-#: application/view/setting.py:183
+#: application/view/setting.py:184
 msgid "Turkish"
 msgstr "Türkçe"
 
-#: application/view/setting.py:184
+#: application/view/setting.py:185
 msgid "Korean"
 msgstr "Koreli"
 
-#: application/view/setting.py:185
+#: application/view/setting.py:186
 msgid "Arabic"
 msgstr "Arapça"
 
-#: application/view/setting.py:186
+#: application/view/setting.py:187
 msgid "Czech"
 msgstr "Çek"
 
-#: application/view/setting.py:187
+#: application/view/setting.py:188
 msgid "Dutch"
 msgstr "Flemenkçe"
 
-#: application/view/setting.py:188
+#: application/view/setting.py:189
 msgid "Greek"
 msgstr "Yunan"
 
-#: application/view/setting.py:189
+#: application/view/setting.py:190
 msgid "Hindi"
 msgstr "Hintçe"
 
-#: application/view/setting.py:190
+#: application/view/setting.py:191
 msgid "Malaysian"
 msgstr "Malezyalı"
 
-#: application/view/setting.py:191
+#: application/view/setting.py:192
 msgid "Bengali"
 msgstr "Bengal"
 
-#: application/view/setting.py:192
+#: application/view/setting.py:193
 msgid "Persian"
 msgstr "Farsça"
 
-#: application/view/setting.py:193
+#: application/view/setting.py:194
 msgid "Urdu"
 msgstr "Urduca"
 
-#: application/view/setting.py:194
+#: application/view/setting.py:195
 msgid "Swahili"
 msgstr "Svahili"
 
-#: application/view/setting.py:195
+#: application/view/setting.py:196
 msgid "Vietnamese"
 msgstr "Vietnam"
 
-#: application/view/setting.py:196
+#: application/view/setting.py:197
 msgid "Punjabi"
 msgstr "Pencap"
 
-#: application/view/setting.py:197
+#: application/view/setting.py:198
 msgid "Javanese"
 msgstr "Cava"
 
-#: application/view/setting.py:198
+#: application/view/setting.py:199
 msgid "Tagalog"
 msgstr "Tagalog"
 
-#: application/view/setting.py:199
+#: application/view/setting.py:200
 msgid "Hausa"
 msgstr "Hausa"
 
-#: application/view/share.py:54 application/view/subscribe.py:215
+#: application/view/share.py:54 application/view/subscribe.py:224
 msgid "Unknown command: {}"
 msgstr "Bilinmeyen komut: {}"
 
@@ -1666,50 +1723,50 @@ msgstr "Aşağıdaki ayrıntılara bakın:"
 msgid "Unknown: {}"
 msgstr "Bilinmeyen: {}"
 
-#: application/view/subscribe.py:58
+#: application/view/subscribe.py:67
 msgid "Title or url is empty!"
 msgstr "URL veya başlık hatalı"
 
-#: application/view/subscribe.py:65 application/view/subscribe.py:133
+#: application/view/subscribe.py:74 application/view/subscribe.py:142
 msgid "Duplicated subscription!"
 msgstr "Duplicated subscription!"
 
-#: application/view/subscribe.py:97
+#: application/view/subscribe.py:106
 msgid "The Title or Url is empty."
 msgstr "Başlık veya URL boş."
 
-#: application/view/subscribe.py:110
+#: application/view/subscribe.py:119
 msgid "Failed to fetch the recipe."
 msgstr "Tarif alınamadı."
 
-#: application/view/subscribe.py:124 application/view/subscribe.py:285
+#: application/view/subscribe.py:133 application/view/subscribe.py:294
 msgid "Failed to save the recipe. Error:"
 msgstr "Tarif kaydedilemedi. Hata:"
 
-#: application/view/subscribe.py:160
+#: application/view/subscribe.py:169
 msgid "The Rss does not exist."
 msgstr "Rss mevcut değil."
 
-#: application/view/subscribe.py:241
+#: application/view/subscribe.py:250
 msgid "You can only delete the uploaded recipe."
 msgstr "Yalnızca yüklenen tarifi silebilirsiniz."
 
-#: application/view/subscribe.py:245
+#: application/view/subscribe.py:254
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "Tarif abone olunmuş, silmeden önce aboneliği iptal edin."
 
-#: application/view/subscribe.py:260 application/view/translator.py:50
+#: application/view/subscribe.py:269 application/view/translator.py:50
 #: application/view/translator.py:99 application/view/translator.py:111
-#: application/view/translator.py:134 application/view/translator.py:177
-#: application/view/translator.py:189
+#: application/view/translator.py:134 application/view/translator.py:179
+#: application/view/translator.py:191
 msgid "This recipe has not been subscribed to yet."
 msgstr "Bu tarife henüz abone olunmadı."
 
-#: application/view/subscribe.py:272
+#: application/view/subscribe.py:281
 msgid "Can not read uploaded file, Error:"
 msgstr "Yüklenen dosya okunamıyor, Hata:"
 
-#: application/view/subscribe.py:280
+#: application/view/subscribe.py:289
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
@@ -1717,23 +1774,22 @@ msgstr ""
 "Tarif çözümlenemedi. Lütfen tarifinizin utf-8 kodlamasında "
 "kaydedildiğinden emin olun."
 
-#: application/view/subscribe.py:300
+#: application/view/subscribe.py:309
 msgid "The recipe is already in the library."
 msgstr "Tarif zaten kütüphanede."
 
-#: application/view/subscribe.py:330
+#: application/view/subscribe.py:339
 msgid "The login information for this recipe has been cleared."
 msgstr "Bu tarifin giriş bilgileri temizlendi."
 
-#: application/view/subscribe.py:334
+#: application/view/subscribe.py:343
 msgid "The login information for this recipe has been saved."
 msgstr "Bu tarifin giriş bilgileri kaydedildi."
 
-#: application/view/translator.py:77 application/view/translator.py:155
+#: application/view/translator.py:77 application/view/translator.py:157
 msgid "The api key is required."
 msgstr "API anahtarı gereklidir."
 
-#: application/view/translator.py:115 application/view/translator.py:193
+#: application/view/translator.py:115 application/view/translator.py:195
 msgid "The text is empty."
 msgstr "Metin boş."
-
