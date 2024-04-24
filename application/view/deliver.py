@@ -55,9 +55,9 @@ def MultiUserDelivery():
                 continue
             
             #到了这里就是需要推送的
-            queueOneBook(bkQueue, user, book.recipe_id, book.separated)
+            queueOneBook(bkQueue, user, book.recipe_id, book.separated, reason='cron')
             sentCnt += 1
-    flushQueueToPush(bkQueue)
+    flushQueueToPush(bkQueue, reason='cron')
     return "Put {} recipes into queue.".format(sentCnt)
 
 #判断指定用户的书籍和订阅哪些需要推送
@@ -77,9 +77,9 @@ def SingleUserDelivery(userName: str, idList: list=None):
     
     bkQueue = defaultdict(list)
     for bkRecipe in recipesToPush: #BookedRecipe实例
-        queueOneBook(bkQueue, user, bkRecipe.recipe_id, bkRecipe.separated)
+        queueOneBook(bkQueue, user, bkRecipe.recipe_id, bkRecipe.separated, reason='manual')
         sent.append(f'<i>{bkRecipe.title}</i>')
-    flushQueueToPush(bkQueue)
+    flushQueueToPush(bkQueue, reason='manual')
     
     if sent:
         tips = (_("The following recipes has been added to the push queue.") + '<br/>&nbsp;&nbsp;&nbsp;&nbsp;' 
@@ -94,18 +94,19 @@ def SingleUserDelivery(userName: str, idList: list=None):
 #user: KeUser实例
 #recipeId: Recipe Id, custom:xx, upload:xx, builtin:xx
 #separated: 是否单独推送
-def queueOneBook(queueToPush: defaultdict, user: KeUser, recipeId: str, separated: bool):
+#reason: cron/manual，启动推送的原因
+def queueOneBook(queueToPush: defaultdict, user: KeUser, recipeId: str, separated: bool, reason='cron'):
     from ..back_end.task_queue_adpt import create_delivery_task
     recipeId = recipeId.replace(':', '__')
     if separated:
-        create_delivery_task({"userName": user.name, "recipeId": recipeId})
+        create_delivery_task({'userName': user.name, 'recipeId': recipeId, 'reason': reason})
     else:
         queueToPush[user.name].append(recipeId) #合并推送
 
 #启动推送队列中的书籍
-def flushQueueToPush(queueToPush: defaultdict):
+def flushQueueToPush(queueToPush: defaultdict, reason='cron'):
     from ..back_end.task_queue_adpt import create_delivery_task
     for name in queueToPush:
-        create_delivery_task({'userName': name, 'recipeId': ','.join(queueToPush[name])})
+        create_delivery_task({'userName': name, 'recipeId': ','.join(queueToPush[name]), 'reason': reason})
     queueToPush.clear()
 

@@ -54,7 +54,8 @@ def create_delivery_task(payload: dict):
     from ..work.worker import WorkerImpl
     userName = payload.get('userName', '')
     recipeId = payload.get('recipeId', '')
-    scheduler.add_job(f'Worker{random.randint(0, 1000)}', WorkerImpl, args=[userName, recipeId], 
+    reason = payload.get('reason', 'cron')
+    scheduler.add_job(f'Worker{random.randint(0, 1000)}', WorkerImpl, args=[userName, recipeId, reason], 
         misfire_grace_time=20*60, replace_existing=True)
 
 def create_url2book_task(payload: dict):

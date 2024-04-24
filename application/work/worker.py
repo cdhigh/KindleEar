@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #后台实际的推送任务，由任务队列触发
+#Author: cdhigh<https://github.com/cdhigh>
 import os, datetime, time, io, logging
 from collections import defaultdict
 from flask import Blueprint, request
@@ -25,15 +26,17 @@ def WorkerAllNow():
 #下载文章和生成电子书并且发送邮件
 @bpWorker.route("/worker")
 def Worker():
-    userName = request.args.get('userName', '')
-    recipeId = request.args.get('recipeId', '')  #如果有多个Recipe，使用','分隔
-    return WorkerImpl(userName, recipeId, default_log)
+    args = request.args
+    userName = args.get('userName', '')
+    recipeId = args.get('recipeId', '')  #如果有多个Recipe，使用','分隔
+    reason = args.get('reason', 'cron') #cron/manual
+    return WorkerImpl(userName, recipeId, reason, default_log)
 
 #执行实际抓取网页生成电子书任务
 #userName: 需要执行任务的账号名
 #recipeId: 需要投递的Recipe ID，如果有多个，使用逗号分隔
 #返回执行结果字符串
-def WorkerImpl(userName: str, recipeId: list=None, log=None):
+def WorkerImpl(userName: str, recipeId: list=None, reason='cron', log=None):
     if not log:
         log = default_log
 
@@ -75,6 +78,7 @@ def WorkerImpl(userName: str, recipeId: list=None, log=None):
         if not ro.language or ro.language == 'und':
             ro.language = user.book_cfg('language')
 
+        ro.delivery_reason = reason
         ro.extra_css = combine_css(ro.extra_css) #合并自定义css
         ro.translator = bked.translator #设置网页翻译器信息
         ro.tts = bked.tts.copy() #文本转语音设置，需要中途修改tts内容
