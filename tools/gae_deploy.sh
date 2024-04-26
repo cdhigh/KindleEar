@@ -13,11 +13,17 @@ if ! gcloud app describe >/dev/null 2>&1; then
 fi
 
 if python ./kindleear/tools/update_req.py gae; then
+  gcloud services enable firestore.googleapis.com datastore.googleapis.com \
+  cloudtasks.googleapis.com cloudscheduler.googleapis.com appenginereporting.googleapis.com \
+  artifactregistry.googleapis.com cloudbuild.googleapis.com cloudtrace.googleapis.com \
+  containerregistry.googleapis.com firebaserules.googleapis.com logging.googleapis.com \
+  pubsub.googleapis.com storage-api.googleapis.com
+  
   gcloud beta app deploy --version=1 ./kindleear/app.yaml
   gcloud beta app deploy --quiet --version=1 ./kindleear/worker.yaml
-  gcloud beta app deploy --version=1 ./kindleear/cron.yaml
-  gcloud beta app deploy --version=1 ./kindleear/queue.yaml
-  gcloud beta app deploy --version=1 ./kindleear/dispatch.yaml
+  gcloud beta app deploy --quiet --version=1 ./kindleear/cron.yaml
+  gcloud beta app deploy --quiet --version=1 ./kindleear/queue.yaml
+  gcloud beta app deploy --quiet --version=1 ./kindleear/dispatch.yaml
   echo -e "The deployment is completed."
   echo -e "The access address is: https://$GOOGLE_CLOUD_PROJECT.appspot.com"
 else
