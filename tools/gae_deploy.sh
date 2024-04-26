@@ -15,9 +15,9 @@ fi
 if python ./kindleear/tools/update_req.py gae; then
   gcloud beta app deploy --version=1 ./kindleear/app.yaml
   gcloud beta app deploy --quiet --version=1 ./kindleear/worker.yaml
-  gcloud beta app deploy --quiet --version=1 ./kindleear/cron.yaml
-  gcloud beta app deploy --quiet --version=1 ./kindleear/queue.yaml
-  gcloud beta app deploy --quiet --version=1 ./kindleear/dispatch.yaml
+  gcloud beta app deploy --version=1 ./kindleear/cron.yaml
+  gcloud beta app deploy --version=1 ./kindleear/queue.yaml
+  gcloud beta app deploy --version=1 ./kindleear/dispatch.yaml
   echo -e "The deployment is completed."
   echo -e "The access address is: https://$GOOGLE_CLOUD_PROJECT.appspot.com"
 else
