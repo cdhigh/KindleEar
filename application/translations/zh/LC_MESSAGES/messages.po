@@ -519,7 +519,7 @@ msgid ""
 "Your recipe has been uploaded, and it can be found in the Library "
 "section. If you dont see it, please make sure to switch to the correct "
 "language."
-msgstr "您的Recipe已经上传，可以在本页面的 \"新闻源\" 区段找到。如果没有，请确认您已经切换到正确的语种。"
+msgstr "您的Recipe已经上传，可以在本页面的 [新闻源] 区段找到。如果没有，请确认您已经切换到正确的语种。"
 
 #: application/templates/base.html:58
 msgid "Your recipe have been deleted."
