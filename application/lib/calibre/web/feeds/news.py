@@ -2232,7 +2232,7 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
             self.remove_tags_from_rules(soup, rules)
             
         #提取失败，尝试自动提取
-        if len(newBody.get_text(strip=True)) < 100:
+        if len(newBody.get_text(strip=True)) < 50:
             self.log.warning(f'Failed to extract content using content_extract_rules, try readability algorithm: {url}')
             try:
                 raw_html = self.extract_readable_article(raw_html, url)
