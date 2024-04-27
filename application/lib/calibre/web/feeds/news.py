@@ -2133,6 +2133,9 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
     #格式和 url_extract_rules 一致，在文章的网页中提取文章正文，为空则使用自动提取
     content_extract_rules = []
 
+    #格式和 url_extract_rules 一致，在提取正文后再删除部分不需要的内容
+    content_remove_rules = []
+
     #返回一个Feed实例列表
     def parse_feeds(self):
         main_urls = self.get_feeds()
@@ -2224,7 +2227,10 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
         newBody = soup.new_tag('body')
         for rules in self.content_extract_rules:
             newBody.extend(self.get_tags_from_rules(soup, rules))
-
+        oldBody.replace_with(newBody)
+        for rules in self.content_remove_rules:
+            self.remove_tags_from_rules(soup, rules)
+            
         #提取失败，尝试自动提取
         if len(newBody.get_text(strip=True)) < 100:
             self.log.warning(f'Failed to extract content using content_extract_rules, try readability algorithm: {url}')
@@ -2234,7 +2240,6 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
                 self.log.warning(f'Failed to auto cleanup URL: {url}')
             return raw_html
         else:
-            oldBody.replace_with(newBody)
             return str(soup)
 
     #根据一个规则列表，从soup中获取符合条件的tag列表
@@ -2248,6 +2253,22 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
         else: #使用CSS选择器，每个选择器的总共最长允许字符长度：1366
             resultTags = soup.select(' '.join(rules))
         return resultTags
+
+    #根据一个规则列表，从soup中去除符合条件的tag列表
+    #rules: 字符串列表或字典列表
+    #此函数直接在soup上修改
+    def remove_tags_from_rules(self, soup, rules):
+        resultTags = []
+        if isinstance(rules[0], dict): #使用Tag字典查找
+            resultTags = soup.find_all(**rules[0])
+            for idx, flt in enumerate(rules[1:]):
+                resultTags = [tag.find_all(**flt) for tag in resultTags]
+                resultTags = [tag for sublist in resultTags for tag in sublist] #二级列表展开为一级列表
+        else: #使用CSS选择器，每个选择器的总共最长允许字符长度：1366
+            resultTags = list(soup.select(' '.join(rules)))
+
+        for tag in resultTags:
+            tag.extract()
 
 class CalibrePeriodical(BasicNewsRecipe):
 
