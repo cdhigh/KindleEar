@@ -94,10 +94,8 @@
         <select class="pure-u-1 pure-u-sm-1-2" name="title_fmt">
           {% set title_fmt = user.book_cfg('title_fmt') %}
           <option value="" {% if not title_fmt %}selected="selected"{% endif %}>{{_("Title Only")}}</option>
-          <option value="%Y-%m-%d" {% if title_fmt=='%Y-%m-%d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%Y-%m-%d")}}</option>
-          <option value="%m-%d" {% if title_fmt=='%m-%d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%m-%d")}}</option>
-          <option value="%b %d" {% if title_fmt=='%b %d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%b %d")}}</option>
-          <option value="%a, %b %d" {% if title_fmt=='%a, %b %d' %}selected="selected"{% endif %}>{{_("Title")}} {{now.strftime("%a, %b %d")}}</option>
+          <option value="title_time" {% if title_fmt=='title_time' %}selected="selected"{% endif %}>{{_("Title")}} {{_("Time")}}</option>
+          <option value="title_[time]" {% if title_fmt=='title_[time]' %}selected="selected"{% endif %}>{{_("Title")}} [{{_("Time")}}]</option>
         </select>
       </div>
       {#<div class="pure-control-group">

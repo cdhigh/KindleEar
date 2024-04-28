@@ -37,6 +37,8 @@ def GenerateRecipeSource(title, feeds, user, isfulltext=False, language=None, ma
     isfulltext = 'True' if isfulltext else 'None'
     language = language or user.book_cfg('language')
     timefmt = user.book_cfg('time_fmt')
+    if timefmt and (user.book_cfg('title_fmt') == 'title_[time]'):
+        timefmt = f'[{timefmt}]'
     cover_url = f"'{cover_url}'" if isinstance(cover_url, str) else cover_url
     src = textwrap.dedent(f'''\
     #!/usr/bin/env python3

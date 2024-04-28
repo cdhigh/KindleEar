@@ -77,10 +77,10 @@ def WorkerImpl(userName: str, recipeId: list=None, reason='cron', log=None):
 
         if not ro.language or ro.language == 'und':
             ro.language = user.book_cfg('language')
-
+            
         ro.delivery_reason = reason
         ro.extra_css = combine_css(ro.extra_css) #合并自定义css
-        ro.translator = bked.translator #设置网页翻译器信息
+        ro.translator = bked.translator.copy() #设置网页翻译器信息
         ro.tts = bked.tts.copy() #文本转语音设置，需要中途修改tts内容
         
         #如果需要登录网站

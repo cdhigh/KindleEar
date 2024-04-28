@@ -160,7 +160,8 @@ def SetLang(langCode):
     if langCode not in supported_languages:
         langCode = "en"
     session['langCode'] = langCode
-    return redirect('/')
+    url = request.args.get('next', '/')
+    return redirect(url)
 
 #Babel选择显示哪种语言的回调函数
 def get_locale():

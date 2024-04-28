@@ -478,7 +478,8 @@ class RecursiveFetcher:
                     self.fs.write(imgpath, data, 'wb')
                     tag['src'] = imgpath
                 except Exception:
-                    traceback.print_exc()
+                    #traceback.print_exc()
+                    self.log.info(traceback.format_exc())
                     continue
 
     #如果需要，纠正或规则化soup里面的图片地址，比如延迟加载等

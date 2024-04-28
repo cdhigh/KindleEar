@@ -293,8 +293,9 @@ class RecipeInput(InputFormatPlugin):
     def build_meta(self, recipe1, onlyRecipe):
         title = recipe1.short_title() if onlyRecipe else 'KindleEar'
         pdate = recipe1.publication_date()
-        if recipe1.output_profile.periodical_date_in_title:
-            title += strftime(recipe1.timefmt, pdate)
+        timefmt = recipe1.timefmt.strip()
+        if timefmt and self.user.book_cfg('title_fmt'):
+            title = f'{title} {strftime(timefmt, pdate)}'
         mi = MetaInformation(title, ['KindleEar'])
         mi.publisher = 'KindleEar'
         #修正Kindle固件5.9.x将作者显示为日期的BUG

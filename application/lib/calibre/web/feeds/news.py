@@ -1640,7 +1640,8 @@ class BasicNewsRecipe(Recipe):
         Defaults to the moment of download. Must return a :class:`datetime.datetime`
         object.
         '''
-        return nowf()
+        #return nowf()
+        return self.user.local_time()
 
     #现在这个函数已经不用，使用recipe_input.py里面的create_opf()
     #通过Feed对象列表构建一个opf文件
