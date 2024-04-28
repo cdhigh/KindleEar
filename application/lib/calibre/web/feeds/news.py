@@ -90,7 +90,7 @@ class Web2diskOptions:
         self.preprocess_raw_html = None
         self.get_delay = None
         self.max_files = None
-        self.keep_image = True
+        self.keep_images = True
 
 
 #每篇文章的下载任务参数
@@ -434,7 +434,8 @@ class BasicNewsRecipe(Recipe):
     #: Set to False if you do not want to use gzipped transfers. Note that some old servers flake out with gzip
     handle_gzip = True
 
-    keep_image = True
+    #: If this value is None, the value of the input option will be used.
+    keep_images = None
 
     # set by worker.py
     translator = {}
@@ -943,7 +944,9 @@ class BasicNewsRecipe(Recipe):
         self.touchscreen = getattr(self.output_profile, 'touchscreen', False)
         if self.touchscreen:
             self.template_css += self.output_profile.touchscreen_news_css
-
+        if self.keep_images is None:
+            self.keep_images = options.keep_images
+            
         self.simultaneous_downloads = min(int(os.getenv('DOWNLOAD_THREAD_NUM', '1')), self.simultaneous_downloads)
 
         if self.test:
@@ -970,7 +973,7 @@ class BasicNewsRecipe(Recipe):
 
         self.web2disk_options = wOpts = Web2diskOptions()
         for attr in ('keep_only_tags', 'remove_tags', 'preprocess_regexps', 'skip_ad_pages', 'preprocess_html', 
-            'remove_tags_after', 'remove_tags_before', 'is_link_wanted', 'compress_news_images', 'keep_image',
+            'remove_tags_after', 'remove_tags_before', 'is_link_wanted', 'compress_news_images', 'keep_images',
             'compress_news_images_max_size', 'compress_news_images_auto_size', 'scale_news_images', 'filter_regexps',
             'match_regexps', 'no_stylesheets', 'verbose', 'delay', 'timeout', 'recursions', 'encoding'):
             setattr(wOpts, attr, getattr(self, attr))
@@ -1307,7 +1310,7 @@ class BasicNewsRecipe(Recipe):
         self.web2disk_options.browser = br
         self.web2disk_options.dir = job_info.art_dir
         if self.tts.get('enable') == 'audio_only':
-            self.web2disk_options.keep_image = False
+            self.web2disk_options.keep_images = False
         
         fetcher = RecursiveFetcher(self.web2disk_options, self.fs, self.log, job_info, self.image_map, self.css_map)
         fetcher.browser = br

@@ -175,7 +175,10 @@ class InputFormatPlugin(Plugin):
                    'do not declare an encoding or that have erroneous '
                    'encoding declarations.')),
         OptionRecommendation(name='user', recommended_value=None,
-            help='Keuser instance.'),}
+            help='Keuser instance.'),
+        OptionRecommendation(name='keep_images', recommended_value=True,
+            help='If keep the images.'),
+        }
 
     #: Options to customize the behavior of this plugin. Every option must be an
     #: instance of :class:`OptionRecommendation`.

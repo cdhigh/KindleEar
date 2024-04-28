@@ -645,10 +645,11 @@ function showH5Dialog(content, buttons, last_btn_act) {
     });
 
     // 计算对话框的垂直位置（屏幕中央）
-    const windowHeight = $(window).height();
+    /*const windowHeight = $(window).height();
     const dialogHeight = modal.outerHeight();
-    const pos = parseInt((windowHeight - dialogHeight) / 3);
-    modal.css('top', pos + 'px');
+    const scrollTop = $(window).scrollTop();
+    const pos = parseInt((windowHeight - dialogHeight) / 3) + scrollTop;
+    modal.css('top', pos + 'px');*/
     modal[0].showModal();
   });
 }

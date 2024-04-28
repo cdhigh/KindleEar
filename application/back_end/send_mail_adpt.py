@@ -76,7 +76,7 @@ def send_to_kindle(user, title, attachment, fileWithTime=True, to=None):
     try:
         send_mail(user, to, subject, body, attachment)
     except Exception as e:
-        status = str(e)
+        status = str(e)[:500]
         default_log.warning(f'Failed to send mail "{title}": {status}')
     
     size = sum([len(a[1]) for a in attachment])
@@ -131,7 +131,7 @@ def send_html_mail(user, to, subject, html, attachments=None, body=None):
     try:
         send_mail(user, to, subject, body, attachments=attachments, html=html)
     except Exception as e:
-        status = str(e)
+        status = str(e)[:500]
     
     size = len(html or body) + sum([len(c) for f, c in (attachments or [])])
     save_delivery_log(user, subject, size, status=status, to=to)

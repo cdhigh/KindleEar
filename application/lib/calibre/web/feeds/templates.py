@@ -65,7 +65,8 @@ class Template:
 class EmbeddedContent(Template):
 
     def _generate(self, article, style=None, extra_css=None):
-        content = article.content if article.content else ''
+        ac = article.content
+        content = ' '.join([e.value for e in ac]) if isinstance(ac, list) else (ac or '')
         summary = article.summary if article.summary else ''
         text = content if len(content) > len(summary) else summary
         head = HEAD(META(charset="utf-8"), TITLE(article.title))

@@ -27,8 +27,10 @@ kindleear/tools/gae_deploy.sh
 ```
 
 3. Finish deployment   
-After deployment, wait a few minutes for GAE backend to create various resources. If it's still not working, manually enable various APIs based on the error logs in the backend.    
-For example, you may need to manually enable the [Cloud Datastore API](https://console.cloud.google.com/apis/library/datastore.googleapis.com).    
+After deployment, wait a few minutes for GAE backend to create various resources. If it's still not working, manually enable various APIs based on the error logs in the backend.   
+
+
+4. Refer to the [Other Instructions](#gae_other_instructions) section for additional information, such as troubleshooting the 'Unauthorized sender' issue.    
 
 
 
@@ -45,17 +47,19 @@ gcloud auth login
 gcloud auth application-default set-quota-project your_app_id
 gcloud config set project your_app_id
 python kindleear/tools/update_req.py gae
-gcloud beta app deploy --version=1 app.yaml
+gcloud beta app deploy --version=1 app.yaml worker.yaml
 gcloud beta app deploy --version=1 cron.yaml
 gcloud beta app deploy --version=1 queue.yaml
+gcloud beta app deploy --version=1 dispatch.yaml
 ```
 
 3. For version updates, simply execute one line of code:  
 
 ```bash
-gcloud beta app deploy --version=1 app.yaml
+gcloud beta app deploy --version=1 app.yaml worker.yaml
 ```
 
+<a id="gae_other_instructions"></a>
 ### Other Instructions
 1. The initial username and password are admin/admin.   
 
@@ -67,13 +71,15 @@ Updating config [queue]...API [cloudtasks.googleapis.com] not enabled on project
 ```  
 
 
-3. If encountering errors like "Timed out fetching pod", you have the option to delete this app id, recreate a new one and select a different region during deployment.   
+3. If encountering errors like "Timed out fetching pod", you have the option to delete this app id, recreate a new one and select a different region during deployment.    
 
-4. After successful deployment, go to the [GAE console](https://console.cloud.google.com/appengine/settings/emailsenders) and add your sender address to "Mail API Authorized Senders" to prevent "Unauthorized sender" errors during delivery.
+4. After successful deployment, go to the [GAE console](https://console.cloud.google.com/appengine/settings/emailsenders) and add your sender address to "Mail API Authorized Senders" to prevent "Unauthorized sender" errors during delivery.     
 
-5. If you have previously deployed Python2 version of KindleEar, it is advisable to create a new project to deploy the Python3 version. Since GAE no longer supports Python 2 deployment, reverting to the original version after overwriting is not possible.    
+5. If you have previously deployed Python2 version of KindleEar, it is advisable to create a new project to deploy the Python3 version. Since GAE no longer supports Python 2 deployment, reverting to the original version after overwriting is not possible.     
 
-6. If various issues arise, you can always check the [logs](https://console.cloud.google.com/logs) resolve them one by one based on the error messages.    
+6. GAE's resources are scalable. Generally, only backend instances (worker.yaml) need to be customized. The default configuration is B4(1536MB/2.4GHz). Adjust this configuration based on your RSS volume.    
+
+7. If various issues arise, you can always check the [logs](https://console.cloud.google.com/logs) resolve them one by one based on the error messages.    
 
 
 

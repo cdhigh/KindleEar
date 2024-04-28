@@ -12,7 +12,10 @@ if ! gcloud app describe >/dev/null 2>&1; then
   gcloud app create   #select a region for app if it's first time
 fi
 
-if python ./kindleear/tools/update_req.py gae; then
+SH_DIR="$(dirname "$0")"
+KE_DIR="$(dirname "$SH_DIR")"
+
+if python ${SH_DIR}/update_req.py gae; then
   echo "Enabling APIs..."
   gcloud services enable firestore.googleapis.com datastore.googleapis.com \
   cloudtasks.googleapis.com cloudscheduler.googleapis.com appenginereporting.googleapis.com \
@@ -20,10 +23,10 @@ if python ./kindleear/tools/update_req.py gae; then
   containerregistry.googleapis.com firebaserules.googleapis.com logging.googleapis.com \
   pubsub.googleapis.com storage-api.googleapis.com
 
-  gcloud beta app deploy --version=1 ./kindleear/app.yaml ./kindleear/worker.yaml
-  gcloud beta app deploy --quiet --version=1 ./kindleear/cron.yaml
-  gcloud beta app deploy --quiet --version=1 ./kindleear/queue.yaml
-  gcloud beta app deploy --quiet --version=1 ./kindleear/dispatch.yaml
+  gcloud beta app deploy --version=1 ${KE_DIR}/app.yaml ${KE_DIR}/worker.yaml
+  gcloud beta app deploy --quiet --version=1 ${KE_DIR}/cron.yaml
+  gcloud beta app deploy --quiet --version=1 ${KE_DIR}/queue.yaml
+  gcloud beta app deploy --quiet --version=1 ${KE_DIR}/dispatch.yaml
   echo -e "The deployment is completed."
   echo -e "The access address is: https://$GOOGLE_CLOUD_PROJECT.appspot.com"
 else
