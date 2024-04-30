@@ -19,6 +19,10 @@ inbound_services:
 - mail
 - mail_bounce
 
+env_variables:
+  KE_TEMP_DIR: "/tmp"
+  DATABASE_URL: "datastore"
+
 handlers:
 - url: /robots.txt
   static_files: application/static/robots.txt

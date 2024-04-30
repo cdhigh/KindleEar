@@ -197,8 +197,7 @@ def AdvImportPost():
                     dbItem.isfulltext = isfulltext
                     dbItem.save()
                 else:
-                    Recipe.create(title=title, url=url, user=user.name, isfulltext=isfulltext, type_='custom',
-                        time=datetime.datetime.now(datetime.timezone.utc))
+                    Recipe.create(title=title, url=url, user=user.name, isfulltext=isfulltext, type_='custom')
                         
         return redirect(url_for("bpSubscribe.MySubscription"))
     else:

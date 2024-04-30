@@ -166,7 +166,7 @@ class Recipe(MyBaseModel):
     type_ = CharField() #'custom','upload'
     needs_subscription = BooleanField(default=False) #是否需要登陆网页，只有上传的recipe才有意义
     src = TextField(default='', index=False) #保存上传的recipe的unicode字符串表示，已经解码
-    time = DateTimeField() #源被加入的时间，用于排序
+    time = DateTimeField(default=datetime.datetime.utcnow) #源被加入的时间，用于排序
     user = CharField() #哪个账号创建的，和nosql一致，保存用户名
     language = CharField(default='')
     translator = JSONField(default=JSONField.dict_default) #用于自定义RSS的备份，实际使用的是BookedRecipe
@@ -222,7 +222,7 @@ class DeliverLog(MyBaseModel):
     to = CharField()
     size = IntegerField(default=0)
     time_str = CharField() #每个用户的时区可能不同，为显示方便，创建记录时就生成推送时间字符串
-    datetime = DateTimeField()
+    datetime = DateTimeField(default=datetime.datetime.utcnow)
     book = CharField(default='')
     status = CharField()
     

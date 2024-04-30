@@ -3,7 +3,7 @@
 """requests默认没有使用超时时间，有时候会卡死，使用此模块封装超时时间和一些表单功能
 为了尽量兼容calibre使用的mechanize无头浏览器，加了很多有用没用的接口
 """
-import sys, requests, weakref, re
+import sys, requests, weakref, re, traceback
 from types import MethodType
 from urllib.request import urlopen #仅用来进行base64 data url解码
 from urllib.parse import quote, unquote, urlunparse, urlparse, urlencode, parse_qs
@@ -77,7 +77,7 @@ class UrlOpener:
         except Exception as e:
             resp = requests.models.Response()
             resp.status_code = 555
-            default_log.warning(f"{method} {url} failed: {str(e)}")
+            default_log.warning(f"open_remote_url: {method} {url} failed: {traceback.format_exc()}")
             
         #有些网页头部没有编码信息，则使用chardet检测编码，否则requests会认为text类型的编码为"ISO-8859-1"
         if "charset" not in resp.headers.get("Content-Type", "").lower():
@@ -259,7 +259,10 @@ class UrlOpener:
     #构建网络请求使用的header字典
     def get_headers(self, url=None, extra_headers=None):
         headers = {k: v for k, v in self.addheaders}
-        referer = self.host if self.host else url
+        if self.host:
+            referer = self.host
+        else:
+            referer = urlparse(url).netloc if url else ''
         if referer:
             headers.setdefault('Referer', referer)
         if extra_headers:

@@ -1003,6 +1003,7 @@ class BasicNewsRecipe(Recipe):
                     link.extract()
             for style in list(soup.find_all('style')):
                 style.extract()
+
         head = soup.find('head')
         if not head:
             head = soup.new_tag('head')
@@ -1041,17 +1042,19 @@ class BasicNewsRecipe(Recipe):
             for o in soup.find_all(onload=True):
                 del o['onload']
 
-        for attr in self.remove_attributes:
-            for x in soup.find_all(attrs={attr: True}):
-                del x[attr]
+        #选择所有带有横杠属性名的属性，并删除它们，因为epub不支持这些属性
+        for tag in soup.find_all(lambda t: any(a for a in t.attrs if ('-' in a) or (a in self.remove_attributes))):
+            tag.attrs = {key: val for key, val in tag.attrs.items() 
+                if ('-' not in key) and (key not in self.remove_attributes)}
 
-        for bad_tag in list(soup.find_all(['base', 'iframe', 'canvas', 'embed',
-            'command', 'datalist', 'video', 'audio', 'noscript', 'link', 'meta'])):
+        #for attr in self.remove_attributes:
+        #    for x in soup.find_all(attrs={attr: True}):
+        #        del x[attr]
+
+        for bad_tag in list(soup.find_all(['base', 'iframe', 'canvas', 'embed', 
+            'command', 'datalist', 'video', 'audio', 'noscript', 'link', 'meta', 'button'])):
             bad_tag.extract()
         
-        for img in soup.find_all('img', srcset=True): # https://bugs.launchpad.net/bugs/1713986
-            del img['srcset']
-
         #如果需要，去掉正文中的超链接(使用斜体下划线标识)，以避免误触
         remove_hyperlinks = self.user.book_cfg('rm_links')
         if remove_hyperlinks in ('text', 'all'):
@@ -1085,9 +1088,12 @@ class BasicNewsRecipe(Recipe):
         ans = self.postprocess_html(soup, first_fetch)
 
         # Nuke HTML5 tags
-        for x in ans.find_all(['article', 'aside', 'header', 'footer', 'nav',
+        for x in ans.find_all(['article', 'aside', 'header', 'footer', 'nav', 'main',
             'figcaption', 'figure', 'section', 'time']):
             x.name = 'div'
+
+        #for x in ans.find_all('mark'):
+        #    x.name = 'strong'
 
         #If tts need, tts propery is set by WorkerImpl
         tts_enable = self.tts.get('enable')
@@ -1137,12 +1143,17 @@ class BasicNewsRecipe(Recipe):
 
         #将上面创建的链接都添加到body
         bodyTag = soup.find("body")
-        for idx, a in enumerate(aTags):
-            bodyTag.append(a)
-            if idx < len(aTags) - 1:
-                span = soup.new_tag("span")
-                span.string = ' | '
-                bodyTag.append(span)
+        if aTags:
+            div = soup.new_tag("div")
+            hr = soup.new_tag("hr")
+            div.append(hr)
+            for idx, a in enumerate(aTags):
+                div.append(a)
+                if idx < len(aTags) - 1:
+                    span = soup.new_tag("span")
+                    span.string = ' | '
+                    div.append(span)
+            bodyTag.append(div)
 
         #如果有需要二维码功能，最后添加
         if shareLinks.get('Qrcode'):
@@ -1154,31 +1165,34 @@ class BasicNewsRecipe(Recipe):
             buffer = io.BytesIO()
             img.save(buffer, 'PNG')
             qrBase64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
-            bodyTag.append(soup.new_tag('br'))
-            bodyTag.append(soup.new_tag('img', src=f"data:image/png;base64,{qrBase64}"))
+            #div.append(soup.new_tag('br'))
+            div = soup.new_tag("div") #单独一个div
+            div.append(soup.new_tag('img', src=f"data:image/png;base64,{qrBase64}", alt="qrcode"))
+            bodyTag.append(div)
 
     #生成保存内容或分享文章链接的KindleEar调用链接
     def make_share_link(self, shareType, user, url, soup):
         share_key = user.share_links.get('key', '')
         titleTag = soup.find('title')
-        title = titleTag.string if titleTag else 'Untitled'
+        url = quote(url)
+        title = quote(titleTag.string if titleTag else 'Untitled')
         appDomain = os.getenv('APP_DOMAIN')
         if shareType in ('Evernote', 'Wiz'):
-            href = f"{appDomain}/share?act={shareType}&u={user.name}&t={title}&k={share_key}&url={quote(url)}"
+            href = f"{appDomain}/share?act={shareType}&u={user.name}&t={title}&k={share_key}&url={url}"
         elif shareType == 'Pocket':
-            href = f'{appDomain}/share?act=Pocket&u={user.name}&t={title}&k={share_key}&url={quote(url)}'
+            href = f'{appDomain}/share?act=Pocket&u={user.name}&t={title}&k={share_key}&url={url}'
         elif shareType == 'Instapaper':
-            href = f'{appDomain}/share?act=Instapaper&u={user.name}&t={title}&k={share_key}&url={quote(url)}'
+            href = f'{appDomain}/share?act=Instapaper&u={user.name}&t={title}&k={share_key}&url={url}'
         elif shareType == 'wallabag':
-            href = f'{appDomain}/share?act=wallabag&u={user.name}&t={title}&k={share_key}&url={quote(url)}'
+            href = f'{appDomain}/share?act=wallabag&u={user.name}&t={title}&k={share_key}&url={url}'
         elif shareType == 'Weibo':
-            href = f'https://service.weibo.com/share/share.php?url={quote(url)}'
+            href = f'https://service.weibo.com/share/share.php?url={url}'
         elif shareType == 'Facebook':
-            href = f'https://www.facebook.com/share.php?u={quote(url)}'
+            href = f'https://www.facebook.com/share.php?u={url}'
         elif shareType == 'X':
-            href = f'https://twitter.com/intent/post?text={title}&url={quote(url)}'
+            href = f'https://twitter.com/intent/post?text={title}&url={url}'
         elif shareType == 'Tumblr':
-            href = f'https://www.tumblr.com/share/link?url={quote(url)}'
+            href = f'https://www.tumblr.com/share/link?url={url}'
         else:
             href = ''
 
@@ -1413,7 +1427,6 @@ class BasicNewsRecipe(Recipe):
         if feeds is None:
             feeds = self.parse_feeds()
 
-        default_log.warning(feeds)
         if not feeds:
             raise ValueError('No articles found, aborting')
 
@@ -2162,7 +2175,8 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
             feed.image_url = None
             feed.oldest_article = self.oldest_article
             feed.articles = []
-            now = time.gmtime()
+            structNow = time.gmtime() #time.struct_time
+            now = datetime.datetime.utcnow()
 
             for title, url in self.extract_urls(main_title, main_url):
                 if len(feed) >= self.max_articles_per_feed:
@@ -2172,18 +2186,18 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
 
                 added.add(url)
                 timeItem = LastDelivered.get_or_none((LastDelivered.user==self.user.name) & (LastDelivered.url==url))
-                delta = (datetime.datetime.now(datetime.timezone.utc) - timeItem.datetime) if timeItem else None
+                delta = (now - timeItem.datetime) if timeItem else None
                 #这里oldest_article和其他的recipe不一样，这个参数表示在这个区间内不会重复推送
                 if ((not timeItem) or (not self.oldest_article) or (self.delivery_reason == 'manual') or
                     (delta.days * 24 * 3600 + delta.seconds > 24 * 3600 * self.oldest_article)):
                     id_counter += 1
-                    feed.articles.append(Article(f'internal id#{id_counter}', title, url, 'KindleEar', '', now, ''))
+                    feed.articles.append(Article(f'internal id#{id_counter}', title, url, 'KindleEar', '', structNow, ''))
 
                     #如果是手动推送，不单不记录已推送日期，还将已有的上次推送日期数据删除
                     if ((self.delivery_reason == 'manual') or (not self.oldest_article)) and timeItem:
                         timeItem.delete_instance()
                     elif timeItem:
-                        timeItem.datetime = datetime.datetime.now(datetime.timezone.utc)
+                        timeItem.datetime = now
                         timeItem.save()
                     else:
                         LastDelivered.create(user=self.user.name, url=url)

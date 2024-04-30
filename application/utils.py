@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 #一些常用工具函数
 
-import os, sys, hashlib, base64, secrets, datetime
+import os, sys, hashlib, base64, secrets, datetime, re
 from urllib.parse import urlparse
 
 #比较安全的eval
@@ -55,8 +55,8 @@ def str_to_bool(txt):
 def time_str(fmt="%Y-%m-%d %H:%M", tz=0):
     return tz_now(tz).strftime(fmt)
 
-#返回datetime实例
-def tz_now(tz):
+#返回datetime实例，包含timezone信息
+def tz_now(tz=0):
     return datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=tz)))
 
 #隐藏真实email地址，使用星号代替部分字符

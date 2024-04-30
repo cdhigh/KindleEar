@@ -79,7 +79,6 @@ def SharedLibraryOfficalAjax():
     creator = hashlib.md5(creator.encode('utf-8')).hexdigest()
 
     #判断是否存在，如果存在，则更新分类或必要的信息，同时返回成功
-    now = datetime.datetime.now(datetime.timezone.utc)
     if url: #自定义RSS，以url为准
         dbItem = SharedRss.get_or_none(SharedRss.url == url)
     else: #上传的recipe，以title为准
@@ -101,8 +100,7 @@ def SharedLibraryOfficalAjax():
             dbItem.category = category
     else:
         dbItem = SharedRss(title=title, url=url, src=src, description=description, category=category, 
-            language=lang, isfulltext=isfulltext, creator=creator, subscribed=1, created_time=now, 
-            invalid_report_days=0, last_invalid_report_time=now, last_subscribed_time=now)
+            language=lang, isfulltext=isfulltext, creator=creator, subscribed=1, invalid_report_days=0)
     dbItem.save()
     UpdateLastSharedRssTime()
 
@@ -110,10 +108,10 @@ def SharedLibraryOfficalAjax():
     if category:
         dbItem = SharedRssCategory.get_or_none(SharedRssCategory.name == category)
         if dbItem:
-            dbItem.last_updated = now
+            dbItem.last_updated = datetime.datetime.utcnow()
             dbItem.save()
         else:
-            SharedRssCategory.create(name=category, language=lang, last_updated=now)
+            SharedRssCategory.create(name=category, language=lang)
 
     #没有其他订阅源使用此分类了
     if prevCategory and not SharedRss.get_or_none(SharedRss.category == prevCategory):
@@ -123,15 +121,15 @@ def SharedLibraryOfficalAjax():
 
 #更新共享库的最新时间信息
 def UpdateLastSharedRssTime():
-    now = datetime.datetime.now(datetime.timezone.utc)
+    now = datetime.datetime.utcnow()
     AppInfo.set_value(AppInfo.lastSharedRssTime, str(int(now.timestamp())))
     
 #共享库的订阅源信息管理
 @bpLibraryOffical.post(LIBRARY_MGR + "<mgrType>")
 def SharedLibraryMgrOffical(mgrType):
-    now = datetime.datetime.now(datetime.timezone.utc)
+    now = datetime.datetime.utcnow()
     form = request.form
-    #print(mgrType, LIBRARY_GETSRC)
+    
     if mgrType == LIBRARY_GETSRC: #获取一个共享recipe的源代码
         dbId = form.get('recipeId', '')
         if dbId.startswith('db:'):

@@ -266,6 +266,8 @@ class RecursiveFetcher:
             is_local = 5
         if is_local > 0:
             url = url[is_local:]
+            if url.startswith('//'):
+                url = url[1:]
             if iswindows and url.startswith('/'):
                 url = url[1:]
             data = response(self.fs.read(url, 'rb'))
@@ -398,8 +400,8 @@ class RecursiveFetcher:
                         self.fs.write(stylepath, data, 'wb')
                         ns.replaceWith(src.replace(m.group(1), stylepath))
 
-    def rescale_image(self, data):
-        return rescale_image(data, self.scale_news_images, self.compress_news_images_max_size, self.compress_news_images_auto_size)
+    def rescale_image(self, data, itype='jpeg'):
+        return rescale_image(data, self.scale_news_images, self.compress_news_images_max_size, self.compress_news_images_auto_size, itype=itype)
 
     def process_images(self, soup, baseurl):
         if not self.keep_images:
@@ -414,6 +416,11 @@ class RecursiveFetcher:
         
         c = 0
         for tag in soup.find_all('img', src=True):
+            if 'alt' not in tag.attrs:
+                tag['alt'] = 'img'
+            if 'srcset' in tag.attrs: #https://bugs.launchpad.net/bugs/1713986
+                del tag['srcset']
+
             iurl = tag['src']
             if iurl.startswith('data:'):
                 try:
@@ -444,8 +451,8 @@ class RecursiveFetcher:
                     self.log.exception(f'Could not fetch image {iurl}: {str(e)}')
                     continue
             c += 1
-            fname = ascii_filename('img'+str(c))
-            data = self.preprocess_image_ext(data, iurl) if self.preprocess_image_ext is not None else data
+            fname = ascii_filename('img' + str(c))
+            data = self.preprocess_image_ext(data, iurl) if self.preprocess_image_ext else data
             if data is None:
                 continue
             itype = what(None, data)
@@ -466,7 +473,8 @@ class RecursiveFetcher:
                         data = image_to_data(img, fmt=itype)
                     if self.compress_news_images: # and itype in {'jpg','jpeg'}:
                         try:
-                            data = self.rescale_image(data)
+                            data = self.rescale_image(data, itype)
+                            itype = what(None, data)
                         except Exception:
                             self.log.warning('failed to compress image ' + iurl)
                     # Moon+ apparently cannot handle .jpeg files

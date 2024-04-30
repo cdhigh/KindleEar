@@ -9,6 +9,7 @@ from ..base_handler import *
 from ..back_end.send_mail_adpt import send_to_kindle
 from ..back_end.db_models import *
 from calibre.web.feeds.recipes import compile_recipe
+from calibre.utils.filenames import ascii_filename
 from ..lib.recipe_helper import *
 from ..lib.build_ebook import recipes_to_ebook
 
@@ -99,6 +100,7 @@ def WorkerImpl(userName: str, recipeId: list=None, reason='cron', log=None):
     ret = []
     for title, roList in recipes.items():
         book = recipes_to_ebook(roList, user)
+        asciiTitle = ascii_filename(title)
 
         #如果有TTS音频，先推送音频
         ext, audio = MergeAudioSegment(roList)
@@ -106,11 +108,11 @@ def WorkerImpl(userName: str, recipeId: list=None, reason='cron', log=None):
             if lastSendTime and (time.time() - lastSendTime < 10):
                 time.sleep(10)
 
-            audioName = f'{title}.{ext}'
+            audioName = f'{asciiTitle}.{ext}'
             to = roList[0].tts.get('send_to') or user.cfg('kindle_email')
             send_to_kindle(user, audioName, (audioName, audio), to=to)
             lastSendTime = time.time()
-            ret.append(f"Sent {title}.mp3")
+            ret.append(f"Sent {asciiTitle}.mp3")
 
         if book:
             #避免触发垃圾邮件机制，最短10s发送一次
@@ -119,7 +121,7 @@ def WorkerImpl(userName: str, recipeId: list=None, reason='cron', log=None):
 
             send_to_kindle(user, title, book)
             lastSendTime = time.time()
-            ret.append(f"Sent {title}.{bookType}")
+            ret.append(f"Sent {asciiTitle}.{bookType}")
         elif not audio:
             save_delivery_log(user, title, 0, status='nonews')
 

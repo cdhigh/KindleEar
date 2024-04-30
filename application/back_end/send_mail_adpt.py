@@ -6,6 +6,7 @@
 #https://cloud.google.com/appengine/docs/standard/python3/reference/services/bundled/google/appengine/api/mail
 #https://cloud.google.com/appengine/docs/standard/python3/services/mail
 import os, datetime, zipfile, base64
+from calibre.utils.filenames import ascii_filename
 from ..utils import ke_decrypt, str_to_bool
 from ..base_handler import save_delivery_log
 from .db_models import KeUser
@@ -66,7 +67,7 @@ def send_to_kindle(user, title, attachment, fileWithTime=True, to=None):
     if not isinstance(attachment, tuple):
         lcTime = "({})".format(lcTime) if fileWithTime else ""
         fileName = f"{title}{lcTime}.{user.book_cfg('type')}"
-        attachment = (fileName, attachment)
+        attachment = (ascii_filename(fileName), attachment)
     
     if not isinstance(attachment, list):
         attachment = [attachment]

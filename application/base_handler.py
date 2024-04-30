@@ -42,6 +42,6 @@ def save_delivery_log(user, book, size, status='ok', to=None):
     
     try:
         DeliverLog.create(user=name, to=to, size=size, time_str=user.local_time("%Y-%m-%d %H:%M"), 
-           datetime=datetime.datetime.now(datetime.timezone.utc), book=book, status=status)
+            book=book, status=status)
     except Exception as e:
         default_log.warning('DeliverLog failed to save: {}'.format(e))
