@@ -1413,6 +1413,7 @@ class BasicNewsRecipe(Recipe):
         if feeds is None:
             feeds = self.parse_feeds()
 
+        default_log.warning(feeds)
         if not feeds:
             raise ValueError('No articles found, aborting')
 
@@ -1868,7 +1869,7 @@ class BasicNewsRecipe(Recipe):
         if not feeds:
             self.log.warning(f'There are no feeds in "{self.title}"')
             return []
-            
+        
         parsed_feeds = []
         br = self.browser
         for obj in feeds:
@@ -1915,7 +1916,7 @@ class BasicNewsRecipe(Recipe):
         remove = [fl for fl in parsed_feeds if len(fl) == 0 and self.remove_empty_feeds]
         for f in remove:
             parsed_feeds.remove(f)
-
+        
         return parsed_feeds
 
     @classmethod
@@ -2142,6 +2143,9 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
 
     #返回一个Feed实例列表
     def parse_feeds(self):
+        if not self.url_extract_rules:
+            return super().parse_feeds()
+            
         main_urls = self.get_feeds()
         if not main_urls:
             self.log.warning(f'There are no urls in "{self.title}"')

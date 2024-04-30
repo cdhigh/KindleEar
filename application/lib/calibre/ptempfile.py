@@ -57,8 +57,10 @@ def app_prefix(prefix):
     return '%s_%s_%s'%(__appname__, __version__, prefix)
 
 def base_dir():
-    return ""
-
+    global _base_dir
+    if _base_dir is None:
+        _base_dir = os.environ.get('KE_TEMP_DIR', '')
+    return _base_dir
 
 def reset_base_dir():
     pass

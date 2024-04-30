@@ -31,10 +31,9 @@ def GenerateRecipeSource(title, feeds, user, isfulltext=False, language=None, ma
     desc = desc[:100]
     oldest_article = user.book_cfg('oldest_article')
     #至少到feedparser 6.0.11为止，其提取xml内的内容有bug，经常提取不到，在他修复之前，我们先暂停全文rss功能
-    #全部都当非全文rss使用
     isfulltext = False
     auto_cleanup = 'False' if isfulltext else 'True'
-    isfulltext = 'True' if isfulltext else 'None'
+    use_embedded_content = 'True' if isfulltext else 'None'
     language = language or user.book_cfg('language')
     timefmt = user.book_cfg('time_fmt')
     if timefmt and (user.book_cfg('title_fmt') == 'title_[time]'):
@@ -50,7 +49,7 @@ def GenerateRecipeSource(title, feeds, user, isfulltext=False, language=None, ma
         language       = '{language}'
         max_articles_per_feed = {max_articles}
         oldest_article = {oldest_article}
-        use_embedded_content  = {isfulltext}
+        use_embedded_content  = {use_embedded_content}
         auto_cleanup          = {auto_cleanup}
         timefmt               = '{timefmt}'
         cover_url             = {cover_url}

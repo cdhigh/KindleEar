@@ -16,10 +16,13 @@ def login_required(forAjax=False):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
+            current_url = request.url
             if (session.get('login', '') == 1) and get_login_user():
                 return func(*args, **kwargs)
+            elif forAjax:
+                return redirect(url_for("bpLogin.NeedLoginAjax"))
             else:
-                return redirect(url_for("bpLogin.NeedLoginAjax") if forAjax else url_for("bpLogin.Login"))
+                return redirect(url_for("bpLogin.Login", next=current_url))
         return wrapper
     return decorator
 

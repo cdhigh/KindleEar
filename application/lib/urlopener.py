@@ -118,6 +118,8 @@ class UrlOpener:
     #读取本地文件
     def open_local_file(self, url):
         url = url[7:] if url.startswith('file://') else url[5:]
+        if url.startswith('//'):
+            url = url[1:]
         plat = sys.platform.lower()
         if ('win32' in plat or 'win64' in plat) and url.startswith('/'): #windows平台
             url = url[1:]

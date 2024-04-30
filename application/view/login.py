@@ -22,15 +22,17 @@ def Login():
     # 则增加一个管理员帐号 ADMIN_NAME，密码 ADMIN_NAME，后续可以修改密码
     tips = ''
     adminName = app.config['ADMIN_NAME']
+    next_url = request.args.get('next', '')
     if CreateAccountIfNotExist(adminName):
         tips = (_("Please use {}/{} to login at first time.").format(adminName, adminName))
     
-    return render_template('login.html', tips=tips)
+    return render_template('login.html', tips=tips, next=next_url)
 
 @bpLogin.post("/login")
 def LoginPost():
     name = request.form.get('username', '').strip()
     passwd = request.form.get('password', '')
+    next_url = request.form.get('next', '')
     tips = ''
     if not name:
         tips = _("Username is empty.")
@@ -40,7 +42,7 @@ def LoginPost():
         tips = _("The username includes unsafe chars.")
 
     if tips:
-        return render_template('login.html', tips=tips)
+        return render_template('login.html', tips=tips, next=next_url)
     
     adminName = app.config['ADMIN_NAME']
     isFirstTime = CreateAccountIfNotExist(adminName) #确认管理员账号是否存在
@@ -75,7 +77,7 @@ def LoginPost():
         elif not user.cfg('kindle_email'):
             url = url_for("bpSetting.Setting")
         else:
-            url = url_for("bpSubscribe.MySubscription")
+            url = next_url if next_url else url_for("bpSubscribe.MySubscription")
         default_log.info(f"Login event: {name}")
         return redirect(url)
     else:  #账号或密码错
@@ -89,7 +91,7 @@ def LoginPost():
         session.pop('login', None)
         session.pop('userName', None)
         session.pop('role', None)
-        return render_template('login.html', userName=name, tips=tips)
+        return render_template('login.html', userName=name, tips=tips, next=next_url)
 
 #判断账号是否存在
 #如果账号不存在，创建一个，并返回True，否则返回False

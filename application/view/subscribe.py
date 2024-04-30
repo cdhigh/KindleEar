@@ -22,8 +22,10 @@ bpSubscribe = Blueprint('bpSubscribe', __name__)
 def MySubscription(tips=None):
     user = get_login_user()
     share_key = user.share_links.get('key', '')
-    title_to_add = request.args.get('title_to_add') #from Bookmarklet
-    url_to_add = request.args.get('url_to_add')
+    args = request.args
+    title_to_add = args.get('title_to_add') #from Bookmarklet/browser extension
+    url_to_add = args.get('url_to_add')
+    isfulltext = str_to_bool(args.get('isfulltext'))
     my_custom_rss = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.url, Recipe.isfulltext, 
         Recipe.translator, Recipe.tts]) for item in user.all_custom_rss()]
 

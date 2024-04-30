@@ -344,9 +344,10 @@ function SubscribeRecipe(id, separated) {
 
 //点击了退订内置或上传的Recipe
 function UnsubscribeRecipe(id, title) {
-  if (!confirm(i18n.areYouSureUnsubscribe.format(title))) {
+  if (!(event.ctrlKey || event.metaKey) && !confirm(i18n.areYouSureUnsubscribe.format(title))) {
     return;
   }
+
   $.post("/recipe/unsubscribe", {id: id}, function (data) {
     if (data.status == "ok") {
       for (var idx = 0; idx < my_booked_recipes.length; idx++) {
@@ -487,6 +488,8 @@ function ShowDeleteCustomRssDialog(event, rssid, title, url, isfulltext) {
         DeleteCustomRss(rssid, title, url, isfulltext, $('#chkReportInvalid').prop('checked'));
       }).catch(function(){});
     }
+  } else {
+    DeleteCustomRss(rssid, title, url, isfulltext, false);
   }
 }
 
