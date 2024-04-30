@@ -2172,7 +2172,7 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
 
                 added.add(url)
                 timeItem = LastDelivered.get_or_none((LastDelivered.user==self.user.name) & (LastDelivered.url==url))
-                delta = (datetime.datetime.utcnow() - timeItem.datetime) if timeItem else None
+                delta = (datetime.datetime.now(datetime.timezone.utc) - timeItem.datetime) if timeItem else None
                 #这里oldest_article和其他的recipe不一样，这个参数表示在这个区间内不会重复推送
                 if ((not timeItem) or (not self.oldest_article) or (self.delivery_reason == 'manual') or
                     (delta.days * 24 * 3600 + delta.seconds > 24 * 3600 * self.oldest_article)):
@@ -2183,7 +2183,7 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
                     if ((self.delivery_reason == 'manual') or (not self.oldest_article)) and timeItem:
                         timeItem.delete_instance()
                     elif timeItem:
-                        timeItem.datetime = datetime.datetime.utcnow()
+                        timeItem.datetime = datetime.datetime.now(datetime.timezone.utc)
                         timeItem.save()
                     else:
                         LastDelivered.create(user=self.user.name, url=url)

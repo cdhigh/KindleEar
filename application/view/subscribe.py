@@ -76,7 +76,7 @@ def MySubscriptionPost():
         return redirect(url_for("bpSubscribe.MySubscription", tips=(_("Duplicated subscription!"))))
     else:
         Recipe.create(title=title, url=url, isfulltext=isfulltext, type_='custom', user=user.name,
-            time=datetime.datetime.utcnow())
+            time=datetime.datetime.now(datetime.timezone.utc))
         return redirect(url_for("bpSubscribe.MySubscription"))
 
 #添加/删除自定义RSS订阅的AJAX处理函数
@@ -145,7 +145,7 @@ def AddCustomRss(user, form):
             return ret
         else:
             rss = Recipe.create(title=title, url=url, isfulltext=isfulltext, type_='custom', user=user.name,
-                time=datetime.datetime.utcnow())
+                time=datetime.datetime.now(datetime.timezone.utc))
             ret['id'] = rss.recipe_id
             UpdateBookedCustomRss(user)
     
@@ -184,7 +184,7 @@ def UpdateBookedCustomRss(user: KeUser):
     if user.cfg('enable_send') == 'all': #添加自定义RSS的订阅
         for rss in custom_rss:
             BookedRecipe.get_or_create(recipe_id=rss.recipe_id, defaults={'separated': False, 'user': userName, 
-                'title': rss.title, 'description': rss.description, 'time': datetime.datetime.utcnow(),
+                'title': rss.title, 'description': rss.description, 'time': datetime.datetime.now(datetime.timezone.utc),
                 'translator': rss.translator, 'tts': rss.tts, 'custom': rss.custom})
     elif custom_rss: #删除订阅
         ids = [rss.recipe_id for rss in custom_rss]
@@ -311,7 +311,7 @@ def SaveRecipeIfCorrect(user: KeUser, src: str):
         raise Exception(_('The recipe is already in the library.'))
 
     params = {"title": recipe.title, "description": recipe.description, "type_": 'upload', 
-        "needs_subscription": recipe.needs_subscription, "src": src, "time": datetime.datetime.utcnow(),
+        "needs_subscription": recipe.needs_subscription, "src": src, "time": datetime.datetime.now(datetime.timezone.utc),
         "user": user.name, "language": recipe.language}
     dbInst = Recipe.create(**params)
     params.pop('src')

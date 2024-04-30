@@ -33,14 +33,14 @@ def RemoveLogsRoute():
 
 def RemoveLogs():
     #停止过期用户的推送
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
     for user in KeUser.select():
         if user.cfg('enable_send') and user.expires and (user.expires < now):
             user.set_cfg('enable_send', '')
             user.save()
 
     #清理30天之前的推送记录
-    time30 = datetime.datetime.utcnow() - datetime.timedelta(days=30)
+    time30 = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=30)
     cnt = DeliverLog.delete().where(DeliverLog.datetime < time30).execute()
     cnt += LastDelivered.delete().where(LastDelivered.datetime < time30).execute()
     return "{} lines delivery log removed.".format(cnt)

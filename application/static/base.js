@@ -797,9 +797,10 @@ function OpenUploadRecipeDialog() {
 
 //删除一个已经上传的Recipe
 function DeleteUploadRecipe(id, title) {
-  if (!confirm(i18n.areYouSureDelete.format(title))) {
+  if (!(event.ctrlKey || event.metaKey) && !confirm(i18n.areYouSureDelete.format(title))) {
     return;
   }
+
   $.post("/recipe/delete", {id: id}, function (data) {
     if (data.status == "ok") {
       for (var idx = 0; idx < my_uploaded_recipes.length; idx++) {
@@ -816,7 +817,7 @@ function DeleteUploadRecipe(id, title) {
       }
       PopulateMySubscribed();
       PopulateLibrary('');
-      alert(i18n.recipeDeleted);
+      //alert(i18n.recipeDeleted);
     } else if (data.status == i18n.loginRequired) {
       window.location.href = '/login';
     } else {

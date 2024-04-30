@@ -79,7 +79,7 @@ def SharedLibraryOfficalAjax():
     creator = hashlib.md5(creator.encode('utf-8')).hexdigest()
 
     #判断是否存在，如果存在，则更新分类或必要的信息，同时返回成功
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
     if url: #自定义RSS，以url为准
         dbItem = SharedRss.get_or_none(SharedRss.url == url)
     else: #上传的recipe，以title为准
@@ -123,12 +123,13 @@ def SharedLibraryOfficalAjax():
 
 #更新共享库的最新时间信息
 def UpdateLastSharedRssTime():
-    AppInfo.set_value(AppInfo.lastSharedRssTime, str(int(datetime.datetime.utcnow().timestamp())))
+    now = datetime.datetime.now(datetime.timezone.utc)
+    AppInfo.set_value(AppInfo.lastSharedRssTime, str(int(now.timestamp())))
     
 #共享库的订阅源信息管理
 @bpLibraryOffical.post(LIBRARY_MGR + "<mgrType>")
 def SharedLibraryMgrOffical(mgrType):
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
     form = request.form
     #print(mgrType, LIBRARY_GETSRC)
     if mgrType == LIBRARY_GETSRC: #获取一个共享recipe的源代码
@@ -164,7 +165,7 @@ def SharedLibraryMgrOffical(mgrType):
             return respDict
 
         #希望能做到“免维护”，在一定数量的失效报告之后，自动删除对应的源，假定前提是人性本善
-        delta = abs(now - dbItem.last_invalid_report_time.replace(tzinfo=None))
+        delta = abs(now - dbItem.last_invalid_report_time)
         deltaDays = delta.days
 
         if deltaDays > 180: #半年内没有人报告失效则重新计数

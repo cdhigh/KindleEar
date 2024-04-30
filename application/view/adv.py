@@ -198,7 +198,7 @@ def AdvImportPost():
                     dbItem.save()
                 else:
                     Recipe.create(title=title, url=url, user=user.name, isfulltext=isfulltext, type_='custom',
-                        time=datetime.datetime.utcnow())
+                        time=datetime.datetime.now(datetime.timezone.utc))
                         
         return redirect(url_for("bpSubscribe.MySubscription"))
     else:

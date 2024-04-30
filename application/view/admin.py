@@ -173,7 +173,7 @@ def AdminAccountChangePost(name):
             else:
                 dbItem.expiration_days = expiration
                 if expiration:
-                    dbItem.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
+                    dbItem.expires = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=expiration)
                 else:
                     dbItem.expires = None
                 if sm_service == 'admin':
