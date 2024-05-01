@@ -396,8 +396,10 @@ class Plumber:
         try:
             self.oeb = self.input_plugin(self.input_, self.opts, self.input_fmt, self.log, tdir, fs)
         except Exception as e:
-            #self.log.warning('Failed to execute input plugin: {}'.format(str(e)))
-            self.log.warning('Failed to execute input plugin: {}'.format(traceback.format_exc()))
+            if 'All feeds are empty, aborting.' in str(e):
+                self.log.warning('Failed to execute input plugin: {}'.format(str(e)))
+            else:
+                self.log.warning('Failed to execute input plugin: {}'.format(traceback.format_exc()))
             fs.clear()
             return
 

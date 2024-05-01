@@ -295,7 +295,7 @@ class RecipeInput(InputFormatPlugin):
         try:
             pdate = recipe1.publication_date()
         except Exception as e:
-            default_log.warning('recipe1.publication_date error: {e}')
+            default_log.warning(f'recipe1.publication_date error: {e}')
             pdate = self.user.local_time()
         timefmt = recipe1.timefmt.strip()
         if timefmt and self.user.book_cfg('title_fmt'):
