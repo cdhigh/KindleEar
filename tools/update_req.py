@@ -198,6 +198,7 @@ def gaeify_config_py(cfgFile):
 #arg: gae[B2,2,t2,20m]
 def update_worker_yaml(workerYamlFile, arg):
     items = arg.split('[')[-1].rstrip(']').split(',') if '[' in arg else []
+    items = [e.strip() for e in items if e.strip()]
     if not items:
         return
 

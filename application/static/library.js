@@ -320,7 +320,8 @@ function SubscribeSharedFeed(title, feedurl, isfulltext, dbId) {
     data: {title: title, fulltext: isfulltext, url: feedurl, fromsharedlibrary: 'true', 'recipeId': dbId},
     success: function (resp, textStatus, xhr) {
       if (resp.status == "ok") {
-        ShowSimpleModalDialog('<h2>' + i18n.congratulations + '</h2><p>' + i18n.feedSubscribed + '</p>');
+        $('.additional-btns').stop(true).hide();
+        $("#toast").fadeIn().delay(3000).fadeOut();
       } else {
         alert(resp.status);
       }
