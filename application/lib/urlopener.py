@@ -73,7 +73,7 @@ class UrlOpener:
             req_func = self.session.post
         
         try:
-            resp = req_func(url, data=data, headers=headers, timeout=timeout, **kwargs)
+            resp = req_func(url, data=data, headers=headers, timeout=timeout, allow_redirects=True, **kwargs)
         except Exception as e:
             resp = requests.models.Response()
             resp.status_code = 555

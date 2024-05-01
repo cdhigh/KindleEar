@@ -4,7 +4,7 @@ __license__ = 'GPL 3'
 __copyright__ = '2009, Kovid Goyal <kovid@kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
-import os, re, sys, shutil, pprint, json, io, css_parser, logging
+import os, re, sys, shutil, pprint, json, io, css_parser, logging, traceback
 from itertools import chain
 from functools import partial
 from calibre.utils.logging import Log
@@ -396,7 +396,8 @@ class Plumber:
         try:
             self.oeb = self.input_plugin(self.input_, self.opts, self.input_fmt, self.log, tdir, fs)
         except Exception as e:
-            self.log.warning('Failed to execute input plugin: {}'.format(str(e)))
+            #self.log.warning('Failed to execute input plugin: {}'.format(str(e)))
+            self.log.warning('Failed to execute input plugin: {}'.format(traceback.format_exc()))
             fs.clear()
             return
 
