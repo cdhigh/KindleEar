@@ -3,12 +3,40 @@
 """requests默认没有使用超时时间，有时候会卡死，使用此模块封装超时时间和一些表单功能
 为了尽量兼容calibre使用的mechanize无头浏览器，加了很多有用没用的接口
 """
-import sys, requests, weakref, re, traceback
+import sys, requests, weakref, re, traceback, time
+from functools import wraps
 from types import MethodType
 from urllib.request import urlopen #仅用来进行base64 data url解码
 from urllib.parse import quote, unquote, urlunparse, urlparse, urlencode, parse_qs
 from bs4 import BeautifulSoup
 from html_form import HTMLForm
+
+#用于在错误时重试
+#max_retries: 最大重试次数，比如设置为2，则函数最多执行3次
+#delay: 初始延时时间（秒）
+#backoff: 多次重试之间的延时时间乘数
+def UrlRetry(max_retries, delay, backoff=1, logger=default_log):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            retries = 0
+            _delay = delay
+            while True:
+                resp = func(*args, **kwargs)
+                code = resp.status_code
+                if (code <= 407) or (code == 555) or (retries >= max_retries):
+                    return resp
+                else:
+                    retries += 1
+                    svrRetry = resp.headers.get('Retry-After', '')
+                    if svrRetry.isdigit():
+                        _delay = min(int(svrRetry), 60)
+                    
+                    logger.warning(f'Found HTTP Error: {UrlOpener.CodeMap(code)}, retrying in {_delay} seconds: {resp.url}')
+                    time.sleep(_delay)
+                    _delay *= backoff
+        return wrapper
+    return decorator
 
 class UrlOpener:
     #headers 可以传入一个字典或元祖列表
@@ -61,6 +89,7 @@ class UrlOpener:
         return self.patch_response(resp)
     
     #远程连接互联网的url
+    @UrlRetry(max_retries=2, delay=1, backoff=2)
     def open_remote_url(self, url, data, headers, timeout, method, **kwargs):
         timeout = timeout if timeout else self.timeout
         headers = self.get_headers(url, headers)

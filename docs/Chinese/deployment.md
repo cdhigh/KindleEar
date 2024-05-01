@@ -25,11 +25,18 @@ chmod +x kindleear/tools/gae_deploy.sh && \
 kindleear/tools/gae_deploy.sh
 ```
 
-3. 部署后动作    
-部署完成后稍等几分钟等GAE后台创建各种资源。如果还不行，根据后台log错误记录手动去使能各种API。         
+注：默认配置为B2实例，1个工作进程，2个工作线程，20分钟超时，如果需要其他配置，可以修改最后一行代码，比如：   
+
+```bash
+#instance_class: B1 (384MB/600MHz)
+#max_instances: 1
+#threads: 2 (2 thread per instance)
+#idle_timeout: 15m (minutes)
+kindleear/tools/gae_deploy.sh B1,1,t2,15m
+```
 
 
-4. 如需要GAE部署的更多信息，请参考 [其他说明](#gae_other_instructions) 章节，比如怎么解决 "Unauthorized sender" 错误等。    
+3. 如需要GAE部署的更多信息，请参考 [其他说明](#gae_other_instructions) 章节，比如怎么解决 "Unauthorized sender" 错误等。    
 
 
 
@@ -74,7 +81,7 @@ Updating config [queue]...API [cloudtasks.googleapis.com] not enabled on project
 
 5. 如果你之前已经部署过Python2版本的KindleEar，建议新建一个项目来部署Python3版本，因GAE不再支持Python2部署，所以覆盖后无法恢复原先的版本。   
 
-6. GAE的计算资源是可伸缩配置的，一般情况下，只有后台实例(worker.yaml)需要修改，默认为B4(1536MB/2.4GHz)，根据你的推送量调整这个配置。      
+6. GAE的计算资源是可伸缩配置的，一般情况下，只有后台实例(worker.yaml)需要修改，默认为B2(768MB/1.2GHz)，根据你的推送量调整这个配置，如果推送量大，调整为B4，如果推送量小，缩小为B1。额外的，如果后台出现 " [CRITICAL] WORKER TIMEOUT"，则需要增加 entrypoint 里面的 --timeout 参数。       
 
 7. 出现各种问题后，随时可以到 [后台](https://console.cloud.google.com/logs) 查看log记录，根据错误信息来逐一解决。   
 

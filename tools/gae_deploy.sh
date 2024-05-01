@@ -15,7 +15,7 @@ fi
 SH_DIR="$(dirname "$0")"
 KE_DIR="$(dirname "$SH_DIR")"
 
-if python ${SH_DIR}/update_req.py gae; then
+if python ${SH_DIR}/update_req.py gae[$@]; then
   echo "Enabling APIs..."
   gcloud services enable firestore.googleapis.com datastore.googleapis.com \
   cloudtasks.googleapis.com cloudscheduler.googleapis.com appenginereporting.googleapis.com \

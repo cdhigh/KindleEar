@@ -129,7 +129,7 @@ def dockerize_config_py(cfgFile, arg):
     
     with open(cfgFile, 'w', encoding='utf-8') as f:
         f.write('\n'.join(ret))
-    print(f'Finished update {cfgFile}')
+    print(f'Finished update of {cfgFile}')
 
 def gae_location():
     try:
@@ -148,19 +148,23 @@ def gae_location():
 def gaeify_config_py(cfgFile):
     appId = os.getenv('GOOGLE_CLOUD_PROJECT')
     loc = gae_location()
+    if not appId or not loc:
+        print('Unable to query the app ID and app location. The script will exit directly.')
+        sys.exit(1)
+
     domain = f"https://{appId}.appspot.com"
-    print('------------------------')
+    print('--------------------------------')
     print(f'   AppId: {appId}')
     print(f'Location: {loc}')
     print(f'  Domain: {domain}')
-    print('------------------------')
+    print('--------------------------------')
     usrInput = input('Confirm the above information, then press y to continue: ')
     if usrInput.lower() != 'y':
         sys.exit(1)
 
-    default_cfg = {'APP_ID': appId, 'APP_DOMAIN': domain, 'SERVER_LOCATION': gae_location(),
+    default_cfg = {'APP_ID': appId, 'APP_DOMAIN': domain, 'SERVER_LOCATION': loc,
         'DATABASE_URL': 'datastore', 'TASK_QUEUE_SERVICE': 'gae', 'TASK_QUEUE_BROKER_URL': '',
-        'KE_TEMP_DIR': '/tmp', 'DOWNLOAD_THREAD_NUM': '3', 'ALLOW_SIGNUP': 'no',
+        'KE_TEMP_DIR': '/tmp', 'DOWNLOAD_THREAD_NUM': '2', 'ALLOW_SIGNUP': 'no',
         'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning', 'SECRET_KEY': new_secret_key}
     ret = []
     inDocComment = False
@@ -188,15 +192,78 @@ def gaeify_config_py(cfgFile):
     
     with open(cfgFile, 'w', encoding='utf-8') as f:
         f.write('\n'.join(ret))
-    print(f'Finished update {cfgFile}')
+    print(f'Finished update of {cfgFile}')
+
+#Change some params in worker.yaml
+#arg: gae[B2,2,t2,20m]
+def update_worker_yaml(workerYamlFile, arg):
+    items = arg.split('[')[-1].rstrip(']').split(',') if '[' in arg else []
+    if not items:
+        return
+
+    instance_class = ''
+    idle_timeout = ''
+    max_instances = ''
+    threads = ''
+    for item in items:
+        if item.startswith('B') and item[1:].isdigit():
+            instance_class = item
+        if item.startswith('t') and item[1:].isdigit():
+            threads = item[1:]
+        elif item.endswith('m') and item[:-1].isdigit():
+            idle_timeout = item
+        elif item.isdigit():
+            max_instances = item
+
+    with open(workerYamlFile, 'r', encoding='utf-8') as f:
+        lines = f.read().splitlines()
+
+    for idx, line in enumerate(lines):
+        if line.startswith('instance_class:') and instance_class:
+            lines[idx] = f"instance_class: {instance_class}"
+        elif line.startswith('  max_instances:') and max_instances:
+            lines[idx] = f"  max_instances: {max_instances}"
+        elif line.startswith('  idle_timeout:') and idle_timeout:
+            lines[idx] = f"  idle_timeout: {idle_timeout}"
+        elif line.startswith('entrypoint:'):
+            #entrypoint: gunicorn -b :$PORT --workers 1 --threads 2 --timeout 1200 main:app
+            parts = line.split(' ')
+            def elemIdx(e):
+                idx = parts.index(e) if e in parts else 99999
+                return idx if (idx < len(parts) - 1) else 0 #ensure have one more slot
+
+            wkIdx = elemIdx('--workers') or elemIdx('-w')
+            if wkIdx and parts[wkIdx + 1].isdigit() and max_instances:
+                parts[wkIdx + 1] = max_instances
+
+            tmIdx = elemIdx('--timeout') or elemIdx('-t')
+            if tmIdx and parts[tmIdx + 1].isdigit() and idle_timeout:
+                parts[tmIdx + 1] = str(int(int(idle_timeout[:-1]) * 60))
+
+            thIdx = elemIdx('--threads')
+            if thIdx and parts[thIdx + 1].isdigit() and threads:
+                parts[thIdx + 1] = threads
+
+            lines[idx] = ' '.join(parts)
+
+    with open(workerYamlFile, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(lines))
+    print(f'Finished update of {workerYamlFile} using params:')
+    print(f'    instance_class: {instance_class}')
+    print(f'     max_instances: {max_instances}')
+    print(f'           threads: {threads}')
+    print(f'      idle_timeout: {idle_timeout}')
+    print('')
 
 if __name__ == '__main__':
     thisDir = os.path.abspath(os.path.dirname(__file__))
     cfgFile = os.path.normpath(os.path.join(thisDir, '..', 'config.py'))
     reqFile = os.path.normpath(os.path.join(thisDir, '..', 'requirements.txt'))
+    workerYamlFile = os.path.normpath(os.path.join(thisDir, '..', 'worker.yaml'))
     if not os.path.exists(cfgFile):
         cfgFile = os.path.normpath(os.path.join(thisDir, 'config.py'))
         reqFile = os.path.normpath(os.path.join(thisDir, 'requirements.txt'))
+        workerYamlFile = os.path.normpath(os.path.join(thisDir, 'worker.yaml'))
 
     dockerArgs = ''
     gaeify = False
@@ -207,15 +274,17 @@ if __name__ == '__main__':
         print('  docker[all]         : prepare for docker image, install all libs')
         print('  docker[name1,name2] : prepare for docker image, install name1,name2')
         print('  gae                 : prepare for deploying in gae')
+        print('  gae[B2,1,t2,20m]    : prepare for deploying in gae, customize worker params')
         print('  empty               : do not modify config.py, only update requirements.txt')
         sys.exit(1)
     elif len(sys.argv) == 2 and sys.argv[1].startswith('docker'):
         print('\nUpdating config.py and requirements.txt for Docker deployment.\n')
         dockerize_config_py(cfgFile, sys.argv[1])
         dockerArgs = sys.argv[1]
-    elif len(sys.argv) == 2 and sys.argv[1] == 'gae':
+    elif len(sys.argv) == 2 and sys.argv[1].startswith('gae'):
         print('\nUpdating config.py and requirements.txt for GAE deployment.\n')
         gaeify_config_py(cfgFile)
+        update_worker_yaml(workerYamlFile, sys.argv[1])
         gaeify = True
     else:
         print('\nThis script can help you to update requirements.txt.\n')

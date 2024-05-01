@@ -26,11 +26,17 @@ chmod +x kindleear/tools/gae_deploy.sh && \
 kindleear/tools/gae_deploy.sh
 ```
 
-3. Finish deployment   
-After deployment, wait a few minutes for GAE backend to create various resources. If it's still not working, manually enable various APIs based on the error logs in the backend.   
+Note: The default configuration is B2 instance, 1 worker process, 2 worker threads, and a 20-minute timeout. If you need a different configuration, you can modify the last line of code, for example:  
 
+```bash
+#instance_class: B1 (384MB/600MHz)
+#max_instances: 1
+#threads: 2 (2 thread per instance)
+#idle_timeout: 15m (minutes)
+kindleear/tools/gae_deploy.sh B1,1,t2,15m
+```
 
-4. Refer to the [Other Instructions](#gae_other_instructions) section for additional information, such as troubleshooting the 'Unauthorized sender' issue.    
+3. Refer to the [Other Instructions](#gae_other_instructions) section for additional information, such as troubleshooting the 'Unauthorized sender' issue.    
 
 
 
@@ -77,7 +83,7 @@ Updating config [queue]...API [cloudtasks.googleapis.com] not enabled on project
 
 5. If you have previously deployed Python2 version of KindleEar, it is advisable to create a new project to deploy the Python3 version. Since GAE no longer supports Python 2 deployment, reverting to the original version after overwriting is not possible.     
 
-6. GAE's resources are scalable. Generally, only backend instances (worker.yaml) need to be customized. The default configuration is B4(1536MB/2.4GHz). Adjust this configuration based on your RSS volume.    
+6. GAE's resources are scalable. Generally, only backend instances (worker.yaml) need to be customized. The default configuration is B2(768MB/1.2GHz). Adjust this configuration based on your RSS volume: increase to B4 for larger volumes and decrease to B1 for smaller volumes. Additionally, if the logs shows a '[CRITICAL] WORKER TIMEOUT' error, it requires increasing the '--timeout' parameter within the entrypoint section.    
 
 7. If various issues arise, you can always check the [logs](https://console.cloud.google.com/logs) resolve them one by one based on the error messages.    
 
