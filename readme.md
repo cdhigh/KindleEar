@@ -3,23 +3,23 @@ __English__ · [简体中文](readme_zh.md)
 ---
 
 # Announcement
-March 10, 2024    
-Official release of 3.0 beta, KindleEar is ready for deployment now.   
-The author has successfully deployed it to GAE/Docker/Oracle Cloud/PythonAnywhere.  
+May 1, 2024  **Official release of KindleEar 3**  
 
 **Significant Updates:**
-* Supports Python 3
-* Redesigned software framework
-* Support for multiple platforms, no longer limited to the GAE platform
-* Support for Calibre's recipe format directly
-* Preset with over 1,000 Calibre builtin recipe files
-* Built-in bilingual translation feature
+* Full support for Python 3
+* Redesigned software architecture
+* Cross-platform support, freeing you from dependence on GAE platform
+* Support for Calibre's recipe format without the need for modification
+* Built-in library of over a thousand Calibre recipe files
+* Integrated bilingual translation feature, breaking language barriers for effortless information retrieval and language learning
+* Built-in text-to-speech functionality, transforming daily news into audio for easy consumption without reading
+* Includes a browser extension, enabling effortless creation of web scraping recipe without coding, facilitating seamless content delivery from any website (brag)    
 
 
 
 # Introduction
 KindleEar is a web application which can be deployed on various Python-hosting platforms or VPS.   
-It automatically aggregates various web content into epub/mobi and delivers it to your Kindle or other e-book readers daily.   
+It automatically aggregates various web content into epub/mobi/mp3 and delivers it to your Kindle or other e-book readers daily.   
 
 
 ## The features included:
@@ -30,7 +30,7 @@ It automatically aggregates various web content into epub/mobi and delivers it t
 * Automatic daily scheduled push
 * Built-in sharing library, you can directly subscribe to feeds shared by other users, and you can also share your own feeds with others
 * Powerful and convenient email forwarding service
-* Integration with systems like Evernote/Pocket/Instapaper
+* Integration with systems like Evernote/Pocket/Instapaper/wallabag
 
 
 
@@ -38,7 +38,8 @@ For other details, please refer to the **[project documentation](https://cdhigh.
 
 
 
-![Screenshot](https://raw.githubusercontent.com/cdhigh/KindleEar/master/docs/scrshot.gif)
+
+![Screenshot](https://raw.githubusercontent.com/cdhigh/KindleEar/master/docs/images/scrshot.gif)
 
 
 

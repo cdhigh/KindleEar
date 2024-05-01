@@ -89,7 +89,7 @@ class UrlOpener:
         return self.patch_response(resp)
     
     #远程连接互联网的url
-    @UrlRetry(max_retries=2, delay=1, backoff=2)
+    @UrlRetry(max_retries=2, delay=2, backoff=2)
     def open_remote_url(self, url, data, headers, timeout, method, **kwargs):
         timeout = timeout if timeout else self.timeout
         headers = self.get_headers(url, headers)

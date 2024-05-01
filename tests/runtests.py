@@ -22,7 +22,8 @@ def set_env():
         'SECRET_KEY', 'ADMIN_NAME', 'POCKET_CONSUMER_KEY', 'HIDE_MAIL_TO_LOCAL']
     for key in keys:
         cfgMap[key] = os.getenv(key) if key in os.environ else getattr(config, key)
-        os.environ[key] = cfgMap[key]
+        if (key == 'APP_DOMAIN') and not cfgMap[key].startswith('http'):
+            cfgMap[key] = 'https://' + cfgMap[key]
     return cfgMap
     
 set_env()

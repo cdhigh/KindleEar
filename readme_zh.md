@@ -2,23 +2,23 @@
 
 ---
 
-# 公告
-2024-03-10    
-正式发布3.0 beta版，代码库已经可以用来部署，作者已经将其成功部署到GAE/Docker/Oracle Cloud/pythonAnywhere。
+2024-05-01  **KindleEar3版本正式发布**     
 
 **主要新特性:**
-* 支持Python 3
-* 重新设计的软件架构
-* 多平台支持，不再受限于gae平台
-* 支持不用修改的Calibre的recipe格式
-* 预置Calibre的一千多个recipe文件
-* 内置双语对照翻译功能，打破语言障碍，获取信息和学习外语同步进行
+* 全面支持Python 3   
+* 全新设计的软件架构   
+* 跨平台支持，告别对 GAE 平台的依赖   
+* 支持 Calibre 的 recipe 格式，无需修改    
+* 内置一千多个 Calibre recipe 文件    
+* 内置双语对照翻译功能，突破语言壁垒，轻松获取信息和学习外语    
+* 内置文本转语音功能，将每日新闻转化为声音，让您无需阅读，也能轻松获取信息     
+* 包含浏览器扩展程序，无需编码即可制作爬虫脚本，便捷推送任意网站（虚假宣传）      
 
 
 
 # 简介
 这是一个Kindle个人推送服务应用，可以将其部署在各种支持Python的托管平台或VPS上。
-每天自动聚合各种网络信息制作成epub/mobi格式推送至您的Kindle或其他电子书阅读器。
+每天自动聚合各种网络信息制作成epub/mobi/mp3格式推送至您的Kindle或其他电子书阅读器。
 
 
 此应用目前的主要功能有：  
@@ -30,14 +30,15 @@
 * 自动每天定时推送
 * 内置共享库，可以直接订阅其他网友分享的订阅源，也可以分享自己的订阅源给其他网友
 * 强大而且方便的邮件中转服务
-* 和Evernote/Pocket/Instapaper等系统的集成
+* 和Evernote/Pocket/Instapaper/wallabag等系统的集成
 
 
 其他细节请参考 **[项目文档](https://cdhigh.github.io/KindleEar)**
 
 
 
-![Screenshot](https://raw.githubusercontent.com/cdhigh/KindleEar/master/docs/scrshot.gif)
+
+![Screenshot](https://raw.githubusercontent.com/cdhigh/KindleEar/master/docs/images/scrshot.gif)
 
 
 

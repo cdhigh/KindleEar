@@ -4,7 +4,7 @@
 # Visit <https://github.com/cdhigh/KindleEar> for the latest version
 # Author: cdhigh <https://github.com/cdhigh>
 
-__Version__ = '3.0.0d'
+__Version__ = '3.0.0'
 
 import os, sys, builtins, logging
 
@@ -26,6 +26,8 @@ def set_env():
         'SECRET_KEY', 'ADMIN_NAME', 'POCKET_CONSUMER_KEY', 'HIDE_MAIL_TO_LOCAL', 'LOG_LEVEL']
     for key in keys:
         cfgMap[key] = os.getenv(key) if key in os.environ else getattr(config, key)
+        if (key == 'APP_DOMAIN') and not cfgMap[key].startswith('http'):
+            cfgMap[key] = 'https://' + cfgMap[key]
         os.environ[key] = cfgMap[key]
     return cfgMap
 

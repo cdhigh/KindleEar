@@ -1,7 +1,7 @@
 ---
 sort: 4
 ---
-# Chrome/Edge Browser Extension
+# Browser Extension
 
 ## Overview
 KindleEar provides a Chrome/Edge browser extension that not only offers bookmarklet functionality but also includes a feature for generating web scraping recipes without writing any code. With this feature, you don't need to understand programming or write code; just a few clicks can generate a Recipe file that KindleEar can use.    
@@ -12,7 +12,13 @@ For many websites that heavily use JavaScript to dynamically generate pages (whe
 
 ## Installation
 Search for "KindleEar" in the Chrome/Edge Web Store.     
-Alternatively, here is [chrome direct link](https://chromewebstore.google.com/detail/kindleear/hjgdeckkpbdndigjkdlloacphoednmln).    
+Alternatively, here is     
+
+[chrome direct link](https://chromewebstore.google.com/detail/kindleear/hjgdeckkpbdndigjkdlloacphoednmln)     
+
+[Edge direct link](
+https://microsoftedge.microsoft.com/addons/detail/kbenhnoknpimfepkkngagppiebjgfokp)    
+
 
 
 

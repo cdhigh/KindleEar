@@ -228,33 +228,39 @@ def update_worker_yaml(workerYamlFile, arg):
             lines[idx] = f"  idle_timeout: {idle_timeout}"
         elif line.startswith('entrypoint:'):
             #entrypoint: gunicorn -b :$PORT --workers 1 --threads 2 --timeout 1200 main:app
-            parts = line.split(' ')
-            def elemIdx(e):
-                idx = parts.index(e) if e in parts else 99999
-                return idx if (idx < len(parts) - 1) else 0 #ensure have one more slot
+            parts = [item.strip() for item in line.split(' ') if item.strip()]
+            def elemIdx(key): #Find position of key
+                return parts.index(key) if key in parts else 0
 
-            wkIdx = elemIdx('--workers') or elemIdx('-w')
-            if wkIdx and parts[wkIdx + 1].isdigit() and max_instances:
-                parts[wkIdx + 1] = max_instances
+            def UpdateOrAddParam(key1, value, key2=None): #Update if exists or add if not
+                idx = elemIdx(key1) or elemIdx(key2)
+                if idx > 0 and idx < len(parts) - 1 and parts[idx + 1].isdigit():
+                    parts[idx + 1] = value
+                elif 0 < idx < len(parts):
+                    parts.insert(idx + 1, value)
+                else:
+                    idx = len(parts) - 1
+                    parts[idx:idx] = [key1, value]
 
-            tmIdx = elemIdx('--timeout') or elemIdx('-t')
-            if tmIdx and parts[tmIdx + 1].isdigit() and idle_timeout:
-                parts[tmIdx + 1] = str(int(int(idle_timeout[:-1]) * 60))
-
-            thIdx = elemIdx('--threads')
-            if thIdx and parts[thIdx + 1].isdigit() and threads:
-                parts[thIdx + 1] = threads
-
+            if max_instances:
+                UpdateOrAddParam('--workers', max_instances, '-w')
+            if idle_timeout:
+                UpdateOrAddParam('--timeout', str(int(int(idle_timeout[:-1]) * 60)), '-t')
+            if threads:
+                UpdateOrAddParam('--threads', threads)
+            
             lines[idx] = ' '.join(parts)
 
-    with open(workerYamlFile, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(lines))
-    print(f'Finished update of {workerYamlFile} using params:')
-    print(f'    instance_class: {instance_class}')
-    print(f'     max_instances: {max_instances}')
-    print(f'           threads: {threads}')
-    print(f'      idle_timeout: {idle_timeout}')
-    print('')
+    ret = [f'Finished update of {workerYamlFile} using params:']
+    instance_class and ret.append(f'    instance_class: {instance_class}')
+    max_instances and ret.append(f'     max_instances: {max_instances}')
+    threads and ret.append(f'           threads: {threads}')
+    idle_timeout and ret.append(f'      idle_timeout: {idle_timeout}')
+    ret.append('')
+    if len(ret) > 2:
+        with open(workerYamlFile, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(lines))
+        print('\n'.join(ret))
 
 if __name__ == '__main__':
     thisDir = os.path.abspath(os.path.dirname(__file__))

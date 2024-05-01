@@ -1,7 +1,7 @@
 ---
 sort: 4
 ---
-# Chrome/Edge浏览器扩展程序
+# 浏览器扩展程序
 
 
 
@@ -16,7 +16,11 @@ KindleEar提供一个Chrome/Edge浏览器扩展程序，除了提供bookmarklet�
 
 ## 安装
 在Chrome/Edge应用商店搜索 "KindleEar"。   
-或者使用 [Chrome直达链接](https://chromewebstore.google.com/detail/kindleear/hjgdeckkpbdndigjkdlloacphoednmln)
+或者使用      
+[Chrome直达链接](https://chromewebstore.google.com/detail/kindleear/hjgdeckkpbdndigjkdlloacphoednmln)     
+
+[Edge直达链接](
+https://microsoftedge.microsoft.com/addons/detail/kbenhnoknpimfepkkngagppiebjgfokp)   
 
 
 

@@ -31,7 +31,16 @@
 
 gcloud app deploy cron.yaml
 gcloud app deploy queue.yaml
+gcloud services list #current enabled services
 gcloud services list | grep datastore.googleapis.com
+gcloud services enable datastore.googleapis.com
+gcloud services enable tasks.googleapis.com
+gcloud services enable cloudtasks.googleapis.com
+gcloud services enable translate.googleapis.com
+gcloud services enable texttospeech.googleapis.com
+
+#all available services
+gcloud services list --available > services.txt
 
 # Windows 安装celery
 * 安装并启动redis服务，(Windows只能安装redis3 <https://github.com/MicrosoftArchive/redis/releases>)
@@ -58,8 +67,11 @@ gcloud services list | grep datastore.googleapis.com
 # 电子书简要生成流程
   build_ebook.ConvertToEbook() -> plumber.run() -> recipe_input.convert() -> news.BasicNewsRecipe.download()
   plumber.create_oebbook() -> OEBReader.call() -> output_plugin.convert()
+
 # KindleEar额外自带的Python库，这些库不用pip安装，不在requirements.txt里面
 * readability-lxml: 修改了其htmls.py|shorten_title()
+
+# 如果要添加新选项，最好添加到 calibre.customize.conversion.py | InputFormatPlugin | common_options, 
 
 # 关于i18n翻译
 * javascript的翻译没有采用其他复杂或引入其他依赖的方案，而是简单粗暴的在base.html里面将要翻译的字段预先翻译，
@@ -77,8 +89,7 @@ tools\pybabel_compile.bat
 # Docker
 ## 构建镜像
 ```bash
-cp ./docker/Dockerfile .
-sudo docker build -t kindleear/kindleear .
+cd kindleear && cp ./docker/Dockerfile . && sudo docker build -t kindleear/kindleear .
 #or
 sudo docker build --no-cache -t kindleear/kindleear .
 sudo docker tag id kindleear/kindleear:version
@@ -104,6 +115,44 @@ sudo docker push kindleear/kindleear
 * sudo apt update && sudo apt install certbot
 * sudo certbot certonly --manual --preferred-challenges=dns --email xx@xx.com -d www.yourdomain.com
 * 添加txt记录
+* 自动续签方案：
+1. crontab
+```bash
+sudo crontab -e
+#打开编辑器后添加下面一行
+0 0 * * 1 /usr/bin/certbot renew >> /var/log/certbot-renew.log
+```
+
+2. systemd
+2.1 创建 /etc/systemd/system/certbot-renew.service
+```
+[Unit]
+Description=Renew SSL certificate with certbot
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/certbot renew
+ExecStartPost=/bin/cp -f /etc/letsencrypt/live/www.yourdomain.com/privkey.pem /home/ubuntu/data/privkey.pem
+ExecStartPost=/bin/cp -f /etc/letsencrypt/live/www.yourdomain.com/fullchain.pem /home/ubuntu/data/fullchain.pem
+```
+
+2.2 创建 /etc/systemd/system/certbot-renew.timer
+```
+[Unit]
+Description=Run certbot renew weekly
+[Timer]
+OnCalendar=Mon *-*-* 00:00:00
+Persistent=true
+[Install]
+WantedBy=timers.target
+```
+2.3 启用并启动定时器
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable certbot-renew.timer
+sudo systemctl start certbot-renew.timer
+```
+
+
 
 # Python托管平台的一些了解
 * [appengine](https://cloud.google.com)：必须绑定信用卡，但有免费额度，有收发邮件服务，任务队列，后台进程
@@ -111,10 +160,12 @@ sudo docker push kindleear/kindleear
 * [Pythonanywhere](https://www.pythonanywhere.com): 有免费计划，不支持任务队列，有每天两次的预定任务计划
 * [Adaptable](https://adaptable.io): 免费计划不支持任何形式的任务队列和后台任务，5分钟内必须完成应答请求
 * [render](https://render.com): 有免费计划，没有免费cron额度
-* []()
+
+
 
 # 常用链接
 [App Engine 文档](https://cloud.google.com/appengine/docs)
 [yaml配置文档](https://cloud.google.com/appengine/docs/standard/reference/app-yaml?tab=python)
 [Cloud Tasks]https://cloud.google.com/tasks/docs
 [Adding your favorite news website](https://manual.calibre-ebook.com/news.html)
+[GAE限额](https://cloud.google.com/appengine/docs/standard/quotas)
