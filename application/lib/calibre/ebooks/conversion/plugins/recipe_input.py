@@ -291,7 +291,7 @@ class RecipeInput(InputFormatPlugin):
     #recipe1: 第一个BasicNewsRecipe实例
     #onlyRecipe: 如果一本书仅包含一个BasicNewRecipe，则为True
     def build_meta(self, recipe1, onlyRecipe):
-        title = recipe1.short_title() if onlyRecipe else 'KindleEar'
+        title = recipe1.short_title() if onlyRecipe else self.user.book_cfg('title')
         try:
             pdate = recipe1.publication_date()
         except Exception as e:

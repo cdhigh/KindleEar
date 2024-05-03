@@ -906,38 +906,27 @@ div[class="schedule_daytimes"] input {
 .tooltip {
     position: relative;
     cursor: pointer;
-    text-decoration: underline;
+    text-decoration: underline dotted;
+    text-underline-offset: 8px;
 }
 
 .tooltip:hover::before {
-    word-break: keep-all;
-    white-space: nowrap;
+    text-align: left;
     content: attr(data-msg);
     position: absolute;
-    padding: 2px 6px;
+    padding: 2px 5px;
     display: block;
+    min-width: 220px;
     color: #333;
     opacity: 1;
+    background-color: #FFFCCC;
     border: 1px solid #333;
     border-radius: 5px;
     font-size: 14px;
     line-height: 18px;
-    top: calc(-100%); /*calc(10% + 5px);*/
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.tooltip:hover::after {
-    content: "﹀";
-    position: absolute;
-    top: -5px;
-    left: 50%;
-    -webkit-transform: translateX(-50%);
-    -ms-transform: translateX(-50%);
-    transform: translateX(-50%);
-    background: #fff;
-    height: 7px;
-    line-height: 13px;
+    bottom: 25px;
+    /*top: calc(-220%);*/
+    right: 0px;
 }
 
 /* 用于推送记录异常信息太长的鼠标悬停指示 */

@@ -283,11 +283,14 @@ class RecursiveFetcher:
         
         try:
             resp = self.browser.open(url, timeout=self.timeout)
-            if resp.status_code == 200:
+            status_code = resp.status_code
+            if status_code == 200:
                 data = response(resp.content)
                 data.newurl = resp.url
+            elif hasattr(self.browser, 'CodeMap'):
+                raise Exception(f'status: {self.browser.CodeMap(status_code)}')
             else:
-                raise Exception(f'status: {resp.status_code}')
+                raise Exception(f'status: {status_code}')
         except Exception as err: #URLError
             #if hasattr(err, 'code') and err.code in responses:
             #    raise FetchError(responses[err.code])
@@ -475,8 +478,9 @@ class RecursiveFetcher:
                         try:
                             data = self.rescale_image(data, itype)
                             itype = what(None, data)
-                        except Exception:
-                            self.log.warning('failed to compress image ' + iurl)
+                        except Exception as e:
+                            self.log.warning(f'failed to compress image {iurl}: {e}')
+                            self.log.info(traceback.format_exc())
                     # Moon+ apparently cannot handle .jpeg files
                     if itype == 'jpeg':
                         itype = 'jpg'
@@ -485,41 +489,36 @@ class RecursiveFetcher:
                         self.imagemap[iurl] = imgpath
                     self.fs.write(imgpath, data, 'wb')
                     tag['src'] = imgpath
-                except Exception:
-                    #traceback.print_exc()
+                except Exception as e:
                     self.log.info(traceback.format_exc())
                     continue
 
-    #如果需要，纠正或规则化soup里面的图片地址，比如延迟加载等
-    def rectify_image_src(self, soup, baseurl=None):
+    #纠正或规则化soup里面的图片地址，比如相对地址/延迟加载等
+    #注意：如果data-src|data-original|file之类的属性保存的不是真实url就没辙了
+    def rectify_image_src(self, soup, baseUrl=None):
+        tagToDelete = []
         for tag in soup.find_all('img'):
-            #现在使用延迟加载图片技术的网站越来越多了，这里处理一下
-            #注意：如果data-src|data-original|file之类的属性保存的不是真实url就没辙了
-            imgUrl = tag['src'] if 'src' in tag.attrs else ''
+            attrs = tag.attrs
+            #大部分使用延迟加载的网站都使用data-src|data-original
+            altUrl = attrs.get('data-src', '') or attrs.get('data-original', '')
+            imgUrl = attrs.pop('src', '') or altUrl
             if not imgUrl or imgUrl.endswith('/none.gif'):
-                for attr in tag.attrs:
-                    if attr != 'src' and (('src' in attr) or (attr == 'data-original')): #很多网站使用data-src|data-original
-                        imgUrl = tag[attr]
-                        break
-                if not imgUrl:
-                    for attr in tag.attrs:
-                        if attr != 'src' and (('data' in attr) or ('file' in attr)): #如果上面的搜索找不到，再大胆一点猜测url
-                            imgUrl = tag[attr]
-                            break
-            
-            if not imgUrl:
-                tag.decompose()
-                continue
+                #分两步是优先使用有src字样的，第二步是更大胆一点猜测
+                candi = [attrs[attr] for attr in attrs if ('src' in attr)]
+                candi.extend([attrs[attr] for attr in attrs if attr.startswith('data') or ('file' in attr)])
+                imgUrl = candi[0] if candi else imgUrl
+
+            if imgUrl and baseUrl and not imgUrl.startswith(('data:', 'http', 'www', 'file:')):
+                imgUrl = urljoin(baseUrl, imgUrl)
                 
-            if baseurl and not imgUrl.startswith(('data:', 'http', 'www', 'file:')):
-                imgUrl = urljoin(baseurl, imgUrl)
-                
-            if not self.is_link_wanted(imgUrl, tag):
-                self.log.warning('Image filtered:{}'.format(imgUrl))
-                tag.decompose()
-                continue
-            
-            tag['src'] = imgUrl #将更正的地址写回保存
+            if imgUrl and self.is_link_wanted(imgUrl, tag):
+                tag['src'] = imgUrl
+            else:
+                tagToDelete.append((tag, imgUrl))
+
+        for tag, imgUrl in tagToDelete:
+            self.log.warning('Image filtered:{}'.format(imgUrl))
+            tag.decompose()
 
     def absurl(self, baseurl, tag, key, filter=True):
         iurl = tag[key]

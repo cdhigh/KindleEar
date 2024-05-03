@@ -1373,6 +1373,7 @@ function TTSEngineFieldChanged(language, region) {
       target.attr('href', url);
       target.removeAttr('onclick');
       target.css('text-decoration', 'underline dotted');
+      target.css('text-underline-offset', '8px');
     } else {
       target.attr('href', 'javascript:void(0)');
       target.attr('onclick', 'return false;');

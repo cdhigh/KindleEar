@@ -415,7 +415,7 @@ def feed_from_xml(raw_xml, title=None, oldest_article=7,
 
     # Handle unclosed escaped entities. They trip up feedparser and HBR for one
     # generates them
-    raw_xml = re.sub(r'(&amp;#\d+)([^0-9;])', r'\1;\2', raw_xml)
+    raw_xml = re.sub(br'(&amp;#\d+)([^0-9;])', br'\1;\2', raw_xml)
     feed = parse(raw_xml)
     pfeed = Feed(get_article_url=get_article_url, log=log)
     pfeed.populate_from_feed(feed, title=title,
@@ -432,6 +432,8 @@ def feed_from_json(raw_json, title=None, oldest_article=7,
     pfeed = Feed(get_article_url=get_article_url, log=log)
 
     try:
+        if isinstance(raw_json, bytes):
+            raw_json = raw_json.decode('utf-8')
         feed = json.loads(raw_json)
     except Exception as e:
         log.warning('Parse json feed failed {}: {}'.format(title, str(e)))

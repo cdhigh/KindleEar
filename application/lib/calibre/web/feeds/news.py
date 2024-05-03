@@ -1907,8 +1907,8 @@ class BasicNewsRecipe(Recipe):
                 #        br.add_password(url, purl.username, purl.password)
                 resp = br.open(url, timeout=self.timeout)
                 if resp.status_code == 200:
-                    raw = resp.text.lstrip()
-                    pFunc = feed_from_json if raw and raw[0] == '{' else feed_from_xml
+                    raw = resp.content
+                    pFunc = feed_from_json if raw and raw[0] == b'{' else feed_from_xml
                     feed = pFunc(raw, title=title, log=self.log, oldest_article=self.oldest_article,
                             max_articles_per_feed=self.max_articles_per_feed, get_article_url=self.get_article_url)
                     parsed_feeds.append(feed)
@@ -2221,7 +2221,7 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
         
         articles = []
         for rules in self.url_extract_rules:
-            for item in self.get_tags_from_rules(soup, rules):
+            for item in get_tags_from_rules(soup, rules):
                 #如果最终tag不是链接，则在子节点中查找，并且添加所有找到的链接
                 item = item.find_all('a') if item.name.lower() != 'a' else [item]
                 for tag in item:
@@ -2248,10 +2248,10 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
 
         newBody = soup.new_tag('body')
         for rules in self.content_extract_rules:
-            newBody.extend(self.get_tags_from_rules(soup, rules))
+            newBody.extend(get_tags_from_rules(soup, rules))
         oldBody.replace_with(newBody)
         for rules in self.content_remove_rules:
-            self.remove_tags_from_rules(soup, rules)
+            remove_tags_from_rules(soup, rules)
             
         #提取失败，尝试自动提取
         if len(newBody.get_text(strip=True)) < 50:
@@ -2263,34 +2263,6 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
             return raw_html
         else:
             return str(soup)
-
-    #根据一个规则列表，从soup中获取符合条件的tag列表
-    #rules: 字符串列表或字典列表
-    def get_tags_from_rules(self, soup, rules):
-        if isinstance(rules[0], dict): #使用Tag字典查找
-            resultTags = soup.find_all(**rules[0])
-            for idx, flt in enumerate(rules[1:]):
-                resultTags = [tag.find_all(**flt) for tag in resultTags]
-                resultTags = [tag for sublist in resultTags for tag in sublist] #二级列表展开为一级列表
-        else: #使用CSS选择器，每个选择器的总共最长允许字符长度：1366
-            resultTags = soup.select(' '.join(rules))
-        return resultTags
-
-    #根据一个规则列表，从soup中去除符合条件的tag列表
-    #rules: 字符串列表或字典列表
-    #此函数直接在soup上修改
-    def remove_tags_from_rules(self, soup, rules):
-        resultTags = []
-        if isinstance(rules[0], dict): #使用Tag字典查找
-            resultTags = soup.find_all(**rules[0])
-            for idx, flt in enumerate(rules[1:]):
-                resultTags = [tag.find_all(**flt) for tag in resultTags]
-                resultTags = [tag for sublist in resultTags for tag in sublist] #二级列表展开为一级列表
-        else: #使用CSS选择器，每个选择器的总共最长允许字符长度：1366
-            resultTags = list(soup.select(' '.join(rules)))
-
-        for tag in resultTags:
-            tag.extract()
 
 class CalibrePeriodical(BasicNewsRecipe):
 
@@ -2361,3 +2333,32 @@ def recursive_fetch_url(url: str, fs):
     paths = fetcher.downloaded_paths
     failures = fetcher.failed_links
     return res, paths, failures
+
+#根据一个规则列表，从soup中获取符合条件的tag列表
+#rules: 字符串列表或字典列表
+#返回tag列表
+def get_tags_from_rules(soup, rules):
+    if isinstance(rules[0], dict): #使用Tag字典查找
+        resultTags = soup.find_all(**rules[0])
+        for idx, flt in enumerate(rules[1:]):
+            resultTags = [tag.find_all(**flt) for tag in resultTags]
+            resultTags = [tag for sublist in resultTags for tag in sublist] #二级列表展开为一级列表
+    else: #使用CSS选择器，每个选择器的总共最长允许字符长度：1366
+        resultTags = soup.select(' '.join(rules))
+    return resultTags
+
+#根据一个规则列表，从soup中去除符合条件的tag列表
+#rules: 字符串列表或字典列表
+#此函数直接在soup上修改
+def remove_tags_from_rules(soup, rules):
+    resultTags = []
+    if isinstance(rules[0], dict): #使用Tag字典查找
+        resultTags = soup.find_all(**rules[0])
+        for idx, flt in enumerate(rules[1:]):
+            resultTags = [tag.find_all(**flt) for tag in resultTags]
+            resultTags = [tag for sublist in resultTags for tag in sublist] #二级列表展开为一级列表
+    else: #使用CSS选择器，每个选择器的总共最长允许字符长度：1366
+        resultTags = list(soup.select(' '.join(rules)))
+
+    for tag in resultTags:
+        tag.extract()

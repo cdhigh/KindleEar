@@ -38,8 +38,8 @@ class KeUser(MyBaseModel): # kindleEar User
     
     #通过这两个基本配置信息的函数，提供一些合理的初始化值
     def cfg(self, item):
-        value = self.base_config.get(item, '')
-        if not value:
+        value = self.base_config.get(item, None)
+        if value is None:
             return {'timezone': 0}.get(item, value)
         else:
             return value
@@ -50,8 +50,8 @@ class KeUser(MyBaseModel): # kindleEar User
 
     #通过这两个关于书籍的配置信息的函数，提供一些合理的初始化值
     def book_cfg(self, item):
-        value = self.book_config.get(item, '')
-        if not value:
+        value = self.book_config.get(item, None)
+        if value is None:
             return {'type': 'epub', 'title': 'KindleEar', 'time_fmt': '%Y-%m-%d', 'oldest_article': 7,
                 'language': 'en'}.get(item, value)
         else:

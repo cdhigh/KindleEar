@@ -140,12 +140,14 @@ def image_to_data(img, compression_quality=95, fmt='JPEG', png_compression_level
     fmt = fmt.upper()
     if fmt == 'GIF':
         return png_data_to_gif_data(img)
-    else:
-        if img.mode != 'RGB':
-            img = img.convert('RGB')
-        data = BytesIO()
-        img.save(data, fmt)
-        return data.getvalue()
+    elif img.mode == 'LA' or (img.mode == 'P' and 'transparency' in img.info):
+        img = img.convert('RGBA').convert('RGB')
+    elif img.mode != 'RGB':
+        img = img.convert('RGB')
+        
+    data = BytesIO()
+    img.save(data, fmt)
+    return data.getvalue()
 
 def save_image(img, path, **kw):
     ''' Save image to the specified path. Image format is taken from the file

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #保存到evernote或分享到社交媒体功能
+#Author: cdhigh<https://github.com/cdhigh>
 
 from urllib.parse import unquote
 from bs4 import BeautifulSoup
@@ -12,9 +13,9 @@ from ..base_handler import *
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import send_html_mail
 from ..utils import hide_email, ke_decrypt
-from ..lib.pocket import Pocket
-from ..lib.wallabag import WallaBag
-from ..lib.urlopener import UrlOpener
+from pocket import Pocket
+from wallabag import WallaBag
+from urlopener import UrlOpener
 from filesystem_dict import FsDictStub
 
 bpShare = Blueprint('bpShare', __name__)

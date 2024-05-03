@@ -89,6 +89,16 @@ tools\pybabel_compile.bat
 # Docker
 ## 构建镜像
 ```bash
+cd kindleear && \
+cp ./docker/Dockerfile . && \
+sudo docker buildx create --use --name=builder && \
+sudo docker buildx build --push --platform=linux/amd64,linux/arm64 -t kindleear/kindleear .
+#or
+cd kindleear && \
+cp ./docker/Dockerfile . && \
+sudo docker buildx use builder && \
+sudo docker buildx build --push --platform=linux/amd64,linux/arm64 -t kindleear/kindleear .
+#or
 cd kindleear && cp ./docker/Dockerfile . && sudo docker build -t kindleear/kindleear .
 #or
 sudo docker build --no-cache -t kindleear/kindleear .

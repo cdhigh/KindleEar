@@ -43,7 +43,7 @@ return json.dumps(item)
 """
 
 import json
-from .urlopener import UrlOpener
+from urlopener import UrlOpener
 
 class APIError(Exception):
     def __init__(self, status_code, x_error_code, x_error, request):

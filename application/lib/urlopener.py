@@ -41,9 +41,9 @@ def UrlRetry(max_retries, delay, backoff=1, logger=default_log):
 class UrlOpener:
     #headers 可以传入一个字典或元祖列表
     #file_stub 用于本地文件读取，如果为None，则使用python的open()函数
-    def __init__(self, *, host=None, timeout=30, headers=None, file_stub=None, user_agent=None, **kwargs):
+    def __init__(self, *, host=None, timeout=60, headers=None, file_stub=None, user_agent=None, **kwargs):
         self.host = host
-        self.timeout = timeout or 30
+        self.timeout = timeout or 60
         #addheaders不使用字典是为了和mechanize接口兼容
         self.addheaders = [ #下面的代码假定第一个元素为 'User-Agent'
             ('User-Agent', "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)"),
@@ -109,7 +109,8 @@ class UrlOpener:
             default_log.warning(f"open_remote_url: {method} {url} failed: {traceback.format_exc()}")
             
         #有些网页头部没有编码信息，则使用chardet检测编码，否则requests会认为text类型的编码为"ISO-8859-1"
-        if "charset" not in resp.headers.get("Content-Type", "").lower():
+        contentType = resp.headers.get("Content-Type", "").lower()
+        if 'text/html' in contentType and "charset" not in contentType:
             resp.encoding = None #resp.apparent_encoding
         return resp
 
@@ -288,10 +289,10 @@ class UrlOpener:
     #构建网络请求使用的header字典
     def get_headers(self, url=None, extra_headers=None):
         headers = {k: v for k, v in self.addheaders}
-        if self.host:
-            referer = self.host
-        else:
-            referer = urlparse(url).netloc if url else ''
+        referer = self.host
+        if not referer and url:
+            parts = urlparse(url)
+            referer = f'{parts.scheme}://{parts.netloc}/'
         if referer:
             headers.setdefault('Referer', referer)
         if extra_headers:
