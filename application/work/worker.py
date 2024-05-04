@@ -177,6 +177,7 @@ def mp3cat_path():
     return execFile
 
 #合并TTS生成的音频片段
+#返回 (ext, audio)
 def MergeAudioSegment(roList):
     audioDirs = [ro.tts.get('audio_dir') for ro in roList if ro.tts.get('audio_dir')]
     ret = ('', None)
@@ -259,6 +260,6 @@ def MergeAudioSegment(roList):
         try:
             shutil.rmtree(dir_)
         except Exception as e:
-            default.log.debug(f"An error occurred while deleting '{item}': {e}")
+            default_log.debug(f"An error occurred while deleting '{dir_}': {e}")
 
     return ret

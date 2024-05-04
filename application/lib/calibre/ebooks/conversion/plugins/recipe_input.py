@@ -80,18 +80,19 @@ class RecipeInput(InputFormatPlugin):
         self.aborted_articles = []
         self.failed_downloads = []
         for recipe in recipes:
+            indexFile = None
             try:
                 ro = recipe(opts, log, output_dir, fs, feed_index_start=feed_index_start)
                 if recipeNum > 1: #只有单独推送才使用recipe的封面或报头
                     ro.cover_url = None
                     ro.masthead_url = None
-                ro.download()
+                indexFile = ro.download()
             except Exception as e:
                 msg = 'Failed to execute recipe "{}": {}'.format(recipe.title, e)
                 log.warning(msg)
                 continue
 
-            if ro.feed_objects:
+            if indexFile and ro.feed_objects:
                 feed_index_start += len(ro.feed_objects)
                 self.feeds.extend(ro.feed_objects)
                 self.aborted_articles.extend(ro.aborted_articles)

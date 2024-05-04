@@ -21,9 +21,9 @@ class TTSBase:
 
     #语音语调的允许常量值列表，除了使用常量值，也可以使用一个正负数值，比如 100%, +1.5, -30.00% 等
     prosody_attributes = {
-        'rate': ('x-slow', 'slow', 'medium', 'fast', 'x-fast'),
-        'pitch': ('x-low', 'low', 'medium', 'high', 'x-high'),
-        'volume': ('silent', 'x-soft', 'soft', 'medium', 'loud', 'x-loud')
+        'rate': {'x-slow': '-50%', 'slow': '-25%', 'medium': '+0%', 'fast': '+25%', 'x-fast': '+50%'},
+        'pitch': {'x-low': '-50Hz', 'low': '-25Hz', 'medium': '+0Hz', 'high': '+25Hz', 'x-high': '+50Hz'},
+        'volume': {'silent': '-100%', 'x-soft': '-50%', 'soft': '-25%', 'medium': '+0%', 'loud': '+25%', 'x-loud': '+50%'}
     }
 
     def __init__(self, params):

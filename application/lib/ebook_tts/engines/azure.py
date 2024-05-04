@@ -6,6 +6,10 @@ import json
 from urllib.parse import urljoin
 from urlopener import UrlOpener
 from .tts_base import TTSBase
+try:
+    import edge_tts
+except:
+    edge_tts = None
 
 #键为BCP-47语种代码，值为语音名字列表
 azuretts_languages = {
@@ -203,7 +207,7 @@ class AzureTTS(TTSBase):
     default_timeout = 60
     #https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-services-quotas-and-limits
     request_interval = 3  #20 transactions per 60 seconds
-    #每段音频不能超过10分钟，所以对于中文，大约2000字，因为大约1500 word
+    #每段音频不能超过10分钟，对于中文，大约2000字，因为大约1500 word
     max_len_per_request = 1000
     languages = azuretts_languages
     regions = azure_regions
@@ -233,7 +237,7 @@ class AzureTTS(TTSBase):
         else:
             return {'status': UrlOpener.CodeMap(resp.status_code)}
 
-    #文本转换为语音，
+    #文本转换为语音，返回(mime, audio)
     #支持的音频格式参考： 
     #<https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-text-to-speech?tabs=streaming#audio-outputs>
     def tts(self, text):
@@ -251,4 +255,65 @@ class AzureTTS(TTSBase):
             raise Exception(self.opener.CodeMap(resp.status_code))
 
 
+class EdgeTTSFree(TTSBase):
+    name = 'EdgeTTS(Free)'
+    alias = 'Microsoft Edge TTS (Free)'
+    need_api_key = False
+    api_key_hint = ''
+    default_api_host = ''
+    default_timeout = 60
+    #https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-services-quotas-and-limits
+    request_interval = 10  #20 transactions per 60 seconds
+    #每段音频不能超过10分钟，对于中文，大约2000字，因为大约1500 word
+    max_len_per_request = 1000
+    languages = azuretts_languages
+    regions = {}
+    engine_url = ''
+    region_url = ''
+    voice_url = ''
+    language_url = ''
+    
+    def __init__(self, params):
+        import asyncio
+        super().__init__(params)
+        try:
+            self.eventLoop = asyncio.get_event_loop()
+        except Exception as e:
+            if str(e).startswith('There is no current event loop in thread'):
+                self.eventLoop = asyncio.new_event_loop()
+                asyncio.set_event_loop(self.eventLoop)
+            else:
+                default_log.warning(f'asyncio.get_event_loop failed: {e}')
+        
+    #获取支持的语音列表
+    #或者可以直接到网页去查询
+    #https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts
+    def voice_list(self):
+        return edge_tts.list_voices()
 
+    #文本转换为语音，返回(mime, audio)
+    #支持的音频格式参考： 
+    #<https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-text-to-speech?tabs=streaming#audio-outputs>
+    def tts(self, text):
+        if not self.eventLoop:
+            raise Exception('Cannot create event_loop')
+
+        #将异步函数包装为同步调用
+        return self.eventLoop.run_until_complete(self.async_get_tts_audio(text))
+
+    #调用edge_tts的异步函数
+    async def async_get_tts_audio(self, text):
+        tts = edge_tts.Communicate(text,
+            voice=self.voice,
+            pitch=self.prosody_attributes['pitch'].get(self.pitch, '+0Hz'),
+            rate=self.prosody_attributes['rate'].get(self.rate, '+0%'),
+            volume=self.prosody_attributes['volume'].get(self.volume, '+0%'))
+        lines = []
+        try:
+            async for chunk in tts.stream():
+                if chunk["type"] == "audio":
+                    lines.append(chunk["data"])
+        except Exception as e:
+            default_log.warning(f'EdgeTTSFree.async_get_tts_audio failed: {e}')
+            return '', b''
+        return 'audio/mpeg', b''.join(lines)
