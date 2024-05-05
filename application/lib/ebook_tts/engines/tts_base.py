@@ -29,16 +29,17 @@ class TTSBase:
     def __init__(self, params):
         params = params or {}
         self.params = params
-        self.language = params.get('language', 'en-US')
+        self.language = params.get('language') or 'en-US'
         self.voice = params.get('voice', '')
-        self.rate = params.get('rate', 'medium')
-        self.pitch = params.get('pitch', 'medium')
-        self.volume = params.get('volume', 'medium')
+        self.rate = params.get('rate') or 'medium'
+        self.pitch = params.get('pitch') or 'medium'
+        self.volume = params.get('volume') or 'medium'
         self.key = params.get('api_key', '')
-        self.host = params.get('api_host', TTSBase.default_api_host)
-        self.timeout = params.get('timeout', TTSBase.default_timeout)
+        self.host = params.get('api_host') or self.default_api_host
+        self.timeout = params.get('timeout') or self.default_timeout
         self.region = params.get('region', '')
-
+        self.model = params.get('model', '')
+        
     #构建一个简单的ssml字符串，返回一个utf-8编码后的二进制字节串
     #text, language, voice: 要转换的文本，语种代码，语音名字
     #pitch: 音调, rate: 语速, volume: 音量

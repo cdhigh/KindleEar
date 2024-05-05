@@ -32,7 +32,7 @@ const g_languageNames = new Intl.DisplayNames([BrowserLanguage()], {type: 'langu
 
 //显示语言名字的便捷函数，如果有的语种代码没有翻译，则返回fallback
 function LanguageName(code, fallback) {
-  var txt = g_languageNames.of(code);
+  var txt = (code && code != 'und') ? g_languageNames.of(code) : code;
   return ((txt == code) && fallback) ? fallback : txt;
 }
 
@@ -1341,6 +1341,7 @@ function PopulateTTSFields(currEngineName) {
 //language: 当前recipe的TTS语种代码
 //region: 当前recipe的region代码
 function TTSEngineFieldChanged(language, region) {
+  let hasSelected = false;
   var engineName = $('#tts_engine').val();
   var engine = g_tts_engines[engineName];
   if (engine.need_api_key) { //设置apikey是否可见
@@ -1351,15 +1352,12 @@ function TTSEngineFieldChanged(language, region) {
     $('#tts_api_key_input').prop("required", false);
     $('#tts_api_key').hide();
   }
-  let hasSelected = false;
+  
   if (engine.regions && Object.keys(engine.regions).length > 0) { //填充region
     $('#tts_region_div').show();
     let region_sel = $('#tts_region_sel');
     for (const [code, name] of Object.entries(engine.regions)) {
       let selected = (code == region) ? 'selected="selected"' : '';
-      if (selected) {
-        hasSelected = true;
-      }
       let txt = '<option value="{0}" {1}>{2}</option>'.format(code, selected, name + ' (' + code + ')');
       region_sel.append($(txt));
     }
@@ -1391,7 +1389,7 @@ function TTSEngineFieldChanged(language, region) {
   let tts_language_sel = $('#tts_language_sel');
   let languages = engine.languages || {}; //键为语种代码，值为语音名字列表
   tts_language_sel.empty();
-  let enName = 'en';
+  let enName = 'und';
   hasSelected = false;
   for (const code of Object.keys(languages)) {
     let selected = (code == language) ? 'selected="selected"' : '';

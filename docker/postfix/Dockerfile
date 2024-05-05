@@ -1,5 +1,5 @@
 # Inspired by <https://github.com/thingless/mailglove>
-From alpine:3.19.1
+From --platform=$TARGETPLATFORM alpine:3.19.1
 
 ADD install.sh /etc/postfix/install.sh
 

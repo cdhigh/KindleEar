@@ -106,11 +106,12 @@ def WorkerImpl(userName: str, recipeId: list=None, reason='cron', log=None):
             if lastSendTime and (time.time() - lastSendTime < 10):
                 time.sleep(10)
 
-            audioName = f'{title}.{ext}'
+            audioName = f"{title}.{ext}"
+            audioNameWithTime = f"{title}_{user.local_time('%Y-%m-%d_%H-%M')}.{ext}"
             to = roList[0].tts.get('send_to') or user.cfg('kindle_email')
-            send_to_kindle(user, audioName, (audioName, audio), to=to)
+            send_to_kindle(user, audioName, (audioNameWithTime, audio), to=to)
             lastSendTime = time.time()
-            ret.append(f"Sent audioName")
+            ret.append(f"Sent {audioName}")
 
         if book:
             #避免触发垃圾邮件机制，最短10s发送一次

@@ -14,6 +14,10 @@ from urlopener import UrlOpener
 
 bpExtension = Blueprint('bpExtension', __name__)
 
+HTML_TPL = """<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title>failed</title></head><body><p>{}</p><br/><p style="text-align:right;color:silver;">by KindleEar &nbsp;</p></body></html>"""
+
+
 #接受扩展程序的请求，下载一个页面，并且将js全部去掉，然后再返回
 @bpExtension.route("/ext/removejs")
 def ExtRemoveJsRoute():
@@ -23,7 +27,9 @@ def ExtRemoveJsRoute():
     url = args.get('url', '')
     user = KeUser.get_or_none(KeUser.name == userName)
     if not user or user.share_links.get('key') != key:
-        return SHARE_INFO_TPL.format(title='failed', info=_("The username '{}' does not exist.").format(userName))
+        return HTML_TPL.format(_("The username '{}' does not exist.").format(userName))
+    elif not url:
+        return HTML_TPL.format(_("The url param is empty."))
 
     opener = UrlOpener()
     resp = opener.open(unquote(url))
@@ -37,7 +43,7 @@ def ExtRemoveJsRoute():
         resp.headers['Access-Control-Allow-Origin'] = '*' #允许跨域访问CSS/FONT之类的
         return resp
     else:
-        return SHARE_INFO_TPL.format(title='Get url failed', info=f'Get url failed: {url}')
+        return HTML_TPL.format(f'Get url failed: {url}<br/>Error: {opener.CodeMap(resp.status_code)}')
 
 
 #接受扩展程序的请求，下载一个页面，将js全部去掉，根据特定的规则提取正文内容，然后返回
@@ -50,18 +56,20 @@ def ExtRenderWithRules():
     ruleStr = args.get('rules', '')
     user = KeUser.get_or_none(KeUser.name == userName)
     if not user or user.share_links.get('key') != key:
-        return SHARE_INFO_TPL.format(title='failed', info=_("The username '{}' does not exist.").format(userName))
+        return HTML_TPL.format(_("The username '{}' does not exist.").format(userName))
+    elif not url:
+        return HTML_TPL.format(_("The url param is empty."))
 
     ruleStr = unquote(ruleStr)
     try:
         rulesList = json.loads(unquote(ruleStr))
     except Exception as e:
-        return SHARE_INFO_TPL.format(title='failed', info=_("The rules parameter is invalid."))
+        return HTML_TPL.format(_("The rules parameter is invalid.") + '<br/>' + str(e))
 
     opener = UrlOpener()
     resp = opener.open(unquote(url))
     if resp.status_code != 200:
-        return SHARE_INFO_TPL.format(title='Get url failed', info=f'Get url failed: {url}')
+        return HTML_TPL.format(f'Get url failed: {url}<br/>Error: {opener.CodeMap(resp.status_code)}')
 
     encoding = resp.encoding or resp.apparent_encoding or 'utf-8'
     rawHtml = resp.text
