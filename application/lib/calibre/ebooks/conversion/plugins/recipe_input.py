@@ -346,7 +346,7 @@ class RecipeInput(InputFormatPlugin):
     def get_cover_masthead(self, dir_, recipe1, user, fs):
         if recipe1.get_cover_url() != False:
             cPath = getattr(recipe1, 'cover_path', None)
-            if cPath:
+            if cPath and fs.exists(cPath):
                 cover_data = fs.read(cPath, 'rb')
             else:
                 cPath = os.path.join(dir_, 'cover.jpg')

@@ -9,6 +9,7 @@ from flask import Blueprint, request, make_response, current_app as app
 from flask_babel import gettext as _
 from calibre.web.feeds.news import get_tags_from_rules
 from ..base_handler import *
+from ..utils import xml_escape
 from ..back_end.db_models import *
 from urlopener import UrlOpener
 
@@ -24,12 +25,12 @@ def ExtRemoveJsRoute():
     args = request.args
     userName = args.get('name', app.config['ADMIN_NAME'])
     key = args.get('key')
-    url = args.get('url', '')
+    url = args.get('url')
     user = KeUser.get_or_none(KeUser.name == userName)
     if not user or user.share_links.get('key') != key:
         return HTML_TPL.format(_("The username '{}' does not exist.").format(userName))
     elif not url:
-        return HTML_TPL.format(_("The url param is empty."))
+        return HTML_TPL.format(_("Some parameters are missing or wrong."))
 
     opener = UrlOpener()
     resp = opener.open(unquote(url))
@@ -43,7 +44,7 @@ def ExtRemoveJsRoute():
         resp.headers['Access-Control-Allow-Origin'] = '*' #允许跨域访问CSS/FONT之类的
         return resp
     else:
-        return HTML_TPL.format(f'Get url failed: {url}<br/>Error: {opener.CodeMap(resp.status_code)}')
+        return HTML_TPL.format(GetRespErrorInfo(resp, url))
 
 
 #接受扩展程序的请求，下载一个页面，将js全部去掉，根据特定的规则提取正文内容，然后返回
@@ -52,13 +53,13 @@ def ExtRenderWithRules():
     args = request.args
     userName = args.get('name', app.config['ADMIN_NAME'])
     key = args.get('key')
-    url = args.get('url', '')
+    url = args.get('url')
     ruleStr = args.get('rules', '')
     user = KeUser.get_or_none(KeUser.name == userName)
     if not user or user.share_links.get('key') != key:
         return HTML_TPL.format(_("The username '{}' does not exist.").format(userName))
-    elif not url:
-        return HTML_TPL.format(_("The url param is empty."))
+    elif not url or not ruleStr:
+        return HTML_TPL.format(_("Some parameters are missing or wrong."))
 
     ruleStr = unquote(ruleStr)
     try:
@@ -69,7 +70,7 @@ def ExtRenderWithRules():
     opener = UrlOpener()
     resp = opener.open(unquote(url))
     if resp.status_code != 200:
-        return HTML_TPL.format(f'Get url failed: {url}<br/>Error: {opener.CodeMap(resp.status_code)}')
+        return HTML_TPL.format(GetRespErrorInfo(resp, url))
 
     encoding = resp.encoding or resp.apparent_encoding or 'utf-8'
     rawHtml = resp.text
@@ -175,3 +176,21 @@ def SetPageSrcEncoding(soup, encoding):
         except Exception as e:
             default_log.warning(f'Set page encoding {encoding} failed: {e}')
 
+
+#requests返回非200响应时获取错误码和响应头
+def GetRespErrorInfo(resp, url):
+    info = [f'Get url failed: {url}', f'Status code: {UrlOpener.CodeMap(resp.status_code)}',]
+    text = resp.text
+    if text:
+        info.append(f'Response body:')
+        if '<html' in text:
+            info.append(f'<pre style="white-space:pre-wrap;font-size:0.8em;">{xml_escape(text)}</pre>')
+        else:
+            info.append(text)
+    info.append('')
+    info.append('--------------------------------')
+    info.append('<strong>Response Headers:</strong>')
+    info.append('--------------------------------')
+    info.extend([f'<p style="display:inline;white-space:nowrap"><strong>{k}:</strong> <small>{v}</small></p>' 
+        for k,v in resp.headers.items()])
+    return '<br/>'.join(info)

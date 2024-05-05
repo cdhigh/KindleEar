@@ -98,6 +98,8 @@ def WorkerImpl(userName: str, recipeId: list=None, reason='cron', log=None):
     bookType = user.book_cfg('type')
     ret = []
     for title, roList in recipes.items():
+        if len(roList) == 1:
+            title = roList[0].title
         book = recipes_to_ebook(roList, user)
         
         #如果有TTS音频，先推送音频

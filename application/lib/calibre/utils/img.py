@@ -300,10 +300,12 @@ def scale_image(data, width=60, height=80, compression_quality=70, as_png=False,
     img = image_from_data(data)
     owidth, oheight = img.size
     if preserve_aspect_ratio:
-        ratio = min(width / owidth, height / oheight)
-        img = img.resize((int(owidth * ratio), int(oheight * ratio)), Image.Resampling.LANCZOS)
+        ratio = min(width / owidth, height / oheight) if owidth and oheight else 0
+        newWidth = int(owidth * ratio)
+        newHeight = int(oheight * ratio)
+        img = img.resize((newWidth, newHeight), Image.Resampling.LANCZOS) if (newWidth and newHeight) else img
     else:
-        img = img.resize((int(width * ratio), int(height * ratio)), Image.Resampling.LANCZOS)
+        img = img.resize((width, height), Image.Resampling.LANCZOS)
     fmt = 'PNG' if as_png else 'JPEG'
     w, h = img.size
     return w, h, image_to_data(img, fmt=fmt)
