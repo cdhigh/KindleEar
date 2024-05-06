@@ -20,7 +20,7 @@ bpUrl2Book = Blueprint('bpUrl2Book', __name__)
 #抓取指定链接，转换成附件推送
 @bpUrl2Book.route("/url2book", methods=['GET', 'POST'])
 def Url2BookRoute():
-    params = request.args if request.method == 'GET' else request.form
+    params = request.args if request.method == 'GET' else request.json
     userName = params.get('userName', app.config['ADMIN_NAME'])
     urls = params.get('urls')
     title = params.get('title')
@@ -74,7 +74,7 @@ def u2lDownloadFile(user, urls, title):
         sents = 'Downloaded books:<br/>{}'.format('<br/>'.join(sents))
     else:
         sents = 'Failed to download books'
-    default_log.info(sents)
+    default_log.warning(sents)
     return sents
 
 #调试目的，将链接直接下载，发送到管理员邮箱
@@ -85,55 +85,42 @@ def u2lDebugFetch(user, urls, title, text):
     else:
         fileName = 'page.html'
 
+    sendCnt = 0
     if text:
         attachments = [(fileName, text.encode('utf-8'))]
-        send_mail(user, user.cfg('email'), 'DEBUG FETCH', 'DEBUG FETCH', attachments=attachments)
+        send_to_kindle(user, 'DEBUG FETCH', attachments, to=user.cfg('email'))
+        sendCnt += 1
     else:
         opener = UrlOpener()
         for url in urls:
             resp = opener.open(url)
             if resp.status_code == 200:
                 attachments = [(fileName, resp.content)]
-                send_mail(user, user.cfg('email'), 'DEBUG FETCH', 'DEBUG FETCH', attachments=attachments)
+                send_to_kindle(user, 'DEBUG FETCH', attachments, to=user.cfg('email'))
+                sendCnt += 1
             else:
-                default_log.warning(f'debug fetch failed: code:{resp.status_code}, url:{url}')
+                default_log.warning(f'debug fetch failed: {UrlOpener.CodeMap(resp.status_code)}, url: {url}')
     
-    info = f"The debug file have been sent to {hide_email(user.cfg('kindle_email'))}."
-    default_log.info(info)
-    return info
+    if sendCnt:
+        info = f"The debug file have been sent to {hide_email(user.cfg('email'))}."
+        default_log.warning(info)
+        return info
+    else:
+        return 'debug fetch failed'
 
 #抓取url，制作成电子书
 def u2lFetchUrl2(user, urls, title, text):
-    book = None
-    if not text:
-        target = 'urls'
-        urls = u2lPreprocessUrl(urls)
-        book = urls_to_book(urls, title, user)
-    else:
+    if not urls:
+        return "No URLs provided."
+
+    if text:
         target = 'selected text'
-        url = urls[0]
-        text = text.replace('\n', '<br/>').replace('\\n', '<br/>')
-        html = f"""<!DOCTYPE html>\n<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        <title>{title}</title></head><body><div>{text}</div><br/><br/><p><a href="{url}">origin : {url}</a></p></body></html>"""
-        fs = FsDictStub(None)
-        fs.write('/index.html', html.encode('utf-8'))
-        res, paths, failures = recursive_fetch_url('file:///index.html', fs)
-        if res:
-            soup = BeautifulSoup(fs.read(res), 'lxml')
-            
-            #修正图片路径，从images目录里面移出
-            imgs = []
-            for imgTag in soup.find_all('img', src=True):
-                src = imgTag['src']
-                data = fs.read(os.path.join(fs.path, src))
-                if data:
-                    if src.startswith('images/'):
-                        src = src[7:]
-                    imgTag['src'] = src
-                    imgs.append((src, data))
-
-            book = html_to_book(str(soup), title, user, imgs)
-
+        book = u2lCreateEbookFromText(user, urls[0], title, text)
+    else:
+        target = 'urls'
+        processedUrls = u2lPreprocessUrl(urls)
+        book = urls_to_book(urls, title, user)
+        
     if book:
         send_to_kindle(user, title, book, fileWithTime=False)
         size = filesizeformat(len(book), suffix='Bytes')
@@ -143,6 +130,37 @@ def u2lFetchUrl2(user, urls, title, text):
         save_delivery_log(user, title, 0, status='fetch failed')
         rs = "Fetch url failed:<br/>{}".format('<br/>'.join(urls))
     return rs
+
+#下载text里面的图像文件，和文本一起做成电子书投递
+def u2lCreateEbookFromText(user, url, title, text):
+    text = text.replace('\n', '<br/>').replace('\\n', '<br/>')
+    htmlText = ['<!DOCTYPE html>', '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>', 
+        f'<title>{title}</title></head><body><div>{text}</div>']
+    if url:
+        htmlText.append(f'<br/><br/><p><a href="{url}">origin : {url}</a></p>')
+    htmlText.append('</body></html>')
+    fs = FsDictStub(path=None)
+    fs.write('/index.html', '\n'.join(htmlText).encode('utf-8'))
+    res, paths, failures = recursive_fetch_url('file:///index.html', fs)
+    if not res:
+        return None
+
+    imgs = []
+    soup = BeautifulSoup(fs.read(res), 'lxml')
+    for tag in soup.find_all('img', src=True): #修正图片路径，从images目录里面移出
+        src = tag['src']
+        data = fs.read(os.path.join(fs.path, src))
+        if data:
+            if src.startswith('images/'):
+                src = src[7:]
+            elif src.startswith('/images/'):
+                src = src[8:]
+            tag['src'] = src
+            imgs.append((src, data))
+        else:
+            tag.extract()
+
+    return html_to_book(str(soup), title, user, imgs)
 
 #url列表的预处理，对一些特殊的网站进行url的适当转换
 #返回处理过的url列表

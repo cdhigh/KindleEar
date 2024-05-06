@@ -63,7 +63,7 @@ def send_to_kindle(user, title, attachment, fileWithTime=True, to=None):
     subject = f"KindleEar {lcTime}"
     to = to or user.cfg('kindle_email')
 
-    if not isinstance(attachment, tuple):
+    if not isinstance(attachment, (tuple, list)):
         lcTime = "({})".format(lcTime) if fileWithTime else ""
         fileName = f"{title}{lcTime}.{user.book_cfg('type')}"
         attachment = (fileName, attachment)
