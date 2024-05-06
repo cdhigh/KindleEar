@@ -219,15 +219,15 @@ function CreatePageContent(category, page) {
 
     hamb_arg = [];
     //汉堡按钮弹出菜单代码
-    var dbId = '';
-    if ((typeof item.r != 'undefined') && item.r) { //item.r 用来保存服务器上的数据库ID
-      dbId = ",'" + item.r + "'";
-    }
-    var repAct = "ReportInvalid('" + item.t + "','" + item.u + "'" + dbId +  ")";
-    var subsAct = "SubscribeSharedFeed('" + item.t + "','" + item.u + "','" + item.f + "'" + dbId +  ")";
+    var dbId = item.r || '';
+    let title = item.t.replace("'", "\\\'");
+    var repAct = "ReportInvalid('`{0}','{1}','{2}')".format(title, item.u, dbId);
+    var subsAct = "SubscribeSharedFeed('{0}','{1}','{2}','{3}',{4})";
     hamb_arg.push({klass: 'btn-A', title: i18n.invalidReport, icon: 'icon-offcloud', act: repAct});
-    hamb_arg.push({klass: 'btn-D', title: i18n.subscribe, icon: 'icon-subscribe', act: subsAct});
-    
+    hamb_arg.push({klass: 'btn-C', title: i18n.subscriSep, icon: 'icon-push', act: 
+      subsAct.format(title, item.u, item.f, dbId, 1)});
+    hamb_arg.push({klass: 'btn-D', title: i18n.subscribe, icon: 'icon-subscribe', act: 
+      subsAct.format(title, item.u, item.f, dbId, 0)});
     rssStr.push(AddHamburgerButton(hamb_arg)); //AddHamburgerButton()在base.js里
     rssStr.push('</div>');
   }
@@ -309,15 +309,14 @@ function DoSearchInShared() {
 }
 
 //订阅一个共享自定义RSS或Recipe
-function SubscribeSharedFeed(title, feedurl, isfulltext, dbId) {
-  if ((typeof dbId == 'undefined') || !dbId) {
-    dbId = '';
-  }
+function SubscribeSharedFeed(title, feedurl, isfulltext, dbId, separated) {
+  dbId = dbId || '';
   
   $.ajax({
     url: "/customrss/add",
     type: "POST",
-    data: {title: title, fulltext: isfulltext, url: feedurl, fromsharedlibrary: 'true', 'recipeId': dbId},
+    data: {'title': title, 'fulltext': isfulltext, 'url': feedurl, fromsharedlibrary: 'true', 
+      'recipeId': dbId, 'separated': separated},
     success: function (resp, textStatus, xhr) {
       if (resp.status == "ok") {
         $('.additional-btns').stop(true).hide();

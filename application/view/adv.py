@@ -13,6 +13,7 @@ from ..utils import ke_encrypt, ke_decrypt, str_to_bool, safe_eval, xml_escape, 
 from ..lib.pocket import Pocket
 from ..lib.wallabag import WallaBag
 from ..lib.urlopener import UrlOpener
+from .setting import UpdateBookedCustomRss
 
 bpAdv = Blueprint('bpAdv', __name__)
 
@@ -187,18 +188,21 @@ def AdvImportPost():
                 title, url, isfulltext = xml_unescape(o.text or o.title), xml_unescape(o.xmlUrl), o.isFulltext
             isfulltext = str_to_bool(isfulltext) if isfulltext else defaultIsFullText
             
-            if not url.startswith('http'):
+            if not title or not url:
+                continue
+            elif not url.startswith('http'):
                 url = ('https:/' if url.startswith('/') else 'https://') + url
 
-            if title and url: #查询是否有重复的
-                dbItem = Recipe.get_or_none((Recipe.user == user.name) & (Recipe.title == title))
-                if dbItem:
-                    dbItem.url = url
-                    dbItem.isfulltext = isfulltext
-                    dbItem.save()
-                else:
-                    Recipe.create(title=title, url=url, user=user.name, isfulltext=isfulltext, type_='custom')
-                        
+            #查询是否有重复的
+            dbItem = Recipe.get_or_none((Recipe.user == user.name) & (Recipe.title == title))
+            if dbItem:
+                dbItem.url = url
+                dbItem.isfulltext = isfulltext
+                dbItem.save()
+            else:
+                Recipe.create(title=title, url=url, user=user.name, isfulltext=isfulltext, type_='custom')
+        
+        UpdateBookedCustomRss(user);
         return redirect(url_for("bpSubscribe.MySubscription"))
     else:
         return redirect(url_for("bpAdv.AdvImport"))

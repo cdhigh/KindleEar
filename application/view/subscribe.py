@@ -23,11 +23,11 @@ def MySubscription(tips=None):
     user = get_login_user()
     share_key = user.share_links.get('key', '')
     args = request.args
-    title_to_add = args.get('title_to_add') #from Bookmarklet/browser extension
-    url_to_add = args.get('url_to_add')
+    title_to_add = args.get('title_to_add', '').strip() #from Bookmarklet/browser extension
+    url_to_add = args.get('url_to_add', '').strip()
     isfulltext = str_to_bool(args.get('isfulltext'))
     my_custom_rss = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.url, Recipe.isfulltext, 
-        Recipe.translator, Recipe.tts]) for item in user.all_custom_rss()]
+        Recipe.translator, Recipe.tts, Recipe.custom]) for item in user.all_custom_rss()]
 
     my_uploaded_recipes = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.description, Recipe.needs_subscription, 
         Recipe.language, Recipe.translator, Recipe.tts]) for item in user.all_uploaded_recipe()]
@@ -40,6 +40,7 @@ def MySubscription(tips=None):
         item['id'] = 'custom:{}'.format(item['id'])
         item['tr_enable'] = item['translator'].get('enable')
         item['tts_enable'] = item['tts'].get('enable')
+        item['separated'] = item['custom'].get('separated', False)
     for item in my_uploaded_recipes:
         item['id'] = 'upload:{}'.format(item['id'])
         item['language'] = item['language'].lower().replace('-', '_').split('_')[0]
@@ -98,10 +99,12 @@ def AddCustomRss(user, form):
     title = form.get('title', '')
     url = form.get('url', '')
     isfulltext = str_to_bool(form.get('fulltext', ''))
+    separated = str_to_bool(form.get('separated', ''))
     fromSharedLibrary = str_to_bool(form.get('fromsharedlibrary', ''))
     recipeId = form.get('recipeId', '')
 
-    ret = {'status':'ok', 'title':title, 'url':url, 'isfulltext':isfulltext, 'recipeId': recipeId}
+    ret = {'status':'ok', 'title':title, 'url':url, 'isfulltext':isfulltext, 'recipeId': recipeId,
+        'separated': separated}
 
     if not title or not (url or recipeId):
         ret['status'] = _("The Title or Url is empty.")
@@ -132,7 +135,12 @@ def AddCustomRss(user, form):
                 params = SaveRecipeIfCorrect(user, src)
             except Exception as e:
                 return {'status': _("Failed to save the recipe. Error:") + str(e)}
+
+            recipe = Recipe.get_by_id_or_none(params['dbId'])
+            params.pop('dbId', None)
             ret.update(params)
+            if recipe:
+                SubscribeRecipe(user, params['id'], recipe, separated)
     else: #自定义RSS
         if not url.lower().startswith('http'):
             url = ('https:/' if url.startswith('/') else 'https://') + url
@@ -143,7 +151,8 @@ def AddCustomRss(user, form):
             ret['status'] = _("Duplicated subscription!")
             return ret
         else:
-            rss = Recipe.create(title=title, url=url, isfulltext=isfulltext, type_='custom', user=user.name)
+            rss = Recipe.create(title=title, url=url, isfulltext=isfulltext, type_='custom', user=user.name,
+                custom={'separated': separated})
             ret['id'] = rss.recipe_id
             UpdateBookedCustomRss(user)
     
@@ -181,9 +190,10 @@ def UpdateBookedCustomRss(user: KeUser):
     custom_rss = user.all_custom_rss()[::-1]
     if user.cfg('enable_send') == 'all': #添加自定义RSS的订阅
         for rss in custom_rss:
-            BookedRecipe.get_or_create(recipe_id=rss.recipe_id, defaults={'separated': False, 'user': userName, 
+            BookedRecipe.get_or_create(recipe_id=rss.recipe_id, defaults={'user': userName, 
                 'title': rss.title, 'description': rss.description, 'time': datetime.datetime.utcnow(),
-                'translator': rss.translator, 'tts': rss.tts, 'custom': rss.custom})
+                'translator': rss.translator, 'tts': rss.tts, 'custom': rss.custom,
+                'separated': rss.custom.get('separated', False)})
     elif custom_rss: #删除订阅
         ids = [rss.recipe_id for rss in custom_rss]
         BookedRecipe.delete().where(BookedRecipe.recipe_id.in_(ids)).execute()
@@ -293,6 +303,7 @@ def SaveUploadedRecipe(user):
     except Exception as e:
         return {'status': _("Failed to save the recipe. Error:") + str(e)}
 
+    params.pop('dbId', None)
     params['status'] = 'ok'
     return params
 
@@ -316,6 +327,7 @@ def SaveRecipeIfCorrect(user: KeUser, src: str):
     params.pop('time')
     params.pop('type_')
     params['id'] = dbInst.recipe_id
+    params['dbId'] = dbInst.id
     params['language'] = params['language'].lower().replace('-', '_').split('_')[0]
     return params
 

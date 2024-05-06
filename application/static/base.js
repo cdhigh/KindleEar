@@ -156,9 +156,8 @@ function AppendRecipeToLibrary(div, id) {
   hamb_arg = [];
   var fTpl = "{0}('{1}','{2}')";
   if (id.startsWith("upload:")) { //增加汉堡按钮弹出菜单代码
-    var id_title = "'{0}','{1}')\"".format(id, title);
-    hamb_arg.push({klass: 'btn-A', title: i18n.delete, icon: 'icon-delete', act: fTpl.format('DeleteUploadRecipe', id, title)});
-    hamb_arg.push({klass: 'btn-E', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', id, title)});
+    hamb_arg.push({klass: 'btn-A', title: i18n.delete, icon: 'icon-delete', act: fTpl.format('DeleteUploadRecipe', id, title.replace("'", "\\\'"))});
+    hamb_arg.push({klass: 'btn-E', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', id, title.replace("'", "\\\'"))});
   }
   hamb_arg.push({klass: 'btn-B', title: i18n.viewSrc, icon: 'icon-source', act: "/viewsrc/" + id.replace(':', '__')});
   hamb_arg.push({klass: 'btn-C', title: i18n.subscriSep, icon: 'icon-push', act: fTpl.format('SubscribeRecipe', id, '1')});
@@ -219,6 +218,9 @@ function PopulateMyCustomRss() {
     if (isfulltext) {
       row_str.push('<sup>{0}</sup>'.format(i18n.abbrEmb));
     }
+    if (rss.separated) {
+      row_str.push('<sup>{0}</sup>'.format(i18n.abbrSep));
+    }
     if (rss.tr_enable) {
       row_str.push('<sup>{0}</sup>'.format(i18n.abbrTr));
     }
@@ -239,9 +241,9 @@ function PopulateMyCustomRss() {
     var fTplAll = "{0}(event,'{1}','{2}','{3}',{4})"; //id,title,url,isfulltext
     hamb_arg.push({klass: 'btn-F', title: i18n.translator, icon: 'icon-translate', act: "/translator/" + id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + id.replace(':', '__')});
-    hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', id, title)});
+    hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', id, title.replace("'", "\\\'"))});
     hamb_arg.push({klass: 'btn-A', title: i18n.deleteCtrlNoConfirm, icon: 'icon-delete', 
-      act: fTplAll.format('ShowDeleteCustomRssDialog', id, title, url, isfulltext)});
+      act: fTplAll.format('ShowDeleteCustomRssDialog', id, title.replace("'", "\\\'"), url, isfulltext)});
     row_str.push(AddHamburgerButton(hamb_arg));
     row_str.push('</div>');
     //console.log(row_str.join(''));
@@ -295,11 +297,11 @@ function PopulateMySubscribed() {
     hamb_arg.push({klass: 'btn-F', title: i18n.translator, icon: 'icon-translate', act: "/translator/" + recipe_id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + recipe_id.replace(':', '__')});
     if (recipe_id.startsWith("upload:")) { //只有自己上传的recipe才能分享，内置的不用分享
-      hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', recipe_id, title)});
+      hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', recipe_id, title.replace("'", "\\\'"))});
     }
     hamb_arg.push({klass: 'btn-B', title: i18n.viewSrc, icon: 'icon-source', act: "/viewsrc/" + recipe_id.replace(':', '__')});
-    hamb_arg.push({klass: 'btn-E', title: i18n.customizeDelivTime, icon: 'icon-schedule', act: fTpl.format('ScheduleRecipe', recipe_id, title)});
-    hamb_arg.push({klass: 'btn-A', title: i18n.unsubscribe, icon: 'icon-unsubscribe', act: fTpl.format('UnsubscribeRecipe', recipe_id, title)});
+    hamb_arg.push({klass: 'btn-E', title: i18n.customizeDelivTime, icon: 'icon-schedule', act: fTpl.format('ScheduleRecipe', recipe_id, title.replace("'", "\\\'"))});
+    hamb_arg.push({klass: 'btn-A', title: i18n.unsubscribe, icon: 'icon-unsubscribe', act: fTpl.format('UnsubscribeRecipe', recipe_id, title.replace("'", "\\\'"))});
     row_str.push(AddHamburgerButton(hamb_arg));
     row_str.push('</div>');
     //console.log(row_str.join(''));
@@ -508,7 +510,6 @@ function DeleteCustomRss(rssid, title, url, isfulltext, reportInvalid) {
       $('#url_to_add').val(url);
       $('#isfulltext').prop('checked', isfulltext);
       if (reportInvalid) { //报告源失效
-        console.log('report invalid');
         $.post("/library/mgr/reportinvalid", {title: title, url: url, recipeId: ''});
       }
     } else if (data.status == i18n.loginRequired) {
@@ -542,6 +543,7 @@ function AddCustomRss() {
   let title_to_add = $('#title_to_add');
   let isfulltext = $('#isfulltext');
   let url_to_add = $('#url_to_add');
+  let separated = $('#separated');
   let title = title_to_add.val();
   let url = url_to_add.val();
   if ((title == '#removeall#') && !url) {
@@ -553,14 +555,17 @@ function AddCustomRss() {
     }
   }
 
-  $.post("/customrss/add", {title: title, url: url, fulltext: isfulltext.prop('checked')},
+  $.post("/customrss/add", {title: title, url: url, fulltext: isfulltext.prop('checked'), 
+    separated: separated.prop('checked')},
     function (data) {
       if (data.status == "ok") {
-        my_custom_rss_list.unshift({title: data.title, url: data.url, 'id': data.id, isfulltext: data.isfulltext});
+        my_custom_rss_list.unshift({title: data.title, url: data.url, 'id': data.id, 
+          isfulltext: data.isfulltext, separated: data.separated});
         PopulateMyCustomRss();
         title_to_add.val("");
         url_to_add.val("");
         isfulltext.prop('checked', false);
+        separated.prop('checked', false);
       } else if (data.status == i18n.loginRequired) {
         window.location.href = '/login';
       } else {

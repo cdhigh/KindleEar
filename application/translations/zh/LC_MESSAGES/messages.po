@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-04-23 10:39-0300\n"
+"POT-Creation-Date: 2024-05-05 21:01-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -75,7 +75,7 @@ msgid "Accounts"
 msgstr "用户账号列表"
 
 #: application/templates/admin.html:43
-#: application/templates/adv_whitelist.html:29 application/templates/my.html:32
+#: application/templates/adv_whitelist.html:29 application/templates/my.html:34
 #: application/view/admin.py:61 application/view/admin.py:69
 #: application/view/admin.py:96
 msgid "Add"
@@ -86,7 +86,7 @@ msgstr "添加"
 #: application/templates/login.html:21 application/templates/logs.html:65
 #: application/templates/reset_password.html:19
 #: application/templates/reset_password.html:20
-#: application/templates/setting.html:224 application/templates/signup.html:21
+#: application/templates/setting.html:222 application/templates/signup.html:21
 #: application/templates/user_account.html:15
 msgid "Username"
 msgstr "用户名"
@@ -124,7 +124,7 @@ msgstr "否"
 msgid "Never"
 msgstr "永不过期"
 
-#: application/templates/admin.html:70 application/templates/setting.html:152
+#: application/templates/admin.html:70 application/templates/setting.html:150
 #: application/templates/user_account.html:43
 msgid "7 Days"
 msgstr "一星期"
@@ -194,7 +194,7 @@ msgstr "邮箱或用户名"
 #: application/templates/adv_archive.html:56
 #: application/templates/adv_archive.html:72 application/templates/base.html:50
 #: application/templates/home.html:16 application/templates/login.html:25
-#: application/templates/setting.html:228 application/templates/signup.html:25
+#: application/templates/setting.html:226 application/templates/signup.html:25
 #: application/templates/user_account.html:19
 msgid "Password"
 msgstr "密码"
@@ -213,14 +213,14 @@ msgid "client_secret"
 msgstr "client_secret"
 
 #: application/templates/adv_archive.html:84
-#: application/templates/setting.html:216
+#: application/templates/setting.html:214
 msgid "Host"
 msgstr "主机"
 
 #: application/templates/adv_archive.html:119
-#: application/templates/book_audiolator.html:112
+#: application/templates/book_audiolator.html:113
 #: application/templates/book_translator.html:80
-#: application/templates/setting.html:250
+#: application/templates/setting.html:248
 msgid "Save settings"
 msgstr "保存设置"
 
@@ -429,8 +429,8 @@ msgid "Category"
 msgstr "类别"
 
 #: application/templates/base.html:35
-#: application/templates/book_audiolator.html:57
-#: application/templates/setting.html:130
+#: application/templates/book_audiolator.html:58
+#: application/templates/setting.html:128
 msgid "Language"
 msgstr "语言"
 
@@ -533,8 +533,8 @@ msgstr "选择内容发送到Kindle"
 msgid "Verified"
 msgstr "已校验"
 
-#: application/templates/base.html:62 application/view/login.py:86
-#: application/view/share.py:157
+#: application/templates/base.html:62 application/view/login.py:88
+#: application/view/share.py:158
 msgid "The username does not exist or password is wrong."
 msgstr "用户名不存在或密码错误。"
 
@@ -546,7 +546,7 @@ msgstr "您选择的文件不是可以接受的类型。"
 msgid "The file have been uploaded successfully."
 msgstr "文件已经成功上传。"
 
-#: application/templates/base.html:65
+#: application/templates/base.html:65 application/templates/library.html:67
 msgid "This feed has been successfully subscribed."
 msgstr "已经成功订阅此新闻源。"
 
@@ -630,13 +630,13 @@ msgstr "这个Recipe的自定义推送时间已经设定成功。"
 msgid "The account have been deleted."
 msgstr "这个账号已经被删除。"
 
-#: application/templates/base.html:86 application/view/share.py:147
+#: application/templates/base.html:86 application/view/share.py:148
 msgid "The username or password is empty."
 msgstr "用户名或密码为空。"
 
 #: application/templates/base.html:87 application/view/admin.py:86
 #: application/view/admin.py:166 application/view/admin.py:204
-#: application/view/login.py:226 application/view/login.py:284
+#: application/view/login.py:228 application/view/login.py:286
 msgid "The two new passwords are dismatch."
 msgstr "两个密码不匹配。"
 
@@ -648,7 +648,7 @@ msgstr "修改密码成功。"
 msgid "Account added successfully."
 msgstr "添加账号成功。"
 
-#: application/templates/base.html:90 application/view/login.py:138
+#: application/templates/base.html:90 application/view/login.py:140
 msgid "login required"
 msgstr "需要登录"
 
@@ -710,8 +710,7 @@ msgstr "配置校验正确。"
 #: application/templates/base.html:103 application/templates/logs.html:22
 #: application/templates/logs.html:67 application/templates/my.html:17
 #: application/templates/setting.html:97 application/templates/setting.html:98
-#: application/templates/setting.html:99 application/templates/setting.html:100
-#: application/templates/setting.html:126
+#: application/templates/setting.html:124
 msgid "Title"
 msgstr "书籍标题"
 
@@ -727,7 +726,7 @@ msgstr "退出"
 
 #: application/templates/base.html:128 application/templates/home.html:17
 #: application/templates/login.html:3 application/templates/login.html:19
-#: application/templates/login.html:29
+#: application/templates/login.html:30
 msgid "Login"
 msgstr "登录"
 
@@ -804,103 +803,103 @@ msgstr "区域"
 msgid "Api Key"
 msgstr "Api Key"
 
-#: application/templates/book_audiolator.html:65
+#: application/templates/book_audiolator.html:66
 msgid "Voice name"
 msgstr "语音名字"
 
-#: application/templates/book_audiolator.html:72
+#: application/templates/book_audiolator.html:73
 msgid "Voice speed"
 msgstr "语音速度"
 
-#: application/templates/book_audiolator.html:74
+#: application/templates/book_audiolator.html:75
 msgid "Extra slow"
 msgstr "超级慢"
 
-#: application/templates/book_audiolator.html:75
+#: application/templates/book_audiolator.html:76
 msgid "Slow"
 msgstr "慢"
 
-#: application/templates/book_audiolator.html:76
-#: application/templates/book_audiolator.html:86
-#: application/templates/book_audiolator.html:96
+#: application/templates/book_audiolator.html:77
+#: application/templates/book_audiolator.html:87
+#: application/templates/book_audiolator.html:97
 msgid "Medium"
 msgstr "中等"
 
-#: application/templates/book_audiolator.html:77
+#: application/templates/book_audiolator.html:78
 msgid "Fast"
 msgstr "快"
 
-#: application/templates/book_audiolator.html:78
+#: application/templates/book_audiolator.html:79
 msgid "Extra fast"
 msgstr "超级快"
 
-#: application/templates/book_audiolator.html:82
+#: application/templates/book_audiolator.html:83
 msgid "Voice pitch"
 msgstr "语音语调"
 
-#: application/templates/book_audiolator.html:84
+#: application/templates/book_audiolator.html:85
 msgid "Extra low"
 msgstr "超级低"
 
-#: application/templates/book_audiolator.html:85
+#: application/templates/book_audiolator.html:86
 msgid "Low"
 msgstr "低"
 
-#: application/templates/book_audiolator.html:87
+#: application/templates/book_audiolator.html:88
 msgid "High"
 msgstr "高"
 
-#: application/templates/book_audiolator.html:88
+#: application/templates/book_audiolator.html:89
 msgid "Extra high"
 msgstr "超级高"
 
-#: application/templates/book_audiolator.html:92
+#: application/templates/book_audiolator.html:93
 msgid "Voice volume"
 msgstr "语音音量"
 
-#: application/templates/book_audiolator.html:94
+#: application/templates/book_audiolator.html:95
 msgid "Extra soft"
 msgstr "超级低"
 
-#: application/templates/book_audiolator.html:95
+#: application/templates/book_audiolator.html:96
 msgid "Soft"
 msgstr "低"
 
-#: application/templates/book_audiolator.html:97
+#: application/templates/book_audiolator.html:98
 msgid "Loud"
 msgstr "高"
 
-#: application/templates/book_audiolator.html:98
+#: application/templates/book_audiolator.html:99
 msgid "Extra loud"
 msgstr "超级高"
 
-#: application/templates/book_audiolator.html:104
+#: application/templates/book_audiolator.html:105
 #: application/templates/book_translator.html:72
 msgid "Apply to all subscribed recipes"
 msgstr "应用到当前所有已订阅Recipe"
 
-#: application/templates/book_audiolator.html:109
+#: application/templates/book_audiolator.html:110
 #: application/templates/book_translator.html:77
 msgid ""
 "Note: Enabling this feature will significantly increase consumed CPU "
 "instance hours."
 msgstr "注意：启用此特性会显著增加CPU实例小时数的消耗。"
 
-#: application/templates/book_audiolator.html:118
+#: application/templates/book_audiolator.html:119
 #: application/templates/book_translator.html:86
 msgid "Test (Please save settings firstly)"
 msgstr "测试 (请先保存设置)"
 
-#: application/templates/book_audiolator.html:120
+#: application/templates/book_audiolator.html:121
 #: application/templates/book_translator.html:88
 msgid "Text"
 msgstr "原文"
 
-#: application/templates/book_audiolator.html:126
+#: application/templates/book_audiolator.html:127
 msgid "Your browser does not support the audio element."
 msgstr "您的浏览器不支持audio标签。"
 
-#: application/templates/book_audiolator.html:131
+#: application/templates/book_audiolator.html:132
 #: application/templates/book_translator.html:97
 msgid "Test"
 msgstr "测试"
@@ -1023,12 +1022,12 @@ msgid ""
 "share the service with friends."
 msgstr "使用开源 %(kindleear)s 应用，您可以部署您自己的网站，每天自动抓取全球新闻热点，并支持多账号，可以提供给多位好友同时使用。"
 
-#: application/templates/library.html:50 application/templates/my.html:62
+#: application/templates/library.html:50 application/templates/my.html:64
 msgid "Search"
 msgstr "搜索"
 
-#: application/templates/login.html:34 application/view/login.py:203
-#: application/view/login.py:210
+#: application/templates/login.html:35 application/view/login.py:205
+#: application/view/login.py:212
 msgid ""
 "The website does not allow registration. You can ask the owner for an "
 "account."
@@ -1039,6 +1038,7 @@ msgid "Only display last 10 logs"
 msgstr "只显示最后10条日志"
 
 #: application/templates/logs.html:21 application/templates/logs.html:66
+#: application/templates/setting.html:97 application/templates/setting.html:98
 msgid "Time"
 msgstr "时间"
 
@@ -1062,7 +1062,7 @@ msgstr "还没有投递过"
 msgid "Logs of other users"
 msgstr "其他用户的日志"
 
-#: application/templates/my.html:12 application/templates/setting.html:124
+#: application/templates/my.html:12 application/templates/setting.html:122
 msgid "Custom RSS"
 msgstr "自定义RSS"
 
@@ -1070,47 +1070,51 @@ msgstr "自定义RSS"
 msgid "Content embedded"
 msgstr "全文RSS"
 
-#: application/templates/my.html:44
+#: application/templates/my.html:27
+msgid "Deliver Separately"
+msgstr "单独推送"
+
+#: application/templates/my.html:46
 msgid "Subscribed"
 msgstr "已订阅"
 
-#: application/templates/my.html:49
+#: application/templates/my.html:51
 msgid "Library"
 msgstr "新闻源"
 
-#: application/templates/my.html:57
+#: application/templates/my.html:59
 msgid "Upload custom recipe"
 msgstr "上传自定义 Recipe"
 
-#: application/templates/my.html:70
+#: application/templates/my.html:72
 msgid "Subscription to selected recipe successful."
 msgstr "已成功订阅您选择的 Recipe"
 
-#: application/templates/my.html:73
+#: application/templates/my.html:75
 msgid "Bookmarklet"
 msgstr "书签小应用"
 
-#: application/templates/my.html:77
+#: application/templates/my.html:79
 msgid "Send to Kindle"
 msgstr "发送到Kindle"
 
-#: application/templates/my.html:81
+#: application/templates/my.html:83
 msgid "Subscribe with KindleEar"
 msgstr "在KindleEar订阅"
 
-#: application/templates/my.html:84
+#: application/templates/my.html:86
 msgid "Drag and drop this link to your bookmarks"
 msgstr "将链接拖动到书签栏"
 
-#: application/templates/my.html:88
+#: application/templates/my.html:90
 msgid "Chrome extension"
 msgstr "Chrome扩展程序"
 
-#: application/templates/my.html:89
+#: application/templates/my.html:91
 msgid "Edge extension"
 msgstr "Edge扩展程序"
 
-#: application/templates/my.html:91
+#: application/templates/my.html:93
 msgid "Browser extensions also available"
 msgstr "浏览器扩展也有提供"
 
@@ -1179,91 +1183,91 @@ msgstr "标题样式"
 msgid "Title Only"
 msgstr "仅标题"
 
-#: application/templates/setting.html:112
+#: application/templates/setting.html:110
 msgid "Remove hyperlinks"
 msgstr "移除链接"
 
-#: application/templates/setting.html:115
+#: application/templates/setting.html:113
 msgid "Do not remove hyperlinks"
 msgstr "不移除链接"
 
-#: application/templates/setting.html:116
+#: application/templates/setting.html:114
 msgid "Remove image links"
 msgstr "移除图像上的链接"
 
-#: application/templates/setting.html:117
+#: application/templates/setting.html:115
 msgid "Remove text links"
 msgstr "移除文本上的链接"
 
-#: application/templates/setting.html:118
+#: application/templates/setting.html:116
 msgid "Remove all hyperlinks"
 msgstr "移除所有链接"
 
-#: application/templates/setting.html:142
+#: application/templates/setting.html:140
 msgid "Oldest article"
 msgstr "最旧文章"
 
-#: application/templates/setting.html:145
+#: application/templates/setting.html:143
 msgid "No limit"
 msgstr "不限制"
 
-#: application/templates/setting.html:146
+#: application/templates/setting.html:144
 msgid "1 Day"
 msgstr "一天"
 
-#: application/templates/setting.html:147
+#: application/templates/setting.html:145
 msgid "2 Days"
 msgstr "两天"
 
-#: application/templates/setting.html:148
+#: application/templates/setting.html:146
 msgid "3 Days"
 msgstr "三天"
 
-#: application/templates/setting.html:149
+#: application/templates/setting.html:147
 msgid "4 Days"
 msgstr "四天"
 
-#: application/templates/setting.html:150
+#: application/templates/setting.html:148
 msgid "5 Days"
 msgstr "五天"
 
-#: application/templates/setting.html:151
+#: application/templates/setting.html:149
 msgid "6 Days"
 msgstr "六天"
 
-#: application/templates/setting.html:156
+#: application/templates/setting.html:154
 msgid "Time format"
 msgstr "时间格式"
 
-#: application/templates/setting.html:169
+#: application/templates/setting.html:167
 msgid "Author format"
 msgstr "标题样式"
 
-#: application/templates/setting.html:186
+#: application/templates/setting.html:184
 msgid "Send Mail Service"
 msgstr "发送邮件服务"
 
-#: application/templates/setting.html:188
+#: application/templates/setting.html:186
 msgid "Service"
 msgstr "服务"
 
-#: application/templates/setting.html:208
+#: application/templates/setting.html:206
 msgid "ApiKey"
 msgstr "ApiKey"
 
-#: application/templates/setting.html:212
+#: application/templates/setting.html:210
 msgid "SecretKey"
 msgstr "SecretKey"
 
-#: application/templates/setting.html:220
+#: application/templates/setting.html:218
 msgid "Port"
 msgstr "端口"
 
-#: application/templates/setting.html:232
+#: application/templates/setting.html:230
 msgid "Save path"
 msgstr "保存路径"
 
-#: application/templates/setting.html:240
+#: application/templates/setting.html:238
 #, python-format
 msgid ""
 "Important: Please activate your kindle firstly, then goto %(personal)s "
@@ -1272,17 +1276,17 @@ msgstr ""
 "注意：必须首先注册您的Kindle设备，同时请到亚马逊账户中心 %(personal)s 页面，将 %(sender)s 添加到 "
 "'已认可的发件人电子邮箱列表'。"
 
-#: application/templates/setting.html:240
+#: application/templates/setting.html:238
 msgid "Personal Document Settings"
 msgstr "个人文档设置"
 
-#: application/templates/setting.html:245 application/view/setting.py:142
+#: application/templates/setting.html:243 application/view/setting.py:142
 msgid ""
 "You have not yet set up your email address. Please go to the 'Admin' page"
 " to add your email address firstly."
 msgstr "您尚未设置您的email地址，请先到“账号管理”页面添加您的email地址。"
 
-#: application/templates/setting.html:252
+#: application/templates/setting.html:250
 msgid "Send Test Email"
 msgstr "发送测试邮件"
 
@@ -1298,9 +1302,9 @@ msgstr "账号"
 msgid "Never expire"
 msgstr "永久有效"
 
-#: application/view/admin.py:51 application/view/adv.py:371
+#: application/view/admin.py:51 application/view/adv.py:384
 #: application/view/setting.py:102 application/view/translator.py:83
-#: application/view/translator.py:163
+#: application/view/translator.py:165
 msgid "Settings Saved!"
 msgstr "恭喜，保存成功！"
 
@@ -1315,29 +1319,31 @@ msgid "You do not have sufficient privileges."
 msgstr "您没有足够的权限。"
 
 #: application/view/admin.py:82 application/view/admin.py:153
-#: application/view/admin.py:202 application/view/login.py:222
-#: application/view/login.py:251 application/view/setting.py:71
+#: application/view/admin.py:202 application/view/extension.py:33
+#: application/view/extension.py:62 application/view/login.py:224
+#: application/view/login.py:253 application/view/setting.py:71
 #: application/view/setting.py:73 application/view/setting.py:75
-#: application/view/share.py:37
+#: application/view/share.py:38
 msgid "Some parameters are missing or wrong."
 msgstr "一些参数为空或错误。"
 
-#: application/view/admin.py:84 application/view/login.py:40
-#: application/view/login.py:228
+#: application/view/admin.py:84 application/view/login.py:42
+#: application/view/login.py:230
 msgid "The username includes unsafe chars."
 msgstr "用户名包含不安全字符。"
 
-#: application/view/admin.py:88 application/view/login.py:230
+#: application/view/admin.py:88 application/view/login.py:232
 msgid "Already exist the username."
 msgstr "此账号已经存在。"
 
 #: application/view/admin.py:93 application/view/admin.py:172
-#: application/view/admin.py:198 application/view/login.py:277
+#: application/view/admin.py:198 application/view/login.py:279
 msgid "The password includes non-ascii chars."
 msgstr "密码包含非ASCII字符。"
 
 #: application/view/admin.py:113 application/view/admin.py:133
-#: application/view/admin.py:164
+#: application/view/admin.py:164 application/view/extension.py:31
+#: application/view/extension.py:60
 msgid "The username '{}' does not exist."
 msgstr "账号名 '{}' 不存在。"
 
@@ -1361,93 +1367,93 @@ msgstr "账号设置已更新。"
 msgid "The old password is wrong."
 msgstr "原密码错误。"
 
-#: application/view/adv.py:80 application/view/adv.py:81
-#: application/view/adv.py:82 application/view/adv.py:83
-#: application/view/adv.py:84 application/view/adv.py:85
-#: application/view/adv.py:86 application/view/adv.py:87
-#: application/view/adv.py:88 application/view/adv.py:89
+#: application/view/adv.py:81 application/view/adv.py:82
+#: application/view/adv.py:83 application/view/adv.py:84
+#: application/view/adv.py:85 application/view/adv.py:86
+#: application/view/adv.py:87 application/view/adv.py:88
+#: application/view/adv.py:89 application/view/adv.py:90
 msgid "Append hyperlink '{}' to article"
 msgstr "在每篇文章后附加 '{}' 超链接"
 
-#: application/view/adv.py:80 application/view/adv.py:81
-#: application/view/adv.py:82 application/view/adv.py:83
-#: application/view/adv.py:84
+#: application/view/adv.py:81 application/view/adv.py:82
+#: application/view/adv.py:83 application/view/adv.py:84
+#: application/view/adv.py:85
 msgid "Save to {}"
 msgstr "保存到 {}"
 
-#: application/view/adv.py:80
+#: application/view/adv.py:81
 msgid "evernote"
 msgstr "evernote"
 
-#: application/view/adv.py:81
+#: application/view/adv.py:82
 msgid "wiz"
 msgstr "为知笔记"
 
-#: application/view/adv.py:82
+#: application/view/adv.py:83
 msgid "pocket"
 msgstr "pocket"
 
-#: application/view/adv.py:83
+#: application/view/adv.py:84
 msgid "instapaper"
 msgstr "instapaper"
 
-#: application/view/adv.py:84
+#: application/view/adv.py:85
 msgid "wallabag"
 msgstr "wallabag"
 
-#: application/view/adv.py:85 application/view/adv.py:86
-#: application/view/adv.py:87 application/view/adv.py:88
+#: application/view/adv.py:86 application/view/adv.py:87
+#: application/view/adv.py:88 application/view/adv.py:89
 msgid "Share on {}"
 msgstr "分享到 {}"
 
-#: application/view/adv.py:85
+#: application/view/adv.py:86
 msgid "weibo"
 msgstr "微博"
 
-#: application/view/adv.py:86
+#: application/view/adv.py:87
 msgid "facebook"
 msgstr "facebook"
 
-#: application/view/adv.py:88
+#: application/view/adv.py:89
 msgid "tumblr"
 msgstr "tumblr"
 
-#: application/view/adv.py:89
+#: application/view/adv.py:90
 msgid "Open in browser"
 msgstr "在浏览器打开"
 
-#: application/view/adv.py:90
+#: application/view/adv.py:91
 msgid "Append qrcode of url to article"
 msgstr "在每篇文章后附加文章链接的二维码"
 
-#: application/view/adv.py:373
+#: application/view/adv.py:386
 msgid "The format is invalid."
 msgstr "格式非法。"
 
-#: application/view/adv.py:406
+#: application/view/adv.py:419
 msgid "Authorization Error!<br/>{}"
 msgstr "申请授权过程失败！<br/>{}"
 
-#: application/view/adv.py:429
+#: application/view/adv.py:442
 msgid "Success authorized by Pocket!"
 msgstr "已经成功获得Pocket的授权！"
 
-#: application/view/adv.py:435
+#: application/view/adv.py:448
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr "申请Pocket授权失败!<hr/>错误信息参考如下：<br/><br/>{}"
 
-#: application/view/adv.py:457
+#: application/view/adv.py:470
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr "Instapaper服务器异常，请稍候再试。"
 
-#: application/view/adv.py:470
+#: application/view/adv.py:483
 msgid "Request type [{}] unsupported"
 msgstr "不支持你请求的命令类型 [{}]"
 
-#: application/view/deliver.py:69 application/view/login.py:175
-#: application/view/share.py:41
+#: application/view/deliver.py:69 application/view/login.py:177
+#: application/view/share.py:42
 msgid "The username does not exist or the email is empty."
 msgstr "用户名不存在或email为空。"
 
@@ -1459,83 +1465,87 @@ msgstr "下列Recipe已经被添加到推送队列。"
 msgid "There are no recipes to deliver."
 msgstr "没有需要推送的Recipe。"
 
+#: application/view/extension.py:68
+msgid "The rules parameter is invalid."
+msgstr "规则参数非法。"
+
 #: application/view/library.py:34
 msgid "Cannot fetch data from {}, status: {}"
 msgstr "无法从 {} 获取数据，状态： {}"
 
-#: application/view/library.py:51 application/view/subscribe.py:212
-#: application/view/subscribe.py:332 application/view/subscribe.py:360
-#: application/view/subscribe.py:367 application/view/translator.py:29
+#: application/view/library.py:51 application/view/subscribe.py:217
+#: application/view/subscribe.py:337 application/view/subscribe.py:365
+#: application/view/subscribe.py:372 application/view/translator.py:29
 msgid "The recipe does not exist."
 msgstr "此Recipe不存在。"
 
-#: application/view/login.py:26 application/view/login.py:83
+#: application/view/login.py:27 application/view/login.py:85
 msgid "Please use {}/{} to login at first time."
 msgstr "初次登录请使用用户名'{}'/密码'{}'。"
 
-#: application/view/login.py:36
+#: application/view/login.py:38
 msgid "Username is empty."
 msgstr "账号名为空。"
 
-#: application/view/login.py:38
+#: application/view/login.py:40
 msgid "The len of username reached the limit of 25 chars."
 msgstr "用户名超过25字符。"
 
-#: application/view/login.py:87
+#: application/view/login.py:89
 msgid "Forgot password?"
 msgstr "忘记密码？"
 
-#: application/view/login.py:154 application/view/login.py:286
+#: application/view/login.py:156 application/view/login.py:288
 msgid "The token is wrong or expired."
 msgstr "Token码错误或已经逾期。"
 
-#: application/view/login.py:157
+#: application/view/login.py:159
 msgid "Please input the correct username and email to reset password."
 msgstr "请输入正确的用户名和Email来重置密码。"
 
-#: application/view/login.py:159
+#: application/view/login.py:161
 msgid "The email of account '{name}' is {email}."
 msgstr "账号 '{name}' 的Email为 {email}"
 
-#: application/view/login.py:180
+#: application/view/login.py:182
 msgid "Reset password success, Please close this page and login again."
 msgstr "修改密码成功，请关闭此页面重新登录。"
 
-#: application/view/login.py:183
+#: application/view/login.py:185
 msgid "The email you input is not associated with this account."
 msgstr "您输入的email不正确。"
 
-#: application/view/login.py:192
+#: application/view/login.py:194
 msgid "The link to reset your password has been sent to your email."
 msgstr "重置密码的邮件已经被发送至你的email。"
 
-#: application/view/login.py:193
+#: application/view/login.py:195
 msgid "Please check your email inbox within 24 hours."
 msgstr "请在24小时内检查你的email收件箱。"
 
-#: application/view/login.py:224
+#: application/view/login.py:226
 msgid "The invitation code is invalid."
 msgstr "邀请码无效。"
 
-#: application/view/login.py:232
+#: application/view/login.py:234
 msgid ""
 "Failed to create an account. Please contact the administrator for "
 "assistance."
 msgstr "创建账号失败，请联系管理员请求协助。"
 
-#: application/view/login.py:242
+#: application/view/login.py:244
 msgid "Successfully created account."
 msgstr "成功创建账号。"
 
-#: application/view/login.py:253
+#: application/view/login.py:255
 msgid "Reset KindleEar password"
 msgstr "重置KindleEar密码"
 
-#: application/view/login.py:254
+#: application/view/login.py:256
 msgid "This is an automated email. Please do not reply to it."
 msgstr "这个是自动发送的邮件，请勿直接回复。"
 
-#: application/view/login.py:255
+#: application/view/login.py:257
 msgid "You can click the following link to reset your KindleEar password."
 msgstr "你可以点击下面的链接来重置你的KindleEar密码。"
 
@@ -1547,211 +1557,211 @@ msgstr "Kindle E-mail必须填写！"
 msgid "Title is requied!"
 msgstr "书籍标题不能为空！"
 
-#: application/view/setting.py:175
+#: application/view/setting.py:176
 msgid "Chinese"
 msgstr "中文"
 
-#: application/view/setting.py:176
+#: application/view/setting.py:177
 msgid "English"
 msgstr "英语"
 
-#: application/view/setting.py:177
+#: application/view/setting.py:178
 msgid "French"
 msgstr "法语"
 
-#: application/view/setting.py:178
+#: application/view/setting.py:179
 msgid "Spanish"
 msgstr "西班牙语"
 
-#: application/view/setting.py:179
+#: application/view/setting.py:180
 msgid "Portuguese"
 msgstr "葡萄牙语"
 
-#: application/view/setting.py:180
+#: application/view/setting.py:181
 msgid "German"
 msgstr "德语"
 
-#: application/view/setting.py:181
+#: application/view/setting.py:182
 msgid "Italian"
 msgstr "意大利语"
 
-#: application/view/setting.py:182
+#: application/view/setting.py:183
 msgid "Japanese"
 msgstr "日语"
 
-#: application/view/setting.py:183
+#: application/view/setting.py:184
 msgid "Russian"
 msgstr "俄语"
 
-#: application/view/setting.py:184
+#: application/view/setting.py:185
 msgid "Turkish"
 msgstr "土耳其语"
 
-#: application/view/setting.py:185
+#: application/view/setting.py:186
 msgid "Korean"
 msgstr "韩语"
 
-#: application/view/setting.py:186
+#: application/view/setting.py:187
 msgid "Arabic"
 msgstr "阿拉伯语"
 
-#: application/view/setting.py:187
+#: application/view/setting.py:188
 msgid "Czech"
 msgstr "捷克语"
 
-#: application/view/setting.py:188
+#: application/view/setting.py:189
 msgid "Dutch"
 msgstr "荷兰语"
 
-#: application/view/setting.py:189
+#: application/view/setting.py:190
 msgid "Greek"
 msgstr "希腊语"
 
-#: application/view/setting.py:190
+#: application/view/setting.py:191
 msgid "Hindi"
 msgstr "印地语"
 
-#: application/view/setting.py:191
+#: application/view/setting.py:192
 msgid "Malaysian"
 msgstr "马来西亚语"
 
-#: application/view/setting.py:192
+#: application/view/setting.py:193
 msgid "Bengali"
 msgstr "孟加拉语"
 
-#: application/view/setting.py:193
+#: application/view/setting.py:194
 msgid "Persian"
 msgstr "波斯语"
 
-#: application/view/setting.py:194
+#: application/view/setting.py:195
 msgid "Urdu"
 msgstr "乌尔都语"
 
-#: application/view/setting.py:195
+#: application/view/setting.py:196
 msgid "Swahili"
 msgstr "斯瓦希里语"
 
-#: application/view/setting.py:196
+#: application/view/setting.py:197
 msgid "Vietnamese"
 msgstr "越南语"
 
-#: application/view/setting.py:197
+#: application/view/setting.py:198
 msgid "Punjabi"
 msgstr "旁遮普语"
 
-#: application/view/setting.py:198
+#: application/view/setting.py:199
 msgid "Javanese"
 msgstr "爪哇语"
 
-#: application/view/setting.py:199
+#: application/view/setting.py:200
 msgid "Tagalog"
 msgstr "他加禄语"
 
-#: application/view/setting.py:200
+#: application/view/setting.py:201
 msgid "Hausa"
 msgstr "豪萨语"
 
-#: application/view/share.py:54 application/view/subscribe.py:224
+#: application/view/share.py:55 application/view/subscribe.py:229
 msgid "Unknown command: {}"
 msgstr "未知命令：{}"
 
-#: application/view/share.py:60
+#: application/view/share.py:61
 msgid "There is no {} email yet."
 msgstr "还没有设置 {} email."
 
-#: application/view/share.py:108 application/view/share.py:133
-#: application/view/share.py:155 application/view/share.py:177
+#: application/view/share.py:109 application/view/share.py:134
+#: application/view/share.py:156 application/view/share.py:178
 msgid "Saved to your {} account."
 msgstr "已经成功被保存到你的 {} 账户。"
 
-#: application/view/share.py:111 application/view/share.py:129
-#: application/view/share.py:158 application/view/share.py:179
+#: application/view/share.py:112 application/view/share.py:130
+#: application/view/share.py:159 application/view/share.py:180
 msgid "Failed save to {}."
 msgstr "无法保存到 {}."
 
-#: application/view/share.py:112 application/view/share.py:130
-#: application/view/share.py:159 application/view/share.py:180
+#: application/view/share.py:113 application/view/share.py:131
+#: application/view/share.py:160 application/view/share.py:181
 msgid "Reason :"
 msgstr "原因："
 
-#: application/view/share.py:121
+#: application/view/share.py:122
 msgid "Unauthorized {} account!"
 msgstr "尚未获得Pocket的授权！"
 
-#: application/view/share.py:134
+#: application/view/share.py:135
 msgid "See details below:"
 msgstr "下面是一些技术细节："
 
-#: application/view/share.py:157
+#: application/view/share.py:158
 msgid "Unknown: {}"
 msgstr "未知: {}"
 
-#: application/view/subscribe.py:67
+#: application/view/subscribe.py:70
 msgid "Title or url is empty!"
 msgstr "标题或 URL 为空！"
 
-#: application/view/subscribe.py:74 application/view/subscribe.py:142
+#: application/view/subscribe.py:77 application/view/subscribe.py:146
 msgid "Duplicated subscription!"
 msgstr "重复的订阅!"
 
-#: application/view/subscribe.py:106
+#: application/view/subscribe.py:110
 msgid "The Title or Url is empty."
 msgstr "标题或URL为空。"
 
-#: application/view/subscribe.py:119
+#: application/view/subscribe.py:123
 msgid "Failed to fetch the recipe."
 msgstr "抓取Recipe失败。"
 
-#: application/view/subscribe.py:133 application/view/subscribe.py:294
+#: application/view/subscribe.py:137 application/view/subscribe.py:299
 msgid "Failed to save the recipe. Error:"
 msgstr "保存Recipe失败。错误："
 
-#: application/view/subscribe.py:169
+#: application/view/subscribe.py:173
 msgid "The Rss does not exist."
 msgstr "此RSS不存在。"
 
-#: application/view/subscribe.py:250
+#: application/view/subscribe.py:255
 msgid "You can only delete the uploaded recipe."
 msgstr "您只能删除你自己上传的Recipe。"
 
-#: application/view/subscribe.py:254
+#: application/view/subscribe.py:259
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "此Recipe已经被订阅，请先取消订阅然后再删除。"
 
-#: application/view/subscribe.py:269 application/view/translator.py:50
-#: application/view/translator.py:99 application/view/translator.py:111
-#: application/view/translator.py:134 application/view/translator.py:179
-#: application/view/translator.py:191
+#: application/view/subscribe.py:274 application/view/translator.py:50
+#: application/view/translator.py:99 application/view/translator.py:112
+#: application/view/translator.py:135 application/view/translator.py:181
+#: application/view/translator.py:194
 msgid "This recipe has not been subscribed to yet."
 msgstr "此Recipe尚未被订阅。"
 
-#: application/view/subscribe.py:281
+#: application/view/subscribe.py:286
 msgid "Can not read uploaded file, Error:"
 msgstr "无法读取上传的文件，错误："
 
-#: application/view/subscribe.py:289
+#: application/view/subscribe.py:294
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
 msgstr "解码Recipe失败，请确保您的Recipe为utf-8编码。"
 
-#: application/view/subscribe.py:309
+#: application/view/subscribe.py:314
 msgid "The recipe is already in the library."
 msgstr "此Recipe已经在新闻源中。"
 
-#: application/view/subscribe.py:339
+#: application/view/subscribe.py:344
 msgid "The login information for this recipe has been cleared."
 msgstr "此Recipe的网站登录信息已经被删除。"
 
-#: application/view/subscribe.py:343
+#: application/view/subscribe.py:348
 msgid "The login information for this recipe has been saved."
 msgstr "此Recipe的网站登录信息已经保存。"
 
-#: application/view/translator.py:77 application/view/translator.py:157
+#: application/view/translator.py:77 application/view/translator.py:158
 msgid "The api key is required."
 msgstr "需要填写api key."
 
-#: application/view/translator.py:115 application/view/translator.py:195
+#: application/view/translator.py:116 application/view/translator.py:198
 msgid "The text is empty."
 msgstr "文本为空。"
 

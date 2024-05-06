@@ -380,9 +380,8 @@ textarea {
 
 @media only screen and (min-width: 768px) {
     .my-rss .box-list .box,
-    .advwhitelist .box-list .box,
-    .advurlfilter .box-list .box {
-        padding-right: 6.3em;
+    .advwhitelist .box-list .box {
+        padding-right: 2em;
     }
 
     .box-list .box .cornerControls {

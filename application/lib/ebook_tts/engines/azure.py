@@ -262,9 +262,7 @@ class EdgeTTSFree(TTSBase):
     api_key_hint = ''
     default_api_host = ''
     default_timeout = 60
-    #https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-services-quotas-and-limits
-    request_interval = 10  #20 transactions per 60 seconds
-    #每段音频不能超过10分钟，对于中文，大约2000字，因为大约1500 word
+    request_interval = 20
     max_len_per_request = 1000
     languages = azuretts_languages
     regions = {}
