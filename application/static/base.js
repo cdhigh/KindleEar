@@ -291,9 +291,9 @@ function PopulateMySubscribed() {
     hamb_arg = [];
     var fTpl = "{0}('{1}','{2}')";
     //汉堡按钮弹出菜单代码
-    //if (need_subs) {
+    if (need_subs) {
         hamb_arg.push({klass: 'btn-C', title: i18n.subscriptionInfo, icon: 'icon-key', act: fTpl.format('AskForSubscriptionInfo', recipe_id, recipe.account)});
-    //}
+    }
     hamb_arg.push({klass: 'btn-F', title: i18n.translator, icon: 'icon-translate', act: "/translator/" + recipe_id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + recipe_id.replace(':', '__')});
     if (recipe_id.startsWith("upload:")) { //只有自己上传的recipe才能分享，内置的不用分享
