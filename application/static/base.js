@@ -291,9 +291,9 @@ function PopulateMySubscribed() {
     hamb_arg = [];
     var fTpl = "{0}('{1}','{2}')";
     //汉堡按钮弹出菜单代码
-    if (need_subs) {
+    //if (need_subs) {
         hamb_arg.push({klass: 'btn-C', title: i18n.subscriptionInfo, icon: 'icon-key', act: fTpl.format('AskForSubscriptionInfo', recipe_id, recipe.account)});
-    }
+    //}
     hamb_arg.push({klass: 'btn-F', title: i18n.translator, icon: 'icon-translate', act: "/translator/" + recipe_id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + recipe_id.replace(':', '__')});
     if (recipe_id.startsWith("upload:")) { //只有自己上传的recipe才能分享，内置的不用分享
@@ -385,24 +385,24 @@ function ScheduleRecipe(id, title) {
   }
   var days = item.send_days || [];
   var times = item.send_times || [];
-  var ostr = ['<h2>' + i18n.customizeDelivTime + '</h2>'];
+  var ostr = ['<h3 style="margin:0px auto;text-align:center;">' + i18n.customizeDelivTime + '</h3>'];
   ostr.push('<form class="pure-form" action="" method="POST" id="custom_schedule">');
   ostr.push('<input type="text" name="id" value="' + id + '" hidden />');
   ostr.push('<div class="pure-control-group">');
-  ostr.push('<p>' + i18n.delivDays + '</p>');
+  ostr.push('<p style="margin-bottom:10px;">' + i18n.delivDays + '</p>');
   ostr.push('<div class="schedule_daytimes">')
-  ostr.push('<label><input type="checkbox" name="Monday" ' + (days.indexOf(0) > -1 ? 'checked' : '')  + '/>' + i18n.Mon + '</label>');
-  ostr.push('<label><input type="checkbox" name="Tuesday" ' + (days.indexOf(1) > -1 ? 'checked' : '')  + '/>' + i18n.Tue + '</label>');
-  ostr.push('<label><input type="checkbox" name="Wednesday" ' + (days.indexOf(2) > -1 ? 'checked' : '')  + '/>' + i18n.Wed + '</label>');
-  ostr.push('<label><input type="checkbox" name="Thursday" ' + (days.indexOf(3) > -1 ? 'checked' : '')  + '/>' + i18n.Thu + '</label>');
-  ostr.push('<label><input type="checkbox" name="Friday" ' + (days.indexOf(4) > -1 ? 'checked' : '')  + '/>' + i18n.Fri + '</label>');
-  ostr.push('<label><input type="checkbox" name="Saturday" ' + (days.indexOf(5) > -1 ? 'checked' : '')  + '/>' + i18n.Sat + '</label>');
-  ostr.push('<label><input type="checkbox" name="Sunday" ' + (days.indexOf(6) > -1 ? 'checked' : '')  + '/>' + i18n.Sun + '</label>');
+  ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="Monday" ' + (days.indexOf(0) > -1 ? 'checked' : '')  + '/>' + i18n.Mon + '</label>');
+  ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="Tuesday" ' + (days.indexOf(1) > -1 ? 'checked' : '')  + '/>' + i18n.Tue + '</label>');
+  ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="Wednesday" ' + (days.indexOf(2) > -1 ? 'checked' : '')  + '/>' + i18n.Wed + '</label>');
+  ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="Thursday" ' + (days.indexOf(3) > -1 ? 'checked' : '')  + '/>' + i18n.Thu + '</label>');
+  ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="Friday" ' + (days.indexOf(4) > -1 ? 'checked' : '')  + '/>' + i18n.Fri + '</label>');
+  ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="Saturday" ' + (days.indexOf(5) > -1 ? 'checked' : '')  + '/>' + i18n.Sat + '</label>');
+  ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="Sunday" ' + (days.indexOf(6) > -1 ? 'checked' : '')  + '/>' + i18n.Sun + '</label>');
   ostr.push('</div></div><div class="pure-control-group">');
-  ostr.push('<p>' + i18n.delivTimes + '</p>');
+  ostr.push('<p style="margin-bottom:10px;">' + i18n.delivTimes + '</p>');
   ostr.push('<div class="schedule_daytimes">')
   for (var t = 0; t < 24; t++) {
-    ostr.push('<label><input type="checkbox" name="' + t + '" ' + (times.indexOf(t) > -1 ? 'checked' : '') + '/>' + t.toString().padStart(2, '0') + '</label>');
+    ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="' + t + '" ' + (times.indexOf(t) > -1 ? 'checked' : '') + '/>' + t.toString().padStart(2, '0') + '</label>');
     if ((t == 7) || (t == 15)) {
       ostr.push('<br/>');
     }
@@ -453,7 +453,7 @@ function GetRecipeInfo(id) {
 
 //弹出对话框，输入Recipe的登录信息，然后保存到服务器
 function AskForSubscriptionInfo(id, account){
-  var ostr = ['<h2>' + i18n.subscriptionInfo + '</h2>'];
+  var ostr = ['<h3 style="margin:0px auto 30px auto;text-align:center;">' + i18n.subscriptionInfo + '</h3>'];
   ostr.push('<form class="pure-form"><fieldset>');
   ostr.push('<input type="text" id="recipe_account" placeholder="' + i18n.account + '" value="' + account + '" style="margin-left: 10px;" />');
   ostr.push('<input type="password" id="recipe_password" placeholder="' + i18n.password + '" style="margin-left: 10px;" />');
@@ -681,7 +681,7 @@ function ShowShareDialog(id, title){
   var languages = ['en','fr','zh','es','pt','de','it','ja','ru','tr','ko','ar','cs','nl','el','hi','ms','bn','fa','ur',
     'sw','vi','pa','jv','tl','ha','da','in','no','pl','ro','sv','th'];
   var userLang = BrowserLanguage();
-  var ostr = ['<h2>' + i18n.shareLinksHappiness + '</h2>'];
+  var ostr = ['<h3 style="margin:0px auto;text-align:center;">' + i18n.shareLinksHappiness + '</h3>'];
   ostr.push('<div class="pure-g">');
   ostr.push('<div class="pure-u-1 pure-u-md-1-2">');
   ostr.push('<p>' + i18n.category + '</p>');
@@ -753,10 +753,18 @@ function StartShareRss(id, title) {
 
 //打开上传Recipe对话框，选择一个文件后上传
 function OpenUploadRecipeDialog() {
-  var ostr = ['<h2>{0}</h2>'.format(i18n.chooseRecipeFile)];
-  ostr.push('<form class="pure-form"><fieldset>');
-  ostr.push('<input type="file" id="recipe_file" style="outline:none;"/>');
-  ostr.push('</fieldset></form>');
+  var ostr = ['<h3 style="padding:0px;margin:0px auto 30px auto;text-align:center;">{0}</h3>'.format(i18n.uploadCustomRecipe)];
+  ostr.push('<form class="pure-form pure-form-aligned"><fieldset>');
+  ostr.push('<div class="pure-control-group">');
+  ostr.push('<label for="recipe_file">{0}</label>'.format(i18n.file));
+  ostr.push('<input type="file" name="recipe_file" id="recipe_file" style="outline:none;"/>');
+  ostr.push('</div><div class="pure-control-group" style="margin-top:20px">');
+  ostr.push('<label for="action_after_upload">{0}</label>'.format(i18n.action));
+  ostr.push('<select id="action_after_upload" name="action_after_upload" />');
+  ostr.push('<option value="">{0}</option>'.format(i18n.uploadOnly));
+  ostr.push('<option value="subscribe">{0}</option>'.format(i18n.subscribe));
+  ostr.push('<option value="separated">{0}</option>'.format(i18n.subscriSep));
+  ostr.push('</div></fieldset></form>');
   showH5Dialog(ostr.join('')).then(function (idx) {
     var recipeFile = $('#recipe_file');
     var formData = new FormData();
@@ -764,7 +772,9 @@ function OpenUploadRecipeDialog() {
     if (!fileData) {
       return;
     }
+    let actionAfterUpload = $('#action_after_upload').val();
     formData.append("recipe_file", fileData);
+    formData.append("action_after_upload", actionAfterUpload);
     $.ajax({
       url: '/recipe/upload',
       type: 'POST',
@@ -782,6 +792,9 @@ function OpenUploadRecipeDialog() {
           my_uploaded_recipes.unshift(data);
           $("#language_pick").val(lang);
           PopulateLibrary('');
+          if (actionAfterUpload) {
+            SubscribeRecipe(data.id, (actionAfterUpload == 'separated'));
+          }
           let msg = `<p>${i18n.recipeUploadedTips}</p>
           <table>
             <tr><td style="text-align:right;padding-right:30px;font-weight:bold;">
@@ -802,11 +815,12 @@ function OpenUploadRecipeDialog() {
 
 //删除一个已经上传的Recipe
 function DeleteUploadRecipe(id, title) {
-  if (!(event.ctrlKey || event.metaKey) && !confirm(i18n.areYouSureDelete.format(title))) {
+  let force = (event.ctrlKey || event.metaKey);
+  if (!force && !confirm(i18n.areYouSureDelete.format(title))) {
     return;
   }
 
-  $.post("/recipe/delete", {id: id}, function (data) {
+  $.post("/recipe/delete", {id: id, force: force}, function (data) {
     if (data.status == "ok") {
       for (var idx = 0; idx < my_uploaded_recipes.length; idx++) {
         if (my_uploaded_recipes[idx]['id'] == id) {
@@ -899,7 +913,7 @@ function VerifyInstapaper() {
       if (data.status != "ok") {
         alert("Error:" + data.status);
       } else if (data.correct == 1) {
-        ShowSimpleModalDialog('<h2>{0}</h2><p>{1}</p>'.format(i18n.congratulations, i18n.configOk));
+        ShowSimpleModalDialog('<h3>{0}</h3><p>{1}</p>'.format(i18n.congratulations, i18n.configOk));
       } else {
         alert(i18n.passwordWrong);
       }
@@ -926,7 +940,7 @@ function VerifyWallaBag() {
     data: data,
     success: function (data, textStatus, jqXHR) {
       if (data.status == "ok") {
-        ShowSimpleModalDialog('<h2>{0}</h2><p>{1}</p>'.format(i18n.congratulations, i18n.configOk));
+        ShowSimpleModalDialog('<h3>{0}</h3><p>{1}</p>'.format(i18n.congratulations, i18n.configOk));
       } else {
         alert(data.status);
       }
@@ -995,7 +1009,7 @@ var AjaxFileUpload = {
       if (this.progress) {
         this.progress.html("").css("display", "none");
       }
-      ShowSimpleModalDialog('<h2>{0}</h2><p>{1}</p>'.format(i18n.congratulations, i18n.fileUploaded));
+      ShowSimpleModalDialog('<h3>{0}</h3><p>{1}</p>'.format(i18n.congratulations, i18n.fileUploaded));
     } else {
       alert(response.status);
     }

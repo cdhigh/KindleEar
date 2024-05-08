@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-05-05 21:01-0300\n"
+"POT-Creation-Date: 2024-05-08 19:13-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:153
+#: application/templates/admin.html:3 application/templates/base.html:156
 msgid "Admin"
 msgstr "账号管理"
 
@@ -157,7 +157,7 @@ msgstr "2年"
 #: application/templates/admin.html:85
 #: application/templates/change_password.html:3
 #: application/templates/change_password.html:13 application/view/admin.py:130
-#: application/view/admin.py:189
+#: application/view/admin.py:190
 msgid "Edit account"
 msgstr "编辑账号"
 
@@ -502,9 +502,9 @@ msgstr "如果任意文本框留空白，则此登录信息将从服务器删除
 msgid "Cannot set the website login information, Error:"
 msgstr "无法设置登录信息，错误描述："
 
-#: application/templates/base.html:54
-msgid "Choose a recipe file to upload"
-msgstr "选择一个Recipe文件上传"
+#: application/templates/base.html:54 application/templates/my.html:59
+msgid "Upload custom recipe"
+msgstr "上传自定义 Recipe"
 
 #: application/templates/base.html:55
 msgid "Congratulations"
@@ -635,7 +635,7 @@ msgid "The username or password is empty."
 msgstr "用户名或密码为空。"
 
 #: application/templates/base.html:87 application/view/admin.py:86
-#: application/view/admin.py:166 application/view/admin.py:204
+#: application/view/admin.py:167 application/view/admin.py:205
 #: application/view/login.py:228 application/view/login.py:286
 msgid "The two new passwords are dismatch."
 msgstr "两个密码不匹配。"
@@ -720,39 +720,51 @@ msgstr "书籍标题"
 msgid "Text to Speech"
 msgstr "文本转语音"
 
-#: application/templates/base.html:126 application/templates/home.html:12
+#: application/templates/base.html:105
+msgid "Action"
+msgstr "动作"
+
+#: application/templates/base.html:106
+msgid "File"
+msgstr "文件"
+
+#: application/templates/base.html:107
+msgid "Upload Only"
+msgstr "仅上传"
+
+#: application/templates/base.html:129 application/templates/home.html:12
 msgid "Logout"
 msgstr "退出"
 
-#: application/templates/base.html:128 application/templates/home.html:17
+#: application/templates/base.html:131 application/templates/home.html:17
 #: application/templates/login.html:3 application/templates/login.html:19
 #: application/templates/login.html:30
 msgid "Login"
 msgstr "登录"
 
-#: application/templates/base.html:130 application/templates/signup.html:3
+#: application/templates/base.html:133 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr "注册"
 
-#: application/templates/base.html:150 application/templates/home.html:11
+#: application/templates/base.html:153 application/templates/home.html:11
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr "我的订阅"
 
-#: application/templates/base.html:151 application/templates/setting.html:3
+#: application/templates/base.html:154 application/templates/setting.html:3
 msgid "Settings"
 msgstr "设置"
 
-#: application/templates/base.html:152 application/templates/logs.html:3
+#: application/templates/base.html:155 application/templates/logs.html:3
 msgid "Logs"
 msgstr "投递日志"
 
-#: application/templates/base.html:154
+#: application/templates/base.html:157
 msgid "Advanced"
 msgstr "高级设置"
 
-#: application/templates/base.html:155 application/templates/library.html:3
+#: application/templates/base.html:158 application/templates/library.html:3
 msgid "Shared"
 msgstr "网友分享"
 
@@ -1082,10 +1094,6 @@ msgstr "已订阅"
 msgid "Library"
 msgstr "新闻源"
 
-#: application/templates/my.html:59
-msgid "Upload custom recipe"
-msgstr "上传自定义 Recipe"
-
 #: application/templates/my.html:72
 msgid "Subscription to selected recipe successful."
 msgstr "已成功订阅您选择的 Recipe"
@@ -1302,7 +1310,7 @@ msgstr "账号"
 msgid "Never expire"
 msgstr "永久有效"
 
-#: application/view/admin.py:51 application/view/adv.py:384
+#: application/view/admin.py:51 application/view/adv.py:387
 #: application/view/setting.py:102 application/view/translator.py:83
 #: application/view/translator.py:165
 msgid "Settings Saved!"
@@ -1318,8 +1326,8 @@ msgstr "添加账号"
 msgid "You do not have sufficient privileges."
 msgstr "您没有足够的权限。"
 
-#: application/view/admin.py:82 application/view/admin.py:153
-#: application/view/admin.py:202 application/view/extension.py:33
+#: application/view/admin.py:82 application/view/admin.py:154
+#: application/view/admin.py:203 application/view/extension.py:33
 #: application/view/extension.py:62 application/view/login.py:224
 #: application/view/login.py:253 application/view/setting.py:71
 #: application/view/setting.py:73 application/view/setting.py:75
@@ -1336,13 +1344,13 @@ msgstr "用户名包含不安全字符。"
 msgid "Already exist the username."
 msgstr "此账号已经存在。"
 
-#: application/view/admin.py:93 application/view/admin.py:172
-#: application/view/admin.py:198 application/view/login.py:279
+#: application/view/admin.py:93 application/view/admin.py:173
+#: application/view/admin.py:199 application/view/login.py:279
 msgid "The password includes non-ascii chars."
 msgstr "密码包含非ASCII字符。"
 
 #: application/view/admin.py:113 application/view/admin.py:133
-#: application/view/admin.py:164 application/view/extension.py:31
+#: application/view/admin.py:165 application/view/extension.py:31
 #: application/view/extension.py:60
 msgid "The username '{}' does not exist."
 msgstr "账号名 '{}' 不存在。"
@@ -1351,19 +1359,19 @@ msgstr "账号名 '{}' 不存在。"
 msgid "The password will not be changed if the fields are empties."
 msgstr "如果不填写密码，则密码不会被修改。"
 
-#: application/view/admin.py:131 application/view/admin.py:190
+#: application/view/admin.py:131 application/view/admin.py:191
 msgid "Change"
 msgstr "修改"
 
-#: application/view/admin.py:187
+#: application/view/admin.py:188
 msgid "Change success."
 msgstr "修改成功。"
 
-#: application/view/admin.py:200
+#: application/view/admin.py:201
 msgid "Changes saved successfully."
 msgstr "账号设置已更新。"
 
-#: application/view/admin.py:211
+#: application/view/admin.py:212
 msgid "The old password is wrong."
 msgstr "原密码错误。"
 
@@ -1426,29 +1434,29 @@ msgstr "在浏览器打开"
 msgid "Append qrcode of url to article"
 msgstr "在每篇文章后附加文章链接的二维码"
 
-#: application/view/adv.py:386
+#: application/view/adv.py:389
 msgid "The format is invalid."
 msgstr "格式非法。"
 
-#: application/view/adv.py:419
+#: application/view/adv.py:422
 msgid "Authorization Error!<br/>{}"
 msgstr "申请授权过程失败！<br/>{}"
 
-#: application/view/adv.py:442
+#: application/view/adv.py:445
 msgid "Success authorized by Pocket!"
 msgstr "已经成功获得Pocket的授权！"
 
-#: application/view/adv.py:448
+#: application/view/adv.py:451
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr "申请Pocket授权失败!<hr/>错误信息参考如下：<br/><br/>{}"
 
-#: application/view/adv.py:470
+#: application/view/adv.py:473
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr "Instapaper服务器异常，请稍候再试。"
 
-#: application/view/adv.py:483
+#: application/view/adv.py:486
 msgid "Request type [{}] unsupported"
 msgstr "不支持你请求的命令类型 [{}]"
 
@@ -1473,9 +1481,9 @@ msgstr "规则参数非法。"
 msgid "Cannot fetch data from {}, status: {}"
 msgstr "无法从 {} 获取数据，状态： {}"
 
-#: application/view/library.py:51 application/view/subscribe.py:217
-#: application/view/subscribe.py:337 application/view/subscribe.py:365
-#: application/view/subscribe.py:372 application/view/translator.py:29
+#: application/view/library.py:51 application/view/subscribe.py:222
+#: application/view/subscribe.py:360 application/view/subscribe.py:388
+#: application/view/subscribe.py:395 application/view/translator.py:29
 msgid "The recipe does not exist."
 msgstr "此Recipe不存在。"
 
@@ -1661,7 +1669,7 @@ msgstr "他加禄语"
 msgid "Hausa"
 msgstr "豪萨语"
 
-#: application/view/share.py:55 application/view/subscribe.py:229
+#: application/view/share.py:55 application/view/subscribe.py:235
 msgid "Unknown command: {}"
 msgstr "未知命令：{}"
 
@@ -1700,7 +1708,7 @@ msgstr "未知: {}"
 msgid "Title or url is empty!"
 msgstr "标题或 URL 为空！"
 
-#: application/view/subscribe.py:77 application/view/subscribe.py:146
+#: application/view/subscribe.py:77 application/view/subscribe.py:151
 msgid "Duplicated subscription!"
 msgstr "重复的订阅!"
 
@@ -1712,48 +1720,52 @@ msgstr "标题或URL为空。"
 msgid "Failed to fetch the recipe."
 msgstr "抓取Recipe失败。"
 
-#: application/view/subscribe.py:137 application/view/subscribe.py:299
+#: application/view/subscribe.py:137 application/view/subscribe.py:310
 msgid "Failed to save the recipe. Error:"
 msgstr "保存Recipe失败。错误："
 
-#: application/view/subscribe.py:173
+#: application/view/subscribe.py:178
 msgid "The Rss does not exist."
 msgstr "此RSS不存在。"
 
-#: application/view/subscribe.py:255
+#: application/view/subscribe.py:262
 msgid "You can only delete the uploaded recipe."
 msgstr "您只能删除你自己上传的Recipe。"
 
-#: application/view/subscribe.py:259
+#: application/view/subscribe.py:267
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "此Recipe已经被订阅，请先取消订阅然后再删除。"
 
-#: application/view/subscribe.py:274 application/view/translator.py:50
+#: application/view/subscribe.py:283 application/view/translator.py:50
 #: application/view/translator.py:99 application/view/translator.py:112
 #: application/view/translator.py:135 application/view/translator.py:181
 #: application/view/translator.py:194
 msgid "This recipe has not been subscribed to yet."
 msgstr "此Recipe尚未被订阅。"
 
-#: application/view/subscribe.py:286
+#: application/view/subscribe.py:297
 msgid "Can not read uploaded file, Error:"
 msgstr "无法读取上传的文件，错误："
 
-#: application/view/subscribe.py:294
+#: application/view/subscribe.py:305
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
 msgstr "解码Recipe失败，请确保您的Recipe为utf-8编码。"
 
-#: application/view/subscribe.py:314
+#: application/view/subscribe.py:328
+msgid "Cannot find any subclass of BasicNewsRecipe."
+msgstr "无法找到BasicNewsRecipe的任何子类。"
+
+#: application/view/subscribe.py:333
 msgid "The recipe is already in the library."
 msgstr "此Recipe已经在新闻源中。"
 
-#: application/view/subscribe.py:344
+#: application/view/subscribe.py:367
 msgid "The login information for this recipe has been cleared."
 msgstr "此Recipe的网站登录信息已经被删除。"
 
-#: application/view/subscribe.py:348
+#: application/view/subscribe.py:371
 msgid "The login information for this recipe has been saved."
 msgstr "此Recipe的网站登录信息已经保存。"
 
@@ -1764,4 +1776,3 @@ msgstr "需要填写api key."
 #: application/view/translator.py:116 application/view/translator.py:198
 msgid "The text is empty."
 msgstr "文本为空。"
-

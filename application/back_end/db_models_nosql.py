@@ -2,12 +2,12 @@
 # -*- coding:utf-8 -*-
 #datastore/mongodb数据库结构定义，使用自己写的兼容peewee接口的ODM库weedata管理
 #cloud datastore 文档 <https://cloud.google.com/datastore/docs/concepts/queries>
-#Author: cdhigh <https://github.com/cdhigh/KindleEar>
-import os, json, datetime
+#Author: cdhigh <https://github.com/cdhigh>
+import os, datetime
 from weedata import *
 
-dbUrl = os.getenv('DATABASE_URL')
-appId = os.getenv('APP_ID')
+dbUrl = os.getenv('DATABASE_URL', '')
+appId = os.getenv('APP_ID', '')
 
 if dbUrl.startswith('mongodb://'):
     dbInstance = MongoDbClient(appId, dbUrl)
@@ -53,7 +53,7 @@ class MyBaseModel(Model):
 
     #将当前行数据转换为一个字典结构，由子类使用，将外键转换为ID，日期转换为字符串
     #可以传入 only=[Book.title, ...]，或 exclude=[]
-    def to_dict(self, **kwargs):
+    def to_dict(self, **kwargs) -> dict:
         ret = self.dicts(**kwargs)
         ret.pop('key', None)
         ret.pop('_id', None)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
+#Author: cdhigh <https://github.com/cdhigh>
 #管理订阅页面
-
 import datetime, json, io, re, zipfile
 from operator import attrgetter
 from urllib.parse import urljoin
@@ -21,6 +21,9 @@ bpSubscribe = Blueprint('bpSubscribe', __name__)
 @login_required()
 def MySubscription(tips=None):
     user = get_login_user()
+    if not user:
+        return 'login required'
+        
     share_key = user.share_links.get('key', '')
     args = request.args
     title_to_add = args.get('title_to_add', '').strip() #from Bookmarklet/browser extension
@@ -213,7 +216,7 @@ def RecipeAjaxPost(actType):
     form = request.form
 
     if actType == 'upload': #上传Recipe
-        return SaveUploadedRecipe(user)
+        return SaveUploadedRecipe(user, form.get('action_after_upload'))
     
     recipeId = form.get('id', '')
     recipeType, dbId = Recipe.type_and_id(recipeId)
@@ -227,7 +230,8 @@ def RecipeAjaxPost(actType):
         separated = str_to_bool(form.get('separated', ''))
         return SubscribeRecipe(user, recipeId, recipe, separated)
     elif actType == 'delete': #删除已经上传的recipe
-        return DeleteRecipe(user, recipeId, recipeType, recipe)
+        force = str_to_bool(form.get('force'))
+        return DeleteRecipe(user, recipeId, recipeType, recipe, force)
     elif actType == 'schedule': #设置某个recipe的自定义推送时间
         return ScheduleRecipe(recipeId, form)
     else:
@@ -252,19 +256,22 @@ def SubscribeRecipe(user, recipeId, recipe, separated):
 #退订某个Recipe
 def UnsubscribeRecipe(user, recipeId, recipe):
     BookedRecipe.delete().where((BookedRecipe.user == user.name) & (BookedRecipe.recipe_id == recipeId)).execute()
+    LastDelivered.delete().where((LastDelivered.user == user.name) & (LastDelivered.bookname == recipe.title)).execute()
     return {'status':'ok', 'id': recipeId, 'title': recipe.title, 'desc': recipe.description}
 
 #删除某个Recipe
-def DeleteRecipe(user, recipeId, recipeType, recipe):
+def DeleteRecipe(user, recipeId, recipeType, recipe, force):
     if recipeType == 'builtin':
         return {'status': _('You can only delete the uploaded recipe.')}
-    else:
-        bkRecipe = user.get_booked_recipe(recipeId)
-        if bkRecipe:
-            return {'status': _('The recipe have been subscribed, please unsubscribe it before delete.')}
-        else:
-            recipe.delete_instance()
-            return {'status': 'ok', 'id': recipeId}
+    
+    if force:
+        BookedRecipe.delete().where((BookedRecipe.user == user.name) & (BookedRecipe.recipe_id == recipeId)).execute()
+    elif user.get_booked_recipe(recipeId):
+        return {'status': _('The recipe have been subscribed, please unsubscribe it before delete.')}
+    
+    LastDelivered.delete().where((LastDelivered.user == user.name) & (LastDelivered.bookname == recipe.title)).execute()
+    recipe.delete_instance()
+    return {'status': 'ok', 'id': recipeId}
 
 #设置某个Recipe的推送时间
 def ScheduleRecipe(recipeId, form):
@@ -279,7 +286,9 @@ def ScheduleRecipe(recipeId, form):
         return {'status': _('This recipe has not been subscribed to yet.')}
 
 #将上传的Recipe保存到数据库，返回一个结果字典，里面是一些recipe的元数据
-def SaveUploadedRecipe(user):
+#将上传表单的文件保存为recipe
+#actionAfterUpload: subscribe-上传后订阅，separated-上传后订阅（独立推送），空-上传后无动作
+def SaveUploadedRecipe(user, actionAfterUpload):
     tips = ''
     try:
         data = request.files.get('recipe_file').read()
@@ -303,6 +312,11 @@ def SaveUploadedRecipe(user):
     except Exception as e:
         return {'status': _("Failed to save the recipe. Error:") + str(e)}
 
+    if actionAfterUpload:
+        separated = (actionAfterUpload == 'separated')
+        recipe = Recipe.get_by_id_or_none(params['dbId'])
+        SubscribeRecipe(user, params['id'], recipe, separated)
+
     params.pop('dbId', None)
     params['status'] = 'ok'
     return params
@@ -313,6 +327,8 @@ def SaveRecipeIfCorrect(user: KeUser, src: str):
     from calibre.web.feeds.recipes import compile_recipe
 
     recipe = compile_recipe(src)
+    if not recipe:
+        raise Exception(_('Cannot find any subclass of BasicNewsRecipe.'))
     
     #判断是否重复
     oldRecipe = Recipe.get_or_none((Recipe.user == user.name) & (Recipe.title == recipe.title))
@@ -329,6 +345,9 @@ def SaveRecipeIfCorrect(user: KeUser, src: str):
     params['id'] = dbInst.recipe_id
     params['dbId'] = dbInst.id
     params['language'] = params['language'].lower().replace('-', '_').split('_')[0]
+
+    LastDelivered.delete().where((LastDelivered.user == user.name) & (LastDelivered.bookname == recipe.title)).execute()
+
     return params
 
 #修改Recipe的网站登陆信息

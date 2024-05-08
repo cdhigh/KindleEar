@@ -2,13 +2,12 @@
 # -*- coding:utf-8 -*-
 #数据库结构定义，使用这个文件隔离sql和nosql的差异，尽量向外提供一致的接口
 #Visit <https://github.com/cdhigh/KindleEar> for the latest version
-#Author:
-# cdhigh <https://github.com/cdhigh>
+#Author: cdhigh <https://github.com/cdhigh>
 import os, sys, random, hashlib, datetime
 from operator import attrgetter
 from ..utils import ke_encrypt, ke_decrypt, tz_now
 
-if os.getenv('DATABASE_URL').startswith(("datastore", "mongodb", "redis", "pickle")):
+if os.getenv('DATABASE_URL', '').startswith(("datastore", "mongodb", "redis", "pickle")):
     from .db_models_nosql import *
 else:
     from .db_models_sql import *

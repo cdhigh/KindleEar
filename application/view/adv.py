@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #一些高级设置功能页面
-
-import datetime, io, textwrap
-from urllib.parse import quote, unquote, urljoin, urlparse
+#Author: cdhigh <https://github.com/cdhigh>
+import io, textwrap
+from urllib.parse import unquote, urljoin, urlparse
 from flask import Blueprint, url_for, render_template, redirect, session, send_file, abort, current_app as app
 from flask_babel import gettext as _
 from PIL import Image
 from ..base_handler import *
 from ..back_end.db_models import *
-from ..utils import ke_encrypt, ke_decrypt, str_to_bool, safe_eval, xml_escape, xml_unescape
+from ..utils import ke_decrypt, str_to_bool, safe_eval, xml_escape, xml_unescape
 from ..lib.pocket import Pocket
 from ..lib.wallabag import WallaBag
 from ..lib.urlopener import UrlOpener
@@ -29,7 +29,7 @@ def adv_render_template(tpl, advCurr, **kwargs):
 @login_required()
 def AdvDeliverNow():
     user = get_login_user()
-    recipes = user.get_booked_recipe()
+    recipes = user.get_booked_recipe() if user else None
     return adv_render_template('adv_delivernow.html', 'deliverNow', user=user, recipes=recipes)
 
 #设置邮件白名单
@@ -49,7 +49,7 @@ def AdvWhiteList():
 def AdvWhiteListPost():
     user = get_login_user()
     wlist = request.form.get('wlist')
-    if wlist:
+    if user and wlist:
         wlist = wlist.replace('"', "").replace("'", "").strip()
         if wlist.startswith('*@'): #输入*@xx.xx则修改为@xx.xx
             wlist = wlist[1:]
@@ -61,7 +61,6 @@ def AdvWhiteListPost():
 @bpAdv.route("/advdel", endpoint='AdvDel')
 @login_required()
 def AdvDel():
-    user = get_login_user()
     wlist_id = request.args.get('wlist_id')
     if wlist_id:
         dbItem = WhiteList.get_by_id_or_none(wlist_id)
@@ -89,7 +88,7 @@ def AdvArchive():
     appendStrs["Tumblr"] = _("Append hyperlink '{}' to article").format(_('Share on {}').format(_('tumblr')))
     appendStrs["Browser"] = _("Append hyperlink '{}' to article").format(_('Open in browser'))
     appendStrs["Qrcode"] = _("Append qrcode of url to article")
-    shareLinks = user.share_links
+    shareLinks = user.share_links if user else {}
     shareLinks.pop('key', None)
     
     return adv_render_template('adv_archive.html', 'archive', user=user, appendStrs=appendStrs,
@@ -99,6 +98,9 @@ def AdvArchive():
 @login_required()
 def AdvArchivePost():
     user = get_login_user()
+    if not user:
+        return redirect(url_for("bpAdv.AdvArchive"))
+
     form = request.form
     evernoteMail = form.get('evernote_mail', '').strip()
     evernote = str_to_bool(form.get('evernote')) and evernoteMail
@@ -169,7 +171,7 @@ def AdvImportPost():
     user = get_login_user()
     upload = request.files.get('import_file')
     defaultIsFullText = bool(request.form.get('default_is_fulltext')) #默认是否按全文RSS导入
-    if upload:
+    if user and upload:
         try:
             rssList = opml.from_string(upload.read())
         except Exception as e:
@@ -183,7 +185,7 @@ def AdvImportPost():
         
         for o in walkOpmlOutline(rssList):
             if o.text and not o.title and isKindleEarOpml: #老版本只有text属性，没有title属性
-                title, url, isfulltext = o.text, unquote_plus(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
+                title, url, isfulltext = o.text, unquote(o.xmlUrl), o.isFulltext #isFulltext为非标准属性
             else:
                 title, url, isfulltext = xml_unescape(o.text or o.title), xml_unescape(o.xmlUrl), o.isFulltext
             isfulltext = str_to_bool(isfulltext) if isfulltext else defaultIsFullText
@@ -224,6 +226,8 @@ def walkOpmlOutline(outline):
 @login_required()
 def AdvExport():
     user = get_login_user()
+    if not user:
+        return b''
     
     #为了简单起见，就不用其他库生成xml，而直接使用字符串格式化生成
     opmlTpl = textwrap.dedent("""\
@@ -258,11 +262,13 @@ def AdvExport():
 def AdvUploadCoverImage(tips=None):
     user = get_login_user()
     covers = {}
-    covers['order'] = user.covers.get('order', 'random')
-    for idx in range(7):
-        coverName = f'cover{idx}'
-        covers[coverName] = user.covers.get(coverName, f'/images/{coverName}.jpg')
-    jsonCovers = json.dumps(covers)
+    jsonCovers = ''
+    if user:
+        covers['order'] = user.covers.get('order', 'random')
+        for idx in range(7):
+            coverName = f'cover{idx}'
+            covers[coverName] = user.covers.get(coverName, f'/images/{coverName}.jpg')
+        jsonCovers = json.dumps(covers)
     return adv_render_template('adv_uploadcover.html', 'uploadCover', user=user, tips=tips,
         uploadUrl=url_for("bpAdv.AdvUploadCoverAjaxPost"), covers=covers, jsonCovers=jsonCovers)
 
@@ -274,6 +280,8 @@ def AdvUploadCoverAjaxPost():
     MAX_HEIGHT = 1280
     ret = {'status': 'ok'}
     user = get_login_user()
+    if not user:
+        return {'status': 'login required'}
     covers = user.covers
     covers['order'] = request.form.get('order', 'random')
     for idx in range(7):
@@ -290,13 +298,14 @@ def AdvUploadCoverAjaxPost():
         
         try:
             #将图像转换为JPEG格式，同时限制分辨率不超过 832x1280，宽高比为0.625~0.664，建议0.65
-            imgInst = Image.open(upload)
+            imgInst = Image.open(upload) #type: ignore
             width, height = imgInst.size
-            fmt = imgInst.format
             if (width > MAX_WIDTH) or (height > MAX_HEIGHT):
                 ratio = min(MAX_WIDTH / width, MAX_HEIGHT / width)
                 imgInst = imgInst.resize((int(width * ratio), int(height * ratio)))
-            if imgInst.mode != 'RGB':
+            if imgInst.mode == 'LA' or (imgInst.mode == 'P' and 'transparency' in imgInst.info):
+                imgInst = imgInst.convert('RGBA').convert('RGB')
+            elif imgInst.mode != 'RGB':
                 imgInst = imgInst.convert('RGB')
             data = io.BytesIO()
             imgInst.save(data, 'JPEG')
@@ -322,7 +331,7 @@ def AdvUploadCoverAjaxPost():
 @login_required()
 def AdvUploadCss(tips=None):
     user = get_login_user()
-    extra_css = user.get_extra_css()
+    extra_css = user.get_extra_css() if user else ''
     return adv_render_template('adv_uploadcss.html', 'uploadCss', extra_css=extra_css,
         user=user, uploadUrl=url_for("bpAdv.AdvUploadCssAjaxPost"), 
         deleteUrl=url_for("bpAdv.AdvDeleteCssAjaxPost"), tips=tips)
@@ -333,16 +342,20 @@ def AdvUploadCss(tips=None):
 def AdvUploadCssAjaxPost():
     ret = {'status': 'ok'}
     user = get_login_user()
+    if not user:
+        return {'status': 'login required'}
+
     try:
         upload = request.files.get('css_file')
-        data = upload.read().decode('utf-8').encode('utf-8') #测试是否是utf-8编码
+        #测试是否是utf-8编码
+        data = upload.read().decode('utf-8').encode('utf-8') #type: ignore
         dbItem = UserBlob.get_or_none((UserBlob.user == user.name) & (UserBlob.name == 'css'))
         if dbItem:
             dbItem.data = data
         else:
             dbItem = UserBlob(name='css', user=user.name, data=data)
         dbItem.save()
-        upload.close()
+        upload.close() #type: ignore
     except Exception as e:
         ret['status'] = str(e)
 
@@ -354,7 +367,7 @@ def AdvUploadCssAjaxPost():
 def AdvDeleteCssAjaxPost():
     ret = {'status': 'ok'}
     user = get_login_user()
-    if request.form.get('action') == 'delete':
+    if user and (request.form.get('action') == 'delete'):
         UserBlob.delete().where((UserBlob.user == user.name) & (UserBlob.name=='css')).execute()
     
     return ret
@@ -364,7 +377,8 @@ def AdvDeleteCssAjaxPost():
 @login_required()
 def AdvCalibreOptions(tips=None):
     user = get_login_user()
-    options = json.dumps(user.custom.get('calibre_options', {}), indent=2)
+    calibreOptions = user.custom.get('calibre_options', {}) if user else {}
+    options = json.dumps(calibreOptions, indent=2, ensure_ascii=False)
     return adv_render_template('adv_calibre_options.html', 'calibreOptions', options=options, user=user)
 
 #设置calibre的参数
@@ -374,9 +388,12 @@ def AdvCalibreOptionsPost():
     user = get_login_user()
     tips = ''
     txt = request.form.get('options', '').strip()
+    if txt:
+        txt = txt.replace('null', 'None').replace('true', 'True').replace('false', 'False')
+
     try:
         options = safe_eval(txt) if txt else {}
-        if isinstance(options, dict):
+        if user and isinstance(options, dict):
             custom = user.custom
             custom['calibre_options'] = options
             user.custom = custom
@@ -387,14 +404,14 @@ def AdvCalibreOptionsPost():
     except Exception as e:
         tips = str(e)
 
-    options = json.dumps(user.custom.get('calibre_options', {}), indent=2)
+    calibreOptions = user.custom.get('calibre_options', {}) if user else {}
+    options = json.dumps(calibreOptions, indent=2, ensure_ascii=False)
     return adv_render_template('adv_calibre_options.html', 'calibreOptions', tips=tips, options=options, user=user)
 
 #读取数据库中的图像二进制数据，如果为dbimage/cover则返回当前用户的封面图片
 @bpAdv.route("/dbimage/<id_>", endpoint='DbImage')
 @login_required()
 def DbImage(id_):
-    user = get_login_user()
     dbItem = UserBlob.get_by_id_or_none(id_)
     if dbItem:
         return send_file(io.BytesIO(dbItem.data), mimetype='image/jpeg')
@@ -408,7 +425,6 @@ def AdvOAuth2(authType):
     if authType.lower() != 'pocket':
         return 'Auth Type ({}) Unsupported!'.format(authType)
         
-    user = get_login_user()
     cbUrl = urljoin(app.config['APP_DOMAIN'], '/oauth2cb/pocket?redirect={}'.format(url_for("bpAdv.AdvArchive")))
     pocket = Pocket(app.config['POCKET_CONSUMER_KEY'], cbUrl)
     try:
@@ -425,11 +441,10 @@ def AdvOAuth2(authType):
 @bpAdv.route("/oauth2cb/<authType>", endpoint='AdvOAuth2Callback')
 @login_required()
 def AdvOAuth2Callback(authType):
-    if authType.lower() != 'pocket':
+    user = get_login_user()
+    if not user or (authType.lower() != 'pocket'):
         return 'Auth Type ({}) Unsupported!'.format(authType)
         
-    user = get_login_user()
-    
     pocket = Pocket(app.config['POCKET_CONSUMER_KEY'])
     request_token = session.get('pocket_request_token', '')
     shareLinks = user.share_links
@@ -451,9 +466,8 @@ def AdvOAuth2Callback(authType):
 @bpAdv.post("/verifyajax/<verifType>", endpoint='VerifyAjaxPost')
 @login_required()
 def VerifyAjaxPost(verifType):
-    user = get_login_user()
     form = request.form
-    respDict = {'status': 'ok'}
+    respDict = {'status': 'ok', 'correct': 0}
     if verifType == 'instapaper':
         INSTAPAPER_API_AUTH_URL = "https://www.instapaper.com/api/authenticate"
         userName = form.get('username', '')
@@ -482,4 +496,3 @@ def VerifyAjaxPost(verifType):
     else:
         respDict['status'] = _('Request type [{}] unsupported').format(verifType)
     return respDict
-    

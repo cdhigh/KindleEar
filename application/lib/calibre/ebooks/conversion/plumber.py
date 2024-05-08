@@ -911,7 +911,9 @@ OptionRecommendation(name='expand_css',
         ),
 
 OptionRecommendation(name='page_breaks_before',
-            recommended_value="//*[name()='h1' or name()='h2']",
+            #commented by cdhigh
+            #recommended_value="//*[name()='h1' or name()='h2']",
+            recommended_value=None,
             level=OptionRecommendation.LOW,
             help=_('An XPath expression. Page breaks are inserted '
                 'before the specified elements. To disable use the expression: /')

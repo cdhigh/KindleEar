@@ -3,7 +3,7 @@
 #Author: cdhigh <https://github.com/cdhigh>
 #将发到string@appid.appspotmail.com的邮件正文转成附件发往kindle邮箱。
 
-import os, sys, re, email
+import os, re, email
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from flask import Blueprint, request
@@ -25,12 +25,12 @@ bpInBoundEmail = Blueprint('bpInBoundEmail', __name__)
 SUBJECT_WORDCNT = 50
 
 #除非强制提取链接，否则超过这个字数的邮件直接转发内容
-WORDCNT_THRESHOLD_APMAIL = 300
+WORDCNT_THRESHOLD_APMAIL = 500
 
 #GAE的退信通知
 @bpInBoundEmail.post("/_ah/bounce")
 def ReceiveGaeBounce():
-    msg = gae_mail.BounceNotification(dict(request.form.lists()))
+    msg = gae_mail.BounceNotification(dict(request.form.lists())) #type:ignore
     default_log.warning("Bounce original: {}, notification: {}".format(msg.original, msg.notification))
     return "OK"
 
@@ -38,7 +38,7 @@ def ReceiveGaeBounce():
 #每个邮件限额: 31.5 MB
 @bpInBoundEmail.post("/_ah/mail/<path>")
 def ReceiveGaeMail(path):
-    message = gae_mail.InboundEmailMessage(request.get_data())
+    message = gae_mail.InboundEmailMessage(request.get_data()) #type:ignore
 
     subject = message.subject if hasattr(message, 'subject') else 'NoSubject'
     
@@ -71,9 +71,9 @@ def ReceiveMail():
         if part.get('Content-Disposition') == 'attachment':
             attachments.append((part.get_filename(), body))
         elif cType == 'text/plain':
-            txtBodies.append(body.decode(part.get_content_charset('us-ascii')))
+            txtBodies.append(body.decode(part.get_content_charset('us-ascii'))) #type:ignore
         elif cType == 'text/html':
-            htmlBodies.append(body.decode(part.get_content_charset('us-ascii')))
+            htmlBodies.append(body.decode(part.get_content_charset('us-ascii'))) #type:ignore
 
     return ReceiveMailImpl(sender=msg.get('From'), to=msg.get_all('To'), subject=msg.get('Subject'), txtBodies=txtBodies,
         htmlBodies=htmlBodies, attachments=attachments)
@@ -119,7 +119,7 @@ def ReceiveMailImpl(sender, to, subject, txtBodies, htmlBodies, attachments):
         return "The user does not exists"
 
     #阻挡垃圾邮件
-    sender = email.utils.parseaddr(sender)[1]
+    sender = email.utils.parseaddr(sender)[1] #type:ignore
     if IsSpamMail(user, sender):
         default_log.warning(f'Spam mail from : {sender}')
         return "Spam mail"
@@ -189,9 +189,9 @@ def DecodeSubject(subject):
     if not subject:
         subject = 'NoSubject'
     elif subject.startswith('=?') and subject.endswith('?='):
-        subject = ''.join(str(s, c or 'us-ascii') for s, c in email.header.decode_header(subject))
+        subject = ''.join(str(s, c or 'us-ascii') for s, c in email.header.decode_header(subject)) #type:ignore
     else:
-        subject = str(email.utils.collapse_rfc2231_value(subject))
+        subject = str(email.utils.collapse_rfc2231_value(subject)) #type:ignore
     return subject.strip()
 
 #判断一个字符串是否是超链接
@@ -203,7 +203,7 @@ def IsHyperLink(txt):
 #如果有多个收件人的话，只解释第一个收件人
 #返回 (userName, to的@前面的部分)
 def ExtractUsernameFromEmail(to):
-    to = email.utils.parseaddr(to)[1]
+    to = email.utils.parseaddr(to)[1] #type:ignore
     to = (to or 'xxx').split('@')[0]
     
     return to.split('__', 1) if '__' in to else ('', to)
@@ -259,18 +259,18 @@ def CreateMailSoup(subject, txtBodies, htmlBodies):
     soup = BeautifulSoup(htmlBodies[0], 'lxml')
     for other in htmlBodies[1:]: #合并多个邮件HTML内容
         tag = BeautifulSoup(other, 'lxml').find('body')
-        soup.body.extend(tag.contents if tag else [])
+        soup.body.extend(tag.contents if tag else []) #type:ignore
 
     #修正不规范的HTML邮件
     h = soup.find('head')
     if not h:
         h = soup.new_tag('head')
-        soup.html.insert(0, h)
-    t = soup.head.find('title')
+        soup.html.insert(0, h) #type:ignore
+    t = soup.head.find('title') #type:ignore
     if not t:
         t = soup.new_tag('title')
         t.string = subject
-        soup.head.insert(0, t)
+        soup.head.insert(0, t) #type:ignore
 
     #删除CSS/JS
     for tag in list(soup.find_all(['link', 'meta', 'style', 'script'])):
@@ -284,7 +284,7 @@ def CreateMailSoup(subject, txtBodies, htmlBodies):
             tag['src'] = tag['src'][4:]
 
     m = soup.new_tag('meta', attrs={"content": "text/html; charset=utf-8", "http-equiv": "Content-Type"})
-    soup.html.head.insert(0, m)
+    soup.html.head.insert(0, m) #type:ignore
     return soup
     
 #提取Soup的超链接，返回一个列表
@@ -326,4 +326,3 @@ def CollectSoupLinks(soup, forceToLinks):
             links = []
 
     return links
-

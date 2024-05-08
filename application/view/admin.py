@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #账号管理页面
-
+#Author: cdhigh <https://github.com/cdhigh>
 import datetime
 from operator import attrgetter
-from flask import Blueprint, request, url_for, render_template, redirect, session, current_app as app
+from flask import Blueprint, request, url_for, render_template, redirect, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
@@ -37,7 +37,7 @@ def AdminPost():
     user = get_login_user()
     #只有管理员才能管理其他用户
     adminName = app.config['ADMIN_NAME']
-    if user.name != adminName:
+    if not user or (user.name != adminName):
         return redirect(url_for('bpAdmin.Admin'))
 
     mailSrv = request.form.get('sm_service')
@@ -55,7 +55,7 @@ def AdminPost():
 @login_required()
 def AdminAddAccount():
     user = get_login_user()
-    if user.name != app.config['ADMIN_NAME']:
+    if not user or (user.name != app.config['ADMIN_NAME']):
         return redirect(url_for("bpLogin.Login"))
     else:
         return render_template('user_account.html', tips='', formTitle=_('Add account'), submitTitle=_('Add'), tab='admin')
@@ -64,15 +64,15 @@ def AdminAddAccount():
 @login_required()
 def AdminAddAccountPost():
     user = get_login_user()
-    if user.name != app.config['ADMIN_NAME']:
+    if not user or (user.name != app.config['ADMIN_NAME']):
         tips = _("You do not have sufficient privileges.")
         return render_template('user_account.html', tips=tips, formTitle=_('Add account'), submitTitle=_('Add'), tab='admin')
     
     form = request.form
-    username = form.get('username')
-    password1 = form.get('password1')
-    password2 = form.get('password2')
-    email = form.get('email')
+    username = form.get('username', '')
+    password1 = form.get('password1', '')
+    password2 = form.get('password2', '')
+    email = form.get('email', '')
     sm_service = form.get('sm_service')
     expiration = str_to_int(form.get('expiration', '0'))
 
@@ -104,8 +104,8 @@ def AdminAddAccountPost():
 def AdminDeleteAccountAjax():
     user = get_login_user()
     adminName = app.config['ADMIN_NAME']
-    name = request.form.get('name')
-    if user.name != adminName or not name or name == adminName:
+    name = request.form.get('name', '')
+    if not user or (user.name != adminName) or not name or (name == adminName):
         return {'status': _("You do not have sufficient privileges.")}
     
     dbItem = KeUser.get_or_none(KeUser.name == name)
@@ -122,9 +122,9 @@ def AdminDeleteAccountAjax():
 def AdminAccountChange(name):
     user = get_login_user()
     tips = _('The password will not be changed if the fields are empties.')
-    if user.name == name: #修改自己的密码和一些设置
+    if user and (user.name == name): #修改自己的密码和一些设置
         return render_template('change_password.html', tips=tips, tab='admin', user=user, shareKey=user.share_links.get('key'))
-    elif user.name == app.config['ADMIN_NAME']: #管理员修改其他人的密码和其他设置
+    elif user and (user.name == app.config['ADMIN_NAME']): #管理员修改其他人的密码和其他设置
         dbItem = KeUser.get_or_none(KeUser.name == name)
         if dbItem:
             return render_template('user_account.html', tips=tips, formTitle=_('Edit account'), 
@@ -148,7 +148,8 @@ def AdminAccountChangePost(name):
     email = form.get('email')
     shareKey = form.get('shareKey')
     dbItem = None
-    if name != username:
+    tips = ''
+    if not user or (name != username):
         return render_template('tipsback.html', title='error', urltoback=url_for('bpAdmin.Admin'), 
             tips=_('Some parameters are missing or wrong.'))
     elif user.name == name: #修改自己的密码

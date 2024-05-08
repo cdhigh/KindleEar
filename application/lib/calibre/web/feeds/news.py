@@ -2185,7 +2185,8 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
                     continue
 
                 added.add(url)
-                timeItem = LastDelivered.get_or_none((LastDelivered.user==self.user.name) & (LastDelivered.url==url))
+                timeItem = LastDelivered.get_or_none((LastDelivered.user==self.user.name) & 
+                    (LastDelivered.bookname==self.title) & (LastDelivered.url==url))
                 delta = (now - timeItem.datetime) if timeItem else None
                 #这里oldest_article和其他的recipe不一样，这个参数表示在这个区间内不会重复推送
                 if ((not timeItem) or (not self.oldest_article) or (self.delivery_reason == 'manual') or
@@ -2200,7 +2201,7 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
                         timeItem.datetime = now
                         timeItem.save()
                     else:
-                        LastDelivered.create(user=self.user.name, url=url)
+                        LastDelivered.create(user=self.user.name, bookname=self.title, url=url)
                 else:
                     self.log.debug(f'Skipping article {title}({url}) as it is too old.')
 

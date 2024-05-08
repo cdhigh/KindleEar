@@ -1,0 +1,19 @@
+[tool.pyright]
+include = ["application/lib"]
+exclude = ["**/__pycache__",
+    "**/.*",
+    "tests/"
+]
+extraPaths = ["application/lib"]
+ignore = []
+defineConstant = {}
+stubPath = "typings"
+
+reportMissingImports = true
+reportMissingTypeStubs = false
+reportWildcardImportFromLibrary = false
+reportImplicitStringConcatenation = false
+
+executionEnvironments = [
+  { root = "", extraPaths = ["application/lib"]},
+]

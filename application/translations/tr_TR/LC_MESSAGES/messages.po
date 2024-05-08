@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-05-05 21:01-0300\n"
+"POT-Creation-Date: 2024-05-08 19:13-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: tr_TR\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:153
+#: application/templates/admin.html:3 application/templates/base.html:156
 msgid "Admin"
 msgstr "Yönetim"
 
@@ -157,7 +157,7 @@ msgstr "2 yıl"
 #: application/templates/admin.html:85
 #: application/templates/change_password.html:3
 #: application/templates/change_password.html:13 application/view/admin.py:130
-#: application/view/admin.py:189
+#: application/view/admin.py:190
 msgid "Edit account"
 msgstr "Hesabı Düzenle"
 
@@ -508,9 +508,9 @@ msgstr ""
 msgid "Cannot set the website login information, Error:"
 msgstr "Abonelik bilgisi ayarlanamıyor, Hata:"
 
-#: application/templates/base.html:54
-msgid "Choose a recipe file to upload"
-msgstr "Yüklemek için bir tarif dosyası seçin"
+#: application/templates/base.html:54 application/templates/my.html:59
+msgid "Upload custom recipe"
+msgstr "Özel tarifi yükle"
 
 #: application/templates/base.html:55
 msgid "Congratulations"
@@ -643,7 +643,7 @@ msgid "The username or password is empty."
 msgstr "Kullanıcı adı veya şifre boş."
 
 #: application/templates/base.html:87 application/view/admin.py:86
-#: application/view/admin.py:166 application/view/admin.py:204
+#: application/view/admin.py:167 application/view/admin.py:205
 #: application/view/login.py:228 application/view/login.py:286
 msgid "The two new passwords are dismatch."
 msgstr "İki yeni şifre uyuşmuyor."
@@ -733,39 +733,51 @@ msgstr "Başlık"
 msgid "Text to Speech"
 msgstr "Metin Okuma"
 
-#: application/templates/base.html:126 application/templates/home.html:12
+#: application/templates/base.html:105
+msgid "Action"
+msgstr "Eylem"
+
+#: application/templates/base.html:106
+msgid "File"
+msgstr "Dosya"
+
+#: application/templates/base.html:107
+msgid "Upload Only"
+msgstr "Yalnızca Yükle"
+
+#: application/templates/base.html:129 application/templates/home.html:12
 msgid "Logout"
 msgstr "Çıkış"
 
-#: application/templates/base.html:128 application/templates/home.html:17
+#: application/templates/base.html:131 application/templates/home.html:17
 #: application/templates/login.html:3 application/templates/login.html:19
 #: application/templates/login.html:30
 msgid "Login"
 msgstr "Giriş"
 
-#: application/templates/base.html:130 application/templates/signup.html:3
+#: application/templates/base.html:133 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr "Kaydol"
 
-#: application/templates/base.html:150 application/templates/home.html:11
+#: application/templates/base.html:153 application/templates/home.html:11
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr "RSSler"
 
-#: application/templates/base.html:151 application/templates/setting.html:3
+#: application/templates/base.html:154 application/templates/setting.html:3
 msgid "Settings"
 msgstr "Ayarlar"
 
-#: application/templates/base.html:152 application/templates/logs.html:3
+#: application/templates/base.html:155 application/templates/logs.html:3
 msgid "Logs"
 msgstr "Kayıtlar"
 
-#: application/templates/base.html:154
+#: application/templates/base.html:157
 msgid "Advanced"
 msgstr "Gelişmiş"
 
-#: application/templates/base.html:155 application/templates/library.html:3
+#: application/templates/base.html:158 application/templates/library.html:3
 msgid "Shared"
 msgstr "Paylaşılan"
 
@@ -1106,10 +1118,6 @@ msgstr "Abone olundu"
 msgid "Library"
 msgstr "Kütüphane"
 
-#: application/templates/my.html:59
-msgid "Upload custom recipe"
-msgstr "Özel tarifi yükle"
-
 #: application/templates/my.html:72
 msgid "Subscription to selected recipe successful."
 msgstr "Seçilen tarife abonelik başarılı."
@@ -1331,7 +1339,7 @@ msgstr "Kullanıcı hesabı"
 msgid "Never expire"
 msgstr "hiç sona ermeyen"
 
-#: application/view/admin.py:51 application/view/adv.py:384
+#: application/view/admin.py:51 application/view/adv.py:387
 #: application/view/setting.py:102 application/view/translator.py:83
 #: application/view/translator.py:165
 msgid "Settings Saved!"
@@ -1347,8 +1355,8 @@ msgstr "Hesap ekle"
 msgid "You do not have sufficient privileges."
 msgstr "Yeterli yetkiniz yok."
 
-#: application/view/admin.py:82 application/view/admin.py:153
-#: application/view/admin.py:202 application/view/extension.py:33
+#: application/view/admin.py:82 application/view/admin.py:154
+#: application/view/admin.py:203 application/view/extension.py:33
 #: application/view/extension.py:62 application/view/login.py:224
 #: application/view/login.py:253 application/view/setting.py:71
 #: application/view/setting.py:73 application/view/setting.py:75
@@ -1365,13 +1373,13 @@ msgstr "Kullanıcı adı güvensiz karakterler içeriyor."
 msgid "Already exist the username."
 msgstr "Kullanıcı adı zaten var."
 
-#: application/view/admin.py:93 application/view/admin.py:172
-#: application/view/admin.py:198 application/view/login.py:279
+#: application/view/admin.py:93 application/view/admin.py:173
+#: application/view/admin.py:199 application/view/login.py:279
 msgid "The password includes non-ascii chars."
 msgstr "Şifre ascii olmayan karakterler içeriyor."
 
 #: application/view/admin.py:113 application/view/admin.py:133
-#: application/view/admin.py:164 application/view/extension.py:31
+#: application/view/admin.py:165 application/view/extension.py:31
 #: application/view/extension.py:60
 msgid "The username '{}' does not exist."
 msgstr "'{}' kullanıcı adı mevcut değil."
@@ -1380,19 +1388,19 @@ msgstr "'{}' kullanıcı adı mevcut değil."
 msgid "The password will not be changed if the fields are empties."
 msgstr "Alanlar boş bırakılırsa şifre değiştirilmeyecek."
 
-#: application/view/admin.py:131 application/view/admin.py:190
+#: application/view/admin.py:131 application/view/admin.py:191
 msgid "Change"
 msgstr "Değiştir"
 
-#: application/view/admin.py:187
+#: application/view/admin.py:188
 msgid "Change success."
 msgstr "Değişim başarılı."
 
-#: application/view/admin.py:200
+#: application/view/admin.py:201
 msgid "Changes saved successfully."
 msgstr "Değişiklikler başarıyla kaydedildi."
 
-#: application/view/admin.py:211
+#: application/view/admin.py:212
 msgid "The old password is wrong."
 msgstr "Eski şifre yanlış."
 
@@ -1455,19 +1463,19 @@ msgstr "Tarayıcıda aç"
 msgid "Append qrcode of url to article"
 msgstr "Makaleye URL'nin QR kodunu ekle"
 
-#: application/view/adv.py:386
+#: application/view/adv.py:389
 msgid "The format is invalid."
 msgstr "Format geçersiz."
 
-#: application/view/adv.py:419
+#: application/view/adv.py:422
 msgid "Authorization Error!<br/>{}"
 msgstr "Yetkilendirme Hatası!<br/>{}"
 
-#: application/view/adv.py:442
+#: application/view/adv.py:445
 msgid "Success authorized by Pocket!"
 msgstr "Pocket tarafından yetkilendirilen başarı!"
 
-#: application/view/adv.py:448
+#: application/view/adv.py:451
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
@@ -1475,13 +1483,13 @@ msgstr ""
 "Pocket yetkilendirme isteği başarısız oldu!<hr/>Aşağıdaki ayrıntılara "
 "bakın:<br/><br/>{}"
 
-#: application/view/adv.py:470
+#: application/view/adv.py:473
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 "Instapaper servisi bir hata ile karşılaştı. Lütfen daha sonra tekrar "
 "deneyin."
 
-#: application/view/adv.py:483
+#: application/view/adv.py:486
 msgid "Request type [{}] unsupported"
 msgstr "İstek türü [{}] desteklenmiyor"
 
@@ -1506,9 +1514,9 @@ msgstr "Kurallar parametresi geçersiz."
 msgid "Cannot fetch data from {}, status: {}"
 msgstr "{}, durumundan veri alınamıyor: {}"
 
-#: application/view/library.py:51 application/view/subscribe.py:217
-#: application/view/subscribe.py:337 application/view/subscribe.py:365
-#: application/view/subscribe.py:372 application/view/translator.py:29
+#: application/view/library.py:51 application/view/subscribe.py:222
+#: application/view/subscribe.py:360 application/view/subscribe.py:388
+#: application/view/subscribe.py:395 application/view/translator.py:29
 msgid "The recipe does not exist."
 msgstr "Tarif mevcut değil."
 
@@ -1700,7 +1708,7 @@ msgstr "Tagalog"
 msgid "Hausa"
 msgstr "Hausa"
 
-#: application/view/share.py:55 application/view/subscribe.py:229
+#: application/view/share.py:55 application/view/subscribe.py:235
 msgid "Unknown command: {}"
 msgstr "Bilinmeyen komut: {}"
 
@@ -1739,7 +1747,7 @@ msgstr "Bilinmeyen: {}"
 msgid "Title or url is empty!"
 msgstr "URL veya başlık hatalı"
 
-#: application/view/subscribe.py:77 application/view/subscribe.py:146
+#: application/view/subscribe.py:77 application/view/subscribe.py:151
 msgid "Duplicated subscription!"
 msgstr "Duplicated subscription!"
 
@@ -1751,34 +1759,34 @@ msgstr "Başlık veya URL boş."
 msgid "Failed to fetch the recipe."
 msgstr "Tarif alınamadı."
 
-#: application/view/subscribe.py:137 application/view/subscribe.py:299
+#: application/view/subscribe.py:137 application/view/subscribe.py:310
 msgid "Failed to save the recipe. Error:"
 msgstr "Tarif kaydedilemedi. Hata:"
 
-#: application/view/subscribe.py:173
+#: application/view/subscribe.py:178
 msgid "The Rss does not exist."
 msgstr "Rss mevcut değil."
 
-#: application/view/subscribe.py:255
+#: application/view/subscribe.py:262
 msgid "You can only delete the uploaded recipe."
 msgstr "Yalnızca yüklenen tarifi silebilirsiniz."
 
-#: application/view/subscribe.py:259
+#: application/view/subscribe.py:267
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "Tarif abone olunmuş, silmeden önce aboneliği iptal edin."
 
-#: application/view/subscribe.py:274 application/view/translator.py:50
+#: application/view/subscribe.py:283 application/view/translator.py:50
 #: application/view/translator.py:99 application/view/translator.py:112
 #: application/view/translator.py:135 application/view/translator.py:181
 #: application/view/translator.py:194
 msgid "This recipe has not been subscribed to yet."
 msgstr "Bu tarife henüz abone olunmadı."
 
-#: application/view/subscribe.py:286
+#: application/view/subscribe.py:297
 msgid "Can not read uploaded file, Error:"
 msgstr "Yüklenen dosya okunamıyor, Hata:"
 
-#: application/view/subscribe.py:294
+#: application/view/subscribe.py:305
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
@@ -1786,15 +1794,19 @@ msgstr ""
 "Tarif çözümlenemedi. Lütfen tarifinizin utf-8 kodlamasında "
 "kaydedildiğinden emin olun."
 
-#: application/view/subscribe.py:314
+#: application/view/subscribe.py:328
+msgid "Cannot find any subclass of BasicNewsRecipe."
+msgstr "BasicNewsRecipe sınıfının hiçbir alt sınıfı bulunamıyor."
+
+#: application/view/subscribe.py:333
 msgid "The recipe is already in the library."
 msgstr "Tarif zaten kütüphanede."
 
-#: application/view/subscribe.py:344
+#: application/view/subscribe.py:367
 msgid "The login information for this recipe has been cleared."
 msgstr "Bu tarifin giriş bilgileri temizlendi."
 
-#: application/view/subscribe.py:348
+#: application/view/subscribe.py:371
 msgid "The login information for this recipe has been saved."
 msgstr "Bu tarifin giriş bilgileri kaydedildi."
 
@@ -1805,4 +1817,3 @@ msgstr "API anahtarı gereklidir."
 #: application/view/translator.py:116 application/view/translator.py:198
 msgid "The text is empty."
 msgstr "Metin boş."
-

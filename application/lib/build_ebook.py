@@ -42,7 +42,10 @@ def urls_to_book(urls: list, title: str, user, options: dict=None, output_fmt: s
     except Exception as e:
         default_log.warning('Failed to compile recipe {}: {}'.format(title, e))
         return None
-
+    if not ro:
+        default_log.warning('Failed to compile recipe {}: {}'.format(title, 'Cannot find any subclass of BasicNewsRecipe.'))
+        return None
+        
     #合并自定义css
     userCss = user.get_extra_css()
     ro.extra_css = f'{ro.extra_css}\n\n{userCss}' if ro.extra_css else userCss

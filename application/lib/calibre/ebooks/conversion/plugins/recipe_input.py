@@ -11,7 +11,6 @@ from bs4 import BeautifulSoup
 from calibre.customize.conversion import InputFormatPlugin, OptionRecommendation
 from calibre.constants import numeric_version
 from calibre import walk, relpath, unicode_path, strftime, force_unicode
-from calibre.web.feeds.recipes import compile_recipe
 from calibre.web.feeds.news import BasicNewsRecipe, DEFAULT_MASTHEAD_IMAGE
 from calibre.utils.localization import canonicalize_lang
 from calibre.ebooks.metadata import MetaInformation
@@ -70,15 +69,15 @@ class RecipeInput(InputFormatPlugin):
         orig_no_inline_navbars = opts.no_inline_navbars
         if not isinstance(recipes, list):
             recipes = [recipes]
-
+        
         #生成 BasicNewsRecipe 对象并执行下载任务
         feed_index_start = 0
         recipeNum = len(recipes)
-        self.recipe_objects = []
-        self.feeds = []
-        self.index_htmls = []
-        self.aborted_articles = []
-        self.failed_downloads = []
+        recipe_objects = [] #如果直接使用self.recipe_objects=[]，经常出现两次执行分配同一地址的情况
+        feeds = []
+        index_htmls = []
+        aborted_articles = []
+        failed_downloads = []
         for recipe in recipes:
             indexFile = None
             try:
@@ -94,18 +93,24 @@ class RecipeInput(InputFormatPlugin):
 
             if indexFile and ro.feed_objects:
                 feed_index_start += len(ro.feed_objects)
-                self.feeds.extend(ro.feed_objects)
-                self.aborted_articles.extend(ro.aborted_articles)
-                self.failed_downloads.extend(ro.failed_downloads)
-                self.index_htmls.append((ro.title, ro.get_root_index_html_name()))
-                self.recipe_objects.append(ro)
+                feeds.extend(ro.feed_objects)
+                aborted_articles.extend(ro.aborted_articles)
+                failed_downloads.extend(ro.failed_downloads)
+                index_htmls.append((ro.title, ro.get_root_index_html_name()))
+                recipe_objects.append(ro)
 
             #可能会有些副作用，前面的conversion_options会影响后面的recipe
             for key, val in ro.conversion_options.items():
                 setattr(opts, key, val)
 
-        if not self.feeds: #让上层处理
+        if not feeds: #让上层处理
             raise Exception('All feeds are empty, aborting.')
+
+        self.feeds = feeds
+        self.aborted_articles = aborted_articles
+        self.failed_downloads = failed_downloads
+        self.index_htmls = index_htmls
+        self.recipe_objects = recipe_objects
 
         #self.build_top_index(output_dir, fs)
         self.create_opf(output_dir, fs, self.user)

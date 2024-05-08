@@ -74,6 +74,9 @@ def WorkerImpl(userName: str, recipeId: list=None, reason='cron', log=None):
         except Exception as e:
             log.warning('Failed to compile recipe {}: {}'.format(title, str(e)))
             continue
+        if not ro:
+            log.warning('Failed to compile recipe {}: {}'.format(title, 'Cannot find any subclass of BasicNewsRecipe.'))
+            continue
 
         if not ro.language or ro.language == 'und':
             ro.language = user.book_cfg('language')
