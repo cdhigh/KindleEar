@@ -4,6 +4,7 @@
 {% endblock -%}
 
 {% block content -%}
+{% set rowStyle = cycler('', 'style="background-color:#f5f5f5;"') %}
 <div class="main">
   <div class="logs">
     {% if mylogs -%}
@@ -27,8 +28,12 @@
       </thead>
       <tbody>
       {% for log in mylogs -%}
-        <tr>
+        <tr {{rowStyle.next()|safe}}>
+          {% if log.datetime.date() == utcnow().date() -%}
+          <td superscript-title="NEW">{{log.time_str}}</td>
+          {% else -%}
           <td>{{log.time_str}}</td>
+          {% endif -%}
           <td>{{log.book}}</td>
           <td>{{log.size|filesizeformat}}</td>
           <td>{{log.to}}</td>
@@ -73,9 +78,13 @@
       <tbody>
       {% for u in logs -%}
       {% for log in logs[u] -%}
-        <tr>
+        <tr {{rowStyle.next()|safe}}>
           <td>{{u}}</td>
+          {% if log.datetime.date() == utcnow().date() -%}
+          <td superscript-title="NEW">{{log.time_str}}</td>
+          {% else -%}
           <td>{{log.time_str}}</td>
+          {% endif -%}
           <td>{{log.book}}</td>
           <td>{{log.size|filesizeformat}}</td>
           <td>{{log.to}}</td>

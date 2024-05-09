@@ -15,14 +15,15 @@ from ebook_tts import get_tts_engines, HtmlAudiolator
 bpTranslator = Blueprint('bpTranslator', __name__)
 
 #翻译路由每个函数校验recipe有效性都是一样的，使用此装饰器避免重复代码
-def translator_route_preprocess(forAjax=False):
+def translator_route_preprocess(forAjax=False, user=None):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            recipeId = kwargs.get('recipeId')
+            recipeId = kwargs.get('recipeId', '')
             user = get_login_user()
             recipeId = recipeId.replace('__', ':')
             kwargs['recipeId'] = recipeId
+            kwargs['user'] = user
             recipeType, dbId = Recipe.type_and_id(recipeId)
             recipe = GetBuiltinRecipeInfo(recipeId) if recipeType == 'builtin' else Recipe.get_by_id_or_none(dbId)
             if not recipe:
@@ -31,7 +32,7 @@ def translator_route_preprocess(forAjax=False):
                     return {'status': tips}
                 else:
                     return render_template('tipsback.html', tips=tips, urltoback=url_for('bpSubscribe.MySubscription'))
-            return func(recipeType, recipe, user, *args, **kwargs)
+            return func(recipeType, recipe, *args, **kwargs)
         return wrapper
     return decorator
 
@@ -199,11 +200,11 @@ def BookTTSTestPost(recipeType, recipe, user, recipeId):
 
     audiolator = HtmlAudiolator(bkRecipe.tts)
     data = audiolator.audiofy_text(text)
-    if data['error']:
-        data['status'] = data['error']
+    if data['error']: #type: ignore
+        data['status'] = data['error'] #type: ignore
     else:
-        data['status'] = 'ok'
-        data['audio'] = base64.b64encode(data['audio']).decode('utf-8')
+        data['status'] = 'ok' #type: ignore
+        data['audio'] = base64.b64encode(data['audio']).decode('utf-8') #type: ignore
         
     return data
 

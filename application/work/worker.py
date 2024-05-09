@@ -3,6 +3,7 @@
 #后台实际的推送任务，由任务队列触发
 #Author: cdhigh<https://github.com/cdhigh>
 import os, datetime, time, io, logging
+from typing import Union
 from collections import defaultdict
 from flask import Blueprint, request
 from ..base_handler import *
@@ -36,7 +37,7 @@ def Worker():
 #userName: 需要执行任务的账号名
 #recipeId: 需要投递的Recipe ID，如果有多个，使用逗号分隔
 #返回执行结果字符串
-def WorkerImpl(userName: str, recipeId: list=None, reason='cron', log=None):
+def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron', log=None):
     if not log:
         log = default_log
 
@@ -82,14 +83,15 @@ def WorkerImpl(userName: str, recipeId: list=None, reason='cron', log=None):
             ro.language = user.book_cfg('language')
             
         ro.delivery_reason = reason
-        ro.extra_css = combine_css(ro.extra_css) #合并自定义css
+        #合并自定义css
+        ro.extra_css = combine_css(ro.extra_css) #type:ignore
         ro.translator = bked.translator.copy() #设置网页翻译器信息
         ro.tts = bked.tts.copy() #文本转语音设置，需要中途修改tts内容
         
         #如果需要登录网站
         if ro.needs_subscription:
-            ro.username = bked.account
-            ro.password = bked.password
+            ro.username = bked.account #type:ignore
+            ro.password = bked.password #type:ignore
         
         if bked.separated:
             recipes[ro.title].append(ro)
@@ -146,8 +148,6 @@ def WorkerImpl(userName: str, recipeId: list=None, reason='cron', log=None):
 #返回一个字典，键名为title，元素为 [BookedRecipe, Recipe, src]
 def GetAllRecipeSrc(user, idList):
     srcDict = {}
-    rssList = []
-    ftRssList = []
     for bked in filter(bool, [BookedRecipe.get_or_none(BookedRecipe.recipe_id == id_) for id_ in idList]):
         recipeId = bked.recipe_id
         recipeType, dbId = Recipe.type_and_id(recipeId)
@@ -211,13 +211,13 @@ def MergeAudioSegment(roList):
         if mp3Cat:
             mergedFiles = len(mp3Files)
             mp3Files = ' '.join(mp3Files)
-            runRet = subprocess.run(f'{mp3Cat} {mp3Files} -f -q -o {outputFile}', shell=True)
+            runRet = subprocess.run(f'{mp3Cat} {mp3Files} -f -q -o {outputFile}', shell=True) #type:ignore
             if runRet.returncode != 0:
                 mergedFiles = 0
                 info = f'mp3cat return code : {runRet.returncode}'
         else:
             try:
-                mergedFiles = pymp3cat.merge(outputFile, mp3Files, quiet=True)
+                mergedFiles = pymp3cat.merge(outputFile, mp3Files, quiet=True) #type:ignore
             except Exception as e:
                 default_log.warning('Failed to merge mp3 by pymp3cat: {e}')
 
@@ -240,13 +240,13 @@ def MergeAudioSegment(roList):
         if mp3Cat:
             mergedFiles = len(chapters)
             mp3Files = ' '.join(chapters)
-            runRet = subprocess.run(f'{mp3Cat} {mp3Files} -f -q -o {outputFile}', shell=True)
+            runRet = subprocess.run(f'{mp3Cat} {mp3Files} -f -q -o {outputFile}', shell=True) #type:ignore
             if runRet.returncode != 0:
                 mergedFiles = 0
                 info = f'mp3cat return code : {runRet.returncode}'
         else:
             try:
-                mergedFiles = pymp3cat.merge(outputFile, chapters, quiet=True)
+                mergedFiles = pymp3cat.merge(outputFile, chapters, quiet=True) #type:ignore
             except Exception as e:
                 info = 'Failed merge mp3 by pymp3cat: {e}'
 

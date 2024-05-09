@@ -16,9 +16,7 @@ bpAdmin = Blueprint('bpAdmin', __name__)
 # 账户管理页面
 @bpAdmin.route("/admin", endpoint='Admin')
 @login_required()
-def Admin():
-    user = get_login_user()
-
+def Admin(user: KeUser):
     #只有管理员才能管理其他用户
     adminName = app.config['ADMIN_NAME']
     if user.name == adminName:
@@ -33,11 +31,10 @@ def Admin():
 
 @bpAdmin.post("/admin", endpoint='AdminPost')
 @login_required()
-def AdminPost():
-    user = get_login_user()
+def AdminPost(user: KeUser):
     #只有管理员才能管理其他用户
     adminName = app.config['ADMIN_NAME']
-    if not user or (user.name != adminName):
+    if user.name != adminName:
         return redirect(url_for('bpAdmin.Admin'))
 
     mailSrv = request.form.get('sm_service')
@@ -53,18 +50,16 @@ def AdminPost():
 #管理员添加一个账号
 @bpAdmin.route("/account/add", endpoint='AdminAddAccount')
 @login_required()
-def AdminAddAccount():
-    user = get_login_user()
-    if not user or (user.name != app.config['ADMIN_NAME']):
+def AdminAddAccount(user: KeUser):
+    if user.name != app.config['ADMIN_NAME']:
         return redirect(url_for("bpLogin.Login"))
     else:
         return render_template('user_account.html', tips='', formTitle=_('Add account'), submitTitle=_('Add'), tab='admin')
 
 @bpAdmin.post("/account/add", endpoint='AdminAddAccountPost')
 @login_required()
-def AdminAddAccountPost():
-    user = get_login_user()
-    if not user or (user.name != app.config['ADMIN_NAME']):
+def AdminAddAccountPost(user: KeUser):
+    if user.name != app.config['ADMIN_NAME']:
         tips = _("You do not have sufficient privileges.")
         return render_template('user_account.html', tips=tips, formTitle=_('Add account'), submitTitle=_('Add'), tab='admin')
     
@@ -101,11 +96,10 @@ def AdminAddAccountPost():
 #直接AJAX删除一个账号
 @bpAdmin.post("/account/delete", endpoint='AdminDeleteAccountAjax')
 @login_required(forAjax=True)
-def AdminDeleteAccountAjax():
-    user = get_login_user()
+def AdminDeleteAccountAjax(user: KeUser):
     adminName = app.config['ADMIN_NAME']
     name = request.form.get('name', '')
-    if not user or (user.name != adminName) or not name or (name == adminName):
+    if (user.name != adminName) or not name or (name == adminName):
         return {'status': _("You do not have sufficient privileges.")}
     
     dbItem = KeUser.get_or_none(KeUser.name == name)
@@ -119,12 +113,11 @@ def AdminDeleteAccountAjax():
 #修改密码，可能是修改自己的密码或管理员修改其他用户的密码
 @bpAdmin.route("/account/change/<name>", endpoint='AdminAccountChange')
 @login_required()
-def AdminAccountChange(name):
-    user = get_login_user()
+def AdminAccountChange(name: str, user: KeUser):
     tips = _('The password will not be changed if the fields are empties.')
-    if user and (user.name == name): #修改自己的密码和一些设置
+    if user.name == name: #修改自己的密码和一些设置
         return render_template('change_password.html', tips=tips, tab='admin', user=user, shareKey=user.share_links.get('key'))
-    elif user and (user.name == app.config['ADMIN_NAME']): #管理员修改其他人的密码和其他设置
+    elif user.name == app.config['ADMIN_NAME']: #管理员修改其他人的密码和其他设置
         dbItem = KeUser.get_or_none(KeUser.name == name)
         if dbItem:
             return render_template('user_account.html', tips=tips, formTitle=_('Edit account'), 
@@ -138,8 +131,7 @@ def AdminAccountChange(name):
 
 @bpAdmin.post("/account/change/<name>", endpoint='AdminAccountChangePost')
 @login_required()
-def AdminAccountChangePost(name):
-    user = get_login_user()
+def AdminAccountChangePost(name: str, user: KeUser):
     form = request.form
     username = form.get('username')
     orgPwd = form.get('orgpwd', '')
@@ -149,7 +141,7 @@ def AdminAccountChangePost(name):
     shareKey = form.get('shareKey')
     dbItem = None
     tips = ''
-    if not user or (name != username):
+    if name != username:
         return render_template('tipsback.html', title='error', urltoback=url_for('bpAdmin.Admin'), 
             tips=_('Some parameters are missing or wrong.'))
     elif user.name == name: #修改自己的密码

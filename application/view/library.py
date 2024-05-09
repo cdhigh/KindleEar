@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #网友共享的订阅源数据
-import datetime
+#Author: cdhigh <https://github.com/cdhigh>
 from urllib.parse import urljoin
 from flask import Blueprint, render_template, request, current_app as app
 from flask_babel import gettext as _
@@ -19,10 +19,8 @@ g_ke_url = KINDLEEAR_SITE
 #给网友提供共享的订阅源数据，初始只返回一个空白页，然后在页面内使用ajax获取数据，参加 SharedLibraryMgrPost()
 @bpLibrary.route("/library", endpoint='SharedLibrary')
 @login_required()
-def SharedLibrary():
-    user = get_login_user()
-    tips = ''
-    return render_template('library.html', tab='shared', user=user, tips=tips)
+def SharedLibrary(user: KeUser):
+    return render_template('library.html', tab='shared', user=user, tips='')
 
 def buildKeUrl(path):
     #url = 'http://localhost:5000/' if app.debug or app.testing else url
@@ -36,13 +34,12 @@ def srvErrStr(status_code, url=KINDLEEAR_SITE):
 #用户分享了一个订阅源，可能为自定义RSS或上传的recipe
 @bpLibrary.post("/library", endpoint='SharedLibraryPost')
 @login_required(forAjax=True)
-def SharedLibraryPost():
-    user = get_login_user()
+def SharedLibraryPost(user: KeUser):
     form = request.form
     recipeId = form.get('id')
     category = form.get('category')
     lang = form.get('lang', '').lower()
-    isfulltext = str_to_bool(form.get('isfulltext', ''))
+    #isfulltext = str_to_bool(form.get('isfulltext', ''))
     creator = form.get('creator')
 
     recipeType, dbId = Recipe.type_and_id(recipeId)
@@ -64,8 +61,7 @@ def SharedLibraryPost():
 #网友分享库的一些操作，包括获取更新时间，获取源信息，报告失效等
 @bpLibrary.post("/library/mgr/<mgrType>", endpoint='SharedLibraryMgrPost')
 @login_required(forAjax=True)
-def SharedLibraryMgrPost(mgrType):
-    user = get_login_user()
+def SharedLibraryMgrPost(mgrType: str, user: KeUser):
     form = request.form
     opener = UrlOpener()
     if mgrType == LIBRARY_GETLASTTIME: #获取分享库的最近更新时间
@@ -77,8 +73,7 @@ def SharedLibraryMgrPost(mgrType):
             return {'status': srvErrStr(resp.status_code)}
     elif mgrType == LIBRARY_GETRSS: #获取分享库的RSS列表
         #一个来源是"官方"KindleEar库
-        rssList = []
-        ret = {'status': 'ok'}
+        ret = {'status': 'ok', 'data': []}
         url = buildKeUrl(LIBRARY_KINDLEEAR)
         resp = opener.open(f'{url}?key={KINDLEEAR_SITE_KEY}&data_type={LIBRARY_GETRSS}')
         keRss = []
@@ -128,9 +123,7 @@ def SharedLibraryMgrPost(mgrType):
 #获取共享的订阅源的分类信息
 @bpLibrary.route("/library/category", endpoint='SharedLibraryCategory')
 @login_required(forAjax=True)
-def SharedLibraryCategory():
-    user = get_login_user()
-    
+def SharedLibraryCategory(user: KeUser):
     #连接分享服务器获取数据
     respDict = {'status': 'ok', 'categories': []}
 
@@ -144,4 +137,3 @@ def SharedLibraryCategory():
         respDict['status'] = srvErrStr(resp.status_code)
 
     return respDict
-

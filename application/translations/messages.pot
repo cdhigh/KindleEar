@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-05-08 19:13-0300\n"
+"POT-Creation-Date: 2024-05-09 11:05-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -501,7 +501,7 @@ msgstr ""
 msgid "Cannot set the website login information, Error:"
 msgstr ""
 
-#: application/templates/base.html:54 application/templates/my.html:59
+#: application/templates/base.html:54 application/templates/my.html:58
 msgid "Upload custom recipe"
 msgstr ""
 
@@ -1033,7 +1033,7 @@ msgid ""
 "share the service with friends."
 msgstr ""
 
-#: application/templates/library.html:50 application/templates/my.html:64
+#: application/templates/library.html:50 application/templates/my.html:61
 msgid "Search"
 msgstr ""
 
@@ -1078,7 +1078,7 @@ msgid "Custom RSS"
 msgstr ""
 
 #: application/templates/my.html:23
-msgid "Content embedded"
+msgid "Content Embedded"
 msgstr ""
 
 #: application/templates/my.html:27
@@ -1093,35 +1093,35 @@ msgstr ""
 msgid "Library"
 msgstr ""
 
-#: application/templates/my.html:72
+#: application/templates/my.html:68
 msgid "Subscription to selected recipe successful."
 msgstr ""
 
-#: application/templates/my.html:75
+#: application/templates/my.html:71
 msgid "Bookmarklet"
 msgstr ""
 
-#: application/templates/my.html:79
+#: application/templates/my.html:75
 msgid "Send to Kindle"
 msgstr ""
 
-#: application/templates/my.html:83
+#: application/templates/my.html:79
 msgid "Subscribe with KindleEar"
 msgstr ""
 
-#: application/templates/my.html:86
+#: application/templates/my.html:82
 msgid "Drag and drop this link to your bookmarks"
 msgstr ""
 
-#: application/templates/my.html:90
+#: application/templates/my.html:86
 msgid "Chrome extension"
 msgstr ""
 
-#: application/templates/my.html:91
+#: application/templates/my.html:87
 msgid "Edge extension"
 msgstr ""
 
-#: application/templates/my.html:93
+#: application/templates/my.html:89
 msgid "Browser extensions also available"
 msgstr ""
 
@@ -1307,7 +1307,7 @@ msgstr ""
 msgid "Never expire"
 msgstr ""
 
-#: application/view/admin.py:51 application/view/adv.py:387
+#: application/view/admin.py:51 application/view/adv.py:401
 #: application/view/setting.py:102 application/view/translator.py:83
 #: application/view/translator.py:165
 msgid "Settings Saved!"
@@ -1372,88 +1372,88 @@ msgstr ""
 msgid "The old password is wrong."
 msgstr ""
 
-#: application/view/adv.py:81 application/view/adv.py:82
-#: application/view/adv.py:83 application/view/adv.py:84
-#: application/view/adv.py:85 application/view/adv.py:86
-#: application/view/adv.py:87 application/view/adv.py:88
-#: application/view/adv.py:89 application/view/adv.py:90
+#: application/view/adv.py:80 application/view/adv.py:81
+#: application/view/adv.py:82 application/view/adv.py:83
+#: application/view/adv.py:84 application/view/adv.py:85
+#: application/view/adv.py:86 application/view/adv.py:87
+#: application/view/adv.py:88 application/view/adv.py:89
 msgid "Append hyperlink '{}' to article"
 msgstr ""
 
-#: application/view/adv.py:81 application/view/adv.py:82
-#: application/view/adv.py:83 application/view/adv.py:84
-#: application/view/adv.py:85
+#: application/view/adv.py:80 application/view/adv.py:81
+#: application/view/adv.py:82 application/view/adv.py:83
+#: application/view/adv.py:84
 msgid "Save to {}"
 msgstr ""
 
-#: application/view/adv.py:81
+#: application/view/adv.py:80
 msgid "evernote"
 msgstr ""
 
-#: application/view/adv.py:82
+#: application/view/adv.py:81
 msgid "wiz"
 msgstr ""
 
-#: application/view/adv.py:83
+#: application/view/adv.py:82
 msgid "pocket"
 msgstr ""
 
-#: application/view/adv.py:84
+#: application/view/adv.py:83
 msgid "instapaper"
 msgstr ""
 
-#: application/view/adv.py:85
+#: application/view/adv.py:84
 msgid "wallabag"
 msgstr ""
 
-#: application/view/adv.py:86 application/view/adv.py:87
-#: application/view/adv.py:88 application/view/adv.py:89
+#: application/view/adv.py:85 application/view/adv.py:86
+#: application/view/adv.py:87 application/view/adv.py:88
 msgid "Share on {}"
 msgstr ""
 
-#: application/view/adv.py:86
+#: application/view/adv.py:85
 msgid "weibo"
 msgstr ""
 
-#: application/view/adv.py:87
+#: application/view/adv.py:86
 msgid "facebook"
 msgstr ""
 
-#: application/view/adv.py:89
+#: application/view/adv.py:88
 msgid "tumblr"
 msgstr ""
 
-#: application/view/adv.py:90
+#: application/view/adv.py:89
 msgid "Open in browser"
 msgstr ""
 
-#: application/view/adv.py:91
+#: application/view/adv.py:90
 msgid "Append qrcode of url to article"
 msgstr ""
 
-#: application/view/adv.py:389
+#: application/view/adv.py:403
 msgid "The format is invalid."
 msgstr ""
 
-#: application/view/adv.py:422
+#: application/view/adv.py:435
 msgid "Authorization Error!<br/>{}"
 msgstr ""
 
-#: application/view/adv.py:445
+#: application/view/adv.py:457
 msgid "Success authorized by Pocket!"
 msgstr ""
 
-#: application/view/adv.py:451
+#: application/view/adv.py:463
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr ""
 
-#: application/view/adv.py:473
+#: application/view/adv.py:484
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 
-#: application/view/adv.py:486
+#: application/view/adv.py:497
 msgid "Request type [{}] unsupported"
 msgstr ""
 
@@ -1478,9 +1478,9 @@ msgstr ""
 msgid "Cannot fetch data from {}, status: {}"
 msgstr ""
 
-#: application/view/library.py:51 application/view/subscribe.py:222
-#: application/view/subscribe.py:360 application/view/subscribe.py:388
-#: application/view/subscribe.py:395 application/view/translator.py:29
+#: application/view/library.py:51 application/view/subscribe.py:225
+#: application/view/subscribe.py:363 application/view/subscribe.py:391
+#: application/view/subscribe.py:398 application/view/translator.py:29
 msgid "The recipe does not exist."
 msgstr ""
 
@@ -1666,7 +1666,7 @@ msgstr ""
 msgid "Hausa"
 msgstr ""
 
-#: application/view/share.py:55 application/view/subscribe.py:235
+#: application/view/share.py:55 application/view/subscribe.py:238
 msgid "Unknown command: {}"
 msgstr ""
 
@@ -1701,68 +1701,68 @@ msgstr ""
 msgid "Unknown: {}"
 msgstr ""
 
-#: application/view/subscribe.py:70
+#: application/view/subscribe.py:73
 msgid "Title or url is empty!"
 msgstr ""
 
-#: application/view/subscribe.py:77 application/view/subscribe.py:151
+#: application/view/subscribe.py:80 application/view/subscribe.py:154
 msgid "Duplicated subscription!"
 msgstr ""
 
-#: application/view/subscribe.py:110
+#: application/view/subscribe.py:113
 msgid "The Title or Url is empty."
 msgstr ""
 
-#: application/view/subscribe.py:123
+#: application/view/subscribe.py:126
 msgid "Failed to fetch the recipe."
 msgstr ""
 
-#: application/view/subscribe.py:137 application/view/subscribe.py:310
+#: application/view/subscribe.py:140 application/view/subscribe.py:313
 msgid "Failed to save the recipe. Error:"
 msgstr ""
 
-#: application/view/subscribe.py:178
+#: application/view/subscribe.py:181
 msgid "The Rss does not exist."
 msgstr ""
 
-#: application/view/subscribe.py:262
+#: application/view/subscribe.py:265
 msgid "You can only delete the uploaded recipe."
 msgstr ""
 
-#: application/view/subscribe.py:267
+#: application/view/subscribe.py:270
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr ""
 
-#: application/view/subscribe.py:283 application/view/translator.py:50
+#: application/view/subscribe.py:286 application/view/translator.py:50
 #: application/view/translator.py:99 application/view/translator.py:112
 #: application/view/translator.py:135 application/view/translator.py:181
 #: application/view/translator.py:194
 msgid "This recipe has not been subscribed to yet."
 msgstr ""
 
-#: application/view/subscribe.py:297
+#: application/view/subscribe.py:300
 msgid "Can not read uploaded file, Error:"
 msgstr ""
 
-#: application/view/subscribe.py:305
+#: application/view/subscribe.py:308
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
 msgstr ""
 
-#: application/view/subscribe.py:328
+#: application/view/subscribe.py:331
 msgid "Cannot find any subclass of BasicNewsRecipe."
 msgstr ""
 
-#: application/view/subscribe.py:333
+#: application/view/subscribe.py:336
 msgid "The recipe is already in the library."
 msgstr ""
 
-#: application/view/subscribe.py:367
+#: application/view/subscribe.py:370
 msgid "The login information for this recipe has been cleared."
 msgstr ""
 
-#: application/view/subscribe.py:371
+#: application/view/subscribe.py:374
 msgid "The login information for this recipe has been saved."
 msgstr ""
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #登录页面
-
+#Author: cdhigh <https://github.com/cdhigh>
 import hashlib, datetime, time, json
 from urllib.parse import urljoin, urlencode
 from flask import Blueprint, url_for, render_template, redirect, session, current_app as app
@@ -46,7 +46,8 @@ def LoginPost():
     
     adminName = app.config['ADMIN_NAME']
     isFirstTime = CreateAccountIfNotExist(adminName) #确认管理员账号是否存在
-    
+    pwdHash = ''
+    nameHash = ''
     user = KeUser.get_or_none(KeUser.name == name)
     if user:
         try:
@@ -140,8 +141,12 @@ def NeedLoginAjax():
     return {'status': _('login required')}
 
 #忘记密码后用于重设密码
-@bpLogin.route("/resetpwd")
+@bpLogin.route("/resetpwd", methods=['GET', 'POST'])
 def ResetPasswordRoute():
+    return ResetPasswordGet() if request.method == 'GET' else ResetPasswordPost()
+
+#忘记密码的第一步
+def ResetPasswordGet():
     name = request.args.get('name')
     token = request.args.get('token')
     user = KeUser.get_or_none(KeUser.name == name) if name else None
@@ -164,7 +169,7 @@ def ResetPasswordRoute():
     return render_template('reset_password.html', tips='<br/>'.join(tips), 
         userName=name, firstStep=True)
 
-@bpLogin.post("/resetpwd")
+##忘记密码的第二步
 def ResetPasswordPost():
     form = request.form
     name = form.get('username')
@@ -180,7 +185,7 @@ def ResetPasswordPost():
         tips = reset_pwd_final_step(user, token, new_p1, new_p2)
         if tips == 'ok':
             tips = _('Reset password success, Please close this page and login again.')
-            return render_template('reset_password.html', tips=tips, userName=name, firstStep=True)
+        return render_template('reset_password.html', tips=tips, userName=name, firstStep=True)
     elif user.cfg('email') != email:
         tips = _("The email you input is not associated with this account.")
         return render_template('reset_password.html', tips=tips, userName=name, firstStep=True)

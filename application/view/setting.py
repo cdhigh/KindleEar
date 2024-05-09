@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #设置页面
-import locale, os, textwrap
+#Author: cdhigh <https://github.com/cdhigh>
+import os, textwrap
 from flask import Blueprint, render_template, request, redirect, session
 from flask import current_app as app
 from flask_babel import gettext as _
@@ -26,23 +27,22 @@ all_timezones = {'UTC-12:00': -12, 'UTC-11:00': -11, 'UTC-10:00': -10, 'UTC-9:30
 
 @bpSetting.route("/setting", endpoint='Setting')
 @login_required()
-def Setting(tips=None):
-    user = get_login_user()
+def Setting(user: KeUser):
     sm_services = avaliable_sm_services()
-    return render_template('setting.html', tab='set', user=user, tips=tips, langMap=LangMap(), 
+    return render_template('setting.html', tab='set', user=user, tips='', langMap=LangMap(), 
         sm_services=sm_services, all_timezones=all_timezones)
 
 @bpSetting.post("/setting", endpoint='SettingPost')
 @login_required()
-def SettingPost():
-    user = get_login_user()
+def SettingPost(user: KeUser):
     form = request.form
     keMail = form.get('kindle_email', '').strip(';, ')
     myTitle = form.get('rss_title')
 
     #service==admin 说明和管理员的设置一致
     sm_srv_need = False
-    sm_srv_type = ''
+    sm_srv_type = sm_apikey = sm_host = sm_port = sm_password = sm_save_path = ''
+    send_mail_service = {}
     if user.name == os.getenv('ADMIN_NAME') or user.send_mail_service.get('service') != 'admin':
         sm_srv_need = True
         sm_srv_type = form.get('sm_service')
@@ -110,8 +110,7 @@ def SettingPost():
 
 @bpSetting.post("/send_test_email", endpoint='SendTestEmailPost')
 @login_required()
-def SendTestEmailPost():
-    user = get_login_user()
+def SendTestEmailPost(user: KeUser):
     srcUrl = request.form.get('url', '')
     body = textwrap.dedent(f"""\
     Dear {user.name}, 
@@ -146,7 +145,7 @@ def SendTestEmailPost():
 #显示环境变量的值
 @bpSetting.route('/env')
 @login_required()
-def DisplayEnv():
+def DisplayEnv(user: KeUser):
     strEnv = []
     for d in os.environ:
         strEnv.append("<pre><p>" + str(d).rjust(28) + " | " + str(os.environ[d]) + "</p></pre>")

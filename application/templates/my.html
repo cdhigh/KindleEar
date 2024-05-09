@@ -20,7 +20,7 @@
         <div class="pure-u-2-5 pure-u-sm-1-3 pure-u-md-1-3" style="text-align:right;">
           <label style="width:auto;white-space:nowrap;margin-right:20px;">
             <input type="checkbox" name="fulltext" id="isfulltext" {% if isfulltext %}checked="checked"{% endif %}/>
-            {{_("Content embedded")}}
+            {{_("Content Embedded")}}
           </label>
           <label style="width:auto;white-space:nowrap;">
             <input type="checkbox" name="separated" id="separated" style="margin-left:10px;" />
@@ -49,20 +49,16 @@
   </div>
 
   <legend><h3>{{ _("Library") }} </h3></legend>
-  <div class="pure-g box-list noborder">
+  <div class="pure-g box-list noborder lib-header">
     <div class="pure-u-1-3 width1_3 pure-form">
       <select class="pure-input-rounded width100" id="language_pick">
       </select>
     </div>
-    <div class="pure-u-1-6">
-      <div class="upload-recipe">
-        <button class="upload-recipe-btn" title="{{_('Upload custom recipe')}}"onclick="OpenUploadRecipeDialog()"><i class="iconfont icon-upload"></i></button>
-      </div>
+    <div class=" pure-u-1-6 upload-recipe">
+      <button class="upload-recipe-btn" title="{{_('Upload custom recipe')}}"onclick="OpenUploadRecipeDialog()"><i class="iconfont icon-upload"></i></button>
     </div>
-    <div class="pure-u-3-6">
-      <div class="pure-form">
-        <input type="text" name="search" id="search_recipe" class="pure-input-rounded" placeholder="{{ _('Search')}}" />
-      </div>
+    <div class="pure-form">
+      <input type="text" name="search" id="search_recipe" class="pure-input-1 pure-input-rounded" placeholder="{{ _('Search')}}" />
     </div>
   </div>
   <div id="all_recipes" class="box-list">

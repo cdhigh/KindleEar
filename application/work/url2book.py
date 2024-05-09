@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #实现接收到邮件后抓取URL然后制作成电子书
-
-import io
+#Author: cdhigh <https://github.com/cdhigh>
 from urllib.parse import urljoin
 from flask import Blueprint, request, current_app as app
 from bs4 import BeautifulSoup
@@ -20,13 +19,13 @@ bpUrl2Book = Blueprint('bpUrl2Book', __name__)
 #抓取指定链接，转换成附件推送
 @bpUrl2Book.route("/url2book", methods=['GET', 'POST'])
 def Url2BookRoute():
-    params = request.args if request.method == 'GET' else request.json
+    params = request.args if request.method == 'GET' else (request.json or {})
     userName = params.get('userName', app.config['ADMIN_NAME'])
-    urls = params.get('urls')
-    title = params.get('title')
-    key = params.get('key')
-    action = params.get('action')
-    text = params.get('text')
+    urls = params.get('urls', '')
+    title = params.get('title', '')
+    key = params.get('key', '')
+    action = params.get('action', '')
+    text = params.get('text', '')
     return Url2BookImpl(userName, urls, title, key, action, text)
     
 
@@ -179,10 +178,11 @@ def GetGitbookChapterUrls(url):
     if resp.status_code == 200:
         soup = BeautifulSoup(resp.text, 'lxml')
         tagSummary = soup.find('ul', attrs={'class': ['summary']})
-        for tagChapter in tagSummary.find_all('li', attrs={'class': ['chapter']}):
-            tagA = tagChapter.find('a', href=True)
-            if tagA:
-                urls.append((tagA.string.strip(), urljoin(url, tagA.attrs['href'])))
+        if tagSummary:
+            for tagChapter in tagSummary.find_all('li', attrs={'class': ['chapter']}): #type:ignore
+                tagA = tagChapter.find('a', href=True)
+                if tagA:
+                    urls.append((tagA.string.strip(), urljoin(url, tagA.attrs['href'])))
     else:
         urls.append(url)
     return urls if urls else [url]

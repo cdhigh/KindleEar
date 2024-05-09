@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #网友共享的订阅源数据，仅为 KINDLEEAR_SITE 使用
+#Author: cdhigh <https://github.com/cdhigh>
 import datetime, json, hashlib
 from operator import attrgetter
-from flask import Blueprint, render_template, request, Response, current_app as app
+from flask import Blueprint, request, Response, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..utils import str_to_bool, str_to_int
@@ -153,6 +154,7 @@ def SharedLibraryMgrOffical(mgrType):
             respDict['url'] = url
 
         #判断是否存在
+        dbItem = None
         if url:
             dbItem = SharedRss.get_or_none(SharedRss.url == url)
         elif recipeId.startswith('db:'):
@@ -226,8 +228,7 @@ def SharedLibraryCategoryOffical():
 #一次性导入共享库数据
 @bpLibraryOffical.post('/translib', endpoint='TransferLibPost')
 @login_required()
-def TransferLibPost():
-    user = get_login_user()
+def TransferLibPost(user: KeUser):
     key = request.form.get('key')
     if user.name != app.config['ADMIN_NAME'] or key != user.share_links.get('key', ''):
         return {}
@@ -236,10 +237,10 @@ def TransferLibPost():
     src = request.form.get('src')
     try:
         if src == 'json':
-            sharedData = json.loads(request.form.get('data'))
+            sharedData = json.loads(request.form.get('data', ''))
         else:
             upload = request.files.get('data_file')
-            sharedData = json.loads(upload.read())
+            sharedData = json.loads(upload.read()) #type: ignore
     except Exception as e:
         return {'status': str(e)}
 

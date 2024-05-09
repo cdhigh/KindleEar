@@ -2,8 +2,7 @@
 # -*- coding:utf-8 -*-
 #Author: cdhigh <https://github.com/cdhigh>
 #管理订阅页面
-import datetime, json, io, re, zipfile
-from operator import attrgetter
+import datetime, json, re
 from urllib.parse import urljoin
 from flask import Blueprint, render_template, request, redirect, url_for, send_file, current_app as app
 from flask_babel import gettext as _
@@ -19,11 +18,8 @@ bpSubscribe = Blueprint('bpSubscribe', __name__)
 #管理我的订阅和杂志列表
 @bpSubscribe.route("/my", endpoint='MySubscription')
 @login_required()
-def MySubscription(tips=None):
-    user = get_login_user()
-    if not user:
-        return 'login required'
-        
+def MySubscription(user: KeUser):
+    tips = ''
     share_key = user.share_links.get('key', '')
     args = request.args
     title_to_add = args.get('title_to_add', '').strip() #from Bookmarklet/browser extension
@@ -63,8 +59,7 @@ def MySubscription(tips=None):
 #添加自定义RSS
 @bpSubscribe.post("/my", endpoint='MySubscriptionPost')
 @login_required()
-def MySubscriptionPost():
-    user = get_login_user()
+def MySubscriptionPost(user: KeUser):
     form = request.form
     title = form.get('rss_title')
     url = form.get('url')
@@ -85,8 +80,7 @@ def MySubscriptionPost():
 #添加/删除自定义RSS订阅的AJAX处理函数
 @bpSubscribe.post("/customrss/<actType>", endpoint='FeedsAjaxPost')
 @login_required(forAjax=True)
-def FeedsAjaxPost(actType):
-    user = get_login_user()
+def FeedsAjaxPost(actType: str, user: KeUser):
     form = request.form
     actType = actType.lower()
 
@@ -211,20 +205,18 @@ def SendNewSubscription(title, url, recipeId):
 #订阅/退订内置或上传Recipe的AJAX处理函数
 @bpSubscribe.post("/recipe/<actType>", endpoint='RecipeAjaxPost')
 @login_required(forAjax=True)
-def RecipeAjaxPost(actType):
-    user = get_login_user()
+def RecipeAjaxPost(actType: str, user: KeUser):
     form = request.form
-
     if actType == 'upload': #上传Recipe
         return SaveUploadedRecipe(user, form.get('action_after_upload'))
-    
+
     recipeId = form.get('id', '')
     recipeType, dbId = Recipe.type_and_id(recipeId)
     recipe = GetBuiltinRecipeInfo(recipeId) if recipeType == 'builtin' else Recipe.get_by_id_or_none(dbId)
+
     if not recipe:
         return {'status': _('The recipe does not exist.')}
-
-    if actType == 'unsubscribe': #退订
+    elif actType == 'unsubscribe': #退订
         return UnsubscribeRecipe(user, recipeId, recipe)
     elif actType == 'subscribe': #订阅
         separated = str_to_bool(form.get('separated', ''))
@@ -236,7 +228,6 @@ def RecipeAjaxPost(actType):
         return ScheduleRecipe(recipeId, form)
     else:
         return {'status': _('Unknown command: {}').format(actType)}
-
 
 #订阅某个Recipe
 def SubscribeRecipe(user, recipeId, recipe, separated):
@@ -353,8 +344,7 @@ def SaveRecipeIfCorrect(user: KeUser, src: str):
 #修改Recipe的网站登陆信息
 @bpSubscribe.post("/recipelogininfo", endpoint='RecipeLoginInfoPostAjax')
 @login_required()
-def RecipeLoginInfoPostAjax():
-    user = get_login_user()
+def RecipeLoginInfoPostAjax(user: KeUser):
     id_ = request.form.get('id', '')
     account = request.form.get('account')
     password = request.form.get('password')
@@ -378,7 +368,7 @@ def RecipeLoginInfoPostAjax():
 #查看特定recipe的源码，将python源码转换为html返回
 @bpSubscribe.route("/viewsrc/<id_>", endpoint='ViewRecipeSourceCode')
 @login_required()
-def ViewRecipeSourceCode(id_):
+def ViewRecipeSourceCode(id_: str, user: KeUser):
     htmlTpl = """<!DOCTYPE html>\n<html><head><meta charset="utf-8"><link rel="stylesheet" href="/static/prism.css" type="text/css"/>
     <title>{title}</title></head><body><pre><code class="language-python">{body}</code></pre><script type="text/javascript" src="/static/prism.js"></script></body></html>"""
     recipeId = id_.replace('__', ':')

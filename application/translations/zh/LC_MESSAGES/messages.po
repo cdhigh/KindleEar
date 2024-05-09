@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-05-08 19:13-0300\n"
+"POT-Creation-Date: 2024-05-09 11:05-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -502,7 +502,7 @@ msgstr "如果任意文本框留空白，则此登录信息将从服务器删除
 msgid "Cannot set the website login information, Error:"
 msgstr "无法设置登录信息，错误描述："
 
-#: application/templates/base.html:54 application/templates/my.html:59
+#: application/templates/base.html:54 application/templates/my.html:58
 msgid "Upload custom recipe"
 msgstr "上传自定义 Recipe"
 
@@ -1034,7 +1034,7 @@ msgid ""
 "share the service with friends."
 msgstr "使用开源 %(kindleear)s 应用，您可以部署您自己的网站，每天自动抓取全球新闻热点，并支持多账号，可以提供给多位好友同时使用。"
 
-#: application/templates/library.html:50 application/templates/my.html:64
+#: application/templates/library.html:50 application/templates/my.html:61
 msgid "Search"
 msgstr "搜索"
 
@@ -1079,7 +1079,7 @@ msgid "Custom RSS"
 msgstr "自定义RSS"
 
 #: application/templates/my.html:23
-msgid "Content embedded"
+msgid "Content Embedded"
 msgstr "全文RSS"
 
 #: application/templates/my.html:27
@@ -1094,35 +1094,35 @@ msgstr "已订阅"
 msgid "Library"
 msgstr "新闻源"
 
-#: application/templates/my.html:72
+#: application/templates/my.html:68
 msgid "Subscription to selected recipe successful."
 msgstr "已成功订阅您选择的 Recipe"
 
-#: application/templates/my.html:75
+#: application/templates/my.html:71
 msgid "Bookmarklet"
 msgstr "书签小应用"
 
-#: application/templates/my.html:79
+#: application/templates/my.html:75
 msgid "Send to Kindle"
 msgstr "发送到Kindle"
 
-#: application/templates/my.html:83
+#: application/templates/my.html:79
 msgid "Subscribe with KindleEar"
 msgstr "在KindleEar订阅"
 
-#: application/templates/my.html:86
+#: application/templates/my.html:82
 msgid "Drag and drop this link to your bookmarks"
 msgstr "将链接拖动到书签栏"
 
-#: application/templates/my.html:90
+#: application/templates/my.html:86
 msgid "Chrome extension"
 msgstr "Chrome扩展程序"
 
-#: application/templates/my.html:91
+#: application/templates/my.html:87
 msgid "Edge extension"
 msgstr "Edge扩展程序"
 
-#: application/templates/my.html:93
+#: application/templates/my.html:89
 msgid "Browser extensions also available"
 msgstr "浏览器扩展也有提供"
 
@@ -1310,7 +1310,7 @@ msgstr "账号"
 msgid "Never expire"
 msgstr "永久有效"
 
-#: application/view/admin.py:51 application/view/adv.py:387
+#: application/view/admin.py:51 application/view/adv.py:401
 #: application/view/setting.py:102 application/view/translator.py:83
 #: application/view/translator.py:165
 msgid "Settings Saved!"
@@ -1375,88 +1375,88 @@ msgstr "账号设置已更新。"
 msgid "The old password is wrong."
 msgstr "原密码错误。"
 
-#: application/view/adv.py:81 application/view/adv.py:82
-#: application/view/adv.py:83 application/view/adv.py:84
-#: application/view/adv.py:85 application/view/adv.py:86
-#: application/view/adv.py:87 application/view/adv.py:88
-#: application/view/adv.py:89 application/view/adv.py:90
+#: application/view/adv.py:80 application/view/adv.py:81
+#: application/view/adv.py:82 application/view/adv.py:83
+#: application/view/adv.py:84 application/view/adv.py:85
+#: application/view/adv.py:86 application/view/adv.py:87
+#: application/view/adv.py:88 application/view/adv.py:89
 msgid "Append hyperlink '{}' to article"
 msgstr "在每篇文章后附加 '{}' 超链接"
 
-#: application/view/adv.py:81 application/view/adv.py:82
-#: application/view/adv.py:83 application/view/adv.py:84
-#: application/view/adv.py:85
+#: application/view/adv.py:80 application/view/adv.py:81
+#: application/view/adv.py:82 application/view/adv.py:83
+#: application/view/adv.py:84
 msgid "Save to {}"
 msgstr "保存到 {}"
 
-#: application/view/adv.py:81
+#: application/view/adv.py:80
 msgid "evernote"
 msgstr "evernote"
 
-#: application/view/adv.py:82
+#: application/view/adv.py:81
 msgid "wiz"
 msgstr "为知笔记"
 
-#: application/view/adv.py:83
+#: application/view/adv.py:82
 msgid "pocket"
 msgstr "pocket"
 
-#: application/view/adv.py:84
+#: application/view/adv.py:83
 msgid "instapaper"
 msgstr "instapaper"
 
-#: application/view/adv.py:85
+#: application/view/adv.py:84
 msgid "wallabag"
 msgstr "wallabag"
 
-#: application/view/adv.py:86 application/view/adv.py:87
-#: application/view/adv.py:88 application/view/adv.py:89
+#: application/view/adv.py:85 application/view/adv.py:86
+#: application/view/adv.py:87 application/view/adv.py:88
 msgid "Share on {}"
 msgstr "分享到 {}"
 
-#: application/view/adv.py:86
+#: application/view/adv.py:85
 msgid "weibo"
 msgstr "微博"
 
-#: application/view/adv.py:87
+#: application/view/adv.py:86
 msgid "facebook"
 msgstr "facebook"
 
-#: application/view/adv.py:89
+#: application/view/adv.py:88
 msgid "tumblr"
 msgstr "tumblr"
 
-#: application/view/adv.py:90
+#: application/view/adv.py:89
 msgid "Open in browser"
 msgstr "在浏览器打开"
 
-#: application/view/adv.py:91
+#: application/view/adv.py:90
 msgid "Append qrcode of url to article"
 msgstr "在每篇文章后附加文章链接的二维码"
 
-#: application/view/adv.py:389
+#: application/view/adv.py:403
 msgid "The format is invalid."
 msgstr "格式非法。"
 
-#: application/view/adv.py:422
+#: application/view/adv.py:435
 msgid "Authorization Error!<br/>{}"
 msgstr "申请授权过程失败！<br/>{}"
 
-#: application/view/adv.py:445
+#: application/view/adv.py:457
 msgid "Success authorized by Pocket!"
 msgstr "已经成功获得Pocket的授权！"
 
-#: application/view/adv.py:451
+#: application/view/adv.py:463
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr "申请Pocket授权失败!<hr/>错误信息参考如下：<br/><br/>{}"
 
-#: application/view/adv.py:473
+#: application/view/adv.py:484
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr "Instapaper服务器异常，请稍候再试。"
 
-#: application/view/adv.py:486
+#: application/view/adv.py:497
 msgid "Request type [{}] unsupported"
 msgstr "不支持你请求的命令类型 [{}]"
 
@@ -1481,9 +1481,9 @@ msgstr "规则参数非法。"
 msgid "Cannot fetch data from {}, status: {}"
 msgstr "无法从 {} 获取数据，状态： {}"
 
-#: application/view/library.py:51 application/view/subscribe.py:222
-#: application/view/subscribe.py:360 application/view/subscribe.py:388
-#: application/view/subscribe.py:395 application/view/translator.py:29
+#: application/view/library.py:51 application/view/subscribe.py:225
+#: application/view/subscribe.py:363 application/view/subscribe.py:391
+#: application/view/subscribe.py:398 application/view/translator.py:29
 msgid "The recipe does not exist."
 msgstr "此Recipe不存在。"
 
@@ -1669,7 +1669,7 @@ msgstr "他加禄语"
 msgid "Hausa"
 msgstr "豪萨语"
 
-#: application/view/share.py:55 application/view/subscribe.py:235
+#: application/view/share.py:55 application/view/subscribe.py:238
 msgid "Unknown command: {}"
 msgstr "未知命令：{}"
 
@@ -1704,68 +1704,68 @@ msgstr "下面是一些技术细节："
 msgid "Unknown: {}"
 msgstr "未知: {}"
 
-#: application/view/subscribe.py:70
+#: application/view/subscribe.py:73
 msgid "Title or url is empty!"
 msgstr "标题或 URL 为空！"
 
-#: application/view/subscribe.py:77 application/view/subscribe.py:151
+#: application/view/subscribe.py:80 application/view/subscribe.py:154
 msgid "Duplicated subscription!"
 msgstr "重复的订阅!"
 
-#: application/view/subscribe.py:110
+#: application/view/subscribe.py:113
 msgid "The Title or Url is empty."
 msgstr "标题或URL为空。"
 
-#: application/view/subscribe.py:123
+#: application/view/subscribe.py:126
 msgid "Failed to fetch the recipe."
 msgstr "抓取Recipe失败。"
 
-#: application/view/subscribe.py:137 application/view/subscribe.py:310
+#: application/view/subscribe.py:140 application/view/subscribe.py:313
 msgid "Failed to save the recipe. Error:"
 msgstr "保存Recipe失败。错误："
 
-#: application/view/subscribe.py:178
+#: application/view/subscribe.py:181
 msgid "The Rss does not exist."
 msgstr "此RSS不存在。"
 
-#: application/view/subscribe.py:262
+#: application/view/subscribe.py:265
 msgid "You can only delete the uploaded recipe."
 msgstr "您只能删除你自己上传的Recipe。"
 
-#: application/view/subscribe.py:267
+#: application/view/subscribe.py:270
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "此Recipe已经被订阅，请先取消订阅然后再删除。"
 
-#: application/view/subscribe.py:283 application/view/translator.py:50
+#: application/view/subscribe.py:286 application/view/translator.py:50
 #: application/view/translator.py:99 application/view/translator.py:112
 #: application/view/translator.py:135 application/view/translator.py:181
 #: application/view/translator.py:194
 msgid "This recipe has not been subscribed to yet."
 msgstr "此Recipe尚未被订阅。"
 
-#: application/view/subscribe.py:297
+#: application/view/subscribe.py:300
 msgid "Can not read uploaded file, Error:"
 msgstr "无法读取上传的文件，错误："
 
-#: application/view/subscribe.py:305
+#: application/view/subscribe.py:308
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
 msgstr "解码Recipe失败，请确保您的Recipe为utf-8编码。"
 
-#: application/view/subscribe.py:328
+#: application/view/subscribe.py:331
 msgid "Cannot find any subclass of BasicNewsRecipe."
 msgstr "无法找到BasicNewsRecipe的任何子类。"
 
-#: application/view/subscribe.py:333
+#: application/view/subscribe.py:336
 msgid "The recipe is already in the library."
 msgstr "此Recipe已经在新闻源中。"
 
-#: application/view/subscribe.py:367
+#: application/view/subscribe.py:370
 msgid "The login information for this recipe has been cleared."
 msgstr "此Recipe的网站登录信息已经被删除。"
 
-#: application/view/subscribe.py:371
+#: application/view/subscribe.py:374
 msgid "The login information for this recipe has been saved."
 msgstr "此Recipe的网站登录信息已经保存。"
 
@@ -1776,3 +1776,4 @@ msgstr "需要填写api key."
 #: application/view/translator.py:116 application/view/translator.py:198
 msgid "The text is empty."
 msgstr "文本为空。"
+

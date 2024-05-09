@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 #保存到evernote或分享到社交媒体功能
 #Author: cdhigh<https://github.com/cdhigh>
-
 from urllib.parse import unquote
 from bs4 import BeautifulSoup
 from flask import Blueprint, render_template, request, current_app as app
@@ -29,11 +28,11 @@ SHARE_IMAGE_EMBEDDED = True
 @bpShare.route("/share")
 def Share():
     get_args = request.args.get
-    action = get_args('act')
-    userName = get_args('u')
-    url = get_args('url')
-    title = get_args('t')
-    key = get_args('k')
+    action = get_args('act', '')
+    userName = get_args('u', '')
+    url = get_args('url', '')
+    title = get_args('t', '')
+    key = get_args('k', '')
     if not all((action, userName, url, key)):
         return _("Some parameters are missing or wrong.")
     
@@ -54,7 +53,7 @@ def Share():
     else:
         return _('Unknown command: {}').format(action)
     
-def SaveToEvernoteWiz(user, action, url, title):
+def SaveToEvernoteWiz(user: KeUser, action: str, url: str, title: str):
     to = user.share_links.get(action, {}).get('email', '')
     html_title = f'Share to {action}'
     if not to:
@@ -63,6 +62,7 @@ def SaveToEvernoteWiz(user, action, url, title):
     html = b''
     fs = FsDictStub(None)
     res, paths, failures = recursive_fetch_url(url, fs)
+    attachments = []
     if res:
         raw = fs.read(res)
         positives = ['image-block', 'image-block-caption', 'image-block-ins']
@@ -78,10 +78,9 @@ def SaveToEvernoteWiz(user, action, url, title):
         a.string = url
         p.string = 'origin : '
         p.append(a)
-        soup.html.body.insert(0, p)
+        soup.html.body.insert(0, p) #type: ignore
         
         #标注图片位置
-        attachments = []
         for img in soup.find_all('img', attrs={'src': True}):
             src = img['src']
             data = fs.read(os.path.join(fs.path, src))
@@ -97,7 +96,7 @@ def SaveToEvernoteWiz(user, action, url, title):
             img.insert_after(p)
 
         try:
-            title = soup.html.head.title.string
+            title = soup.html.head.title.string #type: ignore
         except:
             pass
         html = str(soup)
@@ -115,7 +114,7 @@ def SaveToEvernoteWiz(user, action, url, title):
 
     return SHARE_INFO_TPL.format(title=html_title, info='<br/>'.join(info))
 
-def SaveToPocket(user, action, url, title):
+def SaveToPocket(user: KeUser, action: str, url: str, title: str):
     accessToken = user.share_links.get('Pocket' , {}).get('access_token', '')
     html_title = 'Share to Pocket'
     if not accessToken:
@@ -137,7 +136,7 @@ def SaveToPocket(user, action, url, title):
     
     return SHARE_INFO_TPL.format(title=html_title, info='<br/>'.join(info))
     
-def SaveToInstapaper(user, action, url, title):
+def SaveToInstapaper(user: KeUser, action: str, url: str, title: str):
     INSTAPAPER_API_ADD_URL = 'https://www.instapaper.com/api/add'
     
     instapaper = user.share_links.get('Instapaper', {})
@@ -162,7 +161,7 @@ def SaveToInstapaper(user, action, url, title):
         
     return SHARE_INFO_TPL.format(title=html_title, info='<br/>'.join(info))
 
-def SaveToWallabag(user, action, url, title):
+def SaveToWallabag(user: KeUser, action: str, url: str, title: str):
     config = user.share_links.get('wallabag', {})
     config['password'] = user.decrypt(config.get('password'))
     wallabag = WallaBag(config, default_log)

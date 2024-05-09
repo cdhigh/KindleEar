@@ -9,14 +9,16 @@ from .back_end.db_models import *
 
 #一些共同的工具函数，工具函数都是小写+下划线形式
 
-#确认登录的装饰器
+#确认登录的装饰器，使用此装饰器的函数都需要有一个参数 user
 #forAjax:是否返回一个json字典
 def login_required(forAjax=False):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             current_url = request.url
-            if (session.get('login', '') == 1) and get_login_user():
+            user = get_login_user()
+            if user:
+                kwargs['user'] = user
                 return func(*args, **kwargs)
             elif forAjax:
                 return redirect(url_for("bpLogin.NeedLoginAjax"))
@@ -28,7 +30,7 @@ def login_required(forAjax=False):
 #查询当前登录用户名，在使用此函数前最好保证已经登录
 #返回一个数据库行实例，而不是一个字符串
 def get_login_user() -> Union[KeUser,None]:
-    name = session.get('userName', '')
+    name = session.get('userName', '') if (session.get('login', '') == 1) else ''
     return KeUser.get_or_none(KeUser.name == name) if name else None
     
 #记录投递记录到数据库

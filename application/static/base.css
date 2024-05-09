@@ -39,6 +39,10 @@ button {
   padding: .5em 1.5em;
 }
 
+.pure-form select {
+    height: auto;
+}
+
 /*
  * -- LAYOUT STYLES --
  */
@@ -87,7 +91,7 @@ button {
     font-family: Palatino, STSong, SimSun, serif;
     font-size: 1.5em;
     text-transform: none;
-    font-weight: 200;
+    font-weight: bold;
     color: #222;
 }
 
@@ -379,9 +383,11 @@ textarea {
 }
 
 @media only screen and (min-width: 768px) {
-    .my-rss .box-list .box,
-    .advwhitelist .box-list .box {
+    .my-rss .box-list .box {
         padding-right: 2em;
+    }
+    .advwhitelist .box-list .box {
+        padding-right: 6em;
     }
 
     .box-list .box .cornerControls {
@@ -569,6 +575,26 @@ table.pure-table thead {
 }
 
 /* logs html */
+td[superscript-title] {
+    position: relative;
+    overflow: hidden;
+}
+td[superscript-title]:before {
+    content: attr(superscript-title);
+    position: absolute;
+    z-index: -1;
+    top: 5px;
+    left: -45px;
+    width: 120px;
+    height: 18px;
+    font-size: 9px;
+    line-height: 1.4;
+    text-align: center;
+    color: white;
+    background: linear-gradient(90deg, orange 0%, orangered 100%);
+    transform: rotate(-45deg);
+}
+
 .logs .status {
   display: inline-block;
   border-radius: 20px;
@@ -707,22 +733,31 @@ select[id="shared_rss_lang_pick"] {
     background: linear-gradient(to bottom, rgba(76, 171, 5, 0.6) 50%, rgba(24, 87, 24, 0.8) 50%);
 }
 
+.lib-header {
+    display: flex;
+    align-items: center;
+}
+
+.lib-header div {
+    width: auto;
+}
+
 .upload-recipe {
-    display: inline-block;
+    display: flex;
     margin-left: 20px;
     margin-right: 20px;
     text-align: center;
-    vertical-align: 15px;
+    align-items: center;
+    justify-content: center;
 }
 .upload-recipe-btn {
-    margin-top: .5em;
     text-align: center;
     border: none;
     border-radius: 2em;
     padding: 0px 10px;
     color: white;
     width: 120px;
-    height: 40px;
+    height: 35px;
     background-color: #0078E7;
 }
 

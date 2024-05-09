@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #投递历史页面和维护投递历史
+#Author: cdhigh <https://github.com/cdhigh>
 import datetime
 from operator import attrgetter
 from flask import Blueprint, request, render_template, current_app as app
@@ -12,8 +13,7 @@ bpLogs = Blueprint('bpLogs', __name__)
 
 @bpLogs.route("/logs", endpoint='Mylogs')
 @login_required()
-def Mylogs():
-    user = get_login_user()
+def Mylogs(user: KeUser):
     myLogs = GetOrderedDeliverLog(user.name, 10)
 
     #其他用户的推送记录
@@ -24,7 +24,7 @@ def Mylogs():
             if theLog:
                 logs[u.name] =  theLog
 
-    return render_template('logs.html', tab='logs', mylogs=myLogs, logs=logs)
+    return render_template('logs.html', tab='logs', mylogs=myLogs, logs=logs, utcnow=datetime.datetime.utcnow)
 
 #每天自动运行的任务，清理过期log
 @bpLogs.route("/removelogs")

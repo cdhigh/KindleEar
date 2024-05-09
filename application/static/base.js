@@ -150,7 +150,7 @@ function AppendRecipeToLibrary(div, id) {
     row_str.push('<sup>{0}</sup>'.format(i18n.abbrUpl));
   }
   row_str.push('</div><div class="summaryRow">');
-  row_str.push(recipe.description);
+  row_str.push(recipe.description || '&nbsp;');
   row_str.push('</div>');
 
   hamb_arg = [];
@@ -284,7 +284,7 @@ function PopulateMySubscribed() {
     if (desc.length > 100) {
       row_str.push(desc.substring(0, 100) + '...');
     } else {
-      row_str.push(desc);
+      row_str.push(desc || '&nbsp;');
     }
     row_str.push('</div>');
 
