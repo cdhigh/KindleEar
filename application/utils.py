@@ -40,6 +40,16 @@ def get_exc_location():
     exc_info = None
     return fileName, funcName, lineNo
 
+#获取发生异常时的文件名和行号，添加到自定义错误信息后，此函数必须要在发送异常后才能调用
+def LocExcFile(msg):
+    excType, e, excTb = sys.exc_info()
+    if excTb:
+        fileName = os.path.basename(excTb.tb_frame.f_code.co_filename) #type:ignore
+        lineNo = excTb.tb_lineno #type:ignore
+        return f'{msg}: {e} at {fileName}:{lineNo}'
+    else:
+        return msg
+
 #字符串转整数，出错则返回0
 def str_to_int(txt, default=0):
     try:
