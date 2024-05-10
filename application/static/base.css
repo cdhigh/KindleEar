@@ -579,10 +579,9 @@ td[superscript-title] {
     position: relative;
     overflow: hidden;
 }
-td[superscript-title]:before {
+td[superscript-title]:after {
     content: attr(superscript-title);
     position: absolute;
-    z-index: -1;
     top: 5px;
     left: -45px;
     width: 120px;
