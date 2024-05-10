@@ -33,24 +33,21 @@ try:
 except ImportError:
     MailjetClient = None
 
-try:
-    from smtp_mail import smtp_send_mail
-except ImportError:
-    smtp_send_mail = None
+from smtp_mail import smtp_send_mail
 
 #返回当前可用的发送邮件服务列表
 def avaliable_sm_services():
-    sm = []
+    sm = {}
     if gae_mail:
-        sm.append('gae')
-    if SendGridAPIClient:
-        sm.append('sendgrid')
-    if MailjetClient:
-        sm.append('mailjet')
+        sm['gae'] = 'GAE'
     if smtp_send_mail:
-        sm.append('smtp')
+        sm['smtp'] = 'SMTP'
+    if SendGridAPIClient:
+        sm['sendgrid'] = 'sendgrid'
+    if MailjetClient:
+        sm['mailjet'] = 'mailjet'
     if not hideMailLocal:
-        sm.append('local')
+        sm['local'] = 'local (debug)'
     return sm
 
 #发送邮件
@@ -108,7 +105,7 @@ def send_mail(user, to, subject, body, attachments=None, html=None):
         data['host'] = sm_service.get('host', '')
         data['port'] = sm_service.get('port', 587)
         data['username'] = sm_service.get('username', '')
-        data['password'] = user.decrypt(sm_service.get('password'))
+        data['password'] = sm_service.get('password', '') #获取配置字典时已经解密
         smtp_send_mail(**data)
     elif srv_type == 'local':
         save_mail_to_local(sm_service.get('save_path', 'tests/debug_mail'), **data)

@@ -3,11 +3,10 @@
 #任务队列APScheduler
 #Author: cdhigh <https://github.com/cdhigh>
 import os, random
-
 from flask_apscheduler import APScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 
-_broker_url = os.getenv('TASK_QUEUE_BROKER_URL')
+_broker_url = os.getenv('TASK_QUEUE_BROKER_URL', '')
 if _broker_url.startswith('redis://'):
     import redis
     from apscheduler.jobstores.redis import RedisJobStore
@@ -67,5 +66,14 @@ def create_url2book_task(payload: dict):
     action = payload.get('action', '')
     text = payload.get('text', '')
     args = [userName, urls, title, key, action, text]
-    scheduler.add_job(f'Url2Book{random.randint(0, 1000)}', Url2BookImpl, args=args, misfire_grace_time=20*60,
-        replace_existing=True)
+    scheduler.add_job(f'Url2Book{random.randint(0, 1000)}', Url2BookImpl, args=args, 
+        misfire_grace_time=20*60, replace_existing=True)
+
+def create_notifynewsubs_task(payload: dict):
+    from ..view.subscribe import NotifyNewSubscription
+    title = payload.get('title', '')
+    url = payload.get('url', '')
+    recipeId = payload.get('recipeId', '')
+    args = [title, url, recipeId]
+    scheduler.add_job(f'NotifyNewSubs{random.randint(0, 1000)}', NotifyNewSubscription, args=args, 
+        misfire_grace_time=20*60, replace_existing=True)

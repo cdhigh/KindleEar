@@ -59,12 +59,12 @@ def init_task_queue_service(app):
     celery_app.conf.beat_schedule = {
         'check_deliver': {
             'task': 'check_deliver',
-            'schedule': crontab(minute=50, hour='*/1'), #每个小时
+            'schedule': crontab(minute='50', hour='*/1'), #每个小时
             'args': []
         },
         'remove_logs': {
             'task': 'remove_logs', #每天凌晨
-            'schedule': crontab(minute=0, hour=0, day_of_month='*/1'),
+            'schedule': crontab(minute='0', hour='0', day_of_month='*/1'),
             'args': []
         },
     }
@@ -91,8 +91,17 @@ def start_celery_url2book(**payload):
     from ..work.url2book import Url2BookImpl
     return Url2BookImpl(**payload)
 
+@shared_task(ignore_result=True)
+def start_celery_notifynewsubs(**payload):
+    from ..view.subscribe import NotifyNewSubscription
+    return NotifyNewSubscription(**payload)
+
 def create_delivery_task(payload: dict):
-    start_celery_worker_impl.delay(**payload)
+    start_celery_worker_impl.delay(**payload) #type:ignore
 
 def create_url2book_task(payload: dict):
-    start_celery_url2book.delay(**payload)
+    start_celery_url2book.delay(**payload) #type:ignore
+
+def create_notifynewsubs_task(payload: dict):
+    start_celery_notifynewsubs.delay(**payload) #type:ignore
+

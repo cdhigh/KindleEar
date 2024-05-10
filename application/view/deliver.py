@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #投递相关功能，GAE平台的cron会每个小时调用请求一次Deliver()
-
+#Author: cdhigh <https://github.com/cdhigh>
+import os
 from collections import defaultdict
 from flask import Blueprint, render_template, request
 from flask_babel import gettext as _
 from ..back_end.db_models import *
 from ..base_handler import *
+from ..back_end.task_queue_adpt import create_delivery_task
 
 bpDeliver = Blueprint('bpDeliver', __name__)
 
@@ -96,17 +98,17 @@ def SingleUserDelivery(userName: str, idList: list=None):
 #separated: 是否单独推送
 #reason: cron/manual，启动推送的原因
 def queueOneBook(queueToPush: defaultdict, user: KeUser, recipeId: str, separated: bool, reason='cron'):
-    from ..back_end.task_queue_adpt import create_delivery_task
     recipeId = recipeId.replace(':', '__')
     if separated:
-        create_delivery_task({'userName': user.name, 'recipeId': recipeId, 'reason': reason})
+        key = os.environ.get('SECRET_KEY', '')
+        create_delivery_task({'userName': user.name, 'recipeId': recipeId, 'reason': reason, 'key': key})
     else:
         queueToPush[user.name].append(recipeId) #合并推送
 
 #启动推送队列中的书籍
 def flushQueueToPush(queueToPush: defaultdict, reason='cron'):
-    from ..back_end.task_queue_adpt import create_delivery_task
+    key = os.environ.get('SECRET_KEY', '')
     for name in queueToPush:
-        create_delivery_task({'userName': name, 'recipeId': ','.join(queueToPush[name]), 'reason': reason})
+        create_delivery_task({'userName': name, 'recipeId': ','.join(queueToPush[name]), 'reason': reason, 'key': key})
     queueToPush.clear()
 

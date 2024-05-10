@@ -3,11 +3,12 @@
 #Author: cdhigh <https://github.com/cdhigh>
 #管理订阅页面
 import datetime, json, re
-from urllib.parse import urljoin
-from flask import Blueprint, render_template, request, redirect, url_for, send_file, current_app as app
+from urllib.parse import urljoin, unquote, quote
+from flask import Blueprint, render_template, request, redirect, url_for, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
+from ..back_end.task_queue_adpt import create_notifynewsubs_task
 from ..utils import str_to_bool, xml_escape
 from ..lib.urlopener import UrlOpener
 from ..lib.recipe_helper import GetBuiltinRecipeInfo, GetBuiltinRecipeSource
@@ -91,8 +92,21 @@ def FeedsAjaxPost(actType: str, user: KeUser):
     else:
         return {'status': 'Unknown command: {}'.format(actType)}
 
+@bpSubscribe.route("/notifynewsubs", endpoint='NotifyNewSubscriptionRoute')
+@login_required()
+def NotifyNewSubscriptionRoute(user: KeUser):
+    args = request.args
+    if user.share_links.get('key') == args.get('key'):
+        title = args.get('title', '')
+        url = args.get('url', '')
+        recipeId = args.get('recipeId', '')
+        return NotifyNewSubscription(title, url, recipeId)
+    else:
+        return 'key invalid'
+
 #添加自定义RSS
-def AddCustomRss(user, form):
+#form: request.form 实例
+def AddCustomRss(user: KeUser, form):
     title = form.get('title', '')
     url = form.get('url', '')
     isfulltext = str_to_bool(form.get('fulltext', ''))
@@ -155,7 +169,8 @@ def AddCustomRss(user, form):
     
     #如果是从共享库中订阅的，则通知共享服务器，提供订阅数量信息，以便排序
     if fromSharedLibrary:
-        SendNewSubscription(title, url, recipeId)
+        key = app.config['SECRET_KEY']
+        create_notifynewsubs_task({'title': title, 'url': quote(url), 'recipeId': recipeId, 'key': key})
 
     return ret
 
@@ -196,11 +211,11 @@ def UpdateBookedCustomRss(user: KeUser):
         BookedRecipe.delete().where(BookedRecipe.recipe_id.in_(ids)).execute()
 
 #通知共享服务器，有一个新的订阅
-def SendNewSubscription(title, url, recipeId):
-    opener = UrlOpener()
+def NotifyNewSubscription(title, url, recipeId, key=None):
     path = LIBRARY_MGR + SUBSCRIBED_FROM_LIBRARY
-    #只管杀不管埋，不用管能否成功了
-    opener.open(buildKeUrl(path), {'title': title, 'url': url, 'recipeId': recipeId})
+    data = {'title': title, 'url': unquote(url), 'recipeId': recipeId}
+    resp = UrlOpener().open(buildKeUrl(path), data=data)
+    return f'{resp.status_code}'
 
 #订阅/退订内置或上传Recipe的AJAX处理函数
 @bpSubscribe.post("/recipe/<actType>", endpoint='RecipeAjaxPost')

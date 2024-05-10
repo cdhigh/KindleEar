@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #一些常用工具函数
-
-import os, sys, hashlib, base64, secrets, datetime, re
+#Author: cdhigh <https://github.com/cdhigh>
+import os, sys, hashlib, base64, secrets, datetime, re, traceback
 from urllib.parse import urlparse
 
 #比较安全的eval
@@ -26,27 +26,15 @@ def safe_eval(txt, gbl=None, local=None):
             raise NameError(f'{name} not allowed : {reason}') # pragma: no cover
     return eval(code, gbl, local)
 
-#当异常出现时，使用此函数返回真实引发异常的文件名，函数名和行号
-def get_exc_location():
-    #追踪到最终的异常引发点
-    exc_info = sys.exc_info()[2]
-    last_exc = exc_info.tb_next
-    while (last_exc.tb_next):
-        last_exc = last_exc.tb_next
-    fileName = os.path.basename(last_exc.tb_frame.f_code.co_filename)
-    funcName = last_exc.tb_frame.f_code.co_name
-    lineNo = last_exc.tb_frame.f_lineno
-    last_exc = None
-    exc_info = None
-    return fileName, funcName, lineNo
-
 #获取发生异常时的文件名和行号，添加到自定义错误信息后，此函数必须要在发送异常后才能调用
 def LocExcFile(msg):
     excType, e, excTb = sys.exc_info()
     if excTb:
-        fileName = os.path.basename(excTb.tb_frame.f_code.co_filename) #type:ignore
-        lineNo = excTb.tb_lineno #type:ignore
-        return f'{msg}: {e} at {fileName}:{lineNo}'
+        bottom = traceback.extract_tb(excTb)[-1]
+        fileName = os.path.basename(bottom.filename)
+        lineNo = bottom.lineno
+        funcName = bottom.name
+        return f'{msg}: {e} at {fileName}:{lineNo}:{funcName}()'
     else:
         return msg
 

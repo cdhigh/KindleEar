@@ -5,7 +5,7 @@
 import os, datetime, time, io, logging
 from typing import Union
 from collections import defaultdict
-from flask import Blueprint, request
+from flask import Blueprint, request, current_app as app
 from ..base_handler import *
 from ..back_end.send_mail_adpt import send_to_kindle
 from ..back_end.db_models import *
@@ -31,13 +31,17 @@ def Worker():
     userName = args.get('userName', '')
     recipeId = args.get('recipeId', '')  #如果有多个Recipe，使用','分隔
     reason = args.get('reason', 'cron') #cron/manual
-    return WorkerImpl(userName, recipeId, reason, default_log)
+    key = args.get('key', '')
+    if key == app.config['SECRET_KEY']:
+        return WorkerImpl(userName, recipeId, reason, default_log)
+    else:
+        return 'Key invalid.'
 
 #执行实际抓取网页生成电子书任务
 #userName: 需要执行任务的账号名
 #recipeId: 需要投递的Recipe ID，如果有多个，使用逗号分隔
 #返回执行结果字符串
-def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron', log=None):
+def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron', log=None, key=None):
     if not log:
         log = default_log
 

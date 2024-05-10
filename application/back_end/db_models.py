@@ -36,10 +36,10 @@ class KeUser(MyBaseModel): # kindleEar User
     custom = JSONField(default=JSONField.dict_default) #留着扩展，避免后续一些小特性还需要升级数据表结构
     
     #通过这两个基本配置信息的函数，提供一些合理的初始化值
-    def cfg(self, item):
-        value = self.base_config.get(item, None)
+    def cfg(self, item, default=None):
+        value = self.base_config.get(item, default)
         if value is None:
-            return {'timezone': 0}.get(item, value)
+            return {'email': '', 'kindle_email': '', 'secret_key': '', 'timezone': 0}.get(item, value)
         else:
             return value
     def set_cfg(self, item, value):
@@ -48,8 +48,8 @@ class KeUser(MyBaseModel): # kindleEar User
         self.base_config = cfg
 
     #通过这两个关于书籍的配置信息的函数，提供一些合理的初始化值
-    def book_cfg(self, item):
-        value = self.book_config.get(item, None)
+    def book_cfg(self, item, default=None):
+        value = self.book_config.get(item, default)
         if value is None:
             return {'type': 'epub', 'title': 'KindleEar', 'time_fmt': '%Y-%m-%d', 'oldest_article': 7,
                 'language': 'en'}.get(item, value)
@@ -117,19 +117,24 @@ class KeUser(MyBaseModel): # kindleEar User
 
     #根据设置，获取发送邮件的配置数据
     def get_send_mail_service(self):
+        adminName = os.environ.get('ADMIN_NAME')
         srv = self.send_mail_service
-        adminName = os.getenv('ADMIN_NAME')
-        if self.name == adminName or srv.get('service') != 'admin':
-            return srv
-        else:
+        if (self.name != adminName) and (srv.get('service') == 'admin'):
             dbItem = KeUser.get_or_none(KeUser.name == adminName)
-            return dbItem.send_mail_service if dbItem else {}
+            srv = dbItem.send_mail_service if dbItem else {}
+            if srv.get('service') == 'smtp':
+                srv = srv.copy()
+                srv['password'] = dbItem.decrypt(srv.get('password'))
+        elif srv.get('service') == 'smtp':
+            srv = srv.copy()
+            srv['password'] = self.decrypt(srv.get('password'))
+        return srv
 
     #使用自身的密钥加密和解密字符串
     def encrypt(self, txt):
-        return ke_encrypt((txt or ''), self.cfg('secret_key'))
+        return ke_encrypt((txt or ''), self.cfg('secret_key')) #type:ignore
     def decrypt(self, txt):
-        return ke_decrypt((txt or ''), self.cfg('secret_key'))
+        return ke_decrypt((txt or ''), self.cfg('secret_key')) #type:ignore
     def hash_text(self, txt):
         return hashlib.md5((txt + self.cfg('secret_key')).encode('utf-8')).hexdigest()
 

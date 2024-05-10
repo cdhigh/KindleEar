@@ -35,6 +35,7 @@ from urlopener import UrlOpener
 from requests_file import LocalFileAdapter
 from filesystem_dict import FsDictStub
 from application.back_end.db_models import LastDelivered
+from application.utils import LocExcFile
 
 MASTHEAD_SIZE = (600, 60)
 DEFAULT_MASTHEAD_IMAGE = 'mastheadImage.gif'
@@ -661,7 +662,7 @@ class BasicNewsRecipe(Recipe):
             try:
                 raw_html = self.extract_readable_article(raw_html, url)
             except:
-                self.log.exception('Auto cleanup of URL: %r failed'%url)
+                self.log.exception(LocExcFile(f'Auto cleanup of URL {url} failed'))
 
         return raw_html
 
@@ -1473,7 +1474,7 @@ class BasicNewsRecipe(Recipe):
                 except NotImplementedError:
                     url = article.url
                 except:
-                    self.log.exception('Failed to find print version for: '+article.url)
+                    self.log.exception(LocExcFile(f'Failed to find print version for {article.url}'))
                     url = None
                 if not url:
                     continue

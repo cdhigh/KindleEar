@@ -185,21 +185,9 @@
       <div class="pure-control-group">
         <label>{{_("Service")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="sm_service" id="sm_service" onchange="SetSmOptiosVisualbility();">
-          {% if 'gae' in sm_services -%}
-          <option value="gae" {% if sm_srv_type == 'gae' %}selected="selected"{% endif %}>GAE</option>
-          {% endif -%}
-          {% if 'sendgrid' in sm_services -%}
-          <option value="sendgrid" {% if sm_srv_type == 'sendgrid' %}selected="selected"{% endif %}>sendgrid</option>
-          {% endif -%}
-          {% if 'mailjet' in sm_services -%}
-          <option value="mailjet" {% if sm_srv_type == 'mailjet' %}selected="selected"{% endif %}>mailjet</option>
-          {% endif -%}
-          {% if 'smtp' in sm_services -%}
-          <option value="smtp" {% if sm_srv_type == 'smtp' %}selected="selected"{% endif %}>SMTP</option>
-          {% endif -%}
-          {% if 'local' in sm_services -%}
-          <option value="local" {% if sm_srv_type == 'local' %}selected="selected"{% endif %}>local (debug)</option>
-          {% endif -%}
+          {% for (name, alias) in sm_services.items() -%}
+          <option value="{{name}}" {% if sm_srv_type == name %}selected="selected"{% endif %}>{{alias}}</option>
+          {% endfor -%}
         </select>
       </div>
       <div class="pure-control-group" id="sm_apikey">
@@ -224,7 +212,7 @@
       </div>
       <div class="pure-control-group" id="sm_password">
         <label>{{_("Password")}}</label>
-        <input type="password" name="sm_password" value="{% if sm_srv.get('password', '') %}********{% endif %}" class="pure-u-1 pure-u-sm-1-2" />
+        <input type="password" name="sm_password" value="{{user.decrypt(sm_srv.get('password', ''))}}" class="pure-u-1 pure-u-sm-1-2" />
       </div>
       <div class="pure-control-group" id="sm_save_path">
         <label>{{_("Save path")}}</label>

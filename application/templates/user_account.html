@@ -30,7 +30,7 @@
       <div class="pure-control-group">
         <label for="sm_service">{{_("Email service")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2 bool" name="sm_service">
-          {% set srv = user.send_mail_service.get('service', 'admin') if user else 'admin' %}
+          {% set srv = user.send_mail_service.get('service') if user else 'admin' %}
           <option value="admin" {% if srv == 'admin' %} selected="selected" {% endif %}>{{_("Same as admin")}}</option>
           <option value="independent" {% if srv != 'admin' %} selected="selected" {% endif %}>{{_("Independent")}}</option>
         </select>

@@ -4,8 +4,8 @@
 #Author: cdhigh <https://github.com/cdhigh>
 import os, json
 from urllib.parse import urlencode, urlparse
-appId = os.getenv('APP_ID') #google cloud库会patchos.environ，需要先获取环境变量
-serverLoc = os.getenv('SERVER_LOCATION')
+appId = os.getenv('APP_ID', '') #google cloud库会patchos.environ，需要先获取环境变量
+serverLoc = os.getenv('SERVER_LOCATION', '')
 
 from google.cloud import tasks_v2
 DEFAULT_QUEUE_NAME = "default"
@@ -13,13 +13,16 @@ DEFAULT_QUEUE_NAME = "default"
 def init_task_queue_service(app):
     pass
 
-#外部调用此接口即可
+#外部调用这几个接口即可
 def create_delivery_task(payload: dict):
     create_http_task('/worker', payload, 'GET')
 
 def create_url2book_task(payload: dict):
     create_http_task('/url2book', payload, 'POST') #payload里面的urls可能很长，需要使用POST
 
+def create_notifynewsubs_task(payload: dict):
+    create_http_task('/notifynewsubs', payload, 'GET')
+    
 #创建一个任务
 #url: 任务要调用的链接
 #payload: 要传递给url的参数，为一个Python字典

@@ -2,11 +2,10 @@
 # -*- coding:utf-8 -*-
 #Author: cdhigh <https://github.com/cdhigh>
 #将发到string@appid.appspotmail.com的邮件正文转成附件发往kindle邮箱。
-
 import os, re, email
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
-from flask import Blueprint, request
+from flask import Blueprint, request, current_app as app
 from calibre import guess_type
 from ..back_end.task_queue_adpt import create_delivery_task, create_url2book_task
 from ..back_end.db_models import KeUser
@@ -128,7 +127,8 @@ def ReceiveMailImpl(sender, to, subject, txtBodies, htmlBodies, attachments):
 
     #通过邮件触发一次“现在投递”
     if to.lower() == 'trigger':
-        create_delivery_task({'userName': userName, 'recipeId': subject, 'reason': 'manual'})
+        scrtKey = app.config['SECRET_KEY']
+        create_delivery_task({'userName': userName, 'recipeId': subject, 'reason': 'manual', 'key': scrtKey})
         return f'A delivery task for "{userName}" is triggered'
     
     forceToLinks = False

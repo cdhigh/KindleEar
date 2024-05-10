@@ -39,39 +39,12 @@ def SettingPost(user: KeUser):
     keMail = form.get('kindle_email', '').strip(';, ')
     myTitle = form.get('rss_title')
 
-    #service==admin 说明和管理员的设置一致
-    sm_srv_need = False
-    sm_srv_type = sm_apikey = sm_host = sm_port = sm_password = sm_save_path = ''
-    send_mail_service = {}
-    if user.name == os.getenv('ADMIN_NAME') or user.send_mail_service.get('service') != 'admin':
-        sm_srv_need = True
-        sm_srv_type = form.get('sm_service')
-        sm_apikey = form.get('sm_apikey', '')
-        sm_secret_key = form.get('sm_secret_key', '')
-        sm_host = form.get('sm_host', '')
-        sm_port = str_to_int(form.get('sm_port'))
-        sm_username = form.get('sm_username', '')
-        sm_password = form.get('sm_password', '')
-        sm_save_path = form.get('sm_save_path', '')
-        send_mail_service = {'service': sm_srv_type, 'apikey': sm_apikey, 'secret_key': sm_secret_key,
-            'host': sm_host, 'port': sm_port, 'username': sm_username, 'password': '', 
-            'save_path': sm_save_path}
-        #只有处于smtp模式并且密码存在才更新，空或几个星号则不更新
-        if sm_srv_type == 'smtp':
-            if sm_password and sm_password.strip('*'):
-                send_mail_service['password'] = user.encrypt(sm_password)
-            else:
-                send_mail_service['password'] = user.send_mail_service.get('password', '')
-    
+    send_mail_service = BuildSmSrvDict(user, form)
     if not keMail:
         tips = _("Kindle E-mail is requied!")
     elif not myTitle:
         tips = _("Title is requied!")
-    elif sm_srv_type == 'sendgrid' and not sm_apikey:
-        tips = _("Some parameters are missing or wrong.")
-    elif sm_srv_type == 'smtp' and not all((sm_host, sm_port, sm_password)):
-        tips = _("Some parameters are missing or wrong.")
-    elif sm_srv_type == 'local' and not sm_save_path:
+    elif not send_mail_service:
         tips = _("Some parameters are missing or wrong.")
     else:
         base_config = user.base_config
@@ -96,8 +69,7 @@ def SettingPost(user: KeUser):
         book_config['time_fmt'] = form.get('time_fmt', '')
         user.base_config = base_config
         user.book_config = book_config
-        if sm_srv_need:
-            user.send_mail_service = send_mail_service
+        user.send_mail_service = send_mail_service
         user.save()
         tips = _("Settings Saved!")
 
@@ -107,6 +79,31 @@ def SettingPost(user: KeUser):
     sm_services = avaliable_sm_services()
     return render_template('setting.html', tab='set', user=user, tips=tips, langMap=LangMap(), 
         sm_services=sm_services, all_timezones=all_timezones)
+
+#构建发送邮件服务配置字典，返回空字典表示出错
+#form: request.form 实例
+def BuildSmSrvDict(user: KeUser, form):
+    srv = user.send_mail_service.copy()
+    srvType = form.get('sm_service', '')
+    #service==admin 说明和管理员的设置一致
+    if user.name == os.getenv('ADMIN_NAME') or srv.get('service') != 'admin':
+        srv['service'] = srvType
+        srv['apikey'] = form.get('sm_apikey', '')
+        srv['secret_key'] = form.get('sm_secret_key', '')
+        srv['host'] = form.get('sm_host', '')
+        srv['port'] = str_to_int(form.get('sm_port', '587'))
+        srv['username'] = form.get('sm_username', '')
+        srv['password'] = user.encrypt(form.get('sm_password', ''))
+        srv['save_path'] = form.get('sm_save_path', '')
+        validations = {
+            'sendgrid': lambda srv: srv['apikey'],
+            'mailjet': lambda srv: srv['apikey'] and srv['secret_key'],
+            'smtp': lambda srv: all((srv['host'], srv['port'], srv['password'])), #部分smtp不需要账号名
+            'local': lambda srv: srv['save_path']
+        }
+        if not validations.get(srvType, lambda _: True)(srv):
+            srv = {}
+    return srv
 
 @bpSetting.post("/send_test_email", endpoint='SendTestEmailPost')
 @login_required()

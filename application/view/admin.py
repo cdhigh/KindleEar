@@ -149,7 +149,7 @@ def AdminAccountChangePost(name: str, user: KeUser):
         return render_template('change_password.html', tips=tips, tab='admin', user=user, shareKey=user.share_links.get('key'))
     elif user.name == app.config['ADMIN_NAME']: #管理员修改其他账号
         email = form.get('email', '')
-        sm_service = form.get('sm_service')
+        smType = form.get('sm_service')
         expiration = str_to_int(form.get('expiration', '0'))
 
         dbItem = KeUser.get_or_none(KeUser.name == username)
@@ -169,12 +169,10 @@ def AdminAccountChangePost(name: str, user: KeUser):
                     dbItem.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
                 else:
                     dbItem.expires = None
-                if sm_service == 'admin':
+                if smType == 'admin':
                     dbItem.send_mail_service = {'service': 'admin'}
-                elif dbItem.send_mail_service.get('service', 'admin') == 'admin':
-                    send_mail_service = user.send_mail_service
-                    send_mail_service['service'] = ''
-                    dbItem.send_mail_service = send_mail_service
+                elif dbItem.send_mail_service.get('service') == 'admin': #从和管理员一致变更为独立设置
+                    dbItem.send_mail_service = {}
                 dbItem.set_cfg('email', email)
                 dbItem.save()
                 tips = _("Change success.")
