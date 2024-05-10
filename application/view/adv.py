@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 #一些高级设置功能页面
 #Author: cdhigh <https://github.com/cdhigh>
-import re, io, textwrap
+import re, io, textwrap, json
 from urllib.parse import unquote, urljoin, urlparse
 from flask import Blueprint, url_for, render_template, redirect, session, send_file, abort, current_app as app
 from flask_babel import gettext as _
