@@ -127,8 +127,8 @@ def ReceiveMailImpl(sender, to, subject, txtBodies, htmlBodies, attachments):
 
     #通过邮件触发一次“现在投递”
     if to.lower() == 'trigger':
-        scrtKey = app.config['SECRET_KEY']
-        create_delivery_task({'userName': userName, 'recipeId': subject, 'reason': 'manual', 'key': scrtKey})
+        key = app.config['DELIVERY_KEY']
+        create_delivery_task({'userName': userName, 'recipeId': subject, 'reason': 'manual', 'key': key})
         return f'A delivery task for "{userName}" is triggered'
     
     forceToLinks = False

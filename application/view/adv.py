@@ -29,7 +29,9 @@ def adv_render_template(tpl, advCurr, **kwargs):
 @login_required()
 def AdvDeliverNow(user: KeUser):
     recipes = user.get_booked_recipe()
-    return adv_render_template('adv_delivernow.html', 'deliverNow', user=user, recipes=recipes)
+    deliveryKey = app.config['DELIVERY_KEY']
+    return adv_render_template('adv_delivernow.html', 'deliverNow', user=user, recipes=recipes,
+        deliveryKey=deliveryKey)
 
 #设置邮件白名单
 @bpAdv.route("/adv/whitelist", endpoint='AdvWhiteList')

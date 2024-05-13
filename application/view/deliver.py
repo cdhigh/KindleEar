@@ -4,7 +4,7 @@
 #Author: cdhigh <https://github.com/cdhigh>
 import os
 from collections import defaultdict
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, current_app as app
 from flask_babel import gettext as _
 from ..back_end.db_models import *
 from ..base_handler import *
@@ -18,6 +18,8 @@ bpDeliver = Blueprint('bpDeliver', __name__)
 @bpDeliver.route("/deliver")
 def Deliver():
     userName = request.args.get('u')
+    if request.args.get('key') != app.config['DELIVERY_KEY']:
+        return 'Key invalid.'
     
     if userName: #现在投递【测试使用】，不需要判断时间和星期
         id_ = request.args.get('id', '')
@@ -100,14 +102,14 @@ def SingleUserDelivery(userName: str, idList: list=None):
 def queueOneBook(queueToPush: defaultdict, user: KeUser, recipeId: str, separated: bool, reason='cron'):
     recipeId = recipeId.replace(':', '__')
     if separated:
-        key = os.environ.get('SECRET_KEY', '')
+        key = os.environ.get('DELIVERY_KEY', '')
         create_delivery_task({'userName': user.name, 'recipeId': recipeId, 'reason': reason, 'key': key})
     else:
         queueToPush[user.name].append(recipeId) #合并推送
 
 #启动推送队列中的书籍
 def flushQueueToPush(queueToPush: defaultdict, reason='cron'):
-    key = os.environ.get('SECRET_KEY', '')
+    key = os.environ.get('DELIVERY_KEY', '')
     for name in queueToPush:
         create_delivery_task({'userName': name, 'recipeId': ','.join(queueToPush[name]), 'reason': reason, 'key': key})
     queueToPush.clear()

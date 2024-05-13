@@ -896,9 +896,9 @@ class PocketBookInkpad3Output(OutputProfile):
 
 
 output_profiles = [
-    OutputProfile, KindleOutput, GenericEink, GenericEinkLarge, GenericEinkHD,
-    KindleFireOutput, KindlePaperWhiteOutput, KindleVoyageOutput,
+    KindleOutput, KindleFireOutput, KindlePaperWhiteOutput, KindleVoyageOutput,
     KindlePaperWhite3Output, KindleOasisOutput, KindleScribeOutput,
+    OutputProfile, GenericEink, GenericEinkLarge, GenericEinkHD,
 ]
 
 #output_profiles.sort(key=lambda x: x.name.lower())

@@ -4,15 +4,24 @@
 # Visit <https://github.com/cdhigh/KindleEar> for the latest version
 # Author: cdhigh <https://github.com/cdhigh>
 
-__Version__ = '3.0.4'
+__Version__ = '3.0.5'
 
 import os, sys, builtins, logging
+from application.lib import clogging
 
 appDir = os.path.dirname(os.path.abspath(__file__))
-#logName = None if (DATABASE_URL == 'datastore') else 'gunicorn.error'
-log = logging.getLogger()
 
-builtins.__dict__['default_log'] = log
+#setup log system
+root_log = logging.getLogger() #root
+logging.Logger.manager.setLoggerClass(clogging.CalibreLogger)
+calibre_log = logging.getLogger('calibre') #campat for calibre
+logging.Logger.manager.loggerClass = None #restore
+if not root_log.handlers:
+    root_log.addHandler(logging.StreamHandler(sys.stdout))
+if not calibre_log.handlers:
+    calibre_log.addHandler(root_log.handlers[0])
+
+builtins.__dict__['default_log'] = calibre_log
 builtins.__dict__['appDir'] = appDir
 builtins.__dict__['appVer'] = __Version__
 sys.path.insert(0, os.path.join(appDir, 'application', 'lib'))
@@ -23,7 +32,8 @@ def set_env():
     cfgMap = {}
     keys = ['APP_ID', 'APP_DOMAIN', 'SERVER_LOCATION', 'DATABASE_URL', 'TASK_QUEUE_SERVICE',
         'TASK_QUEUE_BROKER_URL', 'KE_TEMP_DIR', 'DOWNLOAD_THREAD_NUM', 'ALLOW_SIGNUP',
-        'SECRET_KEY', 'ADMIN_NAME', 'POCKET_CONSUMER_KEY', 'HIDE_MAIL_TO_LOCAL', 'LOG_LEVEL']
+        'SECRET_KEY', 'DELIVERY_KEY', 'ADMIN_NAME', 'POCKET_CONSUMER_KEY', 'HIDE_MAIL_TO_LOCAL', 
+        'LOG_LEVEL']
     for key in keys:
         cfgMap[key] = os.getenv(key) if key in os.environ else getattr(config, key)
         if (key == 'APP_DOMAIN') and not cfgMap[key].startswith('http'):
@@ -31,18 +41,12 @@ def set_env():
         os.environ[key] = cfgMap[key]
     return cfgMap
 
-#设置logging的level
-def set_log_level(level):
-    level = logging._nameToLevel.get(level.upper(), logging.WARNING) if isinstance(level, str) else level
-    for handler in logging.root.handlers:
-        handler.setLevel(level)
-
 cfgMap = set_env()
 
 from application import init_app
 app = init_app(__name__, cfgMap, set_env, debug=False)
 celery_app = app.extensions.get("celery", None)
-set_log_level(cfgMap.get('LOG_LEVEL'))
+clogging.set_log_level(cfgMap.get('LOG_LEVEL'))
 
 def main():
     if len(sys.argv) == 2 and sys.argv[1] == 'debug':

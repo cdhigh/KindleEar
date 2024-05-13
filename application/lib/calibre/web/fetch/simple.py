@@ -25,14 +25,13 @@ from calibre.utils.config import OptionParser
 from calibre.utils.filenames import ascii_filename
 from calibre.utils.imghdr import what
 from calibre.utils.localization import _
-from calibre.utils.logging import Log
 from calibre.web.fetch.utils import rescale_image
 from polyglot.http_client import responses
 from polyglot.urllib import (HTTPError,
     URLError, quote, url2pathname, urljoin, urlparse, urlsplit, urlunparse,
     urlunsplit, urlopen
 )
-from application.utils import LocExcFile
+from application.utils import loc_exc_pos
 
 class AbortArticle(Exception):
     pass
@@ -370,7 +369,7 @@ class RecursiveFetcher:
                 try:
                     data = self.fetch_url(iurl)
                 except Exception as e:
-                    self.log.exception(LocExcFile(f'Could not fetch stylesheet {iurl}'))
+                    self.log.exception(loc_exc_pos(f'Could not fetch stylesheet {iurl}'))
                     continue
                 stylepath = os.path.join(diskpath, 'style'+str(c)+'.css')
                 with self.stylemap_lock:
@@ -395,7 +394,7 @@ class RecursiveFetcher:
                         try:
                             data = self.fetch_url(iurl)
                         except Exception as e:
-                            self.log.exception(LocExcFile(f'Could not fetch stylesheet {iurl}'))
+                            self.log.exception(loc_exc_pos(f'Could not fetch stylesheet {iurl}'))
                             continue
                         c += 1
                         stylepath = os.path.join(diskpath, 'style'+str(c)+'.css')
@@ -452,7 +451,7 @@ class RecursiveFetcher:
                         # Skip empty GIF files as PIL errors on them anyway
                         continue
                 except Exception as e:
-                    self.log.exception(LocExcFile(f'Could not fetch image {iurl}'))
+                    self.log.exception(loc_exc_pos(f'Could not fetch image {iurl}'))
                     continue
             c += 1
             fname = ascii_filename('img' + str(c))
@@ -643,7 +642,7 @@ class RecursiveFetcher:
                     if isinstance(e, AbortArticle):
                         raise
                     self.failed_links.append((iurl, traceback.format_exc()))
-                    self.log.exception(LocExcFile(f'Could not fetch link {iurl}'))
+                    self.log.exception(loc_exc_pos(f'Could not fetch link {iurl}'))
                 finally:
                     self.current_dir = diskpath
                     self.files += 1

@@ -2,11 +2,12 @@
 # -*- coding:utf-8 -*-
 #后台实际的推送任务，由任务队列触发
 #Author: cdhigh<https://github.com/cdhigh>
-import os, datetime, time, io, logging
+import os, time
 from typing import Union
 from collections import defaultdict
 from flask import Blueprint, request, current_app as app
 from ..base_handler import *
+from ..utils import filesizeformat
 from ..back_end.send_mail_adpt import send_to_kindle
 from ..back_end.db_models import *
 from calibre.web.feeds.recipes import compile_recipe
@@ -31,8 +32,8 @@ def Worker():
     userName = args.get('userName', '')
     recipeId = args.get('recipeId', '')  #如果有多个Recipe，使用','分隔
     reason = args.get('reason', 'cron') #cron/manual
-    key = args.get('key', '')
-    if key == app.config['SECRET_KEY']:
+    key = args.get('key')
+    if key == app.config['DELIVERY_KEY']:
         return WorkerImpl(userName, recipeId, reason, default_log)
     else:
         return 'Key invalid.'
@@ -122,7 +123,7 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
             to = roList[0].tts.get('send_to') or user.cfg('kindle_email')
             send_to_kindle(user, audioName, (audioNameWithTime, audio), to=to)
             lastSendTime = time.time()
-            ret.append(f"Sent {audioName}")
+            ret.append(f'Sent "{audioName}" ({filesizeformat(len(audio))})')
 
         if book:
             #避免触发垃圾邮件机制，最短10s发送一次
@@ -131,7 +132,7 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
 
             send_to_kindle(user, title, book)
             lastSendTime = time.time()
-            ret.append(f"Sent {title}.{bookType}")
+            ret.append(f'Sent "{title}.{bookType}" ({filesizeformat(len(book))})')
         elif not audio:
             save_delivery_log(user, title, 0, status='nonews')
 
@@ -143,7 +144,8 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
         else:
             ret += f' [Consumed time: {elaspTime:.1f} minutes].'
     else:
-        ret = "There are no new feeds available."
+        titles = ', '.join(recipes.keys())
+        ret = f"There are no new feeds available: {userName}: [{titles}]"
     log.warning(ret)
     return ret
 

@@ -44,7 +44,6 @@ from calibre.ebooks.oeb.polish.utils import (
 )
 from calibre.ptempfile import PersistentTemporaryDirectory, PersistentTemporaryFile
 from calibre.utils.filenames import hardlink_file, nlinks_file
-from calibre.utils.logging import default_log
 from calibre.utils.xml_parse import safe_xml_fromstring
 from calibre.utils.zipfile import ZipFile
 from polyglot.builtins import iteritems

@@ -10,7 +10,7 @@
 {% block advcontent -%}
 <form class="pure-form pure-form-aligned" action="" method="POST">
   <fieldset>
-    <legend><h3>{{_("White List")}}</h3></legend>
+    <legend>{{_("White List")}}</legend>
     <p> <small>
     {{_("Emails sent to %(name)sxxx@%(mailHost)s will be transferred to your kindle email.", name='' if (user.name == adminName) else user.name + '__', mailHost=mailHost)}}
     </small></p>

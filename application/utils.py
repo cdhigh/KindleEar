@@ -26,15 +26,25 @@ def safe_eval(txt, gbl=None, local=None):
             raise NameError(f'{name} not allowed : {reason}') # pragma: no cover
     return eval(code, gbl, local)
 
-#获取发生异常时的文件名和行号，添加到自定义错误信息后，此函数必须要在发送异常后才能调用
-def LocExcFile(msg):
-    excType, e, excTb = sys.exc_info()
+#获取发生异常时的文件名和行号，添加到自定义错误信息后面
+#此函数必须要在异常后调用才有意义，否则只是简单的返回传入的参数
+def loc_exc_pos(msg: str):
+    klass, e, excTb = sys.exc_info()
     if excTb:
-        bottom = traceback.extract_tb(excTb)[-1]
-        fileName = os.path.basename(bottom.filename)
-        lineNo = bottom.lineno
-        funcName = bottom.name
-        return f'{msg}: {e} at {fileName}:{lineNo}:{funcName}()'
+        stacks = traceback.extract_tb(excTb) #StackSummary instance, a list
+        if len(stacks) == 0:
+            return msg
+
+        top = stacks[0]
+        bottom = stacks[-1]
+        tFile = os.path.basename(top.filename)
+        tLn = top.lineno
+        tFun = top.name
+        bFile = os.path.basename(bottom.filename)
+        bLn = bottom.lineno
+        bFun = bottom.name
+        typeName = klass.__name__ if klass else ''
+        return f'{msg}: {typeName} {e} at {tFile}:{tLn}:{tFun}() -> {bFile}:{bLn}:{bFun}()'
     else:
         return msg
 
@@ -125,7 +135,7 @@ def filesizeformat(value, binary=False, suffix='B'):
         if value < base:
             return f"{value:3.1f} {unit}{suffix}" if unit else f"{int(value)} {suffix}"
         value /= base
-    return f"{value:.1f} {unit}{suffix}"
+    return f"{value:.1f} {unit}{suffix}" #type:ignore
 
 
 #将字符串安全转义到xml格式，有标准库函数xml.sax.saxutils.escape()，但是简单的功能就简单的函数就好

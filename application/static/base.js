@@ -873,28 +873,26 @@ function insertBookmarkletGmailThis(subscribeUrl, mailPrefix) {
 
 ///[start] adv_delivernow.html使用的部分
 //根据选择推送的订阅信息，更新接下来要访问服务器的链接参数，使用get而不使用post是因为gae的cron支持get访问
-function UpdateDeliverRecipeLink(name) {
+function UpdateDeliverLink(name, key) {
   var recipeIds = [];
-  $("input[class='deliver_now_rss_id']").each(function() {
-    if ($(this).is(":checked")) {
-      recipeIds.push($(this).prop('id').replace(':', "__"));
-    }
-    var newLink = "/deliver?u=" + name;
-    if (recipeIds.length > 0) {
-      newLink += "&id=" + recipeIds.join(',');
-    }
-    $("#deliverNowButton").attr("href", newLink);
+  $("input.deliver_now_rss_id:checked").each(function() {
+    recipeIds.push($(this).prop('id').replace(':', "__"));
   });
+  var newLink = "/deliver?u={0}&key={1}".format(name, key);
+  if (recipeIds.length > 0) {
+    newLink += "&id=" + recipeIds.join(',');
+  }
+  $("#deliverNowButton").attr("href", newLink);
 }
 
 function SelectDeliverAll() {
-  $("input[class='deliver_now_rss_id']").each(function() {
+  $("input.deliver_now_rss_id").each(function() {
     $(this).prop('checked', true);
   });
 };
 
 function SelectDeliverNone() {
-  $("input[class='deliver_now_rss_id']").each(function() {
+  $("input.deliver_now_rss_id").each(function() {
     $(this).prop('checked', false);
   });
 };
@@ -1494,3 +1492,76 @@ function TestTTS(recipeId) {
   });
 }
 ///[end] book_audiolator.html
+///[start] setting.html
+//点击文本设置对应周内日checkbox的选中状态
+function ToggleWeekBtn(btnName) {
+  var checkbox = $(btnName);
+  checkbox.prop("checked", !checkbox.prop('checked'));
+}
+
+//根据选择的发送邮件服务类型，设置相应的控件可见性
+function SetSmOptiosVisualbility() {
+  var svr = $('#sm_service').val();
+  if (svr == 'gae') {
+    $('#sm_apikey').hide();
+    $('#sm_secret_key').hide();
+    $('#sm_host').hide();
+    $('#sm_port').hide();
+    $('#sm_username').hide();
+    $('#sm_password').hide();
+    $('#sm_save_path').hide();
+  } else if (svr == 'sendgrid') {
+    $('#sm_apikey').show();
+    $('#sm_secret_key').hide();
+    $('#sm_host').hide();
+    $('#sm_port').hide();
+    $('#sm_username').hide();
+    $('#sm_password').hide();
+    $('#sm_save_path').hide();
+  } else if (svr == 'mailjet') {
+    $('#sm_apikey').show();
+    $('#sm_secret_key').show();
+    $('#sm_host').hide();
+    $('#sm_port').hide();
+    $('#sm_username').hide();
+    $('#sm_password').hide();
+    $('#sm_save_path').hide();
+  } else if (svr == 'smtp') {
+    $('#sm_apikey').hide();
+    $('#sm_secret_key').hide();
+    $('#sm_host').show();
+    $('#sm_port').show();
+    $('#sm_username').show();
+    $('#sm_password').show();
+    $('#sm_save_path').hide();
+  } else if (svr == 'local') {
+    $('#sm_apikey').hide();
+    $('#sm_secret_key').hide();
+    $('#sm_host').hide();
+    $('#sm_port').hide();
+    $('#sm_username').hide();
+    $('#sm_password').hide();
+    $('#sm_save_path').show();
+  } else {
+    $('#sm_apikey').hide();
+    $('#sm_secret_key').hide();
+    $('#sm_host').hide();
+    $('#sm_port').hide();
+    $('#sm_username').hide();
+    $('#sm_password').hide();
+    $('#sm_save_path').hide();
+  }
+}
+
+//发送测试邮件
+function SendTestEmail() {
+  $.post("/send_test_email", {url: window.location.href}, function (data) {
+    if (data.status == "ok") {
+      ShowSimpleModalDialog('<p>{0}<br/><hr/>{1}</p>'.format(i18n.testEmailOk, data.emails.join('<br/>')));
+    } else {
+      alert(data.status);
+    }
+  });
+  return false;
+}
+///[end] setting.html

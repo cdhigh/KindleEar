@@ -3,11 +3,9 @@
 #从recipe生成对应的输出格式
 #Author: cdhigh <https://github.com/cdhigh>
 import io, os
-from calibre.ebooks.conversion.plumber import Plumber, create_oebbook
+import clogging
+from calibre.ebooks.conversion.plumber import Plumber
 from calibre.web.feeds.recipes import compile_recipe
-from calibre.ebooks.metadata import MetaInformation
-from calibre.ebooks.metadata.opf2 import OPFCreator
-from calibre.ebooks.metadata.toc import TOC
 from recipe_helper import GenerateRecipeSource
 
 #从输入格式生成对应的输出格式
@@ -48,7 +46,7 @@ def urls_to_book(urls: list, title: str, user, options: dict=None, output_fmt: s
         
     #合并自定义css
     userCss = user.get_extra_css()
-    ro.extra_css = f'{ro.extra_css}\n\n{userCss}' if ro.extra_css else userCss
+    ro.extra_css = f'{ro.extra_css}\n\n{userCss}' if ro.extra_css else userCss #type:ignore
 
     return recipes_to_ebook(ro, user, options, output_fmt)
 
@@ -73,6 +71,7 @@ def ke_opts(user, options=None):
     opt = user.custom.get('calibre_options', {})
     if not isinstance(opt, dict):
         opt = {}
+    opt = opt.copy()
     opt.update(options or {})
     opt.setdefault('output_profile', user.book_cfg('device'))
     opt.setdefault('input_profile', 'kindle')
@@ -85,5 +84,13 @@ def ke_opts(user, options=None):
     #opt.setdefault('debug_pipeline', os.getenv('KE_TEMP_DIR'))
     #opt.setdefault('verbose', 1)
     #opt.setdefault('test', 1)
+
+    #网页上的log_level可以覆盖全局配置
+    level = opt.get('log_level') or os.environ.get('LOG_LEVEL')
+    opt.pop('log_level', None)
+    clogging.set_log_level(level)
+    if opt.get('verbose'):
+        clogging.set_log_level('DEBUG', only='calibre')
+        
     return opt
 

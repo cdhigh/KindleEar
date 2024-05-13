@@ -24,7 +24,8 @@ def Mylogs(user: KeUser):
             if theLog:
                 logs[u.name] =  theLog
 
-    return render_template('logs.html', tab='logs', mylogs=myLogs, logs=logs, utcnow=datetime.datetime.utcnow)
+    today = user.local_time("%Y-%m-%d ")
+    return render_template('logs.html', tab='logs', mylogs=myLogs, logs=logs, today=today)
 
 #每天自动运行的任务，清理过期log
 @bpLogs.route("/removelogs")

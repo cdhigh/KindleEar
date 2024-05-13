@@ -87,7 +87,10 @@ class RecipeInput(InputFormatPlugin):
                     ro.masthead_url = None
                 indexFile = ro.download()
             except Exception as e:
-                msg = 'Failed to execute recipe "{}": {}'.format(recipe.title, e)
+                if str(e) == 'No articles downloaded, aborting':
+                    msg = f'Recipe "{recipe.title}": {e}'
+                else:
+                    msg = f'Failed to execute recipe "{recipe.title}": {e}'
                 log.warning(msg)
                 continue
 
@@ -369,10 +372,9 @@ class RecipeInput(InputFormatPlugin):
         return cover_data, cPath, mPath
 
     def postprocess_book(self, oeb, opts, log):
-        return
-        #for recipe in self.recipe_object:
-        #    recipe.internal_postprocess_book(oeb, opts, log)
-        #    recipe.postprocess_book(oeb, opts, log)
+        for ro in self.recipe_objects:
+            ro.internal_postprocess_book(oeb, opts, log)
+            ro.postprocess_book(oeb, opts, log)
 
     def specialize(self, oeb, opts, log, output_fmt):
         if opts.no_inline_navbars:

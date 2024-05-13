@@ -9,7 +9,7 @@
 
 {% block content -%}
 <div class="main">
-  <legend><h3>{{_("Custom RSS")}}</h3></legend>
+  <legend>{{_("Custom RSS")}}</legend>
   <div class="box-list">
     <div class="book box pure-form pure-form-aligned" style="padding-right:1em;">
       <div class="pure-control-group titleRow pure-g" style="font-size:1em;font-weight:normal;">
@@ -43,12 +43,12 @@
     </div>
   </div>
   
-  <legend><h3>{{_("Subscribed")}}</h3></legend>
+  <legend>{{_("Subscribed")}}</legend>
   <div id="mysubscribed" class="box-list">
     <!-- 由脚本在这里填充数据 -->
   </div>
 
-  <legend><h3>{{_("Library")}}</h3></legend>
+  <legend>{{_("Library")}}</legend>
   <div class="pure-g box-list noborder lib-header">
     <div class="pure-u-1-3 width1_3 pure-form">
       <select class="pure-input-rounded width100" id="language_pick">
@@ -68,7 +68,7 @@
     <i>&#10003; {{_("Subscription to selected recipe successful.")}}</i>
   </div>
 
-  <legend><h3>{{_("Bookmarklet")}}</h3></legend>
+  <legend>{{_("Bookmarklet")}}</legend>
   <div id="bookmarklet" class="box-list">
     <div class="book box" id="bookmarklet_content">
       <a class="actionButton" target="_blank" href='javascript:void function(){var o={userName:"{{user.name}}",key:"{{share_key}}",title:document.title,urls:window.location.href},s=window.getSelection().rangeCount%3Fnew XMLSerializer().serializeToString(window.getSelection().getRangeAt(0).cloneContents()):"";s%3F(o.text=s,function(url,formData){var h=(tag,props)=>Object.assign(document.createElement(tag),props),form=h("form",{action:url,method:"post",hidden:!0,target:"_blank"});for(var[name,value]of Object.entries(formData))form.appendChild(h("input",{name,value}));document.body.appendChild(form),form.submit(),setTimeout(()=>{form.remove()},100),alert("The text you selected ("+s.length()+"Bytes) has been sent to KindleEar.")}("{{url2book_url}}",o)):open("{{url2book_url}}%3F"+new URLSearchParams(o).toString())}();' onclick="return false;">

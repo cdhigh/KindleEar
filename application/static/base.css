@@ -12,9 +12,14 @@ body {
     color: #526066;
 }
 
-h2,
-h3 {
+h2, h3 {
     font-weight: 600;
+}
+
+legend {
+    font-size: 1.17em;
+    font-weight: 600;
+    margin: 0.8em 0.2em;
 }
 
 p {
@@ -302,7 +307,8 @@ button {
     font-style: italic;
 }
 
-.box-list .book .titleRow sup {
+/*.box-list .book .titleRow sup*/
+sup {
     font-size: 0.6em;
     color: red;
     font-weight: normal;

@@ -1,8 +1,6 @@
 
 //所有的分享RSS数据
 var g_SharedRss = false;
-//创建一个新数组，全部按照添加时间倒序
-var g_rssByTime = [];
 //分语言种类
 var g_rssByLang = {};
 //由BuildSharedRssByCategory()根据搜索词动态更新此数组
@@ -37,6 +35,9 @@ function SortSharedRssDataArray() {
 
 //创建一个按照语言种类分类的字典，字典键为两位语言代码，值为列表
 function BuildSharedRssByLang() {
+  if (!g_SharedRss) {
+    return;
+  }
   var userLang = BrowserLanguage();
   var hasUserLangRss = false;
   var hasEnRss = false;
@@ -374,6 +375,9 @@ function escapeXml(xmlStr) {
 
 //将内容全部下载到本地一个xml文件内
 function DownAllRssToFile() {
+  if (!g_SharedRss) {
+    return;
+  }
   var title, url, ftext, cat, rssd, fmtdate, nowdate, lang;
   var elementA = document.createElement('a');
   var aTxt = new Array();
@@ -417,6 +421,13 @@ function InitSharedRssData(lastRssTime) {
     var latestTime = parseInt(window.localStorage.getItem('rss_latest_time'));
     var fetchTime = parseInt(window.localStorage.getItem('rss_fetch_time'));
     var sharedData = window.localStorage.getItem('shared_rss');
+    //先使用本机保存的
+    try {
+      g_SharedRss = JSON.parse(sharedData);
+    } catch (e) {console.log(e)}
+    SortSharedRssDataArray();
+    BuildSharedRssByLang();
+    DoSearchInShared();
 
     //一天内最多只从服务器获取一次分享的RSS列表
     if (!fetchTime || !sharedData || !latestTime) {
@@ -429,7 +440,7 @@ function InitSharedRssData(lastRssTime) {
     if (needLatestTime) { //向服务器发起请求，要求新的数据
       $.ajax({url: "/library/mgr/latesttime",
         type: "POST",
-        async: false, //阻塞式ajax
+        async: true, //非阻塞式ajax
         success: function (resp) {
           if (resp.status == "ok") {
             //console.log(resp);
@@ -437,7 +448,7 @@ function InitSharedRssData(lastRssTime) {
               $('#library_tips').html('<div class="notice-box">' + resp.tips + '</div>');
             }
             if (resp.data > latestTime) { //自从上次获取数据以来服务器有数据更新
-              needData = true;
+              FetchDataFromServer();
             }
             window.localStorage.setItem('rss_latest_time', resp.data);
             window.localStorage.setItem('rss_fetch_time', now);
@@ -447,36 +458,44 @@ function InitSharedRssData(lastRssTime) {
         }
       });
     }
+
     if (needData) {
-      $.ajax({url: "/library/mgr/getrss", 
-        type: "POST",
-        async: false, //阻塞式ajax
-        success: function (resp) {
-          if (resp.status == "ok") {
-            g_SharedRss = resp.data;
-            window.localStorage.setItem('shared_rss', JSON.stringify(g_SharedRss));
-            window.localStorage.setItem('rss_fetch_time', now);
-          }
-        }
-      });
-    } else { //使用本机保存的
-      g_SharedRss = JSON.parse(sharedData);
+      FetchDataFromServer();
     }
   } else { //浏览器不支持本地存储
     $.ajax({url: "/library/mgr/getrss", 
       type: "POST",
-      async: false, //阻塞式ajax
+      async: true, //非阻塞式ajax
       success: function (resp) {
         if (resp.status == "ok") {
           g_SharedRss = resp.data;
+          SortSharedRssDataArray();
+          BuildSharedRssByLang();
+          DoSearchInShared();
         }
       }
     });
   }
+}
 
-  SortSharedRssDataArray();
-  BuildSharedRssByLang();
-  DoSearchInShared();
+//从服务器获取最新的分享数据
+function FetchDataFromServer() {
+  $.ajax({url: "/library/mgr/getrss", 
+    type: "POST",
+    async: true, //非阻塞式ajax
+    success: function (resp) {
+      if (resp.status == "ok") {
+        g_SharedRss = resp.data;
+        if (g_SharedRss && g_SharedRss.length > 0) {
+          window.localStorage.setItem('shared_rss', JSON.stringify(g_SharedRss));
+          window.localStorage.setItem('rss_fetch_time', getNowSeconds());
+          SortSharedRssDataArray();
+          BuildSharedRssByLang();
+          DoSearchInShared();
+        }
+      }
+    }
+  });
 }
 
 $(document).ready(function(){

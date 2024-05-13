@@ -6,8 +6,9 @@ import os, textwrap
 from flask import Blueprint, render_template, request, redirect, session
 from flask import current_app as app
 from flask_babel import gettext as _
+from calibre.customize.profiles import output_profiles
 from ..base_handler import *
-from ..utils import str_to_bool, str_to_int, ke_encrypt
+from ..utils import str_to_bool, str_to_int
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import avaliable_sm_services, send_mail
 from .subscribe import UpdateBookedCustomRss
@@ -30,7 +31,7 @@ all_timezones = {'UTC-12:00': -12, 'UTC-11:00': -11, 'UTC-10:00': -10, 'UTC-9:30
 def Setting(user: KeUser):
     sm_services = avaliable_sm_services()
     return render_template('setting.html', tab='set', user=user, tips='', langMap=LangMap(), 
-        sm_services=sm_services, all_timezones=all_timezones)
+        sm_services=sm_services, all_timezones=all_timezones, output_profiles=output_profiles)
 
 @bpSetting.post("/setting", endpoint='SettingPost')
 @login_required()
@@ -78,7 +79,7 @@ def SettingPost(user: KeUser):
     
     sm_services = avaliable_sm_services()
     return render_template('setting.html', tab='set', user=user, tips=tips, langMap=LangMap(), 
-        sm_services=sm_services, all_timezones=all_timezones)
+        sm_services=sm_services, all_timezones=all_timezones, output_profiles=output_profiles)
 
 #构建发送邮件服务配置字典，返回空字典表示出错
 #form: request.form 实例

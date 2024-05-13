@@ -21,7 +21,6 @@ from calibre.ebooks.oeb.polish.jacket import (
     replace_jacket, add_or_replace_jacket, find_existing_jacket, remove_jacket)
 from calibre.ebooks.oeb.polish.css import remove_unused_css
 from calibre.ebooks.oeb.polish.hyphenation import remove_soft_hyphens, add_soft_hyphens
-from calibre.utils.logging import Log
 from polyglot.builtins import iteritems
 
 ALL_OPTS = {
@@ -294,7 +293,7 @@ def gui_polish(data):
     opts.update(data)
     O = namedtuple('Options', ' '.join(ALL_OPTS))
     opts = O(**opts)
-    log = Log(level=Log.DEBUG)
+    log = default_log
     report = []
     polish(file_map, opts, log, report.append)
     log('')
@@ -345,7 +344,7 @@ def option_parser():
 def main(args=None):
     parser = option_parser()
     opts, args = parser.parse_args(args or sys.argv[1:])
-    log = Log(level=Log.DEBUG if opts.verbose else Log.INFO)
+    log = default_log
     if not args:
         parser.print_help()
         log.error(_('You must provide the input file to polish'))

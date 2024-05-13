@@ -180,7 +180,6 @@ class OCFDirReader(OCFReader):
 
 def render_cover(cpage, zf, reader=None):
     from calibre.ebooks import render_html_svg_workaround
-    from calibre.utils.logging import default_log
 
     if not cpage:
         return

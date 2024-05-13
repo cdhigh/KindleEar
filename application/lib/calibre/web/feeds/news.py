@@ -21,7 +21,6 @@ from calibre.ptempfile import PersistentTemporaryFile, PersistentTemporaryDirect
 from calibre.utils.img import save_cover_data_to
 from calibre.utils.date import now as nowf
 from calibre.utils.localization import canonicalize_lang, ngettext
-from calibre.utils.logging import ThreadSafeWrapper
 from calibre.utils.threadpool import NoResultsPending, ThreadPool, WorkRequest
 from calibre.web import Recipe
 from calibre.web.feeds import Feed, Article, feed_from_xml, feeds_from_index, templates, feed_from_json
@@ -35,7 +34,7 @@ from urlopener import UrlOpener
 from requests_file import LocalFileAdapter
 from filesystem_dict import FsDictStub
 from application.back_end.db_models import LastDelivered
-from application.utils import LocExcFile
+from application.utils import loc_exc_pos
 
 MASTHEAD_SIZE = (600, 60)
 DEFAULT_MASTHEAD_IMAGE = 'mastheadImage.gif'
@@ -662,7 +661,7 @@ class BasicNewsRecipe(Recipe):
             try:
                 raw_html = self.extract_readable_article(raw_html, url)
             except:
-                self.log.exception(LocExcFile(f'Auto cleanup of URL {url} failed'))
+                self.log.exception(loc_exc_pos(f'Auto cleanup of URL {url} failed'))
 
         return raw_html
 
@@ -1071,17 +1070,19 @@ class BasicNewsRecipe(Recipe):
 
         #除了toc里面有标题，内容开头也要有标题，方便阅读
         body_tag = soup.find("body")
-        h_tag = body_tag.find(['h1','h2'])
-
-        #也要判断此H1/H2是否在文章中间出现，如果是则不是文章标题
-        if not h_tag or any(len(tag.get_text(strip=True)) > 100 for tag in h_tag.previous_siblings):
-            h_tag = soup.new_tag('h2')
-            h_tag.string = title
-            body_tag.insert(0, h_tag)
-        elif h_tag: #去掉标题前面的部分内容
-            for tag in h_tag.previous_siblings:
-                if len(tag.get_text(strip=True)) < 20:
-                    tag.extract()
+        if body_tag:
+            h_tag = body_tag.find(['h1','h2']) #type:ignore
+            #也要判断此H1/H2是否在文章中间出现，如果是则不是文章标题
+            if not h_tag or any(len(tag.get_text(strip=True)) > 100 for tag in h_tag.previous_siblings): #type:ignore
+                h_tag = soup.new_tag('h2')
+                h_tag.string = title
+                body_tag.insert(0, h_tag)
+            elif h_tag: #去掉标题前面的部分内容
+                for tag in h_tag.previous_siblings: #type:ignore
+                    if len(tag.get_text(strip=True)) < 20:
+                        tag.extract()
+                if not h_tag.get_text(strip=True):
+                    h_tag.string = title
 
         #job_info.article.url才是真实的url，对于内嵌内容RSS，job_info.url为一个临时文件名
         self.append_share_links(soup, url=job_info.article.url)
@@ -1417,8 +1418,8 @@ class BasicNewsRecipe(Recipe):
             index = self.parse_index()
         except NotImplementedError:
             pass
-        except Exception as e:
-            self.log.warning('parse_index() failed: {}'.format(e))
+        except:
+            self.log.warning(loc_exc_pos('parse_index() failed'))
 
         if index:
             feeds = feeds_from_index(index, oldest_article=self.oldest_article,
@@ -1474,7 +1475,7 @@ class BasicNewsRecipe(Recipe):
                 except NotImplementedError:
                     url = article.url
                 except:
-                    self.log.exception(LocExcFile(f'Failed to find print version for {article.url}'))
+                    self.log.exception(loc_exc_pos(f'Failed to find print version for {article.url}'))
                     url = None
                 if not url:
                     continue
@@ -1916,7 +1917,7 @@ class BasicNewsRecipe(Recipe):
                 else:
                     raise Exception(f'Cannot fetch {url}:{resp.status_code}')
             except Exception as e:
-                msg = 'Failed feed: {} [Error: {}]'.format(title if title else url, str(e))
+                msg = loc_exc_pos('Failed feed: {}'.format(title if title else url))
                 self.log.warning(msg)
                 feed = Feed() #创建一个空的Feed返回
                 feed.populate_from_preparsed_feed(msg, [])

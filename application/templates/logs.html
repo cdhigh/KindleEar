@@ -8,7 +8,7 @@
 <div class="main">
   <div class="logs">
     {% if mylogs -%}
-    <legend><h3>{{ _("Only display last 10 logs") }}</h3></legend>
+    <legend>{{ _("Only display last 10 logs") }}</legend>
     <table class="pure-table pure-table-horizontal" width="100%">
       <colgroup>
       <col width="30%">
@@ -29,7 +29,7 @@
       <tbody>
       {% for log in mylogs -%}
         <tr {{rowStyle.next()|safe}}>
-          {% if log.datetime.date() == utcnow().date() -%}
+          {% if log.time_str.startswith(today) -%}
           <td superscript-title="NEW">{{log.time_str}}</td>
           {% else -%}
           <td>{{log.time_str}}</td>
@@ -55,7 +55,7 @@
     {% endif -%}
 
     {% if logs -%}
-    <legend><h3>{{ _("Logs of other users") }}</h3></legend>
+    <legend>{{ _("Logs of other users") }}</legend>
     <table class="pure-table pure-table-horizontal" width="100%">
       <colgroup>
         <col width="10%" />
@@ -80,7 +80,7 @@
       {% for log in logs[u] -%}
         <tr {{rowStyle.next()|safe}}>
           <td>{{u}}</td>
-          {% if log.datetime.date() == utcnow().date() -%}
+          {% if log.time_str.startswith(today) -%}
           <td superscript-title="NEW">{{log.time_str}}</td>
           {% else -%}
           <td>{{log.time_str}}</td>

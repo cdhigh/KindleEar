@@ -96,7 +96,7 @@ def FeedsAjaxPost(actType: str, user: KeUser):
 @login_required()
 def NotifyNewSubscriptionRoute(user: KeUser):
     args = request.args
-    if user.share_links.get('key') == args.get('key'):
+    if args.get('key') == app.config['DELIVERY_KEY']:
         title = args.get('title', '')
         url = args.get('url', '')
         recipeId = args.get('recipeId', '')
@@ -169,13 +169,13 @@ def AddCustomRss(user: KeUser, form):
     
     #如果是从共享库中订阅的，则通知共享服务器，提供订阅数量信息，以便排序
     if fromSharedLibrary:
-        key = app.config['SECRET_KEY']
+        key = app.config['DELIVERY_KEY']
         create_notifynewsubs_task({'title': title, 'url': quote(url), 'recipeId': recipeId, 'key': key})
 
     return ret
 
 #删除自定义RSS
-def DeleteCustomRss(user, rssId):
+def DeleteCustomRss(user: KeUser, rssId: str):
     tips = {'status': 'ok'}
     if rssId == '#all_custom_rss#': #删除所有当前的自定义RSS
         Recipe.delete().where((Recipe.user == user.name) & (Recipe.type_ == 'custom')).execute()
@@ -211,7 +211,7 @@ def UpdateBookedCustomRss(user: KeUser):
         BookedRecipe.delete().where(BookedRecipe.recipe_id.in_(ids)).execute()
 
 #通知共享服务器，有一个新的订阅
-def NotifyNewSubscription(title, url, recipeId, key=None):
+def NotifyNewSubscription(title: str, url: str, recipeId: bool, key: str=''):
     path = LIBRARY_MGR + SUBSCRIBED_FROM_LIBRARY
     data = {'title': title, 'url': unquote(url), 'recipeId': recipeId}
     resp = UrlOpener().open(buildKeUrl(path), data=data)
@@ -245,14 +245,14 @@ def RecipeAjaxPost(actType: str, user: KeUser):
         return {'status': _('Unknown command: {}').format(actType)}
 
 #订阅某个Recipe
-def SubscribeRecipe(user, recipeId, recipe, separated):
+def SubscribeRecipe(user: KeUser, recipeId: str, recipe: Recipe, separated: bool):
     ret = {'recipe_id': recipeId, 'title': recipe.title, 'description': recipe.description,
         'needs_subscription': recipe.needs_subscription, 'separated': separated}
     
     dbInst = user.get_booked_recipe(recipeId)
     if dbInst: #不报错，更新separated属性
-        dbInst.separated = separated
-        dbInst.save()
+        dbInst.separated = separated #type:ignore
+        dbInst.save() #type:ignore
     else:
         BookedRecipe.create(user=user.name, **ret)
 
@@ -260,13 +260,15 @@ def SubscribeRecipe(user, recipeId, recipe, separated):
     return ret
 
 #退订某个Recipe
-def UnsubscribeRecipe(user, recipeId, recipe):
+def UnsubscribeRecipe(user: KeUser, recipeId: str, recipe: Recipe):
     BookedRecipe.delete().where((BookedRecipe.user == user.name) & (BookedRecipe.recipe_id == recipeId)).execute()
     LastDelivered.delete().where((LastDelivered.user == user.name) & (LastDelivered.bookname == recipe.title)).execute()
     return {'status':'ok', 'id': recipeId, 'title': recipe.title, 'desc': recipe.description}
 
 #删除某个Recipe
-def DeleteRecipe(user, recipeId, recipeType, recipe, force):
+#recipe: 待删除的Recipe实例
+#force: 如果为True，则不管是否已经被订阅都可以删除
+def DeleteRecipe(user: KeUser, recipeId: str, recipeType: str, recipe: Recipe, force: bool):
     if recipeType == 'builtin':
         return {'status': _('You can only delete the uploaded recipe.')}
     
@@ -280,6 +282,7 @@ def DeleteRecipe(user, recipeId, recipeType, recipe, force):
     return {'status': 'ok', 'id': recipeId}
 
 #设置某个Recipe的推送时间
+#form: request.form实例
 def ScheduleRecipe(recipeId, form):
     dbInst = BookedRecipe.get_or_none(BookedRecipe.recipe_id == recipeId)
     if dbInst:
@@ -385,7 +388,8 @@ def RecipeLoginInfoPostAjax(user: KeUser):
 @login_required()
 def ViewRecipeSourceCode(id_: str, user: KeUser):
     htmlTpl = """<!DOCTYPE html>\n<html><head><meta charset="utf-8"><link rel="stylesheet" href="/static/prism.css" type="text/css"/>
-    <title>{title}</title></head><body><pre><code class="language-python">{body}</code></pre><script type="text/javascript" src="/static/prism.js"></script></body></html>"""
+    <title>{title}</title></head><body class="line-numbers"><pre><code class="language-python">{body}</code></pre>
+    <script type="text/javascript" src="/static/prism.js"></script></body></html>"""
     recipeId = id_.replace('__', ':')
     recipeType, dbId = Recipe.type_and_id(recipeId)
     if recipeType == 'upload':

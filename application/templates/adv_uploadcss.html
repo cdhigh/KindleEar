@@ -19,7 +19,7 @@
 {% block advcontent -%}
 <form class="pure-form" id="uploadForm" action="{{uploadUrl}}" method="POST" enctype="multipart/form-data">
   <fieldset>
-    <legend><h3>{{_("Upload stylesheet")}}</h3></legend>
+    <legend>{{_("Upload stylesheet")}}</legend>
     <p><small>{{_("Upload a stylesheet from local (accept utf-8 only).")}}</small></p>
     <div class="box-list">
       <input type="file" name="css_file" id="css_file" class="pure-input-1 box" accept="text/css" />

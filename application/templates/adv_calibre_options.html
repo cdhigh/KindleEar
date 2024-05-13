@@ -9,7 +9,7 @@
     {% if tips -%}
     <div class="notice-box error">{{tips|safe}}</div>
     {% endif -%}
-    <legend><h3>{{_("Calibre Options")}}</h3></legend>
+    <legend>{{_("Calibre Options")}}</legend>
     <p><small>{{_("Set the parameters for Calibre, in JSON dictionary format.")}}</small></p>
     <div class="box-list">
       <textarea name="options" rows="5" cols="50">{{options}}</textarea>

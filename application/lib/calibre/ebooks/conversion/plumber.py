@@ -7,7 +7,6 @@ __docformat__ = 'restructuredtext en'
 import os, re, sys, shutil, pprint, json, io, css_parser, logging, traceback
 from itertools import chain
 from functools import partial
-from calibre.utils.logging import Log
 from calibre.customize.conversion import OptionRecommendation, DummyReporter, InputFormatPlugin
 from calibre.customize.ui import input_profiles, output_profiles, \
         plugin_for_input_format, plugin_for_output_format, \
@@ -93,7 +92,7 @@ class Plumber:
     def __init__(self, input_, output, input_fmt, output_fmt=None, abort_after_input_dump=False):
         self.input_ = input_
         self.output = output
-        self.log = Log() #calibre里面使用的log和python标准库使用的logging不兼容，所以不要外面传递了
+        self.log = default_log
         self.abort_after_input_dump = abort_after_input_dump
         self.pipeline_options = _pipeline_options
         
@@ -207,7 +206,7 @@ class Plumber:
                 if b == '[]':
                     b = None
             return a == b
-        
+
         for name, val in (recommendations or {}).items():
             rec = self.get_option_by_name(name)
             if rec is not None:
@@ -309,12 +308,6 @@ class Plumber:
         self.opts.no_inline_navbars = self.opts.output_profile.supports_mobi_indexing \
                 and self.output_fmt == 'mobi'
 
-        levelNames = {'CRITICAL': self.log.ERROR, 'FATAL': self.log.ERROR, 'ERROR': self.log.ERROR, 
-                'WARN': self.log.WARN, 'WARNING': self.log.WARN, 'INFO': self.log.INFO,
-                'DEBUG': self.log.DEBUG}
-        level = levelNames.get(os.getenv('LOG_LEVEL', '').upper(), self.log.WARN)
-        self.log.filter_level = self.log.DEBUG if self.opts.verbose else level
-        
         if self.opts.verbose > 1:
             self.log.debug('Resolved conversion options')
             try:
@@ -611,11 +604,10 @@ def create_oebbook(log, fs, opts, reader=None,
 
 
 def create_dummy_plumber(input_format, output_format):
-    from calibre.utils.logging import Log
     input_format = input_format.lower()
     output_format = output_format.lower()
     output_path = 'dummy.'+output_format
-    log = Log()
+    log = default_log
     log.outputs = []
     input_file = 'dummy.'+input_format
     if input_format in ARCHIVE_FMTS:

@@ -493,8 +493,7 @@ def get_metadata(stream):
     if raw == b'TPZ':
         from calibre.ebooks.metadata.topaz import get_metadata
         return get_metadata(stream)
-    from calibre.utils.logging import Log
-    log = Log()
+    log = default_log
     try:
         mi = MetaInformation(os.path.basename(stream.name), [_('Unknown')])
     except:

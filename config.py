@@ -44,8 +44,11 @@ DOWNLOAD_THREAD_NUM = "3"
 #If the website allow visitors to signup or not, "yes"|"no"
 ALLOW_SIGNUP = "no"
 
-#For security reasons, it's suggested to change the secret key.
+#The secret key for browser session.
 SECRET_KEY = "n7ro8QJI1qfe"
+
+#The secret key for starting delivery
+DELIVERY_KEY = "cY9gKC"
 
 #The administrator's login name
 ADMIN_NAME = "admin"

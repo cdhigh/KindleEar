@@ -34,14 +34,14 @@ logconfig_dict = {
     'handlers': {
         "error_file": {
             "class": "logging.handlers.RotatingFileHandler",
-            "maxBytes": 50*1024*1024, #50M
+            "maxBytes": 2*1024*1024, #2M, >20000lines
             "backupCount": 1,
             "formatter": "generic",
             "filename": "/data/gunicorn.error.log"
         },
         "access_file": {
             "class": "logging.handlers.RotatingFileHandler",
-            "maxBytes": 10*1024*1024, #10M
+            "maxBytes": 500*1024, #500K >3000lines
             "backupCount": 1,
             "formatter": "access",
             "filename": "/data/gunicorn.access.log"
@@ -49,13 +49,13 @@ logconfig_dict = {
     },
     'formatters':{
         "generic": {
-            "format": "%(asctime)s %(levelname)s [%(filename)s:%(lineno)s] %(message)s",
-            "datefmt": "[%Y-%m-%d %H:%M:%S %z]",
+            "format": "%[(asctime)s] %(levelname)s [%(filename)s:%(lineno)s] %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S %z",
             "class": "logging.Formatter"
         },
         "access": {
             "format": "%(message)s",
-            "datefmt": "[%Y-%m-%d %H:%M:%S %z]",
+            "datefmt": "%Y-%m-%d %H:%M:%S %z",
             "class": "logging.Formatter"
         }
     }

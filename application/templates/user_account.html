@@ -10,7 +10,7 @@
   {% endif -%}
   <form class="pure-form pure-form-aligned" action="" method="POST">
     <fieldset>
-      <legend><h3>{{formTitle}}</h3></legend>
+      <legend>{{formTitle}}</legend>
       <div class="pure-control-group">
         <label for="username">{{ _("Username") }}</label>
         <input name="username" type="text" {% if user %}value="{{user.name}}" readonly {% else %} autofocus {% endif %} class="pure-u-1 pure-u-sm-1-2" />

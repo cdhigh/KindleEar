@@ -16,7 +16,6 @@ import datetime
 from calibre import entity_to_unicode, force_unicode, strftime
 from calibre.utils.cleantext import clean_ascii_chars, clean_xml_chars
 from calibre.utils.date import dt_factory, local_tz, utcnow
-from calibre.utils.logging import default_log
 from polyglot.builtins import string_or_bytes
 
 

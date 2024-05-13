@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-"""create/update requirments.txt of KindleEar
+"""create/update config.py/requirments.txt of KindleEar
 [Version Specification](https://peps.python.org/pep-0440)
 ~=2.31.0 : >=2.31.0,==2.31.*
 >=0.2.3,<1.0.0
 """
-import re, os, sys, shutil, subprocess, secrets
+import re, os, sys, subprocess, secrets
 from itertools import chain
 
 def new_secret_key(length=12):
@@ -103,7 +103,8 @@ def dockerize_config_py(cfgFile, arg):
     default_cfg = {'APP_ID': 'kindleear', 'DATABASE_URL': 'sqlite:////data/kindleear.db',
         'TASK_QUEUE_SERVICE': 'apscheduler', 'TASK_QUEUE_BROKER_URL': 'memory',
         'KE_TEMP_DIR': '/tmp', 'DOWNLOAD_THREAD_NUM': '3', 'ALLOW_SIGNUP': 'no',
-        'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning', 'SECRET_KEY': new_secret_key}
+        'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning', 'SECRET_KEY': new_secret_key,
+        'DELIVERY_KEY': lambda: new_secret_key(6)}
     ret = []
     inDocComment = False
     pattern = r"^([_A-Z]+)\s*=\s*(.+)$"
@@ -121,7 +122,7 @@ def dockerize_config_py(cfgFile, arg):
 
         match = re.match(pattern, line)
         name = match.group(1) if match else None
-        value = default_cfg.get(name, None)
+        value = default_cfg.get(name, None) #type:ignore
         if name is not None and value is not None:
             value = value() if callable(value) else value
             ret.append(f'{name} = "{value}"')
@@ -166,7 +167,8 @@ def gaeify_config_py(cfgFile):
     default_cfg = {'APP_ID': appId, 'APP_DOMAIN': domain, 'SERVER_LOCATION': loc,
         'DATABASE_URL': 'datastore', 'TASK_QUEUE_SERVICE': 'gae', 'TASK_QUEUE_BROKER_URL': '',
         'KE_TEMP_DIR': '/tmp', 'DOWNLOAD_THREAD_NUM': '2', 'ALLOW_SIGNUP': 'no',
-        'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning', 'SECRET_KEY': new_secret_key}
+        'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning', 'SECRET_KEY': new_secret_key,
+        'DELIVERY_KEY': lambda: new_secret_key(6)}
     ret = []
     inDocComment = False
     pattern = r"^([_A-Z]+)\s*=\s*(.+)$"
@@ -184,7 +186,7 @@ def gaeify_config_py(cfgFile):
 
         match = re.match(pattern, line)
         name = match.group(1) if match else None
-        value = default_cfg.get(name, None)
+        value = default_cfg.get(name, None) #type:ignore
         if name is not None and value is not None:
             value = value() if callable(value) else value
             ret.append(f'{name} = "{value}"')
@@ -253,10 +255,10 @@ def update_worker_yaml(workerYamlFile, arg):
             lines[idx] = ' '.join(parts)
 
     ret = [f'Finished update of {workerYamlFile} using params:']
-    instance_class and ret.append(f'    instance_class: {instance_class}')
-    max_instances and ret.append(f'     max_instances: {max_instances}')
-    threads and ret.append(f'           threads: {threads}')
-    idle_timeout and ret.append(f'      idle_timeout: {idle_timeout}')
+    instance_class and ret.append(f'    instance_class: {instance_class}') #type:ignore
+    max_instances and ret.append(f'     max_instances: {max_instances}') #type:ignore
+    threads and ret.append(f'           threads: {threads}') #type:ignore
+    idle_timeout and ret.append(f'      idle_timeout: {idle_timeout}') #type:ignore
     ret.append('')
     if len(ret) > 2:
         with open(workerYamlFile, 'w', encoding='utf-8') as f:

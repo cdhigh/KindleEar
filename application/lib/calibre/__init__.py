@@ -192,7 +192,10 @@ class CurrentDir:
         self.cwd = None
 
     def __enter__(self, *args):
-        self.cwd = os.getcwd()
+        try: # The CWD no longer exists
+            self.cwd = os.getcwd()
+        except:
+            pass
         os.chdir(self.path)
         return self.cwd
 

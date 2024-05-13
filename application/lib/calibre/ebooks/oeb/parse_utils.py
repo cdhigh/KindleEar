@@ -243,7 +243,6 @@ def check_for_html5(prefix, root):
 def parse_html(data, log=None, decoder=None, preprocessor=None,
         filename='<string>', non_html_file_tags=frozenset()):
     if log is None:
-        from calibre.utils.logging import default_log
         log = default_log
 
     filename = force_unicode(filename, enc=filesystem_encoding)

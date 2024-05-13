@@ -20,7 +20,7 @@
     {% endif -%}
 
     <fieldset>
-      <legend><h3>{{_("Base")}}</h3></legend>
+      <legend>{{_("Base")}}</legend>
       <div class="pure-control-group">
         <label>{{_("Auto Delivery")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="enable_send">
@@ -77,16 +77,10 @@
       <div class="pure-control-group">
         <label>{{_("Device type")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="device_type">
-          {% set device = user.book_cfg('device') %}
-          <option value="kindle" {% if device == 'kindle' %}selected="selected"{% endif %}>Kindle</option>
-          <option value="kindle_dx" {% if device == 'kindle_dx' %}selected="selected"{% endif %}>Kindle DX</option>
-          <option value="kindle_pw" {% if device == 'kindle_pw' %}selected="selected"{% endif %}>Kindle PaperWhite</option>
-          <option value="kindle_fire" {% if device == 'kindle_fire' %}selected="selected"{% endif %}>Kindle Fire</option>
-          <option value="kindle_voyage" {% if device == 'kindle_voyage' %}selected="selected"{% endif %}>Kindle Voyage</option>
-          <option value="kindle_pw3" {% if device == 'kindle_pw3' %}selected="selected"{% endif %}>Kindle PaperWhite 3</option>
-          <option value="kindle_oasis" {% if device == 'kindle_oasis' %}selected="selected"{% endif %}>Kindle Oasis</option>
-          <option value="kindle_scribe" {% if device == 'kindle_scribe' %}selected="selected"{% endif %}>Kindle Scribe</option>
-          <option value="others" {% if device == 'others' %}selected="selected"{% endif %}>{{_("Others")}}</option>
+          {% set currDev = user.book_cfg('device') %}
+          {% for dev in output_profiles -%}
+          <option value="{{dev.short_name}}" {% if currDev == dev.short_name %}selected="selected"{% endif %}>{{dev.name}}</option>
+          {% endfor -%}
         </select>
       </div>
       <div class="pure-control-group">
@@ -119,7 +113,7 @@
     </fieldset>
 
     <fieldset id="adv_fieldset">
-      <legend><h3>{{_("Custom RSS")}}</h3></legend>
+      <legend>{{_("Custom RSS")}}</legend>
       <div class="pure-control-group">
         <label><em class="required">*</em> {{_("Title")}}</label>
         <input type="text" name="rss_title" value="{{ user.book_cfg('title') }}" required class="pure-u-1 pure-u-sm-1-2" />
@@ -181,7 +175,7 @@
     {% set sm_srv_type = sm_srv.get('service', 'gae') -%}
     {% if session.get('role') == 'admin' or sm_srv_type != 'admin' -%}
     <fieldset id="send_mail_service">
-      <legend><h3>{{_("Send Mail Service")}}</h3></legend>
+      <legend>{{_("Send Mail Service")}}</legend>
       <div class="pure-control-group">
         <label>{{_("Service")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="sm_service" id="sm_service" onchange="SetSmOptiosVisualbility();">
@@ -246,75 +240,5 @@
 $(document).ready(function() {
   SetSmOptiosVisualbility();
 });
-
-function ToggleWeekBtn(btnName) {
-  var checkbox = $(btnName);
-  checkbox.prop("checked", !checkbox.prop('checked'));
-}
-
-function SetSmOptiosVisualbility() {
-  var svr = $('#sm_service').val();
-  if (svr == 'gae') {
-    $('#sm_apikey').hide();
-    $('#sm_secret_key').hide();
-    $('#sm_host').hide();
-    $('#sm_port').hide();
-    $('#sm_username').hide();
-    $('#sm_password').hide();
-    $('#sm_save_path').hide();
-  } else if (svr == 'sendgrid') {
-    $('#sm_apikey').show();
-    $('#sm_secret_key').hide();
-    $('#sm_host').hide();
-    $('#sm_port').hide();
-    $('#sm_username').hide();
-    $('#sm_password').hide();
-    $('#sm_save_path').hide();
-  } else if (svr == 'mailjet') {
-    $('#sm_apikey').show();
-    $('#sm_secret_key').show();
-    $('#sm_host').hide();
-    $('#sm_port').hide();
-    $('#sm_username').hide();
-    $('#sm_password').hide();
-    $('#sm_save_path').hide();
-  } else if (svr == 'smtp') {
-    $('#sm_apikey').hide();
-    $('#sm_secret_key').hide();
-    $('#sm_host').show();
-    $('#sm_port').show();
-    $('#sm_username').show();
-    $('#sm_password').show();
-    $('#sm_save_path').hide();
-  } else if (svr == 'local') {
-    $('#sm_apikey').hide();
-    $('#sm_secret_key').hide();
-    $('#sm_host').hide();
-    $('#sm_port').hide();
-    $('#sm_username').hide();
-    $('#sm_password').hide();
-    $('#sm_save_path').show();
-  } else {
-    $('#sm_apikey').hide();
-    $('#sm_secret_key').hide();
-    $('#sm_host').hide();
-    $('#sm_port').hide();
-    $('#sm_username').hide();
-    $('#sm_password').hide();
-    $('#sm_save_path').hide();
-  }
-}
-
-//发送测试邮件
-function SendTestEmail() {
-  $.post("/send_test_email", {url: window.location.href}, function (data) {
-    if (data.status == "ok") {
-      ShowSimpleModalDialog('<p>{0}<br/><hr/>{1}</p>'.format(i18n.testEmailOk, data.emails.join('<br/>')));
-    } else {
-      alert(data.status);
-    }
-  });
-  return false;
-}
 </script>
 {% endblock -%}

@@ -17,10 +17,7 @@ from polyglot.builtins import iteritems, cmp
 
 
 def create_log(ostream=None):
-    from calibre.utils.logging import ThreadSafeLog, FileStream
-    log = ThreadSafeLog(level=ThreadSafeLog.DEBUG)
-    log.outputs = [FileStream(ostream)]
-    return log
+    return default_log
 
 
 # Comparing Metadata objects for relevance {{{
