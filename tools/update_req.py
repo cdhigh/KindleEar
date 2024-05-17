@@ -40,10 +40,10 @@ REQ_DB = {
     'mysql': [('peewee', '~=3.17.1'), ('pymysql', '~=1.1.0'),],
     'postgresql': [('peewee', '~=3.17.1'), ('psycopg2-binary', '~=2.9.9'),],
     'cockroachdb': [('peewee', '~=3.17.1'), ('psycopg2-binary', '~=2.9.9'),],
-    'datastore': [('weedata', '>=0.2.6,<1.0.0'), ('google-cloud-datastore', '~=2.19.0'),],
-    'mongodb': [('weedata', '>=0.2.6,<1.0.0'), ('pymongo', '~=4.6.3'),],
-    'redis': [('weedata', '>=0.2.6,<1.0.0'), ('redis', '~=5.0.3'),],
-    'pickle': [('weedata', '>=0.2.6,<1.0.0'),],
+    'datastore': [('weedata', '>=0.2.7,<1.0.0'), ('google-cloud-datastore', '~=2.19.0'),],
+    'mongodb': [('weedata', '>=0.2.7,<1.0.0'), ('pymongo', '~=4.6.3'),],
+    'redis': [('weedata', '>=0.2.7,<1.0.0'), ('redis', '~=5.0.3'),],
+    'pickle': [('weedata', '>=0.2.7,<1.0.0'),],
 }
 
 REQ_TASK = {
@@ -55,7 +55,7 @@ REQ_TASK = {
 
 REQ_PLAT = {'gae': [('appengine-python-standard', '~=1.1.6'),
         ('google-cloud-texttospeech', '~=2.16.3')],
-    'docker': [('weedata', '>=0.2.6,<1.0.0'),('pymysql', '~=1.1.0'), #docker install all libs
+    'docker': [('weedata', '>=0.2.7,<1.0.0'),('pymysql', '~=1.1.0'), #docker install all libs
         ('psycopg2-binary', '~=2.9.9'),('pymongo', '~=4.6.3'),('redis', '~=5.0.3'),
         ('celery', '~=5.3.6'),('flask-rq2', '~=18.3'),('sqlalchemy', '~=2.0.29')],
 }
