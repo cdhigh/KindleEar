@@ -22,7 +22,7 @@ class KeUser(MyBaseModel): # kindleEar User
     expires = DateTimeField(null=True) #超过了此日期后账号自动停止推送
     created_time = DateTimeField(default=datetime.datetime.utcnow)
 
-    #email,kindle_email,secret_key,enable_send,timezone
+    #email,kindle_email,secret_key,enable_send,timezone,save_in_email
     #sender: 可能等于自己的email，也可能是管理员的email
     base_config = JSONField(default=JSONField.dict_default)
     
@@ -39,7 +39,8 @@ class KeUser(MyBaseModel): # kindleEar User
     def cfg(self, item, default=None):
         value = self.base_config.get(item, default)
         if value is None:
-            return {'email': '', 'kindle_email': '', 'secret_key': '', 'timezone': 0}.get(item, value)
+            return {'email': '', 'kindle_email': '', 'secret_key': '', 'timezone': 0,
+                'save_in_email': 0}.get(item, value)
         else:
             return value
     def set_cfg(self, item, value):
@@ -203,7 +204,7 @@ class BookedRecipe(MyBaseModel):
     needs_subscription = BooleanField(default=False)
     account = CharField(default='') #如果网站需要登录才能看
     encrypted_pwd = CharField(default='')
-    send_days = JSONField(default=JSONField.list_default)
+    send_days = JSONField(default=JSONField.dict_default) #{'type':'weekday/date','days':[]}
     send_times = JSONField(default=JSONField.list_default)
     time = DateTimeField(default=datetime.datetime.utcnow) #源被订阅的时间，用于排序
     translator = JSONField(default=JSONField.dict_default)
@@ -280,7 +281,7 @@ class InBox(MyBaseModel):
     status = CharField()
     size = IntegerField(default=0)
     datetime = DateTimeField(default=datetime.datetime.utcnow)
-    body = TextField(default='', index=False)
+    body = JSONField(default=JSONField.dict_default, index=False)
     attachments = CharField(default='') #存放UserBlob的数据库id，逗号分割
 
 class AppInfo(MyBaseModel):

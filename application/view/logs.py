@@ -33,15 +33,26 @@ def RemoveLogsRoute():
     return RemoveLogs()
 
 def RemoveLogs():
-    #停止过期用户的推送
+    ret = []
+    #停止过期用户的推送和删除过期的收件箱内容
     now = datetime.datetime.utcnow()
+    cnt = 0
     for user in KeUser.select():
         if user.cfg('enable_send') and user.expires and (user.expires < now):
             user.set_cfg('enable_send', '')
             user.save()
+        save_in_email = int(user.cfg('save_in_email'))
+        if save_in_email > 0:
+            expTime = now - datetime.timedelta(days=save_in_email)
+            cnt += InBox.delete().where((InBox.user == user.name) & (InBox.datetime < expTime)).execute()
 
+    #彻底删除一天以前被标识为已删除的邮件(针对所有用户)
+    expTime = now - datetime.timedelta(days=1)
+    cnt += InBox.delete().where((InBox.status == 'deleted') & (InBox.datetime < expTime)).execute()
+    if cnt:
+        ret.append(f"Removed a total of {cnt} record of InBox.")
+        
     #清理临时目录
-    ret = []
     tmpDir = app.config['KE_TEMP_DIR']
     if tmpDir and os.path.exists(tmpDir):
         ret.append(DeleteOldFiles(tmpDir, 1))

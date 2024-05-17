@@ -7,7 +7,7 @@ import sys, requests, weakref, re, traceback, time
 from functools import wraps
 from types import MethodType
 from urllib.request import urlopen #仅用来进行base64 data url解码
-from urllib.parse import quote, unquote, urlunparse, urlparse, urlencode, parse_qs
+from urllib.parse import quote, unquote, urljoin, urlunparse, urlparse, urlencode, parse_qs
 from bs4 import BeautifulSoup
 from html_form import HTMLForm
 
@@ -96,14 +96,14 @@ class UrlOpener:
         method = 'POST' if data and (method != 'GET') else 'GET'
         url = self.build_url(url, data, method)
         if method == 'GET':
-            req_func = self.session.get
+            req_func = self.session.get #type:ignore
             data = None
         else:
-            req_func = self.session.post
+            req_func = self.session.post #type:ignore
         
         try:
             resp = req_func(url, data=data, headers=headers, timeout=timeout, allow_redirects=True, **kwargs)
-        except Exception as e:
+        except:
             resp = requests.models.Response()
             resp.status_code = 555
             default_log.warning(f"open_remote_url: {method} {url} failed: {traceback.format_exc()}")
@@ -132,9 +132,12 @@ class UrlOpener:
     #构建最终要使用的url
     def build_url(self, url, data, method):
         if url.startswith("//"):
-            url = f'http:{url}'
+            url = f'https:{url}'
         elif url.startswith('www'):
-            url = f'http://{url}'
+            url = f'https://{url}'
+
+        if not url.startswith('http') and self.host:
+            url = urljoin(self.host, url)
 
         parts = urlparse(url)._replace(fragment='')
         if method == 'GET' and data:
@@ -159,7 +162,7 @@ class UrlOpener:
             if self.fs:
                 resp._content = self.fs.read(url, 'rb')
             else:
-                with read(url, 'rb') as f:
+                with open(url, 'rb') as f:
                     resp._content = f.read()
             resp.status_code = 200
         except Exception as e:
@@ -248,7 +251,7 @@ class UrlOpener:
         elif text_regex:
             if isinstance(text_regex, (str, bytes)):
                 text_regex = re.compile(text_regex, re.IGNORECASE)
-            links = [link for link in links if text_regex.search((link.string or ''))]
+            links = [link for link in links if text_regex.search((link.string or ''))] #type:ignore
         elif name:
             links = [link for link in links if link.get('name', None) == name]
         elif name_regex:
@@ -271,7 +274,7 @@ class UrlOpener:
             return None
 
     #找到并打开一个url，可以使用正则表达式
-    def follow_link(link=None, **kwargs):
+    def follow_link(self, link=None, **kwargs):
         if not link:
             link = self.find_link(**kwargs)
 
@@ -306,7 +309,7 @@ class UrlOpener:
         self.addheaders = [(k, v) for k, v in headers.items()]
         
     def set_simple_cookie(self, name, value, domain, path='/'):
-        self.session.cookies.set(name, value, domain)
+        self.session.cookies.set(name, value, domain=domain, path=path) #type:ignore
 
     def close(self):
         if self.session is not None:

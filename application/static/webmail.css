@@ -1,0 +1,96 @@
+.mail-toolbar {
+  background-color: #e0e0e0;
+  padding: 10px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  border-bottom: 1px solid silver;
+}
+.mail-toolbar button {
+  padding: 3px 20px 3px 20px;
+  margin-left: 5px;
+  border: 1px solid silver;
+  border-radius: 10px;
+}
+.mail-toolbar button:hover {
+  color: white;
+  background-color: #0078e7;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+.mail-list {
+  margin-top: 55px;
+  max-height: 45vh;
+  overflow-y: scroll;
+}
+.mail-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  cursor: pointer;
+}
+.mail-list-table th, .mail-list-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+.mail-list-table th {
+  background-color: #f2f2f2;
+}
+.mail-list-table tr:hover {
+  background-color: #f5f5f5;
+}
+.mail-preview {
+  margin-top: 20px;
+  padding: 5px 20px 10px 20px;
+  border-top: 1px solid #ddd;
+}
+.mail-preview-header {
+  background-color: #f4f4f4;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 10px;
+}
+.mail-preview-header h4 {
+  margin: 10px 0px 5px 0px;
+}
+.mail-preview-content {
+  margin-top: 10px;
+}
+.reply-container {
+  display: grid;
+  grid-template-columns: min-content max-content;
+  grid-template-rows: repeat(3, auto) auto;
+  gap: 0px;
+}
+.reply-header {
+  padding: 5px;
+}
+.reply-header input {
+  width: 100%;
+}
+.reply-content {
+  grid-column: span 2;
+  margin-top: 10px;
+}
+.reply-content textarea {
+  min-width: 500px;
+}
+.unread {
+  font-weight: bold;
+}
+.deleted {
+  text-decoration: line-through;
+}
+.highlighted {
+  background-color: #CFE4FA;
+}
+.textarea {
+  margin-bottom: 12px;
+  padding: 10px;
+  min-width: 500px;
+  max-width: 600px;
+  height: 150px;
+  border: 1px solid #ccc;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}

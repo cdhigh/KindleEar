@@ -2169,7 +2169,7 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
         feeds = []
         id_counter = 0
         added = set()
-        for obj in main_urls:
+        for obj in main_urls: #type:ignore
             main_title, main_url = (self.title, obj) if isinstance(obj, str) else obj
             feed = Feed()
             feed.title = main_title
@@ -2191,14 +2191,14 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
                     (LastDelivered.bookname==self.title) & (LastDelivered.url==url))
                 delta = (now - timeItem.datetime) if timeItem else None
                 #这里oldest_article和其他的recipe不一样，这个参数表示在这个区间内不会重复推送
-                if ((not timeItem) or (not self.oldest_article) or (self.delivery_reason == 'manual') or
-                    (delta.days * 24 * 3600 + delta.seconds > 24 * 3600 * self.oldest_article)):
+                if (not timeItem) or (self.delivery_reason == 'manual'):
                     id_counter += 1
                     feed.articles.append(Article(f'internal id#{id_counter}', title, url, 'KindleEar', '', structNow, ''))
 
                     #如果是手动推送，不单不记录已推送日期，还将已有的上次推送日期数据删除
-                    if ((self.delivery_reason == 'manual') or (not self.oldest_article)) and timeItem:
-                        timeItem.delete_instance()
+                    if self.delivery_reason == 'manual':
+                        if timeItem:
+                            timeItem.delete_instance()
                     elif timeItem:
                         timeItem.datetime = now
                         timeItem.save()

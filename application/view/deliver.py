@@ -39,14 +39,21 @@ def MultiUserDelivery():
         now = user.local_time()
         for book in user.get_booked_recipe():
             #先判断当天是否需要推送
-            day = now.weekday()
+            day = now.day
+            weekday = now.weekday()
             userDays = user.send_days
-            bookDays = book.send_days
+            if not isinstance(book.send_days, dict): #兼容以前版本
+                book.send_days = {}
+                book.save()
+            bookDaysType = book.send_days.get('type')
+            bookDays = book.send_days.get('days')
             #如果特定Recipe设定了推送时间，则以这个时间为优先，不再考虑全局设置值
-            if bookDays:
-                if day not in bookDays:
+            if bookDaysType and bookDays:
+                if (bookDaysType == 'weekday') and (weekday not in bookDays):
                     continue
-            elif userDays and day not in userDays: #user.send_days为空也表示每日推送
+                elif (bookDaysType == 'date') and (day not in bookDays):
+                    continue
+            elif userDays and weekday not in userDays: #user.send_days为空也表示每日推送
                 continue
                 
             #时间判断

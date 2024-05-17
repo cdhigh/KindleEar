@@ -770,18 +770,89 @@ select[id="shared_rss_lang_pick"] {
     background-color: #0765bb;
 }
 
-div[class="schedule_daytimes"] {
+/* customizeDelivTime dialog */
+div.schedule_daytimes {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-row-gap: 15px;
+    margin-top: 20px;
+    margin-bottom: 40px;
+}
+div.schedule_daytimes label {
+    white-space: nowrap;
+}
+.my_datepicker {
+    position: relative;
+    display: inline-block;
+}
+.my_datepicker input[type="text"], div.schedule_daytimes select {
+    width: 350px;
+    padding: 5px;
+    box-sizing: border-box;
+}
+.my_datepicker .my_calendar {
+    position: absolute;
+    left: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 5px silver;
+    border-radius: 5px;
+    padding: 10px;
+    display: none;
+    font-size: 0.8rem;
+    z-index: 999;
+}
+.my_datepicker .my_calendar.pos0 {
+    top: 35px;
+    grid-template-columns: repeat(7, 1fr);
+}
+.my_datepicker .my_calendar.pos1 {
+    bottom: 0;
+    grid-template-columns: repeat(8, 1fr);
+}
+.my_datepicker .my_calendar.show {
+    display: grid;
+}
+.my_datepicker .my_calendar label {
+    display: inline-block;
     text-align: center;
+    margin-bottom: 5px;
+    padding: 5px;
+    cursor: pointer;
 }
-div[class="schedule_daytimes"] label {
-    margin-right: 15px;
-    display: inline-block;
+.my_datepicker .my_calendar label:hover {
+    background-color: #f0f0f0;
 }
-div[class="schedule_daytimes"] input {
-    margin-right: 5px;
-    display: inline-block;
+.my_datepicker .my_calendar label input[type="checkbox"] {
+    display: none;
 }
-
+.my_datepicker .my_calendar label:has(input[type="checkbox"]:checked) {
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 50%;
+}
+/*.my_datepicker .my_calendar label input[type="checkbox"]:checked + span {
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+}*/
+.my_datepicker .my_calendar span.button {
+    grid-column: span 4;
+    padding: 0px 20px 0px 20px;
+    font-size: 0.8rem;
+    border: 1px solid silver;
+    border-radius: 10px;
+    text-align: center;
+    background-color: #f0f0f0;
+    align-self: center;
+    vertical-align: center;
+    cursor: pointer;
+}
+.my_datepicker .my_calendar span.button:hover {
+    background-color: #BEBCBC;
+    color: white;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
 
 /* iconfont */
 @font-face {
@@ -1004,16 +1075,15 @@ dialog#h5-dialog {
     box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     background-color: canvas; /*#fafafa;*/
     position: fixed;
-    top: 50%;
-    margin-left: auto;
-    margin-right: auto;
-    transform: translateY(-45%);
+    margin: auto;
+    /*top: max(50%, calc(50% - 50vh));
+    transform: translateY(-50%);*/
 }
 dialog#h5-dialog::backdrop {
   background-color: rgba(0, 0, 0, 0.5);
 }
 #h5-dialog-content {
-    padding: 40px 40px 20px 40px;
+    padding: 15px 40px 20px 40px;
 }
 #h5-dialog-closebutton {
   position: absolute;

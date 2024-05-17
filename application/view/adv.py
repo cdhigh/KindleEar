@@ -9,7 +9,7 @@ from flask_babel import gettext as _
 from PIL import Image
 from ..base_handler import *
 from ..back_end.db_models import *
-from ..utils import ke_decrypt, str_to_bool, safe_eval, xml_escape, xml_unescape
+from ..utils import ke_decrypt, str_to_int, str_to_bool, safe_eval, xml_escape, xml_unescape
 from ..lib.pocket import Pocket
 from ..lib.wallabag import WallaBag
 from ..lib.urlopener import UrlOpener
@@ -41,19 +41,27 @@ def AdvWhiteList(user: KeUser):
         mailHost = 'appid.appspotmail.com'
     else:
         mailHost = urlparse(app.config['APP_DOMAIN']).netloc.split(':')[0]
-    
-    return adv_render_template('adv_whitelist.html', 'whitelist', user=user, mailHost=mailHost)
+
+    save_in_email = user.cfg("save_in_email")
+
+    return adv_render_template('adv_whitelist.html', 'whitelist', user=user, mailHost=mailHost, 
+        save_in_email=save_in_email)
     
 @bpAdv.post("/adv/whitelist", endpoint='AdvWhiteListPost')
 @login_required()
 def AdvWhiteListPost(user: KeUser):
     wlist = request.form.get('wlist')
-    if wlist:
+    if wlist: #第一个表单：邮件白名单
         wlist = wlist.replace('"', "").replace("'", "").strip()
         if wlist.startswith('*@'): #输入*@xx.xx则修改为@xx.xx
             wlist = wlist[1:]
         if wlist:
             WhiteList.get_or_create(mail=wlist, user=user.name)
+    else:
+        save_in_email = str_to_int(request.form.get('save_in_email'))
+        user.set_cfg('save_in_email', save_in_email)
+        user.save()
+
     return redirect(url_for('bpAdv.AdvWhiteList'))
     
 #删除白名单项目

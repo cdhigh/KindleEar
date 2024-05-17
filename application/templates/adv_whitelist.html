@@ -11,25 +11,51 @@
 <form class="pure-form pure-form-aligned" action="" method="POST">
   <fieldset>
     <legend>{{_("White List")}}</legend>
-    <p> <small>
-    {{_("Emails sent to %(name)sxxx@%(mailHost)s will be transferred to your kindle email.", name='' if (user.name == adminName) else user.name + '__', mailHost=mailHost)}}
+    <p><small>
+      {{_("Emails sent to %(name)sxxx@%(mailHost)s will be transferred to your kindle email.", name='' if (user.name == adminName) else user.name + '__', mailHost=mailHost)}}
     </small></p>
     <div class="box-list">
-      {%- for wl in user.white_lists() -%}
+      {% for wl in user.white_lists() -%}
       <div class="box">
-        {{ wl.mail }}
+        {{wl.mail}}
         <div class="cornerControls">
-          <a href="/advdel?wlist_id={{wl.id}}" class="actionButton">{{ _("Delete") }}</a>
+          <a href="/advdel?wlist_id={{wl.id}}" class="actionButton">{{_("Delete")}}</a>
         </div>
       </div>
-      {%- endfor -%}
+      {% endfor -%}
       <div class="box">
-        <input type="text" name="wlist" placeholder="{{ _('Please input mail address') }}" class="pure-input-1" />
+        <input type="text" name="wlist" placeholder="{{_('Please input mail address')}}" class="pure-input-1" />
         <div class="cornerControls">
-          <input type="submit" value="{{ _('Add') }}" class="actionButton add" />
+          <input type="submit" value="{{_('Add')}}" class="actionButton add" />
         </div>
       </div>
     </div>
   </fieldset>
+</form>
+<br/>
+<form class="pure-form pure-form-aligned" action="" method="POST">
+  <fieldset>
+  <legend>{{_("Webmail")}}</legend>
+  <p><small>
+      {{_("No matter how it is configured, this feature will not impact the email whitelist.")}}
+    </small></p>
+  <div class="pure-control-group">
+    <label>{{_("Save Inbound Mail")}}</label>
+    <select class="pure-u-1 pure-u-sm-1-2" name="save_in_email">
+      <option value="0" {% if not save_in_email %}selected="selected"{% endif %}>{{_("Disable")}}</option>
+      <option value="1" {% if save_in_email==1 %}selected="selected"{% endif %}>{{_("1 Day")}}</option>
+      <option value="7" {% if save_in_email==7 %}selected="selected"{% endif %}>{{_("7 Days")}}</option>
+      <option value="30" {% if save_in_email==30 %}selected="selected"{% endif %}>{{_("30 Days")}}</option>
+      <option value="-1" {% if save_in_email==-1 %}selected="selected"{% endif %}>{{_("No limit")}}</option>
+    </select>
+  </div>
+  </fieldset>
+  <p style="text-align:center;">
+    <p style="text-align:center;">
+      <button type="submit" class="pure-button pure-button-primary pure-input-rounded">{{_('Save settings')}} </button>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <a class="pure-button pure-input-rounded" href="/webmail" target="_blank">{{_("Open webmail")}}</a>
+    </p>
+  </p>
 </form>
 {% endblock -%}

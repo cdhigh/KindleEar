@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block titleTag -%}
+<title>{{_("Webmail")}} - KindleEar</title>
+{% endblock -%}
+{% block cssfiles -%}
+<link rel="stylesheet" href="/static/webmail.css" type="text/css" charset="utf-8"/>
+{% endblock -%}
+{% block header -%}
+{% endblock -%}
+{% block menubar -%}
+{% endblock -%}
+{% block content -%}
+  <div class="container">
+    <!-- 工具栏 -->
+    <div class="mail-toolbar">
+      {% set sender = user.cfg('sender') %}
+      <button onclick="FetchMailList()">{{_('Refresh')}}</button>
+      <button onclick="ToggleMailReadStatus()">{{_('Read/Unread')}}</button>
+      <button onclick="ReplyMail('{{sender}}', 'reply')">{{_('Reply')}}</button>
+      <button onclick="ReplyMail('{{sender}}', 'forward')">{{_('Forward')}}</button>
+      <button onclick="ReplyMail('{{sender}}', 'attachment')">{{_('Fwd as Attach')}}</button>
+      <button onclick="DeleteMails()">{{_('Delete')}}</button>
+    </div>
+    <div class="mail-list">
+      <table class="mail-list-table">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="toggle_select_mail" onclick="SelectUnselectMails()"></th>
+            <th>{{_('From')}}</th>
+            <th>{{_('To')}}</th>
+            <th>{{_('Subject')}}</th>
+            <th>&#128317; {{_('Time')}}</th>
+            <th>{{_('Size')}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 由脚本填充 -->
+        </tbody>
+      </table>
+    </div>
+    <div class="mail-preview" id="mailPreview">
+      <!-- 由脚本填充 -->
+    </div>
+{% endblock -%}
+
+{% block jsfiles -%}
+<script type="text/javascript" src="/static/webmail.js" charset="utf-8"></script>
+{% endblock -%}
+{% block js %}
+<script>
+  var all_mails = [];
+  $(document).ready(function() {
+    FetchMailList();
+    $('.mail-list-table tbody').on('click', 'tr', ClickOnMailRow);
+  });
+</script>
+{% endblock -%}
+
+{% block footer -%}
+{% endblock -%}

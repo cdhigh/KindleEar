@@ -104,7 +104,22 @@
     tts: "{{_('Text to Speech')|safe}}",
     action: "{{_('Action')|safe}}",
     file: "{{_('File')|safe}}",
-    uploadOnly: "{{_('Upload Only')|safe}}"
+    uploadOnly: "{{_('Upload Only')|safe}}",
+    send: "{{_('Send')|safe}}",
+    nothingHere: "{{_('There is nothing here.')|safe}}",
+    selectSingleMail: "{{_('Please select a single mail.')|safe}}",
+    selectAtleastOneMail: "{{_('Please select at least one mail.')|safe}}",
+    someParamsMissing: "{{_('Some parameters are missing or wrong.')|safe}}",
+    mailBeenSent: "{{_('The email has been sent.')|safe}}",
+    from: "{{_('From')|safe}}",
+    to: "{{_('To')|safe}}",
+    subject: "{{_('Subject')|safe}}",
+    time: "{{_('Time')|safe}}",
+    size: "{{_('Size')|safe}}",
+    dateType: "{{_('Date type')|safe}}",
+    weekday: "{{_('Weekday')|safe}}",
+    date: "{{_('Date')|safe}}",
+    multiValuesWithCommas: "{{_('Combine multiple values with commas.')}}"
   };
   </script>
   {% block javascript_inhead %}
@@ -172,8 +187,8 @@
     <div class="footer-sticker"></div>
   </div>
 
+  {% block footer -%}
   <div class="footer l-box">
-    {% block footer -%}
     <p>
       <small>
       2013-2024 &copy; KindleEar&nbsp;@{{g.version}} ｜
@@ -182,8 +197,8 @@
       <a href="https://console.cloud.google.com/appengine" target="_blank">App Engine</a>
       </small>
     </p>
-    {% endblock -%}
   </div>
+  {% endblock -%}
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script>window.jQuery || document.write('<script src="/static/jquery-3.7.1.min.js"><\/script>');</script>

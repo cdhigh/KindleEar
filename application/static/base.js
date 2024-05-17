@@ -12,6 +12,19 @@ function getNowSeconds() {
   return Math.floor(new Date().getTime() / 1000);
 }
 
+//返回一个方便人类可读的文件大小字符串
+function ReadableFileSize(size) {  
+  if (!size) {
+    return `0 B`;  
+  }
+  size /= 1024;
+  if (size > 1024) {
+    return `${(size / 1024).toFixed(1)} MB`;
+  } else {
+    return `${size.toFixed(1)} KB`;
+  }
+}
+
 //检测浏览器语言
 function BrowserLanguage() {
   var lang = "";
@@ -34,6 +47,27 @@ const g_languageNames = new Intl.DisplayNames([BrowserLanguage()], {type: 'langu
 function LanguageName(code, fallback) {
   var txt = (code && code != 'und') ? g_languageNames.of(code) : code;
   return ((txt == code) && fallback) ? fallback : txt;
+}
+
+//使用此函数执行ajax请求，避免重复代码
+function MakeAjaxRequest(url, method, data, callback) {
+  $.ajax({
+    url: url,
+    type: method,
+    data: data,
+    success: function (resp) {
+      if (resp.status == "ok") {
+        callback(resp);
+      } else if (resp.status == i18n.loginRequired) {
+        window.location.href = '/login';
+      } else {
+        alert(resp.status);
+      }
+    },
+    error: function (xhr, status, error) {
+      alert('An error occurred: \n' + status + '\n' + error);
+    }
+  });
 }
 
 ///[start] my.html
@@ -323,23 +357,17 @@ function SubscribeRecipe(id, separated) {
     }
   }
   //发post请求
-  $.post("/recipe/subscribe", {id: id, separated: separated}, function (data) {
-    if (data.status == "ok") {
-      var recipe = GetRecipeInfo(id);
-      if (Object.keys(recipe).length != 0) {
-        var new_item = {recipe_id: id, separated: separated, user: '{{user.name}}', time: (new Date()).getTime(),
-        title: recipe.title, description: recipe.description, needs_subscription: recipe.needs_subscription, account: ''};
-        my_booked_recipes.unshift(new_item);
-        PopulateMySubscribed();
-        $('.additional-btns').stop(true).hide();
-        $("#toast").fadeIn().delay(2000).fadeOut();
-        //订阅后跳转到已订阅区段
-        //$("html, body").animate({scrollTop: $("#mysubscribed").offset().top}, {duration:500, easing:"swing"});
-      }
-    } else if (data.status == i18n.loginRequired) {
-      window.location.href = '/login';
-    } else {
-      alert(i18n.cannotSubsRecipe + data.status);
+  MakeAjaxRequest("/recipe/subscribe", 'POST', {id: id, separated: separated}, function (resp) {
+    var recipe = GetRecipeInfo(id);
+    if (Object.keys(recipe).length != 0) {
+      var new_item = {recipe_id: id, separated: separated, user: '{{user.name}}', time: (new Date()).getTime(),
+      title: recipe.title, description: recipe.description, needs_subscription: recipe.needs_subscription, account: ''};
+      my_booked_recipes.unshift(new_item);
+      PopulateMySubscribed();
+      $('.additional-btns').stop(true).hide();
+      $("#toast").fadeIn().delay(2000).fadeOut();
+      //订阅后跳转到已订阅区段
+      //$("html, body").animate({scrollTop: $("#mysubscribed").offset().top}, {duration:500, easing:"swing"});
     }
   });
 }
@@ -350,20 +378,14 @@ function UnsubscribeRecipe(id, title) {
     return;
   }
 
-  $.post("/recipe/unsubscribe", {id: id}, function (data) {
-    if (data.status == "ok") {
-      for (var idx = 0; idx < my_booked_recipes.length; idx++) {
-        if (my_booked_recipes[idx].recipe_id == id) {
-          my_booked_recipes.splice(idx, 1); //删除对应项
-          break;
-        }
+  MakeAjaxRequest("/recipe/unsubscribe", 'POST', {id: id}, function (resp) {
+    for (var idx = 0; idx < my_booked_recipes.length; idx++) {
+      if (my_booked_recipes[idx].recipe_id == id) {
+        my_booked_recipes.splice(idx, 1); //删除对应项
+        break;
       }
-      PopulateMySubscribed();
-    } else if (data.status == i18n.loginRequired) {
-      window.location.href = '/login';
-    } else {
-      alert(i18n.cannotUnsubsRecipe + data.status);
     }
+    PopulateMySubscribed();
   });
 }
 
@@ -377,55 +399,134 @@ function GetBookedRecipeItem(id) {
   return '';
 }
 
+//根据一个数组，生成一个带输入文本框的日期或时间选择器
+//pickerId: 选择器ID
+//initData: 文本框初始值
+//style: 行内style，现在用于设置初始是否显示
+//calClass: 弹出选择器的类名
+//arr: 内容为要显示的文本，其索引为每个文本对应的数值
+//offset: 索引和数值的偏移
+function BuildDatePicker(pickerId, initData, style, calClass, arr, offset) {
+  offset = offset || 0;
+  let ostr = [`<div class="my_datepicker" id="${pickerId}" ${style}>
+    <input type="text" value="${initData}" onclick="ToggleCalendar('${pickerId}')" />
+    <div class="my_calendar ${calClass}" id="${pickerId}">`];
+  arr.forEach(function(item, idx) {
+    ostr.push(`<label><input type="checkbox" value="${idx + offset}"><span>${item}</span></label>`);
+  });
+  ostr.push(`<span class="button" onclick="DatePickerConfirm('${pickerId}')">Ok</span></div></div>`);
+  return ostr.join('');
+}
+
+//点击日期时间选择器的文本框时显示或隐藏弹出的选择器
+//pickerId: 选择器ID
+function ToggleCalendar(pickerId) {
+  $('.my_calendar').each((index, item) => {
+    if (item.parentElement.id == pickerId) {
+      DatePickerUpdateToCheckboxes(pickerId);
+      $(item).toggleClass('show');
+    } else {
+      $(item).removeClass('show');
+    }
+  });
+  return false;
+}
+
+//因此所有选择器
+function HideCalendars() {
+  $('.my_calendar').removeClass('show');
+  return false;
+}
+
+//日期时间选择器确认当前选择，将选中的项目使用逗号分隔填充到文本框
+//pickerId: 选择器ID
+function DatePickerConfirm(pickerId) {
+  let boxes = $(`#${pickerId} input[type="checkbox"]:checked`);
+  let selected = Array.from(boxes).map(item => item.value);
+  $(`#${pickerId} > input[type="text"]`).val(selected.join(','));
+  $(`#${pickerId} > div.my_calendar`).removeClass('show');
+  return false;
+}
+
+//日期时间选择器将文本框的逗号分隔的数值更新到选择器checkbox中
+//pickerId: 选择器ID
+function DatePickerUpdateToCheckboxes(pickerId) {
+  let arr = $(`#${pickerId} > input[type="text"]`).val().split(',');
+  let boxes = $(`#${pickerId} input[type="checkbox"]`);
+  boxes.each((index, item) => {
+    let $item = $(item);
+    if ((arr.length > 0) && (arr.indexOf($item.val()) !== -1)) {
+      $item.prop('checked', true);
+    } else {
+      $item.prop('checked', false);
+    }
+  });
+  return false;
+}
+
+//根据选择的日期类型，切换周内日或日期是否显示
+//selId: select ID
+function SetWdDatePickerVisuable(selId) {
+  HideCalendars();
+  if ($(`#${selId}`).val() == 'weekday') {
+    $('#wdLabel').show();
+    $('#wdPker').show();
+    $('#dateLabel').hide();
+    $('#datePker').hide();
+  } else {
+    $('#wdLabel').hide();
+    $('#wdPker').hide();
+    $('#dateLabel').show();
+    $('#datePker').show();
+  }
+  return false;
+}
+
 //设置订阅的Recipe的自定义推送时间
 function ScheduleRecipe(id, title) {
   var item = GetBookedRecipeItem(id);
   if (!item) {
     return;
   }
-  var days = item.send_days || [];
-  var times = item.send_times || [];
-  var ostr = ['<h3 style="margin:0px auto;text-align:center;">' + i18n.customizeDelivTime + '</h3>'];
-  ostr.push('<form class="pure-form" action="" method="POST" id="custom_schedule">');
-  ostr.push('<input type="text" name="id" value="' + id + '" hidden />');
-  ostr.push('<div class="pure-control-group">');
-  ostr.push('<p style="margin-bottom:10px;">' + i18n.delivDays + '</p>');
-  ostr.push('<div class="schedule_daytimes">')
-  ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="Monday" ' + (days.indexOf(0) > -1 ? 'checked' : '')  + '/>' + i18n.Mon + '</label>');
-  ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="Tuesday" ' + (days.indexOf(1) > -1 ? 'checked' : '')  + '/>' + i18n.Tue + '</label>');
-  ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="Wednesday" ' + (days.indexOf(2) > -1 ? 'checked' : '')  + '/>' + i18n.Wed + '</label>');
-  ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="Thursday" ' + (days.indexOf(3) > -1 ? 'checked' : '')  + '/>' + i18n.Thu + '</label>');
-  ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="Friday" ' + (days.indexOf(4) > -1 ? 'checked' : '')  + '/>' + i18n.Fri + '</label>');
-  ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="Saturday" ' + (days.indexOf(5) > -1 ? 'checked' : '')  + '/>' + i18n.Sat + '</label>');
-  ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="Sunday" ' + (days.indexOf(6) > -1 ? 'checked' : '')  + '/>' + i18n.Sun + '</label>');
-  ostr.push('</div></div><div class="pure-control-group">');
-  ostr.push('<p style="margin-bottom:10px;">' + i18n.delivTimes + '</p>');
-  ostr.push('<div class="schedule_daytimes">')
-  for (var t = 0; t < 24; t++) {
-    ostr.push('<label style="margin:0px 10px;"><input type="checkbox" name="' + t + '" ' + (times.indexOf(t) > -1 ? 'checked' : '') + '/>' + t.toString().padStart(2, '0') + '</label>');
-    if ((t == 7) || (t == 15)) {
-      ostr.push('<br/>');
-    }
-  }
-  ostr.push('</div></div></form>');
-  showH5Dialog(ostr.join('')).then(function (idx) {
-    var formData = $("#custom_schedule").serialize();
-    $.ajax({
-      url: "/recipe/schedule",
-      type: "POST",
-      data: formData,
-      success: function (resp) {
-        if (resp.status == 'ok') {
-          item.send_days = resp.send_days;
-          item.send_times = resp.send_times;
-          ShowSimpleModalDialog('<p>' + i18n.customDelivTimesaved + '</p>');
-        } else {
-          alert(resp.status);
-        }
-      },
-      error: function (error) {
-        alert(error);
-      }
+  var send_days = item.send_days || {};
+  var sched_type = send_days.type || 'weekday';
+  var wdData = (sched_type == 'weekday') ? (send_days.days || []).join(',') : '';
+  var dtData = (sched_type == 'date') ? (send_days.days || []).join(',') : '';
+  var tmData = (item.send_times || []).join(',');
+  var wdStyle = (sched_type == 'weekday') ? '' : 'style="display:none"';
+  var dtStyle = (sched_type == 'date') ? '' : 'style="display:none"';
+  var wdSel = (sched_type == 'weekday') ? 'selected="selected"' : '';
+  var dtSel = (sched_type == 'date') ? 'selected="selected"' : '';
+  let wdPker = BuildDatePicker('wdPker', wdData, wdStyle, 'pos0', [i18n.Mon, i18n.Tue, i18n.Wed, i18n.Thu, i18n.Fri, i18n.Sat, i18n.Sun], 0);
+  let datePker = BuildDatePicker('datePker', dtData, dtStyle, 'pos0', [...Array(31).keys()].map(i => i + 1), 1);
+  let timePker = BuildDatePicker('timePker', tmData, '', 'pos1', [...Array(24).keys()], 0);
+  var ostr = `<h3 style="margin:10px auto;text-align:center;" onclick="HideCalendars()">${i18n.customizeDelivTime}</h3>
+    <div class="schedule_daytimes">
+      <label onclick="HideCalendars()">${i18n.dateType}</label>
+      <select name="type_sched_date" id="type_sched_date" onchange="SetWdDatePickerVisuable('type_sched_date')" onclick="HideCalendars()">
+        <option value="weekday" ${wdSel}>${i18n.weekday}</option>
+        <option value="date" ${dtSel}>${i18n.date}</option>
+      </select>
+      <label id="wdLabel" ${wdStyle} onclick="HideCalendars()">${i18n.weekday}</label>
+      ${wdPker}
+      <label id="dateLabel" ${dtStyle} onclick="HideCalendars()">${i18n.date}</label>
+      ${datePker}
+      <label onclick="HideCalendars()">${i18n.time}</label>
+      ${timePker}
+    </div>
+    <p style="color:#777" onclick="HideCalendars()">&#x1F4C5; ${i18n.multiValuesWithCommas}</p>`;
+
+  showH5Dialog(ostr).then(function (idx) {
+    let type = $('#type_sched_date').val();
+    let wd = $('#wdPker > input').val();
+    let dt = $('#datePker > input').val();
+    let tm = $('#timePker > input').val();
+    let data = {id: id, type: type, times: tm, days: (type=='weekday' ? wd : dt)};
+    var formData = $.param(data);
+    MakeAjaxRequest("/recipe/schedule", "POST", formData, function (resp) {
+      item.send_days = resp.send_days;
+      item.send_times = resp.send_times;
+      ShowSimpleModalDialog('<p>' + i18n.customDelivTimesaved + '</p>');
     });
   }).catch(function(){});
 }
@@ -452,27 +553,22 @@ function GetRecipeInfo(id) {
 }
 
 //弹出对话框，输入Recipe的登录信息，然后保存到服务器
-function AskForSubscriptionInfo(id, account){
-  var ostr = ['<h3 style="margin:0px auto 30px auto;text-align:center;">' + i18n.subscriptionInfo + '</h3>'];
-  ostr.push('<form class="pure-form"><fieldset>');
-  ostr.push('<input type="text" id="recipe_account" placeholder="' + i18n.account + '" value="' + account + '" style="margin-left: 10px;" />');
-  ostr.push('<input type="password" id="recipe_password" placeholder="' + i18n.password + '" style="margin-left: 10px;" />');
-  ostr.push('</fieldset></form>');
-  ostr.push('<p>' + i18n.recipeLoginTips + '</p>')
-  showH5Dialog(ostr.join('')).then(function (idx) {
+function AskForSubscriptionInfo(id, account) {
+  var ostr = `<h3 style="margin:0px auto 30px auto;text-align:center;">${i18n.subscriptionInfo}</h3>
+    <form class="pure-form">
+      <fieldset>
+        <input type="text" id="recipe_account" placeholder="${i18n.account}" value="${account}" style="margin-left:10px;" />
+        <input type="password" id="recipe_password" placeholder="${i18n.password}" style="margin-left:10px;" />
+      </fieldset>
+    </form>
+    <p style="color:#777">${i18n.recipeLoginTips}</p>`;
+  showH5Dialog(ostr).then(function (idx) {
     var account = $('#recipe_account');
     var password = $('#recipe_password');
-    $.post("/recipelogininfo", {id: id, account: account.val(), password: password.val()},
-      function (data) {
-        if (data.status == "ok") {
-          alert(i18n.congratulations + '\n' + data.result);
-        } else if (data.status == i18n.loginRequired) {
-          window.location.href = '/login';
-        } else {
-          alert(i18n.cannotSetSubsInfo + data.status);
-        }
-      },
-    );
+    MakeAjaxRequest("/recipelogininfo", 'POST', {id: id, account: account.val(), password: password.val()}, 
+      function (resp) {
+        alert(i18n.congratulations + '\n' + resp.result);
+      });
   }).catch(function(){});
 }
 
@@ -497,43 +593,31 @@ function ShowDeleteCustomRssDialog(event, rssid, title, url, isfulltext) {
 
 //删除自定义RSS
 function DeleteCustomRss(rssid, title, url, isfulltext, reportInvalid) {
-  $.post("/customrss/delete", {id: rssid}, function (data) {
-    if (data.status == "ok") {
-      for (var idx = 0; idx < my_custom_rss_list.length; idx++) {
-        if (my_custom_rss_list[idx].id == rssid) {
-          my_custom_rss_list.splice(idx, 1);
-          break;
-        }
+  MakeAjaxRequest("/customrss/delete", "POST", {id: rssid}, function (resp) {
+    for (var idx = 0; idx < my_custom_rss_list.length; idx++) {
+      if (my_custom_rss_list[idx].id == rssid) {
+        my_custom_rss_list.splice(idx, 1);
+        break;
       }
-      PopulateMyCustomRss();
-      $('#title_to_add').val(title);
-      $('#url_to_add').val(url);
-      $('#isfulltext').prop('checked', isfulltext);
-      if (reportInvalid) { //报告源失效
-        $.post("/library/mgr/reportinvalid", {title: title, url: url, recipeId: ''});
-      }
-    } else if (data.status == i18n.loginRequired) {
-      window.location.href = '/login';
-    } else {
-      alert(i18n.cannotDelRss + resp.status);
+    }
+    PopulateMyCustomRss();
+    $('#title_to_add').val(title);
+    $('#url_to_add').val(url);
+    $('#isfulltext').prop('checked', isfulltext);
+    if (reportInvalid) { //报告源失效
+      $.post("/library/mgr/reportinvalid", {title: title, url: url, recipeId: ''});
     }
   });
 }
 
 //一次性删除所有的自定义RSS
 function RemoveAllCustomRss() {
-  $.post("/customrss/delete", {id: '#all_custom_rss#'}, function (data) {
-    if (data.status == "ok") {
-      my_custom_rss_list.length = 0;
-      PopulateMyCustomRss();
-      $('#title_to_add').val('');
-      $('#url_to_add').val('');
-      $('#isfulltext').prop('checked', false);
-    } else if (data.status == i18n.loginRequired) {
-      window.location.href = '/login';
-    } else {
-      alert(resp.status);
-    }
+  MakeAjaxRequest("/customrss/delete", 'POST', {id: '#all_custom_rss#'}, function (resp) {
+    my_custom_rss_list.length = 0;
+    PopulateMyCustomRss();
+    $('#title_to_add').val('');
+    $('#url_to_add').val('');
+    $('#isfulltext').prop('checked', false);
   });
   return false;
 }
@@ -554,25 +638,16 @@ function AddCustomRss() {
       return false;
     }
   }
-
-  $.post("/customrss/add", {title: title, url: url, fulltext: isfulltext.prop('checked'), 
-    separated: separated.prop('checked')},
-    function (data) {
-      if (data.status == "ok") {
-        my_custom_rss_list.unshift({title: data.title, url: data.url, 'id': data.id, 
-          isfulltext: data.isfulltext, separated: data.separated});
-        PopulateMyCustomRss();
-        title_to_add.val("");
-        url_to_add.val("");
-        isfulltext.prop('checked', false);
-        separated.prop('checked', false);
-      } else if (data.status == i18n.loginRequired) {
-        window.location.href = '/login';
-      } else {
-        alert(i18n.cannotAddRss + data.status);
-      }
-    },
-  );
+  MakeAjaxRequest("/customrss/add", "POST", {title: title, url: url, fulltext: isfulltext.prop('checked'), 
+    separated: separated.prop('checked')}, function (resp) {
+      my_custom_rss_list.unshift({title: resp.title, url: resp.url, 'id': resp.id, 
+        isfulltext: resp.isfulltext, separated: resp.separated});
+      PopulateMyCustomRss();
+      title_to_add.val("");
+      url_to_add.val("");
+      isfulltext.prop('checked', false);
+      separated.prop('checked', false);
+    });
 }
 
 //Global variable
@@ -580,8 +655,8 @@ var g_rss_categories = [];
 
 //将一个自定义RSS分享到服务器
 function ShareRssToServer(id, title, category, lang) {
-  $.post("/library", {id: id, category: category, title: title, lang: lang, creator: window.location.hostname}, function (data) {
-    if (data.status == "ok") {
+  MakeAjaxRequest("/library", "POST", {id: id, category: category, title: title, lang: lang, 
+    creator: window.location.hostname}, function (resp) {
       var idx = g_rss_categories.indexOf(category);
       if (g_rss_categories && (category != "")) {
         if (idx > 0) {
@@ -594,12 +669,7 @@ function ShareRssToServer(id, title, category, lang) {
       window.localStorage.setItem('rss_category', JSON.stringify(g_rss_categories));
       window.localStorage.setItem('shared_rss', ''); //清除本地存储，让分享库页面从服务器取新数据
       ShowSimpleModalDialog('<p>' + i18n.thankForShare + '</p>');
-    } else if (data.status == i18n.loginRequired) {
-      window.location.href = '/login';
-    } else {
-      alert(data.status);
-    }
-  });
+    });
 }
 
 //显示html5新增的dialog
@@ -681,24 +751,34 @@ function ShowShareDialog(id, title){
   var languages = ['en','fr','zh','es','pt','de','it','ja','ru','tr','ko','ar','cs','nl','el','hi','ms','bn','fa','ur',
     'sw','vi','pa','jv','tl','ha','da','in','no','pl','ro','sv','th'];
   var userLang = BrowserLanguage();
-  var ostr = ['<h3 style="margin:0px auto;text-align:center;">' + i18n.shareLinksHappiness + '</h3>'];
-  ostr.push('<div class="pure-g">');
-  ostr.push('<div class="pure-u-1 pure-u-md-1-2">');
-  ostr.push('<p>' + i18n.category + '</p>');
-  ostr.push('<div class="select-editable"><select onchange="this.nextElementSibling.value=this.value;DisplayShareRssLang()"><option value=""></option>');
-  for (var idx in g_rss_categories) {
-    ostr.push('<option value="{0}">{0}</option>'.format(g_rss_categories[idx]));
+  var ostr = [`<h3 style="margin:0px auto;text-align:center;">${i18n.shareLinksHappiness}</h3>
+    <div class="pure-g">
+      <div class="pure-u-1 pure-u-md-1-2">
+        <p>${i18n.category}</p>
+        <div class="select-editable">
+          <select onchange="this.nextElementSibling.value=this.value;DisplayShareRssLang()">
+            <option value=""></option>`];
+  for (const category of g_rss_categories) {
+    ostr.push(`<option value="${category}">${category}</option>`);
   }
-  ostr.push('</select><input type="text" name="category" value="" id="txt_share_rss_category" /></div></div>');
-  ostr.push('<div class="pure-u-1 pure-u-md-1-2">');
-  ostr.push('<p id="sh_rss_lang_disp">{0} ({1})</p>'.format(i18n.language, LanguageName(userLang)));
-  ostr.push('<div class="select-editable"><select onchange="this.nextElementSibling.value=this.value;DisplayShareRssLang()"><option value=""></option>');
-  for (var idx in languages){
-    ostr.push('<option value="{0}">{0}</option>'.format(languages[idx]));
+  ostr.push(`</select>
+          <input type="text" name="category" value="" id="txt_share_rss_category" />
+        </div>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-2">
+        <p id="sh_rss_lang_disp">${i18n.language} (${LanguageName(userLang)})</p>
+        <div class="select-editable">
+          <select onchange="this.nextElementSibling.value=this.value;DisplayShareRssLang()">
+            <option value=""></option>`);
+  for (var lang of languages) {
+    ostr.push(`<option value="${lang}">${lang}</option>`);
   }
-  ostr.push('</select><input type="text" name="category" oninput="DisplayShareRssLang()" value="' + userLang + '" id="txt_share_rss_lang" /></div></div>');
-  ostr.push('</div></div>');
-  ostr.push('<p>' + i18n.shareCatTips + '</p>');
+  ostr.push(`</select>
+          <input type="text" name="category" oninput="DisplayShareRssLang()" value="${userLang}" id="txt_share_rss_lang" />
+        </div>
+      </div>
+    </div>
+    <p style="color:#777">${i18n.shareCatTips}</p>`);
   showH5Dialog(ostr.join('')).then(function (idx) {
     var category = $("#txt_share_rss_category").val();
     var lang = $("#txt_share_rss_lang").val().toLowerCase();
@@ -733,17 +813,11 @@ function StartShareRss(id, title) {
     needCat = true;
   }
   if (needCat) {
-    $.get("/library/category", function(data) {
-      if (data.status == "ok") {
-        g_rss_categories = data.categories;
-        window.localStorage.setItem('rss_category', JSON.stringify(g_rss_categories));
-        window.localStorage.setItem('cat_fetch_time', now);
-        ShowShareDialog(id, title);
-      } else if (data.status == i18n.loginRequired) {
-        window.location.href = '/login';
-      } else {
-        alert(i18n.cannotAddRss + data.status);
-      }
+    MakeAjaxRequest("/library/category", "GET", null, function (resp) {
+      g_rss_categories = resp.categories;
+      window.localStorage.setItem('rss_category', JSON.stringify(g_rss_categories));
+      window.localStorage.setItem('cat_fetch_time', now);
+      ShowShareDialog(id, title);
     });
   } else {
     g_rss_categories = JSON.parse(catData);
@@ -753,19 +827,24 @@ function StartShareRss(id, title) {
 
 //打开上传Recipe对话框，选择一个文件后上传
 function OpenUploadRecipeDialog() {
-  var ostr = ['<h3 style="padding:0px;margin:0px auto 30px auto;text-align:center;">{0}</h3>'.format(i18n.uploadCustomRecipe)];
-  ostr.push('<form class="pure-form pure-form-aligned"><fieldset>');
-  ostr.push('<div class="pure-control-group">');
-  ostr.push('<label for="recipe_file">{0}</label>'.format(i18n.file));
-  ostr.push('<input type="file" name="recipe_file" id="recipe_file" style="outline:none;"/>');
-  ostr.push('</div><div class="pure-control-group" style="margin-top:20px">');
-  ostr.push('<label for="action_after_upload">{0}</label>'.format(i18n.action));
-  ostr.push('<select id="action_after_upload" name="action_after_upload" />');
-  ostr.push('<option value="">{0}</option>'.format(i18n.uploadOnly));
-  ostr.push('<option value="subscribe">{0}</option>'.format(i18n.subscribe));
-  ostr.push('<option value="separated">{0}</option>'.format(i18n.subscriSep));
-  ostr.push('</div></fieldset></form>');
-  showH5Dialog(ostr.join('')).then(function (idx) {
+  var ostr = `<h3 style="padding:0px;margin:0px auto 30px auto;text-align:center;">${i18n.uploadCustomRecipe}</h3>
+    <form class="pure-form pure-form-aligned">
+      <fieldset>
+        <div class="pure-control-group">
+          <label for="recipe_file">${i18n.file}</label>
+          <input type="file" name="recipe_file" id="recipe_file" style="outline:none;"/>
+        </div>
+        <div class="pure-control-group" style="margin-top:20px">
+          <label for="action_after_upload">${i18n.action}</label>
+          <select id="action_after_upload" name="action_after_upload">
+            <option value="">${i18n.uploadOnly}</option>
+            <option value="subscribe">${i18n.subscribe}</option>
+            <option value="separated">${i18n.subscriSep}</option>
+          </select>
+        </div>
+      </fieldset>
+    </form>`;
+  showH5Dialog(ostr).then(function (idx) {
     var recipeFile = $('#recipe_file');
     var formData = new FormData();
     var fileData = recipeFile.prop("files")[0];
@@ -820,28 +899,21 @@ function DeleteUploadRecipe(id, title) {
     return;
   }
 
-  $.post("/recipe/delete", {id: id, force: force}, function (data) {
-    if (data.status == "ok") {
-      for (var idx = 0; idx < my_uploaded_recipes.length; idx++) {
-        if (my_uploaded_recipes[idx]['id'] == id) {
-          my_uploaded_recipes.splice(idx, 1);
-          break;
-        }
+  MakeAjaxRequest("/recipe/delete", "POST", {id: id, force: force}, function (resp) {
+    for (var idx = 0; idx < my_uploaded_recipes.length; idx++) {
+      if (my_uploaded_recipes[idx]['id'] == id) {
+        my_uploaded_recipes.splice(idx, 1);
+        break;
       }
-      for (var idx = 0; idx < my_booked_recipes.length; idx++) {
-        if (my_booked_recipes[idx].recipe_id == id) {
-          my_booked_recipes.splice(idx, 1); //删除对应项
-          break;
-        }
-      }
-      PopulateMySubscribed();
-      PopulateLibrary('');
-      //alert(i18n.recipeDeleted);
-    } else if (data.status == i18n.loginRequired) {
-      window.location.href = '/login';
-    } else {
-      alert(data.status);
     }
+    for (var idx = 0; idx < my_booked_recipes.length; idx++) {
+      if (my_booked_recipes[idx].recipe_id == id) {
+        my_booked_recipes.splice(idx, 1); //删除对应项
+        break;
+      }
+    }
+    PopulateMySubscribed();
+    PopulateLibrary('');
   });
 }
 
@@ -902,22 +974,11 @@ function SelectDeliverNone() {
 function VerifyInstapaper() {
   var instauser = $("#instapaper_username").val();
   var instapass = $("#instapaper_password").val();
-
-  $.ajax({
-    url: "/verifyajax/instapaper",
-    type: "POST",
-    data: { username: instauser, password: instapass },
-    success: function (data, textStatus, jqXHR) {
-      if (data.status != "ok") {
-        alert("Error:" + data.status);
-      } else if (data.correct == 1) {
-        ShowSimpleModalDialog('<h3>{0}</h3><p>{1}</p>'.format(i18n.congratulations, i18n.configOk));
-      } else {
-        alert(i18n.passwordWrong);
-      }
-    },
-    error: function (status) {
-      alert(status);
+  MakeAjaxRequest("/verifyajax/instapaper", "POST", {username: instauser, password: instapass}, function (resp) {
+    if (resp.correct == 1) {
+      ShowSimpleModalDialog('<h3>{0}</h3><p>{1}</p>'.format(i18n.congratulations, i18n.configOk));
+    } else {
+      alert(i18n.passwordWrong);
     }
   });
 }
@@ -932,20 +993,8 @@ function VerifyWallaBag() {
   let data = {'host': host, 'username': name, 'password': passwd, 'client_id': id_, 
     'client_secret': secret};
 
-  $.ajax({
-    url: "/verifyajax/wallabag",
-    type: "POST",
-    data: data,
-    success: function (data, textStatus, jqXHR) {
-      if (data.status == "ok") {
-        ShowSimpleModalDialog('<h3>{0}</h3><p>{1}</p>'.format(i18n.congratulations, i18n.configOk));
-      } else {
-        alert(data.status);
-      }
-    },
-    error: function (status) {
-      alert(status.toString());
-    }
+  MakeAjaxRequest("/verifyajax/wallabag", "POST", data, function (resp) {
+    ShowSimpleModalDialog('<h3>{0}</h3><p>{1}</p>'.format(i18n.congratulations, i18n.configOk));
   });
 }
 ///[end] adv_archive.html
@@ -1124,16 +1173,9 @@ function DeleteAccount(name) {
   if (!confirm(i18n.areYouSureDelete.format(name))) {
     return;
   }
-
-  $.post("/account/delete", {name: name}, function (data) {
-    if (data.status == "ok") {
-      ShowSimpleModalDialog('<p>{0}</p>'.format(i18n.accountDeleted));
-      window.location.reload(true);
-    } else if (data.status == i18n.loginRequired) {
-      window.location.href = '/login';
-    } else {
-      alert(data.status);
-    }
+  MakeAjaxRequest("/account/delete", "POST", {name: name}, function (resp) {
+    ShowSimpleModalDialog('<p>{0}</p>'.format(i18n.accountDeleted));
+    window.location.reload(true);
   });
 }
 ///[end] admin.html
@@ -1330,15 +1372,8 @@ function TestTranslator(recipeId) {
   var divDst = $('#translator_test_dst_text');
   divDst.val(i18n.translating);
   recipeId = recipeId.replace(':', '__');
-  $.post("/translator/test/" + recipeId, {recipeId: recipeId, text: text}, function (data) {
-    if (data.status == "ok") {
-      divDst.val(data.text);
-    } else if (data.status == i18n.loginRequired) {
-      window.location.href = '/login';
-    } else {
-      divDst.val('');
-      alert(data.status);
-    }
+  MakeAjaxRequest("/translator/test/" + recipeId, "POST", {recipeId: recipeId, text: text}, function (resp) {
+    divDst.val(resp.text);
   });
 }
 ///[end] book_translator.html
@@ -1472,23 +1507,17 @@ function TestTTS(recipeId) {
   var text = $('#tts_test_src_text').val();
   var ttsAudio = $('#tts_audio_player');
   recipeId = recipeId.replace(':', '__');
-  $.post("/tts/test/" + recipeId, {recipeId: recipeId, text: text}, function (data) {
-    if (data.status == "ok") {
-      let blob = b64toBlob(data.audio, data.mime);
-      let audioUrl = ttsAudio.attr('src');
-      if (audioUrl) {
-        try {
-          URL.revokeObjectURL(audioUrl);
-        } catch (e) {}
-      }
-      audioUrl = URL.createObjectURL(blob);
-      ttsAudio.attr('src', audioUrl);
-      ttsAudio[0].play();
-    } else if (data.status == i18n.loginRequired) {
-      window.location.href = '/login';
-    } else {
-      alert(data.status);
+  MakeAjaxRequest("/tts/test/" + recipeId, "POST", {recipeId: recipeId, text: text}, function (resp) {
+    let blob = b64toBlob(resp.audio, resp.mime);
+    let audioUrl = ttsAudio.attr('src');
+    if (audioUrl) {
+      try {
+        URL.revokeObjectURL(audioUrl);
+      } catch (e) {}
     }
+    audioUrl = URL.createObjectURL(blob);
+    ttsAudio.attr('src', audioUrl);
+    ttsAudio[0].play();
   });
 }
 ///[end] book_audiolator.html
@@ -1555,12 +1584,8 @@ function SetSmOptiosVisualbility() {
 
 //发送测试邮件
 function SendTestEmail() {
-  $.post("/send_test_email", {url: window.location.href}, function (data) {
-    if (data.status == "ok") {
-      ShowSimpleModalDialog('<p>{0}<br/><hr/>{1}</p>'.format(i18n.testEmailOk, data.emails.join('<br/>')));
-    } else {
-      alert(data.status);
-    }
+  MakeAjaxRequest("/send_test_email", "POST", {url: window.location.href}, function (resp) {
+    ShowSimpleModalDialog('<p>{0}<br/><hr/>{1}</p>'.format(i18n.testEmailOk, resp.emails.join('<br/>')));
   });
   return false;
 }

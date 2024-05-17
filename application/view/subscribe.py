@@ -47,6 +47,8 @@ def MySubscription(user: KeUser):
         item['tr_enable'] = item['translator'].get('enable')
         item['tts_enable'] = item['tts'].get('enable')
     for item in my_booked_recipes:
+        if not isinstance(item['send_days'], dict): #处理以前版本的不兼容修改
+            item['send_days'] = {}
         item['tr_enable'] = item['translator'].get('enable')
         item['tts_enable'] = item['tts'].get('enable')
         
@@ -66,7 +68,7 @@ def MySubscriptionPost(user: KeUser):
     url = form.get('url')
     isfulltext = bool(form.get('fulltext'))
     if not title or not url:
-        return redirect(url_for("bpSubscribe.MySubscription", tips=(_("Title or url is empty!"))))
+        return redirect(url_for("bpSubscribe.MySubscription"))
 
     if not url.lower().startswith('http'): #http and https
         url = ('https:/' if url.startswith('/') else 'https://') + url
@@ -286,9 +288,13 @@ def DeleteRecipe(user: KeUser, recipeId: str, recipeType: str, recipe: Recipe, f
 def ScheduleRecipe(recipeId, form):
     dbInst = BookedRecipe.get_or_none(BookedRecipe.recipe_id == recipeId)
     if dbInst:
-        allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        dbInst.send_days = [weekday for weekday, day in enumerate(allDays) if str_to_bool(form.get(day, ''))]
-        dbInst.send_times = [tm for tm in range(24) if str_to_bool(form.get(str(tm), ''))]
+        type_ = form.get('type')
+        if type_ in ('weekday', 'date'):
+            days = [int(item) for item in form.get('days', '').replace(' ', '').split(',') if item.isdigit()]
+            dbInst.send_days = {'type': type_, 'days': days}
+        else:
+            dbInst.send_days = {}
+        dbInst.send_times = [int(item) for item in form.get('times', '').replace(' ', '').split(',') if item.isdigit()]
         dbInst.save()
         return {'status': 'ok', 'id': recipeId, 'send_days': dbInst.send_days, 'send_times': dbInst.send_times}
     else:
