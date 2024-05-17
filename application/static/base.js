@@ -514,7 +514,10 @@ function ScheduleRecipe(id, title) {
       <label onclick="HideCalendars()">${i18n.time}</label>
       ${timePker}
     </div>
-    <p style="color:#777" onclick="HideCalendars()">&#x1F4C5; ${i18n.multiValuesWithCommas}</p>`;
+    <p style="color:#777" onclick="HideCalendars()">
+    &#x1F4C5; ${i18n.settingIsPrioritized}<br/>
+    &#x1F4A1; ${i18n.multiValuesWithCommas}
+    </p>`;
 
   showH5Dialog(ostr).then(function (idx) {
     let type = $('#type_sched_date').val();

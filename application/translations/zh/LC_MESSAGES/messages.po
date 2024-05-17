@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-05-16 19:17-0300\n"
+"POT-Creation-Date: 2024-05-17 12:57-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:171
+#: application/templates/admin.html:3 application/templates/base.html:172
 msgid "Admin"
 msgstr "账号管理"
 
@@ -75,9 +75,9 @@ msgid "Accounts"
 msgstr "用户账号列表"
 
 #: application/templates/admin.html:43
-#: application/templates/adv_whitelist.html:29 application/templates/my.html:34
-#: application/view/admin.py:57 application/view/admin.py:64
-#: application/view/admin.py:91
+#: application/templates/adv_inboundmail.html:61
+#: application/templates/my.html:34 application/view/admin.py:57
+#: application/view/admin.py:64 application/view/admin.py:91
 msgid "Add"
 msgstr "添加"
 
@@ -125,7 +125,7 @@ msgid "Never"
 msgstr "永不过期"
 
 #: application/templates/admin.html:70
-#: application/templates/adv_whitelist.html:47
+#: application/templates/adv_inboundmail.html:26
 #: application/templates/setting.html:144
 #: application/templates/user_account.html:43
 msgid "7 Days"
@@ -164,8 +164,8 @@ msgid "Edit account"
 msgstr "编辑账号"
 
 #: application/templates/admin.html:89
+#: application/templates/adv_inboundmail.html:54
 #: application/templates/adv_uploadcss.html:31
-#: application/templates/adv_whitelist.html:22
 #: application/templates/base.html:21 application/templates/webmail.html:22
 msgid "Delete"
 msgstr "删除"
@@ -220,7 +220,7 @@ msgid "Host"
 msgstr "主机"
 
 #: application/templates/adv_archive.html:119
-#: application/templates/adv_whitelist.html:55
+#: application/templates/adv_inboundmail.html:34
 #: application/templates/book_audiolator.html:113
 #: application/templates/book_translator.html:80
 #: application/templates/setting.html:230
@@ -235,9 +235,11 @@ msgstr "现在投递"
 
 #: application/templates/adv_base.html:48
 #: application/templates/adv_base.html:52
-#: application/templates/adv_whitelist.html:13
-msgid "White List"
-msgstr "邮件白名单"
+#: application/templates/adv_inboundmail.html:3
+#: application/templates/adv_inboundmail.html:9
+#: application/templates/adv_inboundmail.html:14
+msgid "Inbound Mail"
+msgstr "入站邮件"
 
 #: application/templates/adv_base.html:66
 #: application/templates/adv_base.html:70
@@ -316,6 +318,70 @@ msgstr "默认导入为全文订阅源"
 msgid "Download"
 msgstr "下载"
 
+#: application/templates/adv_inboundmail.html:11
+msgid ""
+"To enable the inbound email feature, you also need to configure the "
+"whitelist."
+msgstr "为了使能入站邮件功能，还需要配置白名单列表。"
+
+#: application/templates/adv_inboundmail.html:16
+#: application/templates/book_translator.html:22
+msgid "Disable"
+msgstr "禁止"
+
+#: application/templates/adv_inboundmail.html:17
+msgid "Forward Only"
+msgstr "仅转发"
+
+#: application/templates/adv_inboundmail.html:18
+msgid "Save Only"
+msgstr "仅保存"
+
+#: application/templates/adv_inboundmail.html:19
+msgid "Save and Forward"
+msgstr "保存和转发"
+
+#: application/templates/adv_inboundmail.html:23
+msgid "Email Retention"
+msgstr "邮件保留期"
+
+#: application/templates/adv_inboundmail.html:25
+#: application/templates/setting.html:138
+msgid "1 Day"
+msgstr "一天"
+
+#: application/templates/adv_inboundmail.html:27
+msgid "30 Days"
+msgstr "三十天"
+
+#: application/templates/adv_inboundmail.html:28
+#: application/templates/setting.html:137
+msgid "No limit"
+msgstr "不限制"
+
+#: application/templates/adv_inboundmail.html:36
+msgid "Open webmail"
+msgstr "打开收件箱"
+
+#: application/templates/adv_inboundmail.html:44
+msgid "White List"
+msgstr "邮件白名单"
+
+#: application/templates/adv_inboundmail.html:46
+#, python-format
+msgid ""
+"Emails sent to %(name)sxxx@%(mailHost)s will be forwarded to your kindle "
+"email."
+msgstr "发送至 %(name)sxxx@%(mailHost)s 的邮件将被转发到您的邮箱。"
+
+#: application/templates/adv_inboundmail.html:47
+msgid "Example"
+msgstr "例子"
+
+#: application/templates/adv_inboundmail.html:59
+msgid "Please input mail address"
+msgstr "请输入邮件地址"
+
 #: application/templates/adv_uploadcover.html:3
 msgid "Cover image"
 msgstr "封面图像"
@@ -356,59 +422,6 @@ msgstr "从本机上传一个样式表（仅接受utf-8格式）。"
 #: application/templates/adv_uploadcss.html:30
 msgid "Upload"
 msgstr "上传"
-
-#: application/templates/adv_whitelist.html:3
-msgid "White list"
-msgstr "邮件白名单"
-
-#: application/templates/adv_whitelist.html:15
-#, python-format
-msgid ""
-"Emails sent to %(name)sxxx@%(mailHost)s will be transferred to your "
-"kindle email."
-msgstr "发送至 %(name)sxxx@%(mailHost)s 的邮件将被转发到您的邮箱。"
-
-#: application/templates/adv_whitelist.html:27
-msgid "Please input mail address"
-msgstr "请输入邮件地址"
-
-#: application/templates/adv_whitelist.html:38
-#: application/templates/webmail.html:3
-msgid "Webmail"
-msgstr "收件箱"
-
-#: application/templates/adv_whitelist.html:40
-msgid ""
-"No matter how it is configured, this feature will not impact the email "
-"whitelist."
-msgstr "此配置不会影响到邮件白名单。"
-
-#: application/templates/adv_whitelist.html:43
-msgid "Save Inbound Mail"
-msgstr "保存收到的邮件"
-
-#: application/templates/adv_whitelist.html:45
-#: application/templates/book_translator.html:22
-msgid "Disable"
-msgstr "禁止"
-
-#: application/templates/adv_whitelist.html:46
-#: application/templates/setting.html:138
-msgid "1 Day"
-msgstr "一天"
-
-#: application/templates/adv_whitelist.html:48
-msgid "30 Days"
-msgstr "三十天"
-
-#: application/templates/adv_whitelist.html:49
-#: application/templates/setting.html:137
-msgid "No limit"
-msgstr "不限制"
-
-#: application/templates/adv_whitelist.html:57
-msgid "Open webmail"
-msgstr "打开收件箱"
 
 #: application/templates/autoback.html:3
 msgid "Auto back"
@@ -794,8 +807,8 @@ msgstr "请选择至少一个邮件。"
 #: application/templates/base.html:112 application/view/admin.py:77
 #: application/view/admin.py:146 application/view/admin.py:193
 #: application/view/extension.py:33 application/view/extension.py:62
-#: application/view/inbound_email.py:392 application/view/inbound_email.py:400
-#: application/view/inbound_email.py:415 application/view/inbound_email.py:436
+#: application/view/inbound_email.py:403 application/view/inbound_email.py:411
+#: application/view/inbound_email.py:426 application/view/inbound_email.py:447
 #: application/view/login.py:229 application/view/login.py:258
 #: application/view/setting.py:49 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
@@ -838,42 +851,46 @@ msgid "Date"
 msgstr "日期"
 
 #: application/templates/base.html:122
+msgid "This setting is prioritized."
+msgstr "此设置具有更高优先级。"
+
+#: application/templates/base.html:123
 msgid "Combine multiple values with commas."
 msgstr "使用逗号分隔多个数值。"
 
-#: application/templates/base.html:144 application/templates/home.html:12
+#: application/templates/base.html:145 application/templates/home.html:12
 msgid "Logout"
 msgstr "退出"
 
-#: application/templates/base.html:146 application/templates/home.html:17
+#: application/templates/base.html:147 application/templates/home.html:17
 #: application/templates/login.html:3 application/templates/login.html:19
 #: application/templates/login.html:30
 msgid "Login"
 msgstr "登录"
 
-#: application/templates/base.html:148 application/templates/signup.html:3
+#: application/templates/base.html:149 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr "注册"
 
-#: application/templates/base.html:168 application/templates/home.html:11
+#: application/templates/base.html:169 application/templates/home.html:11
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr "我的订阅"
 
-#: application/templates/base.html:169 application/templates/setting.html:3
+#: application/templates/base.html:170 application/templates/setting.html:3
 msgid "Settings"
 msgstr "设置"
 
-#: application/templates/base.html:170 application/templates/logs.html:3
+#: application/templates/base.html:171 application/templates/logs.html:3
 msgid "Logs"
 msgstr "投递日志"
 
-#: application/templates/base.html:172
+#: application/templates/base.html:173
 msgid "Advanced"
 msgstr "高级设置"
 
-#: application/templates/base.html:173 application/templates/library.html:3
+#: application/templates/base.html:174 application/templates/library.html:3
 msgid "Shared"
 msgstr "网友分享"
 
@@ -1386,6 +1403,10 @@ msgstr "账号"
 msgid "Never expire"
 msgstr "永久有效"
 
+#: application/templates/webmail.html:3
+msgid "Webmail"
+msgstr "收件箱"
+
 #: application/templates/webmail.html:17
 msgid "Refresh"
 msgstr "刷新"
@@ -1406,7 +1427,7 @@ msgstr "转发"
 msgid "Fwd as Attach"
 msgstr "作为附件转发"
 
-#: application/view/admin.py:48 application/view/adv.py:388
+#: application/view/admin.py:48 application/view/adv.py:394
 #: application/view/setting.py:75 application/view/translator.py:84
 #: application/view/translator.py:166
 msgid "Settings Saved!"
@@ -1462,93 +1483,93 @@ msgstr "账号设置已更新。"
 msgid "The old password is wrong."
 msgstr "原密码错误。"
 
-#: application/view/adv.py:85 application/view/adv.py:86
-#: application/view/adv.py:87 application/view/adv.py:88
-#: application/view/adv.py:89 application/view/adv.py:90
 #: application/view/adv.py:91 application/view/adv.py:92
 #: application/view/adv.py:93 application/view/adv.py:94
+#: application/view/adv.py:95 application/view/adv.py:96
+#: application/view/adv.py:97 application/view/adv.py:98
+#: application/view/adv.py:99 application/view/adv.py:100
 msgid "Append hyperlink '{}' to article"
 msgstr "在每篇文章后附加 '{}' 超链接"
 
-#: application/view/adv.py:85 application/view/adv.py:86
-#: application/view/adv.py:87 application/view/adv.py:88
-#: application/view/adv.py:89
+#: application/view/adv.py:91 application/view/adv.py:92
+#: application/view/adv.py:93 application/view/adv.py:94
+#: application/view/adv.py:95
 msgid "Save to {}"
 msgstr "保存到 {}"
 
-#: application/view/adv.py:85
+#: application/view/adv.py:91
 msgid "evernote"
 msgstr "evernote"
 
-#: application/view/adv.py:86
+#: application/view/adv.py:92
 msgid "wiz"
 msgstr "为知笔记"
 
-#: application/view/adv.py:87
+#: application/view/adv.py:93
 msgid "pocket"
 msgstr "pocket"
 
-#: application/view/adv.py:88
+#: application/view/adv.py:94
 msgid "instapaper"
 msgstr "instapaper"
 
-#: application/view/adv.py:89
+#: application/view/adv.py:95
 msgid "wallabag"
 msgstr "wallabag"
 
-#: application/view/adv.py:90 application/view/adv.py:91
-#: application/view/adv.py:92 application/view/adv.py:93
+#: application/view/adv.py:96 application/view/adv.py:97
+#: application/view/adv.py:98 application/view/adv.py:99
 msgid "Share on {}"
 msgstr "分享到 {}"
 
-#: application/view/adv.py:90
+#: application/view/adv.py:96
 msgid "weibo"
 msgstr "微博"
 
-#: application/view/adv.py:91
+#: application/view/adv.py:97
 msgid "facebook"
 msgstr "facebook"
 
-#: application/view/adv.py:93
+#: application/view/adv.py:99
 msgid "tumblr"
 msgstr "tumblr"
 
-#: application/view/adv.py:94
+#: application/view/adv.py:100
 msgid "Open in browser"
 msgstr "在浏览器打开"
 
-#: application/view/adv.py:95
+#: application/view/adv.py:101
 msgid "Append qrcode of url to article"
 msgstr "在每篇文章后附加文章链接的二维码"
 
-#: application/view/adv.py:359 application/view/share.py:54
+#: application/view/adv.py:365 application/view/share.py:54
 #: application/view/subscribe.py:247
 msgid "Unknown command: {}"
 msgstr "未知命令：{}"
 
-#: application/view/adv.py:390
+#: application/view/adv.py:396
 msgid "The format is invalid."
 msgstr "格式非法。"
 
-#: application/view/adv.py:422
+#: application/view/adv.py:428
 msgid "Authorization Error!<br/>{}"
 msgstr "申请授权过程失败！<br/>{}"
 
-#: application/view/adv.py:443
+#: application/view/adv.py:449
 msgid "Success authorized by Pocket!"
 msgstr "已经成功获得Pocket的授权！"
 
-#: application/view/adv.py:449
+#: application/view/adv.py:455
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr "申请Pocket授权失败!<hr/>错误信息参考如下：<br/><br/>{}"
 
-#: application/view/adv.py:470
+#: application/view/adv.py:476
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr "Instapaper服务器异常，请稍候再试。"
 
-#: application/view/adv.py:483
+#: application/view/adv.py:489
 msgid "Request type [{}] unsupported"
 msgstr "不支持你请求的命令类型 [{}]"
 

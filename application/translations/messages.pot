@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-05-16 19:17-0300\n"
+"POT-Creation-Date: 2024-05-17 12:57-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:171
+#: application/templates/admin.html:3 application/templates/base.html:172
 msgid "Admin"
 msgstr ""
 
@@ -74,9 +74,9 @@ msgid "Accounts"
 msgstr ""
 
 #: application/templates/admin.html:43
-#: application/templates/adv_whitelist.html:29 application/templates/my.html:34
-#: application/view/admin.py:57 application/view/admin.py:64
-#: application/view/admin.py:91
+#: application/templates/adv_inboundmail.html:61
+#: application/templates/my.html:34 application/view/admin.py:57
+#: application/view/admin.py:64 application/view/admin.py:91
 msgid "Add"
 msgstr ""
 
@@ -124,7 +124,7 @@ msgid "Never"
 msgstr ""
 
 #: application/templates/admin.html:70
-#: application/templates/adv_whitelist.html:47
+#: application/templates/adv_inboundmail.html:26
 #: application/templates/setting.html:144
 #: application/templates/user_account.html:43
 msgid "7 Days"
@@ -163,8 +163,8 @@ msgid "Edit account"
 msgstr ""
 
 #: application/templates/admin.html:89
+#: application/templates/adv_inboundmail.html:54
 #: application/templates/adv_uploadcss.html:31
-#: application/templates/adv_whitelist.html:22
 #: application/templates/base.html:21 application/templates/webmail.html:22
 msgid "Delete"
 msgstr ""
@@ -219,7 +219,7 @@ msgid "Host"
 msgstr ""
 
 #: application/templates/adv_archive.html:119
-#: application/templates/adv_whitelist.html:55
+#: application/templates/adv_inboundmail.html:34
 #: application/templates/book_audiolator.html:113
 #: application/templates/book_translator.html:80
 #: application/templates/setting.html:230
@@ -234,8 +234,10 @@ msgstr ""
 
 #: application/templates/adv_base.html:48
 #: application/templates/adv_base.html:52
-#: application/templates/adv_whitelist.html:13
-msgid "White List"
+#: application/templates/adv_inboundmail.html:3
+#: application/templates/adv_inboundmail.html:9
+#: application/templates/adv_inboundmail.html:14
+msgid "Inbound Mail"
 msgstr ""
 
 #: application/templates/adv_base.html:66
@@ -315,6 +317,70 @@ msgstr ""
 msgid "Download"
 msgstr ""
 
+#: application/templates/adv_inboundmail.html:11
+msgid ""
+"To enable the inbound email feature, you also need to configure the "
+"whitelist."
+msgstr ""
+
+#: application/templates/adv_inboundmail.html:16
+#: application/templates/book_translator.html:22
+msgid "Disable"
+msgstr ""
+
+#: application/templates/adv_inboundmail.html:17
+msgid "Forward Only"
+msgstr ""
+
+#: application/templates/adv_inboundmail.html:18
+msgid "Save Only"
+msgstr ""
+
+#: application/templates/adv_inboundmail.html:19
+msgid "Save and Forward"
+msgstr ""
+
+#: application/templates/adv_inboundmail.html:23
+msgid "Email Retention"
+msgstr ""
+
+#: application/templates/adv_inboundmail.html:25
+#: application/templates/setting.html:138
+msgid "1 Day"
+msgstr ""
+
+#: application/templates/adv_inboundmail.html:27
+msgid "30 Days"
+msgstr ""
+
+#: application/templates/adv_inboundmail.html:28
+#: application/templates/setting.html:137
+msgid "No limit"
+msgstr ""
+
+#: application/templates/adv_inboundmail.html:36
+msgid "Open webmail"
+msgstr ""
+
+#: application/templates/adv_inboundmail.html:44
+msgid "White List"
+msgstr ""
+
+#: application/templates/adv_inboundmail.html:46
+#, python-format
+msgid ""
+"Emails sent to %(name)sxxx@%(mailHost)s will be forwarded to your kindle "
+"email."
+msgstr ""
+
+#: application/templates/adv_inboundmail.html:47
+msgid "Example"
+msgstr ""
+
+#: application/templates/adv_inboundmail.html:59
+msgid "Please input mail address"
+msgstr ""
+
 #: application/templates/adv_uploadcover.html:3
 msgid "Cover image"
 msgstr ""
@@ -354,59 +420,6 @@ msgstr ""
 
 #: application/templates/adv_uploadcss.html:30
 msgid "Upload"
-msgstr ""
-
-#: application/templates/adv_whitelist.html:3
-msgid "White list"
-msgstr ""
-
-#: application/templates/adv_whitelist.html:15
-#, python-format
-msgid ""
-"Emails sent to %(name)sxxx@%(mailHost)s will be transferred to your "
-"kindle email."
-msgstr ""
-
-#: application/templates/adv_whitelist.html:27
-msgid "Please input mail address"
-msgstr ""
-
-#: application/templates/adv_whitelist.html:38
-#: application/templates/webmail.html:3
-msgid "Webmail"
-msgstr ""
-
-#: application/templates/adv_whitelist.html:40
-msgid ""
-"No matter how it is configured, this feature will not impact the email "
-"whitelist."
-msgstr ""
-
-#: application/templates/adv_whitelist.html:43
-msgid "Save Inbound Mail"
-msgstr ""
-
-#: application/templates/adv_whitelist.html:45
-#: application/templates/book_translator.html:22
-msgid "Disable"
-msgstr ""
-
-#: application/templates/adv_whitelist.html:46
-#: application/templates/setting.html:138
-msgid "1 Day"
-msgstr ""
-
-#: application/templates/adv_whitelist.html:48
-msgid "30 Days"
-msgstr ""
-
-#: application/templates/adv_whitelist.html:49
-#: application/templates/setting.html:137
-msgid "No limit"
-msgstr ""
-
-#: application/templates/adv_whitelist.html:57
-msgid "Open webmail"
 msgstr ""
 
 #: application/templates/autoback.html:3
@@ -793,8 +806,8 @@ msgstr ""
 #: application/templates/base.html:112 application/view/admin.py:77
 #: application/view/admin.py:146 application/view/admin.py:193
 #: application/view/extension.py:33 application/view/extension.py:62
-#: application/view/inbound_email.py:392 application/view/inbound_email.py:400
-#: application/view/inbound_email.py:415 application/view/inbound_email.py:436
+#: application/view/inbound_email.py:403 application/view/inbound_email.py:411
+#: application/view/inbound_email.py:426 application/view/inbound_email.py:447
 #: application/view/login.py:229 application/view/login.py:258
 #: application/view/setting.py:49 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
@@ -837,42 +850,46 @@ msgid "Date"
 msgstr ""
 
 #: application/templates/base.html:122
+msgid "This setting is prioritized."
+msgstr ""
+
+#: application/templates/base.html:123
 msgid "Combine multiple values with commas."
 msgstr ""
 
-#: application/templates/base.html:144 application/templates/home.html:12
+#: application/templates/base.html:145 application/templates/home.html:12
 msgid "Logout"
 msgstr ""
 
-#: application/templates/base.html:146 application/templates/home.html:17
+#: application/templates/base.html:147 application/templates/home.html:17
 #: application/templates/login.html:3 application/templates/login.html:19
 #: application/templates/login.html:30
 msgid "Login"
 msgstr ""
 
-#: application/templates/base.html:148 application/templates/signup.html:3
+#: application/templates/base.html:149 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr ""
 
-#: application/templates/base.html:168 application/templates/home.html:11
+#: application/templates/base.html:169 application/templates/home.html:11
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr ""
 
-#: application/templates/base.html:169 application/templates/setting.html:3
+#: application/templates/base.html:170 application/templates/setting.html:3
 msgid "Settings"
 msgstr ""
 
-#: application/templates/base.html:170 application/templates/logs.html:3
+#: application/templates/base.html:171 application/templates/logs.html:3
 msgid "Logs"
 msgstr ""
 
-#: application/templates/base.html:172
+#: application/templates/base.html:173
 msgid "Advanced"
 msgstr ""
 
-#: application/templates/base.html:173 application/templates/library.html:3
+#: application/templates/base.html:174 application/templates/library.html:3
 msgid "Shared"
 msgstr ""
 
@@ -1383,6 +1400,10 @@ msgstr ""
 msgid "Never expire"
 msgstr ""
 
+#: application/templates/webmail.html:3
+msgid "Webmail"
+msgstr ""
+
 #: application/templates/webmail.html:17
 msgid "Refresh"
 msgstr ""
@@ -1403,7 +1424,7 @@ msgstr ""
 msgid "Fwd as Attach"
 msgstr ""
 
-#: application/view/admin.py:48 application/view/adv.py:388
+#: application/view/admin.py:48 application/view/adv.py:394
 #: application/view/setting.py:75 application/view/translator.py:84
 #: application/view/translator.py:166
 msgid "Settings Saved!"
@@ -1459,93 +1480,93 @@ msgstr ""
 msgid "The old password is wrong."
 msgstr ""
 
-#: application/view/adv.py:85 application/view/adv.py:86
-#: application/view/adv.py:87 application/view/adv.py:88
-#: application/view/adv.py:89 application/view/adv.py:90
 #: application/view/adv.py:91 application/view/adv.py:92
 #: application/view/adv.py:93 application/view/adv.py:94
+#: application/view/adv.py:95 application/view/adv.py:96
+#: application/view/adv.py:97 application/view/adv.py:98
+#: application/view/adv.py:99 application/view/adv.py:100
 msgid "Append hyperlink '{}' to article"
 msgstr ""
 
-#: application/view/adv.py:85 application/view/adv.py:86
-#: application/view/adv.py:87 application/view/adv.py:88
-#: application/view/adv.py:89
+#: application/view/adv.py:91 application/view/adv.py:92
+#: application/view/adv.py:93 application/view/adv.py:94
+#: application/view/adv.py:95
 msgid "Save to {}"
 msgstr ""
 
-#: application/view/adv.py:85
+#: application/view/adv.py:91
 msgid "evernote"
 msgstr ""
 
-#: application/view/adv.py:86
+#: application/view/adv.py:92
 msgid "wiz"
 msgstr ""
 
-#: application/view/adv.py:87
+#: application/view/adv.py:93
 msgid "pocket"
 msgstr ""
 
-#: application/view/adv.py:88
+#: application/view/adv.py:94
 msgid "instapaper"
 msgstr ""
 
-#: application/view/adv.py:89
+#: application/view/adv.py:95
 msgid "wallabag"
 msgstr ""
 
-#: application/view/adv.py:90 application/view/adv.py:91
-#: application/view/adv.py:92 application/view/adv.py:93
+#: application/view/adv.py:96 application/view/adv.py:97
+#: application/view/adv.py:98 application/view/adv.py:99
 msgid "Share on {}"
 msgstr ""
 
-#: application/view/adv.py:90
+#: application/view/adv.py:96
 msgid "weibo"
 msgstr ""
 
-#: application/view/adv.py:91
+#: application/view/adv.py:97
 msgid "facebook"
 msgstr ""
 
-#: application/view/adv.py:93
+#: application/view/adv.py:99
 msgid "tumblr"
 msgstr ""
 
-#: application/view/adv.py:94
+#: application/view/adv.py:100
 msgid "Open in browser"
 msgstr ""
 
-#: application/view/adv.py:95
+#: application/view/adv.py:101
 msgid "Append qrcode of url to article"
 msgstr ""
 
-#: application/view/adv.py:359 application/view/share.py:54
+#: application/view/adv.py:365 application/view/share.py:54
 #: application/view/subscribe.py:247
 msgid "Unknown command: {}"
 msgstr ""
 
-#: application/view/adv.py:390
+#: application/view/adv.py:396
 msgid "The format is invalid."
 msgstr ""
 
-#: application/view/adv.py:422
+#: application/view/adv.py:428
 msgid "Authorization Error!<br/>{}"
 msgstr ""
 
-#: application/view/adv.py:443
+#: application/view/adv.py:449
 msgid "Success authorized by Pocket!"
 msgstr ""
 
-#: application/view/adv.py:449
+#: application/view/adv.py:455
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr ""
 
-#: application/view/adv.py:470
+#: application/view/adv.py:476
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 
-#: application/view/adv.py:483
+#: application/view/adv.py:489
 msgid "Request type [{}] unsupported"
 msgstr ""
 

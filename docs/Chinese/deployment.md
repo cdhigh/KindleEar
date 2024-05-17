@@ -99,22 +99,26 @@ Docker不限平台，只要目标平台支持Docker，资源足够就可以部�
 wget -O - https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/ubuntu_docker.sh | bash
 ```
 
-2. 安装完Docker后，执行一条命令就可以让服务运行起来（yourdomain修改为你自己的值）。  
-命令执行后就使用浏览器 http://ip 确认服务是否正常运行。   
-因为使用了 restart 参数，所以系统重启后会自动重启此服务。    
+2. 安装完Docker后，执行以下命令就可以让服务运行起来（http://example.com 修改为你自己的值）。  
 
 ```bash
-mkdir data #for database and logs, you can use any folder (change ./data to your folder)
-sudo docker run -d -p 80:8000 -v ./data:/data --restart always -e APP_DOMAIN=yourdomain kindleear/kindleear
+wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/ke-docker.sh
+chmod +x ke-docker.sh
+ke-docker.sh http://example.com
 ```
-注：默认镜像的配置：    
+
+注1：KindleEar更新后，重新执行最后一行命令可以自动拉取并启动更新后的版本。    
+注2：脚本会在当前目录创建data子目录（如果不存在）。      
+注3：如果需要https支持，将 fullchain.pem/privkey.pem 拷贝到data目录，再执行此命令。   
+注4：默认镜像的配置：    
 * sqlite数据库    
 * apscheduler，内存队列   
 * 数据库文件和log文件保存到同一目录 /data   
 如果你需要使用其他数据库或任务队列，可以使用Dockerfile直接构建镜像。   
 特别是如果你需要启用多进程，则必须将内存队列更换为redis或其他，同时要修改gunicorn.conf.py或default.conf。     
 
-如果连不上，请确认80端口是否已经开放，不同的平台开放80端口的方法不一样，可能为iptables或ufw。
+
+如果连不上，请确认80/443端口是否已经开放，不同的平台开放80/443端口的方法不一样，可能为iptables或ufw。
 比如：
 
 ```bash
@@ -123,13 +127,15 @@ sudo iptables -I INPUT 7 -m state --state NEW -p tcp --dport 443 -j ACCEPT
 sudo netfilter-persistent save
 ```
 
-如果需要https支持，可以申请一个SSL证书，然后通过环境变量传递给gunicorn，比如到 let's encrypt 申请一个免费证书，然后将 fullchain.pem/privkey.pem拷贝到data目录，再执行此命令   
-
+或者开放所有端口   
 ```bash
-sudo docker run -d -p 80:8000 -p 443:8000 -v ./data:/data --restart always -e APP_DOMAIN=https://kindleear.line.pm -e GUNI_CERT=/data/fullchain.pem -e GUNI_KEY=/data/privkey.pem kindleear/kindleear
+sudo iptables -P INPUT ACCEPT
+sudo iptables -P FORWARD ACCEPT
+sudo iptables -P OUTPUT ACCEPT
+sudo iptables -F
 ```
 
-3. 如果需要使用https，更推荐的是使用caddy做为web服务器，可以自动申请和续期ssl证书（一定要正确填写DOMAIN）：    
+3. 如果需要使用https，更推荐的是使用caddy做为web服务器，可以自动申请和续期ssl证书（一定要先正确填写DOMAIN）    
 
 ```bash
 mkdir data #for database and logs
@@ -143,7 +149,7 @@ sudo docker compose up -d
 ```
 
 
-4. 如果更喜欢nginx：    
+4. 如果更喜欢nginx    
 
 ```bash
 mkdir data #for database and logs
@@ -158,14 +164,27 @@ sudo docker compose -f docker-compose-nginx.yml up -d
 
 使用nginx时如果需要https，预先将ssl证书 fullchain.pem/privkey.pem 拷贝到data目录，取消default.conf/docker-compose-nginx.yml里面对应的注释即可。      
 
-
-5. 需要查询日志文件
+5. 使用docker-compose的版本更新方法      
 
 ```bash
-tail -n 50 ./data/gunicorn.error.log
-tail -n 50 ./data/gunicorn.access.log
+sudo docker compose pull
+sudo docker compose up -d --remove-orphans
+sudo docker image prune
 ```
 
+
+6. 需要查询日志文件
+
+```bash
+tail -n 100 ./data/gunicorn.error.log
+tail -n 100 ./data/gunicorn.access.log
+```
+
+7. 如果不喜欢每次输入docker都使用sudo，可以将你的账号添加到docker用户组
+
+```bash
+sudo usermod -aG docker your-username
+```
 
 
 <a id="oracle-cloud"></a>

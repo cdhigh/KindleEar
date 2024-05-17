@@ -15,6 +15,7 @@ services:
        #DOMAIN with http or https prefix
        APP_DOMAIN: http://example.com
        LOG_LEVEL: warning
+       TZ: Etc/GMT+0
        
   caddy:
     container_name: caddy

@@ -1,0 +1,67 @@
+{% extends "adv_base.html" %}
+{% block titleTag -%}
+<title>{{ _("Inbound Mail") }} - KindleEar</title>
+{% endblock -%}
+
+{% block advcontent -%}
+<form class="pure-form pure-form-aligned" action="" method="POST">
+  <fieldset>
+  <legend>{{_("Inbound Mail")}}</legend>
+  <p style="margin-top:10px;font-size:0.8em;">
+    {{_("To enable the inbound email feature, you also need to configure the whitelist.")}}
+  </p>
+  <div class="pure-control-group">
+    <label>{{_("Inbound Mail")}}</label>
+    <select class="pure-u-1 pure-u-sm-1-2" name="inbound_email">
+      <option value="" {% if not inbound_email %}selected="selected"{% endif %}>{{_("Disable")}}</option>
+      <option value="forward" {% if 'forward' in inbound_email %}selected="selected"{% endif %}>{{_("Forward Only")}}</option>
+      <option value="save" {% if 'save' in inbound_email %}selected="selected"{% endif %}>{{_("Save Only")}}</option>
+      <option value="save,forward" {% if not inbound_email %}selected="selected"{% endif %}>{{_("Save and Forward")}}</option>
+    </select>
+  </div>
+  <div class="pure-control-group">
+    <label>{{_("Email Retention")}}</label>
+    <select class="pure-u-1 pure-u-sm-1-2" name="keep_in_email_days">
+      <option value="1" {% if keep_in_email_days==1 %}selected="selected"{% endif %}>{{_("1 Day")}}</option>
+      <option value="7" {% if keep_in_email_days==7 %}selected="selected"{% endif %}>{{_("7 Days")}}</option>
+      <option value="30" {% if keep_in_email_days==30 %}selected="selected"{% endif %}>{{_("30 Days")}}</option>
+      <option value="0" {% if not keep_in_email_days %}selected="selected"{% endif %}>{{_("No limit")}}</option>
+    </select>
+  </div>
+  </fieldset>
+  <p style="text-align:center;">
+    <p style="text-align:center;">
+      <button type="submit" class="pure-button pure-button-primary pure-input-rounded">{{_('Save settings')}} </button>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <a class="pure-button pure-input-rounded" href="/webmail" target="_blank">{{_("Open webmail")}}</a>
+    </p>
+  </p>
+</form>
+<br/>
+<a id="whitelist"></a>
+<form class="pure-form pure-form-aligned advwhitelist" action="" method="POST">
+  <fieldset>
+    <legend>{{_("White List")}}</legend>
+    <p style="margin-top:10px;font-size:0.8em;">
+      {{_("Emails sent to %(name)sxxx@%(mailHost)s will be forwarded to your kindle email.", name='' if (user.name == adminName) else user.name + '__', mailHost=mailHost)}}<br/>
+      <strong>{{_("Example")}}:</strong> '*', 'xxx@example.com', '@example.com'
+    </p>
+    <div class="box-list">
+      {% for wl in user.white_lists() -%}
+      <div class="box">
+        {{wl.mail}}
+        <div class="cornerControls">
+          <a href="/advdel?wlist_id={{wl.id}}" class="actionButton">{{_("Delete")}}</a>
+        </div>
+      </div>
+      {% endfor -%}
+      <div class="box">
+        <input type="text" name="wlist" placeholder="{{_('Please input mail address')}}" class="pure-input-1" />
+        <div class="cornerControls">
+          <input type="submit" value="{{_('Add')}}" class="actionButton add" />
+        </div>
+      </div>
+    </div>
+  </fieldset>
+</form>
+{% endblock -%}

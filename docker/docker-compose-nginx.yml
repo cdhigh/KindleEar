@@ -14,6 +14,7 @@ services:
        APP_ID: kindleear
        APP_DOMAIN: http://example.com
        LOG_LEVEL: warning
+       TZ: Etc/GMT+0
        
   nginx:
     container_name: nginx

@@ -43,13 +43,13 @@
             <a href="/adv/delivernow" class="pure-menu-link">{{_("Deliver Now")}} </a>
           </li>
           {% endif -%}
-          {% if advCurr=='whitelist' -%}
+          {% if advCurr=='inboundMail' -%}
           <li class="pure-menu-item pure-menu-selected">
-            <span>{{_("White List")}}</span>
+            <span>{{_("Inbound Mail")}}</span>
           </li>
           {% else -%}
           <li class="pure-menu-item">
-            <a href="/adv/whitelist" class="pure-menu-link">{{_("White List")}} </a>
+            <a href="/adv/inboundmail" class="pure-menu-link">{{_("Inbound Mail")}} </a>
           </li>
           {% endif -%}
           {% if advCurr=='archive' -%}

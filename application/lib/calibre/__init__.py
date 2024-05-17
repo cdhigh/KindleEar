@@ -202,7 +202,7 @@ class CurrentDir:
     def __exit__(self, *args):
         try:
             os.chdir(self.cwd)
-        except OSError:
+        except:
             # The previous CWD no longer exists
             pass
 

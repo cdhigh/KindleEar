@@ -75,32 +75,33 @@ gcloud services list --available > services.txt
 
 # 关于i18n翻译
 * javascript的翻译没有采用其他复杂或引入其他依赖的方案，而是简单粗暴的在base.html里面将要翻译的字段预先翻译，
-然后保存到一个全局字典
-* 文本字符串有修改后，逐个执行三个脚本。
-第一个脚本提取文本到messages.pot，第二个将文本更新到messages.po，翻译后使用第三个脚本编译为messages.mo
+然后保存到一个全局字典对象。
+* 文本字符串有修改后，逐个执行两个脚本。
+第一个脚本提取文本到messages.pot并将文本更新到messages.po，翻译后使用第二个脚本编译为messages.mo
 ```bat
 tools\pybabel_extract.bat
-tools\pybabel_update.bat
 tools\pybabel_compile.bat
 ```
+* 翻译空白字符条目 msgstr ""
 * 在po后查找fuzzy，更新翻译后，将fuzzy标识行删除
 
 
 # Docker
 ## 构建镜像
 ```bash
-cd kindleear && \
-cp ./docker/Dockerfile . && \
-sudo docker buildx create --use --name=builder && \
-sudo docker buildx build --push --platform=linux/amd64,linux/arm64 -t kindleear/kindleear .
-#or
+#using the pre-created builder, build && push
 cd kindleear && \
 cp ./docker/Dockerfile . && \
 sudo docker buildx use builder && \
 sudo docker buildx build --push --platform=linux/amd64,linux/arm64 -t kindleear/kindleear .
-#or
+#or, create a new builder, build && push
+cd kindleear && \
+cp ./docker/Dockerfile . && \
+sudo docker buildx create --use --name=builder && \
+sudo docker buildx build --push --platform=linux/amd64,linux/arm64 -t kindleear/kindleear .
+#or, build a single platform image for test
 cd kindleear && cp ./docker/Dockerfile . && sudo docker build -t kindleear/kindleear .
-#or
+#or, build a single platform image without cache and tag it
 sudo docker build --no-cache -t kindleear/kindleear .
 sudo docker tag id kindleear/kindleear:version
 ```
@@ -115,6 +116,7 @@ sudo docker ps -a
 sudo docker compose up -d
 sudo docker run -d
 sudo docker run -it id /bin/bash
+sudo docker exec -it container_id sh
 sudo docker login
 sudo docker push kindleear/kindleear:tag
 sudo docker push kindleear/kindleear

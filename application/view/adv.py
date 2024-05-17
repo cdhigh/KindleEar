@@ -33,36 +33,42 @@ def AdvDeliverNow(user: KeUser):
     return adv_render_template('adv_delivernow.html', 'deliverNow', user=user, recipes=recipes,
         deliveryKey=deliveryKey)
 
-#设置邮件白名单
-@bpAdv.route("/adv/whitelist", endpoint='AdvWhiteList')
+#设置入站邮件设置，包括邮件白名单和收件箱功能
+@bpAdv.route("/adv/inboundmail", endpoint='AdvInboundMail')
 @login_required()
-def AdvWhiteList(user: KeUser):
+def AdvInboundMail(user: KeUser):
     if app.config['DATABASE_URL'] == 'datastore':
         mailHost = 'appid.appspotmail.com'
     else:
         mailHost = urlparse(app.config['APP_DOMAIN']).netloc.split(':')[0]
 
-    save_in_email = user.cfg("save_in_email")
+    inbound_email = user.cfg("inbound_email")
+    keep_in_email_days = user.cfg("keep_in_email_days")
 
-    return adv_render_template('adv_whitelist.html', 'whitelist', user=user, mailHost=mailHost, 
-        save_in_email=save_in_email)
+    return adv_render_template('adv_inboundmail.html', 'inboundMail', user=user, mailHost=mailHost, 
+        inbound_email=inbound_email, keep_in_email_days=keep_in_email_days)
     
-@bpAdv.post("/adv/whitelist", endpoint='AdvWhiteListPost')
+@bpAdv.post("/adv/inboundmail", endpoint='AdvInboundMailPost')
 @login_required()
-def AdvWhiteListPost(user: KeUser):
+def AdvInboundMailPost(user: KeUser):
     wlist = request.form.get('wlist')
-    if wlist: #第一个表单：邮件白名单
-        wlist = wlist.replace('"', "").replace("'", "").strip()
-        if wlist.startswith('*@'): #输入*@xx.xx则修改为@xx.xx
-            wlist = wlist[1:]
-        if wlist:
-            WhiteList.get_or_create(mail=wlist, user=user.name)
+    if wlist: #邮件白名单表单
+        wlists = wlist.replace('"', "").replace("'", "").replace(' ', '').split(',')
+        for item in wlists:
+            if item.startswith('*@'): #输入*@xx.xx则修改为@xx.xx
+                item = item[1:]
+            elif (item != '*') and ('@' not in item): #自动在前面添加@符号
+                item = '@' + item
+            if item:
+                WhiteList.get_or_create(mail=item, user=user.name)
+        return redirect(url_for('bpAdv.AdvInboundMail') + '#whitelist')
     else:
-        save_in_email = str_to_int(request.form.get('save_in_email'))
-        user.set_cfg('save_in_email', save_in_email)
+        inbound_email = request.form.get('inbound_email')
+        keep_in_email_days = str_to_int(request.form.get('keep_in_email_days'))
+        user.set_cfg('inbound_email', inbound_email)
+        user.set_cfg('keep_in_email_days', keep_in_email_days)
         user.save()
-
-    return redirect(url_for('bpAdv.AdvWhiteList'))
+        return redirect(url_for('bpAdv.AdvInboundMail'))
     
 #删除白名单项目
 @bpAdv.route("/advdel", endpoint='AdvDel')
@@ -73,7 +79,7 @@ def AdvDel(user: KeUser):
         dbItem = WhiteList.get_by_id_or_none(wlist_id)
         if dbItem:
             dbItem.delete_instance()
-        return redirect(url_for("bpAdv.AdvWhiteList"))
+        return redirect(url_for("bpAdv.AdvInboundMail") + '#whitelist')
     return redirect(url_for("bpAdmin.Admin"))
 
 #设置归档和分享配置项

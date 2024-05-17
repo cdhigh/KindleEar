@@ -41,19 +41,32 @@ def RemoveLogs():
         if user.cfg('enable_send') and user.expires and (user.expires < now):
             user.set_cfg('enable_send', '')
             user.save()
-        save_in_email = int(user.cfg('save_in_email'))
-        if save_in_email > 0:
-            expTime = now - datetime.timedelta(days=save_in_email)
-            cnt += InBox.delete().where((InBox.user == user.name) & (InBox.datetime < expTime)).execute()
+        inbound_email = user.cfg('inbound_email', '')
+        keep_in_email_days = int(user.cfg('keep_in_email_days'))
+        if ('save' in inbound_email) and (keep_in_email_days > 0):
+            expTime = now - datetime.timedelta(days=keep_in_email_days)
+            #在GAE平台很多人经常出现索引建立失败的情况，这里不能使用除了相等之外的数据库组合查询和组合删除查询
+            #所以就逐个删除好了
+            items = [item for item in InBox.select(InBox.id, InBox.datetime).where(InBox.user == user.name) 
+                if (item.datetime < expTime)]
+            for item in items:
+                item.delete_instance()
+                cnt += 1
+
 
     #彻底删除一天以前被标识为已删除的邮件(针对所有用户)
     expTime = now - datetime.timedelta(days=1)
-    cnt += InBox.delete().where((InBox.status == 'deleted') & (InBox.datetime < expTime)).execute()
+    items = [item for item in InBox.select(InBox.id, InBox.datetime).where(InBox.status == 'deleted') 
+        if (item.datetime < expTime)]
+    for item in items:
+        item.delete_instance()
+        cnt += 1
+
     if cnt:
         ret.append(f"Removed a total of {cnt} record of InBox.")
         
     #清理临时目录
-    tmpDir = app.config['KE_TEMP_DIR']
+    tmpDir = os.environ.get('KE_TEMP_DIR')
     if tmpDir and os.path.exists(tmpDir):
         ret.append(DeleteOldFiles(tmpDir, 1))
 

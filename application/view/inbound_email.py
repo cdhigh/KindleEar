@@ -139,7 +139,11 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
     subject = DecodeSubject(subject or 'NoSubject')
 
     #如果需要暂存邮件
-    if user.cfg('save_in_email'):
+    inbound_email = user.cfg('inbound_email')
+    if not inbound_email:
+        return
+
+    if 'save' in inbound_email:
         SaveInEmailToDb(user, sender, to, subject, txtBodies, htmlBodies)
 
     #通过邮件触发一次“现在投递”
@@ -148,6 +152,10 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
         create_delivery_task({'userName': userName, 'recipeId': subject, 'reason': 'manual', 'key': key})
         return f'A delivery task for "{userName}" is triggered'
     
+    if 'forward' not in inbound_email:
+        default_log.warning('The inbound email forwarding feature is not yet enabled.')
+        return 'The inbound email forwarding feature is not yet enabled.'
+
     forceToLinks = False
     forceToArticle = False
 

@@ -22,7 +22,7 @@ class KeUser(MyBaseModel): # kindleEar User
     expires = DateTimeField(null=True) #超过了此日期后账号自动停止推送
     created_time = DateTimeField(default=datetime.datetime.utcnow)
 
-    #email,kindle_email,secret_key,enable_send,timezone,save_in_email
+    #email,sender,kindle_email,secret_key,enable_send,timezone,inbound_email,keep_in_email_days
     #sender: 可能等于自己的email，也可能是管理员的email
     base_config = JSONField(default=JSONField.dict_default)
     
@@ -40,7 +40,7 @@ class KeUser(MyBaseModel): # kindleEar User
         value = self.base_config.get(item, default)
         if value is None:
             return {'email': '', 'kindle_email': '', 'secret_key': '', 'timezone': 0,
-                'save_in_email': 0}.get(item, value)
+                'inbound_email': 'save,forward', 'keep_in_email_days': 1}.get(item, value)
         else:
             return value
     def set_cfg(self, item, value):

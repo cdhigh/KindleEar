@@ -101,23 +101,27 @@ Installation methods vary for each platform. KindleEar provides a script for Ubu
 wget -O - https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/ubuntu_docker.sh | bash
 ```
 
-2. Execute a command to start the service (replace `yourid/yourdomain` with your own values).  
-Confirm if the service is running properly by visiting http://ip in a browser.   
-The service will automatically restart after system reboot due to the `restart` parameter.  
+
+2. After installing Docker, run the following commands to get the service running (replace `http://example.com` with your own value).     
+
 ```bash
-mkdir data #for database and logs, you can use any folder (change ./data to your folder)
-sudo docker run -d -p 80:8000 -v ./data:/data --restart always -e APP_DOMAIN=yourdomain kindleear/kindleear
+wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/ke-docker.sh
+chmod +x ke-docker.sh
+ke-docker.sh http://example.com
 ```
-Note: This command uses the default configuration:   
-* SQLite database   
-* APScheduler, memory job store   
-* Database and log files are saved to the same directory `/data`  
 
-If you need to use other databases or task queues, you can build the custom image using Dockerfile.    
-Especially if you need to enable multi-process feature, you must replace the memory job store with Redis or other alternatives, and at the same time modify `gunicorn.conf.py` or `default.conf`.    
+**Note 1:** After KindleEar updates, rerun the last command to automatically pull and start the updated version.    
+**Note 2:** The script will create a `data` subdirectory in the current directory (if it doesn't already exist).    
+**Note 3:** If you need HTTPS support, copy `fullchain.pem` and `privkey.pem` to the `data` directory, then run the command again.    
+**Note 4:** Default image configuration:    
+* SQLite database    
+* APScheduler with memory jobstore    
+* Database files and log files are saved to the same directory `/data`    
+If you need to use another database or task queue, you can build the image directly using the Dockerfile.    
+Especially if you need to enable multiple processes, you must replace the memory jobstore with Redis or another option, and modify `gunicorn.conf.py` or `default.conf`.    
 
-If unable to connect, ensure port 80 is open. Methods to open port 80 vary across platforms, such as iptables or ufw.
-For example:
+If unable to connect, ensure port 80/443 is open. Methods to open port 80/443 vary across platforms, such as iptables or ufw.     
+For example:    
 
 ```bash
 sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
@@ -125,10 +129,12 @@ sudo iptables -I INPUT 7 -m state --state NEW -p tcp --dport 443 -j ACCEPT
 sudo netfilter-persistent save
 ```
 
-If HTTPS support is needed, you can apply for an SSL certificate, then pass it to Gunicorn through environment variables. For example, you can apply for a free certificate from "Let's Encrypt", then copy `fullchain.pem/privkey.pem` to the data directory, and execute this command.   
-
+or allow all ports:   
 ```bash
-sudo docker run -d -p 80:8000 -p 443:8000 -v ./data:/data --restart always -e APP_DOMAIN=yourdomain -e GUNI_CERT=/data/fullchain.pem -e GUNI_KEY=/data/privkey.pem kindleear/kindleear
+sudo iptables -P INPUT ACCEPT
+sudo iptables -P FORWARD ACCEPT
+sudo iptables -P OUTPUT ACCEPT
+sudo iptables -F
 ```
 
 3. If HTTPS is needed, it is more recommended to use Caddy as the web server, which can automatically request and renew SSL certificates.    
@@ -159,12 +165,31 @@ sudo docker compose -f docker-compose-nignx.yml up -d
 
 If HTTPS for nginx is needed, copy the SSL certificate fullchain.pem/privkey.pem to the data directory, and uncomment the corresponding lines in default.conf/docker-compose-nginx.yml.   
 
-5. To check log files:
+
+5. Method for Updating Using Docker Compose     
 
 ```bash
-tail -n 50 ./data/gunicorn.error.log
-tail -n 50 ./data/gunicorn.access.log
+sudo docker compose pull
+sudo docker compose up -d --remove-orphans
+sudo docker image prune
 ```
+
+
+6. To check log files
+
+```bash
+tail -n 100 ./data/gunicorn.error.log
+tail -n 100 ./data/gunicorn.access.log
+```
+
+
+7. If you don't like using 'sudo' every time you use Docker, you can add your account to the 'docker' user group.    
+
+```bash
+sudo usermod -aG docker your-username
+```
+
+
 
 
 <a id="oracle-cloud"></a>
