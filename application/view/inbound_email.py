@@ -4,6 +4,7 @@
 #将发到string@appid.appspotmail.com的邮件正文转成附件发往kindle邮箱。
 import os, re, email
 from typing import Union
+from operator import itemgetter
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from flask import Blueprint, request, render_template, current_app as app
@@ -355,10 +356,13 @@ def WebmailRoute(user: KeUser):
 def WebMailListRoute(user: KeUser):
     includes = request.args.get('includes')
     if includes == 'all':
-        all_mails = list(InBox.select().where(InBox.user == user.name).order_by(InBox.datetime.desc()).dicts())
+        qry = InBox.select().where(InBox.user == user.name).dicts()
     else:
-        all_mails = list(InBox.select().where((InBox.user == user.name) & (InBox.status != 'deleted'))
-            .order_by(InBox.datetime.desc()).dicts())
+        #all_mails = list(InBox.select().where((InBox.user == user.name) & (InBox.status != 'deleted'))
+        #    .order_by(InBox.datetime.desc()).dicts())
+        qry = InBox.select().where((InBox.user == user.name) & (InBox.status != 'deleted')).dicts()
+
+    all_mails = sorted(qry, key=itemgetter('datetime'), reverse=True)
     for m in all_mails:
         m.pop('body', None)
         m.pop('attachments', None)
