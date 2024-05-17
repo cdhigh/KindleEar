@@ -355,14 +355,13 @@ def WebmailRoute(user: KeUser):
 @login_required(forAjax=True)
 def WebMailListRoute(user: KeUser):
     includes = request.args.get('includes')
-    if includes == 'all':
-        qry = InBox.select().where(InBox.user == user.name).dicts()
+    qry = InBox.select().where(InBox.user == user.name).dicts()
+    if includes != 'all': #剔除已经被标识为删除的邮件
+        all_mails = sorted((item for item in qry if item.get('status') != 'deleted'), 
+            key=itemgetter('datetime'), reverse=True)
     else:
-        #all_mails = list(InBox.select().where((InBox.user == user.name) & (InBox.status != 'deleted'))
-        #    .order_by(InBox.datetime.desc()).dicts())
-        qry = InBox.select().where((InBox.user == user.name) & (InBox.status != 'deleted')).dicts()
+        all_mails = sorted(qry, key=itemgetter('datetime'), reverse=True)
 
-    all_mails = sorted(qry, key=itemgetter('datetime'), reverse=True)
     for m in all_mails:
         m.pop('body', None)
         m.pop('attachments', None)

@@ -49,7 +49,7 @@ logconfig_dict = {
     },
     'formatters':{
         "generic": {
-            "format": "%[(asctime)s] %(levelname)s [%(filename)s:%(lineno)s] %(message)s",
+            "format": "[%(asctime)s] %(levelname)s [%(filename)s:%(lineno)s] %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S %z",
             "class": "logging.Formatter"
         },
