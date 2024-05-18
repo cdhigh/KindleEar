@@ -41,7 +41,7 @@ def RemoveLogs():
         if user.cfg('enable_send') and user.expires and (user.expires < now):
             user.set_cfg('enable_send', '')
             user.save()
-        inbound_email = user.cfg('inbound_email', '')
+        inbound_email = user.cfg('inbound_email')
         keep_in_email_days = int(user.cfg('keep_in_email_days'))
         if ('save' in inbound_email) and (keep_in_email_days > 0):
             expTime = now - datetime.timedelta(days=keep_in_email_days)

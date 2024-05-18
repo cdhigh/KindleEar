@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 #Author: cdhigh <https://github.com/cdhigh>
 #将发到string@appid.appspotmail.com的邮件正文转成附件发往kindle邮箱。
-import os, re, email
+import os, re, json, email
 from typing import Union
 from operator import itemgetter
 from urllib.parse import urljoin
@@ -349,7 +349,8 @@ def CollectSoupLinks(soup, forceToLinks):
 #暂时不支持保存附件
 def SaveInEmailToDb(user, sender, to, subject, txtBodies, htmlBodies):
     size = sum([len(item) for item in [*txtBodies, *htmlBodies]])
-    body = {'txtBodies': txtBodies, 'htmlBodies': htmlBodies}
+    #GAE对json字段里面的子字段也有1500字节限制，所以这里只能转换为一个字符串
+    body = json.dumps({'txtBodies': txtBodies, 'htmlBodies': htmlBodies})
     InBox.create(user=user.name, sender=sender, to=str(to), subject=subject, status='unread', size=size, body=body)
 
 #webmail网页
@@ -383,9 +384,16 @@ def WebMailListRoute(user: KeUser):
 def WebMailContentRoute(id_: str, user: KeUser):
     dbItem = InBox.get_by_id_or_none(id_)
     content = ''
-    if dbItem and dbItem.body:
-        content = '<br/>'.join(dbItem.body.get('htmlBodies') or dbItem.body.get('txtBodies') or [])
-        content = content.replace('\r\n', '<br/>').replace('\n', '<br/>')
+    body = dbItem.body if dbItem else ''
+    try:
+        if body and not isinstance(body, dict):
+            body = json.loads(body)
+        if body:
+            content = '<br/>'.join(body.get('htmlBodies') or body.get('txtBodies') or [])
+            content = content.replace('\r\n', '<br/>').replace('\n', '<br/>')
+    except Exception as e:
+        default_log.warning('Get mail content failed: {id_}, {e}')
+        pass
     return {'status': 'ok', 'content': content}
 
 #设置某个邮件的已读状态
