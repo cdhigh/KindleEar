@@ -6,6 +6,8 @@
 #https://cloud.google.com/appengine/docs/standard/python3/reference/services/bundled/google/appengine/api/mail
 #https://cloud.google.com/appengine/docs/standard/python3/services/mail
 import os, datetime, zipfile, base64
+
+from main import appDir
 from ..utils import ke_decrypt, str_to_bool
 from ..base_handler import save_delivery_log
 from .db_models import KeUser
@@ -23,7 +25,7 @@ else:
     gae_mail = None
 
 try:
-    from sendgrid import SendGridAPIClient
+    from sendgrid import SendGridAPIClient, FileContent, FileName, FileType, Disposition
     from sendgrid.helpers.mail import Email, Content, Mail, Attachment
 except ImportError:
     SendGridAPIClient = None
@@ -34,6 +36,7 @@ except ImportError:
     MailjetClient = None
 
 from smtp_mail import smtp_send_mail
+
 
 #返回当前可用的发送邮件服务列表
 def avaliable_sm_services():
@@ -50,6 +53,7 @@ def avaliable_sm_services():
         sm['local'] = 'local (debug)'
     return sm
 
+
 #发送邮件
 #title: 邮件标题
 #attachment: 附件二进制内容，或元祖 (filename, content)
@@ -64,7 +68,7 @@ def send_to_kindle(user, title, attachment, fileWithTime=True, to=None):
         lcTime = "({})".format(lcTime) if fileWithTime else ""
         fileName = f"{title}{lcTime}.{user.book_cfg('type')}"
         attachment = (fileName, attachment)
-    
+
     if not isinstance(attachment, list):
         attachment = [attachment]
 
@@ -75,9 +79,10 @@ def send_to_kindle(user, title, attachment, fileWithTime=True, to=None):
     except Exception as e:
         status = str(e)[:500]
         default_log.warning(f'Failed to send mail "{title}": {status}')
-    
+
     size = sum([len(a[1]) for a in attachment])
     save_delivery_log(user, title, size, status=status, to=to)
+
 
 #统一的发送邮件函数
 def send_mail(user, to, subject, body, attachments=None, html=None):
@@ -105,12 +110,13 @@ def send_mail(user, to, subject, body, attachments=None, html=None):
         data['host'] = sm_service.get('host', '')
         data['port'] = sm_service.get('port', 587)
         data['username'] = sm_service.get('username', '')
-        data['password'] = sm_service.get('password', '') #获取配置字典时已经解密
+        data['password'] = sm_service.get('password', '')  #获取配置字典时已经解密
         smtp_send_mail(**data)
     elif srv_type == 'local':
         save_mail_to_local(sm_service.get('save_path', 'tests/debug_mail'), **data)
     else:
         raise ValueError(f'Unknown send mail service [{srv_type}]')
+
 
 #发送一个HTML邮件
 #user: KeUser实例
@@ -123,16 +129,17 @@ def send_mail(user, to, subject, body, attachments=None, html=None):
 def send_html_mail(user, to, subject, html, attachments=None, body=None):
     if not body or not isinstance(body, str):
         body = "Deliver from KindlerEar, refers to html part."
-    
+
     status = 'ok'
     try:
         send_mail(user, to, subject, body, attachments=attachments, html=html)
     except Exception as e:
         status = str(e)[:500]
-    
+
     size = len(html or body) + sum([len(c) for f, c in (attachments or [])])
     save_delivery_log(user, subject, size, status=status, to=to)
     return status
+
 
 #SendGrid发送邮件
 #sender:: 发送者地址
@@ -146,8 +153,8 @@ def grid_send_mail(apikey, sender, to, subject, body, html=None, attachments=Non
     sgClient = SendGridAPIClient(apikey)
     bodyContent = Content("text/plain", body)
     htmlContent = Content("text/html", html) if html else None
-    message = Mail(from_email=sender, to_emails=to, subject=subject, plain_text_content=bodyContent, 
-        html_content=htmlContent)
+    message = Mail(from_email=sender, to_emails=to, subject=subject, plain_text_content=bodyContent,
+                   html_content=htmlContent)
 
     for fileName, data in (attachments or []):
         attachedFile = Attachment(
@@ -155,12 +162,13 @@ def grid_send_mail(apikey, sender, to, subject, body, html=None, attachments=Non
             file_name=FileName(fileName),
             file_type=FileType("application/x-mobipocket-ebook"),
             disposition=Disposition("attachment"),
-            content_id="KindleEar")
+            content_id="rss2ebook.com")
         message.add_attachment(attachedFile)
 
     response = sgClient.send(message)
     if response.status_code not in (200, 202):
         raise Exception(f'sendgrid failed: {response.status_code}')
+
 
 #Mailjet发送邮件
 #sender:: 发送者地址
@@ -174,11 +182,11 @@ def mailjet_send_mail(apikey, secret_key, sender, to, subject, body, html=None, 
     mjClient = MailjetClient(auth=(apikey, secret_key), version='v3.1')
     to = [{'Email': t, 'Name': t} for t in to]
     data = {'Messages': [{
-          "From": {"Email": sender, "Name": sender},
-          "To": to,
-          "Subject": subject,
-          "TextPart": body,
-        }],}
+        "From": {"Email": sender, "Name": sender},
+        "To": to,
+        "Subject": subject,
+        "TextPart": body,
+    }], }
 
     dataDict = data['Messages'][0]
     if html:
@@ -187,9 +195,8 @@ def mailjet_send_mail(apikey, secret_key, sender, to, subject, body, html=None, 
         dataDict['Attachments'] = []
         for fileName, content in (attachments or []):
             dataDict['Attachments'].append({"ContentType": "text/plain", "Filename": fileName,
-                "Base64Content": base64.b64encode(content).decode()})
+                                            "Base64Content": base64.b64encode(content).decode()})
 
-        
     resp = mjClient.send.create(data=data)
     if resp.status_code in (200, 202):
         status = resp.json()["Messages"][0]["Status"]
@@ -198,7 +205,8 @@ def mailjet_send_mail(apikey, secret_key, sender, to, subject, body, html=None, 
             raise Exception(f'mailjet failed: {status}')
     else:
         raise Exception(f'mailjet failed: {resp.status_code}')
-    
+
+
 def save_mail_to_local(dest_dir, subject, body, attachments=None, html=None, **kwargs):
     attachments = attachments or []
     mailDir = os.path.join(appDir, dest_dir)
