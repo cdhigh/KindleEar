@@ -1,3 +1,5 @@
+var g_prevPreviewId = false;
+
 //从一个包含查询字符串的url里面提取某个查询参数，不存在返回空串
 function GetUrlQueryParam(url, key) {
   let params = '', value = '';
@@ -21,6 +23,8 @@ function FetchMailList() {
 
 //使用字典列表填充网页的邮件列表
 function PopulateMailList(mails) {
+  g_prevPreviewId = false;
+  $('#toggle_select_mail').prop('checked', false);
   const $tbody = $('.mail-list-table tbody');
   $tbody.empty();
   if (mails && mails.length > 0) {
@@ -45,18 +49,24 @@ function PopulateMailList(mails) {
 //index: all_mails列表的索引号
 function DisplayMailPreview(index) {
   const mail = all_mails[index];
+  const mailId = mail.id;
+  if (mailId === g_prevPreviewId) {
+    return;
+  }
+
   const $mailPreview = $('#mailPreview');
   $mailPreview.html('');
   if (!mail) {
     return;
   }
-  MakeAjaxRequest("/webmail/content/" + mail.id, "GET", null, function (resp) {
+  MakeAjaxRequest(`/webmail/content/${mailId}`, "GET", null, function (resp) {
     let content = `<div class="mail-preview-header"><h4>${mail.subject}</h4>
                   <strong>${i18n.from}:</strong> ${mail.sender}<br/>
                   <strong>${i18n.to}:</strong> ${mail.to}<br/>
                   <strong>${i18n.time}:</strong> ${mail.datetime}<br/></div>
                   <div class="mail-preview-content">${resp.content}</div>`;
     $mailPreview.html(content);
+    g_prevPreviewId = mailId;
   });
 }
 
@@ -193,6 +203,8 @@ function DeleteMails(act) {
       return;
     }
 
+    $('#toggle_select_mail').prop('checked', false);
+
     let ids = selectedMails.map(item=>item.mail.id);
     let isUndelete = selectedMails.every(item=>item.mail.status=='deleted');
     let url = isUndelete ? "/webmail/undelete" : "/webmail/delete";
@@ -202,7 +214,8 @@ function DeleteMails(act) {
           item.mail.status = 'read';
         });
       } else {
-        selectedMails.forEach(item => {
+        //需要倒序遍历以避免索引问题
+        selectedMails.reverse().forEach(item => {
           all_mails.splice(item.index, 1);
         });
       }

@@ -348,10 +348,11 @@ def CollectSoupLinks(soup, forceToLinks):
 #将接收到的邮件暂存到数据库
 #暂时不支持保存附件
 def SaveInEmailToDb(user, sender, to, subject, txtBodies, htmlBodies):
+    to = ', '.join(to) if isinstance(to, list) else str(to)
     size = sum([len(item) for item in [*txtBodies, *htmlBodies]])
     #GAE对json字段里面的子字段也有1500字节限制，所以这里只能转换为一个字符串
     body = json.dumps({'txtBodies': txtBodies, 'htmlBodies': htmlBodies})
-    InBox.create(user=user.name, sender=sender, to=str(to), subject=subject, status='unread', size=size, body=body)
+    InBox.create(user=user.name, sender=sender, to=to, subject=subject, status='unread', size=size, body=body)
 
 #webmail网页
 @bpInBoundEmail.route("/webmail", endpoint='WebmailRoute')
