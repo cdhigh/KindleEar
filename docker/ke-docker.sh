@@ -33,7 +33,7 @@ echo "Pulling the latest version of the KindleEar..."
 sudo docker pull $IMAGE_NAME
 
 echo "Starting the updated KindleEar with domain: [$DOMAIN] ..."
-sudo docker run -d -p 80:8000 $SSL_PORT -v $(pwd)/data:/data --restart always -e APP_DOMAIN=$DOMAIN $SSL_ENV --name $CONTAINER_NAME $IMAGE_NAME
+sudo docker run -d -p 80:8000 $SSL_PORT -v $(pwd)/data:/data --restart always -e TZ=Etc/GMT+0 -e APP_DOMAIN=$DOMAIN $SSL_ENV --name $CONTAINER_NAME $IMAGE_NAME
 
 echo ""
 echo -e "\033[1;32mKindleEar updated successfully.\033[0m"

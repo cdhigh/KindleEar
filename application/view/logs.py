@@ -47,7 +47,7 @@ def RemoveLogs():
             expTime = now - datetime.timedelta(days=keep_in_email_days)
             #在GAE平台很多人经常出现索引建立失败的情况，这里不能使用除了相等之外的数据库组合查询和组合删除查询
             #所以就逐个删除好了
-            items = [item for item in InBox.select(InBox.id, InBox.datetime).where(InBox.user == user.name) 
+            items = [item for item in InBox.select().where(InBox.user == user.name) 
                 if (item.datetime < expTime)]
             for item in items:
                 item.delete_instance()
@@ -56,7 +56,7 @@ def RemoveLogs():
 
     #彻底删除一天以前被标识为已删除的邮件(针对所有用户)
     expTime = now - datetime.timedelta(days=1)
-    items = [item for item in InBox.select(InBox.id, InBox.datetime).where(InBox.status == 'deleted') 
+    items = [item for item in InBox.select().where(InBox.status == 'deleted') 
         if (item.datetime < expTime)]
     for item in items:
         item.delete_instance()

@@ -135,7 +135,9 @@ sudo iptables -P OUTPUT ACCEPT
 sudo iptables -F
 ```
 
-3. 如果需要使用https，更推荐的是使用caddy做为web服务器，可以自动申请和续期ssl证书（一定要先正确填写DOMAIN）    
+3. 如果需要入站邮件功能（需要开放25端口），请使用docker-compose。     
+
+3.1 推荐使用Caddy做为web服务器，可以自动申请和续期SSL证书（一定要先正确填写DOMAIN）    
 
 ```bash
 mkdir data #for database and logs
@@ -148,8 +150,7 @@ vim ./docker-compose.yml
 sudo docker compose up -d
 ```
 
-
-4. 如果更喜欢nginx    
+3.2 如果更喜欢Nginx    
 
 ```bash
 mkdir data #for database and logs
@@ -162,9 +163,9 @@ vim ./docker-compose-nginx.yml
 sudo docker compose -f docker-compose-nginx.yml up -d
 ```
 
-使用nginx时如果需要https，预先将ssl证书 fullchain.pem/privkey.pem 拷贝到data目录，取消default.conf/docker-compose-nginx.yml里面对应的注释即可。      
+使用Nginx时如果需要https，预先将ssl证书 fullchain.pem/privkey.pem 拷贝到data目录，取消default.conf/docker-compose-nginx.yml里面对应的注释即可。      
 
-5. 使用docker-compose的版本更新方法      
+4. 使用docker-compose的版本更新方法      
 
 ```bash
 sudo docker compose pull
@@ -173,14 +174,14 @@ sudo docker image prune
 ```
 
 
-6. 需要查询日志文件
+5. 需要查询日志文件
 
 ```bash
 tail -n 100 ./data/gunicorn.error.log
 tail -n 100 ./data/gunicorn.access.log
 ```
 
-7. 如果不喜欢每次输入docker都使用sudo，可以将你的账号添加到docker用户组
+6. 如果不喜欢每次输入docker都使用sudo，可以将你的账号添加到docker用户组
 
 ```bash
 sudo usermod -aG docker your-username

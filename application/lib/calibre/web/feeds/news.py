@@ -2191,12 +2191,12 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
                     (LastDelivered.bookname==self.title) & (LastDelivered.url==url))
                 delta = (now - timeItem.datetime) if timeItem else None
                 #这里oldest_article和其他的recipe不一样，这个参数表示在这个区间内不会重复推送
-                if (not timeItem) or (self.delivery_reason == 'manual'):
+                if (not timeItem) or (not self.oldest_article) or (self.delivery_reason == 'manual'):
                     id_counter += 1
                     feed.articles.append(Article(f'internal id#{id_counter}', title, url, 'KindleEar', '', structNow, ''))
 
                     #如果是手动推送，不单不记录已推送日期，还将已有的上次推送日期数据删除
-                    if self.delivery_reason == 'manual':
+                    if (not self.oldest_article) or (self.delivery_reason == 'manual'):
                         if timeItem:
                             timeItem.delete_instance()
                     elif timeItem:
