@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-# KindleEar web application
+# 创建app对象
 # Author: cdhigh <https://github.com/cdhigh>
 __Author__ = "cdhigh"
 
 import os, builtins, datetime
-from flask import Flask, render_template, session, request, g
+from flask import Flask, session, g
 from flask_babel import Babel, gettext
 builtins.__dict__['_'] = gettext
 
@@ -41,9 +41,12 @@ def init_app(name, cfgMap, set_env, debug=False):
 
     @app.before_request
     def BeforeRequest():
+        session.permanent = True
+        app.permanent_session_lifetime = datetime.timedelta(days=31)
         g.version = appVer
         g.now = datetime.datetime.utcnow
         g.allowSignup = (app.config['ALLOW_SIGNUP'] == 'yes')
+        
         connect_database()
 
     @app.teardown_request

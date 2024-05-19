@@ -25,7 +25,7 @@ chmod +x kindleear/tools/gae_deploy.sh && \
 kindleear/tools/gae_deploy.sh
 ```
 
-注：默认配置为B2实例，1个工作进程，2个工作线程，20分钟超时，如果需要其他配置，可以修改最后一行代码，比如：   
+**注1：** 默认配置为B2实例，1个工作进程，2个工作线程，20分钟超时，如果需要其他配置，可以修改最后一行代码   
 
 ```bash
 #instance_class: B1 (384MB/600MHz)
@@ -35,6 +35,12 @@ kindleear/tools/gae_deploy.sh
 kindleear/tools/gae_deploy.sh B1,1,t2,15m
 ```
 
+**注2：** 如果想精简内置Recipe文件，仅保留你需要的语种，可以在 `kindleear/tools/gae_deploy.sh` 命令前增加一行   
+
+```bash
+# parameter is a list of language code you want to keep
+python kindleear/tools/trim_recipes.py en,zh,es
+```
 
 3. 如需要GAE部署的更多信息，请参考 [其他说明](#gae_other_instructions) 章节，比如怎么解决 "Unauthorized sender" 错误等。    
 

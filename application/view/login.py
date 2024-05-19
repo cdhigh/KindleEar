@@ -78,7 +78,7 @@ def LoginPost():
         elif not user.cfg('kindle_email'):
             url = url_for("bpSetting.Setting")
         else:
-            url = next_url if next_url else url_for("bpSubscribe.MySubscription")
+            url = next_url if next_url else url_for("bpLogs.Mylogs")
         default_log.info(f"Login event: {name}")
         return redirect(url)
     else:  #账号或密码错

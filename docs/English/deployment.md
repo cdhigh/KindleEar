@@ -26,7 +26,7 @@ chmod +x kindleear/tools/gae_deploy.sh && \
 kindleear/tools/gae_deploy.sh
 ```
 
-Note: The default configuration is B2 instance, 1 worker process, 2 worker threads, and a 20-minute timeout. If you need a different configuration, you can modify the last line of code, for example:  
+**Note 1:** The default configuration is B2 instance, 1 worker process, 2 worker threads, and a 20-minute timeout. If you need a different configuration, you can modify the last line of code, for example:  
 
 ```bash
 #instance_class: B1 (384MB/600MHz)
@@ -34,6 +34,13 @@ Note: The default configuration is B2 instance, 1 worker process, 2 worker threa
 #threads: 2 (2 thread per instance)
 #idle_timeout: 15m (minutes)
 kindleear/tools/gae_deploy.sh B1,1,t2,15m
+```
+
+**Note 2:** If you want to trim the built-in Recipe file to keep only the languages you need, you can add a line before the `kindleear/tools/gae_deploy.sh` command.    
+
+```bash
+# parameter is a list of language code you want to keep
+python kindleear/tools/trim_recipes.py en,zh,es
 ```
 
 3. Refer to the [Other Instructions](#gae_other_instructions) section for additional information, such as troubleshooting the 'Unauthorized sender' issue.    
