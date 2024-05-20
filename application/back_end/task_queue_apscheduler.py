@@ -59,13 +59,8 @@ def create_delivery_task(payload: dict):
 
 def create_url2book_task(payload: dict):
     from ..work.url2book import Url2BookImpl
-    userName = payload.get('userName', '')
-    urls = payload.get('urls', '')
-    title = payload.get('title', '')
-    key = payload.get('key', '')
-    action = payload.get('action', '')
-    text = payload.get('text', '')
-    args = [userName, urls, title, key, action, text]
+    args = [payload.get(item, '') for item in 
+        ['userName', 'urls', 'title', 'key', 'action', 'text', 'language']]
     scheduler.add_job(f'Url2Book{random.randint(0, 1000)}', Url2BookImpl, args=args, 
         misfire_grace_time=20*60, replace_existing=True)
 

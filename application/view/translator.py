@@ -64,6 +64,7 @@ def BookTranslatorPost(recipeType, recipe, user, recipeId):
     form = request.form
     engineName = form.get('engine', '')
     apiHost = form.get('api_host', '')
+    apiHost = f'https://{apiHost}' if apiHost and not apiHost.startswith('http') else apiHost
     apiKeys = form.get('api_keys', '')
     apiKeys = apiKeys.split('\n') if apiKeys else []
     params = {'enable': str_to_bool(form.get('enable', '')), 'engine': engineName,
@@ -118,8 +119,8 @@ def BookTranslatorTestPost(recipeType, recipe, user, recipeId):
 
     translator = HtmlTranslator(bkRecipe.translator)
     data = translator.translate_text(text)
-    status = data['error'] if data['error'] else 'ok'
-    return {'status': status, 'text': data['translated']}
+    status = data['error'] if data['error'] else 'ok' #type:ignore
+    return {'status': status, 'text': data['translated']} #type:ignore
 
 #书籍文本转语音TTS
 @bpTranslator.route("/tts/<recipeId>", endpoint='BookTTSRoute')
@@ -151,6 +152,8 @@ def BookTTSPost(recipeType, recipe, user, recipeId):
     paramNames = ['engine', 'enable', 'api_host', 'api_key', 'language', 'speed', 'send_to',
         'region', 'voice', 'rate', 'pitch', 'volume']
     params = {item: form.get(item, '') for item in paramNames}
+    apiHost = params['api_host']
+    params['api_host'] = f'https://{apiHost}' if apiHost and not apiHost.startswith('http') else apiHost
 
     engines = get_tts_engines()
     engine = engines.get(params.get('engine'))

@@ -774,7 +774,7 @@ class BasicNewsRecipe(Recipe):
             title = doc.title()
             short_title = doc.short_title()
         except:
-            summary = '<html></html>'
+            summary = '<html><body></body></html>'
             title = ''
             short_title = ''
         
@@ -786,7 +786,7 @@ class BasicNewsRecipe(Recipe):
             soup = simple_extract(html)
             body_tag = soup.find('body')
             if not body_tag or len(body_tag.contents) == 0: #再次失败
-                raise
+                raise Exception('extract_readable_article failed.')
 
             #增加备用算法提示，免责声明：）
             info = soup.new_tag('p', style='color:#555555;font-size:60%;text-align:right;')

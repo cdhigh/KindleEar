@@ -15,7 +15,7 @@ KindleEar支持多种平台部署，我只在这里列出一些我测试通过�
 打开 [google cloud](https://console.cloud.google.com/appengine) ，创建一个项目。
 
 2. Shell部署    
-在同一个页面的右上角有一个图标 "激活 Cloud shell"， 点击它，打开 cloud shell， 拷贝粘贴以下命令，根据提示不停的按 "y" 即可完成部署。    
+在同一个页面的右上角有一个图标 "激活 Cloud shell"， 点击它，打开 cloud shell， 拷贝粘贴以下命令（**请保持多行命令格式**），根据提示不停的按 "y" 即可完成部署。    
 部署和更新都使用同样一条命令。     
 
 ```bash
@@ -35,11 +35,16 @@ kindleear/tools/gae_deploy.sh
 kindleear/tools/gae_deploy.sh B1,1,t2,15m
 ```
 
-**注2：** 如果想精简内置Recipe文件，仅保留你需要的语种，可以在 `kindleear/tools/gae_deploy.sh` 命令前增加一行   
+**注2：** 如果想精简内置Recipe文件，仅保留你需要的语种，可以在 `kindleear/tools/gae_deploy.sh` 命令前增加一行。
+假如内置的Recipe你一个都不想要，可以直接删除 `application/recipes/*.xml, *.zip`。      
 
 ```bash
-# parameter is a list of language code you want to keep
-python kindleear/tools/trim_recipes.py en,zh,es
+# Modify the list after trim_recipes.py to keep desired languages.
+rm -rf kindleear && \
+git clone --depth 1 https://github.com/cdhigh/kindleear.git && \
+chmod +x kindleear/tools/gae_deploy.sh && \
+python kindleear/tools/trim_recipes.py en,zh && \
+kindleear/tools/gae_deploy.sh B1,1,t2,15m
 ```
 
 3. 如需要GAE部署的更多信息，请参考 [其他说明](#gae_other_instructions) 章节，比如怎么解决 "Unauthorized sender" 错误等。    

@@ -156,17 +156,24 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
         default_log.warning('The inbound email forwarding feature is not yet enabled.')
         return 'The inbound email forwarding feature is not yet enabled.'
 
-    forceToLinks = False
-    forceToArticle = False
-
-    #邮件主题中如果存在 !links，则强制提取邮件中的链接然后生成电子书
+    forceToLinks = False #强制提取链接
+    forceToArticle = False #强制发送邮件内容
+    
+    #邮件主题中如果存在 !links ，则强制提取邮件中的链接然后生成电子书
     if subject.endswith('!links') or ' !links ' in subject:
         subject = subject.replace(' !links ', '').replace('!links', '').strip()
         forceToLinks = True
-    # 如果主题存在 !article，则强制转换邮件内容为电子书，忽略其中的链接
+    # 如果主题存在 !article ，则强制转换邮件内容为电子书，忽略其中的链接
     elif subject.endswith('!article') or ' !article ' in subject:
         subject = subject.replace(' !article ', '').replace('!article', '').strip()
         forceToArticle = True
+
+    #设置电子书语种
+    language = ''
+    match = re.search(r' !lang=([^ ]+)', subject) # !lang=en
+    if match:
+        language = match.group(1)
+        subject = subject.replace(match.group(0), '').strip()
     
     soup = CreateMailSoup(subject, txtBodies, htmlBodies)
     if not soup:
@@ -191,7 +198,8 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
                  'urls': '|'.join(links),
                  'action': action,
                  'key': user.share_links.get('key', ''),
-                 'title': subject[:SUBJECT_WORDCNT]}
+                 'title': subject[:SUBJECT_WORDCNT],
+                 'language': language}
         create_url2book_task(params)
     else: #直接转发邮件正文
         #只处理图像，忽略其他类型的附件
@@ -275,7 +283,8 @@ def CreateMailSoup(subject: str, txtBodies: list, htmlBodies: list):
 
     if not htmlBodies:
         return None
-        
+    
+    htmlBodies = [item.replace('<wbr>', '') for item in htmlBodies]
     soup = BeautifulSoup(htmlBodies[0], 'lxml')
     for other in htmlBodies[1:]: #合并多个邮件HTML内容
         tag = BeautifulSoup(other, 'lxml').find('body')
@@ -312,35 +321,38 @@ def CreateMailSoup(subject: str, txtBodies: list, htmlBodies: list):
 #forceToLinks: 不管文章内容如何，强制提取链接
 def CollectSoupLinks(soup, forceToLinks):
     body = soup.body
-    links = [link['href'] for link in body.find_all('a', attrs={'href': True})]
-    if not links: #如果通过a标签找不到连接，则使用显示的文本进行查找
-        for s in body.stripped_strings:
-            if IsHyperLink(s):
-                if s not in links:
-                    links.append(s)
+    links = []
+    emptyLineNum = 0 #放宽一点条件，允许链接之间有一个空行，因为有的应用会添加一个空的<div>
+    #优先通过显示的文本提取链接，可见即可得
+    for txt in body.stripped_strings:
+        if IsHyperLink(txt):
+            emptyLineNum = 0
+            if txt not in links:
+                links.append(txt)
+        else:
             #如果是多个链接，则必须一行一个，不能留空，除非强制提取链接
-            #这个处理是为了去除部分邮件客户端在邮件末尾添加的一个广告链接
-            elif not forceToLinks:
+            #这个处理是为了去除部分邮件客户端在邮件末尾添加的一个广告链接或签名链接
+            if not txt:
+                emptyLineNum += 1
+            if not forceToLinks and emptyLineNum >= 2:
                 break
+
+    if not links: #如果在显示文本中找不到连接，则通过a标签进行查找
+        links = [item['href'] for item in body.find_all('a', attrs={'href': True})]
             
     #如果有相对路径，则在里面找一个绝对路径，然后转换其他的链接为绝对路径
-    hasRelativePath = False
-    fullPath = ''
-    text = ' '.join([s for s in body.stripped_strings])
-    for link in links:
-        text = text.replace(link, '')
-        if not link.startswith('http'):
-            hasRelativePath = True
-        if not fullPath and link.startswith('http'):
-            fullPath = link
-    
+    hasRelativePath = any(not item.startswith('http') for item in links)
+    fullPath = next((item for item in links if item.startswith('http')), '')
+    text = ' '.join([txt for txt in body.stripped_strings])
+    for item in links: #扣除显示出来的链接文本
+        text = text.replace(item, '')
+
     if hasRelativePath and fullPath:
-        for idx, link in enumerate(links):
-            if not link.startswith('http'):
-                links[idx] = urljoin(fullPath, link)
-    
+        links = [(item if item.startswith('http') else urljoin(fullPath, item))
+            for item in links]
+
     #如果字数太多，则认为直接推送正文内容
-    if not forceToLinks and (len(links) != 1 or len(text) > WORDCNT_THRESHOLD_APMAIL):
+    if not forceToLinks and (len(text) > WORDCNT_THRESHOLD_APMAIL):
         links = []
 
     return links

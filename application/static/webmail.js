@@ -196,10 +196,11 @@ function ReplyMail(sender, act) {
 }
 
 //删除/取消删除一个或多个邮件
-function DeleteMails(act) {
+function DeleteMails(event) {
   const selectedMails = GetSelectedMails();
   if (selectedMails.length > 0) {
-    if (!confirm(i18n.areYouSureDelete.format(`${selectedMails.length} mails`))) {
+    if (!(event.ctrlKey || event.metaKey) &&
+      !confirm(i18n.areYouSureDelete.format(`${selectedMails.length} mails`))) {
       return;
     }
 

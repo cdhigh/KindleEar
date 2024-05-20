@@ -1425,8 +1425,9 @@ class OPFCreator(Metadata):
     def create_manifest_from_files_in(self, files_and_dirs, exclude=lambda x:False):
         entries = []
         for i in files_and_dirs:
-            entries.extend([(item, None) for item in self.fs.walk(i) if not exclude(item)])
-
+            for elem in [(item, None) for item in self.fs.walk(i) if not exclude(item)]:
+                if elem not in entries:
+                    entries.append(elem)
         self.create_manifest(entries)
 
     def create_spine(self, entries):

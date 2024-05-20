@@ -186,7 +186,10 @@ class RecipeInput(InputFormatPlugin):
             opf.guide.append(ref)
 
         #manifest 资源列表
-        manifest = [mPath, cPath] #os.path.join(dir_, 'index.html')
+        manifest = [mPath]
+        if cPath:
+            manifest.append(cPath)
+        manifest.append(os.path.join(dir_, 'index.html'))
         manifest.extend([os.path.join(dir_, 'feed_%d'% (i)) for i in range(len(self.feeds))])
         opf.create_manifest_from_files_in(manifest)
 

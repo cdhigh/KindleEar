@@ -291,6 +291,11 @@ class FsDictStub(object):
     def dump(self, path):
         if self.fs_dict:
             self.fs_dict.dump(path)
+        else:
+            try:
+                shutil.copytree(self.path, path)
+            except Exception as e:
+                print(e)
 
 #一个假的threading.RLock
 class fakeRLock:

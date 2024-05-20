@@ -16,7 +16,7 @@
       <option value="" {% if not inbound_email %}selected="selected"{% endif %}>{{_("Disable")}}</option>
       <option value="forward" {% if 'forward' in inbound_email %}selected="selected"{% endif %}>{{_("Forward Only")}}</option>
       <option value="save" {% if 'save' in inbound_email %}selected="selected"{% endif %}>{{_("Save Only")}}</option>
-      <option value="save,forward" {% if not inbound_email %}selected="selected"{% endif %}>{{_("Save and Forward")}}</option>
+      <option value="save,forward" {% if 'save' in inbound_email and 'forward' in inbound_email %}selected="selected"{% endif %}>{{_("Save and Forward")}}</option>
     </select>
   </div>
   <div class="pure-control-group">

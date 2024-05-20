@@ -19,7 +19,7 @@
       <button onclick="ReplyMail('{{sender}}', 'reply')">{{_('Reply')}}</button>
       <button onclick="ReplyMail('{{sender}}', 'forward')">{{_('Forward')}}</button>
       <button onclick="ReplyMail('{{sender}}', 'attachment')">{{_('Fwd as Attach')}}</button>
-      <button onclick="DeleteMails()">{{_('Delete')}}</button>
+      <button onclick="DeleteMails(event)">{{_('Delete')}}</button>
     </div>
     <div class="mail-list">
       <table class="mail-list-table">

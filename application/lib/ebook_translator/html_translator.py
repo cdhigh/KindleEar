@@ -4,6 +4,7 @@
 import time, copy
 from bs4 import BeautifulSoup, NavigableString
 from ebook_translator.engines import *
+from application.utils import loc_exc_pos
 
 #生成一个当前所有支持的翻译引擎的字典，在网页内使用
 def get_trans_engines():
@@ -17,7 +18,7 @@ def get_trans_engines():
 
 class HtmlTranslator:
     def __init__(self, params: dict, thread_num: int=1):
-        params.setdefault('stream', False)
+        #params.setdefault('stream', False)
         self.thread_num = thread_num
         self.params = params
         self.engineName = self.params.get('engine')
@@ -56,10 +57,11 @@ class HtmlTranslator:
             item['translated'] = ''
             if text:
                 try:
-                    item['translated'] = self.translator.translate(text)
-                except Exception as e:
-                    default_log.warning('translate_text failed: ' + str(e))
-                    item['error'] = str(e)
+                    item['translated'] = self.translator.translate(text) #type:ignore
+                except:
+                    msg = loc_exc_pos('translate_text failed')
+                    default_log.warning(msg)
+                    item['error'] = msg
             else:
                 item['error'] = _('The input text is empty')
             ret.append(item)
@@ -88,8 +90,8 @@ class HtmlTranslator:
                     success += 1
                 else:
                     failed += 1
-            except Exception as e:
-                default_log.warning('translate_soup failed: ' + str(e))
+            except:
+                default_log.warning(loc_exc_pos('translate_soup failed'))
                 failed += 1
             if (idx < count - 1) and (self.translator.request_interval > 0.01):
                 time.sleep(self.translator.request_interval)

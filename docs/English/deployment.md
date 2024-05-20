@@ -16,7 +16,7 @@ This GitHub repository [heroku-free-alternatives](https://github.com/anandrmedia
 Open [google cloud](https://console.cloud.google.com/appengine) and create a new project.    
 
 2. Shell deployment   
-On the same page, in the top right corner, there is an icon labeled "Activate Cloud Shell". Click on it to open the cloud shell. Copy and paste the following commands, and follow the prompts by pressing "y" continuously to complete the deployment.   
+On the same page, in the top right corner, there is an icon labeled "Activate Cloud Shell". Click on it to open the cloud shell. Copy and paste the following commands (**Please keep the multi-line format**), and follow the prompts by pressing "y" continuously to complete the deployment.   
 Deployment and updating are both done with the same command.     
 
 ```bash
@@ -37,10 +37,15 @@ kindleear/tools/gae_deploy.sh B1,1,t2,15m
 ```
 
 **Note 2:** If you want to trim the built-in Recipe file to keep only the languages you need, you can add a line before the `kindleear/tools/gae_deploy.sh` command.    
+If you don't want any of the built-in recipes, you can directly delete `application/recipes/*.xml, *.zip`.
 
 ```bash
-# parameter is a list of language code you want to keep
-python kindleear/tools/trim_recipes.py en,zh,es
+# Modify the list after trim_recipes.py to keep desired languages.
+rm -rf kindleear && \
+git clone --depth 1 https://github.com/cdhigh/kindleear.git && \
+chmod +x kindleear/tools/gae_deploy.sh && \
+python kindleear/tools/trim_recipes.py en,zh && \
+kindleear/tools/gae_deploy.sh B1,1,t2,15m
 ```
 
 3. Refer to the [Other Instructions](#gae_other_instructions) section for additional information, such as troubleshooting the 'Unauthorized sender' issue.    

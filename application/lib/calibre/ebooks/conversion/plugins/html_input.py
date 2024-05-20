@@ -71,6 +71,7 @@ class HTMLInput(InputFormatPlugin):
         mi.authors = ['KindleEar']
         mi.publication_type = f'book:book:{title}'
         mi.timestamp = user.local_time()
+        mi.language = input_.get('language') or user.book_cfg('language')
         opf = OPFCreator(fs.path, mi, fs)
         
         #manifest 资源列表

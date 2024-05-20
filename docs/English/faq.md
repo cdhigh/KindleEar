@@ -40,16 +40,20 @@ KindleEar does not store passwords in plain text and cannot retrieve them. If lo
 
 
 <a id="appspotmail"></a>
-## How to use the xxx@appid.appspotmail.com email address?
-If your application is deployed on the Google Cloud Platform (GAE), KindleEar also provides an additional email service xxx@appid.appspotmail.com. After deploying KindleEar, you automatically have countless EMAIL email addresses in the format: xxx@appid.appspotmail.com, where xxx is any legal string and appid is your application name.
-1. To use this feature, you need to add whitelist items firstly. If it's '\*', it allows all emails. Otherwise, the format is 'xx@xx.xx' or '@xx.xx' (without single quotes).
-2. This service will send the contents of received emails as email attachments to your registered kindle email address. If there are only links in the email (multiple links are one per line), KindleEar will fetch the web page content and create an e-book, then send it.
-3. If the subject of the email is followed by the identifier !links, KindleEar will only extract the links from the email regardless of its content, then fetch the web pages and send them to your Kindle. This feature is best for directly sending serialized web pages to Kindle for viewing.
-4. If the subject of the email is followed by the identifier !article, all links will be ignored, and the content will be directly converted into an e-book and sent.
-5. By default, it's sent to the email registered by the administrator. If you want to send it to another user's email, use the format: username__xxx@appid.appspotmail.com. (Note the double underscore)
-6. If you send the download link of an e-book to book@appid.appspotmail.com or username__book@appid.appspotmail.com, KindleEar will directly download the corresponding e-book archive and forward it to the registered email address. (Note: GAE has restrictions on file extensions that can be emailed and cannot send file extensions that may have security risks such as exe, zip files can be sent, but zip files cannot contain files with potential security risks.) GAE's list of email-able file extensions: [Mail Python API Overview](https://cloud.google.com/appengine/docs/python/mail/#Python_Sending_mail_with_attachments) (book/file/download email addresses reserved for downloading e-books)
-7. Sending to trigger@appid.appspotmail.com or username__trigger@appid.appspotmail.com triggers a manual delivery. If the subject is empty or all, it's exactly the same as the "Deliver Now" button on the webpage. If you need to push specific books, write the book name in the subject, separated by commas.
-8. Emails sent to debug@appid.appspotmail.com directly extract the links from the email and send HTML files directly to the administrator's email instead of the Kindle email.
+## How to Use the Inbound Mail Function?    
+If your application is deployed on the Google Cloud Platform (GAE), the email address is: xxx@appid.appspotmail.com (where xxx is any valid string, and appid is your application name).  
+If deployed using Docker Compose, the email address is: `xxx@domain`, remember to open port 25 and set MX records correctly in the DNS server.    
+
+1. To use this function, you need to add whitelist first. If set to '\*', it allows all emails. Otherwise, the format should be `xx@xx.xx` or `@xx.xx`.    
+2. This email will convert the received email body into e-book and push them to your registered email. If the email only contains links (one link per line), it will fetch the web content of the links and create an e-book before pushing.    
+3. If email subject contains the identifier `!links`, regardless of the email content, KindleEar will only extract the links from the email, then fetch the webpages and send them as e-books to your Kindle. This feature is best suited for sending serialized web content directly to Kindle for viewing.   
+4. If the identifier `!article` is present in the subject, all links will be ignored, and the content will be directly converted into an e-book for delivery.      
+5. The default language of the e-book is same as of the custom RSS. If you need another language, you can add the identifier `!lang=en` (replace `en` with the language code you need) after the email subject.   
+6. By default, the e-book is pushed to the administrator's registered email. If you want to push it to another user's email, use the format: `username__xxx@domain`. (Note the double underscore)   
+7. If you send the e-book download link to `book@domain` or `username__book@domain`, KindleEar will directly download the corresponding e-book and forward it to the registered email. (Note: there are restrictions on file extensions; you cannot send file extensions that may have security risks, such as exe, zip files are allowed, but zip files cannot contain files with potential security risks.)
+The suffix list that GAE can send emails to see: [Mail Python API Overview](https://cloud.google.com/appengine/docs/python/mail/#Python_Sending_mail_with_attachments) (book/file/download email addresses are reserved for downloading e-books).        
+8. Sending to `trigger@domain` or `username__trigger@domain` triggers a manual delivery. If the email subject is empty or 'all', it is equivalent to the "Deliver Now" button on the website. If specific books need to be pushed, write their names in the subject, separated by commas.    
+9. Emails sent to `debug@domain` will directly fetch the links from the email and send HTML files directly to the administrator's email instead of the Kindle mailbox.     
 
 
 
@@ -121,12 +125,13 @@ You should select some webpage's contents, then click this Bookmarklet. It will 
 
 
 ## How to save new recipe files to the builtin recipe library?
-KindleEar provides a feature to upload recipe files through the web page.    
-However, if you wish to merge recipe files into the built-in library,     
-for example, when a new version of Calibre is released and there may be some updated recipes included, you can merge the recipes as follows:       
-1. Copy the recipe files to the application/recipes directory. There is no need to delete builtin_recipes.zip/builtin_recipes.xml unless you want to create a brand new built-in library containing only the recipes you have selected.       
-2. Run tools/archive_builtin_recipes.py.      
-3. Delete the recipe files.          
+KindleEar provides a feature to upload recipe files via the web page.   
+After Calibre [updated](https://github.com/kovidgoyal/calibre) the recipes, you can simply upload the recipe files you are interested in without the need to redeploy KindleEar.   
+However, if you wish to merge recipe files into the built-in library:   
+1. If you haven't already created a local running environment for KindleEar, first run pip install -r requirements.txt to ensure the scripts run correctly.   
+2. Copy the recipe files to the application/recipes directory. There is no need to delete builtin_recipes.zip/builtin_recipes.xml unless you want to create a brand new built-in library containing only the recipes you have selected.       
+3. Run tools/archive_builtin_recipes.py.      
+4. Delete the recipe files.          
 
 
 

@@ -25,7 +25,7 @@ def main():
         print('Cannot found builtin_recipes.xml/builtin_recipes.zip')
         return
 
-    print(f'Triming xml file using language list: {langList}')
+    print(f'Triming recipes files using language list: {langList}')
     size0 = os.path.getsize(xmlFile)
     recipeFiles = trimXml(xmlFile, langList)
     size1 = os.path.getsize(xmlFile)
