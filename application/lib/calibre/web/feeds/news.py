@@ -2169,6 +2169,9 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
         feeds = []
         id_counter = 0
         added = set()
+        #这里oldest_article和其他的recipe不一样，这个参数表示在这个区间内不会重复推送
+        oldestSeconds = 24 * 3600 * self.oldest_article
+        now = datetime.datetime.utcnow()
         for obj in main_urls: #type:ignore
             main_title, main_url = (self.title, obj) if isinstance(obj, str) else obj
             feed = Feed()
@@ -2177,9 +2180,7 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
             feed.image_url = None
             feed.oldest_article = self.oldest_article
             feed.articles = []
-            structNow = time.gmtime() #time.struct_time
-            now = datetime.datetime.utcnow()
-
+            
             for title, url in self.extract_urls(main_title, main_url):
                 if len(feed) >= self.max_articles_per_feed:
                     break
@@ -2189,18 +2190,16 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
                 added.add(url)
                 timeItem = LastDelivered.get_or_none((LastDelivered.user==self.user.name) & 
                     (LastDelivered.bookname==self.title) & (LastDelivered.url==url))
-                delta = (now - timeItem.datetime) if timeItem else None
-                #这里oldest_article和其他的recipe不一样，这个参数表示在这个区间内不会重复推送
-                if (not timeItem or not self.oldest_article or self.delivery_reason == 'manual' or
-                    (delta and delta.total_seconds() > 24 * 3600 * self.oldest_article)):
+                delta = (now - timeItem.datetime).total_seconds() if timeItem else (oldestSeconds + 1)
+                if (self.delivery_reason == 'manual') or (delta > oldestSeconds):
                     id_counter += 1
-                    feed.articles.append(Article(f'internal id#{id_counter}', title, url, 'KindleEar', '', structNow, ''))
+                    feed.articles.append(Article(f'internal id#{id_counter}', title, url, 'KindleEar', 
+                        '', time.gmtime(), ''))
 
                     #如果是手动推送，不单不记录已推送日期，还将已有的上次推送日期数据删除
-                    if (self.delivery_reason == 'manual') or (not self.oldest_article):
-                        if timeItem:
-                            timeItem.delete_instance()
-                    else:
+                    if timeItem and ((self.delivery_reason == 'manual') or (not oldestSeconds)):
+                        timeItem.delete_instance()
+                    elif not timeItem:
                         LastDelivered.create(user=self.user.name, bookname=self.title, url=url)
                 else:
                     self.log.debug(f'Skipping article {title}({url}) as it is too old.')
