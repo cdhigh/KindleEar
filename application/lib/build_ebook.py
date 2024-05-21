@@ -2,11 +2,13 @@
 # -*- coding:utf-8 -*-
 #从recipe生成对应的输出格式
 #Author: cdhigh <https://github.com/cdhigh>
-import io, os
+import io, os, re
 import clogging
+from calibre.ptempfile import PersistentTemporaryFile
 from calibre.ebooks.conversion.plumber import Plumber
 from calibre.web.feeds.recipes import compile_recipe
 from recipe_helper import GenerateRecipeSource
+from urlopener import UrlOpener
 
 #从输入格式生成对应的输出格式
 #recipes: 编译后的recipe，为一个列表
@@ -15,7 +17,7 @@ from recipe_helper import GenerateRecipeSource
 #options: 额外的一些参数，为一个字典
 # 如: options={'debug_pipeline': path, 'verbose': 1}
 #返回电子书二进制内容
-def recipes_to_ebook(recipes: list, user, options: dict=None, output_fmt: str=None):
+def recipes_to_ebook(recipes: list, user, options=None, output_fmt=''):
     if not isinstance(recipes, list):
         recipes = [recipes]
     output = io.BytesIO()
@@ -29,26 +31,62 @@ def recipes_to_ebook(recipes: list, user, options: dict=None, output_fmt: str=No
 #urls: [(title, url),...] or [url,url,...]
 #title: 书籍标题
 #user: KeUser对象
-#output_fmt: 如果指定，则生成特定格式的书籍，否则使用user.book_cfg('type')
+#output_fmt: 如果指定，则生成特定格式的书籍，否则使用 user.book_cfg('type')
 #options: 额外的一些参数，为一个字典
-def urls_to_book(urls: list, title: str, user, options: dict=None, output_fmt: str=None):
-    if not isinstance(urls[0], (tuple, list)):
-        urls = [(title, url) for url in urls]
-    src = GenerateRecipeSource(title, urls, user, base='UrlNewsRecipe', max_articles=100, cover_url=False)
+def urls_to_book(urls: list, title: str, user, options=None, output_fmt='', language=''):
+    #提前下载html，获取其title
+    sysTmpDir = os.environ.get('KE_TEMP_DIR')
+    prevDownloads = []
+    def clearPrevDownloads(): #退出时清理临时文件
+        for item in prevDownloads:
+            try:
+                os.remove(item)
+            except Exception as e:
+                print(f'Delete failed: {item}: {e}')
+                pass
+
+    for idx, url in enumerate(urls[:]):
+        if not sysTmpDir or not isinstance(url, str):
+            urls[idx] = (title, url) if isinstance(url, str) else url
+            continue
+
+        resp = UrlOpener().open(url)
+        if resp.status_code != 200:
+            urls[idx] = (title, url)
+            continue
+
+        with PersistentTemporaryFile(suffix='.html', dir=sysTmpDir) as pt:
+            prevDownloads.append(pt.name)
+            try:
+                pt.write(resp.content)
+            except Exception as e:
+                urls[idx] = (title, url)
+                default_log.warning(f'Prev download html failed: {url}: {e}')
+            else: #提取标题
+                match = re.search(r'<title>(.*?)</title>', resp.text, re.I|re.M|re.S)
+                uTitle = match.group(1).strip() if match else title
+                urls[idx] = (uTitle, 'file://' + pt.name)
+
+    src = GenerateRecipeSource(title, urls, user, base='UrlNewsRecipe', max_articles=100, 
+        cover_url=False, language=language)
     try:
         ro = compile_recipe(src)
     except Exception as e:
         default_log.warning('Failed to compile recipe {}: {}'.format(title, e))
+        clearPrevDownloads()
         return None
     if not ro:
         default_log.warning('Failed to compile recipe {}: {}'.format(title, 'Cannot find any subclass of BasicNewsRecipe.'))
+        clearPrevDownloads()
         return None
         
     #合并自定义css
     userCss = user.get_extra_css()
     ro.extra_css = f'{ro.extra_css}\n\n{userCss}' if ro.extra_css else userCss #type:ignore
 
-    return recipes_to_ebook(ro, user, options, output_fmt)
+    book = recipes_to_ebook([ro], user, options, output_fmt)
+    clearPrevDownloads()
+    return book
 
 #将一个html文件和其图像内容转换为一本电子书，返回电子书二进制内容，格式为user.book_cfg('type')
 #html: html文本内容
@@ -57,8 +95,8 @@ def urls_to_book(urls: list, title: str, user, options: dict=None, output_fmt: s
 #imgs: 图像内容列表，[(fileName, content), ...]
 #options: 电子书制作的额外参数
 #output_fmt: 输出格式，这个参数会覆盖user的原本设置
-def html_to_book(html: str, title: str, user, imgs: list=None, options: dict=None, output_fmt: str=None):
-    input_ = {'html': html, 'imgs': imgs, 'title': title}
+def html_to_book(html: str, title: str, user, imgs=None, options=None, output_fmt='', language=''):
+    input_ = {'html': html, 'imgs': imgs, 'title': title, 'language': language}
     output = io.BytesIO()
     output_fmt=output_fmt if output_fmt else user.book_cfg('type')
     plumber = Plumber(input_, output, input_fmt='html', output_fmt=output_fmt)

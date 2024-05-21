@@ -15,7 +15,7 @@ KindleEar支持多种平台部署，我只在这里列出一些我测试通过�
 打开 [google cloud](https://console.cloud.google.com/appengine) ，创建一个项目。
 
 2. Shell部署    
-在同一个页面的右上角有一个图标 "激活 Cloud shell"， 点击它，打开 cloud shell， 拷贝粘贴以下命令，根据提示不停的按 "y" 即可完成部署。    
+在同一个页面的右上角有一个图标 "激活 Cloud shell"， 点击它，打开 cloud shell， 拷贝粘贴以下命令（**请保持多行命令格式**），根据提示不停的按 "y" 即可完成部署。    
 部署和更新都使用同样一条命令。     
 
 ```bash
@@ -25,7 +25,7 @@ chmod +x kindleear/tools/gae_deploy.sh && \
 kindleear/tools/gae_deploy.sh
 ```
 
-注：默认配置为B2实例，1个工作进程，2个工作线程，20分钟超时，如果需要其他配置，可以修改最后一行代码，比如：   
+**注1：** 默认配置为B2实例，1个工作进程，2个工作线程，20分钟超时，如果需要其他配置，可以修改最后一行代码   
 
 ```bash
 #instance_class: B1 (384MB/600MHz)
@@ -35,6 +35,17 @@ kindleear/tools/gae_deploy.sh
 kindleear/tools/gae_deploy.sh B1,1,t2,15m
 ```
 
+**注2：** 如果想精简内置Recipe文件，仅保留你需要的语种，可以在 `kindleear/tools/gae_deploy.sh` 命令前增加一行。
+假如内置的Recipe你一个都不想要，可以直接删除 `application/recipes/*.xml, *.zip`。      
+
+```bash
+# Modify the list after trim_recipes.py to keep desired languages.
+rm -rf kindleear && \
+git clone --depth 1 https://github.com/cdhigh/kindleear.git && \
+chmod +x kindleear/tools/gae_deploy.sh && \
+python kindleear/tools/trim_recipes.py en,zh && \
+kindleear/tools/gae_deploy.sh B1,1,t2,15m
+```
 
 3. 如需要GAE部署的更多信息，请参考 [其他说明](#gae_other_instructions) 章节，比如怎么解决 "Unauthorized sender" 错误等。    
 
@@ -135,7 +146,9 @@ sudo iptables -P OUTPUT ACCEPT
 sudo iptables -F
 ```
 
-3. 如果需要使用https，更推荐的是使用caddy做为web服务器，可以自动申请和续期ssl证书（一定要先正确填写DOMAIN）    
+3. 如果需要入站邮件功能（需要开放25端口），请使用docker-compose。     
+
+3.1 推荐使用Caddy做为web服务器，可以自动申请和续期SSL证书（一定要先正确填写DOMAIN）    
 
 ```bash
 mkdir data #for database and logs
@@ -148,8 +161,7 @@ vim ./docker-compose.yml
 sudo docker compose up -d
 ```
 
-
-4. 如果更喜欢nginx    
+3.2 如果更喜欢Nginx    
 
 ```bash
 mkdir data #for database and logs
@@ -162,9 +174,9 @@ vim ./docker-compose-nginx.yml
 sudo docker compose -f docker-compose-nginx.yml up -d
 ```
 
-使用nginx时如果需要https，预先将ssl证书 fullchain.pem/privkey.pem 拷贝到data目录，取消default.conf/docker-compose-nginx.yml里面对应的注释即可。      
+使用Nginx时如果需要https，预先将ssl证书 fullchain.pem/privkey.pem 拷贝到data目录，取消default.conf/docker-compose-nginx.yml里面对应的注释即可。      
 
-5. 使用docker-compose的版本更新方法      
+4. 使用docker-compose的版本更新方法      
 
 ```bash
 sudo docker compose pull
@@ -173,14 +185,14 @@ sudo docker image prune
 ```
 
 
-6. 需要查询日志文件
+5. 需要查询日志文件
 
 ```bash
 tail -n 100 ./data/gunicorn.error.log
 tail -n 100 ./data/gunicorn.access.log
 ```
 
-7. 如果不喜欢每次输入docker都使用sudo，可以将你的账号添加到docker用户组
+6. 如果不喜欢每次输入docker都使用sudo，可以将你的账号添加到docker用户组
 
 ```bash
 sudo usermod -aG docker your-username

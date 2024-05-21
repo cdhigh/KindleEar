@@ -281,7 +281,7 @@ class InBox(MyBaseModel):
     status = CharField()
     size = IntegerField(default=0)
     datetime = DateTimeField(default=datetime.datetime.utcnow)
-    body = JSONField(default=JSONField.dict_default, index=False)
+    body = TextField(default='', index=False)
     attachments = CharField(default='') #存放UserBlob的数据库id，逗号分割
 
 class AppInfo(MyBaseModel):

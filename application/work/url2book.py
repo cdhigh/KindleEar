@@ -35,7 +35,7 @@ def Url2BookRoute():
 #  debug: 下载链接推送至管理员邮箱
 #  其他: 抓取对应链接的网页并生成电子书推送
 #text存在则直接使用text制作电子书(优先)，urls存在则抓取url
-def Url2BookImpl(userName, urls, title, key, action='', text=''):
+def Url2BookImpl(userName, urls, title, key, action='', text='', language=''):
     if not all((userName, urls, title, key)):
         return "Some parameter missing!"
 
@@ -50,7 +50,7 @@ def Url2BookImpl(userName, urls, title, key, action='', text=''):
     elif action == 'debug': #调试目的，将链接直接下载，发送到管理员邮箱
         return u2lDebugFetch(user, urls, title, text)
     else:
-        return u2lFetchUrl2(user, urls, title, text)
+        return u2lFetchUrl2(user, urls, title, text, language)
         
 #直接下载urls指定的书籍，而不是转换
 def u2lDownloadFile(user, urls, title):
@@ -108,17 +108,17 @@ def u2lDebugFetch(user, urls, title, text):
         return 'debug fetch failed'
 
 #抓取url，制作成电子书
-def u2lFetchUrl2(user, urls, title, text):
+def u2lFetchUrl2(user, urls, title, text, language=''):
     if not urls:
         return "No URLs provided."
 
     if text:
         target = 'selected text'
-        book = u2lCreateEbookFromText(user, urls[0], title, text)
+        book = u2lCreateEbookFromText(user, urls[0], title, text, language=language)
     else:
         target = 'urls'
         processedUrls = u2lPreprocessUrl(urls)
-        book = urls_to_book(urls, title, user)
+        book = urls_to_book(urls, title, user, language=language)
         
     if book:
         send_to_kindle(user, title, book, fileWithTime=False)
@@ -131,7 +131,7 @@ def u2lFetchUrl2(user, urls, title, text):
     return rs
 
 #下载text里面的图像文件，和文本一起做成电子书投递
-def u2lCreateEbookFromText(user, url, title, text):
+def u2lCreateEbookFromText(user, url, title, text, language=''):
     text = text.replace('\n', '<br/>').replace('\\n', '<br/>')
     htmlText = ['<!DOCTYPE html>', '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>', 
         f'<title>{title}</title></head><body><div>{text}</div>']
@@ -159,7 +159,7 @@ def u2lCreateEbookFromText(user, url, title, text):
         else:
             tag.extract()
 
-    return html_to_book(str(soup), title, user, imgs)
+    return html_to_book(str(soup), title, user, imgs, language=language)
 
 #url列表的预处理，对一些特殊的网站进行url的适当转换
 #返回处理过的url列表

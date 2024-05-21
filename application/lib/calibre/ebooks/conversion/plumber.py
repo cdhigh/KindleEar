@@ -357,18 +357,19 @@ class Plumber:
         # Setup baseline option values
         self.setup_options()
         
-        css_parser.log.setLevel(logging.WARN)
+        css_parser.log.setLevel(logging.WARN) #type:ignore
         #get_types_map()  # Ensure the mimetypes module is initialized
+        debug_pipeline = self.opts.debug_pipeline #type:ignore
 
-        if self.opts.debug_pipeline:
+        if debug_pipeline:
             self.opts.verbose = max(self.opts.verbose, 4)
-            self.opts.debug_pipeline = os.path.abspath(self.opts.debug_pipeline)
-            if not os.path.exists(self.opts.debug_pipeline):
-                os.makedirs(self.opts.debug_pipeline)
-            #with open(os.path.join(self.opts.debug_pipeline, 'README.txt'), 'wb') as f:
+            debug_pipeline = os.path.abspath(debug_pipeline)
+            if not os.path.exists(debug_pipeline):
+                os.makedirs(debug_pipeline)
+            #with open(os.path.join(debug_pipeline, 'README.txt'), 'wb') as f:
             #    f.write(DEBUG_README)
-            for x in ('input', '0.parsed', '1.structure', '2.processed'):
-                x = os.path.join(self.opts.debug_pipeline, x)
+            for x in ('input', '0.download', '1.parsed', '2.structure', '3.processed'):
+                x = os.path.join(debug_pipeline, x)
                 try:
                     shutil.rmtree(x)
                 except:
@@ -399,11 +400,11 @@ class Plumber:
         #如果只是要制作epub的话，到目前为止，工作已经完成大半
         #将self.oeb指向的目录拷贝到OEBPS目录，加一个mimetype和一个META-INF/container.xml文件，这两个文件内容是固定的
         #再将这些文件和文件夹一起打包为zip格式，就是完整的epub电子书了
-        #if self.opts.debug_pipeline:
-        #   fs.dump(self.opts.debug_pipeline)
-        #   if self.abort_after_input_dump:
-        #       return
-        #if self.opts.debug_pipeline is not None:
+        if debug_pipeline:
+           fs.dump(os.path.join(debug_pipeline, '0.download'))
+           if self.abort_after_input_dump:
+               return
+        #if debug_pipeline:
         #    self.dump_input(self.oeb, tdir)
         #    if self.abort_after_input_dump:
         #        return
@@ -420,8 +421,8 @@ class Plumber:
         self.input_plugin.postprocess_book(self.oeb, self.opts, self.log)
         self.opts.is_image_collection = self.input_plugin.is_image_collection
         self.flush()
-        if self.opts.debug_pipeline:
-            out_dir = os.path.join(self.opts.debug_pipeline, '0.parsed')
+        if debug_pipeline:
+            out_dir = os.path.join(debug_pipeline, '1.parsed')
             self.dump_oeb(self.oeb, out_dir)
             self.log.info('Parsed HTML written to:{}'.format(out_dir))
         self.input_plugin.specialize(self.oeb, self.opts, self.log,
@@ -476,8 +477,8 @@ class Plumber:
         from calibre.ebooks.oeb.transforms.jacket import Jacket
         Jacket()(self.oeb, self.opts, self.user_metadata)
         
-        if self.opts.debug_pipeline:
-            out_dir = os.path.join(self.opts.debug_pipeline, '1.structure')
+        if debug_pipeline:
+            out_dir = os.path.join(debug_pipeline, '2.structure')
             self.dump_oeb(self.oeb, out_dir)
             self.log.info('Structured HTML written to:{}'.format(out_dir))
 
@@ -546,8 +547,8 @@ class Plumber:
 
         self.oeb.toc.rationalize_play_orders()
         
-        if self.opts.debug_pipeline:
-            out_dir = os.path.join(self.opts.debug_pipeline, '2.processed')
+        if debug_pipeline:
+            out_dir = os.path.join(debug_pipeline, '3.processed')
             self.dump_oeb(self.oeb, out_dir)
             self.log.info('Processed HTML written to:{}'.format(out_dir))
 

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-import os, traceback
-from urllib.parse import urljoin
+import os
 from urlopener import UrlOpener
 
 class Base:
@@ -203,8 +202,6 @@ class Base:
 
             try:
                 return callback(text) if callback else text
-            except:
-                raise Exception('Can not parse translation. Raw data: {text}')
             finally:
                 resp.close()
         elif silence:

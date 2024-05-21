@@ -129,7 +129,20 @@ function FetchBuiltinRecipesXml() {
       firstChild.attr("selected", true);
       firstChild.trigger('change');
     }
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+    console.log("Failed to fetch '/recipes/builtin_recipes.xml': " + errorThrown);
   });
+
+  //添加上传的recipe中存在，但是内置库不存在的语言代码
+  my_uploaded_recipes.forEach(item => {
+    var language = item['language'];
+    if (language && !all_builtin_recipes[language]) {
+      all_builtin_recipes[language] = [];
+      var $newLangOpt = $('<option value="{0}">{1}</option>'.format(language, LanguageName(language)));
+      $("#language_pick").append($newLangOpt);
+    }
+  });
+  
   PopulateLibrary('');
 }
 
@@ -139,21 +152,22 @@ function PopulateLibrary(txt) {
   var $div = $("#all_recipes");
   $div.empty();
   var lang = $("#language_pick").val();
-  if (!lang) {
-    return;
-  }
-
+  
   //先添加自己上传的recipe
   txt = (txt || '').toLowerCase();
   for (var idx = 0; idx < my_uploaded_recipes.length; idx++) {
     var recipe = my_uploaded_recipes[idx];
     var title = (recipe['title'] || '').toLowerCase();
     var desc = (recipe['description'] || '').toLowerCase();
-    if (recipe["language"] == lang) {
+    if (!lang || (recipe["language"] == lang)) {
       if (!txt || (title.indexOf(txt) != -1) || (desc.indexOf(txt) != -1)) {
         AppendRecipeToLibrary($div, recipe['id']);
       }
     }
+  }
+
+  if (!lang) {
+    return;
   }
 
   //再添加内置Recipe
@@ -872,6 +886,12 @@ function OpenUploadRecipeDialog() {
           let lang = data.language;
           let title = data.title;
           my_uploaded_recipes.unshift(data);
+          //添加之前不存在的语言代码
+          if (lang && !all_builtin_recipes[lang]) {
+            all_builtin_recipes[lang] = [];
+            var $newLangOpt = $('<option value="{0}">{1}</option>'.format(lang, LanguageName(lang)));
+            $("#language_pick").append($newLangOpt);
+          }
           $("#language_pick").val(lang);
           PopulateLibrary('');
           if (actionAfterUpload) {

@@ -36,19 +36,21 @@ KindleEar不保存密码原文，无法取回密码。在登录时密码验证�
 
 
 <a id="appspotmail"></a>
-## xxx@appid.appspotmail.com 邮件地址怎么用？
-如果您的应用是部署在Google cloud平台(GAE)，KindleEar还额外赠送了一个邮件服务 xxx@appid.appspotmail.com ，在部署好KindleEar后，你自动拥有了无数个EMAIL邮箱地址，格式为：xxx@appid.appspotmail.com，xxx为任意合法字符串，appid为你的应用名。   
+## 入站邮件功能怎么用？
+如果您的应用是部署在Google cloud平台(GAE)，邮箱地址为：xxx@appid.appspotmail.com (xxx为任意合法字符串，appid为您的应用名)。     
+如果使用Docker compose部署，邮箱地址为： `xxx@domain`，前提是需要开放25端口，并且在DNS服务器正确设置了MX记录。   
 
-1. 要使用此功能，先要添加白名单，如果为 '\*' 则允许所有邮件，否则格式为 'xx@xx.xx' 或 '@xx.xx' （不包括单引号）。
-2. 此邮箱将收到的邮件正文转换为邮件附件推送至你注册的Email邮箱。如果邮件中只有链接（多个链接则每行一个），则抓取链接的网页内容制作成电子书然后再推送。
-3. 如果在邮件主题最后添加了标识 !links，则不论邮件内容如何，KindleEar都只会提取邮件中的链接，然后抓取网页，制作成电子书发送至你的Kindle。这个功能最适合将网络连载网页直接发送至Kindle观看。
-4. 如果在邮件主题后添加了标识 !article，则忽略所有链接，直接将内容转换为电子书发送。
-5. 默认推送至管理员注册的邮箱，如果要推送至其他用户的邮箱，则使用格式：username__xxx@appid.appspotmail.com。（注意是双下划线）
-6. 如果将电子书下载链接发送至 book@appid.appspotmail.com 或 username__book@appid.appspotmail.com 则KindleEar直接下载对应的电子书并转发至注册的邮箱（注意GAE对后缀名有限制，不能发送可能有安全隐患的文件后缀比如exe等，zip文件能发送，但是zip文件内不能包含可能有安全隐患的文件）。
+1. 要使用此功能，先要添加白名单，如果为 '\*' 则允许所有邮件，否则格式为 `xx@xx.xx` 或 `@xx.xx`。
+2. 此邮箱将收到的邮件正文转换为邮件附件推送至你注册的Email邮箱。如果邮件中只有链接（多个链接则每行一个），则抓取链接的网页内容制作成电子书然后再推送。   
+3. 如果在邮件主题最后添加了标识 !links，则不论邮件内容如何，KindleEar都只会提取邮件中的链接，然后抓取网页，制作成电子书发送至你的Kindle。这个功能最适合将网络连载网页直接发送至Kindle观看。   
+4. 如果在邮件主题后添加了标识 !article，则忽略所有链接，直接将内容转换为电子书发送。   
+5. 推送的电子书默认语言为自定义RSS的语言，如需要其他语种，可以在邮件主题后添加标识 !lang=en (将en替换为您需要的语种代码)。     
+6. 默认推送至管理员注册的邮箱，如果要推送至其他用户的邮箱，则使用格式： `username__xxx@domain` 。（注意是双下划线）
+7. 如果将电子书下载链接发送至 `book@domain` 或 `username__book@domain` 则KindleEar直接下载对应的电子书并转发至注册的邮箱（注意后缀名有限制，不能发送可能有安全隐患的文件后缀比如exe等，zip文件能发送，但是zip文件内不能包含可能有安全隐患的文件）。    
 GAE可邮件发送的后缀名列表参见：[Mail Python API Overview](https://cloud.google.com/appengine/docs/python/mail/#Python_Sending_mail_with_attachments)
 （book/file/download邮件地址保留为下载电子书使用）
-7. 发送至 trigger@appid.appspotmail.com 或 username__trigger@appid.appspotmail.com，则触发一次手动投递。邮件标题为空或为all则完全等同于网页上的“现在投递”按钮。如果需要推送特定书籍，则在标题上写书籍名字，多个书籍名字使用逗号分隔。   
-8. 发送至 debug@appid.appspotmail.com 的邮件则直接抓取邮件中的链接并直接发送HTML文件至管理员邮箱而不是Kindle邮箱。  
+8. 发送至 `trigger@domain` 或 `username__trigger@domain`，则触发一次手动投递。邮件标题为空或为all则完全等同于网页上的“现在投递”按钮。如果需要推送特定书籍，则在标题上写书籍名字，多个书籍名字使用逗号分隔。   
+9. 发送至 `debug@domain` 的邮件则直接抓取邮件中的链接并直接发送HTML文件至管理员邮箱而不是Kindle邮箱。   
 
 
 ## 有的网站需要登录才能阅读文章的问题如何解决？
@@ -116,10 +118,12 @@ GAE平台专用，因为只有GAE平台直接有收邮件功能。
 
 
 ## 如何将新的recipe文件保存到内置recipe库？
-KindleEar提供了一个通过网页上传recipe文件的功能，但是如果你希望将recipe文件合并如内置库，比如如果有新的calibre版本发布，里面可能有一些recipe已经更新，这时可以合并recipe。
-1. 将recipe文件拷贝到application/recipes目录，不需要删除 builtin_recipes.zip/builtin_recipes.xml，除非你希望制作一个全新的只包含你选择的recipe的内置库。     
-2. 执行tools/archive_builtin_recipes.py。    
-3. 删除recipe文件。    
+KindleEar提供了一个通过网页上传recipe文件的功能，在calibre的recipe有 [更新](https://github.com/kovidgoyal/calibre) 后，你可以仅仅上传您感兴趣的recipe而不需要重新部署KindleEar。   
+但是如果你希望将recipe文件合并入内置库。    
+1. 如果你还没有创建KindleEar本地运行环境，先运行 `pip install -r requirements.txt` 来保证脚本的正常运行。   
+2. 将recipe文件拷贝到application/recipes目录，不需要删除 builtin_recipes.zip/builtin_recipes.xml， 除非你希望制作一个全新的只包含你选择的recipe的内置库。     
+3. 执行tools/archive_builtin_recipes.py。    
+4. 删除recipe文件。    
 
 
 ## 我还有更多问题，到哪里去问？

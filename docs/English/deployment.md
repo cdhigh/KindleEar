@@ -16,7 +16,7 @@ This GitHub repository [heroku-free-alternatives](https://github.com/anandrmedia
 Open [google cloud](https://console.cloud.google.com/appengine) and create a new project.    
 
 2. Shell deployment   
-On the same page, in the top right corner, there is an icon labeled "Activate Cloud Shell". Click on it to open the cloud shell. Copy and paste the following commands, and follow the prompts by pressing "y" continuously to complete the deployment.   
+On the same page, in the top right corner, there is an icon labeled "Activate Cloud Shell". Click on it to open the cloud shell. Copy and paste the following commands (**Please keep the multi-line format**), and follow the prompts by pressing "y" continuously to complete the deployment.   
 Deployment and updating are both done with the same command.     
 
 ```bash
@@ -26,13 +26,25 @@ chmod +x kindleear/tools/gae_deploy.sh && \
 kindleear/tools/gae_deploy.sh
 ```
 
-Note: The default configuration is B2 instance, 1 worker process, 2 worker threads, and a 20-minute timeout. If you need a different configuration, you can modify the last line of code, for example:  
+**Note 1:** The default configuration is B2 instance, 1 worker process, 2 worker threads, and a 20-minute timeout. If you need a different configuration, you can modify the last line of code, for example:  
 
 ```bash
 #instance_class: B1 (384MB/600MHz)
 #max_instances: 1
 #threads: 2 (2 thread per instance)
 #idle_timeout: 15m (minutes)
+kindleear/tools/gae_deploy.sh B1,1,t2,15m
+```
+
+**Note 2:** If you want to trim the built-in Recipe file to keep only the languages you need, you can add a line before the `kindleear/tools/gae_deploy.sh` command.    
+If you don't want any of the built-in recipes, you can directly delete `application/recipes/*.xml, *.zip`.
+
+```bash
+# Modify the list after trim_recipes.py to keep desired languages.
+rm -rf kindleear && \
+git clone --depth 1 https://github.com/cdhigh/kindleear.git && \
+chmod +x kindleear/tools/gae_deploy.sh && \
+python kindleear/tools/trim_recipes.py en,zh && \
 kindleear/tools/gae_deploy.sh B1,1,t2,15m
 ```
 
@@ -137,7 +149,9 @@ sudo iptables -P OUTPUT ACCEPT
 sudo iptables -F
 ```
 
-3. If HTTPS is needed, it is more recommended to use Caddy as the web server, which can automatically request and renew SSL certificates.    
+3. If you need inbound email functionality (requiring port 25 to be open), please use docker-compose.    
+
+3.1 Using Caddy as the web server is recommended, as it can automatically request and renew SSL certificates.       
 
 ```bash
 mkdir data #for database and logs
@@ -150,7 +164,7 @@ vim ./docker-compose.yml
 sudo docker compose up -d
 ```
 
-4. If you perfer nginx.    
+3.2 If you perfer Nginx.    
 
 ```bash
 mkdir data #for database and logs
@@ -163,10 +177,10 @@ vim ./docker-compose-nginx.yml
 sudo docker compose -f docker-compose-nignx.yml up -d
 ```
 
-If HTTPS for nginx is needed, copy the SSL certificate fullchain.pem/privkey.pem to the data directory, and uncomment the corresponding lines in default.conf/docker-compose-nginx.yml.   
+If HTTPS for Nginx is needed, copy the SSL certificate fullchain.pem/privkey.pem to the data directory, and uncomment the corresponding lines in default.conf/docker-compose-nginx.yml.   
 
 
-5. Method for Updating Using Docker Compose     
+4. Method for Updating Using Docker Compose     
 
 ```bash
 sudo docker compose pull
@@ -175,7 +189,7 @@ sudo docker image prune
 ```
 
 
-6. To check log files
+5. To check log files
 
 ```bash
 tail -n 100 ./data/gunicorn.error.log
@@ -183,7 +197,7 @@ tail -n 100 ./data/gunicorn.access.log
 ```
 
 
-7. If you don't like using 'sudo' every time you use Docker, you can add your account to the 'docker' user group.    
+6. If you don't like using 'sudo' every time you use Docker, you can add your account to the 'docker' user group.    
 
 ```bash
 sudo usermod -aG docker your-username

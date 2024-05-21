@@ -1,5 +1,6 @@
 #!/bin/bash
 if [ -z "$GOOGLE_CLOUD_PROJECT" ]; then
+  echo ""
   read -p "Please input your project ID: " GOOGLE_CLOUD_PROJECT
   if [ -z "$GOOGLE_CLOUD_PROJECT" ]; then
     echo "Error: Project ID cannot be empty."

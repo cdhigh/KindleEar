@@ -774,7 +774,7 @@ class BasicNewsRecipe(Recipe):
             title = doc.title()
             short_title = doc.short_title()
         except:
-            summary = '<html></html>'
+            summary = '<html><body></body></html>'
             title = ''
             short_title = ''
         
@@ -786,7 +786,7 @@ class BasicNewsRecipe(Recipe):
             soup = simple_extract(html)
             body_tag = soup.find('body')
             if not body_tag or len(body_tag.contents) == 0: #再次失败
-                raise
+                raise Exception('extract_readable_article failed.')
 
             #增加备用算法提示，免责声明：）
             info = soup.new_tag('p', style='color:#555555;font-size:60%;text-align:right;')
@@ -2191,17 +2191,15 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
                     (LastDelivered.bookname==self.title) & (LastDelivered.url==url))
                 delta = (now - timeItem.datetime) if timeItem else None
                 #这里oldest_article和其他的recipe不一样，这个参数表示在这个区间内不会重复推送
-                if (not timeItem) or (self.delivery_reason == 'manual'):
+                if (not timeItem or not self.oldest_article or self.delivery_reason == 'manual' or
+                    (delta and delta.total_seconds() > 24 * 3600 * self.oldest_article)):
                     id_counter += 1
                     feed.articles.append(Article(f'internal id#{id_counter}', title, url, 'KindleEar', '', structNow, ''))
 
                     #如果是手动推送，不单不记录已推送日期，还将已有的上次推送日期数据删除
-                    if self.delivery_reason == 'manual':
+                    if (self.delivery_reason == 'manual') or (not self.oldest_article):
                         if timeItem:
                             timeItem.delete_instance()
-                    elif timeItem:
-                        timeItem.datetime = now
-                        timeItem.save()
                     else:
                         LastDelivered.create(user=self.user.name, bookname=self.title, url=url)
                 else:
