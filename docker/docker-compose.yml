@@ -43,7 +43,7 @@ services:
      - "25:25"
    depends_on:
      - kindleear
-     - nginx
+     - caddy
    environment:
      #change DOMAIN to your email domain, without http and https prefix
      DOMAIN: example.com
