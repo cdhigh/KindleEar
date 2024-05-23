@@ -36,15 +36,16 @@ def loc_exc_pos(msg: str):
             return msg
 
         top = stacks[0]
-        bottom = stacks[-1]
-        tFile = os.path.basename(top.filename)
+        bottom2 = stacks[-2]
+        bottom1 = stacks[-1]
+        tF = os.path.basename(top.filename)
         tLn = top.lineno
-        tFun = top.name
-        bFile = os.path.basename(bottom.filename)
-        bLn = bottom.lineno
-        bFun = bottom.name
+        b1F = os.path.basename(bottom1.filename)
+        b1Ln = bottom1.lineno
+        b2F = os.path.basename(bottom2.filename)
+        b2Ln = bottom2.lineno
         typeName = klass.__name__ if klass else ''
-        return f'{msg}: {typeName} {e} at {tFile}:{tLn}:{tFun}() -> {bFile}:{bLn}:{bFun}()'
+        return f'{msg}: {typeName} {e} [{tF}:{tLn}->...->{b2F}:{b2Ln}->{b1F}:{b1Ln}]'
     else:
         return msg
 

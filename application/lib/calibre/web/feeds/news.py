@@ -786,16 +786,17 @@ class BasicNewsRecipe(Recipe):
             import justext_extract #启用备用算法
             summary = justext_extract.justext_extract(html, self.language, url, debug=False)
 
-            #获取原本的title
-            match = re.search(r'<title>(.*?)</title>', html, re.I|re.M|re.S)
-            title = match.group(1).strip() if match else ''
-
             #判断是否再次失败
             if summaryOk(summary):
                 self.log.debug(f'Extracted by alternative algorithm: {url}')
             else:
-                raise Exception('The auto extraction of the readable article failed.')
-            
+                raise Exception('Extract readable article algorithm failed, fallback to raw html.')
+
+        #获取原本的title
+        if not title:
+            match = re.search(r'<title>(.*?)</title>', html, re.I|re.M|re.S)
+            title = match.group(1).strip() if match else 'Untitled'
+
         return self.update_or_add_title(summary, title)
 
     #添加或修改html的title
@@ -808,7 +809,7 @@ class BasicNewsRecipe(Recipe):
 
         title_tag = head.find('title')
         if title_tag:
-            title_tag.string = title
+            title_tag.string = title #type:ignore
         else:
             title_tag = soup.new_tag('title')
             title_tag.string = title
@@ -1027,9 +1028,9 @@ class BasicNewsRecipe(Recipe):
 
         title_tag = head.find('title')
         if title_tag:
-            title = title_tag.string
+            title = title_tag.get_text(strip=True) or 'Untitled'
         else: #创建一个Title
-            title = job_info.article.title if job_info else 'Untitled'
+            title = (job_info.article.title if job_info else '') or 'Untitled'
             title_tag = soup.new_tag('title')
             title_tag.string = title
             head.append(title_tag)
@@ -1227,19 +1228,19 @@ class BasicNewsRecipe(Recipe):
         try:
             res = self.build_index()
             if self.failed_downloads:
-                self.log.warning(_('Failed to download the following articles:'))
+                self.log.debug('Failed to download the following articles:')
                 for feed, article, debug in self.failed_downloads:
-                    self.log.warning('{} from {}'.format(article.title, feed.title))
+                    self.log.debug(f'    {article.title} from {feed.title}')
                     self.log.debug(article.url)
                     self.log.debug(debug)
             if self.partial_failures:
-                self.log.warning(_('Failed to download parts of the following articles:'))
+                self.log.debug('Failed to download parts of the following articles:')
                 for feed, atitle, aurl, debug in self.partial_failures:
-                    self.log.warning(atitle + _(' from ') + feed)
+                    self.log.debug(f'    {atitle} from {feed}')
                     self.log.debug(aurl)
-                    self.log.warning(_('\tFailed links:'))
+                    self.log.debug('\tFailed links:')
                     for l, tb in debug:
-                        self.log.warning(l)
+                        self.log.debug(l)
                         self.log.debug(tb)
             return res
         finally:

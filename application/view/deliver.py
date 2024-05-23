@@ -18,7 +18,9 @@ bpDeliver = Blueprint('bpDeliver', __name__)
 @bpDeliver.route("/deliver")
 def Deliver():
     userName = request.args.get('u')
-    if request.args.get('key') != app.config['DELIVERY_KEY']:
+    isGaeCron = request.headers.get('X-Appengine-Cron')
+    if not (isGaeCron or (request.args.get('key') == app.config['DELIVERY_KEY'])):
+        default_log.warning('Key invalid.')
         return 'Key invalid.'
     
     if userName: #现在投递【测试使用】，不需要判断时间和星期
