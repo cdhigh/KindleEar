@@ -170,7 +170,7 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
 
     #设置电子书语种
     language = ''
-    match = re.search(r' !lang=([^ ]+)', subject) # !lang=en
+    match = re.search(r'!lang=([^ ]+)', subject) # !lang=en
     if match:
         language = match.group(1)
         subject = subject.replace(match.group(0), '').strip()

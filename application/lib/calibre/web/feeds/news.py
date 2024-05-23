@@ -767,36 +767,52 @@ class BasicNewsRecipe(Recipe):
         return BeautifulSoup(_raw, 'lxml')
 
     #使用自动算法提取正文
-    def extract_readable_article(self, html, url):
+    def extract_readable_article(self, html: str, url: str):
+        summary = title = ''
         try:
             doc = readability.Document(html, positive_keywords=self.auto_cleanup_keep, url=url)
             summary = doc.summary(html_partial=False)
-            title = doc.title()
             short_title = doc.short_title()
+            title = short_title if short_title else doc.title()
         except:
-            summary = '<html><body></body></html>'
-            title = ''
-            short_title = ''
+            pass
         
-        soup = BeautifulSoup(summary, "lxml")
-        body_tag = soup.find('body')
+        #内嵌函数，判断提取文本是否有足够的内容
+        def summaryOk(summary):
+            match = re.search(r'<body.*?>([\s\S]*?)<\/body>', summary, re.I|re.M)
+            return match and (len(re.sub(r'<[\s\S]*?>', '', match.group(1), flags=re.I|re.M|re.S)) > 200)
 
-        #如果readability解析失败，则启用备用算法（不够好，但有全天候适应能力）
-        if not body_tag or len(body_tag.get_text(strip=True)) < 100:
-            soup = simple_extract(html)
-            body_tag = soup.find('body')
-            if not body_tag or len(body_tag.contents) == 0: #再次失败
-                raise Exception('extract_readable_article failed.')
+        if not summaryOk(summary):
+            import justext_extract #启用备用算法
+            summary = justext_extract.justext_extract(html, self.language, url, debug=False)
 
-            #增加备用算法提示，免责声明：）
-            info = soup.new_tag('p', style='color:#555555;font-size:60%;text-align:right;')
-            info.string = 'extracted by alternative algorithm.'
-            body_tag.append(info)
+            #获取原本的title
+            match = re.search(r'<title>(.*?)</title>', html, re.I|re.M|re.S)
+            title = match.group(1).strip() if match else ''
 
-        if short_title and (title != short_title):
-            title_tag = soup.find('title')
-            if title_tag:
-                title_tag.string = short_title
+            #判断是否再次失败
+            if summaryOk(summary):
+                self.log.debug(f'Extracted by alternative algorithm: {url}')
+            else:
+                raise Exception('The auto extraction of the readable article failed.')
+            
+        return self.update_or_add_title(summary, title)
+
+    #添加或修改html的title
+    def update_or_add_title(self, html: str, title: str):
+        soup = BeautifulSoup(html, 'lxml')
+        head = soup.find('head')
+        if not head:
+            head = soup.new_tag('head')
+            soup.html.insert(0, head) #type:ignore
+
+        title_tag = head.find('title')
+        if title_tag:
+            title_tag.string = title
+        else:
+            title_tag = soup.new_tag('title')
+            title_tag.string = title
+            head.append(title_tag)
 
         return str(soup)
 
@@ -2254,7 +2270,7 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
             remove_tags_from_rules(soup, rules)
             
         #提取失败，尝试自动提取
-        if len(newBody.get_text(strip=True)) < 50:
+        if len(newBody.get_text(strip=True)) < 200:
             self.log.warning(f'Failed to extract content using content_extract_rules, try readability algorithm: {url}')
             try:
                 raw_html = self.extract_readable_article(raw_html, url)

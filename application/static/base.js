@@ -287,7 +287,7 @@ function PopulateMyCustomRss() {
     //汉堡按钮弹出菜单代码
     var fTpl = "{0}('{1}','{2}')";
     var fTplAll = "{0}(event,'{1}','{2}','{3}',{4})"; //id,title,url,isfulltext
-    hamb_arg.push({klass: 'btn-F', title: i18n.translator, icon: 'icon-translate', act: "/translator/" + id.replace(':', '__')});
+    hamb_arg.push({klass: 'btn-F', title: i18n.biTranslator, icon: 'icon-translate', act: "/translator/" + id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', id, title.replace("'", "\\\'"))});
     hamb_arg.push({klass: 'btn-A', title: i18n.deleteCtrlNoConfirm, icon: 'icon-delete', 
@@ -342,7 +342,7 @@ function PopulateMySubscribed() {
     if (need_subs) {
         hamb_arg.push({klass: 'btn-C', title: i18n.subscriptionInfo, icon: 'icon-key', act: fTpl.format('AskForSubscriptionInfo', recipe_id, recipe.account)});
     }
-    hamb_arg.push({klass: 'btn-F', title: i18n.translator, icon: 'icon-translate', act: "/translator/" + recipe_id.replace(':', '__')});
+    hamb_arg.push({klass: 'btn-F', title: i18n.biTranslator, icon: 'icon-translate', act: "/translator/" + recipe_id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + recipe_id.replace(':', '__')});
     if (recipe_id.startsWith("upload:")) { //只有自己上传的recipe才能分享，内置的不用分享
       hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', recipe_id, title.replace("'", "\\\'"))});
@@ -598,7 +598,8 @@ function ShowDeleteCustomRssDialog(event, rssid, title, url, isfulltext) {
         DeleteCustomRss(rssid, title, url, isfulltext, false);
       }
     } else {
-      msg += '<p><label><input id="chkReportInvalid" type="checkbox" /> {0}</label>'.format(i18n.reportThisFeedInvalid);
+      msg = `<h3 style="margin:0px auto 20px auto;text-align:center;">${i18n.confirmDelete}</h3>${msg}
+        <p><label><input id="chkReportInvalid" type="checkbox" /> ${i18n.reportThisFeedInvalid}</label>`;
       showH5Dialog(msg).then(function (idx) {
         DeleteCustomRss(rssid, title, url, isfulltext, $('#chkReportInvalid').prop('checked'));
       }).catch(function(){});

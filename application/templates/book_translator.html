@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block titleTag -%}
-<title>{{ _("Translator") }} - KindleEar</title>
+<title>{{_("Bilingual Translator")}} - KindleEar</title>
 {% endblock -%}
 {% set src_lang = params.get('src_lang', '') %}
 {% set dst_lang = params.get('dst_lang', '') %}
@@ -14,7 +14,7 @@
     <div class="notice-box error">{{tips|safe}}</div>
     {% endif -%}
     <fieldset>
-      <legend>{{_("Translator")}} [{{title}}]</legend>
+      <legend>{{_("Bilingual Translator")}} [{{title}}]</legend>
       <div class="pure-control-group">
         <label>{{_("State")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="enable" id="translator_state">

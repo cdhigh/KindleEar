@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-05-17 12:57-0300\n"
+"POT-Creation-Date: 2024-05-20 15:10-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: tr_TR\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:172
+#: application/templates/admin.html:3 application/templates/base.html:173
 msgid "Admin"
 msgstr "Yönetim"
 
@@ -166,7 +166,7 @@ msgstr "Hesabı Düzenle"
 #: application/templates/admin.html:89
 #: application/templates/adv_inboundmail.html:54
 #: application/templates/adv_uploadcss.html:31
-#: application/templates/base.html:21 application/templates/webmail.html:22
+#: application/templates/base.html:22 application/templates/webmail.html:22
 msgid "Delete"
 msgstr "Sil"
 
@@ -194,7 +194,7 @@ msgid "Email or Username"
 msgstr "Kullanıcı adı"
 
 #: application/templates/adv_archive.html:56
-#: application/templates/adv_archive.html:72 application/templates/base.html:50
+#: application/templates/adv_archive.html:72 application/templates/base.html:51
 #: application/templates/home.html:16 application/templates/login.html:25
 #: application/templates/setting.html:208 application/templates/signup.html:25
 #: application/templates/user_account.html:19
@@ -202,7 +202,7 @@ msgid "Password"
 msgstr "Şifre"
 
 #: application/templates/adv_archive.html:59
-#: application/templates/adv_archive.html:75 application/templates/base.html:60
+#: application/templates/adv_archive.html:75 application/templates/base.html:61
 msgid "Verify"
 msgstr "Doğrulamak"
 
@@ -285,7 +285,7 @@ msgid "There are no recipes subscribed"
 msgstr "Abone olunan tarif yok"
 
 #: application/templates/adv_delivernow.html:18
-#: application/templates/base.html:95
+#: application/templates/base.html:96
 msgid "Sep"
 msgstr "Sep"
 
@@ -409,7 +409,7 @@ msgid "Random"
 msgstr "Rastgele"
 
 #: application/templates/adv_uploadcover.html:18
-#: application/templates/base.html:120
+#: application/templates/base.html:121
 msgid "Weekday"
 msgstr "Hafta içi gün"
 
@@ -442,123 +442,127 @@ msgstr "5 saniye sonra otomatik olarak önceki sayfaya döneceksiniz."
 msgid "Click to back"
 msgstr "Geri dönmek için tıklayınız"
 
-#: application/templates/base.html:22
+#: application/templates/base.html:21
+msgid "Confirm Deletion"
+msgstr "Silmeyi Onayla"
+
+#: application/templates/base.html:23
 msgid "Delete (Ctrl for no confirm)"
 msgstr "Sil (Onay için Ctrl basın)"
 
-#: application/templates/base.html:23
+#: application/templates/base.html:24
 msgid "View Source Code"
 msgstr "Kaynak kodunu görüntüle"
 
-#: application/templates/base.html:24
+#: application/templates/base.html:25
 msgid "Subscribe (Deliver Separately)"
 msgstr "Abone ol (Ayrı teslim et)"
 
-#: application/templates/base.html:25
+#: application/templates/base.html:26
 msgid "Subscribe"
 msgstr "Abone ol"
 
-#: application/templates/base.html:26
+#: application/templates/base.html:27
 msgid "Cannot add this custom rss, Error:"
 msgstr "Bu özel rss eklenemiyor, Hata:"
 
-#: application/templates/base.html:27
+#: application/templates/base.html:28
 msgid "Cannot delete this feed, Error:"
 msgstr "Bu yayını silemiyorum, Hata:"
 
-#: application/templates/base.html:28
+#: application/templates/base.html:29
 msgid "Fulltext"
 msgstr "Tam Metin"
 
-#: application/templates/base.html:29 application/templates/base.html:39
+#: application/templates/base.html:30 application/templates/base.html:40
 msgid "Share"
 msgstr "Paylaş"
 
-#: application/templates/base.html:30
+#: application/templates/base.html:31
 msgid "Are you sure to delete ({0})?"
 msgstr "({0}) silmek istediğinizden emin misiniz?"
 
-#: application/templates/base.html:31
+#: application/templates/base.html:32
 msgid "Report to the server that this feed is invalid."
 msgstr "Sunucuya bu beslemenin geçersiz olduğunu bildirin."
 
-#: application/templates/base.html:32
+#: application/templates/base.html:33
 msgid "Are you sure to REMOVE ALL CUSTOM RSS?"
 msgstr "TÜM ÖZEL RSS'LERİ KALDIRMAK İSTEDİĞİNİZE EMİN MİSİNİZ?"
 
-#: application/templates/base.html:33
+#: application/templates/base.html:34
 msgid "Share links, share happiness"
 msgstr "Bağlantıları paylaş, mutluluk paylaş"
 
-#: application/templates/base.html:34
+#: application/templates/base.html:35
 msgid "Category"
 msgstr "Kategori"
 
-#: application/templates/base.html:35
+#: application/templates/base.html:36
 #: application/templates/book_audiolator.html:58
 #: application/templates/setting.html:122
 msgid "Language"
 msgstr "Dil"
 
-#: application/templates/base.html:36
+#: application/templates/base.html:37
 msgid ""
 "Please write a category in text field if the one you wish is not in the "
 "list."
 msgstr "Dileğiniz kategori listede yoksa lütfen metin alanına bir kategori yazın."
 
-#: application/templates/base.html:37
+#: application/templates/base.html:38
 msgid "Ok"
 msgstr "Tamam"
 
-#: application/templates/base.html:38
+#: application/templates/base.html:39
 msgid "Cancel"
 msgstr "İptal"
 
-#: application/templates/base.html:40
+#: application/templates/base.html:41
 msgid "Language code invalid"
 msgstr "Dil kodu geçersiz"
 
-#: application/templates/base.html:41
+#: application/templates/base.html:42
 msgid "Thank you for sharing."
 msgstr "Paylaştığınız için teşekkür ederiz."
 
-#: application/templates/base.html:42
+#: application/templates/base.html:43
 msgid "Close"
 msgstr "Kapat"
 
-#: application/templates/base.html:43
+#: application/templates/base.html:44
 msgid "Unsubscribe"
 msgstr "Abonelikten çık"
 
-#: application/templates/base.html:44
+#: application/templates/base.html:45
 msgid "Cannot subscribe this recipe, Error:"
 msgstr "Bu tarife abone olunamıyor, Hata:"
 
-#: application/templates/base.html:45
+#: application/templates/base.html:46
 msgid "Are you sure to Unsubscribe ({0})?"
 msgstr "({0}) aboneliği iptal etmek istediğinizden emin misiniz?"
 
-#: application/templates/base.html:46
+#: application/templates/base.html:47
 msgid "Cannot unsubscribe this recipe, Error:"
 msgstr "Bu tarife abonelik iptal edilemiyor, Hata:"
 
-#: application/templates/base.html:47
+#: application/templates/base.html:48
 msgid "The recipe is already subscribed."
 msgstr "Tarif zaten abone edilmiş."
 
-#: application/templates/base.html:48
+#: application/templates/base.html:49
 msgid "Website login lnformation"
 msgstr "Abonelik bilgisi"
 
-#: application/templates/base.html:49
+#: application/templates/base.html:50
 msgid "Account"
 msgstr "Hesap"
 
-#: application/templates/base.html:51
+#: application/templates/base.html:52
 msgid "Submit"
 msgstr "Gönder"
 
-#: application/templates/base.html:52
+#: application/templates/base.html:53
 msgid ""
 "If any field is left blank, the server will clear the saved login "
 "information."
@@ -566,23 +570,23 @@ msgstr ""
 "Herhangi bir alan boş bırakılırsa, sunucu kayıtlı giriş bilgilerini "
 "silecektir."
 
-#: application/templates/base.html:53
+#: application/templates/base.html:54
 msgid "Cannot set the website login information, Error:"
 msgstr "Abonelik bilgisi ayarlanamıyor, Hata:"
 
-#: application/templates/base.html:54 application/templates/my.html:58
+#: application/templates/base.html:55 application/templates/my.html:58
 msgid "Upload custom recipe"
 msgstr "Özel tarifi yükle"
 
-#: application/templates/base.html:55
+#: application/templates/base.html:56
 msgid "Congratulations"
 msgstr "Tebrikler"
 
-#: application/templates/base.html:56
+#: application/templates/base.html:57
 msgid "Thanks"
 msgstr "Teşekkürler"
 
-#: application/templates/base.html:57
+#: application/templates/base.html:58
 msgid ""
 "Your recipe has been uploaded, and it can be found in the Library "
 "section. If you dont see it, please make sure to switch to the correct "
@@ -591,142 +595,142 @@ msgstr ""
 "Tarifiniz yüklendi ve Kütüphane bölümünde bulunabilir. Görmüyorsanız, "
 "lütfen doğru dile geçtiğinizden emin olun."
 
-#: application/templates/base.html:58
+#: application/templates/base.html:59
 msgid "Your recipe have been deleted."
 msgstr "Tarifiniz silindi."
 
-#: application/templates/base.html:59
+#: application/templates/base.html:60
 msgid "Kindleify Selection"
 msgstr "Kindle'laştırma Seçimi"
 
-#: application/templates/base.html:61
+#: application/templates/base.html:62
 msgid "Verified"
 msgstr "Doğrulanmış"
 
-#: application/templates/base.html:62 application/view/login.py:89
+#: application/templates/base.html:63 application/view/login.py:89
 #: application/view/share.py:157
 msgid "The username does not exist or password is wrong."
 msgstr "Kullanıcı adı mevcut değil veya şifre yanlış."
 
-#: application/templates/base.html:63
+#: application/templates/base.html:64
 msgid "The file you chosen is not an acceptable type."
 msgstr "Seçtiğiniz dosya kabul edilebilir bir türde değil."
 
-#: application/templates/base.html:64
+#: application/templates/base.html:65
 msgid "The file have been uploaded successfully."
 msgstr "Dosya başarıyla yüklendi."
 
-#: application/templates/base.html:65 application/templates/library.html:67
+#: application/templates/base.html:66 application/templates/library.html:67
 msgid "This feed has been successfully subscribed."
 msgstr "Bu besleme başarıyla abone edildi."
 
-#: application/templates/base.html:66
+#: application/templates/base.html:67
 msgid "Thank you for your feedback, this feed will be reviewed soon."
 msgstr "Geri bildiriminiz için teşekkür ederiz, bu besleme yakında incelenecek."
 
-#: application/templates/base.html:67
+#: application/templates/base.html:68
 msgid "Are you confirming to share the recipe ({0})?"
 msgstr "Tarifi paylaşmayı onaylıyor musunuz ({0})?"
 
-#: application/templates/base.html:68
+#: application/templates/base.html:69
 msgid "[All]"
 msgstr "[Tümü]"
 
-#: application/templates/base.html:69
+#: application/templates/base.html:70
 msgid "[By Time]"
 msgstr "[Zamana Göre]"
 
-#: application/templates/base.html:70
+#: application/templates/base.html:71
 msgid "[Uncategoried]"
 msgstr "[Kategorisiz]"
 
-#: application/templates/base.html:71
+#: application/templates/base.html:72
 msgid "There are no links found."
 msgstr "Seçilen dilde bağlantı bulunamadı."
 
-#: application/templates/base.html:72
+#: application/templates/base.html:73
 msgid "Invalid report"
 msgstr "Geçersiz rapor"
 
-#: application/templates/base.html:73
+#: application/templates/base.html:74
 msgid "Are you confirming that this link is invalid or off the cloud?"
 msgstr "Bu bağlantının geçersiz veya bulutta olmadığını onaylıyor musunuz?"
 
-#: application/templates/base.html:74
+#: application/templates/base.html:75
 msgid "Customize delivery time"
 msgstr "Teslimat zamanını özelleştir"
 
-#: application/templates/base.html:75 application/templates/setting.html:46
+#: application/templates/base.html:76 application/templates/setting.html:46
 msgid "Delivery days"
 msgstr "Teslimat günleri"
 
-#: application/templates/base.html:76 application/templates/setting.html:48
+#: application/templates/base.html:77 application/templates/setting.html:48
 msgid "Mon"
 msgstr "Pzt"
 
-#: application/templates/base.html:77 application/templates/setting.html:50
+#: application/templates/base.html:78 application/templates/setting.html:50
 msgid "Tue"
 msgstr "Sal"
 
-#: application/templates/base.html:78 application/templates/setting.html:52
+#: application/templates/base.html:79 application/templates/setting.html:52
 msgid "Wed"
 msgstr "Çar"
 
-#: application/templates/base.html:79 application/templates/setting.html:54
+#: application/templates/base.html:80 application/templates/setting.html:54
 msgid "Thu"
 msgstr "Prş"
 
-#: application/templates/base.html:80 application/templates/setting.html:56
+#: application/templates/base.html:81 application/templates/setting.html:56
 msgid "Fri"
 msgstr "Cum"
 
-#: application/templates/base.html:81 application/templates/setting.html:58
+#: application/templates/base.html:82 application/templates/setting.html:58
 msgid "Sat"
 msgstr "Cts"
 
-#: application/templates/base.html:82 application/templates/setting.html:60
+#: application/templates/base.html:83 application/templates/setting.html:60
 msgid "Sun"
 msgstr "Paz"
 
-#: application/templates/base.html:83
+#: application/templates/base.html:84
 msgid "Delivery times"
 msgstr "Teslimat saatleri"
 
-#: application/templates/base.html:84
+#: application/templates/base.html:85
 msgid "The customized delivery time for the recipe has been successfully saved."
 msgstr "Tarif için özel teslimat zamanı başarıyla kaydedildi."
 
-#: application/templates/base.html:85
+#: application/templates/base.html:86
 msgid "The account have been deleted."
 msgstr "Hesap silindi."
 
-#: application/templates/base.html:86 application/view/share.py:147
+#: application/templates/base.html:87 application/view/share.py:147
 msgid "The username or password is empty."
 msgstr "Kullanıcı adı veya şifre boş."
 
-#: application/templates/base.html:87 application/view/admin.py:81
+#: application/templates/base.html:88 application/view/admin.py:81
 #: application/view/admin.py:159 application/view/admin.py:195
 #: application/view/login.py:233 application/view/login.py:291
 msgid "The two new passwords are dismatch."
 msgstr "İki yeni şifre uyuşmuyor."
 
-#: application/templates/base.html:88
+#: application/templates/base.html:89
 msgid "Password changed successfully."
 msgstr "Şifre başarıyla değiştirildi."
 
-#: application/templates/base.html:89
+#: application/templates/base.html:90
 msgid "Account added successfully."
 msgstr "Hesap başarıyla eklendi."
 
-#: application/templates/base.html:90 application/view/login.py:141
+#: application/templates/base.html:91 application/view/login.py:141
 msgid "login required"
 msgstr "Giriş yapılması gerekiyor"
 
-#: application/templates/base.html:91
+#: application/templates/base.html:92
 msgid "Upload cover files successfully."
 msgstr "Kapak dosyaları başarıyla yüklendi."
 
-#: application/templates/base.html:92
+#: application/templates/base.html:93
 msgid ""
 "Total size of the files you selected exceeds 16MB. Please reduce the "
 "image resolution or upload in batches."
@@ -734,33 +738,33 @@ msgstr ""
 "Seçtiğiniz dosyaların toplam boyutu 16 MB yi aşıyor. Lütfen görüntü "
 "çözünürlüğünü azaltın veya toplu olarak yükleyin."
 
-#: application/templates/base.html:93
+#: application/templates/base.html:94
 #: application/templates/book_translator.html:3
 #: application/templates/book_translator.html:17
-msgid "Translator"
-msgstr "Çevirmen"
+msgid "Bilingual Translator"
+msgstr "Çift Dilli Çevirmen"
 
-#: application/templates/base.html:94
+#: application/templates/base.html:95
 msgid "Upl"
 msgstr "Upl"
 
-#: application/templates/base.html:96
+#: application/templates/base.html:97
 msgid "Log"
 msgstr "Log"
 
-#: application/templates/base.html:97
+#: application/templates/base.html:98
 msgid "Emb"
 msgstr "Emb"
 
-#: application/templates/base.html:98
+#: application/templates/base.html:99
 msgid "Tr"
 msgstr "Tr"
 
-#: application/templates/base.html:99
+#: application/templates/base.html:100
 msgid "Tts"
 msgstr "Tts"
 
-#: application/templates/base.html:100
+#: application/templates/base.html:101
 msgid ""
 "The test email has been successfully sent to the following addresses. "
 "Please check your inbox or spam folder to confirm its delivery. Depending"
@@ -770,142 +774,142 @@ msgstr ""
 "gelen kutunuzu veya spam klasörünüzü kontrol edin. E-posta sunucunuza "
 "bağlı olarak hafif bir gecikme olabilir."
 
-#: application/templates/base.html:101
+#: application/templates/base.html:102
 msgid "Translating..."
 msgstr "Translating..."
 
-#: application/templates/base.html:102
+#: application/templates/base.html:103
 msgid "The configuration validation is correct."
 msgstr "Konfigürasyon doğrulaması doğru."
 
-#: application/templates/base.html:103 application/templates/logs.html:23
+#: application/templates/base.html:104 application/templates/logs.html:23
 #: application/templates/logs.html:72 application/templates/my.html:17
 #: application/templates/setting.html:91 application/templates/setting.html:92
 #: application/templates/setting.html:118
 msgid "Title"
 msgstr "Başlık"
 
-#: application/templates/base.html:104
+#: application/templates/base.html:105
 #: application/templates/book_audiolator.html:3
 #: application/templates/book_audiolator.html:20
 msgid "Text to Speech"
 msgstr "Metin Okuma"
 
-#: application/templates/base.html:105
+#: application/templates/base.html:106
 msgid "Action"
 msgstr "Eylem"
 
-#: application/templates/base.html:106
+#: application/templates/base.html:107
 msgid "File"
 msgstr "Dosya"
 
-#: application/templates/base.html:107
+#: application/templates/base.html:108
 msgid "Upload Only"
 msgstr "Yalnızca Yükle"
 
-#: application/templates/base.html:108
+#: application/templates/base.html:109
 msgid "Send"
 msgstr "Gönder"
 
-#: application/templates/base.html:109 application/templates/logs.html:54
+#: application/templates/base.html:110 application/templates/logs.html:54
 msgid "There is nothing here."
 msgstr "Burada hiçbir şey yok."
 
-#: application/templates/base.html:110
+#: application/templates/base.html:111
 msgid "Please select a single mail."
 msgstr "Lütfen tek bir e-posta seçin."
 
-#: application/templates/base.html:111
+#: application/templates/base.html:112
 msgid "Please select at least one mail."
 msgstr "Lütfen en az bir e-posta seçin."
 
-#: application/templates/base.html:112 application/view/admin.py:77
+#: application/templates/base.html:113 application/view/admin.py:77
 #: application/view/admin.py:146 application/view/admin.py:193
 #: application/view/extension.py:33 application/view/extension.py:62
-#: application/view/inbound_email.py:403 application/view/inbound_email.py:411
-#: application/view/inbound_email.py:426 application/view/inbound_email.py:447
+#: application/view/inbound_email.py:424 application/view/inbound_email.py:432
+#: application/view/inbound_email.py:447 application/view/inbound_email.py:468
 #: application/view/login.py:229 application/view/login.py:258
 #: application/view/setting.py:49 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr "Bazı parametreler eksik veya yanlış."
 
-#: application/templates/base.html:113
+#: application/templates/base.html:114
 msgid "The email has been sent."
 msgstr "E-posta gönderildi."
 
-#: application/templates/base.html:114 application/templates/webmail.html:29
+#: application/templates/base.html:115 application/templates/webmail.html:29
 msgid "From"
 msgstr "Gönderen"
 
-#: application/templates/base.html:115 application/templates/logs.html:25
+#: application/templates/base.html:116 application/templates/logs.html:25
 #: application/templates/logs.html:74 application/templates/webmail.html:30
 msgid "To"
 msgstr "Kime"
 
-#: application/templates/base.html:116 application/templates/webmail.html:31
+#: application/templates/base.html:117 application/templates/webmail.html:31
 msgid "Subject"
 msgstr "Konu"
 
-#: application/templates/base.html:117 application/templates/logs.html:22
+#: application/templates/base.html:118 application/templates/logs.html:22
 #: application/templates/logs.html:71 application/templates/setting.html:91
 #: application/templates/setting.html:92 application/templates/webmail.html:32
 msgid "Time"
 msgstr "Zaman"
 
-#: application/templates/base.html:118 application/templates/logs.html:24
+#: application/templates/base.html:119 application/templates/logs.html:24
 #: application/templates/logs.html:73 application/templates/webmail.html:33
 msgid "Size"
 msgstr "Boyut"
 
-#: application/templates/base.html:119
+#: application/templates/base.html:120
 msgid "Date type"
 msgstr "Tarih türü"
 
-#: application/templates/base.html:121
+#: application/templates/base.html:122
 msgid "Date"
 msgstr "Tarih"
 
-#: application/templates/base.html:122
+#: application/templates/base.html:123
 msgid "This setting is prioritized."
 msgstr "Bu ayar önceliklidir."
 
-#: application/templates/base.html:123
+#: application/templates/base.html:124
 msgid "Combine multiple values with commas."
 msgstr "Birden fazla değeri virgülle birleştirin."
 
-#: application/templates/base.html:145 application/templates/home.html:12
+#: application/templates/base.html:146 application/templates/home.html:12
 msgid "Logout"
 msgstr "Çıkış"
 
-#: application/templates/base.html:147 application/templates/home.html:17
+#: application/templates/base.html:148 application/templates/home.html:17
 #: application/templates/login.html:3 application/templates/login.html:19
 #: application/templates/login.html:30
 msgid "Login"
 msgstr "Giriş"
 
-#: application/templates/base.html:149 application/templates/signup.html:3
+#: application/templates/base.html:150 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr "Kaydol"
 
-#: application/templates/base.html:169 application/templates/home.html:11
+#: application/templates/base.html:170 application/templates/home.html:11
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr "RSSler"
 
-#: application/templates/base.html:170 application/templates/setting.html:3
+#: application/templates/base.html:171 application/templates/setting.html:3
 msgid "Settings"
 msgstr "Ayarlar"
 
-#: application/templates/base.html:171 application/templates/logs.html:3
+#: application/templates/base.html:172 application/templates/logs.html:3
 msgid "Logs"
 msgstr "Kayıtlar"
 
-#: application/templates/base.html:173
+#: application/templates/base.html:174
 msgid "Advanced"
 msgstr "Gelişmiş"
 
-#: application/templates/base.html:174 application/templates/library.html:3
+#: application/templates/base.html:175 application/templates/library.html:3
 msgid "Shared"
 msgstr "Paylaşılan"
 
@@ -1459,8 +1463,8 @@ msgid "Fwd as Attach"
 msgstr "Ek olarak ilet"
 
 #: application/view/admin.py:48 application/view/adv.py:394
-#: application/view/setting.py:75 application/view/translator.py:84
-#: application/view/translator.py:166
+#: application/view/setting.py:75 application/view/translator.py:85
+#: application/view/translator.py:169
 msgid "Settings Saved!"
 msgstr "Ayarlar Kaydedildi!"
 
@@ -1883,9 +1887,9 @@ msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "Tarif abone olunmuş, silmeden önce aboneliği iptal edin."
 
 #: application/view/subscribe.py:301 application/view/translator.py:51
-#: application/view/translator.py:100 application/view/translator.py:113
-#: application/view/translator.py:136 application/view/translator.py:182
-#: application/view/translator.py:195
+#: application/view/translator.py:101 application/view/translator.py:114
+#: application/view/translator.py:137 application/view/translator.py:185
+#: application/view/translator.py:198
 msgid "This recipe has not been subscribed to yet."
 msgstr "Bu tarife henüz abone olunmadı."
 
@@ -1917,11 +1921,11 @@ msgstr "Bu tarifin giriş bilgileri temizlendi."
 msgid "The login information for this recipe has been saved."
 msgstr "Bu tarifin giriş bilgileri kaydedildi."
 
-#: application/view/translator.py:78 application/view/translator.py:159
+#: application/view/translator.py:79 application/view/translator.py:162
 msgid "The api key is required."
 msgstr "API anahtarı gereklidir."
 
-#: application/view/translator.py:117 application/view/translator.py:199
+#: application/view/translator.py:118 application/view/translator.py:202
 msgid "The text is empty."
 msgstr "Metin boş."
 

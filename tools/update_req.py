@@ -12,7 +12,7 @@ def new_secret_key(length=12):
     allchars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz'
     return ''.join([secrets.choice(allchars) for i in range(length)])
 
-REQ_COMM = [('requests', '~=2.31.0'),
+REQ_COMM = [('requests', '~=2.32.0'),
     ('chardet', '~=5.2.0'),
     ('pillow', '~=10.3.0'),
     ('lxml', '~=5.2.0'),
@@ -33,6 +33,7 @@ REQ_COMM = [('requests', '~=2.31.0'),
     ('qrcode', '~=7.4.2'),
     ('gtts', '~=2.5.1'),
     ('edge-tts', '~=6.1.11'),
+    ('justext', '~=3.0.1'),
 ]
 
 REQ_DB = {

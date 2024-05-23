@@ -24,7 +24,7 @@ else:
 
 try:
     from sendgrid import SendGridAPIClient
-    from sendgrid.helpers.mail import Email, Content, Mail, Attachment
+    from sendgrid.helpers.mail import Email, Content, Mail, Attachment, FileContent, FileName, FileType, Disposition
 except ImportError:
     SendGridAPIClient = None
 

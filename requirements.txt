@@ -1,4 +1,4 @@
-requests~=2.31.0
+requests~=2.32.0
 chardet~=5.2.0
 pillow~=10.3.0
 lxml~=5.2.0
@@ -17,14 +17,16 @@ flask-babel~=4.0.0
 six~=1.16.0
 feedparser~=6.0.11
 qrcode~=7.4.2
-#gtts~=2.5.1
 peewee~=3.17.1
+weedata>=0.2.7,<1.0.0
 flask-apscheduler~=1.13.1
-redis~=5.0.3
+justext~=3.0.1
 
+#gtts~=2.5.1
+#edge-tts~=6.1.11
+#redis~=5.0.3
 #pymysql~=1.1.0
 #psycopg2-binary~=2.9.9
-#weedata>=0.2.5,<1.0.0
 #google-cloud-datastore~=2.19.0
 #pymongo~=4.6.3
 #google-cloud-tasks~=2.16.3

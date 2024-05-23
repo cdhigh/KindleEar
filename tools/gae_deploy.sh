@@ -23,6 +23,7 @@ if python ${SH_DIR}/update_req.py gae[$@]; then
   artifactregistry.googleapis.com cloudbuild.googleapis.com cloudtrace.googleapis.com \
   containerregistry.googleapis.com firebaserules.googleapis.com logging.googleapis.com \
   pubsub.googleapis.com storage-api.googleapis.com
+  gcloud logging buckets update _Default --location=global --retention-days=7
 
   gcloud beta app deploy --version=1 ${KE_DIR}/app.yaml ${KE_DIR}/worker.yaml
   gcloud beta app deploy --quiet --version=1 ${KE_DIR}/cron.yaml
