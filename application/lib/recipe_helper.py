@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-import os, re, textwrap, time, zipfile
+import os, textwrap, time, zipfile
 import xml.etree.ElementTree as ET
 
 def py3_repr(x):
@@ -16,19 +16,20 @@ def GenerateRecipeSource(title, feeds, user, isfulltext=False, language=None, ma
     cover_url=None, base='BasicNewsRecipe'):
     className = f'UserRecipe{int(time.time())}'
     title = py3_repr(str(title).strip() or className)
+    print(title)
     indent = ' ' * 8
     feedTitles = []
     feedsStr = []
     if feeds and isinstance(feeds[0], (tuple, list)):
         for t, url in feeds:
-            feedsStr.append(f'{indent}({py3_repr(t)}, {py3_repr(url)}),')
+            feedsStr.append(f"{indent}({py3_repr(t)}, {py3_repr(url)}),")
             feedTitles.append(t)
     else:
-        feedsStr = [f'{indent}{py3_repr(url)},' for url in feeds]
+        feedsStr = [f"{indent}{py3_repr(url)}," for url in feeds]
     
     feeds = 'feeds          = [\n{}\n    ]'.format('\n'.join(feedsStr)) if feedsStr else ''
     desc = 'News from {}'.format(', '.join(feedTitles)) if feedTitles else 'Deliver from KindleEar'
-    desc = desc[:100]
+    desc = desc[:100].replace('"', "'")
     oldest_article = user.book_cfg('oldest_article')
     #至少到feedparser 6.0.11为止，其提取xml内的内容有bug，经常提取不到，在他修复之前，我们先暂停全文rss功能
     isfulltext = False
@@ -45,8 +46,8 @@ def GenerateRecipeSource(title, feeds, user, isfulltext=False, language=None, ma
     from calibre.web.feeds.news import {base}
     class {className}({base}):
         title          = {title}
-        description    = '{desc}'
-        language       = '{language}'
+        description    = "{desc}"
+        language       = "{language}"
         max_articles_per_feed = {max_articles}
         oldest_article = {oldest_article}
         use_embedded_content  = {use_embedded_content}
