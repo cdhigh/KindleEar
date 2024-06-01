@@ -6,9 +6,8 @@
 #https://cloud.google.com/appengine/docs/standard/python3/reference/services/bundled/google/appengine/api/mail
 #https://cloud.google.com/appengine/docs/standard/python3/services/mail
 import os, datetime, zipfile, base64
-from ..utils import ke_decrypt, str_to_bool
+from ..utils import str_to_bool, sanitize_filename
 from ..base_handler import save_delivery_log
-from .db_models import KeUser
 
 #google.appengine will apply patch for os.env module
 hideMailLocal = str_to_bool(os.getenv('HIDE_MAIL_TO_LOCAL'))
@@ -205,15 +204,15 @@ def save_mail_to_local(dest_dir, subject, body, attachments=None, html=None, **k
     if not os.path.exists(mailDir):
         os.makedirs(mailDir)
 
-    subject = subject.replace(':', '_').replace('/', '_').replace('\\', '_').replace('?', '_').replace('*', '_')
     now = str(datetime.datetime.now().strftime('%H-%M-%S'))
     if len(body) < 100 and not html and len(attachments) == 1:
         filename, content = attachments[0]
         b, ext = os.path.splitext(filename)
-        mailFilename = os.path.join(mailDir, f'{b}_{now}{ext}')
+        mailFilename = os.path.join(mailDir, f'{sanitize_filename(b)}_{now}{ext}')
         with open(mailFilename, 'wb') as f:
             f.write(content)
     else:
+        subject = sanitize_filename(subject)
         mailFilename = os.path.join(mailDir, f'{subject}_{now}.zip')
         mailFile = zipfile.ZipFile(mailFilename, 'w')
         mailFile.writestr('textbody.txt', body)

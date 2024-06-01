@@ -46,6 +46,7 @@ def init_app(name, cfgMap, set_env, debug=False):
         g.version = appVer
         g.now = datetime.datetime.utcnow
         g.allowSignup = (app.config['ALLOW_SIGNUP'] == 'yes')
+        g.allowReader = app.config['EBOOK_SAVE_DIR']
         
         connect_database()
 

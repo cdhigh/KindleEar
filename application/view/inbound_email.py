@@ -141,6 +141,7 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
     #如果需要暂存邮件
     inbound_email = user.cfg('inbound_email')
     if not inbound_email:
+        default_log.warning('inbound mail disabled')
         return
 
     if 'save' in inbound_email:

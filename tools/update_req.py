@@ -105,7 +105,7 @@ def dockerize_config_py(cfgFile, arg):
         'TASK_QUEUE_SERVICE': 'apscheduler', 'TASK_QUEUE_BROKER_URL': 'memory',
         'KE_TEMP_DIR': '/tmp', 'DOWNLOAD_THREAD_NUM': '3', 'ALLOW_SIGNUP': 'no',
         'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning', 'SECRET_KEY': new_secret_key,
-        'DELIVERY_KEY': lambda: new_secret_key(6)}
+        'DELIVERY_KEY': lambda: new_secret_key(6), 'EBOOK_SAVE_DIR': '/data/ebooks'}
     ret = []
     inDocComment = False
     pattern = r"^([_A-Z]+)\s*=\s*(.+)$"
@@ -169,7 +169,7 @@ def gaeify_config_py(cfgFile):
         'DATABASE_URL': 'datastore', 'TASK_QUEUE_SERVICE': 'gae', 'TASK_QUEUE_BROKER_URL': '',
         'KE_TEMP_DIR': '/tmp', 'DOWNLOAD_THREAD_NUM': '2', 'ALLOW_SIGNUP': 'no',
         'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning', 'SECRET_KEY': new_secret_key,
-        'DELIVERY_KEY': lambda: new_secret_key(6)}
+        'DELIVERY_KEY': lambda: new_secret_key(6), 'EBOOK_SAVE_DIR': ''}
     ret = []
     inDocComment = False
     pattern = r"^([_A-Z]+)\s*=\s*(.+)$"

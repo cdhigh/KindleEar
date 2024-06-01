@@ -22,11 +22,13 @@ class KeUser(MyBaseModel): # kindleEar User
     expires = DateTimeField(null=True) #超过了此日期后账号自动停止推送
     created_time = DateTimeField(default=datetime.datetime.utcnow)
 
-    #email,sender,kindle_email,secret_key,enable_send,timezone,inbound_email,keep_in_email_days
+    #email,sender,kindle_email,secret_key,enable_send,timezone,inbound_email,
+    #keep_in_email_days,delivery_mode,webshelf_days
     #sender: 可能等于自己的email，也可能是管理员的email
+    #delivery_mode: 推送模式：['email' | 'local' | 'email,local']
     base_config = JSONField(default=JSONField.dict_default)
     
-    #device,type,title,title_fmt,author_fmt,mode,time_fmt,oldest_article,language
+    #device,type,title,title_fmt,author_fmt,mode,time_fmt,oldest_article,language,rm_links,
     #rm_links: 去掉文本或图片上的超链接{'' | 'image' | 'text' | 'all'}
     book_config = JSONField(default=JSONField.dict_default)
     
@@ -40,7 +42,8 @@ class KeUser(MyBaseModel): # kindleEar User
         value = self.base_config.get(item, default)
         if value is None:
             return {'email': '', 'kindle_email': '', 'secret_key': '', 'timezone': 0,
-                'inbound_email': 'save,forward', 'keep_in_email_days': 1}.get(item, value)
+                'inbound_email': 'save,forward', 'keep_in_email_days': 1,
+                'delivery_mode': 'email,local', 'webshelf_days': 7}.get(item, value)
         else:
             return value
     def set_cfg(self, item, value):

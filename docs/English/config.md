@@ -13,6 +13,7 @@ This section describes several simple configuration items, with more detailed de
 | APP_ID             | Application identifier; for GAE platform, it's the app ID, while for other platforms, it's used to identify database and other resources |
 | APP_DOMAIN         | Domain name of the deployed application                 |
 | KE_TEMP_DIR        | Temporary directory for creating eBooks; if empty, temporary files are stored in memory |
+| EBOOK_SAVE_DIR     | If online reading is required, this directory is used to store the generated e-books |
 | DOWNLOAD_THREAD_NUM| Number of threads for downloading web pages; the target platform needs to support multithreading, with a maximum value of 5 |
 | ALLOW_SIGNUP       | Whether to allow user registration; "yes" - Users can register autonomously (with the option to restrict via invitation codes), "no" - means account creation is done by administrators |
 | SECRET_KEY         | Encryption key for browser session, recommended to change, any string is acceptable |

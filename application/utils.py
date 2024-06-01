@@ -138,6 +138,20 @@ def filesizeformat(value, binary=False, suffix='B'):
         value /= base
     return f"{value:.1f} {unit}{suffix}" #type:ignore
 
+#将文件名中的非法字符替换为replace指定的字符
+def sanitize_filename(filename, replace=' '):
+    for c in ('<', '>', '\\', '/', '?', '*', ':', '|', "'", '"'):
+        filename = filename.replace(c, replace)
+    return filename
+
+#获取一个目录的中大小
+def get_directory_size(directory):
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(directory):
+        for filename in filenames:
+            filepath = os.path.join(dirpath, filename)
+            total_size += os.path.getsize(filepath)
+    return total_size
 
 #将字符串安全转义到xml格式，有标准库函数xml.sax.saxutils.escape()，但是简单的功能就简单的函数就好
 def xml_escape(txt):

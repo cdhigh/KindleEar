@@ -80,7 +80,6 @@ gcloud beta app deploy --version=1 app.yaml worker.yaml
 ### 其他说明    
 1. 初始账号和密码为 admin/admin。
 2. 部署时出现下面的几个提示时记得按 y，因为光标自动下移到了下一行，往往会忘记按 y，否则会一直卡在这里。  
-
 ```
 Updating config [cron]...API [cloudscheduler.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)
 Updating config [queue]...API [cloudtasks.googleapis.com] not enabled on project [xxx]. Would you like to enable and retry (this will take a few minutes)
@@ -110,7 +109,7 @@ Docker不限平台，只要目标平台支持Docker，资源足够就可以部�
 wget -O - https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/ubuntu_docker.sh | bash
 ```
 
-2. 安装完Docker后，执行以下命令就可以让服务运行起来（http://example.com 修改为你自己的值）。  
+2. 安装完Docker后，执行以下命令就可以让服务运行起来（`http://example.com` 修改为你自己的值）。  
 
 ```bash
 wget https://raw.githubusercontent.com/cdhigh/KindleEar/master/docker/ke-docker.sh

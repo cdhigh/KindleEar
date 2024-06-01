@@ -63,7 +63,7 @@ div#output_wrapper {
 }
 
 div.paragraph_details {
-    width: 240px;
+    width: 400px;
     float: right;
     display: none;
 }

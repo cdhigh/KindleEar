@@ -107,6 +107,7 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
     lastSendTime = 0
     bookType = user.book_cfg('type')
     ret = []
+    delivery_mode = user.cfg('delivery_mode') or ''
     for title, roList in recipes.items():
         if len(roList) == 1:
             title = roList[0].title
@@ -126,13 +127,16 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
             ret.append(f'Sent "{audioName}" ({filesizeformat(len(audio))})')
 
         if book:
-            #避免触发垃圾邮件机制，最短10s发送一次
-            if lastSendTime and (time.time() - lastSendTime < 10): #单位为s
-                time.sleep(10)
+            if 'email' in delivery_mode:
+                #避免触发垃圾邮件机制，最短10s发送一次
+                if lastSendTime and (time.time() - lastSendTime < 10): #单位为s
+                    time.sleep(10)
 
-            send_to_kindle(user, title, book)
-            lastSendTime = time.time()
-            ret.append(f'Sent "{title}.{bookType}" ({filesizeformat(len(book))})')
+                send_to_kindle(user, title, book)
+                lastSendTime = time.time()
+                ret.append(f'Sent "{title}.{bookType}" ({filesizeformat(len(book))})')
+            elif 'local' in delivery_mode:
+                ret.append(f'Saved "{title}"')
         elif not audio:
             save_delivery_log(user, title, 0, status='nonews')
 

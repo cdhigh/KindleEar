@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{_('Reader')}} - KindleEar</title>
+  <link rel="stylesheet" type="text/css" href="/static/reader.css" />
+</head>
+<body>
+  <div class="container" id="container">
+    <div class="content" id="content">
+      <iframe src="{{initArticle|safe}}" id="iframe" class="embedded-iframe" sandbox="allow-same-origin allow-scripts" scrolling="no" frameborder="0" onload="iframeLoadEvent(this)">Browser not compatible.</iframe>
+    </div>
+    <div class="pos-indicator" id="pos-indicator"></div>
+  </div>
+
+  <div class="navbar" id="navbar">
+    <div class="nav-content" id="nav-content">
+      <!-- 书籍列表在这里，由脚本填充 -->
+    </div>
+    <div class="nav-indicator" id="nav-indicator"></div>
+    <!-- 点击设置按钮弹出的菜单 -->
+    <div class="nav-popmenu" id="nav-popmenu">
+      <!-- <div class="nav-popmenu-row" onclick="pushCurrentBook()">
+        <div class="nav-popmenu-item">
+          <span class="check-icon"></span>
+          <span>{{_("Push current book")}}</span>
+        </div>
+      </div> -->
+      <div class="nav-popmenu-row" onclick="pushCurrentArticle()">
+        <div class="nav-popmenu-item">
+          <span class="check-icon"></span>
+          <span>{{_("Push current article")}}</span>
+        </div>
+      </div>
+      <div class="nav-popmenu-row" id="allow-links" onclick="toggleAllowLinks()">
+        <div class="nav-popmenu-item">
+          <span class="check-icon"></span>
+          <span>{{_("Allow click links")}}</span>
+        </div>
+      </div>
+      <div class="nav-popmenu-row" id="ink-mode" onclick="toggleInkMode()">
+        <div class="nav-popmenu-item">
+          <span class="check-icon"></span>
+          <span>{{_("eInk mode")}}</span>
+        </div>
+      </div>
+      <div class="nav-popmenu-row" onclick="showTouchHint()">
+        <div class="nav-popmenu-item">
+          <span class="check-icon"></span>
+          <span>{{_("Visualize Touch Regions")}}</span>
+        </div>
+      </div>
+      <div class="nav-popmenu-row" style="border:none;" onclick="javascript:window.location.href='/';">
+        <div class="nav-popmenu-item">
+          <span class="check-icon"></span>
+          <span>{{_("Home")}}</span>
+        </div>
+      </div>
+    </div>
+    <!-- 菜单底部固定的图标行 -->
+    <div class="nav-footer" id="nav-footer">
+      <button title="{{_('Menu')}}" onclick="toggleNavPopMenu()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+          <path fill="none" d="M0 0h20v20H0z"/>
+          <path d="M15.95 10.78c.03-.25.05-.51.05-.78s-.02-.53-.06-.78l1.69-1.32c.15-.12.19-.34.1-.51l-1.6-2.77c-.1-.18-.31-.24-.49-.18l-1.99.8c-.42-.32-.86-.58-1.35-.78l-.3-2.12c-.04-.2-.2-.34-.4-.34H8.4c-.2 0-.36.14-.39.34l-.3 2.12c-.49.2-.94.47-1.35.78l-1.99-.8c-.18-.07-.39 0-.49.18l-1.6 2.77c-.1.18-.06.39.1.51l1.69 1.32c-.04.25-.07.52-.07.78s.02.53.06.78L2.37 12.1c-.15.12-.19.34-.1.51l1.6 2.77c.1.18.31.24.49.18l1.99-.8c.42.32.86.58 1.35.78l.3 2.12c.04.2.2.34.4.34h3.2c.2 0 .37-.14.39-.34l.3-2.12c.49-.2.94-.47 1.35-.78l1.99.8c.18.07.39 0 .49-.18l1.6-2.77c.1-.18.06-.39-.1-.51l-1.67-1.32zM10 13c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/>
+        </svg>
+      </button>
+      <button title="{{_('Delete')}}" onclick="navDeleteBooks(event)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+          <path fill="#000" d="M6.42 7.38L7.04 16.16L13.11 16.16L13.73 7.38L15.16 7.38L14.54 16.27C14.48 17.01 13.86 17.59 13.11 17.59L7.04 17.59C6.29 17.59 5.67 17.01 5.62 16.26L4.99 7.38zM9.53 7.82V14.49H8.1V7.82zM12.14 7.82V14.49H10.71V7.82zM2.86 5H17.14V6.43H2.86zM12.98 2.62V4.05H7.27V2.62z"/>
+        </svg>
+      </button>
+      <button title="{{_('Collapse all')}}" onclick="navExpandCollapseAll(0)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+          <path fill="black" d="M18.21 12.86H9.71v-0.95h8.49zm0-4.19H9.71v-0.95h8.49zm0-4.27H9.71v-0.95h8.49zM18.21 17.10H1.82v-0.95h16.39zm-14.32-3.56V5.05h0.95v8.49zm0-8.33l1.27 2.20 1.27 2.20H1.86l1.27-2.20z"/>
+        </svg>
+      </button>
+      <button title="{{_('Expand all')}}" onclick="navExpandCollapseAll(2)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+          <path fill="black" d="M9.84 7.45h8.49v0.94H9.84zm0 4.19h8.49v0.94H9.84zm0 4.27h8.49v0.95H9.84zm-7.9-12.7h16.39v0.95H1.94zm2.92 3.56v8.49h-0.95V6.77zm0 10.33l-1.27-2.2-1.27-2.2h5.07z"/>
+        </svg>
+      </button>
+      <button title="{{_('Prev')}}" onclick="navPageUp()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+          <path d="M 4.375 12.8125 L 10 7.1875 L 15.625 12.8125" stroke="black" stroke-width="1.875" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </button>
+      <button title="{{_('Next page')}}" onclick="navPageDown()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+          <path d="M 4.375 7.1875 L 10 12.8125 L 15.625 7.1875" stroke="black" stroke-width="1.875" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </button>
+      <button class="right-float" title="{{_('Close')}}" id="closeNavBtn" onclick="navCloseNav()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 20 20">
+          <path fill="black" d="M 15.598 5.582 L 14.418 4.402 L 10 8.82 L 5.582 4.402 L 4.402 5.582 L 8.82 10 L 4.402 14.418 L 5.582 15.598 L 10 11.18 L 14.418 15.598 L 15.598 14.418 L 11.18 10 Z M 15.598 5.582 "/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <!-- 在线书库为空时显示的svg -->
+  <div style="display:none;" id="nothing-here">
+    <div style="position:absolute;top:0px;left:0px;width:100%;height:100%;display:table;">
+      <div style="display:table-cell;vertical-align:middle;text-align:center;padding-bottom:50px;">
+        <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="341.3" height="341.3" viewBox="0 0 256 326">
+          <path fill="#aaa" d="M106 18c-3 2-3 3-3 7 1 3 1 4-2 4a153 153 0 0 0-59 47L30 96l-7 15c-1 2-3 6-6 8-6 7-5 14 2 15 2 1 3 2 3 8l3 15c3 6 3 10 4 30 1 22 1 23-2 26-7 11-13 27-13 34l2 5c2 2 3 2 112 2s110 0 112-2c3-3 3-7 0-15-4-13-14-29-24-41l-3-6c12-17 21-37 21-51 0-3 0-4 3-5 7-1 8-8 2-15-3-2-5-6-6-8l-7-15a131 131 0 0 0-67-65l-7-3 1-4c0-3 0-4-3-6-2-2-3-2-8-2s-7 1-10 4l-4 3-4-3c-3-3-5-4-10-4s-6 0-8 2zm13 5 4 4c3 4 7 4 10 0 2-3 6-5 10-5s5 1 2 4c-2 4-1 6 7 9 31 11 57 36 71 69 3 6 7 14 10 17 4 6 5 8 1 8s-6 3-6 11c-3 34-31 65-68 74-7 2-11 2-32 2-26 0-34-1-48-7l-7-3v-59l4 3 7 5c3 1 3 2 3 5 0 7 9 13 26 17 14 3 36 0 48-6 8-4 10-13 5-21-8-12-23-21-37-21h-5v-5c-1-6-6-15-12-19-13-8-29-6-39 6-6 8-6 10-6 53v38l-6-4c-6-5-14-14-19-21-8-11-14-29-14-40 0-5-2-8-6-8-3 0-3-2 1-8 3-3 7-10 9-16 15-34 41-59 72-70 8-3 10-5 7-9l-2-3c0-2 7-1 10 0zm-13 86c4 1 7 4 9 7 2 4 3 5 3 12 0 8-1 9-3 13-4 6-10 9-17 10-8 0-14-2-19-7-8-10-8-22 1-31 8-8 17-9 26-4zm37 29c7 3 13 8 12 9 0 1-26 2-34 1h-4l2-4 4-6v-3h7c5 0 10 1 13 3zm20 17c1 7-2 11-14 14-21 7-56 0-56-10 0-2 0-2 5-2l8-2 14-1h23l16-1c2 0 3 0 4 2zM39 183l4 7-3 6c-5 6-5 7-5-9v-9l4 5zm18 19 8 6c2 2 2 2 1 5-6 11-23 12-29 1-1-3-1-3 5-11 6-7 7-8 8-7l7 6zm161 7c7 10 12 19 16 28 4 12 6 11-25 11h-26l-7-6a73 73 0 0 0-96 0l-7 6H47c-25 0-27 0-27-2s4-15 7-20c5-9 4-9 9-4 8 6 16 8 25 4 5-3 9-7 11-12l1-2 7 3c14 6 21 7 48 7 22 0 26 0 33-2 16-4 31-12 42-21l4-4 3 3 8 11zm-73 23c7 2 18 7 24 12l5 4H82l3-3c16-13 38-18 60-13z"/><path fill="#aaa" d="M95 93c0 1 3 5 5 5l3-1c1-2 1-2-1-4s-6-3-7-1zm59 0c-2 2-2 2-1 4 2 2 4 1 6-1 4-4-1-7-5-3zm-2 26-2 3c0 2 3 6 6 6 4 0 7-7 4-10-2-1-7-1-8 1zm-61-2c-5 4-3 11 4 13 3 1 8-1 9-5 3-8-7-15-13-8z"/>
+          <text x="50%" y="296" font-family="Comic Sans MS, Comic Sans, cursive" font-size="30" fill="#333" text-anchor="middle">Nothing here</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  {% autoescape off -%}
+  <script type="text/javascript">
+    var g_books = {{oebBooks|safe}}; //[{date:, books: [{title:, articles:[{text:, src:}],},...]}, ]
+    var i18n = {
+      confirmDelete: "{{_('Confirm Deletion')|safe}}",
+      areYouSureDelete: "{{_('Are you sure to delete?')|safe}}",
+      selectAtleastOneItem: "{{_('Please select at least one item.')|safe}}",
+      pushOk: "{{_('Pushed successfully.')|safe}}",
+      noReading: "{{_('There are currently no books or articles being read.')|safe}}"
+    };
+  </script>
+  {% endautoescape -%}
+  <script src="/static/reader.js"></script>
+</body>
+</html>

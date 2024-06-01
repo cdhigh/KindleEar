@@ -11,6 +11,9 @@
   <link rel="bookmark" href="/static/favicon.ico" type="image/x-icon" />
   <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
   <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oleo+Script:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/pure-min.css" type="text/css" charset="utf-8"/>
   <link rel="stylesheet" href="/static/grids-responsive-min.css" type="text/css" charset="utf-8"/>
   <link rel="stylesheet" href="/static/base.css" type="text/css" charset="utf-8"/>
@@ -28,7 +31,7 @@
     cannotDelRss: "{{_('Cannot delete this feed, Error:')|safe}}",
     fulltext: "{{_('Fulltext')|safe}}",
     share: "{{_('Share')|safe}}",
-    areYouSureDelete: "{{_('Are you sure to delete ({0})?')|safe}}",
+    areYouSureDelete: "{{_('Are you sure to delete?')|safe}}",
     reportThisFeedInvalid: "{{_('Report to the server that this feed is invalid.')|safe}}",
     areYouSureRemoveAll: "{{_('Are you sure to REMOVE ALL CUSTOM RSS?')|safe}}",
     shareLinksHappiness: "{{_('Share links, share happiness')|safe}}",
@@ -108,8 +111,8 @@
     uploadOnly: "{{_('Upload Only')|safe}}",
     send: "{{_('Send')|safe}}",
     nothingHere: "{{_('There is nothing here.')|safe}}",
-    selectSingleMail: "{{_('Please select a single mail.')|safe}}",
-    selectAtleastOneMail: "{{_('Please select at least one mail.')|safe}}",
+    selectSingleItem: "{{_('Please select a single item.')|safe}}",
+    selectAtleastOneItem: "{{_('Please select at least one item.')|safe}}",
     someParamsMissing: "{{_('Some parameters are missing or wrong.')|safe}}",
     mailBeenSent: "{{_('The email has been sent.')|safe}}",
     from: "{{_('From')|safe}}",
@@ -138,7 +141,12 @@
     <!-- Header Navigation -->
     <div class="header pure-menu pure-menu-horizontal">
     {% block header -%}
-      <a href="/" class="pure-menu-heading pure-menu-link logo">KindleEar</a>
+      <div>
+        <a href="/" class="pure-menu-heading pure-menu-link logo">KindleEar</a>
+        {% if g.allowReader -%}
+        <a href="/reader" target="_blank" class="pure-menu-heading pure-menu-link reader-link">Reader</a>
+        {% endif %}
+      </div>
       {% block header_loginfo -%}
       <ul class="pure-menu-list home-menu">
         {% if session.get('userName') -%}
@@ -173,6 +181,9 @@
         <li class="pure-menu-item {% if tab == 'admin' %}pure-menu-selected{% endif %}"><a href="/admin" class="pure-menu-link">{{_("Admin")}}</a></li>
         <li class="pure-menu-item {% if tab == 'advset' %}pure-menu-selected{% endif %}"><a href="/adv" class="pure-menu-link">{{_("Advanced")}}</a></li>
         <li class="pure-menu-item {% if tab == 'shared' %}pure-menu-selected{% endif %}"><a href="/library" class="pure-menu-link">{{_("Shared")}}</a></li>
+        {% if g.allowReader -%}
+        <li class="pure-menu-item"><a href="/reader" class="pure-menu-link" target="_blank">{{_("Reader")}}</a></li>
+        {% endif -%}
       </ul>
     </div>
     {% endif -%}

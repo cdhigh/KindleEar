@@ -55,7 +55,7 @@ def html_json_extract(html: str, language: str, url: str) -> str:
             for item in filtered(finalList, language)])
 
         #获取原本的title
-        match = re.search(r'<title>(.*?)</title>', html, re.I|re.M|re.S)
+        match = re.search(r'<title[^>]*>(.*?)</title>', html, re.I|re.M|re.S)
         title = match.group(1).strip() if match else ''
         return f"""<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <title>{title}</title></head><body>{finalTxt}

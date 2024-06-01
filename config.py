@@ -38,6 +38,9 @@ TASK_QUEUE_BROKER_URL = "memory"
 #Setting this option can reduce memory consumption, supports both relative and absolute paths
 KE_TEMP_DIR = "/tmp"
 
+#If online reading is required, this directory is used to store the generated e-books.
+EBOOK_SAVE_DIR = ""
+
 #If the depolyment plataform supports multi-threads, set this option will boost the download speed
 DOWNLOAD_THREAD_NUM = "3"
 

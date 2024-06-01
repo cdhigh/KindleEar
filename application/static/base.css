@@ -92,12 +92,34 @@ button {
 }
 
 .logo {
-    padding: .5em;
-    font-family: Palatino, STSong, SimSun, serif;
+    margin: 10px;
+    padding: 3px 20px;
+    font-family: "Oleo Script", Palatino, STSong, SimSun, system-ui, serif;
     font-size: 1.5em;
     text-transform: none;
-    font-weight: bold;
-    color: #222;
+    font-weight: bolder;
+    color: #ff5733;
+    border-radius: 50%;
+    border: 1px solid #ffddc1;
+    background-color: #ffddc1;
+    box-shadow: 2px 2px 5px #ff5733;
+    text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5);
+}
+
+.reader-link {
+    font-family: "Oleo Script", Palatino, STSong, SimSun, system-ui, serif;
+    font-size: 0.8em;
+    font-weight: normal;
+    padding: 3px;
+    margin-left: -30px;
+    margin-bottom: 15px;
+    border: 1px solid #c1e1ff;
+    text-transform: none;
+    background-color: #c1e1ff;
+    color: #3375ff;
+    padding: 5px 10px;
+    border-radius: 50%;
+    box-shadow: 0px 0px 3px #0078e7;
 }
 
 .home-menu {
@@ -123,7 +145,7 @@ button {
 
 @media only screen and (min-width: 480px) {
     .app-menu .pure-menu-list {
-        display: block!important;
+        display: block !important;
     }
 }
 

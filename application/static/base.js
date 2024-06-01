@@ -592,7 +592,7 @@ function AskForSubscriptionInfo(id, account) {
 //用户点击了删除自定义RSS按钮，如果按住ctrl键再点击删除，则不需要确认
 function ShowDeleteCustomRssDialog(event, rssid, title, url, isfulltext) {
   if (!(event.ctrlKey || event.metaKey)) {
-    let msg = i18n.areYouSureDelete.format(title);
+    let msg = i18n.areYouSureDelete + '\n' + title;
     if (!('show' in HTMLDialogElement.prototype)) { //校验兼容性
       if (confirm(msg)) {
         DeleteCustomRss(rssid, title, url, isfulltext, false);
@@ -919,7 +919,7 @@ function OpenUploadRecipeDialog() {
 //删除一个已经上传的Recipe
 function DeleteUploadRecipe(id, title) {
   let force = (event.ctrlKey || event.metaKey);
-  if (!force && !confirm(i18n.areYouSureDelete.format(title))) {
+  if (!force && !confirm(i18n.areYouSureDelete + '\n' + title)) {
     return;
   }
 
@@ -1194,7 +1194,7 @@ var AjaxFileUpload = {
 ///[start] admin.html
 //删除一个账号
 function DeleteAccount(name) {
-  if (!confirm(i18n.areYouSureDelete.format(name))) {
+  if (!confirm(i18n.areYouSureDelete + '\n' + name)) {
     return;
   }
   MakeAjaxRequest("/account/delete", "POST", {name: name}, function (resp) {

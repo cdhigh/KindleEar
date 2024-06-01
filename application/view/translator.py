@@ -20,10 +20,8 @@ def translator_route_preprocess(forAjax=False, user=None):
         @wraps(func)
         def wrapper(*args, **kwargs):
             recipeId = kwargs.get('recipeId', '')
-            user = get_login_user()
             recipeId = recipeId.replace('__', ':')
             kwargs['recipeId'] = recipeId
-            kwargs['user'] = user
             recipeType, dbId = Recipe.type_and_id(recipeId)
             recipe = GetBuiltinRecipeInfo(recipeId) if recipeType == 'builtin' else Recipe.get_by_id_or_none(dbId)
             if not recipe:

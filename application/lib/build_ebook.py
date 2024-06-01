@@ -46,7 +46,7 @@ def urls_to_book(urls: list, title: str, user, options=None, output_fmt='', lang
                 pass
 
     for idx, url in enumerate(urls[:]):
-        if not sysTmpDir or not isinstance(url, str):
+        if not sysTmpDir or not isinstance(url, str): #如果没有使用临时目录则无法提取下载
             urls[idx] = (title, url) if isinstance(url, str) else url
             continue
 
@@ -63,7 +63,7 @@ def urls_to_book(urls: list, title: str, user, options=None, output_fmt='', lang
                 urls[idx] = (title, url)
                 default_log.warning(f'Prev download html failed: {url}: {e}')
             else: #提取标题
-                match = re.search(r'<title>(.*?)</title>', resp.text, re.I|re.M|re.S)
+                match = re.search(r'<title[^>]*>(.*?)</title>', resp.text, re.I|re.M|re.S)
                 uTitle = match.group(1).strip() if match else title
                 urls[idx] = (uTitle, 'file://' + pt.name)
 

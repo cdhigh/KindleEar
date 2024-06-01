@@ -23,6 +23,8 @@ from calibre.constants import __version__
 from polyglot.builtins import string_or_bytes
 
 from filesystem_dict import FsDictStub
+from application.utils import sanitize_filename, get_directory_size
+from application.base_handler import save_delivery_log
 
 DEBUG_README=b'''
 This debug folder contains snapshots of the e-book as it passes through the
@@ -88,7 +90,6 @@ class Plumber:
 
     #input_: 输入，编译好的recipes列表或包含html和相关图像的一个字典
     #output: 输出文件绝对路径名，也可能是一个BytesIO
-    #user: KeUser 实例
     def __init__(self, input_, output, input_fmt, output_fmt=None, abort_after_input_dump=False):
         self.input_ = input_
         self.output = output
@@ -552,6 +553,9 @@ class Plumber:
             self.dump_oeb(self.oeb, out_dir)
             self.log.info('Processed HTML written to:{}'.format(out_dir))
 
+        #如果需要在线阅读，则需要保存到输出文件夹
+        self.save_oeb_if_need(self.oeb)
+        
         self.log.info('Creating %s...'%self.output_plugin.name)
 
         #创建输出临时文件缓存
@@ -570,6 +574,29 @@ class Plumber:
         fs_out.clear()
         if not isinstance(self.output, io.BytesIO):
             run_plugins_on_postprocess(self.output, self.output_fmt)
+
+    #如果需要在线阅读，则需要保存到输出文件夹
+    def save_oeb_if_need(self, oeb):
+        user = self.opts.user #type:ignore
+        oebDir = os.environ.get('EBOOK_SAVE_DIR')
+        if not (oebDir and ('local' in user.cfg('delivery_mode'))):
+            return
+
+        title = sanitize_filename(oeb.metadata.title[0].value or 'Untitled')
+        bookDir = _bookDir = os.path.join(oebDir, user.name, user.local_time('%Y-%m-%d'), title)
+        cnt = 0
+        while os.path.exists(bookDir): #一天可以保存多个同名推送
+            cnt += 1
+            bookDir = f'{_bookDir} [{cnt}]'
+        try:
+            os.makedirs(bookDir)
+        except Exception as e:
+            self.log.warning(f'Failed to save eBook due to dir creation error: {bookDir}: {e}')
+            return
+
+        self.dump_oeb(self.oeb, bookDir)
+        size = get_directory_size(bookDir)
+        save_delivery_log(user, title, size, status='ok', to=oebDir)
 
 regex_wizard_callback = None
 def set_regex_wizard_callback(f):

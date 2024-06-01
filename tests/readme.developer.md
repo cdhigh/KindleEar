@@ -181,3 +181,5 @@ sudo systemctl start certbot-renew.timer
 [Cloud Tasks]https://cloud.google.com/tasks/docs
 [Adding your favorite news website](https://manual.calibre-ebook.com/news.html)
 [GAE限额](https://cloud.google.com/appengine/docs/standard/quotas)
+[查看GAE日志当前存储量](https://console.cloud.google.com/logs/storage)
+

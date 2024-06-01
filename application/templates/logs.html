@@ -8,7 +8,7 @@
 <div class="main">
   <div class="logs">
     {% if mylogs -%}
-    <legend>{{ _("Only display last 10 logs") }}</legend>
+    <legend>{{_("Only display last 20 logs")}}</legend>
     <table class="pure-table pure-table-horizontal" width="100%">
       <colgroup>
       <col width="30%">
@@ -39,7 +39,7 @@
           <td>{{log.to}}</td>
           <td>
           {% if log.status == 'ok' -%}
-            <span class="status success">ok</span>
+            <span class="status success">{{log.status}}</span>
           {% elif log.status|length > 15 -%}
             <span class="log_tooltip status error">{{log.status[:12]}}...<span class="log_tooltiptext">{{log.status}}</span></span>
           {% else -%}
@@ -89,9 +89,13 @@
           <td>{{log.size|filesizeformat}}</td>
           <td>{{log.to}}</td>
           <td>
-            <span class="status {% if 'ok' in log.status -%} success {%- else -%} error {%- endif %}">
-            {{ log.status }}
-            </span>
+            {% if log.status == 'ok' -%}
+            <span class="status success">{{log.status}}</span>
+            {% elif log.status|length > 15 -%}
+            <span class="log_tooltip status error">{{log.status[:12]}}...<span class="log_tooltiptext">{{log.status}}</span></span>
+            {% else -%}
+            <span class="status error">{{ log.status }}</span>
+            {% endif -%}
           </td>
         </tr>
       {% endfor -%}

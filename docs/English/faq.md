@@ -135,5 +135,21 @@ However, if you wish to merge recipe files into the built-in library:
 
 
 
+## About Online Reading Related Knowledge?   
+KindleEar supports email delivery and online reading.   
+The advantage of email delivery is the ability to read offline. After downloading to an e-book device, you can carry it with you and read it anytime.    
+The advantage of online reading is that it does not occupy space on the e-book device and does not require manual deletion of e-books, moreover, it can support more e-book devices.    
+1. The online reading feature is only supported on Docker/VPS platforms. Due to the lack of writable disk permissions on the GAE platform, the online reading feature cannot be enabled.   
+2. It is recommended to set a suitable "web shelf" time. KindleEar will automatically clean up e-books that exceed this time, making it worry-free and effortless.    
+3. The online reading page is specially optimized for e-ink screens, using page flipping instead of scrolling:    
+  * Clicking the top 20% of the page opens the menu.    
+  * The bottom left 30% is for the previous page.   
+  * The bottom right 60% is for the next page.   
+  * Clicking the next page area on the last page of the current article automatically opens the next article.    
+  * Clicking the previous page area on the first page of the article automatically opens the previous article.   
+4. The online reading webpage also requires login. If you haven't visited for a long time, you may need to manually enter your account password. To avoid this hassle, you can add query strings to the e-book bookmark, such as `https://youdomain/reader?username=yourname&password=yourpassword`. Some people may feel that storing plaintext passwords is insecure, so it's up to you to decide.    
+
+
+
 ## I have more questions, where can I ask?
 If you have more questions, you can submit an issue at [https://github.com/cdhigh/KindleEar/issues](https://github.com/cdhigh/KindleEar/issues) and wait for a reply. Before submitting a question, it's recommended to search for previously submitted issues first. Maybe someone has already submitted a similar issue? If no one has submitted a similar issue, when you submit a new one, it's recommended to attach the Logs information of [GAE backend](https://console.cloud.google.com/appengine) or the platform you deployed to for problem location, which can also get you a faster reply.

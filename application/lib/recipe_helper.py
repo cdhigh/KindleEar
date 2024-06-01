@@ -16,7 +16,6 @@ def GenerateRecipeSource(title, feeds, user, isfulltext=False, language=None, ma
     cover_url=None, base='BasicNewsRecipe'):
     className = f'UserRecipe{int(time.time())}'
     title = py3_repr(str(title).strip() or className)
-    print(title)
     indent = ' ' * 8
     feedTitles = []
     feedsStr = []

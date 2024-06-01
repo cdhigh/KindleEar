@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KindleEar</title>
+  <style type="text/css">
+    .touch-hint {
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      bottom: 0px;
+      margin: 0px;
+      height: 100%;
+      width: 100%;
+      display: block;
+      background-color: white;
+    }
+    .touch-hint-menu {
+      position: fixed;
+      left: 0px;
+      top: 0px;
+      width: 100%;
+      height: 20%;
+      border-bottom: 2px solid #ccc;
+      text-align: center;
+      vertical-align: middle;
+      display: table;
+    }
+    .touch-hint-prev {
+      position: absolute;
+      top: 21%;
+      left: 0px;
+      width: 33%;
+      height: 80%;
+      margin: 5px 10px 0px 0px;
+      border-right: 2px solid #ccc;
+      text-align: center;
+      vertical-align: middle;
+      display: table;
+    }
+    .touch-hint-next {
+      position: absolute;
+      top: 21%;
+      left: 35%;
+      width: 66%;
+      height: 80%;
+      margin-top: 5px;
+      text-align: center;
+      vertical-align: middle;
+      display: table;
+    }
+    .touch-hint-text {
+      display: table-cell;
+      font-size: 2rem;
+      text-align: center;
+      vertical-align: middle;
+      color: #333;
+    }
+    .tips {
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      display: table;
+    }
+    .tips-text {
+      display: table-cell;
+      vertical-align: middle;
+      text-align: center;
+      background-color: rgba(0, 0, 0, 0.5);
+      font-size: 3em;
+      color: white;
+      padding: 20px 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="touch-hint" id="touch-hint">
+    <div class="touch-hint-menu"><div class="touch-hint-text">{{_("Menu")}}</div></div>
+    <div class="touch-hint-prev"><div class="touch-hint-text">{{_("Prev")}}</div></div>
+    <div class="touch-hint-next">
+      <div class="touch-hint-text">
+        {{_("Next page")}}
+        <br/><br/>
+        <svg width="100px" height="100px" viewBox="0 0 100 100">
+          <path fill="#333" d="M 76.2 35.8 C 73.7 35.8 71.3 36.8 69.6 38.4 C 67.8 36.8 65.5 35.8 63 35.8 C 60.4 35.8 58.1 36.8 56.3 38.4 C 55.6 37.7 54.8 37.2 53.9 36.8 C 57.1 32.8 59 27.8 59 22.5 C 59 10.1 48.9 0 36.5 0 C 24 0 13.9 10.1 13.9 22.5 C 13.9 31.2 18.9 39.1 26.6 42.8 L 26.6 70.3 C 26.6 86.7 39.9 100 56.3 100 C 72.7 100 86.1 86.7 86.1 70.3 L 86.1 45.7 C 86.1 40.2 81.6 35.8 76.2 35.8 Z M 20.4 22.5 C 20.4 13.7 27.6 6.5 36.5 6.5 C 45.3 6.5 52.5 13.7 52.5 22.5 C 52.5 27.6 50.2 32.2 46.3 35.2 L 46.3 22.5 C 46.3 17.1 41.9 12.7 36.5 12.7 C 31 12.7 26.6 17.1 26.6 22.5 L 26.6 35.2 C 22.8 32.2 20.4 27.6 20.4 22.5 Z M 79.6 70.3 C 79.6 83.1 69.2 93.5 56.3 93.5 C 43.5 93.5 33.1 83.1 33.1 70.3 L 33.1 40.8 C 33.1 40.7 33.1 40.6 33.1 40.5 L 33.1 22.5 C 33.1 20.7 34.6 19.1 36.5 19.1 C 38.3 19.1 39.9 20.7 39.9 22.5 L 39.9 52.8 C 39.9 54.5 41.3 56 43.1 56 C 44.9 56 46.3 54.5 46.3 52.8 L 46.3 45.7 C 46.3 43.8 47.8 42.3 49.7 42.3 C 51.6 42.3 53.1 43.8 53.1 45.7 L 53.1 52.8 C 53.1 54.5 54.6 56 56.3 56 C 58.1 56 59.6 54.5 59.6 52.8 L 59.6 45.7 C 59.6 43.8 61.1 42.3 63 42.3 C 64.8 42.3 66.4 43.8 66.4 45.7 L 66.4 52.8 C 66.4 54.5 67.8 56 69.6 56 C 71.4 56 72.8 54.5 72.8 52.8 L 72.8 45.7 C 72.8 43.8 74.3 42.3 76.2 42.3 C 78.1 42.3 79.6 43.8 79.6 45.7 L 79.6 70.3 Z"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  {% if tips -%}
+  <div class="tips"><div class="tips-text">{{tips}}</div></div>
+  {% endif %}
+</body>
+</html>

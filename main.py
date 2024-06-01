@@ -4,7 +4,7 @@
 # Visit <https://github.com/cdhigh/KindleEar> for the latest version
 # Author: cdhigh <https://github.com/cdhigh>
 
-__Version__ = '3.0.7'
+__Version__ = '3.1.0'
 
 import os, sys, builtins, logging
 from application.lib import clogging
@@ -33,7 +33,7 @@ def set_env():
     keys = ['APP_ID', 'APP_DOMAIN', 'SERVER_LOCATION', 'DATABASE_URL', 'TASK_QUEUE_SERVICE',
         'TASK_QUEUE_BROKER_URL', 'KE_TEMP_DIR', 'DOWNLOAD_THREAD_NUM', 'ALLOW_SIGNUP',
         'SECRET_KEY', 'DELIVERY_KEY', 'ADMIN_NAME', 'POCKET_CONSUMER_KEY', 'HIDE_MAIL_TO_LOCAL', 
-        'LOG_LEVEL']
+        'LOG_LEVEL', 'EBOOK_SAVE_DIR']
     for key in keys:
         cfgMap[key] = os.getenv(key) if key in os.environ else getattr(config, key)
         if (key == 'APP_DOMAIN') and not cfgMap[key].startswith('http'):
@@ -81,4 +81,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-    

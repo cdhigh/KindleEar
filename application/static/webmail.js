@@ -82,7 +82,7 @@ function ToggleMailReadStatus() {
       }
     });
   } else {
-    alert(i18n.selectAtleastOneMail);
+    alert(i18n.selectAtleastOneItem);
   }
 }
 
@@ -152,7 +152,7 @@ function SelectUnselectMails() {
 function ReplyMail(sender, act) {
   const selectedMails = GetSelectedMails();
   if (selectedMails.length != 1) {
-    alert(i18n.selectSingleMail);
+    alert(i18n.selectSingleItem);
     return;
   }
 
@@ -200,7 +200,7 @@ function DeleteMails(event) {
   const selectedMails = GetSelectedMails();
   if (selectedMails.length > 0) {
     if (!(event.ctrlKey || event.metaKey) &&
-      !confirm(i18n.areYouSureDelete.format(`${selectedMails.length} mails`))) {
+      !confirm(i18n.areYouSureDelete + '\n' + `${selectedMails.length} mails`)) {
       return;
     }
 
@@ -223,7 +223,7 @@ function DeleteMails(event) {
       PopulateMailList(all_mails);
     });
   } else {
-    alert(i18n.selectAtleastOneMail);
+    alert(i18n.selectAtleastOneItem);
   }
 }
 

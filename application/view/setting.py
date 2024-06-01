@@ -3,8 +3,7 @@
 #设置页面
 #Author: cdhigh <https://github.com/cdhigh>
 import os, textwrap
-from flask import Blueprint, render_template, request, redirect, session
-from flask import current_app as app
+from flask import Blueprint, render_template, request, redirect, session, current_app as app
 from flask_babel import gettext as _
 from calibre.customize.profiles import output_profiles
 from ..base_handler import *
@@ -54,6 +53,8 @@ def SettingPost(user: KeUser):
         enable_send = form.get('enable_send')
         base_config['enable_send'] = enable_send if enable_send in ('all', 'recipes') else ''
         base_config['kindle_email'] = keMail
+        base_config['delivery_mode'] = form.get('delivery_mode', 'email') if app.config['EBOOK_SAVE_DIR'] else 'email'
+        base_config['webshelf_days'] = str_to_int(form.get('webshelf_days', '7'))
         base_config['timezone'] = float(form.get('timezone', '0'))
         user.send_time = int(form.get('send_time', '0'))
         book_config['type'] = form.get('book_type', 'epub')

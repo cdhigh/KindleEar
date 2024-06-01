@@ -794,7 +794,7 @@ class BasicNewsRecipe(Recipe):
 
         #获取原本的title
         if not title:
-            match = re.search(r'<title>(.*?)</title>', html, re.I|re.M|re.S)
+            match = re.search(r'<title[^>]*>(.*?)</title>', html, re.I|re.M|re.S)
             title = match.group(1).strip() if match else 'Untitled'
 
         return self.update_or_add_title(summary, title)

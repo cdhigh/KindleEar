@@ -22,7 +22,7 @@
     <fieldset>
       <legend>{{_("Base")}}</legend>
       <div class="pure-control-group">
-        <label>{{_("Auto Delivery")}}</label>
+        <label>{{_("Auto delivery")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="enable_send">
           {% set enable_send = user.cfg('enable_send') %}
           <option value="all" {% if enable_send=='all' %}selected="selected"{% endif %}>{{_("Recipes and custom RSS")}}</option>
@@ -34,6 +34,32 @@
         <label><em class="required">*</em> {{_("Kindle E-mail")}}</label>
         <input type="email" name="kindle_email" value="{{user.cfg('kindle_email')}}" placeholder="{{_('Seperated by comma')}}" class="pure-u-1 pure-u-sm-1-2" required multiple />
       </div>
+      {% if g.allowReader -%}
+      <div class="pure-control-group">
+        <label>{{_("Delivery mode")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="delivery_mode">
+          {% set delivery_mode = user.cfg('delivery_mode') %}
+          <option value="email,local" {% if 'email' in delivery_mode and 'local' in delivery_mode %}selected="selected"{% endif %}>{{_("Email delivery & online reading")}}</option>
+          <option value="email" {% if delivery_mode=='email' %}selected="selected"{% endif %}>{{_("Email delivery")}}</option>
+          <option value="local" {% if delivery_mode=='local' %}selected="selected"{% endif %}>{{_("Online reading")}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Web shelf")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="webshelf_days">
+          {% set onlineDays = user.cfg('webshelf_days') %}
+          <option value="0" {% if not onlineDays %}selected="selected"{% endif %}>{{_("No limit")}}</option>
+          <option value="1" {% if onlineDays==1 %}selected="selected"{% endif %}>{{_("1 Day")}}</option>
+          <option value="2" {% if onlineDays==2 %}selected="selected"{% endif %}>{{_("2 Days")}}</option>
+          <option value="3" {% if onlineDays==3 %}selected="selected"{% endif %}>{{_("3 Days")}}</option>
+          <option value="4" {% if onlineDays==4 %}selected="selected"{% endif %}>{{_("4 Days")}}</option>
+          <option value="5" {% if onlineDays==5 %}selected="selected"{% endif %}>{{_("5 Days")}}</option>
+          <option value="6" {% if onlineDays==6 %}selected="selected"{% endif %}>{{_("6 Days")}}</option>
+          <option value="7" {% if onlineDays==7 %}selected="selected"{% endif %}>{{_("7 Days")}}</option>
+          <option value="30" {% if onlineDays==30 %}selected="selected"{% endif %}>{{_("30 Days")}}</option>
+        </select>
+      </div>
+      {% endif %}
       <div class="pure-control-group">
         <label>{{_("Time zone")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="timezone">
