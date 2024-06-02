@@ -64,19 +64,21 @@
       position: absolute;
       top: 21%;
       left: 0px;
-      width: 33%;
-      height: 75%;
+      width: 20%;
+      height: 50%;
       margin: 0px;
       border-right: 2px solid #ccc;
+      border-bottom: 2px solid #ccc;
       text-align: center;
       vertical-align: middle;
       display: table;
+      overflow: hidden;
     }
     .next-page {
       position: absolute;
       top: 21%;
-      left: 35%;
-      width: 66%;
+      left: 22%;
+      width: 80%;
       height: 75%;
       margin-top: 0px;
       text-align: center;
@@ -89,6 +91,9 @@
       text-align: center;
       vertical-align: middle;
       color: #333;
+    }
+    .hint-prev-text {
+      font-size: 1rem;
     }
     .tips {
       position: fixed;
@@ -121,7 +126,7 @@
         </tr>
       </table>
     </div>
-    <div class="prev-page"><div class="hint-text">{{_("Prev")}}</div></div>
+    <div class="prev-page"><div class="hint-text hint-prev-text">{{_("Prev")}}</div></div>
     <div class="next-page">
       <div class="hint-text">
         {{_("Next page")}}

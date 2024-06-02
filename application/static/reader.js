@@ -129,8 +129,35 @@ function updateNavIndicator() {
   indicator.style.top = pos + 'px';
 }
 
+//获取最靠近点击位置的一个单词（以空格分隔的单词）
+function getWordAtClick(event) {
+  iframe = document.getElementById('iframe');
+  var doc = iframe.contentDocument || iframe.contentWindow.document;
+  const range = doc.caretRangeFromPoint(event.clientX, event.clientY);
+  if (range) {
+    const textNode = range.startContainer;
+    const offset = range.startOffset;
+
+    if (textNode.nodeType === Node.TEXT_NODE) {
+      const textContent = textNode.textContent;
+      const leftText = textContent.slice(0, offset);
+      const rightText = textContent.slice(offset);
+
+      const leftMatch = leftText.match(/[\w']+$/);
+      const rightMatch = rightText.match(/^[\w']+/);
+
+      if (leftMatch || rightMatch) {
+        const word = (leftMatch ? leftMatch[0] : '') + (rightMatch ? rightMatch[0] : '');
+        return word;
+      }
+    }
+  }
+  return null;
+}
+
 //屏幕点击事件的处理
 function clickEvent(event) {
+  event.preventDefault();
   var content = document.getElementById('content');
   var navbar = document.getElementById('navbar');
   var navPopMenu = document.getElementById('nav-popmenu')
@@ -143,12 +170,12 @@ function clickEvent(event) {
   if (y < wh / 5) { //上部 (20%)
     if (x < ww * 0.15) { //左上 15%，上一篇文章
       openPrevArticle();
-    } else if (x > ww * 0.80) { //右上 20%，下一篇文章
+    } else if (x > ww * 0.8) { //右上 20%，下一篇文章
       openNextArticle();
     } else if (isMobile()) { //中间65%，弹出菜单
       navbar.style.display = (navbar.style.display == "block") ? "none" : "block";
     }
-  } else if (x < ww / 3) { //左侧往回翻页 (30%)
+  } else if ((x < ww / 5) && (y < wh * 0.7)) { //左侧往回翻页 (宽20%,高50%)
     pageUp(content, navbar);
   } else { //右侧往前翻页
     pageDown(content, navbar);
@@ -771,6 +798,7 @@ function adjustIFrameStyle(iframe) {
   body.style.hyphens = 'auto';
   body.style.marginRight = '10px';
   body.style.fontSize = g_fontSize.toFixed(1) + 'em';
+  body.style.cursor = 'pointer';
   iframe.style.display = "block";
 
   var vh = getViewportHeight();

@@ -510,7 +510,8 @@ class RecursiveFetcher:
 
             if imgUrl and baseUrl and not imgUrl.startswith(('data:', 'http', 'www', 'file:')):
                 imgUrl = urljoin(baseUrl, imgUrl)
-                
+
+            imgUrl = imgUrl.split(' ')[0] #srcset是有空格的，仅使用第一个图像，尽管可能是small的
             if imgUrl and self.is_link_wanted(imgUrl, tag):
                 tag['src'] = imgUrl
             else:

@@ -1079,12 +1079,29 @@ class BasicNewsRecipe(Recipe):
                 a_.name = 'i'
                 a_.attrs.clear()
 
-        #去掉图像上面的链接，以免误触后打开浏览器
-        if remove_hyperlinks in ('image', 'all'):
-            for tag in soup.find_all('img'):
-                if tag.parent and tag.parent.parent and tag.parent.name == 'a':
-                    tag.parent.replace_with(tag)
+        #去掉图像上面的链接，以免误触后打开浏览器，同时如果使用了picture标签，删除picture
+        rmImgLinks = remove_hyperlinks in ('image', 'all')
+        for tag in soup.find_all('img'):
+            parent = tag.parent
+            grParent = parent.parent if parent else None
+            if parent and grParent:
+                if rmImgLinks and (parent.name == 'a'):
+                    parent.replace_with(tag)
+                elif parent.name == 'picture':
+                    parent.replace_with(tag)
+                elif grParent.parent and (grParent.name == 'picture'):
+                    grParent.replace_with(tag)
 
+        #kindle不支持内嵌title的svg
+        keep_svg = getattr(self.options, 'keep_svg')
+        for svg in soup.find_all('svg'):
+            if keep_svg:
+                tag = svg.find('title')
+                if tag:
+                    tag.extract()
+            else:
+                svg.extract()
+        
         #除了toc里面有标题，内容开头也要有标题，方便阅读
         body_tag = soup.find("body")
         if body_tag:

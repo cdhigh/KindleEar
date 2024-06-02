@@ -13,7 +13,7 @@ from ..utils import ke_decrypt, str_to_int, str_to_bool, safe_eval, xml_escape, 
 from ..lib.pocket import Pocket
 from ..lib.wallabag import WallaBag
 from ..lib.urlopener import UrlOpener
-from .setting import UpdateBookedCustomRss
+from .settings import UpdateBookedCustomRss
 
 bpAdv = Blueprint('bpAdv', __name__)
 

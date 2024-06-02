@@ -593,7 +593,7 @@ class Plumber:
             return int(match.group(1)) if match else 0
 
         dateDir = os.path.join(oebDir, user.name, user.local_time('%Y-%m-%d'))
-        maxIdx = max([prefixNum(item) for item in os.listdir(dateDir)]) if os.path.exists(dateDir) else 0
+        maxIdx = max([prefixNum(item) for item in os.listdir(dateDir)] + [0]) if os.path.exists(dateDir) else 0
         title = oeb.metadata.title[0].value or 'Untitled'
         title = ascii_filename(title).replace(' ', '_')
         bookDir = os.path.join(dateDir, f'{maxIdx + 1:03}_{title}')

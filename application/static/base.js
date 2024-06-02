@@ -1545,7 +1545,7 @@ function TestTTS(recipeId) {
   });
 }
 ///[end] book_audiolator.html
-///[start] setting.html
+///[start] settings.html
 //点击文本设置对应周内日checkbox的选中状态
 function ToggleWeekBtn(btnName) {
   var checkbox = $(btnName);
@@ -1613,4 +1613,4 @@ function SendTestEmail() {
   });
   return false;
 }
-///[end] setting.html
+///[end] settings.html

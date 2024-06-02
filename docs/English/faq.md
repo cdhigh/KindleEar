@@ -146,8 +146,8 @@ The advantage of online reading is that it does not occupy space on the e-book d
   * Top left corner for the previous article.   
   * Top right corner for the next article.    
   * About 70% of the upper middle area of the page is for opening the menu.    
-  * The bottom left 30% is for the previous page.   
-  * The bottom right 60% is for the next page.   
+  * The bottom left 20% is for the previous page.   
+  * The bottom right 80% is for the next page.   
   * Clicking the next page area on the last page of the current article automatically opens the next article.    
   * Clicking the previous page area on the first page of the article automatically opens the previous article.   
   * Support for using keyboard arrow keys and Page keys to turn pages.    

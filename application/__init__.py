@@ -25,10 +25,10 @@ def init_app(name, cfgMap, set_env, debug=False):
     app.config.from_mapping(cfgMap)
     app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024 #32MB
     
-    from .view import setting
+    from .view import settings
     app.config["BABEL_TRANSLATION_DIRECTORIES"] = i18n_folder
     babel = Babel(app)
-    babel.init_app(app, locale_selector=setting.get_locale)
+    babel.init_app(app, locale_selector=settings.get_locale)
 
     app.config.from_prefixed_env()
 

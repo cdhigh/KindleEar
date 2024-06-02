@@ -12,7 +12,7 @@ from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import avaliable_sm_services, send_mail
 from .subscribe import UpdateBookedCustomRss
 
-bpSetting = Blueprint('bpSetting', __name__)
+bpSettings = Blueprint('bpSettings', __name__)
 
 supported_languages = ['zh', 'tr_TR', 'en']
 
@@ -25,16 +25,16 @@ all_timezones = {'UTC-12:00': -12, 'UTC-11:00': -11, 'UTC-10:00': -10, 'UTC-9:30
     'UTC+9:00': 9, 'UTC+9:30': 9.5, 'UTC+10:00': 10, 'UTC+10:30': 10.5, 'UTC+11:00': 11,
     'UTC+12:00': 12, 'UTC+12:45': 12.75, 'UTC+13:00': 13, 'UTC+14:00': 14}
 
-@bpSetting.route("/setting", endpoint='Setting')
+@bpSettings.route("/settings", endpoint='Settings')
 @login_required()
-def Setting(user: KeUser):
+def Settings(user: KeUser):
     sm_services = avaliable_sm_services()
-    return render_template('setting.html', tab='set', user=user, tips='', langMap=LangMap(), 
+    return render_template('settings.html', tab='set', user=user, tips='', langMap=LangMap(), 
         sm_services=sm_services, all_timezones=all_timezones, output_profiles=output_profiles)
 
-@bpSetting.post("/setting", endpoint='SettingPost')
+@bpSettings.post("/settings", endpoint='SettingsPost')
 @login_required()
-def SettingPost(user: KeUser):
+def SettingsPost(user: KeUser):
     form = request.form
     keMail = form.get('kindle_email', '').strip(';, ')
     myTitle = form.get('rss_title')
@@ -79,7 +79,7 @@ def SettingPost(user: KeUser):
         UpdateBookedCustomRss(user)
     
     sm_services = avaliable_sm_services()
-    return render_template('setting.html', tab='set', user=user, tips=tips, langMap=LangMap(), 
+    return render_template('settings.html', tab='set', user=user, tips=tips, langMap=LangMap(), 
         sm_services=sm_services, all_timezones=all_timezones, output_profiles=output_profiles)
 
 #构建发送邮件服务配置字典，返回空字典表示出错
@@ -107,7 +107,7 @@ def BuildSmSrvDict(user: KeUser, form):
             srv = {}
     return srv
 
-@bpSetting.post("/send_test_email", endpoint='SendTestEmailPost')
+@bpSettings.post("/send_test_email", endpoint='SendTestEmailPost')
 @login_required()
 def SendTestEmailPost(user: KeUser):
     srcUrl = request.form.get('url', '')
@@ -142,7 +142,7 @@ def SendTestEmailPost(user: KeUser):
     return {'status': status, 'emails': emails}
 
 #显示环境变量的值
-@bpSetting.route('/env')
+@bpSettings.route('/env')
 @login_required()
 def DisplayEnv(user: KeUser):
     strEnv = []
@@ -152,7 +152,7 @@ def DisplayEnv(user: KeUser):
     return ''.join(strEnv)
 
 #设置国际化语种
-@bpSetting.route("/setlocale/<langCode>")
+@bpSettings.route("/setlocale/<langCode>")
 def SetLang(langCode):
     global supported_languages
     if langCode not in supported_languages:

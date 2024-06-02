@@ -3,7 +3,7 @@
 #主页和其他路由
 import os
 from flask import Blueprint, render_template, send_from_directory, current_app
-from .view import (login, admin, adv, deliver, library, library_offical, logs, setting, share, 
+from .view import (login, admin, adv, deliver, library, library_offical, logs, settings, share, 
     subscribe, inbound_email, translator, extension, reader)
 from .work import worker, url2book
 
@@ -40,7 +40,7 @@ def register_routes(app):
         app.register_blueprint(deliver.bpDeliver)
         app.register_blueprint(library.bpLibrary)
         app.register_blueprint(logs.bpLogs)
-        app.register_blueprint(setting.bpSetting)
+        app.register_blueprint(settings.bpSettings)
         app.register_blueprint(share.bpShare)
         app.register_blueprint(subscribe.bpSubscribe)
         app.register_blueprint(translator.bpTranslator)

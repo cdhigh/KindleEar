@@ -117,6 +117,7 @@ def ke_opts(user, options=None):
     opt.setdefault('dont_split_on_page_breaks', True)
     opt.setdefault('dont_save_webshelf', False)
     opt.setdefault('keep_images', True)
+    opt.setdefault('keep_svg', False)
     opt['user'] = user
 
     #opt.setdefault('debug_pipeline', os.getenv('KE_TEMP_DIR'))
