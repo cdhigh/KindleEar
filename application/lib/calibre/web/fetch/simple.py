@@ -144,6 +144,7 @@ class RecursiveFetcher:
         self.fs = fs
         fs.makedirs(self.base_dir)
         self.log = log
+        self.options = options
         self.verbose = options.verbose
         self.timeout = options.timeout or 60
         self.encoding = options.encoding
@@ -180,7 +181,6 @@ class RecursiveFetcher:
         self.scale_news_images = getattr(options, 'scale_news_images', None)
         self.get_delay = getattr(options, 'get_delay', None)
         self.download_stylesheets = not options.no_stylesheets
-        self.keep_images = options.keep_images
         self.show_progress = False
         self.failed_links = []
         self.job_info = job_info
@@ -407,7 +407,7 @@ class RecursiveFetcher:
         return rescale_image(data, self.scale_news_images, self.compress_news_images_max_size, self.compress_news_images_auto_size, itype=itype)
 
     def process_images(self, soup, baseurl):
-        if not self.keep_images:
+        if not getattr(self.options, 'keep_images'):
             for tag in soup.find_all('img'):
                 tag.decompose()
             return
@@ -461,11 +461,14 @@ class RecursiveFetcher:
             itype = what(None, data)
             if itype == 'svg' or (itype is None and b'<svg' in data[:1024]):
                 # SVG image
-                imgpath = os.path.join(diskpath, fname+'.svg')
-                with self.imagemap_lock:
-                    self.imagemap[iurl] = imgpath
-                self.fs.write(imgpath, data, 'wb')
-                tag['src'] = imgpath
+                if getattr(self.options, 'keep_svg'):
+                    imgpath = os.path.join(diskpath, fname+'.svg')
+                    with self.imagemap_lock:
+                        self.imagemap[iurl] = imgpath
+                    self.fs.write(imgpath, data, 'wb')
+                    tag['src'] = imgpath
+                else:
+                    tag.extract()
             else:
                 from calibre.utils.img import image_from_data, image_to_data
                 try:
