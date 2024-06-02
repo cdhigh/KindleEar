@@ -3,34 +3,36 @@ __English__ · [简体中文](readme_zh.md)
 ---
 
 # Announcement
-May 1, 2024  **Official release of KindleEar 3**  
+June 1, 2024  ** Release of KindleEar 3.1, includes an online reader optimized for e-ink (Docker only). **  
 
 **Significant Updates:**
-* Full support for Python 3
-* Redesigned software architecture
-* Cross-platform support, freeing you from dependence on GAE platform
-* Support for Calibre's recipe format without the need for modification
-* Built-in library of over a thousand Calibre recipe files
-* Integrated bilingual translation feature, breaking language barriers for effortless information retrieval and language learning
-* Built-in text-to-speech functionality, transforming daily news into audio for easy consumption without reading
-* Includes a browser extension, enabling effortless creation of web scraping recipe without coding, facilitating seamless content delivery from any website (brag)    
+* Full support for Python 3    
+* Redesigned software architecture   
+* Cross-platform support, freeing you from dependence on GAE platform   
+* Support email delivery and online reading (Docker version), built-in online reader optimized for e-ink screens   
+* Support for Calibre's recipe format without the need for modification    
+* Built-in library of over a thousand Calibre recipe files    
+* Integrated bilingual translation feature, breaking language barriers for effortless information     retrieval and language learning    
+* Built-in text-to-speech functionality, transforming daily news into audio for easy consumption without reading   
+* Includes a browser extension, enabling effortless creation of web scraping recipe without coding, facilitating seamless content delivery from any website (brag)     
 
 
 
 # Introduction
 KindleEar is a web application which can be deployed on various Python-hosting platforms or VPS.   
 It automatically aggregates various web content into epub/mobi/mp3 and delivers it to your Kindle or other e-book readers daily.   
+Support online reading too, including an online reader specifically optimized for e-ink screens.   
 
 
 ## The features included:
-* Unlimited RSS/ATOM/JSON or web content collection with support for Calibre's recipe format
-* Unlimited custom feeds, directly enter RSS/ATOM/JSON link and title for automatic push
-* Multiple account management, supporting multiple users and multiple Kindles
-* Generate epub/mobi with images and table of contents
-* Automatic daily scheduled push
-* Built-in sharing library, you can directly subscribe to feeds shared by other users, and you can also share your own feeds with others
-* Powerful and convenient email forwarding service
-* Integration with systems like Evernote/Pocket/Instapaper/wallabag
+* Unlimited RSS/ATOM/JSON or web content collection with support for Calibre's recipe format   
+* Unlimited custom feeds, directly enter RSS/ATOM/JSON link and title for automatic push    
+* Multiple account management, supporting multiple users and multiple Kindles    
+* Generate epub/mobi with images and table of contents    
+* Automatic daily scheduled push or online reading    
+* Built-in sharing library, you can directly subscribe to feeds shared by other users, and you can also share your own feeds with others    
+* Powerful and convenient email forwarding service   
+* Integration with systems like Evernote/Pocket/Instapaper/wallabag   
 
 
 

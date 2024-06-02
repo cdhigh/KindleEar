@@ -5,7 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KindleEar</title>
   <style type="text/css">
-    .touch-hint {
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+      cursor: pointer;
+    }
+    .hint {
       position: fixed;
       top: 0px;
       left: 0px;
@@ -17,8 +26,8 @@
       display: block;
       background-color: white;
     }
-    .touch-hint-menu {
-      position: fixed;
+    .hint-top {
+      position: absolute;
       left: 0px;
       top: 0px;
       width: 100%;
@@ -26,34 +35,57 @@
       border-bottom: 2px solid #ccc;
       text-align: center;
       vertical-align: middle;
-      display: table;
     }
-    .touch-hint-prev {
+    .hint-top table {
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      vertical-align: middle;
+      color: #333;
+      border-collapse: collapse;
+      border: none;
+    }
+    .menu {
+      font-size: 1.8rem;
+      border-left: 1px dotted #ccc;
+      border-right: 1px dotted #ccc;
+    }
+    .prev-article {
+      width: 15%;
+      font-weight: bold;
+      font-size: 1.8rem;
+    }
+    .next-article {
+      width: 20%;
+      font-weight: bold;
+      font-size: 1.8rem;
+    }
+    .prev-page {
       position: absolute;
       top: 21%;
       left: 0px;
       width: 33%;
-      height: 80%;
-      margin: 5px 10px 0px 0px;
+      height: 75%;
+      margin: 0px;
       border-right: 2px solid #ccc;
       text-align: center;
       vertical-align: middle;
       display: table;
     }
-    .touch-hint-next {
+    .next-page {
       position: absolute;
       top: 21%;
       left: 35%;
       width: 66%;
-      height: 80%;
-      margin-top: 5px;
+      height: 75%;
+      margin-top: 0px;
       text-align: center;
       vertical-align: middle;
       display: table;
     }
-    .touch-hint-text {
+    .hint-text {
       display: table-cell;
-      font-size: 2rem;
+      font-size: 1.8rem;
       text-align: center;
       vertical-align: middle;
       color: #333;
@@ -79,11 +111,19 @@
   </style>
 </head>
 <body>
-  <div class="touch-hint" id="touch-hint">
-    <div class="touch-hint-menu"><div class="touch-hint-text">{{_("Menu")}}</div></div>
-    <div class="touch-hint-prev"><div class="touch-hint-text">{{_("Prev")}}</div></div>
-    <div class="touch-hint-next">
-      <div class="touch-hint-text">
+  <div class="hint" id="hint">
+    <div class="hint-top">
+      <table>
+        <tr>
+          <td class="prev-article">&#8617;</td>
+          <td class="menu">{{_("Menu")}}</td>
+          <td class="next-article">&#8618;</td>
+        </tr>
+      </table>
+    </div>
+    <div class="prev-page"><div class="hint-text">{{_("Prev")}}</div></div>
+    <div class="next-page">
+      <div class="hint-text">
         {{_("Next page")}}
         <br/><br/>
         <svg width="100px" height="100px" viewBox="0 0 100 100">
@@ -94,6 +134,6 @@
   </div>
   {% if tips -%}
   <div class="tips"><div class="tips-text">{{tips}}</div></div>
-  {% endif %}
+  {% endif -%}
 </body>
 </html>

@@ -22,8 +22,8 @@ def recipes_to_ebook(recipes: list, user, options=None, output_fmt=''):
         recipes = [recipes]
     output = io.BytesIO()
     output_fmt=output_fmt if output_fmt else user.book_cfg('type')
-    plumber = Plumber(recipes, output, input_fmt='recipe', output_fmt=output_fmt)
-    plumber.merge_ui_recommendations(ke_opts(user, options))
+    options = ke_opts(user, options)
+    plumber = Plumber(recipes, output, input_fmt='recipe', output_fmt=output_fmt, options=options)
     plumber.run()
     return output.getvalue()
 
@@ -98,18 +98,16 @@ def urls_to_book(urls: list, title: str, user, options=None, output_fmt='', lang
 def html_to_book(html: str, title: str, user, imgs=None, options=None, output_fmt='', language=''):
     input_ = {'html': html, 'imgs': imgs, 'title': title, 'language': language}
     output = io.BytesIO()
-    output_fmt=output_fmt if output_fmt else user.book_cfg('type')
-    plumber = Plumber(input_, output, input_fmt='html', output_fmt=output_fmt)
-    plumber.merge_ui_recommendations(ke_opts(user, options))
+    output_fmt = output_fmt if output_fmt else user.book_cfg('type')
+    options = ke_opts(user, options)
+    plumber = Plumber(input_, output, input_fmt='html', output_fmt=output_fmt, options=options)
     plumber.run()
     return output.getvalue()
 
 #获取KindleEar定制的电子书转换参数
 def ke_opts(user, options=None):
-    opt = user.custom.get('calibre_options', {})
-    if not isinstance(opt, dict):
-        opt = {}
-    opt = opt.copy()
+    opt = user.custom.get('calibre_options')
+    opt = opt.copy() if isinstance(opt, dict) else {}
     opt.update(options or {})
     opt.setdefault('output_profile', user.book_cfg('device'))
     opt.setdefault('input_profile', 'kindle')
@@ -117,6 +115,8 @@ def ke_opts(user, options=None):
     opt.setdefault('epub_inline_toc', True)
     opt.setdefault('dont_compress', True)
     opt.setdefault('dont_split_on_page_breaks', True)
+    opt.setdefault('dont_save_webshelf', False)
+    opt.setdefault('keep_images', True)
     opt['user'] = user
 
     #opt.setdefault('debug_pipeline', os.getenv('KE_TEMP_DIR'))

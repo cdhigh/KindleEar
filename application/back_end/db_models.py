@@ -23,7 +23,7 @@ class KeUser(MyBaseModel): # kindleEar User
     created_time = DateTimeField(default=datetime.datetime.utcnow)
 
     #email,sender,kindle_email,secret_key,enable_send,timezone,inbound_email,
-    #keep_in_email_days,delivery_mode,webshelf_days
+    #keep_in_email_days,delivery_mode,webshelf_days,reader_params
     #sender: 可能等于自己的email，也可能是管理员的email
     #delivery_mode: 推送模式：['email' | 'local' | 'email,local']
     base_config = JSONField(default=JSONField.dict_default)
@@ -43,7 +43,8 @@ class KeUser(MyBaseModel): # kindleEar User
         if value is None:
             return {'email': '', 'kindle_email': '', 'secret_key': '', 'timezone': 0,
                 'inbound_email': 'save,forward', 'keep_in_email_days': 1,
-                'delivery_mode': 'email,local', 'webshelf_days': 7}.get(item, value)
+                'delivery_mode': 'email,local', 'webshelf_days': 7,
+                'reader_params': {}}.get(item, value)
         else:
             return value
     def set_cfg(self, item, value):

@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 #KindleEar在线RSS阅读器，为电子墨水屏进行了专门优化
 #Author: cdhigh <https://github.com/cdhigh>
-import os, json, shutil
+import os, json, shutil, time
 from functools import wraps
 from operator import itemgetter
 from lxml import etree #type:ignore
@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from flask import Blueprint, render_template, session, request, send_from_directory, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
+from ..utils import xml_escape, xml_unescape, str_to_int, str_to_float
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import send_to_kindle
 from build_ebook import html_to_book
@@ -60,13 +61,16 @@ def ReaderRoute():
                 user = None
 
     if not user:
+        if userName and password:
+            time.sleep(5) #防止暴力破解
         return redirect(url_for("bpLogin.Login", next=url_for('bpReader.ReaderRoute')))
 
     userDir = os.path.join(oebDir, user.name).replace('\\', '/')
     oebBooks = GetSavedOebList(userDir)
     oebBooks = json.dumps(oebBooks, ensure_ascii=False)
     initArticle = url_for('bpReader.ReaderArticleNoFoundRoute', tips='')
-    return render_template('reader.html', oebBooks=oebBooks, initArticle=initArticle)
+    params = user.cfg('reader_params')
+    return render_template('reader.html', oebBooks=oebBooks, initArticle=initArticle, params=params)
 
 #在线阅读器的404页面
 @bpReader.route("/reader/404", endpoint='ReaderArticleNoFoundRoute')
@@ -93,15 +97,16 @@ def ReaderPushPost(user: KeUser, userDir: str):
     type_ = request.form.get('type')
     src = request.form.get('src', '') #2024-05-30/KindleEar/feed_0/article_1/index.html
     title = request.form.get('title', '')
-    print(type_, src, title) #TODO
+    language = request.form.get('language', '')
     if not ((type_ in ('book', 'article')) and ('/' in src) and title):
         return {'status': _("Some parameters are missing or wrong.")}
 
+    title = xml_unescape(title)
     msg = 'ok'
     if type_ == 'book':
         book = '/'.join(src.split('/')[:2])
     elif type_ == 'article':
-        msg = PushSingleArticle(src, title, user, userDir)
+        msg = PushSingleArticle(src, title, user, userDir, language)
     return {'status': msg}
 
 #删除某些书籍
@@ -109,15 +114,11 @@ def ReaderPushPost(user: KeUser, userDir: str):
 @login_required(forAjax=True)
 @reader_route_preprocess(forAjax=True)
 def ReaderDeletePost(user: KeUser, userDir: str):
-    books = ''
-    try:
-        books = json.loads(request.form.get('books', ''))
-    except:
-        pass
-    if not books or not isinstance(books, list):
+    books = request.form.get('books', '')
+    if not books:
         return _("Some parameters are missing or wrong.")
 
-    for book in books:
+    for book in books.split('|'):
         bkDir = os.path.join(userDir, book)
         dateDir = os.path.dirname(bkDir)
         if os.path.exists(bkDir):
@@ -134,8 +135,20 @@ def ReaderDeletePost(user: KeUser, userDir: str):
                     pass
     return {'status': 'ok'}
 
+#设置阅读器的默认参数
+@bpReader.post("/reader/settings", endpoint='ReaderSettingsPost')
+@login_required(forAjax=True)
+@reader_route_preprocess(forAjax=True)
+def ReaderSettingsPost(user: KeUser, userDir: str):
+    fontSize = str_to_float(request.form.get('fontSize', '1.0'), 1.0)
+    allowLinks = request.form.get('allowLinks', '')
+    inkMode = str_to_int(request.form.get('inkMode', '1'), 1)
+    user.set_cfg('reader_params', {'fontSize': fontSize, 'allowLinks': allowLinks, 'inkMode': inkMode})
+    user.save()
+    return {'status': 'ok'}
+
 #将一个特定的文章制作成电子书推送
-def PushSingleArticle(src: str, title: str, user: KeUser, userDir: str):
+def PushSingleArticle(src: str, title: str, user: KeUser, userDir: str, language: str):
     path = os.path.join(userDir, src).replace('\\', '/')
     try:
         with open(path, 'r', encoding='utf-8') as f:
@@ -184,31 +197,12 @@ def PushSingleArticle(src: str, title: str, user: KeUser, userDir: str):
         else:
             tag.extract()
 
-    book = html_to_book(str(soup), title, user, imgs, language=GetOebLanguage(path, userDir))
+    book = html_to_book(str(soup), title, user, imgs, language=language, options={'dont_save_webshelf': True})
     if book:
         send_to_kindle(user, title, book, fileWithTime=False)
         return 'ok'
     else:
         return _('Failed to create ebook.')
-
-#获取一个本地保存电子书的语言种类，实际是找到content.opf，在里面提取
-#path: 一本书或一篇文章的绝对地址
-def GetOebLanguage(path, userDir):
-    opfPath = ''
-    while len(path) > len(userDir):
-        if os.path.exists(os.path.join(path, 'content.opf')):
-            opfPath = os.path.join(path, 'content.opf')
-            break
-        else:
-            path = os.path.dirname(path)
-
-    if opfPath:
-        tree = etree.parse(opfPath)
-        root = tree.getroot()
-        dcLang = root.find('.//{*}language')
-        return dcLang.text if dcLang is not None else ''
-    else:
-        return ''
 
 #获取当前用户保存的所有电子书，返回一个列表[{date:, books: [{title:, articles:[{text:, src:}],},...]}, ]
 def GetSavedOebList(userDir: str) -> list:
@@ -216,23 +210,49 @@ def GetSavedOebList(userDir: str) -> list:
         return []
 
     ret = []
-    for date in os.listdir(userDir):
+    for date in sorted(os.listdir(userDir), reverse=True):
         someDay = {'date': date, 'books': []}
         dateDir = os.path.join(userDir, date)
-        for title in os.listdir(dateDir):
-            prefix = f'{date}/{title}'
-            tocFile = os.path.join(dateDir, title, 'toc.ncx')
-            articles = ExtractArticleListFromNcx(tocFile, prefix)
-            if articles:
-                someDay['books'].append({'title': title, 'articles': articles})
+        for book in sorted(os.listdir(dateDir), reverse=True):
+            bookDir = os.path.join(dateDir, book)
+            opfFile = os.path.join(bookDir, 'content.opf')
+            tocFile = os.path.join(bookDir, 'toc.ncx')
+            prefix = f'{date}/{book}'
+            meta = ExtractBookMeta(opfFile)
+            articles = ExtractArticleList(tocFile, prefix)
+            if meta and articles:
+                someDay['books'].append({'title': meta['title'], 'language': meta['language'], 
+                    'bookDir': prefix, 'articles': articles})
         if someDay['books']:
             ret.append(someDay)
 
     ret.sort(key=itemgetter('date'), reverse=True)
     return ret
 
+#从content.opf里面提取文章元信息，返回一个字典 {title:,language:,}
+def ExtractBookMeta(opfFile: str) -> dict:
+    if not os.path.exists(opfFile):
+        return {}
+
+    try:
+        tree = etree.parse(opfFile)
+    except Exception as e:
+        default_log.warning(f"Error parsing Toc file: {opfFile} : {e}")
+        return {}
+
+    root = tree.getroot()
+    ret = {}
+    title = root.find('.//{*}title')
+    if title is not None: #需要使用not None
+        ret['title'] = xml_escape(title.text)
+    lang = root.find('.//{*}language')
+    if lang is not None:
+        ret['language'] = xml_escape(lang.text)
+    
+    return ret
+
 #从toc.ncx里面提取文章列表，返回一个字典列表 [{text:,'src':,}]
-def ExtractArticleListFromNcx(ncxFile: str, prefix: str) -> list:
+def ExtractArticleList(ncxFile: str, prefix: str) -> list:
     if not os.path.exists(ncxFile):
         return []
 

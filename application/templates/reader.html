@@ -39,10 +39,22 @@
           <span>{{_("Allow click links")}}</span>
         </div>
       </div>
-      <div class="nav-popmenu-row" id="ink-mode" onclick="toggleInkMode()">
+      <!-- <div class="nav-popmenu-row" id="ink-mode" onclick="toggleInkMode()">
         <div class="nav-popmenu-item">
           <span class="check-icon"></span>
           <span>{{_("eInk mode")}}</span>
+        </div>
+      </div>-->
+      <div class="nav-popmenu-row" onclick="increaseFontSize()">
+        <div class="nav-popmenu-item">
+          <span class="check-icon"></span>
+          <span>{{_("Increase font size")}}</span>
+        </div>
+      </div>
+      <div class="nav-popmenu-row" onclick="decreaseFontSize()">
+        <div class="nav-popmenu-item">
+          <span class="check-icon"></span>
+          <span>{{_("Decrease font size")}}</span>
         </div>
       </div>
       <div class="nav-popmenu-row" onclick="showTouchHint()">
@@ -113,6 +125,10 @@
   {% autoescape off -%}
   <script type="text/javascript">
     var g_books = {{oebBooks|safe}}; //[{date:, books: [{title:, articles:[{text:, src:}],},...]}, ]
+    var g_allowLinks = "{{params.get('allowLinks', '')}}"; //all,web,ke,''
+    var g_inkMode = {{params.get('inkMode', 1)}};
+    var g_fontSize = {{params.get('fontSize', 1.0)}};
+
     var i18n = {
       confirmDelete: "{{_('Confirm Deletion')|safe}}",
       areYouSureDelete: "{{_('Are you sure to delete?')|safe}}",
@@ -121,7 +137,7 @@
       noReading: "{{_('There are currently no books or articles being read.')|safe}}"
     };
   </script>
-  {% endautoescape -%}
   <script src="/static/reader.js"></script>
+  {% endautoescape -%}
 </body>
 </html>

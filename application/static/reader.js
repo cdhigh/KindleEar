@@ -2,10 +2,8 @@
 //If you need to make some changes,
 //Please use legacy JavaScript syntax only, avoid using any modern syntax and feature.
 
-var g_allowLinks = ''; //all,web,ke,''
-var g_inkMode = true;
 var g_iframeScrollHeight = 500; //在 iframeLoadEvent 里更新
-var g_iframeClientHeight = 500;
+//var g_iframeClientHeight = 500;
 var g_currentArticle = {};
 
 //对古董浏览器兼容性最好的判断一个变量是否为空的语法
@@ -66,10 +64,10 @@ function ajax(url, options) {
   }
 
   if (type == "GET") {
-    xhr.open("GET", options.url + "?" + params, true);
+    xhr.open("GET", url + "?" + params, true); //第三个参数true表示异步请求
     xhr.send(null);
   } else if (type == "POST") {
-    xhr.open("POST", options.url, true);
+    xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.send(params);
   }
@@ -132,39 +130,60 @@ function updateNavIndicator() {
 }
 
 //屏幕点击事件的处理
-function clickEvent(event, clientHeight, scrollHeight) {
+function clickEvent(event) {
   var content = document.getElementById('content');
   var navbar = document.getElementById('navbar');
   var navPopMenu = document.getElementById('nav-popmenu')
-  var scrollTop = content.scrollTop;
-  var scrollHeight = scrollHeight || content.scrollHeight;
   var x = event.clientX;
   var y = event.clientY - content.scrollTop;
-  var ww = getViewportWidth();
-  var wh = content.clientHeight; //getViewportHeight();
+  var ww = content.clientWidth;
+  var wh = content.clientHeight;
   //alert(x + ',' + event.clientY + ',' + content.scrollTop + ',' + content.clientHeight);
   navPopMenu.style.display = 'none';
-  if ((y < wh / 5) && isMobile()) { //上部弹出菜单 (20%)
-    navbar.style.display = (navbar.style.display == "block") ? "none" : "block";
-  } else if (x < ww / 3) { //左侧往回翻页 (30%)
-    if (navbar.style.display == "block") {
-      navbar.style.display = 'none';
-    } else if (g_inkMode) {
-      if (scrollTop <= 0) {
-        openPrevArticle();
-      } else {
-        content.scrollTop = Math.max(0, scrollTop - wh + 40);
-      }
+  if (y < wh / 5) { //上部 (20%)
+    if (x < ww * 0.15) { //左上 15%，上一篇文章
+      openPrevArticle();
+    } else if (x > ww * 0.80) { //右上 20%，下一篇文章
+      openNextArticle();
+    } else if (isMobile()) { //中间65%，弹出菜单
+      navbar.style.display = (navbar.style.display == "block") ? "none" : "block";
     }
+  } else if (x < ww / 3) { //左侧往回翻页 (30%)
+    pageUp(content, navbar);
   } else { //右侧往前翻页
-    if (navbar.style.display == "block") {
-      navbar.style.display = 'none';
-    } else if (g_inkMode) {
-      if (scrollTop >= scrollHeight - wh) {
-        openNextArticle();
-      } else {
-        content.scrollTop = Math.min(scrollTop + wh - 40, scrollHeight);
-      }
+    pageDown(content, navbar);
+  }
+}
+
+//往上翻页
+function pageUp(content, navbar) {
+  content = content || document.getElementById('content');
+  navbar = navbar || document.getElementById('navbar');
+  if (isMobile() && (navbar.style.display == "block")) {
+    navbar.style.display = 'none';
+  } else if (g_inkMode) {
+    var scrollTop = content.scrollTop;
+    if (scrollTop <= 0) {
+      openPrevArticle();
+    } else {
+      content.scrollTop = Math.max(0, scrollTop - content.clientHeight + 40);
+    }
+  }
+}
+
+//往下翻页
+function pageDown(content, navbar) {
+  content = content || document.getElementById('content');
+  navbar = navbar || document.getElementById('navbar');
+  if (isMobile() && (navbar.style.display == "block")) {
+    navbar.style.display = 'none';
+  } else if (g_inkMode) {
+    var scrollTop = content.scrollTop;
+    var scrollHeight = g_iframeScrollHeight || content.scrollHeight;
+    if (scrollTop >= scrollHeight - content.clientHeight) {
+      openNextArticle();
+    } else {
+      content.scrollTop = Math.min(scrollTop + content.clientHeight - 40, scrollHeight);
     }
   }
 }
@@ -176,14 +195,14 @@ function iFrameEvent(event) {
   var data = event.data;
   //console.log('iFrameEvent: ' + JSON.stringify(data));
   g_iframeScrollHeight = data.scrollHeight;
-  g_iframeClientHeight = data.clientHeight;
+  //g_iframeClientHeight = data.clientHeight;
   if (data.type == 'iframeLoaded') {
     document.getElementById('iframe').style.height = g_iframeScrollHeight + 'px';
   } else if (data.type == 'click') {
     if (data.href && g_allowLinks) {
       window.location.href = data.href; //覆盖原先的阅读界面
     } else {
-      clickEvent(data.event, g_iframeClientHeight, g_iframeScrollHeight);
+      clickEvent(data.event);
     }
   }
 }
@@ -199,7 +218,8 @@ function getViewportWidth() {
 //oasis分辨率(1680x1264)
 //pw5分辨率(1648x1236)
 function isMobile() {
-  return getViewportWidth() <= 1072;
+  var width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+  return width <= 1072;
 }
 
 //返回屏幕高度
@@ -238,6 +258,11 @@ function adjustContentHeight() {
   if (navbar.offsetHeight && footer.offsetHeight) {
     navContent.style.height = (navbar.offsetHeight - footer.offsetHeight) + 'px';
   }
+  if (!isMobile()) {
+    navbar.style.display = "block";
+  }
+  container.style.height = getViewportHeight() + 'px';
+  content.style.height = getViewportHeight() + 'px';
 }
 
 //导航栏往上翻页
@@ -345,18 +370,20 @@ function navDeleteBooks(event) {
   }
 
   var books = [];
+  var titles = []
   for (var i = 0; i < chks.length; i++) {
-    books.push(chks[i].value);
+    books.push(chks[i].value); //bookDir
+    titles.push(chks[i].nextElementSibling.textContent);
   }
-  var booksStr = books.slice(0, 5).join('\n');
-  if (books.length > 5) {
-    booksStr += '\n...';
+  var titleStr = titles.slice(0, 5).join('\n');
+  if (titles.length > 5) {
+    titleStr += '\n...';
   }
-  if (!(event.ctrlKey || event.metaKey) && !confirm(i18n.areYouSureDelete + '\n' + booksStr)) {
+  if (!(event.ctrlKey || event.metaKey) && !confirm(i18n.areYouSureDelete + '\n' + titleStr)) {
     return;
   }
 
-  ajax_post('/reader/delete', {books: JSON.stringify(books)}, function (resp) {
+  ajax_post('/reader/delete', {books: books.join('|')}, function (resp) {
     if (resp.status == 'ok') {
       deleteBooksAndUpdateUi(books);
     } else {
@@ -371,8 +398,7 @@ function deleteBooksAndUpdateUi(books) {
   var removeSet = new Set(books);
   g_books = g_books.filter(function (entry) {
       entry.books = entry.books.filter(function (book) {
-          var key = entry.date + '/' + book.title;
-          return !removeSet.has(key);
+          return !removeSet.has(book.bookDir);
       });
       return entry.books.length > 0;
   });
@@ -382,11 +408,36 @@ function deleteBooksAndUpdateUi(books) {
 //显示/隐藏导航设置菜单
 function toggleNavPopMenu() {
   var menu = document.getElementById('nav-popmenu');
-  var inkIcon = document.getElementById('ink-mode').querySelector('.check-icon');
+  //var inkIcon = document.getElementById('ink-mode').querySelector('.check-icon');
+  //inkIcon.innerHTML = g_inkMode ? '✔' : '☐';
   var allowIcon = document.getElementById('allow-links').querySelector('.check-icon');
-  inkIcon.innerHTML = g_inkMode ? '✔' : '☐';
   allowIcon.innerHTML = g_allowLinks ? '✔' : '☐';
   menu.style.display = (menu.style.display == 'block') ? 'none' : 'block';
+}
+
+//增加iframe的字号
+function increaseFontSize() {
+  g_fontSize = parseFloat(Math.min(g_fontSize * 1.2, 3.0).toFixed(1));
+  adjustIFrameStyle();
+  if (isMobile()) {
+    hideNavbar();
+  }
+  saveSettings();
+}
+
+//减小iframe的字号
+function decreaseFontSize() {
+  g_fontSize = parseFloat(Math.max(g_fontSize * 0.8, 0.5).toFixed(1));
+  adjustIFrameStyle();
+  if (isMobile()) {
+    hideNavbar();
+  }
+  saveSettings();
+}
+
+//将目前的配置保存到服务器
+function saveSettings() {
+  ajax_post('/reader/settings', {fontSize: g_fontSize, allowLinks: g_allowLinks, inkMode: g_inkMode});
 }
 
 //显示触摸区域图示
@@ -396,7 +447,8 @@ function showTouchHint() {
     document.getElementById('navbar').style.display = 'none';
   }
   var iframe = document.getElementById('iframe');
-  iframe.style.height = 'auto'; //规避iframe只能变大不能变小的bug
+  //iframe.style.height = 'auto'; //规避iframe只能变大不能变小的bug
+  iframe.style.display = "none"; //加载完成后再显示
   iframe.src = '/reader/404?tips=';
 }
 
@@ -407,6 +459,7 @@ function hidePopMenu() {
 
 //隐藏左侧导航栏
 function hideNavbar() {
+  hidePopMenu();
   if (isMobile()) {
     document.getElementById('navbar').style.display = 'none';
   }
@@ -417,16 +470,19 @@ function toggleAllowLinks() {
   g_allowLinks = !g_allowLinks;
   var allowIcon = document.getElementById('allow-links').querySelector('.check-icon');
   allowIcon.innerHTML = g_allowLinks ? '✔' : '☐';
+  saveSettings();
 }
 
 //是否允许墨水屏模式
 function toggleInkMode() {
   g_inkMode = !g_inkMode;
   setInkMode(g_inkMode);
+  saveSettings();
 }
 
 //根据是否使能墨水屏模式，设置相应的元素属性
 function setInkMode(enable) {
+  return; //暂时先禁用
   var container = document.getElementById('container');
   var content = document.getElementById('content');
   var indicator = document.getElementById('pos-indicator');
@@ -437,21 +493,21 @@ function setInkMode(enable) {
     container.style.height = getViewportHeight() + 'px';
     content.style.height = getViewportHeight() + 'px';
     content.style.scrollbarWidth = "none";
-    body.style.overflow = 'hidden';
-    body.style.scrollbarWidth = 'none';
-    body.style.scrollbarColor = 'transparent';
-    body.style.msOverflowStyle = 'none';
-    indicator.style.display = 'block';
+    //body.style.overflow = 'hidden';
+    //body.style.scrollbarWidth = 'none';
+    //body.style.scrollbarColor = 'transparent';
+    //body.style.msOverflowStyle = 'none';
+    //indicator.style.display = 'block';
   } else {
     icon.innerHTML = '☐';
     container.style.height = g_iframeScrollHeight + 'px';
     content.style.height = g_iframeScrollHeight + 'px';
     content.style.scrollbarWidth = "auto";
-    body.style.overflow = 'auto';
-    body.style.scrollbarWidth = 'auto';
-    body.style.scrollbarColor = 'auto';
-    body.style.msOverflowStyle = 'scrollbar';
-    indicator.style.display = 'none';
+    //body.style.overflow = 'auto';
+    //body.style.scrollbarWidth = 'auto';
+    //body.style.scrollbarColor = 'auto';
+    //body.style.msOverflowStyle = 'scrollbar';
+    //indicator.style.display = 'none';
   }
 }
 
@@ -482,7 +538,7 @@ function populateBooks(expandLevel) {
       ostr.push(
         '<div class="nav-book">' +
           '<div class="nav-book-title">' +
-            '<input type="checkbox" class="nav-book-chk" onclick="javascript:event.stopPropagation()" value="' + dateStr + '/' + book.title + '"/>');
+            '<input type="checkbox" class="nav-book-chk" onclick="javascript:event.stopPropagation()" value="' + book.bookDir + '"/>');
       ostr.push('<span>' + book.title + '</span>');
       ostr.push(
           '</div>');
@@ -550,7 +606,6 @@ function navClickEvent(event) {
     var text = span ? span.textContent.trim() : '';
     if (src && text) {
       openArticle({text: text, src: src});
-
     }
   } else if (navBook) {
     toggleNavBook(navBook);
@@ -580,12 +635,14 @@ function pushCurrentBook() {
 function pushCurrentArticle() {
   var art = g_currentArticle;
   if (!isEmpty(art)) {
-    ajax_post('/reader/push', {type: 'article', src: art.src, title: art.text}, function (resp) {
-      if (resp.status == 'ok') {
-        alert(i18n.pushOk + '\n' + art.text);
-      } else {
-        alert(resp.status);
-      }
+    var language = getBookLanguage(art);
+    ajax_post('/reader/push', {type: 'article', src: art.src, title: art.text, language: language}, 
+      function (resp) {
+        if (resp.status == 'ok') {
+          alert(i18n.pushOk + '\n' + art.text);
+        } else {
+          alert(resp.status);
+        }
     });
   } else {
     alert(i18n.noReading);
@@ -593,11 +650,29 @@ function pushCurrentArticle() {
   hidePopMenu();
 }
 
+//通过一个文章获取对应书本的语言
+function getBookLanguage(art) {
+  for (var i = 0; i < g_books.length; i++) {
+    var entry = g_books[i]; //date
+    for (var j = 0; j < entry.books.length; j++) {
+      var book = entry.books[j];
+      var articles = book.articles;
+      for (var k = 0; k < articles.length; k++) {
+        if (articles[k].src == art.src) {
+          return book.language;
+        }
+      }
+    }
+  }
+  return '';
+}
+
 //点击某篇文章后在iframe打开，article是字典
 function openArticle(article) {
   if (article.src) {
     var iframe = document.getElementById('iframe');
-    iframe.style.height = 'auto'; //规避iframe只能变大不能变小的bug
+    //iframe.style.height = 'auto'; //规避iframe只能变大不能变小的bug
+    iframe.style.display = "none"; //加载完成后再显示
     iframe.src = '/reader/article/' + article.src;
     g_currentArticle = article;
   }
@@ -621,12 +696,12 @@ function openNextArticle() {
 function findPreviousArticle(art) {
   var prev = {};
   for (var i = 0; i < g_books.length; i++) {
-    var entry = g_books[i];
+    var entry = g_books[i]; //date
     for (var j = 0; j < entry.books.length; j++) {
       var book = entry.books[j];
-      for (var k = 0; k < book.articles.length; k++) {
-        var article = book.articles[k];
-        var current = article;
+      var articles = book.articles;
+      for (var k = 0; k < articles.length; k++) {
+        var current = articles[k];
         if (!art.src) {
           return current;
         } else if (current.src == art.src) {
@@ -644,12 +719,12 @@ function findPreviousArticle(art) {
 function findNextArticle(art) {
   var found = false;
   for (var i = 0; i < g_books.length; i++) {
-    var entry = g_books[i];
+    var entry = g_books[i]; //date
     for (var j = 0; j < entry.books.length; j++) {
       var book = entry.books[j];
-      for (var k = 0; k < book.articles.length; k++) {
-        var article = book.articles[k];
-        var current = article;
+      var articles = book.articles;
+      for (var k = 0; k < articles.length; k++) {
+        var current = articles[k];
         if (found || !art.src) {
           return current;
         }
@@ -664,11 +739,8 @@ function findNextArticle(art) {
 
 //iframe每次加载一个新的文档后会调用此函数，注册一些事件并更新一些变量
 function iframeLoadEvent(iframe) {
+  adjustIFrameStyle(iframe);
   var doc = iframe.contentDocument || iframe.contentWindow.document;
-  var vh = getViewportHeight();
-  g_iframeScrollHeight = Math.max(doc.documentElement.scrollHeight || doc.body.scrollHeight, vh);
-  g_iframeClientHeight = Math.max(doc.documentElement.clientHeight || doc.body.clientHeight, vh);
-  iframe.style.height = g_iframeScrollHeight + 'px';
   doc.addEventListener('click', function(event) {
     var target = event.target || event.srcElement;
     if (target && (target.tagName == 'A')) {
@@ -676,14 +748,50 @@ function iframeLoadEvent(iframe) {
       event.preventDefault();
       var href = target.getAttribute('href');
       if (href && g_allowLinks) {
-        window.location.href = href; //需要覆盖整个阅读界面，否则可能会碰到跨域问题
+        //window.open(href, '_blank');
+        window.location.href = href; //kindle不支持window.open()
         return;
       }
     }
     if (!doc.getSelection().toString()) { //没有选择文本才翻页
-      clickEvent(event, g_iframeClientHeight, g_iframeScrollHeight);
+      clickEvent(event);
     }
   });
+  doc.addEventListener('keydown', documentKeyDownEvent);
+}
+
+//每次iframe加载完成后调整其样式和容器高度
+function adjustIFrameStyle(iframe) {
+  iframe = iframe || document.getElementById('iframe');
+  var doc = iframe.contentDocument || iframe.contentWindow.document;
+  var body = doc.body;
+  iframe.style.height = 'auto';
+  body.style.textAlign = 'justify';
+  body.style.wordWrap = 'break-word';
+  body.style.hyphens = 'auto';
+  body.style.marginRight = '10px';
+  body.style.fontSize = g_fontSize.toFixed(1) + 'em';
+  iframe.style.display = "block";
+
+  var vh = getViewportHeight();
+  g_iframeScrollHeight = Math.max(doc.documentElement.scrollHeight || body.scrollHeight, vh);
+  //g_iframeClientHeight = Math.max(doc.documentElement.clientHeight || body.clientHeight, vh);
+  iframe.style.height = g_iframeScrollHeight + 'px';
+}
+
+//使用键盘快捷键翻页
+function documentKeyDownEvent(event) {
+  var key = event.key;
+  //console.log('Key pressed:', key);
+  if ((key == ' ') || (key == 'ArrowDown') || (key == 'ArrowRight') || (key == 'PageDown')) {
+    event.stopPropagation();
+    event.preventDefault();
+    pageDown();
+  } else if ((key == 'ArrowUp') || (key == 'ArrowLeft') || (key == 'PageUp')) {
+    event.stopPropagation();
+    event.preventDefault();
+    pageUp();
+  }
 }
 
 //文档加载完成后初始化
@@ -693,11 +801,13 @@ document.addEventListener('DOMContentLoaded', function() {
   var iframe = document.getElementById('iframe');
   adjustContentHeight();
   window.addEventListener('resize', adjustContentHeight);
+  document.addEventListener('keydown', documentKeyDownEvent);
   //window.addEventListener('message', iFrameEvent);
   content.addEventListener('click', clickEvent);
   content.addEventListener('scroll', updatePosIndicator);
   navContent.addEventListener('click', navClickEvent);
   navContent.addEventListener('scroll', updateNavIndicator);
   populateBooks(1);
+  iframe.style.display = "none"; //加载完成后再显示
   iframe.src = iframe.src; //强制刷新一次，避免偶尔出现不能点击的情况
 });

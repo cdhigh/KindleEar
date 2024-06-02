@@ -13,7 +13,7 @@ builtins.__dict__['default_log'] = log
 builtins.__dict__['appDir'] = appDir
 builtins.__dict__['appVer'] = '3.0'
 
-from config import *
+import config
 
 def set_env():
     cfgMap = {}

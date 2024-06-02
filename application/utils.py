@@ -49,10 +49,17 @@ def loc_exc_pos(msg: str):
     else:
         return msg
 
-#字符串转整数，出错则返回0
+#字符串转整数，出错则返回default
 def str_to_int(txt, default=0):
     try:
         return int(txt.split('.')[0].replace(',', '').strip())
+    except:
+        return default
+
+#字符串转浮点，出错则返回default
+def str_to_float(txt, default=0.0):
+    try:
+        return float(txt.replace(',', '').replace('_', '').strip())
     except:
         return default
 
@@ -155,7 +162,7 @@ def get_directory_size(directory):
 
 #将字符串安全转义到xml格式，有标准库函数xml.sax.saxutils.escape()，但是简单的功能就简单的函数就好
 def xml_escape(txt):
-    txt = txt.replace("&", "&amp;")
+    txt = (txt or '').replace("&", "&amp;")
     txt = txt.replace("<", "&lt;")
     txt = txt.replace(">", "&gt;")
     txt = txt.replace('"', "&quot;")
@@ -163,7 +170,7 @@ def xml_escape(txt):
     return txt
 
 def xml_unescape(txt):
-    txt = txt.replace("&amp;", "&")
+    txt = (txt or '').replace("&amp;", "&")
     txt = txt.replace("&lt;", "<")
     txt = txt.replace("&gt;", ">")
     txt = txt.replace("&quot;", '"')

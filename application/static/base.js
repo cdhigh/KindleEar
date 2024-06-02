@@ -1150,7 +1150,7 @@ var AjaxFileUpload = {
         }
       },
       error: function(xhr, status, error) {
-        alert(status);
+        alert(status + '\n' + error);
       }
     });
   },
@@ -1312,7 +1312,7 @@ function startUploadCoversToServer(url) {
         $("#up_cover_progress").hide();
         $("#up_cover_progress_bar").css("width", "0px");
         $("#up_cover_progress_bar").html('');
-        alert(status);
+        alert(status + '\n' + error);
       }
   });
 }

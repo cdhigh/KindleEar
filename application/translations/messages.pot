@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-05-31 23:39-0300\n"
+"POT-Creation-Date: 2024-06-01 12:08-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -165,7 +165,7 @@ msgstr ""
 #: application/templates/admin.html:89
 #: application/templates/adv_inboundmail.html:54
 #: application/templates/adv_uploadcss.html:31
-#: application/templates/base.html:25 application/templates/reader.html:69
+#: application/templates/base.html:25 application/templates/reader.html:81
 #: application/templates/webmail.html:22
 msgid "Delete"
 msgstr ""
@@ -437,7 +437,7 @@ msgstr ""
 msgid "Click to back"
 msgstr ""
 
-#: application/templates/base.html:24 application/templates/reader.html:117
+#: application/templates/base.html:24 application/templates/reader.html:129
 msgid "Confirm Deletion"
 msgstr ""
 
@@ -473,7 +473,7 @@ msgstr ""
 msgid "Share"
 msgstr ""
 
-#: application/templates/base.html:34 application/templates/reader.html:118
+#: application/templates/base.html:34 application/templates/reader.html:130
 msgid "Are you sure to delete?"
 msgstr ""
 
@@ -521,7 +521,7 @@ msgstr ""
 msgid "Thank you for sharing."
 msgstr ""
 
-#: application/templates/base.html:46 application/templates/reader.html:94
+#: application/templates/base.html:46 application/templates/reader.html:106
 msgid "Close"
 msgstr ""
 
@@ -806,7 +806,7 @@ msgstr ""
 msgid "Please select a single item."
 msgstr ""
 
-#: application/templates/base.html:115 application/templates/reader.html:119
+#: application/templates/base.html:115 application/templates/reader.html:131
 msgid "Please select at least one item."
 msgstr ""
 
@@ -816,7 +816,7 @@ msgstr ""
 #: application/view/inbound_email.py:425 application/view/inbound_email.py:433
 #: application/view/inbound_email.py:448 application/view/inbound_email.py:469
 #: application/view/login.py:229 application/view/login.py:258
-#: application/view/reader.py:98 application/view/reader.py:118
+#: application/view/reader.py:99 application/view/reader.py:115
 #: application/view/setting.py:48 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr ""
@@ -1135,7 +1135,7 @@ msgstr ""
 msgid "Confirm Change"
 msgstr ""
 
-#: application/templates/home.html:3 application/templates/reader.html:57
+#: application/templates/home.html:3 application/templates/reader.html:69
 msgid "Home"
 msgstr ""
 
@@ -1259,37 +1259,45 @@ msgid "eInk mode"
 msgstr ""
 
 #: application/templates/reader.html:51
-msgid "Visualize Touch Regions"
+msgid "Increase font size"
+msgstr ""
+
+#: application/templates/reader.html:57
+msgid "Decrease font size"
 msgstr ""
 
 #: application/templates/reader.html:63
+msgid "Visualize Touch Regions"
+msgstr ""
+
+#: application/templates/reader.html:75
 #: application/templates/reader_404.html:83
 msgid "Menu"
 msgstr ""
 
-#: application/templates/reader.html:74
+#: application/templates/reader.html:86
 msgid "Collapse all"
 msgstr ""
 
-#: application/templates/reader.html:79
+#: application/templates/reader.html:91
 msgid "Expand all"
 msgstr ""
 
-#: application/templates/reader.html:84
+#: application/templates/reader.html:96
 #: application/templates/reader_404.html:84
 msgid "Prev"
 msgstr ""
 
-#: application/templates/reader.html:89
+#: application/templates/reader.html:101
 #: application/templates/reader_404.html:87
 msgid "Next page"
 msgstr ""
 
-#: application/templates/reader.html:120
+#: application/templates/reader.html:132
 msgid "Pushed successfully."
 msgstr ""
 
-#: application/templates/reader.html:121
+#: application/templates/reader.html:133
 msgid "There are currently no books or articles being read."
 msgstr ""
 
@@ -1750,19 +1758,19 @@ msgstr ""
 msgid "You can click the following link to reset your KindleEar password."
 msgstr ""
 
-#: application/view/reader.py:27 application/view/reader.py:42
+#: application/view/reader.py:28 application/view/reader.py:43
 msgid "Online reading feature has not been activated yet."
 msgstr ""
 
-#: application/view/reader.py:78
+#: application/view/reader.py:79
 msgid "The article is missing?"
 msgstr ""
 
-#: application/view/reader.py:144
+#: application/view/reader.py:141
 msgid "Failed to push: {}"
 msgstr ""
 
-#: application/view/reader.py:192
+#: application/view/reader.py:189
 msgid "Failed to create ebook."
 msgstr ""
 

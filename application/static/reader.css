@@ -1,48 +1,61 @@
-body {
+* {
   padding: 0px;
   margin: 0px;
-  font-family: Arial, sans-serif;
-  overflow: hidden;
+}
+html, body {
+  padding: 0px;
+  margin: 0px;
+  height: 100%;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-::-webkit-scrollbar {
+body::-webkit-scrollbar {
   display: none;
   width: 0px;
   height: 0px;
   background: transparent;
 }
-::-webkit-scrollbar-thumb {
+body::-webkit-scrollbar-thumb {
   background: transparent;
   display: none;
 }
 
 .container {
   margin: 0px;
-  padding: 5px;
+  padding: 0px;
   position: relative;
   height: 100%;
   width: 100%;
   box-sizing: border-box;
 }
 .content {
-  margin-right: 10px;
-  padding: 15px;
+  margin: 0px;
+  padding: 0px;
   overflow-y: auto;
   height: 100%;
   width: 100%;
-  scrollbar-width: none;
   box-sizing: border-box;
-  /*-webkit-overflow-scrolling: touch;*/
 }
-.content::-webkit-scrollbar {
-  display: none;
+.embedded-iframe {
+  padding: 10px 20px 10px 10px;
+  margin: 0px;
+  width: 100%;
+  height: 100%;
+  border: none;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  overflow: hidden;
+  hyphens: auto;
+  box-sizing: border-box;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .pos-indicator {
   position: absolute;
-  right: 15px;
+  right: 5px;
   top: 5px;
-  width: 10px;
+  width: 15px;
   height: 50px;
   background-color: rgba(0, 0, 0, 0.5);
   border-radius: 5px;
@@ -52,6 +65,7 @@ body {
   position: fixed;
   left: 0px;
   top: 0px;
+  margin: 0px;
   padding: 5px 10px 5px 5px;
   background-color: white;
   overflow-x: hidden;
@@ -62,13 +76,22 @@ body {
 
 /* small screen, ink mode, pw3/voyage=1448x1072 */
 @media (max-width: 1072px) {
+  ::-webkit-scrollbar {
+    display: none;
+    width: 0px;
+    height: 0px;
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: transparent;
+    display: none;
+  }
   .navbar {
     display: none;
     right: 20px;
-    bottom: 10px;
+    bottom: 0px;
   }
   .container {
-    width: 100%;
     margin: 0px 10px 0px 0px;
     overflow: hidden;
     -webkit-overflow-scrolling: touch;
@@ -90,13 +113,10 @@ body {
   }
   .container {
     width: auto;
-    overflow-y: scroll;
-    margin-left: 400px; /* width of .navbar */
+    margin-left: 410px; /* width of .navbar */
   }
-  .pos-indicator {
-    display: none;
-  }
-  button#closeNavBtn {
+
+  .pos-indicator, .nav-indicator, button#closeNavBtn {
     display: none;
   }
   .nav-footer button {
@@ -263,13 +283,4 @@ body {
   width: 40px;
   text-align: center;
   font-size: 0.9em;
-}
-.embedded-iframe {
-  padding: 0px;
-  margin: 0px;
-  width: 100%;
-  height: 100%;
-  border: none;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }

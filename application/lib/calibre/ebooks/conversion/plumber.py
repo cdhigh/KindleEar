@@ -17,13 +17,14 @@ from calibre.ebooks.conversion.preprocess import HTMLPreProcessor
 from calibre.ptempfile import PersistentTemporaryDirectory
 from calibre.utils.date import parse_date
 from calibre.utils.zipfile import ZipFile
+from calibre.utils.filenames import ascii_filename
 from calibre import (extract, walk, isbytestring, filesystem_encoding,
         get_types_map)
 from calibre.constants import __version__
 from polyglot.builtins import string_or_bytes
 
 from filesystem_dict import FsDictStub
-from application.utils import sanitize_filename, get_directory_size
+from application.utils import get_directory_size
 from application.base_handler import save_delivery_log
 
 DEBUG_README=b'''
@@ -90,10 +91,11 @@ class Plumber:
 
     #input_: 输入，编译好的recipes列表或包含html和相关图像的一个字典
     #output: 输出文件绝对路径名，也可能是一个BytesIO
-    def __init__(self, input_, output, input_fmt, output_fmt=None, abort_after_input_dump=False):
+    def __init__(self, input_, output, input_fmt, output_fmt=None, options=None, abort_after_input_dump=False):
         self.input_ = input_
         self.output = output
         self.log = default_log
+        self.user_options = options or {}
         self.abort_after_input_dump = abort_after_input_dump
         self.pipeline_options = _pipeline_options
         
@@ -190,8 +192,6 @@ class Plumber:
         for source in (self.input_plugin, self.output_plugin):
             self.merge_plugin_recs(source)
 
-    #在外面设置电子书生成的参数
-    # {'name1': value1, 'name2': value2}
     def merge_ui_recommendations(self, recommendations: dict):
         '''
         Merge recommendations from the UI. As long as the UI recommendation
@@ -213,10 +213,10 @@ class Plumber:
             if rec is not None:
                 rec.recommended_value = val
                 
-    def opts_to_mi(self, mi):
+    def opts_to_mi(self, opts, mi):
         from calibre.ebooks.metadata import string_to_authors
         for x in self.metadata_option_names:
-            val = getattr(self.opts, x, None)
+            val = getattr(opts, x, None)
             if val is not None:
                 if x == 'authors':
                     val = string_to_authors(val)
@@ -252,7 +252,7 @@ class Plumber:
         img.convert('RGB').save(pt.name)
         return pt.name
 
-    def read_user_metadata(self):
+    def read_user_metadata(self, opts):
         '''
         Read all metadata specified by the user. Command line options override
         metadata from a specified OPF file.
@@ -266,7 +266,7 @@ class Plumber:
         #    with open(self.opts.read_metadata_from_opf, 'rb') as stream:
         #        opf = OPF(stream, os.path.dirname(self.opts.read_metadata_from_opf))
         #    mi = opf.to_book_metadata()
-        self.opts_to_mi(mi)
+        self.opts_to_mi(opts, mi)
         #if mi.cover:
         #    if mi.cover.startswith('http:') or mi.cover.startswith('https:'):
         #        mi.cover = self.download_cover(mi.cover)
@@ -282,43 +282,48 @@ class Plumber:
         '''
         Setup the `self.opts` object.
         '''
-        self.opts = OptionValues()
+        opts = OptionValues()
         for group in (self.input_options, self.pipeline_options, self.output_options):
             for rec in group:
-                setattr(self.opts, rec.option.name, rec.recommended_value)
+                setattr(opts, rec.option.name, rec.recommended_value)
+
+        for name, val in self.user_options.items():
+            setattr(opts, name, val)
 
         def set_profile(profiles, which):
             attr = which + '_profile'
-            sval = getattr(self.opts, attr)
+            sval = getattr(opts, attr)
             for x in profiles():
                 if x.short_name == sval:
-                    setattr(self.opts, attr, x)
+                    setattr(opts, attr, x)
                     return
             self.log.warn(
                 'Profile (%s) %r is no longer available, using default'%(which, sval))
             for x in profiles():
                 if x.short_name == 'default':
-                    setattr(self.opts, attr, x)
+                    setattr(opts, attr, x)
                     break
 
         set_profile(input_profiles, 'input')
         set_profile(output_profiles, 'output')
 
-        self.read_user_metadata()
+        self.read_user_metadata(opts)
 
-        self.opts.no_inline_navbars = self.opts.output_profile.supports_mobi_indexing \
+        opts.no_inline_navbars = opts.output_profile.supports_mobi_indexing \
                 and self.output_fmt == 'mobi'
 
-        if self.opts.verbose > 1:
+        if opts.verbose > 1:
             self.log.debug('Resolved conversion options')
             try:
                 self.log.debug('calibre version:', __version__)
-                odict = dict(self.opts.__dict__)
+                odict = dict(opts.__dict__)
                 for x in ('username', 'password'):
                     odict.pop(x, None)
                 self.log.debug(pprint.pformat(odict))
             except:
                 self.log.exception('Failed to get resolved conversion options')
+
+        self.opts = opts
 
     def flush(self):
         try:
@@ -409,7 +414,7 @@ class Plumber:
         #    self.dump_input(self.oeb, tdir)
         #    if self.abort_after_input_dump:
         #        return
-        self.opts_to_mi(self.user_metadata)
+        self.opts_to_mi(self.opts, self.user_metadata)
         if not hasattr(self.oeb, 'manifest'): #从一堆文件里面创建OEBBook实例
             try:
                 self.oeb = create_oebbook(self.log, self.oeb, self.opts, encoding=self.input_plugin.output_encoding,
@@ -579,15 +584,20 @@ class Plumber:
     def save_oeb_if_need(self, oeb):
         user = self.opts.user #type:ignore
         oebDir = os.environ.get('EBOOK_SAVE_DIR')
-        if not (oebDir and ('local' in user.cfg('delivery_mode'))):
+        if getattr(self.opts, 'dont_save_webshelf') or not (oebDir and ('local' in user.cfg('delivery_mode'))):
             return
 
-        title = sanitize_filename(oeb.metadata.title[0].value or 'Untitled')
-        bookDir = _bookDir = os.path.join(oebDir, user.name, user.local_time('%Y-%m-%d'), title)
-        cnt = 0
-        while os.path.exists(bookDir): #一天可以保存多个同名推送
-            cnt += 1
-            bookDir = f'{_bookDir} [{cnt}]'
+        #提取字符串开头的数字
+        def prefixNum(txt):
+            match = re.search(r'^(\d+)', txt)
+            return int(match.group(1)) if match else 0
+
+        dateDir = os.path.join(oebDir, user.name, user.local_time('%Y-%m-%d'))
+        maxIdx = max([prefixNum(item) for item in os.listdir(dateDir)]) if os.path.exists(dateDir) else 0
+        title = oeb.metadata.title[0].value or 'Untitled'
+        title = ascii_filename(title).replace(' ', '_')
+        bookDir = os.path.join(dateDir, f'{maxIdx + 1:03}_{title}')
+        
         try:
             os.makedirs(bookDir)
         except Exception as e:
