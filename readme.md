@@ -3,7 +3,7 @@ __English__ · [简体中文](readme_zh.md)
 ---
 
 # Announcement
-June 1, 2024  ** Release of KindleEar 3.1, includes an online reader optimized for e-ink (Docker only). **  
+June 1, 2024  **Release of KindleEar 3.1, includes an online reader optimized for e-ink (Docker only).**  
 
 **Significant Updates:**
 * Full support for Python 3    
