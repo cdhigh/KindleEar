@@ -38,6 +38,7 @@ function BuildSharedRssByLang() {
   if (!g_SharedRss) {
     return;
   }
+  g_rssByLang = {};
   var userLang = BrowserLanguage();
   var hasUserLangRss = false;
   var hasEnRss = false;
@@ -125,10 +126,7 @@ function BuildSharedRssByCategory(lang, txt) {
   g_rssByCat[i18n.catByTime] = byTextTime;
   for (var idx = 0; idx < bySearchText.length; idx++) {
     var item = bySearchText[idx];
-    var category = item.c; //c:category
-    if (category == "") {
-      category = i18n.uncategoried;
-    }
+    var category = item.c || i18n.uncategoried; //c:category
     g_rssByCat[category] = g_rssByCat[category] || [];
     g_rssByCat[category].push(item);
   }
@@ -359,19 +357,6 @@ function ReportInvalid(title, feedurl, dbId) {
   });
 }
 
-//xml的转义函数
-function escapeXml(xmlStr) {
-  return xmlStr.replace(/[<>&'"]/g, function(char) {
-    switch (char) {
-      case '<': return '&lt;';
-      case '>': return '&gt;';
-      case '&': return '&amp;';
-      case "'": return '&apos;';
-      case '"': return '&quot;';
-      default: return char;
-    }
-  });
-}
 
 //将内容全部下载到本地一个xml文件内
 function DownAllRssToFile() {

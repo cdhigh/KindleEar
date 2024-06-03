@@ -30,8 +30,6 @@ def GenerateRecipeSource(title, feeds, user, isfulltext=False, language=None, ma
     desc = 'News from {}'.format(', '.join(feedTitles)) if feedTitles else 'Deliver from KindleEar'
     desc = desc[:100].replace('"', "'")
     oldest_article = user.book_cfg('oldest_article')
-    #至少到feedparser 6.0.11为止，其提取xml内的内容有bug，经常提取不到，在他修复之前，我们先暂停全文rss功能
-    isfulltext = False
     auto_cleanup = 'False' if isfulltext else 'True'
     use_embedded_content = 'True' if isfulltext else 'None'
     language = language or user.book_cfg('language')

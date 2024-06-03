@@ -7,6 +7,20 @@ String.prototype.format = function() {
   });
 };
 
+//xml的转义函数
+function escapeXml(xmlStr) {
+  return xmlStr.replace(/[<>&'"]/g, function(char) {
+    switch (char) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '&': return '&amp;';
+      case "'": return '&apos;';
+      case '"': return '&quot;';
+      default: return char;
+    }
+  });
+}
+
 //返回当前时间戳，单位为秒
 function getNowSeconds() {
   return Math.floor(new Date().getTime() / 1000);
@@ -191,7 +205,7 @@ function AppendRecipeToLibrary(div, id) {
   if (Object.keys(recipe).length == 0) {
     return;
   }
-  var title = recipe.title;
+  var title = escapeXml(recipe.title);
   var row_str = ['<div class="book box"><div class="titleRow">'];
   row_str.push(title);
   if (id.startsWith("upload:")) {
@@ -204,8 +218,8 @@ function AppendRecipeToLibrary(div, id) {
   hamb_arg = [];
   var fTpl = "{0}('{1}','{2}')";
   if (id.startsWith("upload:")) { //增加汉堡按钮弹出菜单代码
-    hamb_arg.push({klass: 'btn-A', title: i18n.delete, icon: 'icon-delete', act: fTpl.format('DeleteUploadRecipe', id, title.replace("'", "\\\'"))});
-    hamb_arg.push({klass: 'btn-E', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', id, title.replace("'", "\\\'"))});
+    hamb_arg.push({klass: 'btn-A', title: i18n.delete, icon: 'icon-delete', act: fTpl.format('DeleteUploadRecipe', id, title)});
+    hamb_arg.push({klass: 'btn-E', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', id, title)});
   }
   hamb_arg.push({klass: 'btn-B', title: i18n.viewSrc, icon: 'icon-source', act: "/viewsrc/" + id.replace(':', '__')});
   hamb_arg.push({klass: 'btn-C', title: i18n.subscriSep, icon: 'icon-push', act: fTpl.format('SubscribeRecipe', id, '1')});
@@ -257,7 +271,7 @@ function PopulateMyCustomRss() {
   $div.empty();
   for (var idx = 0; idx < my_custom_rss_list.length; idx++) {
     var rss = my_custom_rss_list[idx];
-    var title = rss.title;
+    var title = escapeXml(rss.title);
     var url = rss.url;
     var isfulltext = rss.isfulltext;
     var id = rss['id'];
@@ -289,9 +303,9 @@ function PopulateMyCustomRss() {
     var fTplAll = "{0}(event,'{1}','{2}','{3}',{4})"; //id,title,url,isfulltext
     hamb_arg.push({klass: 'btn-F', title: i18n.biTranslator, icon: 'icon-translate', act: "/translator/" + id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + id.replace(':', '__')});
-    hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', id, title.replace("'", "\\\'"))});
+    hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', id, title)});
     hamb_arg.push({klass: 'btn-A', title: i18n.deleteCtrlNoConfirm, icon: 'icon-delete', 
-      act: fTplAll.format('ShowDeleteCustomRssDialog', id, title.replace("'", "\\\'"), url, isfulltext)});
+      act: fTplAll.format('ShowDeleteCustomRssDialog', id, title, url, isfulltext)});
     row_str.push(AddHamburgerButton(hamb_arg));
     row_str.push('</div>');
     //console.log(row_str.join(''));
@@ -307,7 +321,7 @@ function PopulateMySubscribed() {
   for (var idx = 0; idx < my_booked_recipes.length; idx++) {
     var recipe = my_booked_recipes[idx];
     
-    var title = recipe.title;
+    var title = escapeXml(recipe.title);
     var desc = recipe.description;
     var need_subs = recipe.needs_subscription;
     var recipe_id = recipe.recipe_id;
@@ -345,11 +359,11 @@ function PopulateMySubscribed() {
     hamb_arg.push({klass: 'btn-F', title: i18n.biTranslator, icon: 'icon-translate', act: "/translator/" + recipe_id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + recipe_id.replace(':', '__')});
     if (recipe_id.startsWith("upload:")) { //只有自己上传的recipe才能分享，内置的不用分享
-      hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', recipe_id, title.replace("'", "\\\'"))});
+      hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', recipe_id, title)});
     }
     hamb_arg.push({klass: 'btn-B', title: i18n.viewSrc, icon: 'icon-source', act: "/viewsrc/" + recipe_id.replace(':', '__')});
-    hamb_arg.push({klass: 'btn-E', title: i18n.customizeDelivTime, icon: 'icon-schedule', act: fTpl.format('ScheduleRecipe', recipe_id, title.replace("'", "\\\'"))});
-    hamb_arg.push({klass: 'btn-A', title: i18n.unsubscribe, icon: 'icon-unsubscribe', act: fTpl.format('UnsubscribeRecipe', recipe_id, title.replace("'", "\\\'"))});
+    hamb_arg.push({klass: 'btn-E', title: i18n.customizeDelivTime, icon: 'icon-schedule', act: fTpl.format('ScheduleRecipe', recipe_id, title)});
+    hamb_arg.push({klass: 'btn-A', title: i18n.unsubscribe, icon: 'icon-unsubscribe', act: fTpl.format('UnsubscribeRecipe', recipe_id, title)});
     row_str.push(AddHamburgerButton(hamb_arg));
     row_str.push('</div>');
     //console.log(row_str.join(''));
@@ -592,18 +606,12 @@ function AskForSubscriptionInfo(id, account) {
 //用户点击了删除自定义RSS按钮，如果按住ctrl键再点击删除，则不需要确认
 function ShowDeleteCustomRssDialog(event, rssid, title, url, isfulltext) {
   if (!(event.ctrlKey || event.metaKey)) {
-    let msg = i18n.areYouSureDelete + '\n' + title;
-    if (!('show' in HTMLDialogElement.prototype)) { //校验兼容性
-      if (confirm(msg)) {
-        DeleteCustomRss(rssid, title, url, isfulltext, false);
-      }
-    } else {
-      msg = `<h3 style="margin:0px auto 20px auto;text-align:center;">${i18n.confirmDelete}</h3>${msg}
-        <p><label><input id="chkReportInvalid" type="checkbox" /> ${i18n.reportThisFeedInvalid}</label>`;
-      showH5Dialog(msg).then(function (idx) {
-        DeleteCustomRss(rssid, title, url, isfulltext, $('#chkReportInvalid').prop('checked'));
-      }).catch(function(){});
-    }
+    let msg = `<h3 style="margin:0px auto 20px auto;text-align:center;">${i18n.confirmDelete}</h3>
+      ${i18n.areYouSureDelete}<br/>${title}
+      <p><label><input id="chkReportInvalid" type="checkbox" /> ${i18n.reportThisFeedInvalid}</label>`;
+    showH5Dialog(msg).then(function (idx) {
+      DeleteCustomRss(rssid, title, url, isfulltext, $('#chkReportInvalid').prop('checked'));
+    }).catch(function(){});
   } else {
     DeleteCustomRss(rssid, title, url, isfulltext, false);
   }

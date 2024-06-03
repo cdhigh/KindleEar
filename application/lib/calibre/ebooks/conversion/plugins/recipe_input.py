@@ -5,12 +5,10 @@ __license__   = 'GPL v3'
 __copyright__ = '2009, Kovid Goyal <kovid@kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
-import os, io, uuid, datetime
-from collections import defaultdict
+import os, io, uuid, traceback
 from bs4 import BeautifulSoup
 from calibre.customize.conversion import InputFormatPlugin, OptionRecommendation
-from calibre.constants import numeric_version
-from calibre import walk, relpath, unicode_path, strftime, force_unicode
+from calibre import strftime, force_unicode
 from calibre.web.feeds.news import BasicNewsRecipe, DEFAULT_MASTHEAD_IMAGE
 from calibre.utils.localization import canonicalize_lang
 from calibre.ebooks.metadata import MetaInformation
@@ -92,6 +90,7 @@ class RecipeInput(InputFormatPlugin):
                 else:
                     msg = f'Failed to execute recipe "{recipe.title}": {e}'
                 log.warning(msg)
+                log.debug(traceback.format_exc())
                 continue
 
             if indexFile and ro.feed_objects:

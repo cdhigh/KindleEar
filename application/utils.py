@@ -36,7 +36,7 @@ def loc_exc_pos(msg: str):
             return msg
 
         top = stacks[0]
-        bottom2 = stacks[-2]
+        bottom2 = stacks[-2] if len(stacks) > 1 else stacks[-1]
         bottom1 = stacks[-1]
         tF = os.path.basename(top.filename)
         tLn = top.lineno

@@ -1943,7 +1943,9 @@ class BasicNewsRecipe(Recipe):
                 #        br.add_password(url, purl.username, purl.password)
                 resp = br.open(url, timeout=self.timeout)
                 if resp.status_code == 200:
-                    raw = resp.content
+                    #https://github.com/kurtmckee/feedparser/issues/440
+                    #等这个bug解决掉之后可以去掉replace
+                    raw = resp.content.replace(b'&lt;![CDATA[', b'<![CDATA[').replace(b']]&gt;', b']]>')
                     pFunc = feed_from_json if raw and raw[0] == b'{' else feed_from_xml
                     feed = pFunc(raw, title=title, log=self.log, oldest_article=self.oldest_article,
                             max_articles_per_feed=self.max_articles_per_feed, get_article_url=self.get_article_url)
