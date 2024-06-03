@@ -143,9 +143,7 @@
     {% block header -%}
       <div>
         <a href="/" class="pure-menu-heading pure-menu-link logo">KindleEar</a>
-        {% if g.allowReader -%}
         <a href="/reader" target="_blank" class="pure-menu-heading pure-menu-link reader-link">Reader</a>
-        {% endif %}
       </div>
       {% block header_loginfo -%}
       <ul class="pure-menu-list home-menu">
@@ -181,9 +179,7 @@
         <li class="pure-menu-item {% if tab == 'admin' %}pure-menu-selected{% endif %}"><a href="/admin" class="pure-menu-link">{{_("Admin")}}</a></li>
         <li class="pure-menu-item {% if tab == 'advset' %}pure-menu-selected{% endif %}"><a href="/adv" class="pure-menu-link">{{_("Advanced")}}</a></li>
         <li class="pure-menu-item {% if tab == 'shared' %}pure-menu-selected{% endif %}"><a href="/library" class="pure-menu-link">{{_("Shared")}}</a></li>
-        {% if g.allowReader -%}
         <li class="pure-menu-item"><a href="/reader" class="pure-menu-link" target="_blank">{{_("Reader")}}</a></li>
-        {% endif -%}
       </ul>
     </div>
     {% endif -%}

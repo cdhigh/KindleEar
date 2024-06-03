@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-01 12:08-0300\n"
+"POT-Creation-Date: 2024-06-02 21:37-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: tr_TR\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:181
+#: application/templates/admin.html:3 application/templates/base.html:179
 msgid "Admin"
 msgstr "Yönetim"
 
@@ -86,7 +86,7 @@ msgstr "Ekle"
 #: application/templates/login.html:21 application/templates/logs.html:70
 #: application/templates/reset_password.html:19
 #: application/templates/reset_password.html:20
-#: application/templates/setting.html:230 application/templates/signup.html:21
+#: application/templates/settings.html:230 application/templates/signup.html:21
 #: application/templates/user_account.html:15
 msgid "Username"
 msgstr "Kullanıcı adı"
@@ -126,7 +126,8 @@ msgstr "Asla"
 
 #: application/templates/admin.html:70
 #: application/templates/adv_inboundmail.html:26
-#: application/templates/setting.html:58 application/templates/setting.html:170
+#: application/templates/settings.html:58
+#: application/templates/settings.html:170
 #: application/templates/user_account.html:43
 msgid "7 Days"
 msgstr "7 Günlük"
@@ -166,7 +167,7 @@ msgstr "Hesabı Düzenle"
 #: application/templates/admin.html:89
 #: application/templates/adv_inboundmail.html:54
 #: application/templates/adv_uploadcss.html:31
-#: application/templates/base.html:25 application/templates/reader.html:81
+#: application/templates/base.html:25 application/templates/reader.html:93
 #: application/templates/webmail.html:22
 msgid "Delete"
 msgstr "Sil"
@@ -197,7 +198,7 @@ msgstr "Kullanıcı adı"
 #: application/templates/adv_archive.html:56
 #: application/templates/adv_archive.html:72 application/templates/base.html:54
 #: application/templates/home.html:16 application/templates/login.html:25
-#: application/templates/setting.html:234 application/templates/signup.html:25
+#: application/templates/settings.html:234 application/templates/signup.html:25
 #: application/templates/user_account.html:19
 msgid "Password"
 msgstr "Şifre"
@@ -216,15 +217,16 @@ msgid "client_secret"
 msgstr "client_secret"
 
 #: application/templates/adv_archive.html:84
-#: application/templates/setting.html:222
+#: application/templates/settings.html:222
 msgid "Host"
 msgstr "Ana bilgisayar"
 
 #: application/templates/adv_archive.html:119
 #: application/templates/adv_inboundmail.html:34
+#: application/templates/adv_reader.html:50
 #: application/templates/book_audiolator.html:113
 #: application/templates/book_translator.html:80
-#: application/templates/setting.html:256
+#: application/templates/settings.html:256
 msgid "Save settings"
 msgstr "Ayarları kaydet"
 
@@ -261,6 +263,13 @@ msgstr "Stylesheet"
 
 #: application/templates/adv_base.html:93
 #: application/templates/adv_base.html:97
+#: application/templates/adv_reader.html:3 application/templates/base.html:182
+#: application/templates/reader.html:6
+msgid "Reader"
+msgstr "Okuyucu"
+
+#: application/templates/adv_base.html:102
+#: application/templates/adv_base.html:106
 #: application/templates/adv_calibre_options.html:12
 msgid "Calibre Options"
 msgstr "Calibre seçenekleri"
@@ -349,17 +358,19 @@ msgid "Email Retention"
 msgstr "E-posta Saklama"
 
 #: application/templates/adv_inboundmail.html:25
-#: application/templates/setting.html:52 application/templates/setting.html:164
+#: application/templates/settings.html:52
+#: application/templates/settings.html:164
 msgid "1 Day"
 msgstr "1 Günlük"
 
 #: application/templates/adv_inboundmail.html:27
-#: application/templates/setting.html:59
+#: application/templates/settings.html:59
 msgid "30 Days"
 msgstr "30 Gün"
 
 #: application/templates/adv_inboundmail.html:28
-#: application/templates/setting.html:51 application/templates/setting.html:163
+#: application/templates/settings.html:51
+#: application/templates/settings.html:163
 msgid "No limit"
 msgstr "Sınırlama yok."
 
@@ -387,6 +398,75 @@ msgstr "Örnek"
 #: application/templates/adv_inboundmail.html:59
 msgid "Please input mail address"
 msgstr "Lütfen e-posta adresini giriniz"
+
+#: application/templates/adv_reader.html:18
+#: application/templates/reader.html:57
+msgid "Dictionary"
+msgstr "Sözlük"
+
+#: application/templates/adv_reader.html:20
+msgid "Set up a dictionary for online reading."
+msgstr "Çevrimiçi okuma için bir sözlük kurun."
+
+#: application/templates/adv_reader.html:23
+#: application/templates/book_translator.html:26
+msgid "Engine"
+msgstr "Motor"
+
+#: application/templates/adv_reader.html:29
+#: application/templates/book_audiolator.html:41
+#: application/templates/book_translator.html:32
+msgid "Api Host"
+msgstr "Api Host"
+
+#: application/templates/adv_reader.html:33
+#: application/templates/book_audiolator.html:53
+#: application/templates/book_translator.html:36
+msgid "Api Key"
+msgstr "Api Key"
+
+#: application/templates/adv_reader.html:34
+#: application/templates/book_translator.html:37
+msgid "One key per line"
+msgstr "Satır başına bir tuş"
+
+#: application/templates/adv_reader.html:37
+#: application/templates/book_translator.html:40
+msgid "Source language"
+msgstr "Kaynak dil"
+
+#: application/templates/adv_reader.html:43
+#: application/templates/book_translator.html:46
+msgid "Target language"
+msgstr "Hedef dil"
+
+#: application/templates/adv_reader.html:56
+#: application/templates/book_audiolator.html:119
+#: application/templates/book_translator.html:86
+msgid "Test (Please save settings firstly)"
+msgstr "Test (Lütfen önce ayarları kaydedin)"
+
+#: application/templates/adv_reader.html:58
+#: application/templates/book_audiolator.html:121
+#: application/templates/book_translator.html:88
+msgid "Text"
+msgstr "Metin"
+
+#: application/templates/adv_reader.html:62
+#: application/templates/book_translator.html:92
+msgid "Translation"
+msgstr "Çeviri"
+
+#: application/templates/adv_reader.html:67
+#: application/templates/book_audiolator.html:132
+#: application/templates/book_translator.html:97
+msgid "Test"
+msgstr "Test"
+
+#: application/templates/adv_reader.html:72 application/view/reader.py:30
+#: application/view/reader.py:93
+msgid "Online reading feature has not been activated yet."
+msgstr "Çevrimiçi okuma özelliği henüz etkinleştirilmedi."
 
 #: application/templates/adv_uploadcover.html:3
 msgid "Cover image"
@@ -444,7 +524,7 @@ msgstr "5 saniye sonra otomatik olarak önceki sayfaya döneceksiniz."
 msgid "Click to back"
 msgstr "Geri dönmek için tıklayınız"
 
-#: application/templates/base.html:24 application/templates/reader.html:129
+#: application/templates/base.html:24 application/templates/reader.html:146
 msgid "Confirm Deletion"
 msgstr "Silmeyi Onayla"
 
@@ -480,7 +560,7 @@ msgstr "Tam Metin"
 msgid "Share"
 msgstr "Paylaş"
 
-#: application/templates/base.html:34 application/templates/reader.html:130
+#: application/templates/base.html:34 application/templates/reader.html:147
 msgid "Are you sure to delete?"
 msgstr "Silmek istediğinizden emin misiniz?"
 
@@ -502,7 +582,7 @@ msgstr "Kategori"
 
 #: application/templates/base.html:39
 #: application/templates/book_audiolator.html:58
-#: application/templates/setting.html:148
+#: application/templates/settings.html:148
 msgid "Language"
 msgstr "Dil"
 
@@ -528,7 +608,7 @@ msgstr "Dil kodu geçersiz"
 msgid "Thank you for sharing."
 msgstr "Paylaştığınız için teşekkür ederiz."
 
-#: application/templates/base.html:46 application/templates/reader.html:106
+#: application/templates/base.html:46 application/templates/reader.html:118
 msgid "Close"
 msgstr "Kapat"
 
@@ -662,35 +742,35 @@ msgstr "Bu bağlantının geçersiz veya bulutta olmadığını onaylıyor musun
 msgid "Customize delivery time"
 msgstr "Teslimat zamanını özelleştir"
 
-#: application/templates/base.html:79 application/templates/setting.html:72
+#: application/templates/base.html:79 application/templates/settings.html:72
 msgid "Delivery days"
 msgstr "Teslimat günleri"
 
-#: application/templates/base.html:80 application/templates/setting.html:74
+#: application/templates/base.html:80 application/templates/settings.html:74
 msgid "Mon"
 msgstr "Pzt"
 
-#: application/templates/base.html:81 application/templates/setting.html:76
+#: application/templates/base.html:81 application/templates/settings.html:76
 msgid "Tue"
 msgstr "Sal"
 
-#: application/templates/base.html:82 application/templates/setting.html:78
+#: application/templates/base.html:82 application/templates/settings.html:78
 msgid "Wed"
 msgstr "Çar"
 
-#: application/templates/base.html:83 application/templates/setting.html:80
+#: application/templates/base.html:83 application/templates/settings.html:80
 msgid "Thu"
 msgstr "Prş"
 
-#: application/templates/base.html:84 application/templates/setting.html:82
+#: application/templates/base.html:84 application/templates/settings.html:82
 msgid "Fri"
 msgstr "Cum"
 
-#: application/templates/base.html:85 application/templates/setting.html:84
+#: application/templates/base.html:85 application/templates/settings.html:84
 msgid "Sat"
 msgstr "Cts"
 
-#: application/templates/base.html:86 application/templates/setting.html:86
+#: application/templates/base.html:86 application/templates/settings.html:86
 msgid "Sun"
 msgstr "Paz"
 
@@ -786,9 +866,9 @@ msgstr "Konfigürasyon doğrulaması doğru."
 
 #: application/templates/base.html:107 application/templates/logs.html:23
 #: application/templates/logs.html:72 application/templates/my.html:17
-#: application/templates/setting.html:117
-#: application/templates/setting.html:118
-#: application/templates/setting.html:144
+#: application/templates/settings.html:117
+#: application/templates/settings.html:118
+#: application/templates/settings.html:144
 msgid "Title"
 msgstr "Başlık"
 
@@ -822,7 +902,7 @@ msgstr "Burada hiçbir şey yok."
 msgid "Please select a single item."
 msgstr "Lütfen tek bir öğe seçin."
 
-#: application/templates/base.html:115 application/templates/reader.html:131
+#: application/templates/base.html:115 application/templates/reader.html:148
 msgid "Please select at least one item."
 msgstr "Lütfen en az bir öğe seçin."
 
@@ -832,8 +912,9 @@ msgstr "Lütfen en az bir öğe seçin."
 #: application/view/inbound_email.py:425 application/view/inbound_email.py:433
 #: application/view/inbound_email.py:448 application/view/inbound_email.py:469
 #: application/view/login.py:229 application/view/login.py:258
-#: application/view/reader.py:99 application/view/reader.py:115
-#: application/view/setting.py:48 application/view/share.py:37
+#: application/view/reader.py:115 application/view/reader.py:132
+#: application/view/reader.py:174 application/view/settings.py:48
+#: application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr "Bazı parametreler eksik veya yanlış."
 
@@ -855,8 +936,9 @@ msgid "Subject"
 msgstr "Konu"
 
 #: application/templates/base.html:121 application/templates/logs.html:22
-#: application/templates/logs.html:71 application/templates/setting.html:117
-#: application/templates/setting.html:118 application/templates/webmail.html:32
+#: application/templates/logs.html:71 application/templates/settings.html:117
+#: application/templates/settings.html:118
+#: application/templates/webmail.html:32
 msgid "Time"
 msgstr "Zaman"
 
@@ -881,45 +963,41 @@ msgstr "Bu ayar önceliklidir."
 msgid "Combine multiple values with commas."
 msgstr "Birden fazla değeri virgülle birleştirin."
 
-#: application/templates/base.html:154 application/templates/home.html:12
+#: application/templates/base.html:152 application/templates/home.html:12
 msgid "Logout"
 msgstr "Çıkış"
 
-#: application/templates/base.html:156 application/templates/home.html:17
+#: application/templates/base.html:154 application/templates/home.html:17
 #: application/templates/login.html:3 application/templates/login.html:19
 #: application/templates/login.html:30
 msgid "Login"
 msgstr "Giriş"
 
-#: application/templates/base.html:158 application/templates/signup.html:3
+#: application/templates/base.html:156 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr "Kaydol"
 
-#: application/templates/base.html:178 application/templates/home.html:11
+#: application/templates/base.html:176 application/templates/home.html:11
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr "RSSler"
 
-#: application/templates/base.html:179 application/templates/setting.html:3
+#: application/templates/base.html:177 application/templates/settings.html:3
 msgid "Settings"
 msgstr "Ayarlar"
 
-#: application/templates/base.html:180 application/templates/logs.html:3
+#: application/templates/base.html:178 application/templates/logs.html:3
 msgid "Logs"
 msgstr "Kayıtlar"
 
-#: application/templates/base.html:182
+#: application/templates/base.html:180
 msgid "Advanced"
 msgstr "Gelişmiş"
 
-#: application/templates/base.html:183 application/templates/library.html:3
+#: application/templates/base.html:181 application/templates/library.html:3
 msgid "Shared"
 msgstr "Paylaşılan"
-
-#: application/templates/base.html:185 application/templates/reader.html:6
-msgid "Reader"
-msgstr "Okuyucu"
 
 #: application/templates/book_audiolator.html:22
 #: application/templates/book_translator.html:19
@@ -950,11 +1028,6 @@ msgstr "Kindle_email kullanmak için boş bırakın"
 msgid "TTS Engine"
 msgstr "TTS Motoru"
 
-#: application/templates/book_audiolator.html:41
-#: application/templates/book_translator.html:32
-msgid "Api Host"
-msgstr "Api Host"
-
 #: application/templates/book_audiolator.html:42
 msgid "Empty to use default endpoint"
 msgstr "Varsayılan uç noktayı kullanmak için boş bırakın"
@@ -962,11 +1035,6 @@ msgstr "Varsayılan uç noktayı kullanmak için boş bırakın"
 #: application/templates/book_audiolator.html:46
 msgid "Region"
 msgstr "Bölge"
-
-#: application/templates/book_audiolator.html:53
-#: application/templates/book_translator.html:36
-msgid "Api Key"
-msgstr "Api Key"
 
 #: application/templates/book_audiolator.html:66
 msgid "Voice name"
@@ -1052,44 +1120,13 @@ msgstr ""
 "Not: Bu özelliği etkinleştirmek, kullanılan CPU örnek saatlerini önemli "
 "ölçüde artırır."
 
-#: application/templates/book_audiolator.html:119
-#: application/templates/book_translator.html:86
-msgid "Test (Please save settings firstly)"
-msgstr "Test (Lütfen önce ayarları kaydedin)"
-
-#: application/templates/book_audiolator.html:121
-#: application/templates/book_translator.html:88
-msgid "Text"
-msgstr "Metin"
-
 #: application/templates/book_audiolator.html:127
 msgid "Your browser does not support the audio element."
 msgstr "Tarayıcınız ses öğesini desteklemiyor."
 
-#: application/templates/book_audiolator.html:132
-#: application/templates/book_translator.html:97
-msgid "Test"
-msgstr "Test"
-
 #: application/templates/book_translator.html:21
 msgid "Enable"
 msgstr "Etkinleştir"
-
-#: application/templates/book_translator.html:26
-msgid "Engine"
-msgstr "Motor"
-
-#: application/templates/book_translator.html:37
-msgid "One key per line"
-msgstr "Satır başına bir tuş"
-
-#: application/templates/book_translator.html:40
-msgid "Source language"
-msgstr "Kaynak dil"
-
-#: application/templates/book_translator.html:46
-msgid "Target language"
-msgstr "Hedef dil"
 
 #: application/templates/book_translator.html:52
 msgid "Translation Position"
@@ -1123,10 +1160,6 @@ msgstr "Orijinal metin stili"
 msgid "Translated text style"
 msgstr "Çevrilmiş metin stili"
 
-#: application/templates/book_translator.html:92
-msgid "Translation"
-msgstr "Çeviri"
-
 #: application/templates/change_password.html:15
 msgid "Old password"
 msgstr "Eski şifre"
@@ -1153,7 +1186,7 @@ msgstr "Paylaşma anahtarı"
 msgid "Confirm Change"
 msgstr "Değişikliği Onayla"
 
-#: application/templates/home.html:3 application/templates/reader.html:69
+#: application/templates/home.html:3
 msgid "Home"
 msgstr "Ana Sayfa"
 
@@ -1217,7 +1250,7 @@ msgstr "Durum"
 msgid "Logs of other users"
 msgstr "Diğer kullanıcıların işlem kayıtları"
 
-#: application/templates/my.html:12 application/templates/setting.html:142
+#: application/templates/my.html:12 application/templates/settings.html:142
 msgid "Custom RSS"
 msgstr "Özel RSS"
 
@@ -1269,62 +1302,66 @@ msgstr "Edge eklentisi"
 msgid "Browser extensions also available"
 msgstr "Tarayıcı eklentileri de mevcut"
 
-#: application/templates/reader.html:27
+#: application/templates/reader.html:33
 msgid "Push current book"
 msgstr "Şu anki kitabı gönder"
 
-#: application/templates/reader.html:33
+#: application/templates/reader.html:39
 msgid "Push current article"
 msgstr "Şu anki makaleyi gönder"
 
-#: application/templates/reader.html:39
+#: application/templates/reader.html:45
 msgid "Allow click links"
 msgstr "Bağlantıları tıklamaya izin ver"
 
-#: application/templates/reader.html:45
+#: application/templates/reader.html:51
 msgid "eInk mode"
 msgstr "eInk modu"
 
-#: application/templates/reader.html:51
+#: application/templates/reader.html:63
 msgid "Increase font size"
 msgstr "Yazı tipi boyutunu artır"
 
-#: application/templates/reader.html:57
+#: application/templates/reader.html:69
 msgid "Decrease font size"
 msgstr "Yazı tipi boyutunu azalt"
 
-#: application/templates/reader.html:63
+#: application/templates/reader.html:75
 msgid "Visualize Touch Regions"
 msgstr "Dokunma bölgelerini görselleştir"
 
-#: application/templates/reader.html:75
-#: application/templates/reader_404.html:83
+#: application/templates/reader.html:81
+msgid "Help"
+msgstr "Yardım"
+
+#: application/templates/reader.html:87
+#: application/templates/reader_404.html:124
 msgid "Menu"
 msgstr "Menü"
 
-#: application/templates/reader.html:86
+#: application/templates/reader.html:98
 msgid "Collapse all"
 msgstr "Tümünü daralt"
 
-#: application/templates/reader.html:91
+#: application/templates/reader.html:103
 msgid "Expand all"
 msgstr "Tümünü genişlet"
 
-#: application/templates/reader.html:96
-#: application/templates/reader_404.html:84
+#: application/templates/reader.html:108
+#: application/templates/reader_404.html:129
 msgid "Prev"
 msgstr "Önceki"
 
-#: application/templates/reader.html:101
-#: application/templates/reader_404.html:87
+#: application/templates/reader.html:113
+#: application/templates/reader_404.html:132
 msgid "Next page"
 msgstr "Sonraki sayfa"
 
-#: application/templates/reader.html:132
+#: application/templates/reader.html:149
 msgid "Pushed successfully."
 msgstr "Başarıyla itildi"
 
-#: application/templates/reader.html:133
+#: application/templates/reader.html:150
 msgid "There are currently no books or articles being read."
 msgstr "Şu anda okunan herhangi bir kitap veya makale bulunmamaktadır."
 
@@ -1333,161 +1370,166 @@ msgstr "Şu anda okunan herhangi bir kitap veya makale bulunmamaktadır."
 msgid "Reset password"
 msgstr "Şifreyi sıfırla"
 
-#: application/templates/setting.html:14
+#: application/templates/settings.html:14
 msgid "Your account will pause after {0}, please log in again before it expires."
 msgstr ""
 "Bu hesabın gönderileri şu tarihte duraklatılacak: {0} duraklatılmaması "
 "için bu tarihten önce giriş yapınız."
 
-#: application/templates/setting.html:23
+#: application/templates/settings.html:23
 msgid "Base"
 msgstr "Temel"
 
-#: application/templates/setting.html:25
+#: application/templates/settings.html:25
 msgid "Auto delivery"
 msgstr "Otomatik Teslimat"
 
-#: application/templates/setting.html:28
+#: application/templates/settings.html:28
 msgid "Recipes and custom RSS"
 msgstr "Tarifler ve özel RSS"
 
-#: application/templates/setting.html:29
+#: application/templates/settings.html:29
 msgid "Recipes only"
 msgstr "Sadece tarifler"
 
-#: application/templates/setting.html:30
+#: application/templates/settings.html:30
 msgid "Disable all"
 msgstr "Tümünü devre dışı bırak"
 
-#: application/templates/setting.html:34
+#: application/templates/settings.html:34
 msgid "Kindle E-mail"
 msgstr "Kindle E-mail"
 
-#: application/templates/setting.html:35
+#: application/templates/settings.html:35
 msgid "Seperated by comma"
 msgstr "Virgülle ayrılmış"
 
-#: application/templates/setting.html:39
+#: application/templates/settings.html:39
 msgid "Delivery mode"
 msgstr "Teslimat modu"
 
-#: application/templates/setting.html:42
+#: application/templates/settings.html:42
 msgid "Email delivery & online reading"
 msgstr "E-posta teslimatı ve çevrimiçi okuma"
 
-#: application/templates/setting.html:43
+#: application/templates/settings.html:43
 msgid "Email delivery"
 msgstr "E-posta teslimatı"
 
-#: application/templates/setting.html:44
+#: application/templates/settings.html:44
 msgid "Online reading"
 msgstr "Çevrimiçi okuma"
 
-#: application/templates/setting.html:48
+#: application/templates/settings.html:48
 msgid "Web shelf"
 msgstr "Web kitaplık"
 
-#: application/templates/setting.html:53 application/templates/setting.html:165
+#: application/templates/settings.html:53
+#: application/templates/settings.html:165
 msgid "2 Days"
 msgstr "2 Günlük"
 
-#: application/templates/setting.html:54 application/templates/setting.html:166
+#: application/templates/settings.html:54
+#: application/templates/settings.html:166
 msgid "3 Days"
 msgstr "3 Günlük"
 
-#: application/templates/setting.html:55 application/templates/setting.html:167
+#: application/templates/settings.html:55
+#: application/templates/settings.html:167
 msgid "4 Days"
 msgstr "4 Günlük"
 
-#: application/templates/setting.html:56 application/templates/setting.html:168
+#: application/templates/settings.html:56
+#: application/templates/settings.html:168
 msgid "5 Days"
 msgstr "5 Günlük"
 
-#: application/templates/setting.html:57 application/templates/setting.html:169
+#: application/templates/settings.html:57
+#: application/templates/settings.html:169
 msgid "6 Days"
 msgstr "6 Günlük"
 
-#: application/templates/setting.html:64
+#: application/templates/settings.html:64
 msgid "Time zone"
 msgstr "Saat dilimi"
 
-#: application/templates/setting.html:89
+#: application/templates/settings.html:89
 msgid "Delivery time"
 msgstr "Teslimat zamanı"
 
-#: application/templates/setting.html:97
+#: application/templates/settings.html:97
 msgid "Book type"
 msgstr "Dosya tipi"
 
-#: application/templates/setting.html:104
+#: application/templates/settings.html:104
 msgid "Device type"
 msgstr "Cihaz tipi"
 
-#: application/templates/setting.html:113
+#: application/templates/settings.html:113
 msgid "Title format"
 msgstr "Başlık Formatı"
 
-#: application/templates/setting.html:116
+#: application/templates/settings.html:116
 msgid "Title Only"
 msgstr "Yalnızca Başlık"
 
-#: application/templates/setting.html:130
+#: application/templates/settings.html:130
 msgid "Remove hyperlinks"
 msgstr "Bağlantıları kaldır"
 
-#: application/templates/setting.html:133
+#: application/templates/settings.html:133
 msgid "Do not remove hyperlinks"
 msgstr "Bağlantıları kaldırma"
 
-#: application/templates/setting.html:134
+#: application/templates/settings.html:134
 msgid "Remove image links"
 msgstr "Resim bağlantılarını kaldır"
 
-#: application/templates/setting.html:135
+#: application/templates/settings.html:135
 msgid "Remove text links"
 msgstr "Metin bağlantılarını kaldır"
 
-#: application/templates/setting.html:136
+#: application/templates/settings.html:136
 msgid "Remove all hyperlinks"
 msgstr "Tüm bağlantıları kaldır"
 
-#: application/templates/setting.html:160
+#: application/templates/settings.html:160
 msgid "Oldest article"
 msgstr "En eski içerik?"
 
-#: application/templates/setting.html:174
+#: application/templates/settings.html:174
 msgid "Time format"
 msgstr "Zaman formatı"
 
-#: application/templates/setting.html:187
+#: application/templates/settings.html:187
 msgid "Author format"
 msgstr "Başlık Formatı"
 
-#: application/templates/setting.html:204
+#: application/templates/settings.html:204
 msgid "Send Mail Service"
 msgstr "Posta servisi gönder"
 
-#: application/templates/setting.html:206
+#: application/templates/settings.html:206
 msgid "Service"
 msgstr "Servis"
 
-#: application/templates/setting.html:214
+#: application/templates/settings.html:214
 msgid "ApiKey"
 msgstr "ApiKey"
 
-#: application/templates/setting.html:218
+#: application/templates/settings.html:218
 msgid "SecretKey"
 msgstr "SecretKey"
 
-#: application/templates/setting.html:226
+#: application/templates/settings.html:226
 msgid "Port"
 msgstr "Port"
 
-#: application/templates/setting.html:238
+#: application/templates/settings.html:238
 msgid "Save path"
 msgstr "Kayıt yolu"
 
-#: application/templates/setting.html:246
+#: application/templates/settings.html:246
 #, python-format
 msgid ""
 "Important: Please activate your kindle firstly, then goto %(personal)s "
@@ -1497,11 +1539,11 @@ msgstr ""
 "Sayfasına gidin ve %(sender)s'yi 'Onaylanmış Kişisel Belge E-posta "
 "Listesi'ne ekleyin."
 
-#: application/templates/setting.html:246
+#: application/templates/settings.html:246
 msgid "Personal Document Settings"
 msgstr "Ayarları kaydet"
 
-#: application/templates/setting.html:251 application/view/setting.py:140
+#: application/templates/settings.html:251 application/view/settings.py:140
 msgid ""
 "You have not yet set up your email address. Please go to the 'Admin' page"
 " to add your email address firstly."
@@ -1509,7 +1551,7 @@ msgstr ""
 "Email adresinizi henüz ayarlamadınız. Lütfen e-posta adresinizi eklemek "
 "için 'Yönetim' sayfasına öncelikle gidin."
 
-#: application/templates/setting.html:258
+#: application/templates/settings.html:258
 msgid "Send Test Email"
 msgstr "Test E-postası Gönder"
 
@@ -1549,9 +1591,9 @@ msgstr "İlet"
 msgid "Fwd as Attach"
 msgstr "Ek olarak ilet"
 
-#: application/view/admin.py:48 application/view/adv.py:394
-#: application/view/setting.py:76 application/view/translator.py:83
-#: application/view/translator.py:167
+#: application/view/admin.py:48 application/view/adv.py:410
+#: application/view/adv.py:454 application/view/settings.py:76
+#: application/view/translator.py:83 application/view/translator.py:167
 msgid "Settings Saved!"
 msgstr "Ayarlar Kaydedildi!"
 
@@ -1605,83 +1647,93 @@ msgstr "Değişiklikler başarıyla kaydedildi."
 msgid "The old password is wrong."
 msgstr "Eski şifre yanlış."
 
-#: application/view/adv.py:91 application/view/adv.py:92
-#: application/view/adv.py:93 application/view/adv.py:94
-#: application/view/adv.py:95 application/view/adv.py:96
-#: application/view/adv.py:97 application/view/adv.py:98
-#: application/view/adv.py:99 application/view/adv.py:100
+#: application/view/adv.py:94 application/view/adv.py:95
+#: application/view/adv.py:96 application/view/adv.py:97
+#: application/view/adv.py:98 application/view/adv.py:99
+#: application/view/adv.py:100 application/view/adv.py:101
+#: application/view/adv.py:102 application/view/adv.py:103
 msgid "Append hyperlink '{}' to article"
 msgstr "'{}' linkini makaleye ekle"
 
-#: application/view/adv.py:91 application/view/adv.py:92
-#: application/view/adv.py:93 application/view/adv.py:94
-#: application/view/adv.py:95
+#: application/view/adv.py:94 application/view/adv.py:95
+#: application/view/adv.py:96 application/view/adv.py:97
+#: application/view/adv.py:98
 msgid "Save to {}"
 msgstr "{} kaydedildi"
 
-#: application/view/adv.py:91
+#: application/view/adv.py:94
 msgid "evernote"
 msgstr "evernote"
 
-#: application/view/adv.py:92
+#: application/view/adv.py:95
 msgid "wiz"
 msgstr "wiz"
 
-#: application/view/adv.py:93
+#: application/view/adv.py:96
 msgid "pocket"
 msgstr "pocket"
 
-#: application/view/adv.py:94
+#: application/view/adv.py:97
 msgid "instapaper"
 msgstr "instapaper"
 
-#: application/view/adv.py:95
+#: application/view/adv.py:98
 msgid "wallabag"
 msgstr "wallabag"
 
-#: application/view/adv.py:96 application/view/adv.py:97
-#: application/view/adv.py:98 application/view/adv.py:99
+#: application/view/adv.py:99 application/view/adv.py:100
+#: application/view/adv.py:101 application/view/adv.py:102
 msgid "Share on {}"
 msgstr "{} üzerinde paylaş"
 
-#: application/view/adv.py:96
+#: application/view/adv.py:99
 msgid "weibo"
 msgstr "weibo"
 
-#: application/view/adv.py:97
+#: application/view/adv.py:100
 msgid "facebook"
 msgstr "facebook"
 
-#: application/view/adv.py:99
+#: application/view/adv.py:102
 msgid "tumblr"
 msgstr "tumblr"
 
-#: application/view/adv.py:100
+#: application/view/adv.py:103
 msgid "Open in browser"
 msgstr "Tarayıcıda aç"
 
-#: application/view/adv.py:101
+#: application/view/adv.py:104
 msgid "Append qrcode of url to article"
 msgstr "Makaleye URL'nin QR kodunu ekle"
 
-#: application/view/adv.py:365 application/view/share.py:54
+#: application/view/adv.py:368 application/view/share.py:54
 #: application/view/subscribe.py:247
 msgid "Unknown command: {}"
 msgstr "Bilinmeyen komut: {}"
 
-#: application/view/adv.py:396
+#: application/view/adv.py:399 application/view/translator.py:77
+#: application/view/translator.py:160
+msgid "The api key is required."
+msgstr "API anahtarı gereklidir."
+
+#: application/view/adv.py:420 application/view/translator.py:116
+#: application/view/translator.py:200
+msgid "The text is empty."
+msgstr "Metin boş."
+
+#: application/view/adv.py:456
 msgid "The format is invalid."
 msgstr "Format geçersiz."
 
-#: application/view/adv.py:428
+#: application/view/adv.py:488
 msgid "Authorization Error!<br/>{}"
 msgstr "Yetkilendirme Hatası!<br/>{}"
 
-#: application/view/adv.py:449
+#: application/view/adv.py:509
 msgid "Success authorized by Pocket!"
 msgstr "Pocket tarafından yetkilendirilen başarı!"
 
-#: application/view/adv.py:455
+#: application/view/adv.py:515
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
@@ -1689,13 +1741,13 @@ msgstr ""
 "Pocket yetkilendirme isteği başarısız oldu!<hr/>Aşağıdaki ayrıntılara "
 "bakın:<br/><br/>{}"
 
-#: application/view/adv.py:476
+#: application/view/adv.py:536
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 "Instapaper servisi bir hata ile karşılaştı. Lütfen daha sonra tekrar "
 "deneyin."
 
-#: application/view/adv.py:489
+#: application/view/adv.py:549
 msgid "Request type [{}] unsupported"
 msgstr "İstek türü [{}] desteklenmiyor"
 
@@ -1802,131 +1854,127 @@ msgstr ""
 "KindleEar şifrenizi sıfırlamak için aşağıdaki bağlantıya "
 "tıklayabilirsiniz."
 
-#: application/view/reader.py:28 application/view/reader.py:43
-msgid "Online reading feature has not been activated yet."
-msgstr "Çevrimiçi okuma özelliği henüz etkinleştirilmedi."
-
-#: application/view/reader.py:79
+#: application/view/reader.py:95
 msgid "The article is missing?"
 msgstr "Makale eksik mi?"
 
-#: application/view/reader.py:141
+#: application/view/reader.py:192
 msgid "Failed to push: {}"
 msgstr "İtilemedi: {}"
 
-#: application/view/reader.py:189
+#: application/view/reader.py:240
 msgid "Failed to create ebook."
 msgstr "E-kitap oluşturulamadı."
 
-#: application/view/setting.py:44
+#: application/view/settings.py:44
 msgid "Kindle E-mail is requied!"
 msgstr "Kindle E-mail adresi gerekli!"
 
-#: application/view/setting.py:46
+#: application/view/settings.py:46
 msgid "Title is requied!"
 msgstr "Başlık zorunlu!"
 
-#: application/view/setting.py:174
+#: application/view/settings.py:174
 msgid "Chinese"
 msgstr "Çince"
 
-#: application/view/setting.py:175
+#: application/view/settings.py:175
 msgid "English"
 msgstr "İngilizce"
 
-#: application/view/setting.py:176
+#: application/view/settings.py:176
 msgid "French"
 msgstr "Fransızca"
 
-#: application/view/setting.py:177
+#: application/view/settings.py:177
 msgid "Spanish"
 msgstr "İspanyolca"
 
-#: application/view/setting.py:178
+#: application/view/settings.py:178
 msgid "Portuguese"
 msgstr "Portekizce"
 
-#: application/view/setting.py:179
+#: application/view/settings.py:179
 msgid "German"
 msgstr "Almanca"
 
-#: application/view/setting.py:180
+#: application/view/settings.py:180
 msgid "Italian"
 msgstr "İtalyanca"
 
-#: application/view/setting.py:181
+#: application/view/settings.py:181
 msgid "Japanese"
 msgstr "Japonca"
 
-#: application/view/setting.py:182
+#: application/view/settings.py:182
 msgid "Russian"
 msgstr "Rusça"
 
-#: application/view/setting.py:183
+#: application/view/settings.py:183
 msgid "Turkish"
 msgstr "Türkçe"
 
-#: application/view/setting.py:184
+#: application/view/settings.py:184
 msgid "Korean"
 msgstr "Koreli"
 
-#: application/view/setting.py:185
+#: application/view/settings.py:185
 msgid "Arabic"
 msgstr "Arapça"
 
-#: application/view/setting.py:186
+#: application/view/settings.py:186
 msgid "Czech"
 msgstr "Çek"
 
-#: application/view/setting.py:187
+#: application/view/settings.py:187
 msgid "Dutch"
 msgstr "Flemenkçe"
 
-#: application/view/setting.py:188
+#: application/view/settings.py:188
 msgid "Greek"
 msgstr "Yunan"
 
-#: application/view/setting.py:189
+#: application/view/settings.py:189
 msgid "Hindi"
 msgstr "Hintçe"
 
-#: application/view/setting.py:190
+#: application/view/settings.py:190
 msgid "Malaysian"
 msgstr "Malezyalı"
 
-#: application/view/setting.py:191
+#: application/view/settings.py:191
 msgid "Bengali"
 msgstr "Bengal"
 
-#: application/view/setting.py:192
+#: application/view/settings.py:192
 msgid "Persian"
 msgstr "Farsça"
 
-#: application/view/setting.py:193
+#: application/view/settings.py:193
 msgid "Urdu"
 msgstr "Urduca"
 
-#: application/view/setting.py:194
+#: application/view/settings.py:194
 msgid "Swahili"
 msgstr "Svahili"
 
-#: application/view/setting.py:195
+#: application/view/settings.py:195
 msgid "Vietnamese"
 msgstr "Vietnam"
 
-#: application/view/setting.py:196
+#: application/view/settings.py:196
 msgid "Punjabi"
 msgstr "Pencap"
 
-#: application/view/setting.py:197
+#: application/view/settings.py:197
 msgid "Javanese"
 msgstr "Cava"
 
-#: application/view/setting.py:198
+#: application/view/settings.py:198
 msgid "Tagalog"
 msgstr "Tagalog"
 
-#: application/view/setting.py:199
+#: application/view/settings.py:199
 msgid "Hausa"
 msgstr "Hausa"
 
@@ -2023,12 +2071,4 @@ msgstr "Bu tarifin giriş bilgileri temizlendi."
 #: application/view/subscribe.py:388
 msgid "The login information for this recipe has been saved."
 msgstr "Bu tarifin giriş bilgileri kaydedildi."
-
-#: application/view/translator.py:77 application/view/translator.py:160
-msgid "The api key is required."
-msgstr "API anahtarı gereklidir."
-
-#: application/view/translator.py:116 application/view/translator.py:200
-msgid "The text is empty."
-msgstr "Metin boş."
 

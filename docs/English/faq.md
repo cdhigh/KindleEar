@@ -1,5 +1,5 @@
 ---
-sort: 5
+sort: 6
 ---
 # FAQ
 
@@ -133,26 +133,6 @@ However, if you wish to merge recipe files into the built-in library:
 3. Run tools/archive_builtin_recipes.py.      
 4. Delete the recipe files.    
 **Note:** You can directly use calibre's `builtin_recipes.zip` and `builtin_recipes.xml`.   
-
-
-## About Online Reading Related Knowledge?   
-KindleEar supports email delivery and online reading.   
-The advantage of email delivery is the ability to read offline. After downloading to an e-book device, you can carry it with you and read it anytime.    
-The advantage of online reading is that it does not occupy space on the e-book device and does not require manual deletion of e-books, moreover, it can support more e-book devices.    
-1. To enable the online reading feature, configure EBOOK_SAVE_DIR to a directory with write permissions.   
-2. The online reading feature is only supported on Docker/VPS platforms. Due to the lack of writable disk permissions on the GAE platform, the online reading feature cannot be enabled.   
-3. It is recommended to set a suitable "web shelf" time. KindleEar will automatically clean up e-books that exceed this time, making it worry-free and effortless.    
-4. The online reading page is specially optimized for e-ink screens, using page flipping instead of scrolling, the page area is divided into 5 clickable regions:    
-  * Top left corner for the previous article.   
-  * Top right corner for the next article.    
-  * About 70% of the upper middle area of the page is for opening the menu.    
-  * The bottom left 20% is for the previous page.   
-  * The bottom right 80% is for the next page.   
-  * Clicking the next page area on the last page of the current article automatically opens the next article.    
-  * Clicking the previous page area on the first page of the article automatically opens the previous article.   
-  * Support for using keyboard arrow keys and Page keys to turn pages.    
-5. The Kindle browser does not support cookie persistence, requiring you to enter your password every time you open it. To avoid this inconvenience, you can add a query string to your bookmark. such as `https://youdomain/reader?username=yourname&password=yourpassword`. Some people may feel that storing plaintext passwords is insecure, so it's up to you to decide.    
-6. If some feeds require offline reading while others only need online reading, you can create two accounts: one for pushing and the other for online reading.      
 
 
 

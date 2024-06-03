@@ -9,11 +9,13 @@ from lxml import etree #type:ignore
 from bs4 import BeautifulSoup
 from flask import Blueprint, render_template, session, request, send_from_directory, current_app as app
 from flask_babel import gettext as _
+from build_ebook import html_to_book
+from ebook_translator import HtmlTranslator
 from ..base_handler import *
 from ..utils import xml_escape, xml_unescape, str_to_int, str_to_float
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import send_to_kindle
-from build_ebook import html_to_book
+from .settings import get_locale
 
 bpReader = Blueprint('bpReader', __name__)
 
@@ -38,10 +40,6 @@ def reader_route_preprocess(forAjax=False):
 #在线阅读器首页
 @bpReader.route("/reader", endpoint='ReaderRoute')
 def ReaderRoute():
-    oebDir = app.config['EBOOK_SAVE_DIR']
-    if not oebDir:
-        return _("Online reading feature has not been activated yet.")
-
     userName = request.args.get('username')
     password = request.args.get('password')
     user = get_login_user()
@@ -65,20 +63,35 @@ def ReaderRoute():
             time.sleep(5) #防止暴力破解
         return redirect(url_for("bpLogin.Login", next=url_for('bpReader.ReaderRoute')))
 
-    userDir = os.path.join(oebDir, user.name).replace('\\', '/')
-    oebBooks = GetSavedOebList(userDir)
+    oebDir = app.config['EBOOK_SAVE_DIR']
+    if oebDir:
+        userDir = os.path.join(oebDir, user.name).replace('\\', '/')
+        oebBooks = GetSavedOebList(userDir)
+        comicTitle = 'Nothing here'
+    else:
+        oebBooks = []
+        comicTitle = 'Not activated'
+        
     oebBooks = json.dumps(oebBooks, ensure_ascii=False)
     initArticle = url_for('bpReader.ReaderArticleNoFoundRoute', tips='')
     params = user.cfg('reader_params')
-    return render_template('reader.html', oebBooks=oebBooks, initArticle=initArticle, params=params)
+    shareKey = user.share_links.get('key')
+    if (get_locale() or '').startswith('zh'):
+        helpPage = 'https://cdhigh.github.io/KindleEar/Chinese/reader.html'
+    else:
+        helpPage = 'https://cdhigh.github.io/KindleEar/English/reader.html'
+    return render_template('reader.html', oebBooks=oebBooks, initArticle=initArticle, params=params,
+        shareKey=shareKey, comicTitle=comicTitle, helpPage=helpPage)
 
 #在线阅读器的404页面
 @bpReader.route("/reader/404", endpoint='ReaderArticleNoFoundRoute')
 @login_required()
-@reader_route_preprocess()
-def ReaderArticleNoFoundRoute(user: KeUser, userDir: str):
+def ReaderArticleNoFoundRoute(user):
     tips = request.args.get('tips')
-    if tips is None:
+    oebDir = app.config['EBOOK_SAVE_DIR']
+    if not oebDir:
+        tips = _("Online reading feature has not been activated yet.")
+    elif tips is None:
         tips = _('The article is missing?')
     return render_template('reader_404.html', tips=tips.strip())
 
@@ -143,9 +156,31 @@ def ReaderSettingsPost(user: KeUser, userDir: str):
     fontSize = str_to_float(request.form.get('fontSize', '1.0'), 1.0)
     allowLinks = request.form.get('allowLinks', '')
     inkMode = str_to_int(request.form.get('inkMode', '1'), 1)
-    user.set_cfg('reader_params', {'fontSize': fontSize, 'allowLinks': allowLinks, 'inkMode': inkMode})
+    params = user.cfg('reader_params')
+    params.update({'fontSize': fontSize, 'allowLinks': allowLinks, 'inkMode': inkMode})
+    user.set_cfg('reader_params', params)
     user.save()
     return {'status': 'ok'}
+
+#查词
+@bpReader.post("/reader/dict", endpoint='ReaderDictPost')
+@login_required(forAjax=True)
+@reader_route_preprocess(forAjax=True)
+def ReaderDictPost(user: KeUser, userDir: str):
+    word = request.form.get('word')
+    key = request.form.get('key')
+    language = request.form.get('language', '')
+    if not word or key != user.share_links.get('key'):
+        return {'status': _("Some parameters are missing or wrong.")}
+
+    params = user.cfg('reader_params')
+    dictParams = params.get('dict', {})
+    if not dictParams.get('src_lang'): #如果设置源语言为自动，则使用当前书本的语言设置
+        dictParams['src_lang'] = language
+    translator = HtmlTranslator(dictParams)
+    data = translator.translate_text(word)
+    status = data['error'] if data['error'] else 'ok' #type:ignore
+    return {'status': status, 'word': word, 'text': data['translated']} #type:ignore
 
 #将一个特定的文章制作成电子书推送
 def PushSingleArticle(src: str, title: str, user: KeUser, userDir: str, language: str):

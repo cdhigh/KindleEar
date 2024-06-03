@@ -284,3 +284,44 @@ body::-webkit-scrollbar-thumb {
   text-align: center;
   font-size: 0.9em;
 }
+
+.tr-result {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  box-shadow: 0px 0px 3px #aaa;
+  display: none;
+  min-width: 200px;
+  max-width: 50%;
+  max-height: 50%;
+  cursor: pointer;
+}
+.tr-close-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  color: #111;
+  border: 1px solid #000;
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: bolder;
+}
+.tr-word {
+  margin: 10px auto 10px auto;
+  padding: 10px 50px 10px 40px;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px dotted #ccc;
+}
+.tr-text {
+  margin: 10px auto 10px auto;
+  padding: 10px;
+  text-align: center;
+}

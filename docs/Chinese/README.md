@@ -10,6 +10,7 @@ sort: 2
     - [Docker (VPS)](https://cdhigh.github.io/KindleEar/Chinese/deployment.html#docker)
     - [Oracle cloud (VPS)](https://cdhigh.github.io/KindleEar/Chinese/deployment.html#oracle-cloud)
     - [Pythonanywhere (PaaS)](https://cdhigh.github.io/KindleEar/Chinese/deployment.html#python-anywhere)
+- [在线阅读](https://cdhigh.github.io/KindleEar/Chinese/reader.html)
 - [浏览器插件](https://cdhigh.github.io/KindleEar/Chinese/extension.html)
 - [FAQ](https://cdhigh.github.io/KindleEar/Chinese/faq.html)
 - [changelog](https://cdhigh.github.io/KindleEar/Chinese/changelog.html)

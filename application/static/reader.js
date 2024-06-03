@@ -5,6 +5,7 @@
 var g_iframeScrollHeight = 500; //在 iframeLoadEvent 里更新
 //var g_iframeClientHeight = 500;
 var g_currentArticle = {};
+var g_dictMode = false;
 
 //对古董浏览器兼容性最好的判断一个变量是否为空的语法
 //支持基本类型/数组/对象
@@ -130,8 +131,8 @@ function updateNavIndicator() {
 }
 
 //获取最靠近点击位置的一个单词（以空格分隔的单词）
-function getWordAtClick(event) {
-  iframe = document.getElementById('iframe');
+function getWordAtClick(event, iframe) {
+  iframe = iframe || document.getElementById('iframe');
   var doc = iframe.contentDocument || iframe.contentWindow.document;
   const range = doc.caretRangeFromPoint(event.clientX, event.clientY);
   if (range) {
@@ -155,12 +156,54 @@ function getWordAtClick(event) {
   return null;
 }
 
+//连接服务器查询一个单词的释义然后显示出来
+//event: click event
+//word: 要查的词
+//selection: 是否有选择区域
+function translateWord(event, word, selection) {
+  var language = isEmpty(g_currentArticle) ? '' : getBookLanguage(g_currentArticle);
+  ajax_post('/reader/dict', {word: word, key: g_shareKey, language: language}, function (resp) {
+    if (resp.status == 'ok') {
+      var content = document.getElementById('content');
+      var dialog = document.getElementById('tr-result');
+      var title = document.getElementById('tr-word');
+      var text = document.getElementById('tr-text');
+      title.innerHTML = word;
+      text.innerHTML = resp.text;
+      var x = event.clientX;
+      var y = Math.max(event.clientY - content.scrollTop, 0);
+      var width = content.clientWidth;
+      var height = content.clientHeight;
+      if (x > width * 0.8) {
+        dialog.style.left = 'auto';
+        dialog.style.right = Math.max(width - x, 20) + 'px';
+      } else {
+        dialog.style.right = 'auto';
+        dialog.style.left = x + 'px';
+      }
+      if (y > height * 0.8) {
+        dialog.style.top = 'auto';
+        dialog.style.bottom = Math.max(height - y, 20) + 'px';
+      } else {
+        dialog.style.bottom = 'auto';
+        dialog.style.top = (y + 20) + 'px';
+      }
+      dialog.style.display = 'block';
+      if (selection) {
+        selection.removeAllRanges();
+      }
+    } else {
+      alert(resp.status);
+    }
+  });
+}
+
 //屏幕点击事件的处理
 function clickEvent(event) {
   event.preventDefault();
   var content = document.getElementById('content');
   var navbar = document.getElementById('navbar');
-  var navPopMenu = document.getElementById('nav-popmenu')
+  var navPopMenu = document.getElementById('nav-popmenu');
   var x = event.clientX;
   var y = event.clientY - content.scrollTop;
   var ww = content.clientWidth;
@@ -439,6 +482,8 @@ function toggleNavPopMenu() {
   //inkIcon.innerHTML = g_inkMode ? '✔' : '☐';
   var allowIcon = document.getElementById('allow-links').querySelector('.check-icon');
   allowIcon.innerHTML = g_allowLinks ? '✔' : '☐';
+  //var dictIcon = document.getElementById('dict-mode').querySelector('.check-icon');
+  //dictIcon.innerHTML = g_dictMode ? '✔' : '☐';
   menu.style.display = (menu.style.display == 'block') ? 'none' : 'block';
 }
 
@@ -505,6 +550,19 @@ function toggleInkMode() {
   g_inkMode = !g_inkMode;
   setInkMode(g_inkMode);
   saveSettings();
+}
+
+//切换查词模式
+function toggleDictMode() {
+  g_dictMode = !g_dictMode;
+  document.getElementById('tr-result').style.display='none';
+  hideNavbar();
+}
+
+//关闭查词窗口
+function closeDictDialog() {
+  document.getElementById('tr-result').style.display='none';
+  g_dictMode = false;
 }
 
 //根据是否使能墨水屏模式，设置相应的元素属性
@@ -677,7 +735,7 @@ function pushCurrentArticle() {
   hidePopMenu();
 }
 
-//通过一个文章获取对应书本的语言
+//通过一个文章获取对应书本的语言，在调用时请保证art合法
 function getBookLanguage(art) {
   for (var i = 0; i < g_books.length; i++) {
     var entry = g_books[i]; //date
@@ -704,6 +762,7 @@ function openArticle(article) {
     g_currentArticle = article;
   }
   hideNavbar();
+  closeDictDialog();
 }
 
 //打开上一篇文章
@@ -765,7 +824,8 @@ function findNextArticle(art) {
 }
 
 //iframe每次加载一个新的文档后会调用此函数，注册一些事件并更新一些变量
-function iframeLoadEvent(iframe) {
+function iframeLoadEvent(evt) {
+  var iframe = document.getElementById('iframe');
   adjustIFrameStyle(iframe);
   var doc = iframe.contentDocument || iframe.contentWindow.document;
   doc.addEventListener('click', function(event) {
@@ -780,7 +840,15 @@ function iframeLoadEvent(iframe) {
         return;
       }
     }
-    if (!doc.getSelection().toString()) { //没有选择文本才翻页
+    var selection = doc.getSelection();
+    var text = selection.toString();
+    if (g_dictMode) {
+      g_dictMode = false;
+      text = text || getWordAtClick(event, iframe);
+      if (text) {
+        translateWord(event, text, selection);
+      }
+    } else if (!text) { //没有选择文本才翻页
       clickEvent(event);
     }
   });
@@ -811,14 +879,22 @@ function adjustIFrameStyle(iframe) {
 function documentKeyDownEvent(event) {
   var key = event.key;
   //console.log('Key pressed:', key);
-  if ((key == ' ') || (key == 'ArrowDown') || (key == 'ArrowRight') || (key == 'PageDown')) {
+  if ((key == ' ') || (key == 'ArrowRight') || (key == 'PageDown')) {
     event.stopPropagation();
     event.preventDefault();
     pageDown();
-  } else if ((key == 'ArrowUp') || (key == 'ArrowLeft') || (key == 'PageUp')) {
+  } else if (key == 'ArrowDown') {
+    event.stopPropagation();
+    event.preventDefault();
+    openNextArticle();
+  } else if ((key == 'ArrowLeft') || (key == 'PageUp')) {
     event.stopPropagation();
     event.preventDefault();
     pageUp();
+  } else if (key == 'ArrowUp') {
+    event.stopPropagation();
+    event.preventDefault();
+    openPrevArticle();
   }
 }
 
@@ -835,6 +911,7 @@ document.addEventListener('DOMContentLoaded', function() {
   content.addEventListener('scroll', updatePosIndicator);
   navContent.addEventListener('click', navClickEvent);
   navContent.addEventListener('scroll', updateNavIndicator);
+  iframe.addEventListener('load', iframeLoadEvent);
   populateBooks(1);
   iframe.style.display = "none"; //加载完成后再显示
   iframe.src = iframe.src; //强制刷新一次，避免偶尔出现不能点击的情况

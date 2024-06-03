@@ -1,9 +1,9 @@
 ---
-sort: 6
+sort: 7
 ---
 # Changelog
 
-## 3.0.0b
+## 3.0.0
 1. Supports Python 3
 2. Redesigned software framework
 3. Support for multiple platforms, no longer limited to the GAE platform

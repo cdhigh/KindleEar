@@ -1318,7 +1318,8 @@ function startUploadCoversToServer(url) {
 }
 ///[end] adv_uploadcover.html
 ///[start] book_translator.html
-//根据当前可选的翻译引擎列表 g_trans_engines 填充下拉框，currEngineName为Recipe的当前配置
+//根据当前可选的翻译引擎列表 g_trans_engines 填充下拉框，
+//currEngineName: Recipe的当前配置
 function PopulateTranslatorFields(currEngineName) {
   var engineSel = $('#translator_engine');
   for (var name in g_trans_engines) {
@@ -1400,6 +1401,16 @@ function TestTranslator(recipeId) {
     divDst.val(resp.text);
   });
 }
+
+//测试在线阅读器的翻译器设置是否正确，这个是adv_reader.html的函数，放在这里是为了归类
+function TestReaderTranslator() {
+  var text = $('#translator_test_src_text').val();
+  var divDst = $('#translator_test_dst_text');
+  divDst.val(i18n.translating);
+  MakeAjaxRequest("/adv/reader/test", "POST", {text: text}, function (resp) {
+    divDst.val(resp.text);
+  });
+} 
 ///[end] book_translator.html
 
 ///[start] book_audiolator.html
