@@ -45,6 +45,6 @@ The principle of the dictionary function is to automatically extract the word cl
 
 The extracted word is sent to your deployed KindleEar site for translation, and the response is displayed.   
 
-1. To use the dictionary function, first configure the translation engine and languages in "Advanced" | "Reader" options page.   
+1. To use the dictionary function, first configure the translation engine and languages in "Advanced"/"Reader" options page.   
 
 2. When encountering an unfamiliar word while reading, open the menu, select "Dictionary" to enter dictionary mode (no indication/tips is shown). Click the word to be queried, and dictionary mode will automatically exit after the query. To query again, click "Dictionary" in the menu again.    
