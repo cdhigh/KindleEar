@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-02 21:37-0300\n"
+"POT-Creation-Date: 2024-06-03 20:15-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: tr_TR\n"
@@ -167,8 +167,7 @@ msgstr "Hesabı Düzenle"
 #: application/templates/admin.html:89
 #: application/templates/adv_inboundmail.html:54
 #: application/templates/adv_uploadcss.html:31
-#: application/templates/base.html:25 application/templates/reader.html:93
-#: application/templates/webmail.html:22
+#: application/templates/base.html:25 application/templates/webmail.html:22
 msgid "Delete"
 msgstr "Sil"
 
@@ -400,7 +399,7 @@ msgid "Please input mail address"
 msgstr "Lütfen e-posta adresini giriniz"
 
 #: application/templates/adv_reader.html:18
-#: application/templates/reader.html:57
+#: application/templates/reader.html:100
 msgid "Dictionary"
 msgstr "Sözlük"
 
@@ -524,7 +523,7 @@ msgstr "5 saniye sonra otomatik olarak önceki sayfaya döneceksiniz."
 msgid "Click to back"
 msgstr "Geri dönmek için tıklayınız"
 
-#: application/templates/base.html:24 application/templates/reader.html:146
+#: application/templates/base.html:24 application/templates/reader.html:153
 msgid "Confirm Deletion"
 msgstr "Silmeyi Onayla"
 
@@ -560,7 +559,7 @@ msgstr "Tam Metin"
 msgid "Share"
 msgstr "Paylaş"
 
-#: application/templates/base.html:34 application/templates/reader.html:147
+#: application/templates/base.html:34 application/templates/reader.html:154
 msgid "Are you sure to delete?"
 msgstr "Silmek istediğinizden emin misiniz?"
 
@@ -608,7 +607,7 @@ msgstr "Dil kodu geçersiz"
 msgid "Thank you for sharing."
 msgstr "Paylaştığınız için teşekkür ederiz."
 
-#: application/templates/base.html:46 application/templates/reader.html:118
+#: application/templates/base.html:46 application/templates/reader.html:125
 msgid "Close"
 msgstr "Kapat"
 
@@ -902,7 +901,7 @@ msgstr "Burada hiçbir şey yok."
 msgid "Please select a single item."
 msgstr "Lütfen tek bir öğe seçin."
 
-#: application/templates/base.html:115 application/templates/reader.html:148
+#: application/templates/base.html:115 application/templates/reader.html:155
 msgid "Please select at least one item."
 msgstr "Lütfen en az bir öğe seçin."
 
@@ -1302,66 +1301,70 @@ msgstr "Edge eklentisi"
 msgid "Browser extensions also available"
 msgstr "Tarayıcı eklentileri de mevcut"
 
-#: application/templates/reader.html:33
+#: application/templates/reader.html:37
 msgid "Push current book"
 msgstr "Şu anki kitabı gönder"
 
-#: application/templates/reader.html:39
+#: application/templates/reader.html:43
 msgid "Push current article"
 msgstr "Şu anki makaleyi gönder"
 
-#: application/templates/reader.html:45
+#: application/templates/reader.html:49
+msgid "Delete selected books"
+msgstr "Seçili kitapları sil"
+
+#: application/templates/reader.html:55
 msgid "Allow click links"
 msgstr "Bağlantıları tıklamaya izin ver"
 
-#: application/templates/reader.html:51
+#: application/templates/reader.html:61
 msgid "eInk mode"
 msgstr "eInk modu"
 
-#: application/templates/reader.html:63
+#: application/templates/reader.html:67
 msgid "Increase font size"
 msgstr "Yazı tipi boyutunu artır"
 
-#: application/templates/reader.html:69
+#: application/templates/reader.html:73
 msgid "Decrease font size"
 msgstr "Yazı tipi boyutunu azalt"
 
-#: application/templates/reader.html:75
+#: application/templates/reader.html:79
 msgid "Visualize Touch Regions"
 msgstr "Dokunma bölgelerini görselleştir"
 
-#: application/templates/reader.html:81
+#: application/templates/reader.html:85
 msgid "Help"
 msgstr "Yardım"
 
-#: application/templates/reader.html:87
-#: application/templates/reader_404.html:124
+#: application/templates/reader.html:91
+#: application/templates/reader_404.html:125
 msgid "Menu"
 msgstr "Menü"
 
-#: application/templates/reader.html:98
+#: application/templates/reader.html:105
 msgid "Collapse all"
 msgstr "Tümünü daralt"
 
-#: application/templates/reader.html:103
+#: application/templates/reader.html:110
 msgid "Expand all"
 msgstr "Tümünü genişlet"
 
-#: application/templates/reader.html:108
-#: application/templates/reader_404.html:129
+#: application/templates/reader.html:115
+#: application/templates/reader_404.html:130
 msgid "Prev"
 msgstr "Önceki"
 
-#: application/templates/reader.html:113
-#: application/templates/reader_404.html:132
+#: application/templates/reader.html:120
+#: application/templates/reader_404.html:133
 msgid "Next page"
 msgstr "Sonraki sayfa"
 
-#: application/templates/reader.html:149
+#: application/templates/reader.html:156
 msgid "Pushed successfully."
 msgstr "Başarıyla itildi"
 
-#: application/templates/reader.html:150
+#: application/templates/reader.html:157
 msgid "There are currently no books or articles being read."
 msgstr "Şu anda okunan herhangi bir kitap veya makale bulunmamaktadır."
 

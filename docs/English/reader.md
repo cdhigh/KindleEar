@@ -48,3 +48,5 @@ The extracted word is sent to your deployed KindleEar site for translation, and 
 1. To use the dictionary function, first configure the translation engine and languages in "Advanced"/"Reader" options page.   
 
 2. When encountering an unfamiliar word while reading, open the menu, select "Dictionary" to enter dictionary mode (no indication/tips is shown). Click the word to be queried, and dictionary mode will automatically exit after the query. To query again, click "Dictionary" in the menu again.    
+
+3. Click anywhere inside the pop-up dictionary box to close it.   

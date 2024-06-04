@@ -174,16 +174,17 @@ function translateWord(event, word, selection) {
       var y = Math.max(event.clientY - content.scrollTop, 0);
       var width = content.clientWidth;
       var height = content.clientHeight;
-      if (x > width * 0.8) {
+      /*if (x > width * 0.6) {
         dialog.style.left = 'auto';
-        dialog.style.right = Math.max(width - x, 20) + 'px';
+        dialog.style.right = Math.max(width - x, 40) + 'px';
       } else {
         dialog.style.right = 'auto';
         dialog.style.left = x + 'px';
-      }
-      if (y > height * 0.8) {
+      }*/
+      //alert(dialog.style.left + ',' + dialog.style.right);
+      if (y > height * 0.6) {
         dialog.style.top = 'auto';
-        dialog.style.bottom = Math.max(height - y, 20) + 'px';
+        dialog.style.bottom = Math.max(height - y, 40) + 'px';
       } else {
         dialog.style.bottom = 'auto';
         dialog.style.top = (y + 20) + 'px';
@@ -482,8 +483,6 @@ function toggleNavPopMenu() {
   //inkIcon.innerHTML = g_inkMode ? '✔' : '☐';
   var allowIcon = document.getElementById('allow-links').querySelector('.check-icon');
   allowIcon.innerHTML = g_allowLinks ? '✔' : '☐';
-  //var dictIcon = document.getElementById('dict-mode').querySelector('.check-icon');
-  //dictIcon.innerHTML = g_dictMode ? '✔' : '☐';
   menu.style.display = (menu.style.display == 'block') ? 'none' : 'block';
 }
 
@@ -556,13 +555,15 @@ function toggleInkMode() {
 function toggleDictMode() {
   g_dictMode = !g_dictMode;
   document.getElementById('tr-result').style.display='none';
+  document.getElementById('dict-mode').style.border = g_dictMode ? '2px solid #000' : 'none';
   hideNavbar();
 }
 
 //关闭查词窗口
 function closeDictDialog() {
-  document.getElementById('tr-result').style.display='none';
   g_dictMode = false;
+  document.getElementById('tr-result').style.display='none';
+  document.getElementById('dict-mode').style.border = 'none';
 }
 
 //根据是否使能墨水屏模式，设置相应的元素属性
@@ -844,6 +845,7 @@ function iframeLoadEvent(evt) {
     var text = selection.toString();
     if (g_dictMode) {
       g_dictMode = false;
+      document.getElementById('dict-mode').style.border = 'none';
       text = text || getWordAtClick(event, iframe);
       if (text) {
         translateWord(event, text, selection);

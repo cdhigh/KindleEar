@@ -163,16 +163,17 @@ def ReaderSettingsPost(user: KeUser, userDir: str):
     return {'status': 'ok'}
 
 #查词
-@bpReader.post("/reader/dict", endpoint='ReaderDictPost')
+@bpReader.route("/reader/dict", methods=['GET', 'POST'], endpoint='ReaderDictRoute')
 @login_required(forAjax=True)
 @reader_route_preprocess(forAjax=True)
-def ReaderDictPost(user: KeUser, userDir: str):
-    word = request.form.get('word')
-    key = request.form.get('key')
-    language = request.form.get('language', '')
+def ReaderDictRoute(user: KeUser, userDir: str):
+    form = request.form if request.method == 'POST' else request.args
+    word = form.get('word')
+    key = form.get('key')
+    language = form.get('language', '')
     if not word or key != user.share_links.get('key'):
         return {'status': _("Some parameters are missing or wrong.")}
-
+    
     params = user.cfg('reader_params')
     dictParams = params.get('dict', {})
     if not dictParams.get('src_lang'): #如果设置源语言为自动，则使用当前书本的语言设置

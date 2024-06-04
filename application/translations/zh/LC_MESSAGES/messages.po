@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-02 21:37-0300\n"
+"POT-Creation-Date: 2024-06-03 20:15-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -167,8 +167,7 @@ msgstr "编辑账号"
 #: application/templates/admin.html:89
 #: application/templates/adv_inboundmail.html:54
 #: application/templates/adv_uploadcss.html:31
-#: application/templates/base.html:25 application/templates/reader.html:93
-#: application/templates/webmail.html:22
+#: application/templates/base.html:25 application/templates/webmail.html:22
 msgid "Delete"
 msgstr "删除"
 
@@ -396,7 +395,7 @@ msgid "Please input mail address"
 msgstr "请输入邮件地址"
 
 #: application/templates/adv_reader.html:18
-#: application/templates/reader.html:57
+#: application/templates/reader.html:100
 msgid "Dictionary"
 msgstr "词典"
 
@@ -518,7 +517,7 @@ msgstr "5秒钟后自动返回上一页"
 msgid "Click to back"
 msgstr "点击直接返回"
 
-#: application/templates/base.html:24 application/templates/reader.html:146
+#: application/templates/base.html:24 application/templates/reader.html:153
 msgid "Confirm Deletion"
 msgstr "确认删除"
 
@@ -554,7 +553,7 @@ msgstr "全文RSS"
 msgid "Share"
 msgstr "分享"
 
-#: application/templates/base.html:34 application/templates/reader.html:147
+#: application/templates/base.html:34 application/templates/reader.html:154
 msgid "Are you sure to delete?"
 msgstr "您确认要删除吗？"
 
@@ -602,7 +601,7 @@ msgstr "语言代码不合法"
 msgid "Thank you for sharing."
 msgstr "谢谢您的分享。"
 
-#: application/templates/base.html:46 application/templates/reader.html:118
+#: application/templates/base.html:46 application/templates/reader.html:125
 msgid "Close"
 msgstr "关闭"
 
@@ -887,7 +886,7 @@ msgstr "这里什么都没有。"
 msgid "Please select a single item."
 msgstr "请选择单独一项。"
 
-#: application/templates/base.html:115 application/templates/reader.html:148
+#: application/templates/base.html:115 application/templates/reader.html:155
 msgid "Please select at least one item."
 msgstr "请选择至少一项。"
 
@@ -1276,66 +1275,70 @@ msgstr "Edge扩展程序"
 msgid "Browser extensions also available"
 msgstr "浏览器扩展也有提供"
 
-#: application/templates/reader.html:33
+#: application/templates/reader.html:37
 msgid "Push current book"
 msgstr "推送当前书籍"
 
-#: application/templates/reader.html:39
+#: application/templates/reader.html:43
 msgid "Push current article"
 msgstr "推送当前文章"
 
-#: application/templates/reader.html:45
+#: application/templates/reader.html:49
+msgid "Delete selected books"
+msgstr "删除选择的书本"
+
+#: application/templates/reader.html:55
 msgid "Allow click links"
 msgstr "允许点击链接"
 
-#: application/templates/reader.html:51
+#: application/templates/reader.html:61
 msgid "eInk mode"
 msgstr "墨水屏模式"
 
-#: application/templates/reader.html:63
+#: application/templates/reader.html:67
 msgid "Increase font size"
 msgstr "增大字号"
 
-#: application/templates/reader.html:69
+#: application/templates/reader.html:73
 msgid "Decrease font size"
 msgstr "缩小字号"
 
-#: application/templates/reader.html:75
+#: application/templates/reader.html:79
 msgid "Visualize Touch Regions"
 msgstr "显示触摸区域图示"
 
-#: application/templates/reader.html:81
+#: application/templates/reader.html:85
 msgid "Help"
 msgstr "帮助"
 
-#: application/templates/reader.html:87
-#: application/templates/reader_404.html:124
+#: application/templates/reader.html:91
+#: application/templates/reader_404.html:125
 msgid "Menu"
 msgstr "菜单"
 
-#: application/templates/reader.html:98
+#: application/templates/reader.html:105
 msgid "Collapse all"
 msgstr "折叠所有"
 
-#: application/templates/reader.html:103
+#: application/templates/reader.html:110
 msgid "Expand all"
 msgstr "展开所有"
 
-#: application/templates/reader.html:108
-#: application/templates/reader_404.html:129
+#: application/templates/reader.html:115
+#: application/templates/reader_404.html:130
 msgid "Prev"
 msgstr "前一页"
 
-#: application/templates/reader.html:113
-#: application/templates/reader_404.html:132
+#: application/templates/reader.html:120
+#: application/templates/reader_404.html:133
 msgid "Next page"
 msgstr "下一页"
 
-#: application/templates/reader.html:149
+#: application/templates/reader.html:156
 msgid "Pushed successfully."
 msgstr "推送成功。"
 
-#: application/templates/reader.html:150
+#: application/templates/reader.html:157
 msgid "There are currently no books or articles being read."
 msgstr "当前没有正在阅读的书籍或文章。"
 

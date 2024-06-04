@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-02 21:37-0300\n"
+"POT-Creation-Date: 2024-06-03 20:15-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -166,8 +166,7 @@ msgstr ""
 #: application/templates/admin.html:89
 #: application/templates/adv_inboundmail.html:54
 #: application/templates/adv_uploadcss.html:31
-#: application/templates/base.html:25 application/templates/reader.html:93
-#: application/templates/webmail.html:22
+#: application/templates/base.html:25 application/templates/webmail.html:22
 msgid "Delete"
 msgstr ""
 
@@ -395,7 +394,7 @@ msgid "Please input mail address"
 msgstr ""
 
 #: application/templates/adv_reader.html:18
-#: application/templates/reader.html:57
+#: application/templates/reader.html:100
 msgid "Dictionary"
 msgstr ""
 
@@ -517,7 +516,7 @@ msgstr ""
 msgid "Click to back"
 msgstr ""
 
-#: application/templates/base.html:24 application/templates/reader.html:146
+#: application/templates/base.html:24 application/templates/reader.html:153
 msgid "Confirm Deletion"
 msgstr ""
 
@@ -553,7 +552,7 @@ msgstr ""
 msgid "Share"
 msgstr ""
 
-#: application/templates/base.html:34 application/templates/reader.html:147
+#: application/templates/base.html:34 application/templates/reader.html:154
 msgid "Are you sure to delete?"
 msgstr ""
 
@@ -601,7 +600,7 @@ msgstr ""
 msgid "Thank you for sharing."
 msgstr ""
 
-#: application/templates/base.html:46 application/templates/reader.html:118
+#: application/templates/base.html:46 application/templates/reader.html:125
 msgid "Close"
 msgstr ""
 
@@ -886,7 +885,7 @@ msgstr ""
 msgid "Please select a single item."
 msgstr ""
 
-#: application/templates/base.html:115 application/templates/reader.html:148
+#: application/templates/base.html:115 application/templates/reader.html:155
 msgid "Please select at least one item."
 msgstr ""
 
@@ -1275,66 +1274,70 @@ msgstr ""
 msgid "Browser extensions also available"
 msgstr ""
 
-#: application/templates/reader.html:33
+#: application/templates/reader.html:37
 msgid "Push current book"
 msgstr ""
 
-#: application/templates/reader.html:39
+#: application/templates/reader.html:43
 msgid "Push current article"
 msgstr ""
 
-#: application/templates/reader.html:45
+#: application/templates/reader.html:49
+msgid "Delete selected books"
+msgstr ""
+
+#: application/templates/reader.html:55
 msgid "Allow click links"
 msgstr ""
 
-#: application/templates/reader.html:51
+#: application/templates/reader.html:61
 msgid "eInk mode"
 msgstr ""
 
-#: application/templates/reader.html:63
+#: application/templates/reader.html:67
 msgid "Increase font size"
 msgstr ""
 
-#: application/templates/reader.html:69
+#: application/templates/reader.html:73
 msgid "Decrease font size"
 msgstr ""
 
-#: application/templates/reader.html:75
+#: application/templates/reader.html:79
 msgid "Visualize Touch Regions"
 msgstr ""
 
-#: application/templates/reader.html:81
+#: application/templates/reader.html:85
 msgid "Help"
 msgstr ""
 
-#: application/templates/reader.html:87
-#: application/templates/reader_404.html:124
+#: application/templates/reader.html:91
+#: application/templates/reader_404.html:125
 msgid "Menu"
 msgstr ""
 
-#: application/templates/reader.html:98
+#: application/templates/reader.html:105
 msgid "Collapse all"
 msgstr ""
 
-#: application/templates/reader.html:103
+#: application/templates/reader.html:110
 msgid "Expand all"
 msgstr ""
 
-#: application/templates/reader.html:108
-#: application/templates/reader_404.html:129
+#: application/templates/reader.html:115
+#: application/templates/reader_404.html:130
 msgid "Prev"
 msgstr ""
 
-#: application/templates/reader.html:113
-#: application/templates/reader_404.html:132
+#: application/templates/reader.html:120
+#: application/templates/reader_404.html:133
 msgid "Next page"
 msgstr ""
 
-#: application/templates/reader.html:149
+#: application/templates/reader.html:156
 msgid "Pushed successfully."
 msgstr ""
 
-#: application/templates/reader.html:150
+#: application/templates/reader.html:157
 msgid "There are currently no books or articles being read."
 msgstr ""
 

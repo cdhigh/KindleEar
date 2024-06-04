@@ -282,22 +282,29 @@ body::-webkit-scrollbar-thumb {
   display: inline-block;
   width: 40px;
   text-align: center;
+  vertical-align: middle;
   font-size: 0.9em;
 }
 
 .tr-result {
   position: absolute;
   top: 50%;
-  left: 50%;
+  /*left: 50%;*/
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
   background-color: white;
   border: 1px solid #ccc;
   border-radius: 20px;
   box-shadow: 0px 0px 3px #aaa;
   display: none;
   min-width: 200px;
-  max-width: 50%;
-  max-height: 50%;
+  max-width: 80%;
+  max-height: 400px;
   cursor: pointer;
+  overflow: hidden;
+  width: fit-content;
 }
 .tr-close-icon {
   position: absolute;
@@ -320,8 +327,19 @@ body::-webkit-scrollbar-thumb {
   text-align: center;
   border-bottom: 1px dotted #ccc;
 }
+.tr-result-text {
+  width: 100%;
+  max-height: 350px; /* tr-result - tr-word */
+  overflow: hidden;
+}
+.tr-text-container {
+  width: 100%;
+  max-height: 350px;
+  overflow-y: auto;
+}
 .tr-text {
   margin: 10px auto 10px auto;
   padding: 10px;
   text-align: center;
+  height: 100%;
 }

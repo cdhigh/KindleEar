@@ -16,7 +16,11 @@
     <div class="tr-result" id="tr-result" onclick="closeDictDialog()">
       <div class="tr-close-icon" id="tr-close-icon" onclick="closeDictDialog()">X</div>
       <div class="tr-word" id="tr-word"></div>
-      <div class="tr-text" id="tr-text"></div>
+      <div class="tr-result-text">
+        <div class="tr-text-container">
+          <div class="tr-text" id="tr-text"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -39,6 +43,14 @@
           <span>{{_("Push current article")}}</span>
         </div>
       </div>
+      <div class="nav-popmenu-row" onclick="navDeleteBooks(event)">
+        <div class="nav-popmenu-item">
+          <span class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+          <path fill="#000" d="M6.42 7.38L7.04 16.16L13.11 16.16L13.73 7.38L15.16 7.38L14.54 16.27C14.48 17.01 13.86 17.59 13.11 17.59L7.04 17.59C6.29 17.59 5.67 17.01 5.62 16.26L4.99 7.38zM9.53 7.82V14.49H8.1V7.82zM12.14 7.82V14.49H10.71V7.82zM2.86 5H17.14V6.43H2.86zM12.98 2.62V4.05H7.27V2.62z"/>
+        </svg></span>
+          <span>{{_("Delete selected books")}}</span>
+        </div>
+      </div>
       <div class="nav-popmenu-row" id="allow-links" onclick="toggleAllowLinks()">
         <div class="nav-popmenu-item">
           <span class="check-icon"></span>
@@ -51,30 +63,24 @@
           <span>{{_("eInk mode")}}</span>
         </div>
       </div>-->
-      <div class="nav-popmenu-row" id="dict-mode" onclick="toggleDictMode()">
-        <div class="nav-popmenu-item">
-          <span class="check-icon"></span>
-          <span>{{_("Dictionary")}}</span>
-        </div>
-      </div>
       <div class="nav-popmenu-row" onclick="increaseFontSize()">
         <div class="nav-popmenu-item">
-          <span class="check-icon"></span>
+          <span class="check-icon">&#x2295;</span>
           <span>{{_("Increase font size")}}</span>
         </div>
       </div>
       <div class="nav-popmenu-row" onclick="decreaseFontSize()">
         <div class="nav-popmenu-item">
-          <span class="check-icon"></span>
+          <span class="check-icon">&#x2299;</span>
           <span>{{_("Decrease font size")}}</span>
         </div>
       </div>
-      <div class="nav-popmenu-row" onclick="showTouchHint()">
+      <!--<div class="nav-popmenu-row" onclick="showTouchHint()">
         <div class="nav-popmenu-item">
           <span class="check-icon"></span>
           <span>{{_("Visualize Touch Regions")}}</span>
         </div>
-      </div>
+      </div>-->
       <div class="nav-popmenu-row" style="border:none;" onclick="javascript:window.location.href='{{helpPage}}';">
         <div class="nav-popmenu-item">
           <span class="check-icon"></span>
@@ -85,14 +91,17 @@
     <!-- 菜单底部固定的图标行 -->
     <div class="nav-footer" id="nav-footer">
       <button title="{{_('Menu')}}" onclick="toggleNavPopMenu()">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 20 20">
+          <path fill="#000" d="M12.18 17.5C11.96 17.5 11.75 17.42 11.59 17.27C11.35 17.06 10.56 16.45 10 16.45C9.43 16.45 8.65 17.06 8.42 17.27C8.18 17.5 7.79 17.57 7.48 17.43L7.44 17.41L5.16 16.1C4.89 15.89 4.77 15.55 4.84 15.21C4.9 14.91 5.04 13.92 4.76 13.43C4.48 12.95 3.55 12.58 3.25 12.48C2.94 12.38 2.7 12.11 2.64 11.79C2.63 11.75 2.5 10.98 2.5 10.42C2.5 9.86 2.63 9.09 2.64 9.06C2.69 8.74 2.95 8.45 3.25 8.36C3.55 8.26 4.48 7.89 4.76 7.4C5.04 6.91 4.91 5.93 4.84 5.63C4.77 5.29 4.89 4.95 5.16 4.74L5.2 4.71L7.48 3.4C7.78 3.27 8.18 3.34 8.42 3.56C8.65 3.77 9.44 4.38 10 4.38C10.57 4.38 11.35 3.77 11.58 3.56C11.82 3.34 12.21 3.27 12.52 3.4L12.56 3.42L14.84 4.74C15.1 4.93 15.24 5.3 15.16 5.62C15.1 5.93 14.96 6.91 15.24 7.4C15.52 7.88 16.45 8.26 16.75 8.35C17.05 8.45 17.31 8.74 17.36 9.05C17.37 9.08 17.5 9.85 17.5 10.42C17.5 11 17.37 11.75 17.36 11.78C17.3 12.11 17.06 12.37 16.75 12.48C16.45 12.57 15.52 12.95 15.24 13.43C14.96 13.92 15.09 14.9 15.16 15.21C15.24 15.53 15.1 15.9 14.84 16.09L14.8 16.12L12.52 17.43C12.41 17.47 12.3 17.5 12.18 17.5ZM5.75 15.37L7.82 16.56C8.05 16.36 9.04 15.52 10 15.52C10.95 15.52 11.95 16.36 12.18 16.56L14.25 15.37C14.19 15.07 13.96 13.8 14.44 12.97C14.93 12.12 16.22 11.68 16.46 11.6C16.48 11.48 16.57 10.85 16.57 10.42C16.57 9.98 16.48 9.35 16.46 9.23C16.22 9.15 14.93 8.71 14.44 7.86C13.96 7.04 14.19 5.76 14.25 5.46L12.18 4.27C11.95 4.47 10.95 5.31 10 5.31C9.04 5.31 8.05 4.47 7.82 4.27L5.75 5.46C5.8 5.76 6.04 7.04 5.56 7.86C5.06 8.71 3.77 9.15 3.54 9.23C3.52 9.35 3.42 9.98 3.42 10.42C3.42 10.85 3.52 11.48 3.54 11.6C3.77 11.68 5.06 12.12 5.56 12.97C6.04 13.8 5.8 15.07 5.75 15.37ZM10 13.56C8.26 13.56 6.85 12.15 6.85 10.42C6.85 8.68 8.26 7.27 10 7.27C11.74 7.27 13.15 8.68 13.15 10.42C13.15 12.15 11.74 13.56 10 13.56ZM10 8.2C8.77 8.2 7.77 9.19 7.77 10.42C7.77 11.64 8.77 12.64 10 12.63C11.23 12.63 12.22 11.64 12.23 10.42C12.22 9.19 11.23 8.2 10 8.2Z"/>
+        </svg>
+        <!--<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
           <path fill="none" d="M0 0h20v20H0z"/>
           <path d="M15.95 10.78c.03-.25.05-.51.05-.78s-.02-.53-.06-.78l1.69-1.32c.15-.12.19-.34.1-.51l-1.6-2.77c-.1-.18-.31-.24-.49-.18l-1.99.8c-.42-.32-.86-.58-1.35-.78l-.3-2.12c-.04-.2-.2-.34-.4-.34H8.4c-.2 0-.36.14-.39.34l-.3 2.12c-.49.2-.94.47-1.35.78l-1.99-.8c-.18-.07-.39 0-.49.18l-1.6 2.77c-.1.18-.06.39.1.51l1.69 1.32c-.04.25-.07.52-.07.78s.02.53.06.78L2.37 12.1c-.15.12-.19.34-.1.51l1.6 2.77c.1.18.31.24.49.18l1.99-.8c.42.32.86.58 1.35.78l.3 2.12c.04.2.2.34.4.34h3.2c.2 0 .37-.14.39-.34l.3-2.12c.49-.2.94-.47 1.35-.78l1.99.8c.18.07.39 0 .49-.18l1.6-2.77c.1-.18.06-.39-.1-.51l-1.67-1.32zM10 13c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/>
-        </svg>
+        </svg> -->
       </button>
-      <button title="{{_('Delete')}}" onclick="navDeleteBooks(event)">
+      <button title="{{_('Dictionary')}}" id="dict-mode" onclick="toggleDictMode()">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
-          <path fill="#000" d="M6.42 7.38L7.04 16.16L13.11 16.16L13.73 7.38L15.16 7.38L14.54 16.27C14.48 17.01 13.86 17.59 13.11 17.59L7.04 17.59C6.29 17.59 5.67 17.01 5.62 16.26L4.99 7.38zM9.53 7.82V14.49H8.1V7.82zM12.14 7.82V14.49H10.71V7.82zM2.86 5H17.14V6.43H2.86zM12.98 2.62V4.05H7.27V2.62z"/>
+          <path fill="#000" d="M10.9 12.9H9.1l-.6 1.2c-.1.1-.2.2-.3.2s-.3 0-.4-.1c-.1-.1-.2-.2-.1-.4L9.7 9.9c.1-.1.2-.3.3-.3s.3.1.3.3l1.8 3.9c.1.1 0 .3-.1.4-.1.1-.2.1-.3.1s-.3-.1-.4-.2zm-.3-.7L10 10.9l-.6 1.2zm-4.1-9.6h9.3c.1 0 .2.1.3.2s.1.2 0 .3c-.1.1-.2.2-.3.2H6.4c-1 0-1.8.8-1.8 1.8s.8 1.8 1.8 1.8h9.3c.2 0 .3.1.3.3v10c0 .2-.1.3-.3.3H6.4c-1.4 0-2.5-1.1-2.5-2.5v-10c0-1.4 1.1-2.5 2.5-2.5zm-1.8 4.2v8.2c0 1 .8 1.8 1.8 1.8h8.9V7.5H6.4c-.7 0-1.3-.3-1.8-.8zm1.8-1.4c-.2 0-.3-.1-.3-.3s.1-.3.3-.3H15c.2 0 .3.1.3.3s-.1.3-.3.3H6.4z"/>
         </svg>
       </button>
       <button title="{{_('Collapse all')}}" onclick="navExpandCollapseAll(0)">
