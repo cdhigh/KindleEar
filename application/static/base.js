@@ -21,6 +21,16 @@ function escapeXml(xmlStr) {
   });
 }
 
+//将一个字符串转义为能安全用于js字符串拼接的场合
+function encodeJsSafeStr(str) {
+  return btoa(encodeURIComponent(str));
+}
+
+//安全的解码经过 encodeJsSafeStr 编码的字符串
+function decodeJsSafeStr(str) {
+  return decodeURIComponent(atob(str));
+}
+
 //返回当前时间戳，单位为秒
 function getNowSeconds() {
   return Math.floor(new Date().getTime() / 1000);
@@ -215,6 +225,7 @@ function AppendRecipeToLibrary(div, id) {
   row_str.push(recipe.description || '&nbsp;');
   row_str.push('</div>');
 
+  title = encodeJsSafeStr(recipe.title);
   hamb_arg = [];
   var fTpl = "{0}('{1}','{2}')";
   if (id.startsWith("upload:")) { //增加汉堡按钮弹出菜单代码
@@ -297,6 +308,7 @@ function PopulateMyCustomRss() {
     }
     row_str.push('</a></div>');
 
+    title = encodeJsSafeStr(rss.title);
     hamb_arg = [];
     //汉堡按钮弹出菜单代码
     var fTpl = "{0}('{1}','{2}')";
@@ -350,6 +362,7 @@ function PopulateMySubscribed() {
     }
     row_str.push('</div>');
 
+    title = encodeJsSafeStr(recipe.title);
     hamb_arg = [];
     var fTpl = "{0}('{1}','{2}')";
     //汉堡按钮弹出菜单代码
@@ -402,6 +415,7 @@ function SubscribeRecipe(id, separated) {
 
 //点击了退订内置或上传的Recipe
 function UnsubscribeRecipe(id, title) {
+  title = decodeJsSafeStr(title);
   if (!(event.ctrlKey || event.metaKey) && !confirm(i18n.areYouSureUnsubscribe.format(title))) {
     return;
   }
@@ -512,6 +526,7 @@ function SetWdDatePickerVisuable(selId) {
 
 //设置订阅的Recipe的自定义推送时间
 function ScheduleRecipe(id, title) {
+  title = decodeJsSafeStr(title);
   var item = GetBookedRecipeItem(id);
   if (!item) {
     return;
@@ -605,6 +620,7 @@ function AskForSubscriptionInfo(id, account) {
 
 //用户点击了删除自定义RSS按钮，如果按住ctrl键再点击删除，则不需要确认
 function ShowDeleteCustomRssDialog(event, rssid, title, url, isfulltext) {
+  title = decodeJsSafeStr(title);
   if (!(event.ctrlKey || event.metaKey)) {
     let msg = `<h3 style="margin:0px auto 20px auto;text-align:center;">${i18n.confirmDelete}</h3>
       ${i18n.areYouSureDelete}<br/>${title}
@@ -828,6 +844,8 @@ function DisplayShareRssLang() {
 
 //点击分享自定义RSS
 function StartShareRss(id, title) {
+  title = decodeJsSafeStr(title);
+
   //从本地存储或服务器获取分类信息
   var now = getNowSeconds();
   var needCat = false;
@@ -926,6 +944,7 @@ function OpenUploadRecipeDialog() {
 
 //删除一个已经上传的Recipe
 function DeleteUploadRecipe(id, title) {
+  title = decodeJsSafeStr(title);
   let force = (event.ctrlKey || event.metaKey);
   if (!force && !confirm(i18n.areYouSureDelete + '\n' + title)) {
     return;

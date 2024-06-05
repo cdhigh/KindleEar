@@ -33,7 +33,9 @@ The advantage of online reading is that it does not occupy space on the e-book d
    * Up arrow key - Previous book
    * Down arrow key - Next book
 
-6. The Kindle browser does not support persistent cookies, so you need to enter your username and password each time you open it. To avoid this hassle, you can add your username and password in the query string of a bookmark, e.g., `https://yourdomain/reader?username=yourname&password=yourpassword`. Note that storing plain text passwords may be insecure, so consider this carefully.
+6. The Kindle browser does not support cookie persistence, requiring account and password to be entered each time it's opened. To avoid this inconvenience, you can add account and password query strings to bookmarks in two formats, either of your choice. If you prefer not to store passwords in plain text, you can use a "Share Key" (available on the "Edit account" page):     
+`https://youdomain/reader?username=YourName&password=YourPassword`     
+`https://youdomain/reader?username=YourName&key=ShareKey`      
 
 7. If you need some subscriptions to be pushed and others only for online reading, you can create two accounts, one for pushing and one for online reading.
 

@@ -42,13 +42,16 @@ def reader_route_preprocess(forAjax=False):
 def ReaderRoute():
     userName = request.args.get('username')
     password = request.args.get('password')
+    key = request.args.get('key')
     user = get_login_user()
     #为了方便在墨水屏上使用，如果没有登录的话，可以使用查询字符串传递用户名和密码
-    if not user and userName and password:
+    if not user and userName:
         user = KeUser.get_or_none(KeUser.name == userName)
         if user:
+            isValidKey = key and (key == user.share_links.get('key'))
             try:
-                if user.passwd_hash == user.hash_text(password):
+                isValidPassword = password and (user.passwd_hash == user.hash_text(password))
+                if isValidKey or isValidPassword:
                     session['login'] = 1
                     session['userName'] = userName
                     session['role'] = 'admin' if userName == app.config['ADMIN_NAME'] else 'user'
@@ -59,7 +62,7 @@ def ReaderRoute():
                 user = None
 
     if not user:
-        if userName and password:
+        if userName and (password or key):
             time.sleep(5) #防止暴力破解
         return redirect(url_for("bpLogin.Login", next=url_for('bpReader.ReaderRoute')))
 

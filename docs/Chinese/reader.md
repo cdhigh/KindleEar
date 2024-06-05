@@ -29,7 +29,10 @@ KindleEar支持邮件推送和在线阅读，邮件推送的好处是可以离�
   * 上方向键 - 上一本书
   * 下方向键 - 下一本书
 
-6. Kindle浏览器不支持cookie持久化，每次打开都需要输入账号密码，为了避免这个麻烦，可以在书签中添加账号和密码的查询字符串，比如 `https://youdomain/reader?username=yourname&password=yourpassword`，有人可能觉得存储明文密码会显得不安全，自己抉择吧。    
+6. Kindle浏览器不支持cookie持久化，每次打开都需要输入账号密码，为了避免这个麻烦，可以在书签中添加账号和密码的查询字符串，两种格式，任选一种，如果觉得不应该明文保存密码，可以使用"分享密钥"(可以在"编辑账号"页面找到)： 
+`https://youdomain/reader?username=YourName&password=YourPassword`     
+`https://youdomain/reader?username=YourName&key=ShareKey`    
+
 
 7. 如果需要有的订阅需要推送，有的订阅仅需要在线阅读，可以创建两个账号，一个用于推送一个用于在线阅读。   
 ## 词典功能  
