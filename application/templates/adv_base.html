@@ -61,6 +61,15 @@
             <a href="/adv/archive" class="pure-menu-link">{{_("Archive")}} </a>
           </li>
           {% endif -%}
+          {% if advCurr=='dictionary' -%}
+          <li class="pure-menu-item pure-menu-selected">
+            <span>{{_("Dictionary")}}</span>
+          </li>
+          {% else -%}
+          <li class="pure-menu-item">
+            <a href="/adv/dict" class="pure-menu-link">{{_("Dictionary")}}</a>
+          </li>
+          {% endif -%}
           {% if advCurr=='import' -%}
           <li class="pure-menu-item pure-menu-selected">
             <span>{{_("Import Feeds")}}</span>
@@ -86,15 +95,6 @@
           {% else -%}
           <li class="pure-menu-item">
             <a href="/adv/css" class="pure-menu-link">{{_("Stylesheet")}}</a>
-          </li>
-          {% endif -%}
-          {% if advCurr=='reader' -%}
-          <li class="pure-menu-item pure-menu-selected">
-            <span>{{_("Reader")}}</span>
-          </li>
-          {% else -%}
-          <li class="pure-menu-item">
-            <a href="/adv/reader" class="pure-menu-link">{{_("Reader")}}</a>
           </li>
           {% endif -%}
           {% if advCurr=='calibreOptions' -%}

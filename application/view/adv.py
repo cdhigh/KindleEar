@@ -2,8 +2,9 @@
 # -*- coding:utf-8 -*-
 #一些高级设置功能页面
 #Author: cdhigh <https://github.com/cdhigh>
-import re, io, textwrap, json, secrets
+import re, io, textwrap, json
 from urllib.parse import unquote, urljoin, urlparse
+from bs4 import BeautifulSoup
 from flask import Blueprint, url_for, render_template, redirect, session, send_file, abort, current_app as app
 from flask_babel import gettext as _
 from PIL import Image
@@ -13,9 +14,7 @@ from ..utils import ke_decrypt, str_to_int, str_to_bool, safe_eval, xml_escape, 
 from ..lib.pocket import Pocket
 from ..lib.wallabag import WallaBag
 from ..lib.urlopener import UrlOpener
-from .settings import UpdateBookedCustomRss
-from .translator import famous_quotes
-from ebook_translator import get_trans_engines, HtmlTranslator
+from .settings import UpdateBookedCustomRss, LangMap
 
 bpAdv = Blueprint('bpAdv', __name__)
 
@@ -368,62 +367,41 @@ def AdvDeleteCssAjaxPost(user: KeUser):
         ret['status'] = _('Unknown command: {}').format(act)
     return ret
 
-#设置在线阅读器的一些配置
-@bpAdv.route("/adv/reader", endpoint='AdvReader')
+#设置在线阅读器的字典
+@bpAdv.route("/adv/dict", endpoint='AdvDict')
 @login_required()
-def AdvReader(user: KeUser):
-    engines = json.dumps(get_trans_engines(), separators=(',', ':'))
-    params = user.cfg('reader_params')
-    famous = secrets.choice(famous_quotes)
-    return adv_render_template('adv_reader.html', 'reader', user=user, engines=engines, params=params,
-        famous=famous, tips='')
-    
-@bpAdv.post("/adv/reader", endpoint='AdvReaderPost')
-@login_required()
-def AdvReaderPost(user: KeUser):
-    form = request.form
-    engineName = form.get('engine', '')
-    apiHost = form.get('api_host', '')
-    apiHost = f'https://{apiHost}' if apiHost and not apiHost.startswith('http') else apiHost
-    apiKeys = form.get('api_keys', '')
-    apiKeys = apiKeys.split('\n') if apiKeys else []
-    dictParams = {'engine': engineName, 'api_host': apiHost, 'api_keys': apiKeys, 
-        'src_lang': form.get('src_lang', ''), 'dst_lang': form.get('dst_lang', 'en')}
+def AdvDict(user: KeUser):
+    from dictionary import all_dict_engines
+    dictParams = user.cfg('reader_params').get('dicts', {}).copy()
+    #js的字典是不按顺序的，需要转换为字典列表再传递给html
+    #列表长度为3，最后一个元素为默认字典，[{language:,engine:,database:,},]
+    defDict = dictParams.pop('und', {})
+    defDict['language'] = 'und'
+    dictsCfg = [{}, {}, defDict]
+    for idx, (language, cfg) in enumerate(list(dictParams.items())[:2]):
+        cfg['language'] = language
+        dictsCfg[idx] = cfg
 
-    famous = secrets.choice(famous_quotes)
-    params = user.cfg('reader_params')
-    engines = get_trans_engines()
-    engine = engines.get(engineName, None)
-    if engine and engine.get('need_api_key'):
-        if not apiKeys:
-            tips = _('The api key is required.')
-            engines = json.dumps(get_trans_engines(), separators=(',', ':'))
-            return adv_render_template('adv_reader.html', 'reader', user=user, engines=engines, params=params,
-                famous=famous, tips=tips)
-    else:
-        dictParams['api_host'] = ''
+    engines = json.dumps({name: {'databases': klass.databases} for name,klass in all_dict_engines.items()})
+    return adv_render_template('adv_dict.html', 'dictionary', user=user, engines=engines, 
+        dictsCfg=dictsCfg, tips='', langMap=LangMap())
     
-    engines = json.dumps(get_trans_engines(), separators=(',', ':'))
-    params.update({'dict': dictParams})
+@bpAdv.post("/adv/dict", endpoint='AdvDictPost')
+@login_required()
+def AdvDictPost(user: KeUser):
+    from dictionary import all_dict_engines
+    form = request.form
+    newParams = {}
+    for idx in range(3):
+        language = form.get(f'language{idx}', '').split('-')[0] if idx < 2 else 'und'
+        item = {'engine': form.get(f'engine{idx}', ''), 'database': form.get(f'database{idx}', '')}
+        newParams[language] = item
+    
+    params = user.cfg('reader_params')
+    params.update({'dicts': newParams})
     user.set_cfg('reader_params', params)
     user.save()
-    tips = _("Settings Saved!")
-    return adv_render_template('adv_reader.html', 'reader', user=user, engines=engines, params=params,
-                famous=famous, tips=tips)
-
-#测试在线阅读器的文本翻译器设置是否正确
-@bpAdv.post("/adv/reader/test", endpoint='AdvReaderTestPostAjax')
-@login_required(forAjax=True)
-def AdvReaderTestPostAjax(user: KeUser):
-    text = request.form.get('text')
-    if not text:
-        return {'status': _('The text is empty.')}
-
-    params = user.cfg('reader_params')
-    translator = HtmlTranslator(params.get('dict', {}))
-    data = translator.translate_text(text)
-    status = data['error'] if data['error'] else 'ok' #type:ignore
-    return {'status': status, 'text': data['translated']} #type:ignore
+    return redirect(url_for('bpAdv.AdvDict'))
 
 #设置calibre的参数
 @bpAdv.route("/adv/calibre", endpoint='AdvCalibreOptions')

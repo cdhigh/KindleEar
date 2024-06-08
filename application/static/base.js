@@ -1349,12 +1349,12 @@ function startUploadCoversToServer(url) {
 //currEngineName: Recipe的当前配置
 function PopulateTranslatorFields(currEngineName) {
   var engineSel = $('#translator_engine');
+  engineSel.empty();
   for (var name in g_trans_engines) {
     var selected = (currEngineName == name) ? 'selected="selected"' : '';
     var txt = '<option value="{0}" {1}>{2}</option>'.format(name, selected, g_trans_engines[name].alias);
     engineSel.append($(txt));
   }
-  
 }
 
 //选择一个翻译引擎后显示或隐藏ApiKey文本框，语种列表也同步更新
@@ -1429,15 +1429,6 @@ function TestTranslator(recipeId) {
   });
 }
 
-//测试在线阅读器的翻译器设置是否正确，这个是adv_reader.html的函数，放在这里是为了归类
-function TestReaderTranslator() {
-  var text = $('#translator_test_src_text').val();
-  var divDst = $('#translator_test_dst_text');
-  divDst.val(i18n.translating);
-  MakeAjaxRequest("/adv/reader/test", "POST", {text: text}, function (resp) {
-    divDst.val(resp.text);
-  });
-} 
 ///[end] book_translator.html
 
 ///[start] book_audiolator.html
@@ -1652,3 +1643,40 @@ function SendTestEmail() {
   return false;
 }
 ///[end] settings.html
+///[start] adv_dict.html
+
+//根据词典引擎列表 g_dictEngines 和 当前配置 g_dictParams 填充下拉框
+function PopulateDictFields() {
+  for (var idx = 0; idx < 3; idx++) {
+    var cfg = g_dictsCfg[idx];
+    var engineSel = $('#dict_engine' + idx);
+    engineSel.empty();
+    var engineName = cfg.engine;
+    for (var name in g_dictEngines) {
+      var selected = (engineName == name) ? 'selected="selected"' : '';
+      var txt = `<option value="${name}" ${selected}>${name}</option>`;
+      engineSel.append($(txt));
+    }
+  }
+}
+
+//选择不同的阅读词典引擎
+//idx: 选择的配置索引，当前支持3个配置，前两个为特定语种，最后一个是默认字典配置
+function DictEngineFieldChanged(idx) {
+  var engineSel = $('#dict_engine' + idx);
+  var dbSel = $('#dict_database' + idx);
+  var engine = engineSel.val();
+  dbSel.empty();
+  var databases = g_dictEngines[engine].databases;
+  if (!databases) {
+    return;
+  }
+  var currDb = g_dictsCfg[idx].database;
+  for (var name in databases) {
+    var selected = (currDb == name) ? 'selected="selected"' : '';
+    var txt = `<option value="${name}" ${selected}>${databases[name]}</option>`;
+    dbSel.append($(txt));
+  }
+}
+
+///[end] adv_dict.html

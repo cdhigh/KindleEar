@@ -219,7 +219,7 @@ function CreatePageContent(category, page) {
     hamb_arg = [];
     //汉堡按钮弹出菜单代码
     var dbId = item.r || '';
-    let title = item.t.replace("'", "\\\'");
+    let title = encodeJsSafeStr(item.t);
     var repAct = "ReportInvalid('`{0}','{1}','{2}')".format(title, item.u, dbId);
     var subsAct = "SubscribeSharedFeed('{0}','{1}','{2}','{3}',{4})";
     hamb_arg.push({klass: 'btn-A', title: i18n.invalidReport, icon: 'icon-offcloud', act: repAct});
@@ -310,6 +310,7 @@ function DoSearchInShared() {
 //订阅一个共享自定义RSS或Recipe
 function SubscribeSharedFeed(title, feedurl, isfulltext, dbId, separated) {
   dbId = dbId || '';
+  title = decodeJsSafeStr(title);
   
   $.ajax({
     url: "/customrss/add",
@@ -335,10 +336,10 @@ function ReportInvalid(title, feedurl, dbId) {
   if (!confirm(i18n.confirmInvalidReport)) {
     return;
   }
-
   if ((typeof dbId == 'undefined') || !dbId) {
     dbId = '';
   }
+  title = decodeJsSafeStr(title);
 
   $.ajax({
     url: "/library/mgr/reportinvalid",

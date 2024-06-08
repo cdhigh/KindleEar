@@ -1,0 +1,100 @@
+{% extends "adv_base.html" %}
+{% block titleTag -%}
+<title>{{ _("Dictionary") }} - KindleEar</title>
+{% endblock -%}
+
+{% block advcontent -%}
+{% if g.allowReader -%}
+<form class="pure-form pure-form-aligned" action="" method="POST">
+  {% if tips -%}
+  <div class="notice-box error">{{tips}}</div>
+  {% endif -%}
+  <fieldset>
+  <legend>{{_("Dictionary")}}</legend>
+  <p style="margin-top:10px;font-size:0.8em;">
+    {{_("Set up dictionaries for online reading.")}}
+  </p>
+  <div class="pure-control-group">
+    <label>{{_("Book language")}}</label>
+    <select class="pure-u-1 pure-u-sm-1-2" name="language0">
+      {% for code,name in langMap.items() -%}
+      {% set lang0 = dictsCfg[0].get('language', '') -%}
+      <option value="{{code}}" {% if lang0 and code.startswith(lang0) %}selected="selected"{% endif %}>{{name}}</option>
+      {% endfor -%}
+    </select>
+  </div>
+  <div class="pure-control-group">
+    <label>{{_("Engine")}}</label>
+    <select class="pure-u-1 pure-u-sm-1-2" name="engine0" id="dict_engine0" onchange="DictEngineFieldChanged(0)">
+      <!-- 由脚本填充 -->
+    </select>
+  </div>
+  <div class="pure-control-group">
+    <label>{{_("Database")}}</label>
+    <select class="pure-u-1 pure-u-sm-1-2" name="database0" id="dict_database0">
+      <!-- 由脚本填充 -->
+    </select>
+  </div>
+  <hr/>
+  <div class="pure-control-group">
+    <label>{{_("Book language")}}</label>
+    <select class="pure-u-1 pure-u-sm-1-2" name="language1">
+      {% for code,name in langMap.items() -%}
+      {% set lang1 = dictsCfg[1].get('language', '') -%}
+      <option value="{{code}}" {% if lang1 and code.startswith(lang1) %}selected="selected"{% endif %}>{{name}}</option>
+      {% endfor -%}
+    </select>
+  </div>
+  <div class="pure-control-group">
+    <label>{{_("Engine")}}</label>
+    <select class="pure-u-1 pure-u-sm-1-2" name="engine1" id="dict_engine1" onchange="DictEngineFieldChanged(1)">
+      <!-- 由脚本填充 -->
+    </select>
+  </div>
+  <div class="pure-control-group">
+    <label>{{_("Database")}}</label>
+    <select class="pure-u-1 pure-u-sm-1-2" name="database1" id="dict_database1">
+      <!-- 由脚本填充 -->
+    </select>
+  </div>
+  <hr/>
+  <div class="pure-control-group">
+    <label>{{_("Book language")}}</label>
+    <input type="text" name="language2" value="{{_('Other languages')}}" class="pure-u-1 pure-u-sm-1-2" readonly />
+  </div>
+  <div class="pure-control-group">
+    <label>{{_("Engine")}}</label>
+    <select class="pure-u-1 pure-u-sm-1-2" name="engine2" id="dict_engine2" onchange="DictEngineFieldChanged(2)">
+      <!-- 由脚本填充 -->
+    </select>
+  </div>
+  <div class="pure-control-group">
+    <label>{{_("Database")}}</label>
+    <select class="pure-u-1 pure-u-sm-1-2" name="database2" id="dict_database2">
+      <!-- 由脚本填充 -->
+    </select>
+  </div>
+  </fieldset>
+  <p style="text-align:center;">
+    <button type="submit" class="pure-button pure-button-primary pure-input-rounded">{{_('Save settings')}} </button>
+  </p>
+</form>
+{% else %}
+<p style="margin-top:10px;font-size:0.8em;">
+  {{_("Online reading feature has not been activated yet.")}}
+</p>
+{% endif -%}
+{% endblock -%}
+{% block js -%}
+<script type="text/javascript">
+var g_dictEngines = {{engines|safe}};
+var g_dictsCfg = {{dictsCfg|safe}}; //[{language:,engine:,database:,},]
+
+$(document).ready(function() {
+  PopulateDictFields();
+  DictEngineFieldChanged(0);
+  DictEngineFieldChanged(1);
+  DictEngineFieldChanged(2);
+});
+</script>
+{% endblock -%}

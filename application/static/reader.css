@@ -289,11 +289,11 @@ body::-webkit-scrollbar-thumb {
 .tr-result {
   position: absolute;
   top: 50%;
-  /*left: 50%;*/
   left: 0;
   right: 0;
   margin-left: auto;
   margin-right: auto;
+  margin-top: -200px;
   background-color: white;
   border: 1px solid #ccc;
   border-radius: 20px;
@@ -306,6 +306,34 @@ body::-webkit-scrollbar-thumb {
   overflow: hidden;
   width: fit-content;
 }
+.tr-scrl-up-icon {
+  position: absolute;
+  top: 80px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  color: #111;
+  background-color: white;
+  border: 1px solid #000;
+  border-radius: 50%;
+  font-size: 20px;
+}
+.tr-scrl-down-icon {
+  position: absolute;
+  top: 150px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  color: #111;
+  background-color: white;
+  border: 1px solid #000;
+  border-radius: 50%;
+  font-size: 20px;
+}
 .tr-close-icon {
   position: absolute;
   top: 10px;
@@ -315,6 +343,7 @@ body::-webkit-scrollbar-thumb {
   text-align: center;
   line-height: 30px;
   color: #111;
+  background-color: white;
   border: 1px solid #000;
   border-radius: 50%;
   font-size: 20px;
@@ -329,17 +358,19 @@ body::-webkit-scrollbar-thumb {
 }
 .tr-result-text {
   width: 100%;
+  min-height: 100px;
   max-height: 350px; /* tr-result - tr-word */
   overflow: hidden;
 }
 .tr-text-container {
   width: 100%;
+  min-height: 100px;
   max-height: 350px;
   overflow-y: auto;
 }
 .tr-text {
-  margin: 10px auto 10px auto;
-  padding: 10px;
+  margin: 0px auto 10px auto;
+  padding: 0px 10px 10px 10px;
   text-align: center;
-  height: 100%;
+  min-height: 100%;
 }

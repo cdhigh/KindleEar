@@ -39,7 +39,8 @@ The advantage of online reading is that it does not occupy space on the e-book d
 
 7. If you need some subscriptions to be pushed and others only for online reading, you can create two accounts, one for pushing and one for online reading.
 
-## Dictionary Function
+
+## Dictionary
 
 Due to the limitations of the Kindle browser, only limited click-to-translate functionality is supported.     
 Highlighting for translation and phrase translation is not supported. If you need extensive dictionary usage, it's recommended to push to Kindle for reading.     
@@ -52,3 +53,9 @@ The extracted word is sent to your deployed KindleEar site for translation, and 
 2. When encountering an unfamiliar word while reading, open the menu, select "Dictionary" to enter dictionary mode (no indication/tips is shown). Click the word to be queried, and dictionary mode will automatically exit after the query. To query again, click "Dictionary" in the menu again.    
 
 3. Click anywhere inside the pop-up dictionary box to close it.   
+
+4. By default, American English morphology queries are supported.    
+If you need to support morphology rules for other languages, please download the corresponding Hunspell format files (.dic/.aff), and then copy them to `data/dict/morphology`. Be careful not to store them in a subdirectory.    
+KindleEar will automatically use the morphology rules that match the book's language.   
+
+As for where to download Hunspell/MySpell morphology files, you can search on websites such as GitHub or SourceForge. Additionally, here is a [link](https://sourceforge.net/projects/goldendict/files/better%20morphologies/1.0/) you can check.   

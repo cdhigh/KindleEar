@@ -14,10 +14,20 @@
     <div class="pos-indicator" id="pos-indicator"></div>
     <!-- 查词典的结果显示窗口 -->
     <div class="tr-result" id="tr-result" onclick="closeDictDialog()">
+      <div class="tr-scrl-up-icon" id="tr-scrl-up-icon" onclick="dictScrollUp(event)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 20 20">
+          <path d="M 4.375 12.8125 L 10 7.1875 L 15.625 12.8125" stroke="black" stroke-width="1.875" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="tr-scrl-down-icon" id="tr-scrl-down-icon" onclick="dictScrollDown(event)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 20 20">
+          <path d="M 4.375 7.1875 L 10 12.8125 L 15.625 7.1875" stroke="black" stroke-width="1.875" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
       <div class="tr-close-icon" id="tr-close-icon" onclick="closeDictDialog()">X</div>
       <div class="tr-word" id="tr-word"></div>
       <div class="tr-result-text">
-        <div class="tr-text-container">
+        <div class="tr-text-container" id="tr-text-container">
           <div class="tr-text" id="tr-text"></div>
         </div>
       </div>

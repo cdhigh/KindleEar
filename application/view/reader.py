@@ -10,7 +10,6 @@ from bs4 import BeautifulSoup
 from flask import Blueprint, render_template, session, request, send_from_directory, current_app as app
 from flask_babel import gettext as _
 from build_ebook import html_to_book
-from ebook_translator import HtmlTranslator
 from ..base_handler import *
 from ..utils import xml_escape, xml_unescape, str_to_int, str_to_float
 from ..back_end.db_models import *
@@ -170,21 +169,66 @@ def ReaderSettingsPost(user: KeUser, userDir: str):
 @login_required(forAjax=True)
 @reader_route_preprocess(forAjax=True)
 def ReaderDictRoute(user: KeUser, userDir: str):
+    from dictionary import CreateDictInst
     form = request.form if request.method == 'POST' else request.args
     word = form.get('word')
-    key = form.get('key')
-    language = form.get('language', '')
-    if not word or key != user.share_links.get('key'):
-        return {'status': _("Some parameters are missing or wrong.")}
-    
-    params = user.cfg('reader_params')
-    dictParams = params.get('dict', {})
-    if not dictParams.get('src_lang'): #如果设置源语言为自动，则使用当前书本的语言设置
-        dictParams['src_lang'] = language
-    translator = HtmlTranslator(dictParams)
-    data = translator.translate_text(word)
-    status = data['error'] if data['error'] else 'ok' #type:ignore
-    return {'status': status, 'word': word, 'text': data['translated']} #type:ignore
+    language = form.get('language', '').replace('_', '-').split('-')[0].lower() #书本语种
+    if not word:
+        return {'status': _("The text is empty.")}
+
+    params = user.cfg('reader_params').get('dicts', {})
+    defDict = params.get('und', {})
+    dictParams = params.get(language, defDict)
+    inst = CreateDictInst(dictParams.get('engine', ''), dictParams.get('database', ''))
+    try:
+        definition = inst.definition(word, language)
+        if not definition and language: #如果查询不到，尝试使用构词法词典获取词根
+            stem = GetWordStem(word, language)
+            if stem:
+                word = stem
+                definition = inst.definition(word, language) #再次查询
+    except Exception as e:
+        definition = f'Error: {e}'
+    return {'status': 'ok', 'word': word, 'definition': definition}
+
+#根据构词法获取词干
+#language: 语种代码，只有前两个字母
+def GetWordStem(word, language):
+    try:
+        import dictionary
+        import hunspell #type:ignore
+    except:
+        return ''
+
+    #默认位置，在dictionary模块的子目录 morphology
+    defMorphDir = os.path.join(os.path.dirname(dictionary.__file__), 'morphology')
+    dictDir = app.config['DICTIONARY_DIR'] or ''
+    morphDir = os.path.join(dictDir, 'morphology') if dictDir else ''
+    dirs = [dir_ for dir_ in [morphDir, defMorphDir] if dir_ and os.path.exists(dir_)]
+    if not dirs:
+        return ''
+
+    dics = []
+    for dir_ in dirs:
+        dics.extend([os.path.join(dir_, e) for e in os.listdir(dir_) if e.endswith('.dic') and e.startswith(language)])
+
+    dic = dics[0] if dics else ''
+    aff = os.path.splitext(dic)[0] + '.aff'
+    if dic and os.path.exists(aff):
+        #根据情况，哪个包能用就用哪个包： cyhunspell, hunspell
+        if hasattr(hunspell, 'HunSpell'):
+            hObj = hunspell.HunSpell(dic, aff)
+        else:
+            dir_ = os.path.dirname(dic)
+            dic = os.path.splitext(os.path.basename(dic))[0]
+            hObj = hunspell.Hunspell(lang=dic, hunspell_data_dir=dir_)
+        stems = [s for s in hObj.stem(word) if s != word]
+        stem = stems[0] if stems else ''
+        if isinstance(stem, bytes):
+            stem = stem.decode('utf-8')
+        return stem
+    else:
+        return ''
 
 #将一个特定的文章制作成电子书推送
 def PushSingleArticle(src: str, title: str, user: KeUser, userDir: str, language: str):

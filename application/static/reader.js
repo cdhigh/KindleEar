@@ -6,6 +6,7 @@ var g_iframeScrollHeight = 500; //在 iframeLoadEvent 里更新
 //var g_iframeClientHeight = 500;
 var g_currentArticle = {};
 var g_dictMode = false;
+const g_trTextContainerHeight = 350; //350px在reader.css定义tr-text-container和tr-result-text
 
 //对古董浏览器兼容性最好的判断一个变量是否为空的语法
 //支持基本类型/数组/对象
@@ -134,26 +135,29 @@ function updateNavIndicator() {
 function getWordAtClick(event, iframe) {
   iframe = iframe || document.getElementById('iframe');
   var doc = iframe.contentDocument || iframe.contentWindow.document;
-  const range = doc.caretRangeFromPoint(event.clientX, event.clientY);
+  var range = doc.caretRangeFromPoint(event.clientX, event.clientY);
   if (range) {
-    const textNode = range.startContainer;
-    const offset = range.startOffset;
+    var textNode = range.startContainer;
+    var offset = range.startOffset;
+    if (textNode.nodeType == Node.TEXT_NODE) {
+      var textContent = textNode.textContent;
+      var leftText = textContent.slice(0, offset);
+      var rightText = textContent.slice(offset);
+      var clickedChar = textContent.charAt(offset);
+      var isCJK = /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/.test(clickedChar);
+      var isCJKPunctuation = /[\u3000-\u303F\uFF00-\uFFEF]/.test(clickedChar);
+      if (isCJK || isCJKPunctuation) {
+        return clickedChar;
+      }
 
-    if (textNode.nodeType === Node.TEXT_NODE) {
-      const textContent = textNode.textContent;
-      const leftText = textContent.slice(0, offset);
-      const rightText = textContent.slice(offset);
-
-      const leftMatch = leftText.match(/[\w']+$/);
-      const rightMatch = rightText.match(/^[\w']+/);
-
+      var leftMatch = leftText.match(/\p{L}+$/u);
+      var rightMatch = rightText.match(/^\p{L}+/u);
       if (leftMatch || rightMatch) {
-        const word = (leftMatch ? leftMatch[0] : '') + (rightMatch ? rightMatch[0] : '');
-        return word;
+        return (leftMatch ? leftMatch[0] : '') + (rightMatch ? rightMatch[0] : '');
       }
     }
   }
-  return null;
+  return '';
 }
 
 //连接服务器查询一个单词的释义然后显示出来
@@ -162,34 +166,9 @@ function getWordAtClick(event, iframe) {
 //selection: 是否有选择区域
 function translateWord(event, word, selection) {
   var language = isEmpty(g_currentArticle) ? '' : getBookLanguage(g_currentArticle);
-  ajax_post('/reader/dict', {word: word, key: g_shareKey, language: language}, function (resp) {
+  ajax_post('/reader/dict', {word: word, language: language}, function (resp) {
     if (resp.status == 'ok') {
-      var content = document.getElementById('content');
-      var dialog = document.getElementById('tr-result');
-      var title = document.getElementById('tr-word');
-      var text = document.getElementById('tr-text');
-      title.innerHTML = word;
-      text.innerHTML = resp.text;
-      var x = event.clientX;
-      var y = Math.max(event.clientY - content.scrollTop, 0);
-      var width = content.clientWidth;
-      var height = content.clientHeight;
-      /*if (x > width * 0.6) {
-        dialog.style.left = 'auto';
-        dialog.style.right = Math.max(width - x, 40) + 'px';
-      } else {
-        dialog.style.right = 'auto';
-        dialog.style.left = x + 'px';
-      }*/
-      //alert(dialog.style.left + ',' + dialog.style.right);
-      if (y > height * 0.6) {
-        dialog.style.top = 'auto';
-        dialog.style.bottom = Math.max(height - y, 40) + 'px';
-      } else {
-        dialog.style.bottom = 'auto';
-        dialog.style.top = (y + 20) + 'px';
-      }
-      dialog.style.display = 'block';
+      displayDictDialog(resp.word, resp.definition);
       if (selection) {
         selection.removeAllRanges();
       }
@@ -197,6 +176,55 @@ function translateWord(event, word, selection) {
       alert(resp.status);
     }
   });
+}
+
+//显示查词窗口
+function displayDictDialog(word, text) {
+    var content = document.getElementById('content');
+    var dialog = document.getElementById('tr-result');
+    var titleDiv = document.getElementById('tr-word');
+    var textWrap = document.getElementById('tr-text-container');
+    var textDiv = document.getElementById('tr-text');
+    titleDiv.innerHTML = word;
+    textDiv.innerHTML = text.replace(/\n/g, '<br/>');
+    console.log(textDiv.innerHTML);
+    var y = Math.max(event.clientY - content.scrollTop, 0);
+    var height = content.clientHeight;
+    if (y > height * 0.6) {
+      dialog.style.top = 'auto';
+      dialog.style.bottom = Math.max(height - y, 40) + 'px';
+    } else {
+      dialog.style.bottom = 'auto';
+      dialog.style.top = (y + 20) + 'px';
+    }
+    dialog.style.display = 'block';
+    textWrap.scrollTop = 0;
+    //根据情况确定是否显示上下翻页按钮
+    var scrlUp = document.getElementById('tr-scrl-up-icon');
+    var scrlDown = document.getElementById('tr-scrl-down-icon');
+    if (isMobile() && (textWrap.scrollHeight > g_trTextContainerHeight)) {
+      scrlUp.style.display = 'block';
+      scrlDown.style.display = 'block';
+      textDiv.style.paddingRight = '40px';
+    } else {
+      scrlUp.style.display = 'none';
+      scrlDown.style.display = 'none';
+      textDiv.style.paddingRight = '10px';
+    }
+}
+
+//查词窗口向上滚动
+function dictScrollUp(event) {
+  event.stopPropagation();
+  var textWrap = document.getElementById('tr-text-container');
+  textWrap.scrollTop = Math.max(0, textWrap.scrollTop - g_trTextContainerHeight + 40);
+}
+
+//查词窗口向下滚动
+function dictScrollDown(event) {
+  event.stopPropagation();
+  var textWrap = document.getElementById('tr-text-container');
+  textWrap.scrollTop = Math.min(textWrap.scrollHeight, textWrap.scrollTop + g_trTextContainerHeight - 40);
 }
 
 //屏幕点击事件的处理
