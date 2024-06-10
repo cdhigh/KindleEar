@@ -75,18 +75,22 @@ class DictCc:
         if database not in self.databases:
             default_log.warning(f'Database "{database}" not exists, fallback to "english"')
             database = 'en'
-        self.destCode = database
+        self.database = database
         self.destLang = self.databases[database]
         self.host = 'dict.cc'
         self.opener = UrlOpener()
+
+    #返回当前使用的词典名字
+    def __repr__(self):
+        return f'dict.cc [{self.database}]'
         
     def definition(self, word, language=''):
         if language not in self.databases:
             default_log.info(f'Database "{language}" not exists, fallback to "english"')
             language = 'en'
-        if language == self.destCode:
+        if language == self.database:
             raise Exception(f'The source and destination languages cannot be the same: {language}.')
-        url = f"https://{language}{self.destCode}.dict.cc"
+        url = f"https://{language}{self.database}.dict.cc"
         resp = self.opener.open(url, data={"s": word.encode("utf-8")})
         if resp.status_code == 200:
             return self.parse_resp(resp.text)

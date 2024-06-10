@@ -8,6 +8,7 @@ sort: 2
 - [部署方法](https://cdhigh.github.io/KindleEar/Chinese/deployment.html)
     - [Google cloud (PaaS)](https://cdhigh.github.io/KindleEar/Chinese/deployment.html#gae)
     - [Docker (VPS)](https://cdhigh.github.io/KindleEar/Chinese/deployment.html#docker)
+    - [群晖 (NAS)](https://cdhigh.github.io/KindleEar/Chinese/deployment.html#synology)
     - [Oracle cloud (VPS)](https://cdhigh.github.io/KindleEar/Chinese/deployment.html#oracle-cloud)
     - [Pythonanywhere (PaaS)](https://cdhigh.github.io/KindleEar/Chinese/deployment.html#python-anywhere)
 - [在线阅读](https://cdhigh.github.io/KindleEar/Chinese/reader.html)

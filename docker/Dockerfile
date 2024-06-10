@@ -10,7 +10,8 @@ COPY ./config.py ./tools/update_req.py ./docker/gunicorn.conf.py ./main.py ./
 COPY ./tools/mp3cat/*mp3cat /usr/local/bin/
 
 #RUN python update_req.py docker[all]
-RUN python update_req.py docker && \
+RUN apt install libhunspell-dev && \
+    python update_req.py docker $TARGETPLATFORM && \
     pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     chmod +x /usr/local/bin/*mp3cat

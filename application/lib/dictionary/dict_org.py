@@ -179,12 +179,16 @@ class DictOrg:
     #'*' - all result, '!' - only the first result, others - database name
     def __init__(self, database='!', host=None):
         if database not in self.databases:
-            default_log.warning('Database "{database}" not exists, fallback to "First match"')
+            default_log.warning(f'Database "{database}" not exists, fallback to "First match"')
             database = '!'
         self.database = database
         self.host = 'dict.org'
         self.con = Connection(self.host)
         self.db = Database(self.con, database)
+
+    #返回当前使用的词典名字
+    def __repr__(self):
+        return 'dict.org [{}]'.format(self.databases.get(self.database, ''))
 
     #查词，language - word的语种
     def definition(self, word, language=''):
@@ -208,11 +212,11 @@ class DictOrg:
             txt = f'{start}/{phon}/{rest}'
 
         #音标符号
-        phonetic = {'[a^]': 'æ', '[e^]': 'ɛ', '[u^]': 'ʌ', '[.a]': 'ə', '[y^]': 'ɪ', '[i^]': 'iː',
-            '[oo^]': 'uː', '[~e]': 'ə', '[o^]': 'ɔ', '[=a]': 'eɪ', '[th]': 'θ', '[=e]': 'iː', '[=u]': 'juː',
+        phonetic = {'[a^]': 'æ', '[e^]': 'ɛ', '[u^]': 'ʌ', '[.a]': 'ə', '[y^]': 'ɪ', '[i^]': 'i',
+            '[oo^]': 'uː', '[~e]': 'ə', '[o^]': 'ɔ', '[=a]': 'eɪ', '[th]': 'ð', '[=e]': 'iː', '[=u]': 'juː',
             '[ng]': 'ŋ', '[aum]': 'ɔː', '[-o]': 'oʊ', "['e]": 'e', '[=o]': 'oʊ', '[^o]': 'ɔ',
             '[imac]': 'aɪ', '[-e]': 'iː', '[add]': 'ɔː', '[asl]': 'æ', '[^e]': 'ɪ', '[=ae]': 'eɪ',
-            '[ae]': 'eɪ', '[ˌo]': 'əʊ'}
+            '[ae]': 'æ', '[ˌo]': 'əʊ', '[-u]': 'u', '[thorn]': 'θ', '[eth]': 'ð'}
         
         pattern = re.compile('|'.join(re.escape(key) for key in phonetic.keys()))
         return pattern.sub(lambda x: phonetic[x.group()], txt)

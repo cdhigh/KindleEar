@@ -205,6 +205,18 @@ sudo usermod -aG docker your-username
 
 
 
+<a id="synology"></a>
+## Synology (NAS)
+1. Open the "Package Center", search for and install Docker.
+2. Open Docker (Container Manager), search for "KindleEar" in tab "Registry", and install "kindleear/kindleear".
+3. Run KindleEar and show the settings ui:
+   3.1. First, check "Enable auto-restart";
+   3.2. Second:
+      3.2.1. In the "Port Settings", select a local port (eg. 8001) to map to KindleEar's 8000 port;
+      3.2.2. In the "Volume Settings", add a folder mapped to `/data`, for example, map `/docker/data` to `/data`, with "Read/Write" permissions.
+4. After starting, access it via http://ip:8001.
+5. If you need the link sharing feature, you can set the environment variable `APP_DOMAIN`.   
+
 
 <a id="oracle-cloud"></a>
 ## Oracle cloud (VPS)   

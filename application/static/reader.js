@@ -25,6 +25,16 @@ function isEmpty(obj) {
   return true;
 }
 
+//将一个字符串转义为能安全用于js字符串拼接的场合
+function encodeJsSafeStr(str) {
+  return btoa(encodeURIComponent(str));
+}
+
+//安全的解码经过 encodeJsSafeStr 编码的字符串
+function decodeJsSafeStr(str) {
+  return decodeURIComponent(atob(str));
+}
+
 //将一个字典对象转换为ajax使用的参数字符串
 function formatParams(data) {
   var arr = [("v_=" + Math.random()).replace(".", "")];
@@ -150,8 +160,13 @@ function getWordAtClick(event, iframe) {
         return clickedChar;
       }
 
-      var leftMatch = leftText.match(/\p{L}+$/u);
-      var rightMatch = rightText.match(/^\p{L}+/u);
+      //var leftMatch = leftText.match(/\p{L}+$/u); //kindle不支持 "\p{L}"
+      //var rightMatch = rightText.match(/^\p{L}+/u);
+      var unicodeLetters = "\u0041-\u005A\u0061-\u007A\u00AA\u00B5\u00BA\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u01BF\u01CD-\u01FF\u0620-\u064A";
+      var patLeft = new RegExp("[" + unicodeLetters + "]+$");
+      var patRight = new RegExp("^[" + unicodeLetters + "]+");
+      var leftMatch = leftText.match(patLeft);
+      var rightMatch = rightText.match(patRight);
       if (leftMatch || rightMatch) {
         return (leftMatch ? leftMatch[0] : '') + (rightMatch ? rightMatch[0] : '');
       }
@@ -161,14 +176,13 @@ function getWordAtClick(event, iframe) {
 }
 
 //连接服务器查询一个单词的释义然后显示出来
-//event: click event
 //word: 要查的词
 //selection: 是否有选择区域
-function translateWord(event, word, selection) {
+function translateWord(word, selection) {
   var language = isEmpty(g_currentArticle) ? '' : getBookLanguage(g_currentArticle);
   ajax_post('/reader/dict', {word: word, language: language}, function (resp) {
     if (resp.status == 'ok') {
-      displayDictDialog(resp.word, resp.definition);
+      showDictDialog(resp.word, resp.definition, resp.dictname, resp.others);
       if (selection) {
         selection.removeAllRanges();
       }
@@ -178,39 +192,78 @@ function translateWord(event, word, selection) {
   });
 }
 
+//在查词窗口选择其他词典，则使用其他词典再次翻译
+function changeDictToTranslate(event) {
+  event.stopPropagation();
+  event.preventDefault();
+  var sel = document.getElementById('tr-dict-name-sel');
+  var value = sel ? sel.value : '';
+  if (!value) {
+    return;
+  }
+  value = decodeJsSafeStr(value).split('::');
+  var word = value[0];
+  var language = value[1];
+  var engine = value[2];
+  var database = value[3];
+  ajax_post('/reader/dict', {word: word, language: language, engine: engine, database: database}, function (resp) {
+    if (resp.status == 'ok') {
+      showDictDialog(resp.word, resp.definition, resp.dictname, resp.others);
+    } else {
+      alert(resp.status);
+    }
+  });
+}
+
 //显示查词窗口
-function displayDictDialog(word, text) {
-    var content = document.getElementById('content');
-    var dialog = document.getElementById('tr-result');
-    var titleDiv = document.getElementById('tr-word');
-    var textWrap = document.getElementById('tr-text-container');
-    var textDiv = document.getElementById('tr-text');
-    titleDiv.innerHTML = word;
-    textDiv.innerHTML = text.replace(/\n/g, '<br/>');
-    console.log(textDiv.innerHTML);
-    var y = Math.max(event.clientY - content.scrollTop, 0);
-    var height = content.clientHeight;
-    if (y > height * 0.6) {
-      dialog.style.top = 'auto';
-      dialog.style.bottom = Math.max(height - y, 40) + 'px';
-    } else {
-      dialog.style.bottom = 'auto';
-      dialog.style.top = (y + 20) + 'px';
+//word, text - 分别为单词和释义
+//dictname: 返回当前释义的词典名字
+//others: 其他候选词典列表 [{language:,engine:,database:,dbName}]
+function showDictDialog(word, text, dictname, others) {
+  var content = document.getElementById('content');
+  var dialog = document.getElementById('tr-result');
+  var dictNameDiv = document.getElementById('tr-dict-name-sel');
+  var titleDiv = document.getElementById('tr-word');
+  var textWrap = document.getElementById('tr-text-container');
+  var textDiv = document.getElementById('tr-text');
+  var ostr = ['<option value="">▽ ' + (dictname || '') + '</option>'];
+  for (var i = 0; i < others.length; i++) {
+    var elem = others[i];
+    if (elem.language && elem.engine && elem.database) {
+      var value = encodeJsSafeStr(word + '::' + elem.language + '::' + elem.engine + '::' + elem.database);
+      var dbName = elem.dbName;
+      if (dbName.length < 15) {
+        dbName = elem.engine + ' [' + dbName + ']';
+      }
+      ostr.push('<option value="' + value + '">' + elem.dbName + '</option>');
     }
-    dialog.style.display = 'block';
-    textWrap.scrollTop = 0;
-    //根据情况确定是否显示上下翻页按钮
-    var scrlUp = document.getElementById('tr-scrl-up-icon');
-    var scrlDown = document.getElementById('tr-scrl-down-icon');
-    if (isMobile() && (textWrap.scrollHeight > g_trTextContainerHeight)) {
-      scrlUp.style.display = 'block';
-      scrlDown.style.display = 'block';
-      textDiv.style.paddingRight = '40px';
-    } else {
-      scrlUp.style.display = 'none';
-      scrlDown.style.display = 'none';
-      textDiv.style.paddingRight = '10px';
-    }
+  }
+  dictNameDiv.innerHTML = ostr.join('');
+  titleDiv.innerHTML = word;
+  textDiv.innerHTML = text.replace(/\n/g, '<br/>');
+  var y = Math.max(event.clientY - content.scrollTop, 0);
+  var height = content.clientHeight;
+  if (y > height * 0.6) {
+    dialog.style.top = 'auto';
+    dialog.style.bottom = Math.max(height - y, 40) + 'px';
+  } else {
+    dialog.style.bottom = 'auto';
+    dialog.style.top = (y + 20) + 'px';
+  }
+  dialog.style.display = 'block';
+  textWrap.scrollTop = 0;
+  //根据情况确定是否显示上下翻页按钮
+  var scrlUp = document.getElementById('tr-scrl-up-icon');
+  var scrlDown = document.getElementById('tr-scrl-down-icon');
+  if (isMobile() && (textWrap.scrollHeight > g_trTextContainerHeight)) {
+    scrlUp.style.display = 'block';
+    scrlDown.style.display = 'block';
+    textDiv.style.paddingRight = '40px';
+  } else {
+    scrlUp.style.display = 'none';
+    scrlDown.style.display = 'none';
+    textDiv.style.paddingRight = '10px';
+  }
 }
 
 //查词窗口向上滚动
@@ -240,8 +293,12 @@ function clickEvent(event) {
   //alert(x + ',' + event.clientY + ',' + content.scrollTop + ',' + content.clientHeight);
   navPopMenu.style.display = 'none';
   if (y < wh / 5) { //上部 (20%)
-    if (x < ww * 0.15) { //左上 15%，上一篇文章
-      openPrevArticle();
+    if (x < ww * 0.15) { //左上 15%，上一篇文章或直接激活查词模式
+      if (g_topleftDict) {
+        toggleDictMode();
+      } else {
+        openPrevArticle();
+      }
     } else if (x > ww * 0.8) { //右上 20%，下一篇文章
       openNextArticle();
     } else if (isMobile()) { //中间65%，弹出菜单
@@ -268,6 +325,11 @@ function pageUp(content, navbar) {
       content.scrollTop = Math.max(0, scrollTop - content.clientHeight + 40);
     }
   }
+}
+
+//禁用事件的默认处理事件
+function eventPreventDefault(event) {
+  event.preventDefault();
 }
 
 //往下翻页
@@ -493,7 +555,7 @@ function navDeleteBooks(event) {
 
 //删除本地数组中的元素然后更新页面，books为数组，元素为 'date/title'
 function deleteBooksAndUpdateUi(books) {
-  //[{date:, books: [{title:, articles:[{text:, src:}],},...]}, ]
+  //[{date:, books: [{title:, articles:[{title:, src:}],},...]}, ]
   var removeSet = new Set(books);
   g_books = g_books.filter(function (entry) {
       entry.books = entry.books.filter(function (book) {
@@ -507,10 +569,10 @@ function deleteBooksAndUpdateUi(books) {
 //显示/隐藏导航设置菜单
 function toggleNavPopMenu() {
   var menu = document.getElementById('nav-popmenu');
-  //var inkIcon = document.getElementById('ink-mode').querySelector('.check-icon');
-  //inkIcon.innerHTML = g_inkMode ? '✔' : '☐';
   var allowIcon = document.getElementById('allow-links').querySelector('.check-icon');
   allowIcon.innerHTML = g_allowLinks ? '✔' : '☐';
+  var actIcon = document.getElementById('topleft-activate-dict').querySelector('.check-icon');
+  actIcon.innerHTML = g_topleftDict ? '✔' : '☐';
   menu.style.display = (menu.style.display == 'block') ? 'none' : 'block';
 }
 
@@ -536,7 +598,8 @@ function decreaseFontSize() {
 
 //将目前的配置保存到服务器
 function saveSettings() {
-  ajax_post('/reader/settings', {fontSize: g_fontSize, allowLinks: g_allowLinks, inkMode: g_inkMode});
+  ajax_post('/reader/settings', {fontSize: g_fontSize, allowLinks: g_allowLinks, inkMode: g_inkMode,
+    topleftDict: g_topleftDict});
 }
 
 //显示触摸区域图示
@@ -572,6 +635,14 @@ function toggleAllowLinks() {
   saveSettings();
 }
 
+//切换左上角模式，默认为前一本书，可以切换为直接进入查词模式
+function toggleTopleftDict() {
+  g_topleftDict = !g_topleftDict;
+  var actIcon = document.getElementById('topleft-activate-dict').querySelector('.check-icon');
+  actIcon.innerHTML = g_topleftDict ? '✔' : '☐';
+  saveSettings();
+}
+
 //是否允许墨水屏模式
 function toggleInkMode() {
   g_inkMode = !g_inkMode;
@@ -582,16 +653,16 @@ function toggleInkMode() {
 //切换查词模式
 function toggleDictMode() {
   g_dictMode = !g_dictMode;
-  document.getElementById('tr-result').style.display='none';
-  document.getElementById('dict-mode').style.border = g_dictMode ? '2px solid #000' : 'none';
+  document.getElementById('tr-result').style.display = 'none';
+  document.getElementById('corner-dict-hint').style.display = g_dictMode ? 'block' : 'none';
   hideNavbar();
 }
 
 //关闭查词窗口
 function closeDictDialog() {
   g_dictMode = false;
-  document.getElementById('tr-result').style.display='none';
-  document.getElementById('dict-mode').style.border = 'none';
+  document.getElementById('tr-result').style.display = 'none';
+  document.getElementById('corner-dict-hint').style.display = 'none';
 }
 
 //根据是否使能墨水屏模式，设置相应的元素属性
@@ -660,14 +731,14 @@ function populateBooks(expandLevel) {
           '<div class="nav-article">');
       for (var aIdx = 0; aIdx < articles.length; aIdx++) {
         var article = articles[aIdx];
-        if (!article || !article.src || !article.text) {
+        if (!article || !article.src || !article.title) {
           continue;
         }
         ostr.push(
              '<div class="nav-title" data-src="' + article.src +'">' +
                 '<div>' +
                   articleSvgIcon() +
-                  '<span class="nav-title-text">' + article.text + '</span>' +
+                  '<span class="nav-title-text">' + article.title + '</span>' +
                 '</div>' +
               '</div>');
       }
@@ -719,7 +790,7 @@ function navClickEvent(event) {
     var span = navTitle.querySelector('.nav-title-text');
     var text = span ? span.textContent.trim() : '';
     if (src && text) {
-      openArticle({text: text, src: src});
+      openArticle({title: text, src: src});
     }
   } else if (navBook) {
     toggleNavBook(navBook);
@@ -732,9 +803,9 @@ function navClickEvent(event) {
 function pushCurrentBook() {
   var art = g_currentArticle;
   if (!isEmpty(art)) {
-    ajax_post('/reader/push', {type: 'book', src: art.src, title: art.text}, function (resp) {
+    ajax_post('/reader/push', {type: 'book', src: art.src, title: art.title}, function (resp) {
       if (resp.status == 'ok') {
-        alert(i18n.pushOk + '\n' + art.text);
+        alert(i18n.pushOk + '\n' + art.title);
       } else {
         alert(resp.status);
       }
@@ -750,10 +821,10 @@ function pushCurrentArticle() {
   var art = g_currentArticle;
   if (!isEmpty(art)) {
     var language = getBookLanguage(art);
-    ajax_post('/reader/push', {type: 'article', src: art.src, title: art.text, language: language}, 
+    ajax_post('/reader/push', {type: 'article', src: art.src, title: art.title, language: language}, 
       function (resp) {
         if (resp.status == 'ok') {
-          alert(i18n.pushOk + '\n' + art.text);
+          alert(i18n.pushOk + '\n' + art.title);
         } else {
           alert(resp.status);
         }
@@ -830,7 +901,7 @@ function findPreviousArticle(art) {
 }
 
 //给定一篇文章，返回此文章后一篇文章，如果art为空，则返回第一篇找到的文章
-//返回为一个字典 {text:, src:,}
+//返回为一个字典 {title:, src:,}
 function findNextArticle(art) {
   var found = false;
   for (var i = 0; i < g_books.length; i++) {
@@ -872,12 +943,12 @@ function iframeLoadEvent(evt) {
     var selection = doc.getSelection();
     var text = selection.toString();
     if (g_dictMode) {
-      g_dictMode = false;
-      document.getElementById('dict-mode').style.border = 'none';
       text = text || getWordAtClick(event, iframe);
       if (text) {
-        translateWord(event, text, selection);
+        translateWord(text, selection);
       }
+      g_dictMode = false;
+      document.getElementById('corner-dict-hint').style.display = 'none';
     } else if (!text) { //没有选择文本才翻页
       clickEvent(event);
     }
@@ -897,7 +968,15 @@ function adjustIFrameStyle(iframe) {
   body.style.marginRight = '10px';
   body.style.fontSize = g_fontSize.toFixed(1) + 'em';
   body.style.cursor = 'pointer';
+  body.style.webkitTapHighlightColor = 'transparent';
+  body.style.webkitTouchCallout = 'none';
   iframe.style.display = "block";
+
+  var images = doc.querySelectorAll('img');
+  for (var i = 0; i < images.length; i++) {
+    images[i].style.maxWidth = '100%';
+    images[i].style.height = 'auto';
+  }
 
   var vh = getViewportHeight();
   g_iframeScrollHeight = Math.max(doc.documentElement.scrollHeight || body.scrollHeight, vh);

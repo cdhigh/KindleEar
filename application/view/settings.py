@@ -171,8 +171,8 @@ def get_locale():
 
 #各种语言的语种代码和文字描述的对应关系
 def LangMap():
-    return {"zh-cn": _("Chinese"),
-        "en-us": _("English"),
+    return {"en-us": _("English"),
+        "zh-cn": _("Chinese"),
         "fr-fr": _("French"),
         "es-es": _("Spanish"),
         "pt-br": _("Portuguese"),
@@ -196,4 +196,20 @@ def LangMap():
         "pa": _("Punjabi"),
         "jv": _("Javanese"),
         "tl": _("Tagalog"),
-        "ha": _("Hausa"),}
+        "ha": _("Hausa"),
+        "th-th": _("Thai"),
+        "pl-pl": _("Polish"),
+        "ro-ro": _("Romanian"),
+        "hu-hu": _("Hungarian"),
+        "sv-se": _("Swedish"),
+        "he-il": _("Hebrew"),
+        "no-no": _("Norwegian"),
+        "fi-fi": _("Finnish"),
+        "da-dk": _("Danish"),
+        "uk-ua": _("Ukrainian"),
+        "ta": _("Tamil"),
+        "mr": _("Marathi"),
+        "my": _("Burmese"),
+        "am": _("Amharic"),
+        "az": _("Azerbaijani"),
+        "kk": _("Kazakh"),}

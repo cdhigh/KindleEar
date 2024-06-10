@@ -6,7 +6,7 @@ sort: 4
 
 ## Overview
 
-KindleEar supports email delivery and online reading.    
+KindleEar supports email delivery and online reading. Built-in an online reader specially optimized for e-ink screens.    
 The advantage of email delivery is the ability to read offline. After downloading to an e-book device, you can carry it with you and read it anytime.    
 The advantage of online reading is that it does not occupy space on the e-book device and does not require manual deletion of e-books, moreover, it can support more e-book devices.    
 
@@ -19,7 +19,7 @@ The advantage of online reading is that it does not occupy space on the e-book d
 3. It is recommended to set an appropriate "Web shelf" time on the "Settings" page. KindleEar will automatically clean up e-books that exceed this time, making it worry-free and effortless.    
 
 4. The online reading page is optimized for e-ink screens, using pagination instead of scrolling. The page is divided into 5 clickable areas:
-   * Top left corner: Previous article
+   * The top-left corner defaults to activating the dictionary lookup mode, which can be adjusted to 'Open Previous Article' through the options menu.    
    * Top right corner: Next article
    * Middle top area: Open menu
    * Middle left side: Previous page
@@ -48,14 +48,21 @@ The principle of the dictionary function is to automatically extract the word cl
 
 The extracted word is sent to your deployed KindleEar site for translation, and the response is displayed.   
 
-1. To use the dictionary function, first configure the translation engine and languages in "Advanced"/"Reader" options page.   
-
-2. When encountering an unfamiliar word while reading, open the menu, select "Dictionary" to enter dictionary mode (no indication/tips is shown). Click the word to be queried, and dictionary mode will automatically exit after the query. To query again, click "Dictionary" in the menu again.    
-
-3. Click anywhere inside the pop-up dictionary box to close it.   
-
-4. By default, American English morphology queries are supported.    
+### Installing Dictionaries
+1. KindleEar supports online dictionaries such as [dict.org](https://dict.org/), [dict.cc](https://www.dict.cc/), [dict.cn](http://dict.cn/), and [Merriam-Webster](https://www.merriam-webster.com/). These dictionaries require no installation and are ready to use out of the box.    
+2. KindleEar also supports offline dictionaries in the stardict format. After downloading the corresponding dictionary, unzip it into the `data/dict` directory. You can organize different dictionaries into subdirectories. Then, restart the KindleEar service to refresh the dictionary list.    
+3. By default, American English morphology queries are supported.    
 If you need to support morphology rules for other languages, please download the corresponding Hunspell format files (.dic/.aff), and then copy them to `data/dict/morphology`. Be careful not to store them in a subdirectory.    
 KindleEar will automatically use the morphology rules that match the book's language.   
-
 As for where to download Hunspell/MySpell morphology files, you can search on websites such as GitHub or SourceForge. Additionally, here is a [link](https://sourceforge.net/projects/goldendict/files/better%20morphologies/1.0/) you can check.   
+
+
+### Using Dictionaries
+1. To use the dictionary function, first configure the translation engine and languages in "Advanced"/"Dictionary" options page.   
+
+2. When encountering an unfamiliar word while reading.  
+2.1. If the top-left corner dictionary mode is activated (by default), clicking on the top-left corner of the page will enter the dictionary lookup mode.     
+2.2. Open the menu and click on the 'Dictionary' icon.     
+After entering the dictionary lookup mode, a dictionary indicator will appear in the top-left corner of the page. Click on the word you want to look up, and the lookup mode will automatically exit after the lookup.   
+
+3. Click anywhere inside the pop-up dictionary box to close it.   

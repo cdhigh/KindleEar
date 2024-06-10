@@ -18,7 +18,7 @@ TEMPLATE = '''
 <head>
   <title>{title}</title>
   <style type="text/css">
-  li {{ list-style-type: none }}
+  li {{ list-style-type: none; padding-bottom: 8px }}
   a {{ text-decoration: none }}
   a:hover {{ color: red }}
   {extra_css}

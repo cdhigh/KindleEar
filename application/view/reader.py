@@ -11,7 +11,7 @@ from flask import Blueprint, render_template, session, request, send_from_direct
 from flask_babel import gettext as _
 from build_ebook import html_to_book
 from ..base_handler import *
-from ..utils import xml_escape, xml_unescape, str_to_int, str_to_float
+from ..utils import xml_escape, xml_unescape, str_to_int, str_to_float, str_to_bool
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import send_to_kindle
 from .settings import get_locale
@@ -95,7 +95,8 @@ def ReaderArticleNoFoundRoute(user):
         tips = _("Online reading feature has not been activated yet.")
     elif tips is None:
         tips = _('The article is missing?')
-    return render_template('reader_404.html', tips=tips.strip())
+    params = user.cfg('reader_params')
+    return render_template('reader_404.html', tips=tips.strip(), params=params)
 
 #获取文章或图像内容
 @bpReader.route("/reader/article/<path:path>", endpoint='ReaderArticleRoute')
@@ -155,11 +156,13 @@ def ReaderDeletePost(user: KeUser, userDir: str):
 @login_required(forAjax=True)
 @reader_route_preprocess(forAjax=True)
 def ReaderSettingsPost(user: KeUser, userDir: str):
-    fontSize = str_to_float(request.form.get('fontSize', '1.0'), 1.0)
-    allowLinks = request.form.get('allowLinks', '')
-    inkMode = str_to_int(request.form.get('inkMode', '1'), 1)
+    form = request.form
+    fontSize = str_to_float(form.get('fontSize', '1.0'), 1.0)
+    allowLinks = 1 if str_to_bool(form.get('allowLinks', 'true')) else 0
+    topleftDict = 1 if str_to_bool(form.get('topleftDict', 'true')) else 0
+    inkMode = str_to_int(form.get('inkMode', '1'), 1)
     params = user.cfg('reader_params')
-    params.update({'fontSize': fontSize, 'allowLinks': allowLinks, 'inkMode': inkMode})
+    params.update({'fontSize': fontSize, 'allowLinks': allowLinks, 'inkMode': inkMode, 'topleftDict': topleftDict})
     user.set_cfg('reader_params', params)
     user.save()
     return {'status': 'ok'}
@@ -169,17 +172,47 @@ def ReaderSettingsPost(user: KeUser, userDir: str):
 @login_required(forAjax=True)
 @reader_route_preprocess(forAjax=True)
 def ReaderDictRoute(user: KeUser, userDir: str):
-    from dictionary import CreateDictInst
+    from dictionary import CreateDictInst, GetDictDisplayName
     form = request.form if request.method == 'POST' else request.args
     word = form.get('word')
     language = form.get('language', '').replace('_', '-').split('-')[0].lower() #书本语种
     if not word:
         return {'status': _("The text is empty.")}
 
-    params = user.cfg('reader_params').get('dicts', {})
-    defDict = params.get('und', {})
-    dictParams = params.get(language, defDict)
-    inst = CreateDictInst(dictParams.get('engine', ''), dictParams.get('database', ''))
+    #为一个字典列表[{language:,engine:,database:,}]
+    dictParams = user.cfg('reader_params').get('dicts', [])
+
+    #优先使用网页传递过来的引擎和数据库参数
+    engine = form.get('engine')
+    database = form.get('database')
+    if not engine or not database:
+        defDict = {}
+        params = {}
+        for item in dictParams:
+            itemLang = item.get('language', 'und')
+            if not itemLang or (itemLang == 'und'):
+                defDict = item
+            elif not params and (itemLang == language):
+                params = item
+        if not params:
+            params = defDict
+        engine = params.get('engine', '')
+        database = params.get('database', '')
+    
+    inst = CreateDictInst(engine, database)
+    #将其他可选的词典信息也传递给网页
+    others = []
+    added = set()
+    for e in dictParams:
+        itemEngine = e.get('engine')
+        itemDb = e.get('database')
+        indi = f'{itemEngine}.{itemDb}'
+        if (indi not in added) and ((itemEngine != inst.name) or (itemDb != inst.database)):
+            added.add(indi)
+            dbName = GetDictDisplayName(itemEngine, itemDb)
+            others.append({'language': e.get('language', ''), 'engine': itemEngine, 'database': itemDb,
+                'dbName': f'{itemEngine} [{dbName}]'})
+
     try:
         definition = inst.definition(word, language)
         if not definition and language: #如果查询不到，尝试使用构词法词典获取词根
@@ -189,7 +222,8 @@ def ReaderDictRoute(user: KeUser, userDir: str):
                 definition = inst.definition(word, language) #再次查询
     except Exception as e:
         definition = f'Error: {e}'
-    return {'status': 'ok', 'word': word, 'definition': definition}
+    return {'status': 'ok', 'word': word, 'definition': definition, 
+        'dictname': str(inst), 'others': others}
 
 #根据构词法获取词干
 #language: 语种代码，只有前两个字母
@@ -217,7 +251,7 @@ def GetWordStem(word, language):
     if dic and os.path.exists(aff):
         #根据情况，哪个包能用就用哪个包： cyhunspell, hunspell
         if hasattr(hunspell, 'HunSpell'):
-            hObj = hunspell.HunSpell(dic, aff)
+            hObj = hunspell.HunSpell(dic, aff) #type:ignore
         else:
             dir_ = os.path.dirname(dic)
             dic = os.path.splitext(os.path.basename(dic))[0]
@@ -287,7 +321,7 @@ def PushSingleArticle(src: str, title: str, user: KeUser, userDir: str, language
     else:
         return _('Failed to create ebook.')
 
-#获取当前用户保存的所有电子书，返回一个列表[{date:, books: [{title:, articles:[{text:, src:}],},...]}, ]
+#获取当前用户保存的所有电子书，返回一个列表[{date:, books: [{title:, articles:[{title:, src:}],},...]}, ]
 def GetSavedOebList(userDir: str) -> list:
     if not os.path.exists(userDir):
         return []
@@ -334,7 +368,7 @@ def ExtractBookMeta(opfFile: str) -> dict:
     
     return ret
 
-#从toc.ncx里面提取文章列表，返回一个字典列表 [{text:,'src':,}]
+#从toc.ncx里面提取文章列表，返回一个字典列表 [{title:,'src':,}]
 def ExtractArticleList(ncxFile: str, prefix: str) -> list:
     if not os.path.exists(ncxFile):
         return []
@@ -356,5 +390,5 @@ def ExtractArticleList(ncxFile: str, prefix: str) -> list:
             text = (text.text or '').strip()
             src = src.attrib.get('src', '')
             if text and src:
-                ret.append({'text': text, 'src': f'{prefix}/{src}'})
+                ret.append({'title': text, 'src': f'{prefix}/{src}'})
     return ret

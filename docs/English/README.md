@@ -9,6 +9,7 @@ sort: 1
     - [Google cloud (PaaS)](https://cdhigh.github.io/KindleEar/English/deployment.html#gae)
     - [Docker (VPS)](https://cdhigh.github.io/KindleEar/English/deployment.html#docker)
     - [Oracle cloud (VPS)](https://cdhigh.github.io/KindleEar/English/deployment.html#oracle-cloud)
+    - [Synology (NAS)](https://cdhigh.github.io/KindleEar/Chinese/deployment.html#synology)
     - [Pythonanywhere (PaaS)](https://cdhigh.github.io/KindleEar/English/deployment.html#python-anywhere)
 - [Online reader](https://cdhigh.github.io/KindleEar/English/reader.html)
 - [Browser extension](https://cdhigh.github.io/KindleEar/English/extension.html)

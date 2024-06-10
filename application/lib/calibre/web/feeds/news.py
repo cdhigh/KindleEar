@@ -91,6 +91,7 @@ class Web2diskOptions:
         self.get_delay = None
         self.max_files = None
         self.keep_images = True
+        self.keep_svg = False
 
 
 #每篇文章的下载任务参数
@@ -994,7 +995,8 @@ class BasicNewsRecipe(Recipe):
             'compress_news_images_max_size', 'compress_news_images_auto_size', 'scale_news_images', 'filter_regexps',
             'match_regexps', 'no_stylesheets', 'verbose', 'delay', 'timeout', 'recursions', 'encoding'):
             setattr(wOpts, attr, getattr(self, attr))
-
+            
+        wOpts.keep_svg = getattr(options, 'keep_svg')
         wOpts.postprocess_html = self._postprocess_html
         wOpts.preprocess_image = self.preprocess_image
         wOpts.preprocess_raw_html = self.preprocess_raw_html_

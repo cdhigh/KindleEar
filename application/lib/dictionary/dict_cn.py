@@ -13,6 +13,10 @@ class DictCn:
         self.database = database
         self.host = 'https://dict.cn'
         self.opener = UrlOpener(host=self.host)
+    
+    #返回当前使用的词典名字
+    def __repr__(self):
+        return 'dict.cn [English-Chinese]'
         
     def definition(self, word, language=''):
         resp = self.opener.open(f'{self.host}/{word}')

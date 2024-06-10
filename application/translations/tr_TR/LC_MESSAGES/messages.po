@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-03 20:15-0300\n"
+"POT-Creation-Date: 2024-06-09 21:53-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: tr_TR\n"
@@ -221,8 +221,8 @@ msgid "Host"
 msgstr "Ana bilgisayar"
 
 #: application/templates/adv_archive.html:119
+#: application/templates/adv_dict.html:79
 #: application/templates/adv_inboundmail.html:34
-#: application/templates/adv_reader.html:50
 #: application/templates/book_audiolator.html:113
 #: application/templates/book_translator.html:80
 #: application/templates/settings.html:256
@@ -244,28 +244,27 @@ msgid "Inbound Mail"
 msgstr "Gelen Posta"
 
 #: application/templates/adv_base.html:66
-#: application/templates/adv_base.html:70
+#: application/templates/adv_base.html:70 application/templates/adv_dict.html:3
+#: application/templates/adv_dict.html:13 application/templates/reader.html:127
+msgid "Dictionary"
+msgstr "Sözlük"
+
+#: application/templates/adv_base.html:75
+#: application/templates/adv_base.html:79
 #: application/templates/adv_import.html:8
 msgid "Import Feeds"
 msgstr "feedleri içeri aktar"
 
-#: application/templates/adv_base.html:75
-#: application/templates/adv_base.html:79
+#: application/templates/adv_base.html:84
+#: application/templates/adv_base.html:88
 msgid "Cover Image"
 msgstr "Kapak resmi"
 
-#: application/templates/adv_base.html:84
-#: application/templates/adv_base.html:88
+#: application/templates/adv_base.html:93
+#: application/templates/adv_base.html:97
 #: application/templates/adv_uploadcss.html:3
 msgid "Stylesheet"
 msgstr "Stylesheet"
-
-#: application/templates/adv_base.html:93
-#: application/templates/adv_base.html:97
-#: application/templates/adv_reader.html:3 application/templates/base.html:182
-#: application/templates/reader.html:6
-msgid "Reader"
-msgstr "Okuyucu"
 
 #: application/templates/adv_base.html:102
 #: application/templates/adv_base.html:106
@@ -309,6 +308,38 @@ msgstr "Hiçbirini seçme"
 #: application/templates/adv_delivernow.html:29
 msgid "Deliver"
 msgstr "Şimdi gönder"
+
+#: application/templates/adv_dict.html:15
+msgid "Set up dictionaries for online reading."
+msgstr "Online okuma için sözlükleri kurun."
+
+#: application/templates/adv_dict.html:18
+#: application/templates/adv_dict.html:40
+#: application/templates/adv_dict.html:62
+msgid "Book language"
+msgstr "Kitap dili"
+
+#: application/templates/adv_dict.html:27
+#: application/templates/adv_dict.html:49
+#: application/templates/adv_dict.html:66
+#: application/templates/book_translator.html:26
+msgid "Engine"
+msgstr "Motor"
+
+#: application/templates/adv_dict.html:33
+#: application/templates/adv_dict.html:55
+#: application/templates/adv_dict.html:72
+msgid "Database"
+msgstr "Veritabanı"
+
+#: application/templates/adv_dict.html:63
+msgid "Other languages"
+msgstr "Diğer diller"
+
+#: application/templates/adv_dict.html:84 application/view/reader.py:29
+#: application/view/reader.py:95
+msgid "Online reading feature has not been activated yet."
+msgstr "Çevrimiçi okuma özelliği henüz etkinleştirilmedi."
 
 #: application/templates/adv_import.html:3
 #: application/templates/adv_import.html:19
@@ -398,75 +429,6 @@ msgstr "Örnek"
 msgid "Please input mail address"
 msgstr "Lütfen e-posta adresini giriniz"
 
-#: application/templates/adv_reader.html:18
-#: application/templates/reader.html:100
-msgid "Dictionary"
-msgstr "Sözlük"
-
-#: application/templates/adv_reader.html:20
-msgid "Set up a dictionary for online reading."
-msgstr "Çevrimiçi okuma için bir sözlük kurun."
-
-#: application/templates/adv_reader.html:23
-#: application/templates/book_translator.html:26
-msgid "Engine"
-msgstr "Motor"
-
-#: application/templates/adv_reader.html:29
-#: application/templates/book_audiolator.html:41
-#: application/templates/book_translator.html:32
-msgid "Api Host"
-msgstr "Api Host"
-
-#: application/templates/adv_reader.html:33
-#: application/templates/book_audiolator.html:53
-#: application/templates/book_translator.html:36
-msgid "Api Key"
-msgstr "Api Key"
-
-#: application/templates/adv_reader.html:34
-#: application/templates/book_translator.html:37
-msgid "One key per line"
-msgstr "Satır başına bir tuş"
-
-#: application/templates/adv_reader.html:37
-#: application/templates/book_translator.html:40
-msgid "Source language"
-msgstr "Kaynak dil"
-
-#: application/templates/adv_reader.html:43
-#: application/templates/book_translator.html:46
-msgid "Target language"
-msgstr "Hedef dil"
-
-#: application/templates/adv_reader.html:56
-#: application/templates/book_audiolator.html:119
-#: application/templates/book_translator.html:86
-msgid "Test (Please save settings firstly)"
-msgstr "Test (Lütfen önce ayarları kaydedin)"
-
-#: application/templates/adv_reader.html:58
-#: application/templates/book_audiolator.html:121
-#: application/templates/book_translator.html:88
-msgid "Text"
-msgstr "Metin"
-
-#: application/templates/adv_reader.html:62
-#: application/templates/book_translator.html:92
-msgid "Translation"
-msgstr "Çeviri"
-
-#: application/templates/adv_reader.html:67
-#: application/templates/book_audiolator.html:132
-#: application/templates/book_translator.html:97
-msgid "Test"
-msgstr "Test"
-
-#: application/templates/adv_reader.html:72 application/view/reader.py:30
-#: application/view/reader.py:93
-msgid "Online reading feature has not been activated yet."
-msgstr "Çevrimiçi okuma özelliği henüz etkinleştirilmedi."
-
 #: application/templates/adv_uploadcover.html:3
 msgid "Cover image"
 msgstr "Kapak resmi"
@@ -523,7 +485,7 @@ msgstr "5 saniye sonra otomatik olarak önceki sayfaya döneceksiniz."
 msgid "Click to back"
 msgstr "Geri dönmek için tıklayınız"
 
-#: application/templates/base.html:24 application/templates/reader.html:153
+#: application/templates/base.html:24 application/templates/reader.html:181
 msgid "Confirm Deletion"
 msgstr "Silmeyi Onayla"
 
@@ -559,7 +521,7 @@ msgstr "Tam Metin"
 msgid "Share"
 msgstr "Paylaş"
 
-#: application/templates/base.html:34 application/templates/reader.html:154
+#: application/templates/base.html:34 application/templates/reader.html:182
 msgid "Are you sure to delete?"
 msgstr "Silmek istediğinizden emin misiniz?"
 
@@ -607,7 +569,7 @@ msgstr "Dil kodu geçersiz"
 msgid "Thank you for sharing."
 msgstr "Paylaştığınız için teşekkür ederiz."
 
-#: application/templates/base.html:46 application/templates/reader.html:125
+#: application/templates/base.html:46 application/templates/reader.html:152
 msgid "Close"
 msgstr "Kapat"
 
@@ -901,7 +863,7 @@ msgstr "Burada hiçbir şey yok."
 msgid "Please select a single item."
 msgstr "Lütfen tek bir öğe seçin."
 
-#: application/templates/base.html:115 application/templates/reader.html:155
+#: application/templates/base.html:115 application/templates/reader.html:183
 msgid "Please select at least one item."
 msgstr "Lütfen en az bir öğe seçin."
 
@@ -911,9 +873,8 @@ msgstr "Lütfen en az bir öğe seçin."
 #: application/view/inbound_email.py:425 application/view/inbound_email.py:433
 #: application/view/inbound_email.py:448 application/view/inbound_email.py:469
 #: application/view/login.py:229 application/view/login.py:258
-#: application/view/reader.py:115 application/view/reader.py:132
-#: application/view/reader.py:174 application/view/settings.py:48
-#: application/view/share.py:37
+#: application/view/reader.py:118 application/view/reader.py:135
+#: application/view/settings.py:48 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr "Bazı parametreler eksik veya yanlış."
 
@@ -998,6 +959,10 @@ msgstr "Gelişmiş"
 msgid "Shared"
 msgstr "Paylaşılan"
 
+#: application/templates/base.html:182 application/templates/reader.html:6
+msgid "Reader"
+msgstr "Okuyucu"
+
 #: application/templates/book_audiolator.html:22
 #: application/templates/book_translator.html:19
 msgid "State"
@@ -1027,6 +992,11 @@ msgstr "Kindle_email kullanmak için boş bırakın"
 msgid "TTS Engine"
 msgstr "TTS Motoru"
 
+#: application/templates/book_audiolator.html:41
+#: application/templates/book_translator.html:32
+msgid "Api Host"
+msgstr "Api Host"
+
 #: application/templates/book_audiolator.html:42
 msgid "Empty to use default endpoint"
 msgstr "Varsayılan uç noktayı kullanmak için boş bırakın"
@@ -1034,6 +1004,11 @@ msgstr "Varsayılan uç noktayı kullanmak için boş bırakın"
 #: application/templates/book_audiolator.html:46
 msgid "Region"
 msgstr "Bölge"
+
+#: application/templates/book_audiolator.html:53
+#: application/templates/book_translator.html:36
+msgid "Api Key"
+msgstr "Api Key"
 
 #: application/templates/book_audiolator.html:66
 msgid "Voice name"
@@ -1119,13 +1094,40 @@ msgstr ""
 "Not: Bu özelliği etkinleştirmek, kullanılan CPU örnek saatlerini önemli "
 "ölçüde artırır."
 
+#: application/templates/book_audiolator.html:119
+#: application/templates/book_translator.html:86
+msgid "Test (Please save settings firstly)"
+msgstr "Test (Lütfen önce ayarları kaydedin)"
+
+#: application/templates/book_audiolator.html:121
+#: application/templates/book_translator.html:88
+msgid "Text"
+msgstr "Metin"
+
 #: application/templates/book_audiolator.html:127
 msgid "Your browser does not support the audio element."
 msgstr "Tarayıcınız ses öğesini desteklemiyor."
 
+#: application/templates/book_audiolator.html:132
+#: application/templates/book_translator.html:97
+msgid "Test"
+msgstr "Test"
+
 #: application/templates/book_translator.html:21
 msgid "Enable"
 msgstr "Etkinleştir"
+
+#: application/templates/book_translator.html:37
+msgid "One key per line"
+msgstr "Satır başına bir tuş"
+
+#: application/templates/book_translator.html:40
+msgid "Source language"
+msgstr "Kaynak dil"
+
+#: application/templates/book_translator.html:46
+msgid "Target language"
+msgstr "Hedef dil"
 
 #: application/templates/book_translator.html:52
 msgid "Translation Position"
@@ -1158,6 +1160,10 @@ msgstr "Orijinal metin stili"
 #: application/templates/book_translator.html:66
 msgid "Translated text style"
 msgstr "Çevrilmiş metin stili"
+
+#: application/templates/book_translator.html:92
+msgid "Translation"
+msgstr "Çeviri"
 
 #: application/templates/change_password.html:15
 msgid "Old password"
@@ -1269,6 +1275,10 @@ msgstr "Abone olundu"
 msgid "Library"
 msgstr "Kütüphane"
 
+#: application/templates/my.html:51
+msgid "get more recipes"
+msgstr "daha fazla tarif alın"
+
 #: application/templates/my.html:68
 msgid "Subscription to selected recipe successful."
 msgstr "Seçilen tarife abonelik başarılı."
@@ -1301,70 +1311,74 @@ msgstr "Edge eklentisi"
 msgid "Browser extensions also available"
 msgstr "Tarayıcı eklentileri de mevcut"
 
-#: application/templates/reader.html:37
+#: application/templates/reader.html:57
 msgid "Push current book"
 msgstr "Şu anki kitabı gönder"
 
-#: application/templates/reader.html:43
+#: application/templates/reader.html:63
 msgid "Push current article"
 msgstr "Şu anki makaleyi gönder"
 
-#: application/templates/reader.html:49
+#: application/templates/reader.html:71
 msgid "Delete selected books"
 msgstr "Seçili kitapları sil"
 
-#: application/templates/reader.html:55
+#: application/templates/reader.html:77
 msgid "Allow click links"
 msgstr "Bağlantıları tıklamaya izin ver"
 
-#: application/templates/reader.html:61
+#: application/templates/reader.html:82
+msgid "Top-left dict mode"
+msgstr "Üst sol sözlük modu"
+
+#: application/templates/reader.html:88
 msgid "eInk mode"
 msgstr "eInk modu"
 
-#: application/templates/reader.html:67
+#: application/templates/reader.html:94
 msgid "Increase font size"
 msgstr "Yazı tipi boyutunu artır"
 
-#: application/templates/reader.html:73
+#: application/templates/reader.html:100
 msgid "Decrease font size"
 msgstr "Yazı tipi boyutunu azalt"
 
-#: application/templates/reader.html:79
+#: application/templates/reader.html:106
 msgid "Visualize Touch Regions"
 msgstr "Dokunma bölgelerini görselleştir"
 
-#: application/templates/reader.html:85
+#: application/templates/reader.html:112
 msgid "Help"
 msgstr "Yardım"
 
-#: application/templates/reader.html:91
-#: application/templates/reader_404.html:125
+#: application/templates/reader.html:118
+#: application/templates/reader_404.html:135
 msgid "Menu"
 msgstr "Menü"
 
-#: application/templates/reader.html:105
+#: application/templates/reader.html:132
 msgid "Collapse all"
 msgstr "Tümünü daralt"
 
-#: application/templates/reader.html:110
+#: application/templates/reader.html:137
 msgid "Expand all"
 msgstr "Tümünü genişlet"
 
-#: application/templates/reader.html:115
-#: application/templates/reader_404.html:130
+#: application/templates/reader.html:142
+#: application/templates/reader_404.html:140
 msgid "Prev"
 msgstr "Önceki"
 
-#: application/templates/reader.html:120
-#: application/templates/reader_404.html:133
+#: application/templates/reader.html:147
+#: application/templates/reader_404.html:143
 msgid "Next page"
 msgstr "Sonraki sayfa"
 
-#: application/templates/reader.html:156
+#: application/templates/reader.html:184
 msgid "Pushed successfully."
 msgstr "Başarıyla itildi"
 
-#: application/templates/reader.html:157
+#: application/templates/reader.html:185
 msgid "There are currently no books or articles being read."
 msgstr "Şu anda okunan herhangi bir kitap veya makale bulunmamaktadır."
 
@@ -1594,9 +1608,9 @@ msgstr "İlet"
 msgid "Fwd as Attach"
 msgstr "Ek olarak ilet"
 
-#: application/view/admin.py:48 application/view/adv.py:410
-#: application/view/adv.py:454 application/view/settings.py:76
-#: application/view/translator.py:83 application/view/translator.py:167
+#: application/view/admin.py:48 application/view/adv.py:425
+#: application/view/settings.py:76 application/view/translator.py:83
+#: application/view/translator.py:167
 msgid "Settings Saved!"
 msgstr "Ayarlar Kaydedildi!"
 
@@ -1650,93 +1664,83 @@ msgstr "Değişiklikler başarıyla kaydedildi."
 msgid "The old password is wrong."
 msgstr "Eski şifre yanlış."
 
-#: application/view/adv.py:94 application/view/adv.py:95
-#: application/view/adv.py:96 application/view/adv.py:97
-#: application/view/adv.py:98 application/view/adv.py:99
-#: application/view/adv.py:100 application/view/adv.py:101
-#: application/view/adv.py:102 application/view/adv.py:103
+#: application/view/adv.py:93 application/view/adv.py:94
+#: application/view/adv.py:95 application/view/adv.py:96
+#: application/view/adv.py:97 application/view/adv.py:98
+#: application/view/adv.py:99 application/view/adv.py:100
+#: application/view/adv.py:101 application/view/adv.py:102
 msgid "Append hyperlink '{}' to article"
 msgstr "'{}' linkini makaleye ekle"
 
-#: application/view/adv.py:94 application/view/adv.py:95
-#: application/view/adv.py:96 application/view/adv.py:97
-#: application/view/adv.py:98
+#: application/view/adv.py:93 application/view/adv.py:94
+#: application/view/adv.py:95 application/view/adv.py:96
+#: application/view/adv.py:97
 msgid "Save to {}"
 msgstr "{} kaydedildi"
 
-#: application/view/adv.py:94
+#: application/view/adv.py:93
 msgid "evernote"
 msgstr "evernote"
 
-#: application/view/adv.py:95
+#: application/view/adv.py:94
 msgid "wiz"
 msgstr "wiz"
 
-#: application/view/adv.py:96
+#: application/view/adv.py:95
 msgid "pocket"
 msgstr "pocket"
 
-#: application/view/adv.py:97
+#: application/view/adv.py:96
 msgid "instapaper"
 msgstr "instapaper"
 
-#: application/view/adv.py:98
+#: application/view/adv.py:97
 msgid "wallabag"
 msgstr "wallabag"
 
-#: application/view/adv.py:99 application/view/adv.py:100
-#: application/view/adv.py:101 application/view/adv.py:102
+#: application/view/adv.py:98 application/view/adv.py:99
+#: application/view/adv.py:100 application/view/adv.py:101
 msgid "Share on {}"
 msgstr "{} üzerinde paylaş"
 
-#: application/view/adv.py:99
+#: application/view/adv.py:98
 msgid "weibo"
 msgstr "weibo"
 
-#: application/view/adv.py:100
+#: application/view/adv.py:99
 msgid "facebook"
 msgstr "facebook"
 
-#: application/view/adv.py:102
+#: application/view/adv.py:101
 msgid "tumblr"
 msgstr "tumblr"
 
-#: application/view/adv.py:103
+#: application/view/adv.py:102
 msgid "Open in browser"
 msgstr "Tarayıcıda aç"
 
-#: application/view/adv.py:104
+#: application/view/adv.py:103
 msgid "Append qrcode of url to article"
 msgstr "Makaleye URL'nin QR kodunu ekle"
 
-#: application/view/adv.py:368 application/view/share.py:54
+#: application/view/adv.py:367 application/view/share.py:54
 #: application/view/subscribe.py:247
 msgid "Unknown command: {}"
 msgstr "Bilinmeyen komut: {}"
 
-#: application/view/adv.py:399 application/view/translator.py:77
-#: application/view/translator.py:160
-msgid "The api key is required."
-msgstr "API anahtarı gereklidir."
-
-#: application/view/adv.py:420 application/view/translator.py:116
-#: application/view/translator.py:200
-msgid "The text is empty."
-msgstr "Metin boş."
-
-#: application/view/adv.py:456
+#: application/view/adv.py:427
 msgid "The format is invalid."
 msgstr "Format geçersiz."
 
-#: application/view/adv.py:488
+#: application/view/adv.py:459
 msgid "Authorization Error!<br/>{}"
 msgstr "Yetkilendirme Hatası!<br/>{}"
 
-#: application/view/adv.py:509
+#: application/view/adv.py:480
 msgid "Success authorized by Pocket!"
 msgstr "Pocket tarafından yetkilendirilen başarı!"
 
-#: application/view/adv.py:515
+#: application/view/adv.py:486
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
@@ -1744,13 +1748,13 @@ msgstr ""
 "Pocket yetkilendirme isteği başarısız oldu!<hr/>Aşağıdaki ayrıntılara "
 "bakın:<br/><br/>{}"
 
-#: application/view/adv.py:536
+#: application/view/adv.py:507
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 "Instapaper servisi bir hata ile karşılaştı. Lütfen daha sonra tekrar "
 "deneyin."
 
-#: application/view/adv.py:549
+#: application/view/adv.py:520
 msgid "Request type [{}] unsupported"
 msgstr "İstek türü [{}] desteklenmiyor"
 
@@ -1857,15 +1861,20 @@ msgstr ""
 "KindleEar şifrenizi sıfırlamak için aşağıdaki bağlantıya "
 "tıklayabilirsiniz."
 
-#: application/view/reader.py:95
+#: application/view/reader.py:97
 msgid "The article is missing?"
 msgstr "Makale eksik mi?"
 
-#: application/view/reader.py:192
+#: application/view/reader.py:180 application/view/translator.py:116
+#: application/view/translator.py:200
+msgid "The text is empty."
+msgstr "Metin boş."
+
+#: application/view/reader.py:274
 msgid "Failed to push: {}"
 msgstr "İtilemedi: {}"
 
-#: application/view/reader.py:240
+#: application/view/reader.py:322
 msgid "Failed to create ebook."
 msgstr "E-kitap oluşturulamadı."
 
@@ -1878,12 +1887,12 @@ msgid "Title is requied!"
 msgstr "Başlık zorunlu!"
 
 #: application/view/settings.py:174
-msgid "Chinese"
-msgstr "Çince"
-
-#: application/view/settings.py:175
 msgid "English"
 msgstr "İngilizce"
+
+#: application/view/settings.py:175
+msgid "Chinese"
+msgstr "Çince"
 
 #: application/view/settings.py:176
 msgid "French"
@@ -1981,6 +1990,70 @@ msgstr "Tagalog"
 msgid "Hausa"
 msgstr "Hausa"
 
+#: application/view/settings.py:200
+msgid "Thai"
+msgstr "Taylandca"
+
+#: application/view/settings.py:201
+msgid "Polish"
+msgstr "Lehçe"
+
+#: application/view/settings.py:202
+msgid "Romanian"
+msgstr "Rumen"
+
+#: application/view/settings.py:203
+msgid "Hungarian"
+msgstr "Macarca"
+
+#: application/view/settings.py:204
+msgid "Swedish"
+msgstr "İsveççe"
+
+#: application/view/settings.py:205
+msgid "Hebrew"
+msgstr "İbranice"
+
+#: application/view/settings.py:206
+msgid "Norwegian"
+msgstr "Norveççe"
+
+#: application/view/settings.py:207
+msgid "Finnish"
+msgstr "Fince"
+
+#: application/view/settings.py:208
+msgid "Danish"
+msgstr "Danca"
+
+#: application/view/settings.py:209
+msgid "Ukrainian"
+msgstr "Ukraynaca"
+
+#: application/view/settings.py:210
+msgid "Tamil"
+msgstr "Tamilce"
+
+#: application/view/settings.py:211
+msgid "Marathi"
+msgstr "Marathi"
+
+#: application/view/settings.py:212
+msgid "Burmese"
+msgstr "Burmaca"
+
+#: application/view/settings.py:213
+msgid "Amharic"
+msgstr "Amharca"
+
+#: application/view/settings.py:214
+msgid "Azerbaijani"
+msgstr "Azerbaycanca"
+
+#: application/view/settings.py:215
+msgid "Kazakh"
+msgstr "Kazakça"
+
 #: application/view/share.py:60
 msgid "There is no {} email yet."
 msgstr "Henüz {} e-postası bulunmamaktadır."
@@ -2074,4 +2147,8 @@ msgstr "Bu tarifin giriş bilgileri temizlendi."
 #: application/view/subscribe.py:388
 msgid "The login information for this recipe has been saved."
 msgstr "Bu tarifin giriş bilgileri kaydedildi."
+
+#: application/view/translator.py:77 application/view/translator.py:160
+msgid "The api key is required."
+msgstr "API anahtarı gereklidir."
 

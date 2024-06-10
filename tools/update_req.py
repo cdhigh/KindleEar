@@ -56,7 +56,9 @@ REQ_TASK = {
 
 REQ_PLAT = {'gae': [('appengine-python-standard', '~=1.1.6'),
         ('google-cloud-texttospeech', '~=2.16.3')],
-    'docker': [('weedata', '>=0.2.7,<1.0.0'),('pymysql', '~=1.1.0'), #docker install all libs
+    'docker': [('cyhunspell', '~=2.0.2'), ('marisa_trie', '~=1.2.0')], #docker/amd64 basic libs
+    'dockerArm': [('hunspell', '~=0.5.5')], #docker/arm64 basic libs
+    'dockerAll': [('weedata', '>=0.2.7,<1.0.0'),('pymysql', '~=1.1.0'), #docker[all] install all libs
         ('psycopg2-binary', '~=2.9.9'),('pymongo', '~=4.6.3'),('redis', '~=5.0.3'),
         ('celery', '~=5.3.6'),('flask-rq2', '~=18.3'),('sqlalchemy', '~=2.0.29')],
 }
@@ -105,7 +107,8 @@ def dockerize_config_py(cfgFile, arg):
         'TASK_QUEUE_SERVICE': 'apscheduler', 'TASK_QUEUE_BROKER_URL': 'memory',
         'KE_TEMP_DIR': '/tmp', 'DOWNLOAD_THREAD_NUM': '3', 'ALLOW_SIGNUP': 'no',
         'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning', 'SECRET_KEY': new_secret_key,
-        'DELIVERY_KEY': lambda: new_secret_key(6), 'EBOOK_SAVE_DIR': '/data/ebooks'}
+        'DELIVERY_KEY': lambda: new_secret_key(6), 'EBOOK_SAVE_DIR': '/data/ebooks', 
+        'DICTIONARY_DIR': '/data/dict'}
     ret = []
     inDocComment = False
     pattern = r"^([_A-Z]+)\s*=\s*(.+)$"
@@ -169,7 +172,7 @@ def gaeify_config_py(cfgFile):
         'DATABASE_URL': 'datastore', 'TASK_QUEUE_SERVICE': 'gae', 'TASK_QUEUE_BROKER_URL': '',
         'KE_TEMP_DIR': '/tmp', 'DOWNLOAD_THREAD_NUM': '2', 'ALLOW_SIGNUP': 'no',
         'HIDE_MAIL_TO_LOCAL': 'yes', 'LOG_LEVEL': 'warning', 'SECRET_KEY': new_secret_key,
-        'DELIVERY_KEY': lambda: new_secret_key(6), 'EBOOK_SAVE_DIR': ''}
+        'DELIVERY_KEY': lambda: new_secret_key(6), 'EBOOK_SAVE_DIR': '', 'DICTIONARY_DIR': ''}
     ret = []
     inDocComment = False
     pattern = r"^([_A-Z]+)\s*=\s*(.+)$"
@@ -278,7 +281,9 @@ if __name__ == '__main__':
 
     dockerArgs = ''
     gaeify = False
-    if len(sys.argv) == 2 and sys.argv[1] == '--help':
+    arg1 = sys.argv[1] if len(sys.argv) >= 2 else ''
+    arg2 = sys.argv[2] if len(sys.argv) >= 3 else '' #TARGETPLATFORM
+    if arg1 == '--help':
         print('This script can help you to update config.py and requirements.txt.')
         print('Command arguments:')
         print('  docker              : prepare for docker image')
@@ -288,14 +293,14 @@ if __name__ == '__main__':
         print('  gae[B2,1,t2,20m]    : prepare for deploying in gae, customize worker params')
         print('  empty               : do not modify config.py, only update requirements.txt')
         sys.exit(1)
-    elif len(sys.argv) == 2 and sys.argv[1].startswith('docker'):
+    elif arg1.startswith('docker'):
         print('\nUpdating config.py and requirements.txt for Docker deployment.\n')
-        dockerize_config_py(cfgFile, sys.argv[1])
-        dockerArgs = sys.argv[1]
-    elif len(sys.argv) == 2 and sys.argv[1].startswith('gae'):
+        dockerize_config_py(cfgFile, arg1)
+        dockerArgs = arg1
+    elif arg1.startswith('gae'):
         print('\nUpdating config.py and requirements.txt for GAE deployment.\n')
         gaeify_config_py(cfgFile)
-        update_worker_yaml(workerYamlFile, sys.argv[1])
+        update_worker_yaml(workerYamlFile, arg1)
         gaeify = True
     else:
         print('\nThis script can help you to update requirements.txt.\n')
@@ -309,7 +314,9 @@ if __name__ == '__main__':
     broker = cfg['TASK_QUEUE_BROKER_URL']
     plat = ''
     if dockerArgs == 'docker[all]':
-        plat = 'docker'
+        plat = 'dockerAll'
+    elif dockerArgs.startswith('docker'):
+        plat = 'dockerArm' if 'arm' in arg2 else 'docker'
     elif (cfg['DATABASE_URL'].startswith('datastore') or cfg['TASK_QUEUE_SERVICE'] == 'gae'):
         plat = 'gae'
     

@@ -372,30 +372,23 @@ def AdvDeleteCssAjaxPost(user: KeUser):
 @login_required()
 def AdvDict(user: KeUser):
     from dictionary import all_dict_engines
-    dictParams = user.cfg('reader_params').get('dicts', {}).copy()
-    #js的字典是不按顺序的，需要转换为字典列表再传递给html
-    #列表长度为3，最后一个元素为默认字典，[{language:,engine:,database:,},]
-    defDict = dictParams.pop('und', {})
-    defDict['language'] = 'und'
-    dictsCfg = [{}, {}, defDict]
-    for idx, (language, cfg) in enumerate(list(dictParams.items())[:2]):
-        cfg['language'] = language
-        dictsCfg[idx] = cfg
-
-    engines = json.dumps({name: {'databases': klass.databases} for name,klass in all_dict_engines.items()})
+    #[{language:,engine:,database:,},]
+    dictParams = user.cfg('reader_params').get('dicts', [])
+    
+    engines = {name: {'databases': klass.databases} for name,klass in all_dict_engines.items()}
     return adv_render_template('adv_dict.html', 'dictionary', user=user, engines=engines, 
-        dictsCfg=dictsCfg, tips='', langMap=LangMap())
+        dictParams=dictParams, tips='', langMap=LangMap())
     
 @bpAdv.post("/adv/dict", endpoint='AdvDictPost')
 @login_required()
 def AdvDictPost(user: KeUser):
-    from dictionary import all_dict_engines
     form = request.form
-    newParams = {}
+    newParams = []
     for idx in range(3):
         language = form.get(f'language{idx}', '').split('-')[0] if idx < 2 else 'und'
-        item = {'engine': form.get(f'engine{idx}', ''), 'database': form.get(f'database{idx}', '')}
-        newParams[language] = item
+        engine = form.get(f'engine{idx}', '')
+        database = form.get(f'database{idx}', '')
+        newParams.append({'language': language, 'engine': engine, 'database': database})
     
     params = user.cfg('reader_params')
     params.update({'dicts': newParams})

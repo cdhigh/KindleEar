@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-03 20:15-0300\n"
+"POT-Creation-Date: 2024-06-09 21:53-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -220,8 +220,8 @@ msgid "Host"
 msgstr ""
 
 #: application/templates/adv_archive.html:119
+#: application/templates/adv_dict.html:79
 #: application/templates/adv_inboundmail.html:34
-#: application/templates/adv_reader.html:50
 #: application/templates/book_audiolator.html:113
 #: application/templates/book_translator.html:80
 #: application/templates/settings.html:256
@@ -243,27 +243,26 @@ msgid "Inbound Mail"
 msgstr ""
 
 #: application/templates/adv_base.html:66
-#: application/templates/adv_base.html:70
-#: application/templates/adv_import.html:8
-msgid "Import Feeds"
+#: application/templates/adv_base.html:70 application/templates/adv_dict.html:3
+#: application/templates/adv_dict.html:13 application/templates/reader.html:127
+msgid "Dictionary"
 msgstr ""
 
 #: application/templates/adv_base.html:75
 #: application/templates/adv_base.html:79
-msgid "Cover Image"
+#: application/templates/adv_import.html:8
+msgid "Import Feeds"
 msgstr ""
 
 #: application/templates/adv_base.html:84
 #: application/templates/adv_base.html:88
-#: application/templates/adv_uploadcss.html:3
-msgid "Stylesheet"
+msgid "Cover Image"
 msgstr ""
 
 #: application/templates/adv_base.html:93
 #: application/templates/adv_base.html:97
-#: application/templates/adv_reader.html:3 application/templates/base.html:182
-#: application/templates/reader.html:6
-msgid "Reader"
+#: application/templates/adv_uploadcss.html:3
+msgid "Stylesheet"
 msgstr ""
 
 #: application/templates/adv_base.html:102
@@ -307,6 +306,38 @@ msgstr ""
 
 #: application/templates/adv_delivernow.html:29
 msgid "Deliver"
+msgstr ""
+
+#: application/templates/adv_dict.html:15
+msgid "Set up dictionaries for online reading."
+msgstr ""
+
+#: application/templates/adv_dict.html:18
+#: application/templates/adv_dict.html:40
+#: application/templates/adv_dict.html:62
+msgid "Book language"
+msgstr ""
+
+#: application/templates/adv_dict.html:27
+#: application/templates/adv_dict.html:49
+#: application/templates/adv_dict.html:66
+#: application/templates/book_translator.html:26
+msgid "Engine"
+msgstr ""
+
+#: application/templates/adv_dict.html:33
+#: application/templates/adv_dict.html:55
+#: application/templates/adv_dict.html:72
+msgid "Database"
+msgstr ""
+
+#: application/templates/adv_dict.html:63
+msgid "Other languages"
+msgstr ""
+
+#: application/templates/adv_dict.html:84 application/view/reader.py:29
+#: application/view/reader.py:95
+msgid "Online reading feature has not been activated yet."
 msgstr ""
 
 #: application/templates/adv_import.html:3
@@ -393,75 +424,6 @@ msgstr ""
 msgid "Please input mail address"
 msgstr ""
 
-#: application/templates/adv_reader.html:18
-#: application/templates/reader.html:100
-msgid "Dictionary"
-msgstr ""
-
-#: application/templates/adv_reader.html:20
-msgid "Set up a dictionary for online reading."
-msgstr ""
-
-#: application/templates/adv_reader.html:23
-#: application/templates/book_translator.html:26
-msgid "Engine"
-msgstr ""
-
-#: application/templates/adv_reader.html:29
-#: application/templates/book_audiolator.html:41
-#: application/templates/book_translator.html:32
-msgid "Api Host"
-msgstr ""
-
-#: application/templates/adv_reader.html:33
-#: application/templates/book_audiolator.html:53
-#: application/templates/book_translator.html:36
-msgid "Api Key"
-msgstr ""
-
-#: application/templates/adv_reader.html:34
-#: application/templates/book_translator.html:37
-msgid "One key per line"
-msgstr ""
-
-#: application/templates/adv_reader.html:37
-#: application/templates/book_translator.html:40
-msgid "Source language"
-msgstr ""
-
-#: application/templates/adv_reader.html:43
-#: application/templates/book_translator.html:46
-msgid "Target language"
-msgstr ""
-
-#: application/templates/adv_reader.html:56
-#: application/templates/book_audiolator.html:119
-#: application/templates/book_translator.html:86
-msgid "Test (Please save settings firstly)"
-msgstr ""
-
-#: application/templates/adv_reader.html:58
-#: application/templates/book_audiolator.html:121
-#: application/templates/book_translator.html:88
-msgid "Text"
-msgstr ""
-
-#: application/templates/adv_reader.html:62
-#: application/templates/book_translator.html:92
-msgid "Translation"
-msgstr ""
-
-#: application/templates/adv_reader.html:67
-#: application/templates/book_audiolator.html:132
-#: application/templates/book_translator.html:97
-msgid "Test"
-msgstr ""
-
-#: application/templates/adv_reader.html:72 application/view/reader.py:30
-#: application/view/reader.py:93
-msgid "Online reading feature has not been activated yet."
-msgstr ""
-
 #: application/templates/adv_uploadcover.html:3
 msgid "Cover image"
 msgstr ""
@@ -516,7 +478,7 @@ msgstr ""
 msgid "Click to back"
 msgstr ""
 
-#: application/templates/base.html:24 application/templates/reader.html:153
+#: application/templates/base.html:24 application/templates/reader.html:181
 msgid "Confirm Deletion"
 msgstr ""
 
@@ -552,7 +514,7 @@ msgstr ""
 msgid "Share"
 msgstr ""
 
-#: application/templates/base.html:34 application/templates/reader.html:154
+#: application/templates/base.html:34 application/templates/reader.html:182
 msgid "Are you sure to delete?"
 msgstr ""
 
@@ -600,7 +562,7 @@ msgstr ""
 msgid "Thank you for sharing."
 msgstr ""
 
-#: application/templates/base.html:46 application/templates/reader.html:125
+#: application/templates/base.html:46 application/templates/reader.html:152
 msgid "Close"
 msgstr ""
 
@@ -885,7 +847,7 @@ msgstr ""
 msgid "Please select a single item."
 msgstr ""
 
-#: application/templates/base.html:115 application/templates/reader.html:155
+#: application/templates/base.html:115 application/templates/reader.html:183
 msgid "Please select at least one item."
 msgstr ""
 
@@ -895,9 +857,8 @@ msgstr ""
 #: application/view/inbound_email.py:425 application/view/inbound_email.py:433
 #: application/view/inbound_email.py:448 application/view/inbound_email.py:469
 #: application/view/login.py:229 application/view/login.py:258
-#: application/view/reader.py:115 application/view/reader.py:132
-#: application/view/reader.py:174 application/view/settings.py:48
-#: application/view/share.py:37
+#: application/view/reader.py:118 application/view/reader.py:135
+#: application/view/settings.py:48 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr ""
 
@@ -982,6 +943,10 @@ msgstr ""
 msgid "Shared"
 msgstr ""
 
+#: application/templates/base.html:182 application/templates/reader.html:6
+msgid "Reader"
+msgstr ""
+
 #: application/templates/book_audiolator.html:22
 #: application/templates/book_translator.html:19
 msgid "State"
@@ -1011,12 +976,22 @@ msgstr ""
 msgid "TTS Engine"
 msgstr ""
 
+#: application/templates/book_audiolator.html:41
+#: application/templates/book_translator.html:32
+msgid "Api Host"
+msgstr ""
+
 #: application/templates/book_audiolator.html:42
 msgid "Empty to use default endpoint"
 msgstr ""
 
 #: application/templates/book_audiolator.html:46
 msgid "Region"
+msgstr ""
+
+#: application/templates/book_audiolator.html:53
+#: application/templates/book_translator.html:36
+msgid "Api Key"
 msgstr ""
 
 #: application/templates/book_audiolator.html:66
@@ -1101,12 +1076,39 @@ msgid ""
 "instance hours."
 msgstr ""
 
+#: application/templates/book_audiolator.html:119
+#: application/templates/book_translator.html:86
+msgid "Test (Please save settings firstly)"
+msgstr ""
+
+#: application/templates/book_audiolator.html:121
+#: application/templates/book_translator.html:88
+msgid "Text"
+msgstr ""
+
 #: application/templates/book_audiolator.html:127
 msgid "Your browser does not support the audio element."
 msgstr ""
 
+#: application/templates/book_audiolator.html:132
+#: application/templates/book_translator.html:97
+msgid "Test"
+msgstr ""
+
 #: application/templates/book_translator.html:21
 msgid "Enable"
+msgstr ""
+
+#: application/templates/book_translator.html:37
+msgid "One key per line"
+msgstr ""
+
+#: application/templates/book_translator.html:40
+msgid "Source language"
+msgstr ""
+
+#: application/templates/book_translator.html:46
+msgid "Target language"
 msgstr ""
 
 #: application/templates/book_translator.html:52
@@ -1139,6 +1141,10 @@ msgstr ""
 
 #: application/templates/book_translator.html:66
 msgid "Translated text style"
+msgstr ""
+
+#: application/templates/book_translator.html:92
+msgid "Translation"
 msgstr ""
 
 #: application/templates/change_password.html:15
@@ -1242,6 +1248,10 @@ msgstr ""
 msgid "Library"
 msgstr ""
 
+#: application/templates/my.html:51
+msgid "get more recipes"
+msgstr ""
+
 #: application/templates/my.html:68
 msgid "Subscription to selected recipe successful."
 msgstr ""
@@ -1274,70 +1284,74 @@ msgstr ""
 msgid "Browser extensions also available"
 msgstr ""
 
-#: application/templates/reader.html:37
+#: application/templates/reader.html:57
 msgid "Push current book"
 msgstr ""
 
-#: application/templates/reader.html:43
+#: application/templates/reader.html:63
 msgid "Push current article"
 msgstr ""
 
-#: application/templates/reader.html:49
+#: application/templates/reader.html:71
 msgid "Delete selected books"
 msgstr ""
 
-#: application/templates/reader.html:55
+#: application/templates/reader.html:77
 msgid "Allow click links"
 msgstr ""
 
-#: application/templates/reader.html:61
+#: application/templates/reader.html:82
+msgid "Top-left dict mode"
+msgstr ""
+
+#: application/templates/reader.html:88
 msgid "eInk mode"
 msgstr ""
 
-#: application/templates/reader.html:67
+#: application/templates/reader.html:94
 msgid "Increase font size"
 msgstr ""
 
-#: application/templates/reader.html:73
+#: application/templates/reader.html:100
 msgid "Decrease font size"
 msgstr ""
 
-#: application/templates/reader.html:79
+#: application/templates/reader.html:106
 msgid "Visualize Touch Regions"
 msgstr ""
 
-#: application/templates/reader.html:85
+#: application/templates/reader.html:112
 msgid "Help"
 msgstr ""
 
-#: application/templates/reader.html:91
-#: application/templates/reader_404.html:125
+#: application/templates/reader.html:118
+#: application/templates/reader_404.html:135
 msgid "Menu"
 msgstr ""
 
-#: application/templates/reader.html:105
+#: application/templates/reader.html:132
 msgid "Collapse all"
 msgstr ""
 
-#: application/templates/reader.html:110
+#: application/templates/reader.html:137
 msgid "Expand all"
 msgstr ""
 
-#: application/templates/reader.html:115
-#: application/templates/reader_404.html:130
+#: application/templates/reader.html:142
+#: application/templates/reader_404.html:140
 msgid "Prev"
 msgstr ""
 
-#: application/templates/reader.html:120
-#: application/templates/reader_404.html:133
+#: application/templates/reader.html:147
+#: application/templates/reader_404.html:143
 msgid "Next page"
 msgstr ""
 
-#: application/templates/reader.html:156
+#: application/templates/reader.html:184
 msgid "Pushed successfully."
 msgstr ""
 
-#: application/templates/reader.html:157
+#: application/templates/reader.html:185
 msgid "There are currently no books or articles being read."
 msgstr ""
 
@@ -1560,9 +1574,9 @@ msgstr ""
 msgid "Fwd as Attach"
 msgstr ""
 
-#: application/view/admin.py:48 application/view/adv.py:410
-#: application/view/adv.py:454 application/view/settings.py:76
-#: application/view/translator.py:83 application/view/translator.py:167
+#: application/view/admin.py:48 application/view/adv.py:425
+#: application/view/settings.py:76 application/view/translator.py:83
+#: application/view/translator.py:167
 msgid "Settings Saved!"
 msgstr ""
 
@@ -1616,103 +1630,93 @@ msgstr ""
 msgid "The old password is wrong."
 msgstr ""
 
-#: application/view/adv.py:94 application/view/adv.py:95
-#: application/view/adv.py:96 application/view/adv.py:97
-#: application/view/adv.py:98 application/view/adv.py:99
-#: application/view/adv.py:100 application/view/adv.py:101
-#: application/view/adv.py:102 application/view/adv.py:103
+#: application/view/adv.py:93 application/view/adv.py:94
+#: application/view/adv.py:95 application/view/adv.py:96
+#: application/view/adv.py:97 application/view/adv.py:98
+#: application/view/adv.py:99 application/view/adv.py:100
+#: application/view/adv.py:101 application/view/adv.py:102
 msgid "Append hyperlink '{}' to article"
 msgstr ""
 
-#: application/view/adv.py:94 application/view/adv.py:95
-#: application/view/adv.py:96 application/view/adv.py:97
-#: application/view/adv.py:98
+#: application/view/adv.py:93 application/view/adv.py:94
+#: application/view/adv.py:95 application/view/adv.py:96
+#: application/view/adv.py:97
 msgid "Save to {}"
 msgstr ""
 
-#: application/view/adv.py:94
+#: application/view/adv.py:93
 msgid "evernote"
 msgstr ""
 
-#: application/view/adv.py:95
+#: application/view/adv.py:94
 msgid "wiz"
 msgstr ""
 
-#: application/view/adv.py:96
+#: application/view/adv.py:95
 msgid "pocket"
 msgstr ""
 
-#: application/view/adv.py:97
+#: application/view/adv.py:96
 msgid "instapaper"
 msgstr ""
 
-#: application/view/adv.py:98
+#: application/view/adv.py:97
 msgid "wallabag"
 msgstr ""
 
-#: application/view/adv.py:99 application/view/adv.py:100
-#: application/view/adv.py:101 application/view/adv.py:102
+#: application/view/adv.py:98 application/view/adv.py:99
+#: application/view/adv.py:100 application/view/adv.py:101
 msgid "Share on {}"
 msgstr ""
 
-#: application/view/adv.py:99
+#: application/view/adv.py:98
 msgid "weibo"
 msgstr ""
 
-#: application/view/adv.py:100
+#: application/view/adv.py:99
 msgid "facebook"
 msgstr ""
 
-#: application/view/adv.py:102
+#: application/view/adv.py:101
 msgid "tumblr"
 msgstr ""
 
-#: application/view/adv.py:103
+#: application/view/adv.py:102
 msgid "Open in browser"
 msgstr ""
 
-#: application/view/adv.py:104
+#: application/view/adv.py:103
 msgid "Append qrcode of url to article"
 msgstr ""
 
-#: application/view/adv.py:368 application/view/share.py:54
+#: application/view/adv.py:367 application/view/share.py:54
 #: application/view/subscribe.py:247
 msgid "Unknown command: {}"
 msgstr ""
 
-#: application/view/adv.py:399 application/view/translator.py:77
-#: application/view/translator.py:160
-msgid "The api key is required."
-msgstr ""
-
-#: application/view/adv.py:420 application/view/translator.py:116
-#: application/view/translator.py:200
-msgid "The text is empty."
-msgstr ""
-
-#: application/view/adv.py:456
+#: application/view/adv.py:427
 msgid "The format is invalid."
 msgstr ""
 
-#: application/view/adv.py:488
+#: application/view/adv.py:459
 msgid "Authorization Error!<br/>{}"
 msgstr ""
 
-#: application/view/adv.py:509
+#: application/view/adv.py:480
 msgid "Success authorized by Pocket!"
 msgstr ""
 
-#: application/view/adv.py:515
+#: application/view/adv.py:486
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr ""
 
-#: application/view/adv.py:536
+#: application/view/adv.py:507
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 
-#: application/view/adv.py:549
+#: application/view/adv.py:520
 msgid "Request type [{}] unsupported"
 msgstr ""
 
@@ -1813,15 +1817,20 @@ msgstr ""
 msgid "You can click the following link to reset your KindleEar password."
 msgstr ""
 
-#: application/view/reader.py:95
+#: application/view/reader.py:97
 msgid "The article is missing?"
 msgstr ""
 
-#: application/view/reader.py:192
+#: application/view/reader.py:180 application/view/translator.py:116
+#: application/view/translator.py:200
+msgid "The text is empty."
+msgstr ""
+
+#: application/view/reader.py:274
 msgid "Failed to push: {}"
 msgstr ""
 
-#: application/view/reader.py:240
+#: application/view/reader.py:322
 msgid "Failed to create ebook."
 msgstr ""
 
@@ -1834,11 +1843,11 @@ msgid "Title is requied!"
 msgstr ""
 
 #: application/view/settings.py:174
-msgid "Chinese"
+msgid "English"
 msgstr ""
 
 #: application/view/settings.py:175
-msgid "English"
+msgid "Chinese"
 msgstr ""
 
 #: application/view/settings.py:176
@@ -1937,6 +1946,70 @@ msgstr ""
 msgid "Hausa"
 msgstr ""
 
+#: application/view/settings.py:200
+msgid "Thai"
+msgstr ""
+
+#: application/view/settings.py:201
+msgid "Polish"
+msgstr ""
+
+#: application/view/settings.py:202
+msgid "Romanian"
+msgstr ""
+
+#: application/view/settings.py:203
+msgid "Hungarian"
+msgstr ""
+
+#: application/view/settings.py:204
+msgid "Swedish"
+msgstr ""
+
+#: application/view/settings.py:205
+msgid "Hebrew"
+msgstr ""
+
+#: application/view/settings.py:206
+msgid "Norwegian"
+msgstr ""
+
+#: application/view/settings.py:207
+msgid "Finnish"
+msgstr ""
+
+#: application/view/settings.py:208
+msgid "Danish"
+msgstr ""
+
+#: application/view/settings.py:209
+msgid "Ukrainian"
+msgstr ""
+
+#: application/view/settings.py:210
+msgid "Tamil"
+msgstr ""
+
+#: application/view/settings.py:211
+msgid "Marathi"
+msgstr ""
+
+#: application/view/settings.py:212
+msgid "Burmese"
+msgstr ""
+
+#: application/view/settings.py:213
+msgid "Amharic"
+msgstr ""
+
+#: application/view/settings.py:214
+msgid "Azerbaijani"
+msgstr ""
+
+#: application/view/settings.py:215
+msgid "Kazakh"
+msgstr ""
+
 #: application/view/share.py:60
 msgid "There is no {} email yet."
 msgstr ""
@@ -2027,5 +2100,9 @@ msgstr ""
 
 #: application/view/subscribe.py:388
 msgid "The login information for this recipe has been saved."
+msgstr ""
+
+#: application/view/translator.py:77 application/view/translator.py:160
+msgid "The api key is required."
 msgstr ""
 

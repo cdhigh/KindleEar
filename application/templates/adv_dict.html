@@ -18,7 +18,7 @@
     <label>{{_("Book language")}}</label>
     <select class="pure-u-1 pure-u-sm-1-2" name="language0">
       {% for code,name in langMap.items() -%}
-      {% set lang0 = dictsCfg[0].get('language', '') -%}
+      {% set lang0 = dictParams[0].get('language', '') -%}
       <option value="{{code}}" {% if lang0 and code.startswith(lang0) %}selected="selected"{% endif %}>{{name}}</option>
       {% endfor -%}
     </select>
@@ -40,7 +40,7 @@
     <label>{{_("Book language")}}</label>
     <select class="pure-u-1 pure-u-sm-1-2" name="language1">
       {% for code,name in langMap.items() -%}
-      {% set lang1 = dictsCfg[1].get('language', '') -%}
+      {% set lang1 = dictParams[1].get('language', '') -%}
       <option value="{{code}}" {% if lang1 and code.startswith(lang1) %}selected="selected"{% endif %}>{{name}}</option>
       {% endfor -%}
     </select>
@@ -88,7 +88,7 @@
 {% block js -%}
 <script type="text/javascript">
 var g_dictEngines = {{engines|safe}};
-var g_dictsCfg = {{dictsCfg|safe}}; //[{language:,engine:,database:,},]
+var g_dictParams = {{dictParams|safe}}; //[{language:,engine:,database:,},]
 
 $(document).ready(function() {
   PopulateDictFields();

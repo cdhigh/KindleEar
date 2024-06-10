@@ -1648,7 +1648,7 @@ function SendTestEmail() {
 //根据词典引擎列表 g_dictEngines 和 当前配置 g_dictParams 填充下拉框
 function PopulateDictFields() {
   for (var idx = 0; idx < 3; idx++) {
-    var cfg = g_dictsCfg[idx];
+    var cfg = g_dictParams[idx];
     var engineSel = $('#dict_engine' + idx);
     engineSel.empty();
     var engineName = cfg.engine;
@@ -1671,7 +1671,7 @@ function DictEngineFieldChanged(idx) {
   if (!databases) {
     return;
   }
-  var currDb = g_dictsCfg[idx].database;
+  var currDb = g_dictParams[idx].database;
   for (var name in databases) {
     var selected = (currDb == name) ? 'selected="selected"' : '';
     var txt = `<option value="${name}" ${selected}>${databases[name]}</option>`;

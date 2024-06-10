@@ -198,6 +198,20 @@ sudo usermod -aG docker your-username
 ```
 
 
+
+<a id="synology"></a>
+## 群晖 (NAS)
+1. 打开 "套件中心"，搜索并安装Docker。
+2. 打开Docker (Container Manager)，在注册表搜索 "KindleEar"，安装 kindleear/kindleear。
+3. 运行KindleEar，进入设置界面：
+  3.1 第一步勾选"启用自动重新启动"；
+  3.2 第二步：
+    3.2.1 在"端口设置"里面选择一个本地端口(比如:8001)映射到KindleEar的8000端口
+    3.2.2 在"存储空间设置"里面添加一个文件夹映射到 `/data`，比如 `/docker/data` 映射到 `/data`，权限为"读取/写入"
+4. 启动完成后使用 http://ip:8001 访问。  
+5. 如果需要链接分享功能，可以设置环境变量 `APP_DOMAIN`。 
+
+
 <a id="oracle-cloud"></a>
 ## Oracle cloud (VPS)
 这是手动在一个 [Oracle VPS](https://cloud.oracle.com/) 上部署的步骤，比较复杂，一般不建议，如果没有特殊要求，推荐使用docker镜像。   
