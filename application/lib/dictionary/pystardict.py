@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #stardict词典支持，基于 <https://github.com/lig/pystardict> 修改
-import os, re, gzip, logging
+import os, re, logging
 from struct import unpack
+try:
+    import indexed_gzip as igzip
+except:
+    import gzip
+    igzip = None
+
 try:
     import marisa_trie
 except:
@@ -404,8 +410,34 @@ class _StarDictDict:
         """
         cords = self._container.idx[word]
         self._file.seek(cords[0])
-        return self._file.read(cords[1]) #type:ignore
+        data = self._file.read(cords[1]) #type:ignore
+        ret = {}
+        typeSeq = self._container.ifo.sametypesequence
+        seqLen = len(typeSeq)
+        if seqLen:
+            for k, type_ in enumerate(typeSeq):
+                if type_ in "mlgtxykwhnr": #文本
+                    if k >= seqLen - 1: #最后一个数据段
+                        ret[type_] = data
+                    else:
+                        ret[type_], _, data = data.partition(b'\0') #type:ignore
+                else: #音频图像，暂不支持
+                    #开头一个网络字节序的32位整数指示实际数据长度
+                    size = unpack("!L", data[:4]) #type:ignore
+                    #ret[type_] = data[4:size + 4] #type:ignore
+                    data = data[size + 4:]
+        else:
+            while data:
+                type_ = unpack("!c", data[:1]) #type:ignore
+                if type_ in "mlgtxykwhnr": #type:ignore
+                    ret[type_], _, data = data.partition(b'\0') #type:ignore
+                else: #音频图像，暂不支持
+                    size = unpack("!L", data[:4]) #type:ignore
+                    #ret[type_] = data[4:size + 4] #type:ignore
+                    data = data[size + 4:]
 
+        return b''.join(ret.values())
+        
     def __contains__(self, word):
         return word in self._container.idx
 
@@ -435,7 +467,7 @@ def open_file(regular, gz):
     #但是它提供一个表可以用来在文件中随机访问压缩块。
     if os.path.exists(gz):
         try:
-            return gzip.open(gz, 'rb')
+            return igzip.IndexedGzipFile(gz) if igzip else gzip.open(gz, 'rb') #type:ignore
         except Exception as e:
             raise Exception('gz file opening error: "{}"'.format(e))
 

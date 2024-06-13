@@ -12,6 +12,7 @@ import time
 import traceback
 import json
 import datetime
+import html
 
 from calibre import entity_to_unicode, force_unicode, strftime
 from calibre.utils.cleantext import clean_ascii_chars, clean_xml_chars
@@ -249,6 +250,11 @@ class Feed:
             content = None
         if not link and not content:
             return
+
+        if description:
+            description = html.unescape(description)
+        if content:
+            content = html.unescape(content)
         article = Article(id, title, link, author, description, published, content)
         delta = utcnow() - article.utctime
         if (self.oldest_article == 0) or (delta.days*24*3600 + delta.seconds <= 24*3600*self.oldest_article):

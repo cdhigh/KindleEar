@@ -11,7 +11,7 @@ from ..utils import str_to_bool, str_to_int
 from ..back_end.db_models import *
 
 #几个"官方"服务的地址
-KINDLEEAR_SITE = "https://reador.appspot.com"
+KINDLEEAR_SITE = "https://cdhigh.serv00.net"
 LIBRARY_KINDLEEAR = "/kelibrary"
 LIBRARY_GETRSS = "getrss"
 LIBRARY_GETLASTTIME = "latesttime"

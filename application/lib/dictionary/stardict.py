@@ -39,4 +39,10 @@ class StarDict:
         
     def definition(self, word, language=''):
         ret = self.dictionary.get(word) if self.dictionary else ''
-        return ret.decode('utf-8') if isinstance(ret, bytes) else ret
+        if isinstance(ret, bytes):
+            ret = ret.decode('utf-8')
+        lines = [line.strip() for line in str(ret).split('\n') if line.strip()]
+        if lines and lines[0] in (word, f'<b>{word}</b>'):
+            lines = lines[1:]
+        return '\n'.join(lines)
+

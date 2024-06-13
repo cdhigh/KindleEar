@@ -373,7 +373,11 @@ def AdvDeleteCssAjaxPost(user: KeUser):
 def AdvDict(user: KeUser):
     from dictionary import all_dict_engines
     #[{language:,engine:,database:,},]
-    dictParams = user.cfg('reader_params').get('dicts', [])
+    dictParams = user.cfg('reader_params').get('dicts', [{},{},{}])
+    if not isinstance(dictParams, list):
+        dictParams = [{},{},{}]
+    while len(dictParams) < 3:
+        dictParams.append({})
     
     engines = {name: {'databases': klass.databases} for name,klass in all_dict_engines.items()}
     return adv_render_template('adv_dict.html', 'dictionary', user=user, engines=engines, 

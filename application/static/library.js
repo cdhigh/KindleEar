@@ -220,7 +220,7 @@ function CreatePageContent(category, page) {
     //汉堡按钮弹出菜单代码
     var dbId = item.r || '';
     let title = encodeJsSafeStr(item.t);
-    var repAct = "ReportInvalid('`{0}','{1}','{2}')".format(title, item.u, dbId);
+    var repAct = "ReportInvalid('{0}','{1}','{2}')".format(title, item.u, dbId);
     var subsAct = "SubscribeSharedFeed('{0}','{1}','{2}','{3}',{4})";
     hamb_arg.push({klass: 'btn-A', title: i18n.invalidReport, icon: 'icon-offcloud', act: repAct});
     hamb_arg.push({klass: 'btn-C', title: i18n.subscriSep, icon: 'icon-push', act: 
