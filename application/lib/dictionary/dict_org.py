@@ -192,6 +192,7 @@ class DictOrg:
 
     #查词，language - word的语种
     def definition(self, word, language=''):
+        word = word.lower().strip()
         defs = self.db.define(word)
         ret = '\n'.join([item.getdefstr() for item in defs])
         ret = self.convert_to_ipa(ret) #转换音标格式

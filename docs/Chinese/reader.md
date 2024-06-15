@@ -45,9 +45,10 @@ KindleEar支持邮件推送和在线阅读，内置一个为电子墨水屏进�
 
 
 ### 安装词典
-1. KindleEar支持在线词典 [dict.org](https://dict.org/), [dict.cc](https://www.dict.cc/), [dict.cn](http://dict.cn/), [韦氏词典](https://www.merriam-webster.com/)， 这几个词典不需要安装，开箱即用。    
-2. KindleEar同时还支持离线词典，当前支持 stardict 格式词典，下载对应的词典后，解压到 `data/dict` 目录，可以使用子目录整理不同的词典，然后重启 KindleEar 服务以便能刷新词典列表。   
-3. 已经默认支持美式英语的构词法规则，可以查询单词时态语态复数等变形，如果需要支持其他语种的构词法，请下载对应的hunspell格式的文件（.dic/.aff），然后拷贝到 `data/dict/morphology` ，注意不要存放到子目录下，KindleEar会自动使用和书本语言相匹配的构词法规则。   
+1. KindleEar支持在线词典 [dict.org](https://dict.org/), [dict.cc](https://www.dict.cc/), [dict.cn](http://dict.cn/), [韦氏词典](https://www.merriam-webster.com/)，[牛津词典](https://www.oxfordlearnersdictionaries.com/)， 这几个词典不需要安装，开箱即用。    
+2. 在线词典很方便，但是避免有时候因为网络原因不是太稳定，所以如果要稳定使用，最好还是使用离线词典，为此，KindleEar同时支持 mdict/stardict 格式词典，下载对应的词典后，解压到 `data/dict` 目录（可以使用子目录整理不同的词典）。   
+3. 离线词典第一次查词会比较慢，因为要创建索引文件(后缀为trie)，特别是针对大词典，不建议在KindleEar使用大词典。   
+4. 已经默认支持美式英语的构词法规则，可以查询单词时态语态复数等变形，如果需要支持其他语种的构词法，请下载对应的hunspell格式的文件（.dic/.aff），然后拷贝到 `data/dict/morphology` ，注意不要存放到子目录下，KindleEar会自动使用和书本语言相匹配的构词法规则。   
 至于到哪里下载hunspell/myspell构词法文件，可以到github/sourceforge等网站上搜索。额外的，这里有一个 [链接](https://sourceforge.net/projects/goldendict/files/better%20morphologies/1.0/)
 
 

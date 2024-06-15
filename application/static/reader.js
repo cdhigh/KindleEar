@@ -241,6 +241,7 @@ function showDictDialog(word, text, dictname, others) {
   dictNameDiv.innerHTML = ostr.join('');
   titleDiv.innerHTML = word;
   textDiv.innerHTML = text.replace(/\n/g, '<br/>');
+  textDiv.style.textAlign = text.length > 50 ? 'left' : 'center';
   var y = Math.max(event.clientY - content.scrollTop, 0);
   var height = content.clientHeight;
   if (y > height * 0.6) {

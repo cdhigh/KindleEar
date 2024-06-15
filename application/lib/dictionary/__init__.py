@@ -4,11 +4,14 @@
 from .dict_org import DictOrg
 from .dict_cn import DictCn
 from .dict_cc import DictCc
-from .stardict import StarDict
 from .merriam_webster import MerriamWebster
+from .oxford_learners import OxfordLearners
+from .stardict import StarDict
+from .mdict import MDict
 
 all_dict_engines = {DictOrg.name: DictOrg, DictCn.name: DictCn, DictCc.name: DictCc,
-    MerriamWebster.name: MerriamWebster, StarDict.name: StarDict}
+    MerriamWebster.name: MerriamWebster, OxfordLearners.name: OxfordLearners,
+    StarDict.name: StarDict, MDict.name: MDict}
 
 #创建一个词典实例
 def CreateDictInst(engine, database, host=None):

@@ -49,9 +49,13 @@ The principle of the dictionary function is to automatically extract the word cl
 The extracted word is sent to your deployed KindleEar site for translation, and the response is displayed.   
 
 ### Installing Dictionaries
-1. KindleEar supports online dictionaries such as [dict.org](https://dict.org/), [dict.cc](https://www.dict.cc/), [dict.cn](http://dict.cn/), and [Merriam-Webster](https://www.merriam-webster.com/). These dictionaries require no installation and are ready to use out of the box.    
+1. KindleEar supports online dictionaries such as [dict.org](https://dict.org/), [dict.cc](https://www.dict.cc/), [dict.cn](http://dict.cn/), [Merriam-Webster](https://www.merriam-webster.com/), [Oxford](https://www.oxfordlearnersdictionaries.com/). These dictionaries require no installation and are ready to use out of the box.    
+
 2. KindleEar also supports offline dictionaries in the stardict format. After downloading the corresponding dictionary, unzip it into the `data/dict` directory. You can organize different dictionaries into subdirectories. Then, restart the KindleEar service to refresh the dictionary list.    
-3. By default, American English morphology queries are supported.    
+
+3. The first time you look up a word in the offline dictionary may be slow because it needs to create an index file (suffix: trie), especially for large dictionaries. It is not recommended to use large dictionaries in KindleEar.   
+
+4. By default, American English morphology queries are supported.    
 If you need to support morphology rules for other languages, please download the corresponding Hunspell format files (.dic/.aff), and then copy them to `data/dict/morphology`. Be careful not to store them in a subdirectory.    
 KindleEar will automatically use the morphology rules that match the book's language.   
 As for where to download Hunspell/MySpell morphology files, you can search on websites such as GitHub or SourceForge. Additionally, here is a [link](https://sourceforge.net/projects/goldendict/files/better%20morphologies/1.0/) you can check.   

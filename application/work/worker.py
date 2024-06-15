@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 #后台实际的推送任务，由任务队列触发
 #Author: cdhigh<https://github.com/cdhigh>
-import os, time
+import os, sys, time
 from typing import Union
 from collections import defaultdict
 from flask import Blueprint, request, current_app as app
@@ -181,10 +181,8 @@ def GetAllRecipeSrc(user, idList):
 #返回可用的mp3cat执行文件路径
 def mp3cat_path():
     try:
-        import subprocess, platform
-        #AMD64:win/amd64, x86_64:amd64, aarch64:arm64, armv7l:arm/v7
-        machine = platform.machine()
-        execFile = {'AMD64': 'mp3cat.exe', 'aarch64': 'arm64_mp3cat'}.get(machine, 'mp3cat')
+        import subprocess
+        execFile = 'mp3cat.exe' if 'win' in sys.platform.lower() else 'mp3cat'
         subprocess.run([execFile, "--version"], check=True, shell=True)
         default_log.debug('Using system mp3cat')
     except: #subprocess.CalledProcessError:

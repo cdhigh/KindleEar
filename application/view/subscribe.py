@@ -242,7 +242,7 @@ def RecipeAjaxPost(actType: str, user: KeUser):
         force = str_to_bool(form.get('force'))
         return DeleteRecipe(user, recipeId, recipeType, recipe, force)
     elif actType == 'schedule': #设置某个recipe的自定义推送时间
-        return ScheduleRecipe(recipeId, form)
+        return ScheduleRecipe(user, recipeId, form)
     else:
         return {'status': _('Unknown command: {}').format(actType)}
 
@@ -285,8 +285,8 @@ def DeleteRecipe(user: KeUser, recipeId: str, recipeType: str, recipe: Recipe, f
 
 #设置某个Recipe的推送时间
 #form: request.form实例
-def ScheduleRecipe(recipeId, form):
-    dbInst = BookedRecipe.get_or_none(BookedRecipe.recipe_id == recipeId)
+def ScheduleRecipe(user: KeUser, recipeId: str, form):
+    dbInst = BookedRecipe.get_or_none((BookedRecipe.user == user.name) & (BookedRecipe.recipe_id == recipeId))
     if dbInst:
         type_ = form.get('type')
         if type_ in ('weekday', 'date'):

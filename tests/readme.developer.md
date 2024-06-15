@@ -5,24 +5,21 @@
 ```bash
 #using the pre-created builder, build && push
 cd ~/kindleear && \
-cp ./docker/Dockerfile . && \
 sudo docker buildx use builder && \
-sudo docker buildx build --push --platform=linux/amd64,linux/arm64 -t kindleear/kindleear . && \
+sudo docker buildx build --push --platform=linux/amd64,linux/arm64 -t kindleear/kindleear:latest -t kindleear/kindleear:3.1.0 -f docker/Dockerfile . && \
 cd ~
 #or, create a new builder, build && push
 cd ~/kindleear && \
-cp ./docker/Dockerfile . && \
 sudo docker buildx create --use --name=builder && \
-sudo docker buildx build --push --platform=linux/amd64,linux/arm64 -t kindleear/kindleear . && \
+sudo docker buildx build --push --platform=linux/amd64,linux/arm64 -t kindleear/kindleear:latest -t kindleear/kindleear:3.1.0 -f docker/Dockerfile . && \
 cd ~
 #using the pre-created builder, build && output
 cd ~/kindleear && \
-cp ./docker/Dockerfile . && \
 sudo docker buildx use builder && \
-sudo docker buildx build --platform=linux/arm64 -t kindleear/kindleear --output type=docker,dest=../kindleear.tar . && \
+sudo docker buildx build --platform=linux/arm64 -t kindleear/kindleear --output type=docker,dest=../kindleear.tar -f docker/Dockerfile . && \
 cd ~
 #or, build a single platform image for test
-cd ~/kindleear && cp ./docker/Dockerfile . && sudo docker build -t kindleear/kindleear . && cd ~
+cd ~/kindleear && sudo docker build -t kindleear/kindleear -f docker/Dockerfile . && cd ~
 #or, build a single platform image without cache and tag it
 sudo docker build --no-cache -t kindleear/kindleear .
 sudo docker tag id kindleear/kindleear:version

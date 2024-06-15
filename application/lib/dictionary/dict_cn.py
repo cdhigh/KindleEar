@@ -19,6 +19,7 @@ class DictCn:
         return 'dict.cn [English-Chinese]'
         
     def definition(self, word, language=''):
+        word = word.lower().strip()
         resp = self.opener.open(f'{self.host}/{word}')
         if resp.status_code == 200:
             soup = BeautifulSoup(resp.text, 'lxml')

@@ -417,6 +417,6 @@ body::-webkit-scrollbar-thumb {
 .tr-text {
   margin: 0px auto 10px auto;
   padding: 0px 10px 10px 10px;
-  text-align: center;
+  /*text-align: center;*/
   min-height: 100%;
 }

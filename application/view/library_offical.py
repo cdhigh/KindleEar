@@ -260,6 +260,9 @@ def TransferLibPost(user: KeUser):
         category = t.get('c', '')
         subscribed = t.get('s', 1)
         created_time = t.get('d', 0)
+        src = t.get('r', '')
+        if len(src) < 30:
+            src = ''
         cats.add(category)
         try:
             created_time = datetime.datetime.utcfromtimestamp(created_time)
@@ -269,6 +272,8 @@ def TransferLibPost(user: KeUser):
         dbItem = SharedRss.get_or_none(SharedRss.title == title) or SharedRss(title=title, url=url)
         dbItem.url = url
         dbItem.isfulltext = isfulltext
+        if src:
+            dbItem.src = src
         if language:
             dbItem.language = language
         if category:
@@ -277,6 +282,8 @@ def TransferLibPost(user: KeUser):
             dbItem.subscribed = subscribed
         if created_time:
             dbItem.created_time = created_time
+        dbItem.recipe_url = t.get('recipe_url', dbItem.recipe_url)
+        dbItem.creator = t.get('creator', dbItem.creator)
         dbItem.save()
 
     for cat in cats:
@@ -284,3 +291,20 @@ def TransferLibPost(user: KeUser):
             SharedRssCategory.create(name=cat, language='')
     UpdateLastSharedRssTime()
     return f'Finished, data count={len(sharedData)}, category count={len(cats)}'
+
+@bpLibraryOffical.post('/exportlib', endpoint='ExportLibPost')
+@login_required()
+def ExportLibPost(user: KeUser):
+    key = request.form.get('key')
+    if key != 'eHam9CEL2ayi':
+        return {}
+
+    sharedData = [{'t': d.title, 'u': d.url, 'f': d.isfulltext, 'l': d.language, 
+        'c': d.category, 's': d.subscribed, 'd': int(d.last_subscribed_time.timestamp()), 
+        'r': d.src, 'e': d.description,
+        'recipe_url': d.recipe_url, 'creator': d.creator, 'created_time': int(d.last_subscribed_time.timestamp()),
+        'invalid_report_days': d.invalid_report_days, 'last_invalid_report_time': int(d.last_invalid_report_time.timestamp()),
+        }
+        for d in SharedRss.select().order_by(SharedRss.last_subscribed_time.desc())
+        .limit(2000).execute()] #type:ignore
+    return json.dumps(sharedData, separators=(',', ':'), ensure_ascii=False)

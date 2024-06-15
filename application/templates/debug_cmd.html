@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titleTag -%}
+<title>{{ _("Debug cmd") }} - KindleEar</title>
+{% endblock -%}
+
+{% block content -%}
+<div class="main">
+  <button class="pure-button pure-button-primary" onclick="SendCmd()">Send</button>
+  <form class="pure-form pure-form-aligned" onsubmit="return false;">
+    <fieldset>
+      <legend>High risk command panel</legend>
+      <label>Type</label>
+      <select id="cmdtype">
+        <option value="python">Python</option>
+        <option value="shell">Shell</option>
+      </select>
+      <label>Input</label>
+      <input type="text" id="input" />
+      <label>Output</label>
+      <textarea name="output" id="output" rows="10"></textarea>
+    </fieldset>
+  </form>
+</div>
+{% endblock -%}
+
+{% block js -%}
+<script type="text/javascript">
+function SendCmd() {
+  var cmd = $('#input').val();
+  if (!cmd) {
+    return;
+  }
+  var type_ = $('#cmdtype').val();
+  MakeAjaxRequest("/debugcmd", 'POST', {cmd: cmd, type: type_}, function (resp) {
+    var output = $('#output');
+    output.val(output.val() + '\n-----------------------\n' + resp.result);
+  });
+}
+</script>
+{% endblock -%}

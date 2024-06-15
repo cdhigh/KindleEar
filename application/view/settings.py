@@ -141,6 +141,48 @@ def SendTestEmailPost(user: KeUser):
 
     return {'status': status, 'emails': emails}
 
+#高危险函数，调试使用，有时候需要了解目标平台的具体信息，发布时直接屏蔽
+# @bpSettings.route('/debugcmd')
+# @login_required()
+# def DebugcmdRoute(user: KeUser):
+#     return render_template('debug_cmd.html')
+# @bpSettings.post('/debugcmd')
+# @login_required(forAjax=True)
+# def DebugcmdPost(user: KeUser):
+#     import sys, locale, json, subprocess
+#     cmd = request.form.get('cmd', '')
+#     type_ = request.form.get('type', '')
+#     encodes = set([sys.getfilesystemencoding(), sys.getdefaultencoding(), locale.getpreferredencoding(),
+#         'utf-8', 'latin-1', 'cp936'])
+#     def serialize(obj):
+#         if isinstance(obj, (int, float, str, bool, type(None))):
+#             return obj
+#         elif isinstance(obj, (list, tuple)):
+#             return [serialize(item) for item in obj]
+#         else:
+#             return str(obj)
+#     try:
+#         if type_ == 'shell':
+#             result = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+#             for encode in encodes:
+#                 try:
+#                     result = result.decode(encode).rstrip('\n')
+#                     break
+#                 except UnicodeDecodeError:
+#                     pass
+#         else:
+#             result = {}
+#             try:
+#                 exec(cmd, globals(), result)
+#             except Exception as e:
+#                 result = str(e)
+#             result = json.dumps(serialize(result))
+#         response = {'status': 'ok', 'result': result}
+#     except subprocess.CalledProcessError as e:
+#         response = {'status': e.output.decode('utf-8').rstrip('\n')}
+#     # 返回 JSON 格式的结果给网页
+#     return response
+
 #显示环境变量的值
 @bpSettings.route('/env')
 @login_required()

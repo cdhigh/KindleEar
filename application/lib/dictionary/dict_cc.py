@@ -85,6 +85,7 @@ class DictCc:
         return f'dict.cc [{self.database}]'
         
     def definition(self, word, language=''):
+        word = word.strip()
         if language not in self.databases:
             default_log.info(f'Database "{language}" not exists, fallback to "english"')
             language = 'en'

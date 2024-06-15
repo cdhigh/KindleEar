@@ -24,6 +24,11 @@ class StarDict:
     #词典列表，键为词典缩写，值为词典描述
     databases = getStarDictList()
 
+    #更新词典列表
+    @classmethod
+    def refresh(cls):
+        cls.databases = getStarDictList()
+
     def __init__(self, database='', host=None):
         self.database = database
         self.dictionary = None
@@ -31,13 +36,14 @@ class StarDict:
             try:
                 self.dictionary = PyStarDict(database)
             except Exception as e:
-                default_log.warning(f'Instantiate stardict failed: {database}: {e}')
+                default_log.warning(f'Instantiate stardict failed: {self.databases[database]}: {e}')
 
     #返回当前使用的词典名字
     def __repr__(self):
         return 'stardict [{}]'.format(self.databases.get(self.database, ''))
         
     def definition(self, word, language=''):
+        word = word.lower().strip()
         ret = self.dictionary.get(word) if self.dictionary else ''
         if isinstance(ret, bytes):
             ret = ret.decode('utf-8')

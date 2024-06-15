@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block titleTag -%}
+<title>{{_("Dict")}} - KindleEar</title>
+{% endblock -%}
+{% block menubar -%}
+{% endblock -%}
+{% block css %}
+<style type="text/css">
+  .tr_container {
+    margin: 20px;
+    padding: 0px 10px 40px 10px;
+    border-top: 1px solid #ccc;
+  }
+  .tr_engine {
+    display: none;
+    margin: 10px 0px 20px 10px;
+    padding: 20px 30px 20px 30px;
+    border: 1px solid #ccc;
+    border-radius: 30px;
+    box-shadow: 2px 2px 5px #ccc;
+    background-color: #F5F5F5;
+  }
+</style>
+{% endblock -%}
+
+{% block content -%}
+<div>
+  <form class="pure-form pure-form-aligned" action="" method="POST" onsubmit="return false;">
+    {% if tips -%}
+    <div class="notice-box error">{{tips}}</div>
+    {% endif -%}
+
+    <fieldset>
+      <div class="pure-control-group">
+        <label>{{_("Query")}}</label>
+        <input type="text" name="text" id="search_for" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Source language")}}</label>
+        <select name="language" id="language" class="pure-u-1 pure-u-sm-1-2">
+          {% for code,name in langMap.items() -%}
+          <option value="{{code}}">{{name}}</option>
+          {% endfor -%}
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Engine")}}</label>
+        <select name="engine" id="engine" class="pure-u-1 pure-u-sm-1-2" onchange="DictEngineChanged()">
+          <!-- 由脚本填充 -->
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Database")}}</label>
+        <select name="database" id="database" class="pure-u-1 pure-u-sm-1-2">
+          <!-- 由脚本填充 -->
+        </select>
+      </div>
+      <p style="text-align:center;">
+        <button class="pure-button pure-input-rounded" onclick="startQueryDict()">{{_('Query')}}</button>
+      </p>
+    </fieldset>
+  </form>
+  <div class="tr_container">
+    <div class="tr_engine" id="tr_engine"></div>
+    <div class="tr_result" id="tr_result"></div>
+  </div>
+</div>
+{% endblock -%}
+
+{% block js -%}
+<script type="text/javascript">
+var g_dictEngines = {{engines|safe}};
+
+//填充可用的引擎列表
+function PopulateDictEngines() {
+  var engineSel = $('#engine');
+  engineSel.empty();
+  for (var name in g_dictEngines) {
+    var txt = `<option value="${name}">${name}</option>`;
+    engineSel.append($(txt));
+  }
+}
+
+//词典引擎变化时填充数据库名字列表
+function DictEngineChanged() {
+  var engineSel = $('#engine');
+  var dbSel = $('#database');
+  var engine = engineSel.val();
+  dbSel.empty();
+  var databases = g_dictEngines[engine].databases;
+  if (!databases) {
+    return;
+  }
+  for (var name in databases) {
+    var txt = `<option value="${name}">${databases[name]}</option>`;
+    dbSel.append($(txt));
+  }
+}
+
+//开始查词
+function startQueryDict() {
+  var word = $('#search_for').val();
+  var language = $('#language').val();
+  var engine = $('#engine').val();
+  var database = $('#database').val();
+  if (!word) {
+    return;
+  }
+
+  $.post('/reader/dict', {word: word, language: language, engine: engine, database: database}, function (resp) {
+    if (resp.status == 'ok') {
+      showTrResult(resp.word, resp.definition, resp.dictname);
+    } else {
+      alert(resp.status);
+    }
+  });
+}
+
+//显示翻译结果
+function showTrResult(word, text, dictname) {
+  var engineDiv = $('#tr_engine');
+  var resultDiv = $('#tr_result');
+  engineDiv.html('From: <strong>' + dictname + '</strong>');
+  resultDiv.empty();
+  if (!text) {
+    engineDiv.css('display', 'none');
+    resultDiv.html('No definitions found for "' + word + '"');
+  } else {
+    engineDiv.css('display', 'inline-block');
+    resultDiv.html(text.replace(/\n/g, '<br/>'));
+  }
+}
+
+//初始化页面
+$(document).ready(function() {
+  PopulateDictEngines();
+  DictEngineChanged();
+  $("#search_for").keydown(function(event) {
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      startQueryDict();
+    }
+  });
+});
+</script>
+{% endblock -%}
+{% block footer -%}
+{% endblock -%}

@@ -14,7 +14,7 @@ from ..base_handler import *
 from ..utils import xml_escape, xml_unescape, str_to_int, str_to_float, str_to_bool
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import send_to_kindle
-from .settings import get_locale
+from .settings import get_locale, LangMap
 
 bpReader = Blueprint('bpReader', __name__)
 
@@ -167,14 +167,29 @@ def ReaderSettingsPost(user: KeUser, userDir: str):
     user.save()
     return {'status': 'ok'}
 
-#查词
-@bpReader.route("/reader/dict", methods=['GET', 'POST'], endpoint='ReaderDictRoute')
+#网页查词
+@bpReader.route("/reader/dict", endpoint='ReaderDictRoute')
+@login_required()
+@reader_route_preprocess()
+def ReaderDictRoute(user: KeUser, userDir: str):
+    from dictionary import all_dict_engines
+
+    #刷新词典列表，方便在不重启服务的情况下添加删除离线词典文件
+    for dic in all_dict_engines.values():
+        if hasattr(dic, 'refresh'):
+            dic.refresh()
+    
+    engines = {name: {'databases': klass.databases} for name,klass in all_dict_engines.items()}
+    return render_template('dict.html', user=user, engines=engines, tips='', langMap=LangMap())
+
+#Api查词
+@bpReader.post("/reader/dict", endpoint='ReaderDictPost')
 @login_required(forAjax=True)
 @reader_route_preprocess(forAjax=True)
-def ReaderDictRoute(user: KeUser, userDir: str):
+def ReaderDictPost(user: KeUser, userDir: str):
     from dictionary import CreateDictInst, GetDictDisplayName
-    form = request.form if request.method == 'POST' else request.args
-    word = form.get('word')
+    form = request.form
+    word = form.get('word', '').strip()
     language = form.get('language', '').replace('_', '-').split('-')[0].lower() #书本语种
     if not word:
         return {'status': _("The text is empty.")}
@@ -221,7 +236,10 @@ def ReaderDictRoute(user: KeUser, userDir: str):
                 word = stem
                 definition = inst.definition(word, language) #再次查询
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         definition = f'Error: {e}'
+    print(json.dumps(definition)) #TODO
     return {'status': 'ok', 'word': word, 'definition': definition, 
         'dictname': str(inst), 'others': others}
 
@@ -231,39 +249,38 @@ def GetWordStem(word, language):
     try:
         import dictionary
         import hunspell #type:ignore
-    except:
+    except Exception as e:
+        import traceback #TODO
+        default_log.warning(traceback.format_exc())
         return ''
 
-    #默认位置，在dictionary模块的子目录 morphology
-    defMorphDir = os.path.join(os.path.dirname(dictionary.__file__), 'morphology')
     dictDir = app.config['DICTIONARY_DIR'] or ''
     morphDir = os.path.join(dictDir, 'morphology') if dictDir else ''
-    dirs = [dir_ for dir_ in [morphDir, defMorphDir] if dir_ and os.path.exists(dir_)]
-    if not dirs:
-        return ''
-
     dics = []
-    for dir_ in dirs:
-        dics.extend([os.path.join(dir_, e) for e in os.listdir(dir_) if e.endswith('.dic') and e.startswith(language)])
+    if morphDir and os.path.exists(morphDir):
+        dics.extend([os.path.splitext(e)[0] for e in os.listdir(morphDir) if e.endswith('.dic') and e.startswith(language)])
 
-    dic = dics[0] if dics else ''
-    aff = os.path.splitext(dic)[0] + '.aff'
-    if dic and os.path.exists(aff):
-        #根据情况，哪个包能用就用哪个包： cyhunspell, hunspell
-        if hasattr(hunspell, 'HunSpell'):
-            hObj = hunspell.HunSpell(dic, aff) #type:ignore
-        else:
-            dir_ = os.path.dirname(dic)
-            dic = os.path.splitext(os.path.basename(dic))[0]
-            hObj = hunspell.Hunspell(lang=dic, hunspell_data_dir=dir_)
-        stems = [s for s in hObj.stem(word) if s != word]
-        stem = stems[0] if stems else ''
-        if isinstance(stem, bytes):
-            stem = stem.decode('utf-8')
-        return stem
+    if dics:
+        dic = dics[0]
+    elif language.startswith('en'): #使用默认英语变形数据 en_US
+        dic = 'en_US'
+        morphDir = None
     else:
         return ''
 
+    stems = []
+    try:
+        hObj = hunspell.Hunspell(lang=dic, hunspell_data_dir=morphDir)
+        stems = [s for s in hObj.stem(word) if s != word]
+        default_log.debug(f'got stem tuple: {stems}')
+    except Exception as e:
+        default_log.warning(f'Get stem of "{word}" failed: {e}')
+
+    stem = stems[0] if stems else ''
+    if isinstance(stem, bytes):
+        stem = stem.decode('utf-8')
+    return stem
+    
 #将一个特定的文章制作成电子书推送
 def PushSingleArticle(src: str, title: str, user: KeUser, userDir: str, language: str):
     path = os.path.join(userDir, src).replace('\\', '/')

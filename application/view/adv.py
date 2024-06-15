@@ -378,6 +378,11 @@ def AdvDict(user: KeUser):
         dictParams = [{},{},{}]
     while len(dictParams) < 3:
         dictParams.append({})
+
+    #刷新词典列表，方便在不重启服务的情况下添加删除离线词典文件
+    for dic in all_dict_engines.values():
+        if hasattr(dic, 'refresh'):
+            dic.refresh()
     
     engines = {name: {'databases': klass.databases} for name,klass in all_dict_engines.items()}
     return adv_render_template('adv_dict.html', 'dictionary', user=user, engines=engines, 
