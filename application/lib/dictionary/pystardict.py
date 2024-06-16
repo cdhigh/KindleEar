@@ -174,13 +174,13 @@ class _StarDictIdx:
         idx_filename = f'{dict_prefix}.idx'
         idx_filename_gz = f'{idx_filename}.gz'
         trie_filename = f'{dict_prefix}.trie'
-        fmt_filename = f'{dict_prefix}.fmt'
         self.trie = None
-        if os.path.exists(trie_filename) and os.path.exists(fmt_filename):
+        bytes_size = int(container.ifo.idxoffsetbits / 8)
+        offset_format = 'L' if bytes_size == 4 else 'Q'
+        trie_fmt = f">{offset_format}L"
+        if os.path.exists(trie_filename):
             try:
-                with open(fmt_filename, 'r') as f:
-                    fmt = f.read()
-                self.trie = marisa_trie.RecordTrie(fmt)
+                self.trie = marisa_trie.RecordTrie(trie_fmt) #type:ignore
                 self.trie.load(trie_filename)
             except Exception as e:
                 self.trie = None
@@ -196,7 +196,7 @@ class _StarDictIdx:
         except Exception as e:
             raise Exception('idx file opening error: "{}"'.format(e))
 
-        _file = file.read()
+        fileContent = file.read()
 
         #check file size
         if file.tell() != container.ifo.idxfilesize:
@@ -206,38 +206,33 @@ class _StarDictIdx:
         file.close()
 
         #prepare main dict and parsing parameters
-        bytes_size = int(container.ifo.idxoffsetbits / 8)
-        offset_format = 'L' if bytes_size == 4 else 'Q'
         record_size = str(bytes_size + 4).encode('utf-8') #偏移+数据长
 
         #parse data via regex
         record_pattern = br'(.+?\x00.{' + record_size + br'})'
-        matched_records = re.findall(record_pattern, _file, re.DOTALL) #type:ignore
+        matched_records = re.findall(record_pattern, fileContent, re.DOTALL) #type:ignore
 
         #check records count
         if len(matched_records) != container.ifo.wordcount:
             raise Exception('words count is incorrect')
 
         #unpack parsed records
-        idxBuff = []
-        for matched_record in matched_records:
-            cnt = matched_record.find(b'\x00') + 1
-            record_tuple = unpack(f'!{cnt}c{offset_format}L', matched_record)
-            word = b''.join(record_tuple[:cnt-1]).decode('utf8').lower()
-            idxBuff.append((word, record_tuple[cnt:])) #(word, (offset, size))
+        #为了减小一点内存占用，将这部分写成生成器
+        def idxForTrie():
+            for matched_record in matched_records:
+                cnt = matched_record.find(b'\x00') + 1
+                record_tuple = unpack(f'>{cnt}c{offset_format}L', matched_record)
+                word = b''.join(record_tuple[:cnt-1]).decode('utf8').lower()
+                yield (word, record_tuple[cnt:]) #(word, (offset, size))
 
-        fmt = f"!{offset_format}L"
-        self.trie = marisa_trie.RecordTrie(fmt, idxBuff)
+        self.trie = marisa_trie.RecordTrie(trie_fmt, idxForTrie()) #type:ignore
         self.trie.save(trie_filename)
-        with open(fmt_filename, 'w') as f:
-            f.write(fmt)
-
+        
         del self.trie
-        self.trie = marisa_trie.RecordTrie(fmt)
+        self.trie = marisa_trie.RecordTrie(trie_fmt) #type:ignore
         self.trie.load(trie_filename)
-        del _file
+        del fileContent
         del matched_records
-        del idxBuff
         import gc
         gc.collect()
         

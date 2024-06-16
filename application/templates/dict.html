@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block titleTag -%}
-<title>{{_("Dict")}} - KindleEar</title>
+<title>{{_("Word lookup")}} - KindleEar</title>
 {% endblock -%}
 {% block menubar -%}
 {% endblock -%}
@@ -10,6 +10,10 @@
     margin: 20px;
     padding: 0px 10px 40px 10px;
     border-top: 1px solid #ccc;
+  }
+  .tr_container span {
+    margin: 5px;
+    padding: 0px;
   }
   .tr_engine {
     display: none;
@@ -32,10 +36,6 @@
 
     <fieldset>
       <div class="pure-control-group">
-        <label>{{_("Query")}}</label>
-        <input type="text" name="text" id="search_for" class="pure-u-1 pure-u-sm-1-2" />
-      </div>
-      <div class="pure-control-group">
         <label>{{_("Source language")}}</label>
         <select name="language" id="language" class="pure-u-1 pure-u-sm-1-2">
           {% for code,name in langMap.items() -%}
@@ -55,8 +55,12 @@
           <!-- 由脚本填充 -->
         </select>
       </div>
+      <div class="pure-control-group">
+        <label>{{_("Word")}}</label>
+        <input type="text" name="text" id="search_for" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
       <p style="text-align:center;">
-        <button class="pure-button pure-input-rounded" onclick="startQueryDict()">{{_('Query')}}</button>
+        <button class="pure-button pure-input-rounded" onclick="startQueryDict()">{{_('Word lookup')}}</button>
       </p>
     </fieldset>
   </form>
@@ -70,6 +74,9 @@
 {% block js -%}
 <script type="text/javascript">
 var g_dictEngines = {{engines|safe}};
+var g_lastLanguage = '';
+var g_lastEngine = '';
+var g_lastDatabase = '';
 
 //填充可用的引擎列表
 function PopulateDictEngines() {
@@ -109,10 +116,24 @@ function startQueryDict() {
 
   $.post('/reader/dict', {word: word, language: language, engine: engine, database: database}, function (resp) {
     if (resp.status == 'ok') {
-      showTrResult(resp.word, resp.definition, resp.dictname);
+      showTrResult(word, resp.definition, resp.dictname);
     } else {
       alert(resp.status);
     }
+
+    //保存当前配置
+    if (g_lastLanguage != language) {
+      window.localStorage.setItem('lastDictLanguage', language);
+    }
+    if (g_lastEngine != engine) {
+      window.localStorage.setItem('lastDictEngine', engine);
+    }
+    if (g_lastDatabase != database) {
+      window.localStorage.setItem('lastDictDatabase', database);
+    }
+    g_lastLanguage = language;
+    g_lastEngine = engine;
+    g_lastDatabase = database;
   });
 }
 
@@ -141,6 +162,29 @@ $(document).ready(function() {
       startQueryDict();
     }
   });
+
+  //自动选择上次使用的词典
+  g_lastLanguage = window.localStorage.getItem('lastDictLanguage');
+  g_lastEngine = window.localStorage.getItem('lastDictEngine');
+  g_lastDatabase = window.localStorage.getItem('lastDictDatabase');
+  if (g_lastLanguage) {
+    $('#language').val(g_lastLanguage);
+  }
+  if (g_lastEngine) {
+    var sel = $('#engine');
+    sel.val(g_lastEngine);
+    if (!sel.val()) {
+      sel.prop('selectedIndex', 0);
+    }
+    DictEngineChanged();
+  }
+  if (g_lastDatabase) {
+    var sel = $('#database');
+    sel.val(g_lastDatabase);
+    if (!sel.val()) {
+      sel.prop('selectedIndex', 0);
+    }
+  }
 });
 </script>
 {% endblock -%}

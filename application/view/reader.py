@@ -236,10 +236,10 @@ def ReaderDictPost(user: KeUser, userDir: str):
                 word = stem
                 definition = inst.definition(word, language) #再次查询
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        definition = f'Error: {e}'
-    print(json.dumps(definition)) #TODO
+        #import traceback
+        #traceback.print_exc()
+        definition = f'Error:<br/>{e}'
+    #print(json.dumps(definition)) #TODO
     return {'status': 'ok', 'word': word, 'definition': definition, 
         'dictname': str(inst), 'others': others}
 
@@ -250,8 +250,8 @@ def GetWordStem(word, language):
         import dictionary
         import hunspell #type:ignore
     except Exception as e:
-        import traceback #TODO
-        default_log.warning(traceback.format_exc())
+        #import traceback #TODO
+        #default_log.warning(traceback.format_exc())
         return ''
 
     dictDir = app.config['DICTIONARY_DIR'] or ''

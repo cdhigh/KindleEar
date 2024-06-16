@@ -28,8 +28,8 @@ COPY --from=builder /usr/kindleear/config.py /usr/kindleear/requirements.txt ./
 COPY --from=builder /usr/kindleear/tools/mp3cat /usr/local/bin/mp3cat
 COPY ./docker/gunicorn.conf.py ./main.py ./
 
-RUN apk add libstdc++ && \
-    pip install --upgrade pip && \
+#apk add libstdc++ && \
+RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     chmod +x /usr/local/bin/mp3cat
 

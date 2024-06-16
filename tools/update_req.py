@@ -56,8 +56,8 @@ REQ_TASK = {
 
 REQ_PLAT = {'gae': [('appengine-python-standard', '~=1.1.6'),
         ('google-cloud-texttospeech', '~=2.16.3')],
-    'docker': [('chunspell', '~=2.0.3'), ('marisa_trie', '~=1.2.0'), ('indexed-gzip', '~=1.8.7')], #docker/amd64 basic libs
-    'dockerArm': [('chunspell', '~=2.0.3'), ('marisa_trie', '~=1.2.0'), ('indexed-gzip', '~=1.8.7')], #docker/arm64 basic libs
+    'docker': [('chunspell', '~=2.0.4'), ('marisa_trie', '~=1.2.0'), ('indexed-gzip', '~=1.8.7')], #docker/amd64 basic libs
+    'dockerArm': [('chunspell', '~=2.0.4'), ('marisa_trie', '~=1.2.0'), ('indexed-gzip', '~=1.8.7')], #docker/arm64 basic libs
     'dockerAll': [('weedata', '>=0.2.7,<1.0.0'),('pymysql', '~=1.1.0'), #docker[all] install all libs
         ('psycopg2-binary', '~=2.9.9'),('pymongo', '~=4.6.3'),('redis', '~=5.0.3'),
         ('celery', '~=5.3.6'),('flask-rq2', '~=18.3'),('sqlalchemy', '~=2.0.29')],

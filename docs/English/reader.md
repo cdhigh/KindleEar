@@ -53,12 +53,17 @@ The extracted word is sent to your deployed KindleEar site for translation, and 
 
 2. KindleEar also supports offline dictionaries in the stardict format. After downloading the corresponding dictionary, unzip it into the `data/dict` directory. You can organize different dictionaries into subdirectories. Then, restart the KindleEar service to refresh the dictionary list.    
 
-3. The first time you look up a word in the offline dictionary may be slow because it needs to create an index file (suffix: trie), especially for large dictionaries. It is not recommended to use large dictionaries in KindleEar.   
+3. The first time you look up a word in the offline dictionary, it may be slow because it needs to create an index file (suffix: trie), After that, it will be much faster. 
+If you are using a large dictionary, the indexing process will consume a significant amount of memory. If the server has limited memory, the indexing might fail. You can first use the dictionary on your local machine to look up a word and generate the "trie" file, then copy it to the corresponding directory on the server.    
 
-4. By default, American English morphology queries are supported.    
-If you need to support morphology rules for other languages, please download the corresponding Hunspell format files (.dic/.aff), and then copy them to `data/dict/morphology`. Be careful not to store them in a subdirectory.    
+4. By default, American English morphology queries are supported (tense, voice, plural etc.).    
+If you need to support morphology rules for other languages, please download the corresponding Hunspell format files (.dic/.aff), and then copy them to `data/dict/morphology` (create it if not exists). Be careful not to store them in a subdirectory.    
 KindleEar will automatically use the morphology rules that match the book's language.   
-As for where to download Hunspell/MySpell morphology files, you can search on websites such as GitHub or SourceForge. Additionally, here is a [link](https://sourceforge.net/projects/goldendict/files/better%20morphologies/1.0/) you can check.   
+As for where to download Hunspell/MySpell morphology files, you can search on websites such as GitHub or SourceForge.    
+[LibreOffice](https://github.com/LibreOffice/dictionaries)    
+[Firefox](https://addons.mozilla.org/en-US/firefox/language-tools/)    
+[sztaki](http://hlt.sztaki.hu/resources/hunspell/)     
+[wooorm](https://github.com/wooorm/dictionaries)    
 
 
 ### Using Dictionaries

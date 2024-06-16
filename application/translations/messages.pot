@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-09 21:53-0300\n"
+"POT-Creation-Date: 2024-06-15 21:09-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -322,12 +322,13 @@ msgstr ""
 #: application/templates/adv_dict.html:49
 #: application/templates/adv_dict.html:66
 #: application/templates/book_translator.html:26
+#: application/templates/dict.html:47
 msgid "Engine"
 msgstr ""
 
 #: application/templates/adv_dict.html:33
 #: application/templates/adv_dict.html:55
-#: application/templates/adv_dict.html:72
+#: application/templates/adv_dict.html:72 application/templates/dict.html:53
 msgid "Database"
 msgstr ""
 
@@ -335,7 +336,12 @@ msgstr ""
 msgid "Other languages"
 msgstr ""
 
-#: application/templates/adv_dict.html:84 application/view/reader.py:29
+#: application/templates/adv_dict.html:81 application/templates/dict.html:3
+#: application/templates/dict.html:63
+msgid "Word lookup"
+msgstr ""
+
+#: application/templates/adv_dict.html:86 application/view/reader.py:29
 #: application/view/reader.py:95
 msgid "Online reading feature has not been activated yet."
 msgstr ""
@@ -1104,6 +1110,7 @@ msgid "One key per line"
 msgstr ""
 
 #: application/templates/book_translator.html:40
+#: application/templates/dict.html:39
 msgid "Source language"
 msgstr ""
 
@@ -1171,6 +1178,14 @@ msgstr ""
 
 #: application/templates/change_password.html:37
 msgid "Confirm Change"
+msgstr ""
+
+#: application/templates/debug_cmd.html:3
+msgid "Debug cmd"
+msgstr ""
+
+#: application/templates/dict.html:59
+msgid "Word"
 msgstr ""
 
 #: application/templates/home.html:3
@@ -1574,7 +1589,7 @@ msgstr ""
 msgid "Fwd as Attach"
 msgstr ""
 
-#: application/view/admin.py:48 application/view/adv.py:425
+#: application/view/admin.py:48 application/view/adv.py:434
 #: application/view/settings.py:76 application/view/translator.py:83
 #: application/view/translator.py:167
 msgid "Settings Saved!"
@@ -1694,29 +1709,29 @@ msgstr ""
 msgid "Unknown command: {}"
 msgstr ""
 
-#: application/view/adv.py:427
+#: application/view/adv.py:436
 msgid "The format is invalid."
 msgstr ""
 
-#: application/view/adv.py:459
+#: application/view/adv.py:468
 msgid "Authorization Error!<br/>{}"
 msgstr ""
 
-#: application/view/adv.py:480
+#: application/view/adv.py:489
 msgid "Success authorized by Pocket!"
 msgstr ""
 
-#: application/view/adv.py:486
+#: application/view/adv.py:495
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr ""
 
-#: application/view/adv.py:507
+#: application/view/adv.py:516
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 
-#: application/view/adv.py:520
+#: application/view/adv.py:529
 msgid "Request type [{}] unsupported"
 msgstr ""
 
@@ -1821,16 +1836,16 @@ msgstr ""
 msgid "The article is missing?"
 msgstr ""
 
-#: application/view/reader.py:180 application/view/translator.py:116
+#: application/view/reader.py:195 application/view/translator.py:116
 #: application/view/translator.py:200
 msgid "The text is empty."
 msgstr ""
 
-#: application/view/reader.py:274
+#: application/view/reader.py:291
 msgid "Failed to push: {}"
 msgstr ""
 
-#: application/view/reader.py:322
+#: application/view/reader.py:339
 msgid "Failed to create ebook."
 msgstr ""
 
@@ -1842,171 +1857,171 @@ msgstr ""
 msgid "Title is requied!"
 msgstr ""
 
-#: application/view/settings.py:174
+#: application/view/settings.py:216
 msgid "English"
 msgstr ""
 
-#: application/view/settings.py:175
+#: application/view/settings.py:217
 msgid "Chinese"
 msgstr ""
 
-#: application/view/settings.py:176
+#: application/view/settings.py:218
 msgid "French"
 msgstr ""
 
-#: application/view/settings.py:177
+#: application/view/settings.py:219
 msgid "Spanish"
 msgstr ""
 
-#: application/view/settings.py:178
+#: application/view/settings.py:220
 msgid "Portuguese"
 msgstr ""
 
-#: application/view/settings.py:179
+#: application/view/settings.py:221
 msgid "German"
 msgstr ""
 
-#: application/view/settings.py:180
+#: application/view/settings.py:222
 msgid "Italian"
 msgstr ""
 
-#: application/view/settings.py:181
+#: application/view/settings.py:223
 msgid "Japanese"
 msgstr ""
 
-#: application/view/settings.py:182
+#: application/view/settings.py:224
 msgid "Russian"
 msgstr ""
 
-#: application/view/settings.py:183
+#: application/view/settings.py:225
 msgid "Turkish"
 msgstr ""
 
-#: application/view/settings.py:184
+#: application/view/settings.py:226
 msgid "Korean"
 msgstr ""
 
-#: application/view/settings.py:185
+#: application/view/settings.py:227
 msgid "Arabic"
 msgstr ""
 
-#: application/view/settings.py:186
+#: application/view/settings.py:228
 msgid "Czech"
 msgstr ""
 
-#: application/view/settings.py:187
+#: application/view/settings.py:229
 msgid "Dutch"
 msgstr ""
 
-#: application/view/settings.py:188
+#: application/view/settings.py:230
 msgid "Greek"
 msgstr ""
 
-#: application/view/settings.py:189
+#: application/view/settings.py:231
 msgid "Hindi"
 msgstr ""
 
-#: application/view/settings.py:190
+#: application/view/settings.py:232
 msgid "Malaysian"
 msgstr ""
 
-#: application/view/settings.py:191
+#: application/view/settings.py:233
 msgid "Bengali"
 msgstr ""
 
-#: application/view/settings.py:192
+#: application/view/settings.py:234
 msgid "Persian"
 msgstr ""
 
-#: application/view/settings.py:193
+#: application/view/settings.py:235
 msgid "Urdu"
 msgstr ""
 
-#: application/view/settings.py:194
+#: application/view/settings.py:236
 msgid "Swahili"
 msgstr ""
 
-#: application/view/settings.py:195
+#: application/view/settings.py:237
 msgid "Vietnamese"
 msgstr ""
 
-#: application/view/settings.py:196
+#: application/view/settings.py:238
 msgid "Punjabi"
 msgstr ""
 
-#: application/view/settings.py:197
+#: application/view/settings.py:239
 msgid "Javanese"
 msgstr ""
 
-#: application/view/settings.py:198
+#: application/view/settings.py:240
 msgid "Tagalog"
 msgstr ""
 
-#: application/view/settings.py:199
+#: application/view/settings.py:241
 msgid "Hausa"
 msgstr ""
 
-#: application/view/settings.py:200
+#: application/view/settings.py:242
 msgid "Thai"
 msgstr ""
 
-#: application/view/settings.py:201
+#: application/view/settings.py:243
 msgid "Polish"
 msgstr ""
 
-#: application/view/settings.py:202
+#: application/view/settings.py:244
 msgid "Romanian"
 msgstr ""
 
-#: application/view/settings.py:203
+#: application/view/settings.py:245
 msgid "Hungarian"
 msgstr ""
 
-#: application/view/settings.py:204
+#: application/view/settings.py:246
 msgid "Swedish"
 msgstr ""
 
-#: application/view/settings.py:205
+#: application/view/settings.py:247
 msgid "Hebrew"
 msgstr ""
 
-#: application/view/settings.py:206
+#: application/view/settings.py:248
 msgid "Norwegian"
 msgstr ""
 
-#: application/view/settings.py:207
+#: application/view/settings.py:249
 msgid "Finnish"
 msgstr ""
 
-#: application/view/settings.py:208
+#: application/view/settings.py:250
 msgid "Danish"
 msgstr ""
 
-#: application/view/settings.py:209
+#: application/view/settings.py:251
 msgid "Ukrainian"
 msgstr ""
 
-#: application/view/settings.py:210
+#: application/view/settings.py:252
 msgid "Tamil"
 msgstr ""
 
-#: application/view/settings.py:211
+#: application/view/settings.py:253
 msgid "Marathi"
 msgstr ""
 
-#: application/view/settings.py:212
+#: application/view/settings.py:254
 msgid "Burmese"
 msgstr ""
 
-#: application/view/settings.py:213
+#: application/view/settings.py:255
 msgid "Amharic"
 msgstr ""
 
-#: application/view/settings.py:214
+#: application/view/settings.py:256
 msgid "Azerbaijani"
 msgstr ""
 
-#: application/view/settings.py:215
+#: application/view/settings.py:257
 msgid "Kazakh"
 msgstr ""
 

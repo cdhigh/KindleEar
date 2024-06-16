@@ -41,20 +41,19 @@ class MDict:
         self.database = database
         self.dictionary = None
         if database in self.databases:
-                #try:
+            try:
                 self.dictionary = IndexedMdx(database)
-                #except Exception as e:
-                #default_log.warning(f'Instantiate mdict failed: {self.databases[database]}: {e}')
+            except Exception as e:
+                default_log.warning(f'Instantiate mdict failed: {self.databases[database]}: {e}')
+        else:
+            default_log.warning(f'dict not found: {self.databases[database]}')
 
     #返回当前使用的词典名字
     def __repr__(self):
         return 'mdict [{}]'.format(self.databases.get(self.database, ''))
         
     def definition(self, word, language=''):
-        ret = self.dictionary.get(word) if self.dictionary else ''
-        if isinstance(ret, bytes):
-            ret = ret.decode(self.dictionary.meta.get('encoding', 'utf-8'))
-        return ret
+        return self.dictionary.get(word) if self.dictionary else ''
 
 #经过词典树缓存的Mdx
 class IndexedMdx:
@@ -66,62 +65,35 @@ class IndexedMdx:
         prefix = os.path.splitext(fname)[0]
         dictName = os.path.basename(prefix)
         trieName = f'{prefix}.trie'
-        metaName = f'{prefix}.meta'
         self.trie = None
-        self.meta = {}
-        self.stylesheet = {}
-        if os.path.exists(trieName) and os.path.exists(metaName):
+        self.mdx = MDX(fname, encoding, substyle, passcode)
+        if os.path.exists(trieName):
             try:
-                self.trie = marisa_trie.RecordTrie(self.TRIE_FMT)
+                self.trie = marisa_trie.RecordTrie(self.TRIE_FMT) #type:ignore
                 self.trie.load(trieName)
-                with open(metaName, 'r', encoding='utf-8') as f:
-                    self.meta = json.loads(f.read())
-                if not isinstance(self.meta, dict):
-                    self.meta = {}
-                self.stylesheet = json.loads(self.meta.get("stylesheet", '{}'))
             except Exception as e:
                 self.trie = None
                 default_log.warning(f'Failed to load mdict trie data: {dictName}: {e}')
 
-        if self.trie and self.meta:
-            self.fMdx = open(fname, 'rb')
+        if self.trie:
             return
 
         #重建索引
         default_log.info(f"Building trie for {dictName}")
-        mdx = MDX(fname, encoding, substyle, passcode)
-        dictIndex = mdx.get_index()
-        indexList = dictIndex["index_dict_list"]
-        #[(word, (params,)),...]
         #为了能制作大词典，mdx中这些数据都是64bit的，但是为了节省空间，这里只使用32bit保存(>LLLLLL)
-        idxBuff = [(item["key_text"].lower(), (
-                item["file_pos"], #32bit
-                item["compressed_size"], #64bit
-                item["decompressed_size"], #64bit
-                item["record_start"], #64bit
-                item["record_end"], #64bit
-                item["offset"])) #64bit
-            for item in indexList]
-        self.trie = marisa_trie.RecordTrie(self.TRIE_FMT, idxBuff)
+        self.trie = marisa_trie.RecordTrie(self.TRIE_FMT, self.mdx.get_index()) #type:ignore
         self.trie.save(trieName)
-        self.meta = dictIndex['meta']
-        #mdx内嵌css，键为序号(1-255)，值为元祖 (startTag, endTag)
-        self.stylesheet = json.loads(self.meta.get("stylesheet", '{}'))
-        with open(metaName, 'w', encoding='utf-8') as f:
-            f.write(json.dumps(self.meta))
-
-        self.fMdx = open(fname, 'rb')
-
-        del mdx
+        
         del self.trie
-        self.trie = marisa_trie.RecordTrie(self.TRIE_FMT)
+        self.trie = marisa_trie.RecordTrie(self.TRIE_FMT) #type:ignore
         self.trie.load(trieName)
-        del idxBuff
         import gc
         gc.collect()
 
     #获取单词释义，不存在则返回空串
     def get(self, word):
+        if not self.trie:
+            return ''
         word = word.lower().strip()
         indexes = self.trie[word] if word in self.trie else None
         ret = self.get_content_by_Index(indexes)
@@ -138,47 +110,21 @@ class IndexedMdx:
     #通过单词的索引数据，直接读取文件对应的数据块返回释义
     #indexes是列表，因为可能有多个单词条目
     def get_content_by_Index(self, indexes):
-        if not indexes:
-            return ''
-
-        ret = []
-        encoding = self.meta.get('encoding', 'utf-8')
-        for index in indexes:
-            filePos, compSize, decompSize, startPos, endPos, offset = index
-            self.fMdx.seek(filePos)
-            compressed = self.fMdx.read(compSize)
-            type_ = compressed[:4] #32bit-type, 32bit-adler, data
-            if type_ == b"\x00\x00\x00\x00":
-                data = compressed[8:]
-            elif type_ == b"\x01\x00\x00\x00":
-                #header = b"\xf0" + pack(">I", decompSize)
-                data = lzo.decompress(compressed[8:], initSize=decompSize, blockSize=1308672)
-            elif type_ == b"\x02\x00\x00\x00":
-                data = zlib.decompress(compressed[8:])
-            else:
-                continue
-            record = data[startPos - offset : endPos - offset]
-            ret.append(record.decode(encoding, errors="ignore").strip("\x00"))
-
-        txt = '<hr/>'.join(ret)
-        if self.stylesheet:
-            txt = self.replace_css(txt)
-
-        #很多人制作的mdx很复杂，可能需要后处理
-        return self.post_process(txt)
+        return self.post_process(self.mdx.get_content_by_Index(indexes))
         
     #对查词结果进行后处理
     def post_process(self, content):
         if not content:
             return ''
 
-        soup = BeautifulSoup(content, 'html.parser') #html.parser不会自动添加body
+        soup = BeautifulSoup(content, 'html.parser') #html.parser不会自动添加html/body
 
         #删除图像
         for tag in soup.find_all('img'):
             tag.extract()
 
-        self.inline_css(soup)
+        self.adjust_css(soup)
+        #self.inline_css(soup) #碰到稍微复杂一些的CSS文件性能就比较低下，暂时屏蔽对CSS文件的支持
         self.remove_empty_tags(soup)
 
         body = soup.body
@@ -187,9 +133,9 @@ class IndexedMdx:
 
         return str(soup)
 
-    #将css样式内联到html标签中
-    def inline_css(self, soup):
-        # 首先删除 height 属性
+    #调整一些CSS
+    def adjust_css(self, soup):
+        #删除 height 属性
         for element in soup.find_all():
             if element.has_attr('height'):
                 del element['height']
@@ -200,6 +146,8 @@ class IndexedMdx:
                     del newStyle['height']
                 element['style'] = "; ".join(f"{k}: {v}" for k, v in newStyle.items())
 
+    #将外部单独css文件的样式内联到html标签中
+    def inline_css(self, soup):
         link = soup.find('link', attrs={'rel': 'stylesheet', 'href': True})
         if not link:
             return
@@ -225,7 +173,7 @@ class IndexedMdx:
         except Exception as e:
             default_log.warning(f'parse css failed: {self.mdxFilename}: {e}')
             return
-            
+        
         for rule in cssRules:
             if rule.type == rule.STYLE_RULE:
                 selector = rule.selectorText
@@ -263,16 +211,3 @@ class IndexedMdx:
                 self.remove_empty_tags(tag, preserve_tags)
         for tag in empty_tags:
             tag.decompose()
-
-    #替换css，其实这个不是css，算是一种模板替换，不过都这么叫
-    def replace_css(self, txt):
-        txt_list = re.split(r"`\d+`", txt)
-        txt_tag = re.findall(r"`\d+`", txt)
-        txt_styled = txt_list[0]
-        for j, p in enumerate(txt_list[1:]):
-            style = self.stylesheet[txt_tag[j][1:-1]]
-            if p and p[-1] == "\n":
-                txt_styled = txt_styled + style[0] + p.rstrip() + style[1] + "\r\n"
-            else:
-                txt_styled = txt_styled + style[0] + p + style[1]
-        return txt_styled
