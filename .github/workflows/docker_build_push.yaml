@@ -46,4 +46,4 @@ jobs:
           TAG_LATEST: latest
           TAG_VERSION: ${{ steps.get_version.outputs.version }}
         run: |
-          docker buildx build --push --platform=linux/amd64,linux/arm64 -t $IMAGE_NAME:$TAG_LATEST -t $IMAGE_NAME:$TAG_VERSION -f docker/Dockerfile .
+          docker buildx build --push --platform=linux/amd64,linux/arm64 -t $IMAGE_NAME:$TAG_VERSION -t $IMAGE_NAME:$TAG_LATEST -f docker/Dockerfile .

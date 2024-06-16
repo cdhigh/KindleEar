@@ -77,6 +77,8 @@ def ReaderRoute():
     oebBooks = json.dumps(oebBooks, ensure_ascii=False)
     initArticle = url_for('bpReader.ReaderArticleNoFoundRoute', tips='')
     params = user.cfg('reader_params')
+    if not params.get('allowLinks'):
+        params['allowLinks'] = 0
     shareKey = user.share_links.get('key')
     if (get_locale() or '').startswith('zh'):
         helpPage = 'https://cdhigh.github.io/KindleEar/Chinese/reader.html'
