@@ -1,6 +1,6 @@
 *.pyc
 .DS_Store
-.*
+.git/
 *.db
 *.mobi
 *.epub
@@ -13,3 +13,6 @@ tests/debug_mail/*
 tests/cov_html/*
 .idea/
 datastore/
+.coverage
+.tags
+.tags_sorted_by_file
