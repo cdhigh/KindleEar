@@ -19,7 +19,7 @@
       </svg>
     </div>
     <!-- 查词典的结果显示窗口 -->
-    <div class="tr-result" id="tr-result" onclick="closeDictDialog()">
+    <div class="tr-result" id="tr-result" onclick="closeDictDialog(event)">
       <div class="tr-dict-name" id="tr-dict-name">
         <select id="tr-dict-name-sel" onclick="javascript:event.stopPropagation()" onchange="changeDictToTranslate(event)">
         </select>
@@ -34,7 +34,7 @@
           <path d="M 4.375 7.1875 L 10 12.8125 L 15.625 7.1875" stroke="black" stroke-width="1.875" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
         </svg>
       </div>
-      <div class="tr-close-icon" id="tr-close-icon" onclick="closeDictDialog()">X</div>
+      <div class="tr-close-icon" id="tr-close-icon" onclick="closeDictDialog(event)">X</div>
       <div class="tr-word" id="tr-word"></div>
       <div class="tr-result-text">
         <div class="tr-text-container" id="tr-text-container">
@@ -171,10 +171,10 @@
   {% autoescape off -%}
   <script type="text/javascript">
     var g_books = {{oebBooks|safe}}; //[{date:, books: [{title:, articles:[{title:, src:}],},...]}, ]
-    var g_allowLinks = {{params.get('allowLinks', 0)}};
-    var g_topleftDict = {{params.get('topleftDict', 1)}};
-    var g_inkMode = {{params.get('inkMode', 1)}};
-    var g_fontSize = {{params.get('fontSize', 1.0)}};
+    var g_allowLinks = {{params.get('allowLinks', 0) | int}};
+    var g_topleftDict = {{params.get('topleftDict', 1) | int}};
+    var g_inkMode = {{params.get('inkMode', 1) | int}};
+    var g_fontSize = {{params.get('fontSize', 1.0) | float}};
     var g_shareKey = "{{shareKey}}";
     
     var i18n = {

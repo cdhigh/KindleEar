@@ -823,6 +823,106 @@ class MDX(MDict):
         txt = b'<hr/>'.join(ret).decode(self.encoding)
         return self._substitute_stylesheet(txt) if self.stylesheet else txt
 
+    def compare_keys(self, key1, key2):
+        """
+        排序要求：
+        header中KeyCaseSensitive表明排序时是否大小写不敏感,为No时要转化为小写字母比较。
+        header中StripKey只对mdx有效，为No，则不分词，字母、空格、符号都参与排序，为Yes，则分词，仅字母参与排序，去掉空格、符号。
+        MDX的编码有utf-8,utf-16,gb18030(包括gbk，gb2313,gb18030),BIG5,ISO8859-1。
+        MDD的编码为utf-16le,尽管utf-16默认也是utf-16le，但是会加前缀\xff\xfe。
+        排序:utf-16按照utf-16le编解码，按照utf-16be排序，其他按照各自编码排序。
+        @param key1: the key user input
+        @param key2: the key from the file
+        @return:
+        """
+        # mdx和mdd中的key都是bytes，查询key是str，因此str转bytes要在lower()之后进行。
+        # if type(key1) == str:
+        #     key1 = key1.encode(self._encoding)
+        # if type(key2) == str:
+        #     key2 = key2.encode(self._encoding)
+        # Dictionary of Engineering的最后一个词条是b'\xc5ngstr\xf6m compensation pyrheliometer'，其中\xc5和\xf6解码报错，因此用replace。
+        key1 = self.process_str_keys(key1)
+        key2 = self.process_str_keys(key2)
+
+        # if operator.__lt__(key1, key2):
+        #     return -1
+        # elif operator.__eq__(key1, key2):
+        #     return 0
+        # elif operator.__gt__(key1, key2):
+        #     return 1
+        import operator
+        if self.__class__.__name__ == 'MDX':
+            if self.encoding == 'UTF-16':
+                t_key1 = key1.encode('utf-16be', errors='ignore')
+                t_key2 = key2.encode('utf-16be', errors='ignore')
+                if operator.__lt__(t_key1, t_key2):
+                    return -1
+                elif operator.__eq__(t_key1, t_key2):
+                    return 0
+                elif operator.__gt__(t_key1, t_key2):
+                    return 1
+            if self.encoding == 'BIG-5':
+                t_key1 = key1.encode('utf-8', errors='ignore')
+                t_key2 = key2.encode('utf-8', errors='ignore')
+                if operator.__lt__(t_key1, t_key2):
+                    return -1
+                elif operator.__eq__(t_key1, t_key2):
+                    return 0
+                elif operator.__gt__(t_key1, t_key2):
+                    return 1
+            else:
+                t_key1 = key1.encode(self.encoding, errors='ignore')
+                t_key2 = key2.encode(self.encoding, errors='ignore')
+                if operator.__lt__(t_key1, t_key2):
+                    return -1
+                elif operator.__eq__(t_key1, t_key2):
+                    return 0
+                elif operator.__gt__(t_key1, t_key2):
+                    return 1
+        else:
+            t_key1 = key1.encode('utf-8', errors='ignore')
+            t_key2 = key2.encode('utf-8', errors='ignore')
+            if operator.__lt__(t_key1, t_key2):
+                return -1
+            elif operator.__eq__(t_key1, t_key2):
+                return 0
+            elif operator.__gt__(t_key1, t_key2):
+                return 1
+
+    def lower_str_keys(self, key):
+        """自动转换为小写"""
+        return key if self.header.get('KeyCaseSensitive') == 'Yes' else key.lower()
+        
+    def strip_key(self):
+        # 0:False,1:True,2:None
+        if 'StripKey' in self.header.keys():
+            if self.header['StripKey'] == 'Yes':
+                self._strip_key = 1
+            elif self.header['StripKey'] == 'No':
+                self._strip_key = 0
+            else:
+                self._strip_key = 2
+        else:
+            self._strip_key = 2
+
+        if self.__class__.__name__ == 'MDD':
+            self._strip_key = 0
+
+    def process_str_keys(self, key):
+        if self.__class__.__name__ == 'MDX':
+            if isinstance(key, bytes):
+                if self.encoding == 'UTF-16':
+                    key = key.decode('utf-16le', errors='ignore')
+                else:
+                    # ISO8859-1编码中文报错latin-1 UnicodeDecodeError
+                    key = key.decode(self.encoding, errors='ignore')
+        else:
+            if isinstance(key, bytes):
+                key = key.decode(self.encoding)
+        if self._strip_key == 1:
+            key = re.sub(r'[ _=,.;:!?@%&#~`()\[\]<>{}/\\\$\+\-\*\^\'"\t|]', '', key)
+        return self.lower_str_keys(key) # 这里不能strip()
+
 if __name__ == "__main__":
     import sys
     import os

@@ -4,8 +4,9 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #stardict离线词典支持
-import os, re, zlib, json
+import os
 from bs4 import BeautifulSoup
+from application.utils import xml_escape
 from .readmdict import MDX
 try:
     import marisa_trie
@@ -79,6 +80,8 @@ class IndexedMdx:
             return
 
         #重建索引
+        #为什么不使用单独的后台任务自动重建索引？是因为运行时间还不是最重要的约束，而是服务器内存
+        #如果是大词典，内存可能要爆，怎么运行都不行，如果是小词典，则时间可以接受
         default_log.info(f"Building trie for {dictName}")
         #为了能制作大词典，mdx中这些数据都是64bit的，但是为了节省空间，这里只使用32bit保存(>LLLLLL)
         self.trie = marisa_trie.RecordTrie(self.TRIE_FMT, self.mdx.get_index()) #type:ignore
@@ -95,6 +98,10 @@ class IndexedMdx:
         if not self.trie:
             return ''
         word = word.lower().strip()
+        #和mdict官方应用一样，输入:about返回词典基本信息
+        if word == ':about':
+            return self.dictHtmlInfo()
+
         indexes = self.trie[word] if word in self.trie else None
         ret = self.get_content_by_Index(indexes)
         if ret.startswith('@@@LINK='):
@@ -119,18 +126,37 @@ class IndexedMdx:
 
         soup = BeautifulSoup(content, 'html.parser') #html.parser不会自动添加html/body
 
-        #删除图像
-        for tag in soup.find_all('img'):
+        #浏览器不支持 entry:// 协议，会直接拦截导致无法跳转，
+        #预先将其转换为 https://kindleear/entry/ 前缀，然后在js里面判断这个前缀
+        for tag in soup.find_all('a', href=True):
+            href = tag['href']
+            if href.startswith('entry://'):
+                tag['href'] = f'https://kindleear/entry/{href[8:]}'
+
+        #kindle对html支持很差，有一些词典又使用到这些标签
+        for tag in soup.find_all(['article', 'aside', 'header', 'footer', 'nav', 'main',
+            'figcaption', 'figure', 'section', 'time']):
+            tag.name = 'div'
+
+        #删除多媒体资源和脚本
+        for tag in list(soup.find_all(['img', 'script', 'base', 'iframe', 'canvas', 'embed', 'source',
+            'command', 'datalist', 'video', 'audio', 'noscript', 'meta', 'button'])):
+            tag.extract()
+        
+        self.adjust_css(soup)
+        self.inline_css(soup)
+        #self.remove_empty_tags(soup)
+
+        tag = soup.head
+        if tag:
             tag.extract()
 
-        self.adjust_css(soup)
-        #self.inline_css(soup) #碰到稍微复杂一些的CSS文件性能就比较低下，暂时屏蔽对CSS文件的支持
-        self.remove_empty_tags(soup)
-
-        body = soup.body
-        if body:
-            body.name = 'div'
-
+        #mdict质量良莠不齐，有些词典在html/body外写释义
+        #所以不能直接提取body内容，直接修改为div简单粗暴也有效
+        for tag in (soup.html, soup.body):
+            if tag:
+                tag.name = 'div'
+        
         return str(soup)
 
     #调整一些CSS
@@ -149,8 +175,9 @@ class IndexedMdx:
     #将外部单独css文件的样式内联到html标签中
     def inline_css(self, soup):
         link = soup.find('link', attrs={'rel': 'stylesheet', 'href': True})
-        if not link:
-            return
+        if link:
+            link.extract()
+        return #碰到稍微复杂一些的CSS文件性能就比较低下，暂时屏蔽对CSS文件的支持
 
         link.extract()
         css = ''
@@ -211,3 +238,15 @@ class IndexedMdx:
                 self.remove_empty_tags(tag, preserve_tags)
         for tag in empty_tags:
             tag.decompose()
+
+    #返回当前词典的基本信息，html格式
+    def dictHtmlInfo(self):
+        ret = []
+        header = self.mdx.header.copy()
+        ret.append('<strong>{}</strong><hr/>'.format(header.pop('Title', '')))
+        ret.append('<b>Description:</b><br/>{}<br/><hr/>'.format(header.pop('Description', '')))
+        stylesheet = xml_escape(header.pop('StyleSheet', '').replace('\n', '\\n'))
+        for k,v in header.items():
+            ret.append('<b>{}:</b>&nbsp;&nbsp;{}<br/>'.format(k, v))
+        ret.append('<b>StyleSheet:</b>{}<br/>'.format(stylesheet))
+        return ''.join(ret)

@@ -1070,7 +1070,7 @@ class BasicNewsRecipe(Recipe):
         #    for x in soup.find_all(attrs={attr: True}):
         #        del x[attr]
 
-        for bad_tag in list(soup.find_all(['base', 'iframe', 'canvas', 'embed', 
+        for bad_tag in list(soup.find_all(['base', 'iframe', 'canvas', 'embed', 'source',
             'command', 'datalist', 'video', 'audio', 'noscript', 'link', 'meta', 'button'])):
             bad_tag.extract()
         

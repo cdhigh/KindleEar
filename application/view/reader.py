@@ -77,8 +77,6 @@ def ReaderRoute():
     oebBooks = json.dumps(oebBooks, ensure_ascii=False)
     initArticle = url_for('bpReader.ReaderArticleNoFoundRoute', tips='')
     params = user.cfg('reader_params')
-    if not params.get('allowLinks'):
-        params['allowLinks'] = 0
     shareKey = user.share_links.get('key')
     if (get_locale() or '').startswith('zh'):
         helpPage = 'https://cdhigh.github.io/KindleEar/Chinese/reader.html'
@@ -182,7 +180,7 @@ def ReaderDictRoute(user: KeUser, userDir: str):
             dic.refresh()
     
     engines = {name: {'databases': klass.databases} for name,klass in all_dict_engines.items()}
-    return render_template('dict.html', user=user, engines=engines, tips='', langMap=LangMap())
+    return render_template('word_lookup.html', user=user, engines=engines, tips='', langMap=LangMap())
 
 #Api查词
 @bpReader.post("/reader/dict", endpoint='ReaderDictPost')
@@ -241,7 +239,7 @@ def ReaderDictPost(user: KeUser, userDir: str):
         #import traceback
         #traceback.print_exc()
         definition = f'Error:<br/>{e}'
-    #print(json.dumps(definition)) #TODO
+    print(json.dumps(definition)) #TODO
     return {'status': 'ok', 'word': word, 'definition': definition, 
         'dictname': str(inst), 'others': others}
 

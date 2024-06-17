@@ -6,6 +6,18 @@
 {% endblock -%}
 {% block css %}
 <style type="text/css">
+  .pure-form select { /* override pure css */
+    height: 1.5em;
+    border: 1px solid #ccc;
+    background-color: white;
+    padding: 0px 10px;
+  }
+  .pure-form input {
+    height: 1.8em;
+    border: 1px solid #ccc;
+    background-color: white;
+    padding: 10px 10px;
+  }
   .tr_container {
     margin: 20px;
     padding: 0px 10px 40px 10px;
@@ -59,9 +71,13 @@
         <label>{{_("Word")}}</label>
         <input type="text" name="text" id="search_for" class="pure-u-1 pure-u-sm-1-2" />
       </div>
-      <p style="text-align:center;">
-        <button class="pure-button pure-input-rounded" onclick="startQueryDict()">{{_('Word lookup')}}</button>
-      </p>
+      <div class="pure-control-group">
+        <label>
+          <button class="pure-button pure-button-disabled" id="history-back" onclick="historyBack()">&#9665;</button>
+          <button class="pure-button pure-button-disabled" id="history-forward" onclick="historyForward()">&#9655;</button>
+        </label>
+        <button class="pure-button pure-input-rounded pure-button-primary" onclick="startQueryDict()" style="margin-left:2em">{{_('Word lookup')}}</button>
+      </div>
     </fieldset>
   </form>
   <div class="tr_container">
@@ -77,6 +93,8 @@ var g_dictEngines = {{engines|safe}};
 var g_lastLanguage = '';
 var g_lastEngine = '';
 var g_lastDatabase = '';
+var g_history = [];
+var g_currHisIdx = -1;
 
 //填充可用的引擎列表
 function PopulateDictEngines() {
@@ -104,16 +122,22 @@ function DictEngineChanged() {
   }
 }
 
-//开始查词
-function startQueryDict() {
-  var word = $('#search_for').val();
+//开始查词，可以传入一个word，否则内部获取网页上的word
+function startQueryDict(word) {
   var language = $('#language').val();
   var engine = $('#engine').val();
   var database = $('#database').val();
-  if (!word) {
-    return;
+  if (word) {
+    $('#search_for').val(word);
+  } else {
+    word = $('#search_for').val();
+    if (word) { //保存查词历史
+      addToHistory(word);
+    } else {
+      return;
+    }
   }
-
+  
   $.post('/reader/dict', {word: word, language: language, engine: engine, database: database}, function (resp) {
     if (resp.status == 'ok') {
       showTrResult(word, resp.definition, resp.dictname);
@@ -152,10 +176,42 @@ function showTrResult(word, text, dictname) {
   }
 }
 
-//初始化页面
-$(document).ready(function() {
-  PopulateDictEngines();
-  DictEngineChanged();
+//将一个新词添加到历史列表
+function addToHistory(word) {
+  g_history.push(word);
+  g_currHisIdx = g_history.length - 1;
+  if (g_history.length > 1) {
+    $('#history-back').removeClass('pure-button-disabled');
+    $('#history-forward').addClass('pure-button-disabled');
+  }
+}
+
+//返回前一个查词结果
+function historyBack() {
+  if (g_currHisIdx > 0) {
+    g_currHisIdx--;
+    startQueryDict(g_history[g_currHisIdx]);
+    $('#history-forward').removeClass('pure-button-disabled');
+  }
+  if (g_currHisIdx <= 0) {
+    $('#history-back').addClass('pure-button-disabled');
+  }
+}
+
+//返回后一个查词结果
+function historyForward() {
+  if (g_currHisIdx < g_history.length - 1) {
+    g_currHisIdx++;
+    startQueryDict(g_history[g_currHisIdx]);
+    $('#history-back').removeClass('pure-button-disabled');
+  }
+  if (g_currHisIdx >= g_history.length - 1) {
+    $('#history-forward').addClass('pure-button-disabled');
+  }
+}
+
+//注册各种事件
+function regEvents() {
   $("#search_for").keydown(function(event) {
     if (event.keyCode === 13) {
       event.preventDefault();
@@ -163,7 +219,23 @@ $(document).ready(function() {
     }
   });
 
-  //自动选择上次使用的词典
+  //点击词典内的跳转，可以直接查其他词
+  $('#tr_result').on('click', 'a', function(event) {
+    var href = $(this).attr('href');
+    if (href.startsWith('https://kindleear/entry/')) {
+      event.preventDefault();
+      event.stopPropagation();
+      var word = href.substring(24);
+      if (word) {
+        startQueryDict(word);
+        addToHistory(word);
+      }
+    }
+  });
+}
+
+//自动选择上次使用的词典
+function restoreLast() {
   g_lastLanguage = window.localStorage.getItem('lastDictLanguage');
   g_lastEngine = window.localStorage.getItem('lastDictEngine');
   g_lastDatabase = window.localStorage.getItem('lastDictDatabase');
@@ -185,6 +257,14 @@ $(document).ready(function() {
       sel.prop('selectedIndex', 0);
     }
   }
+}
+
+//初始化页面
+$(document).ready(function() {
+  PopulateDictEngines();
+  DictEngineChanged();
+  restoreLast();
+  regEvents();
 });
 </script>
 {% endblock -%}
