@@ -239,7 +239,7 @@ def ReaderDictPost(user: KeUser, userDir: str):
         #import traceback
         #traceback.print_exc()
         definition = f'Error:<br/>{e}'
-    print(json.dumps(definition)) #TODO
+    #print(json.dumps(definition)) #TODO
     return {'status': 'ok', 'word': word, 'definition': definition, 
         'dictname': str(inst), 'others': others}
 

@@ -275,7 +275,7 @@ sudo usermod -aG ubuntu www-data #or add nginx www-data to my group ubuntu
 cd kindleear
 virtualenv --python=python3 venv  #create virtual environ
 vim ./config.py  #start to modify some config items
-python3 ./tools/update_req.py #update requirements.txt
+python3 ./tools/update_req.py docker #update requirements.txt
 
 source ./venv/bin/activate  #activate virtual environ
 pip install -r requirements.txt #install dependencies

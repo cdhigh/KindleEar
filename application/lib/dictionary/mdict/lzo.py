@@ -4,19 +4,19 @@ import math
 class FlexBuffer:
     def __init__(self):
         self.blockSize = None
-        self.c = None
-        self.l = None
-        self.buf = None
+        self.c = 0
+        self.len = 0
+        self.buf = b''
 
     def require(self, n):
-        r = self.c - self.l + n
-        if r > 0:
-            self.l = self.l + self.blockSize * math.ceil(r / self.blockSize)
-            # tmp = bytearray(self.l)
+        r = self.c + n - self.len
+        if r > 0: #缓冲区不够了，需要添加
+            self.len += self.blockSize * math.ceil(r / self.blockSize)
+            # tmp = bytearray(self.len)
             # for i in len(self.buf):
             #    tmp[i] = self.buf[i]
             # self.buf = tmp
-            self.buf = self.buf + bytearray(self.l - len(self.buf))
+            self.buf = self.buf + bytearray(self.len - len(self.buf))
         self.c = self.c + n
         return self.buf
 
@@ -27,9 +27,9 @@ class FlexBuffer:
             sz = 4096
         self.blockSize = self.roundUp(sz)
         self.c = 0
-        self.l = self.roundUp(initSize) | 0
-        self.l += self.blockSize - (self.l % self.blockSize)
-        self.buf = bytearray(self.l)
+        self.len = self.roundUp(initSize) | 0
+        self.len += self.blockSize - (self.len % self.blockSize)
+        self.buf = bytearray(self.len)
         return self.buf
 
     def roundUp(self, n):
@@ -41,7 +41,7 @@ class FlexBuffer:
 
     def reset(self):
         self.c = 0
-        self.l = len(self.buf)
+        self.len = len(self.buf)
 
     def pack(self, size):
         return self.buf[0:size]

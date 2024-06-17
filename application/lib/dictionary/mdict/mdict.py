@@ -58,7 +58,7 @@ class MDict:
 
 #经过词典树缓存的Mdx
 class IndexedMdx:
-    TRIE_FMT = '>LLLLLL'
+    TRIE_FMT = '>LLLLL'
 
     #fname: mdx文件全路径名
     def __init__(self, fname, encoding="", substyle=False, passcode=None):
@@ -83,7 +83,7 @@ class IndexedMdx:
         #为什么不使用单独的后台任务自动重建索引？是因为运行时间还不是最重要的约束，而是服务器内存
         #如果是大词典，内存可能要爆，怎么运行都不行，如果是小词典，则时间可以接受
         default_log.info(f"Building trie for {dictName}")
-        #为了能制作大词典，mdx中这些数据都是64bit的，但是为了节省空间，这里只使用32bit保存(>LLLLLL)
+        #为了能制作大词典，mdx中这些数据都是64bit的，但是为了节省空间，这里只使用32bit保存
         self.trie = marisa_trie.RecordTrie(self.TRIE_FMT, self.mdx.get_index()) #type:ignore
         self.trie.save(trieName)
         

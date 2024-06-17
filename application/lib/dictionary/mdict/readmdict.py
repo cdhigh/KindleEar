@@ -183,36 +183,35 @@ class MDict(object):
     def _decode_key_block(self, key_block_compressed, key_block_info_list):
         key_list = []
         i = 0
+        key_block = b''
         for compressed_size, decompressed_size in key_block_info_list:
             start = i
             end = i + compressed_size
             # 4 bytes : compression type
             key_block_type = key_block_compressed[start : start + 4]
             # 4 bytes : adler checksum of decompressed key block
-            adler32 = unpack(
-                NumberFmt.be_uint, key_block_compressed[start + 4 : start + 8]
-            )[0]
+            #adler32 = unpack(NumberFmt.be_uint, key_block_compressed[start + 4 : start + 8])[0]
             if key_block_type == b"\x00\x00\x00\x00":
                 key_block = key_block_compressed[start + 8 : end]
             elif key_block_type == b"\x01\x00\x00\x00":
                 header = b"\xf0" + pack(NumberFmt.be_uint, decompressed_size)
-                key_block = lzo.decompress(key_block_compressed[start + 8 : end],
+                key_block = lzo.decompress(header + key_block_compressed[start + 8 : end],
                     initSize=decompressed_size, blockSize=1308672)
             elif key_block_type == b"\x02\x00\x00\x00":
                 key_block = zlib.decompress(key_block_compressed[start + 8 : end])
             # extract one single key block into a key list
-            key_list += self._split_key_block(key_block)
+            key_list.extend(self._split_key_block(key_block))
             # notice that adler32 returns signed value
-            assert adler32 == zlib.adler32(key_block) & 0xFFFFFFFF
-
+            #assert adler32 == zlib.adler32(key_block) & 0xFFFFFFFF
             i += compressed_size
         return key_list
 
     def _split_key_block(self, key_block):
-        key_list = []
+        #key_list = []
         key_start_index = 0
+        key_end_index = 0
         while key_start_index < len(key_block):
-            temp = key_block[key_start_index : key_start_index + self._number_width]
+            #temp = key_block[key_start_index : key_start_index + self._number_width]
             # the corresponding record's offset in record block
             key_id = unpack(
                 self._number_format,
@@ -238,8 +237,8 @@ class MDict(object):
                 .strip()
             )
             key_start_index = key_end_index + width
-            key_list += [(key_id, key_text)]
-        return key_list
+            yield (key_id, key_text)
+        return #key_list
 
     #读取文件头，生成一个python字典
     def _read_header(self):
@@ -469,7 +468,7 @@ class MDD(MDict):
                 record_block = record_block_compressed[8:]
             elif record_block_type == b"\x01\x00\x00\x00":
                 header = b"\xf0" + pack(NumberFmt.be_uint, decompressed_size)
-                record_block = lzo.decompress(record_block_compressed[start + 8 : end],
+                record_block = lzo.decompress(header + record_block_compressed[start + 8 : end],
                     initSize=decompressed_size, blockSize=1308672)
             elif record_block_type == b"\x02\x00\x00\x00":
                 record_block = zlib.decompress(record_block_compressed[8:])
@@ -551,9 +550,9 @@ class MDD(MDict):
                     record_block = record_block_compressed[8:]
             elif record_block_type == b"\x01\x00\x00\x00":
                 _type = 1
-                #header = b"\xf0" + pack(NumberFmt.be_uint, decompressed_size)
+                header = b"\xf0" + pack(NumberFmt.be_uint, decompressed_size)
                 if check_block:
-                    record_block = lzo.decompress(record_block_compressed[start + 8 : end],
+                    record_block = lzo.decompress(header + record_block_compressed[start + 8 : end],
                         initSize=decompressed_size, blockSize=1308672)
             elif record_block_type == b"\x02\x00\x00\x00":
                 _type = 2
@@ -677,7 +676,7 @@ class MDX(MDict):
                 record_block = record_block_compressed[8:]
             elif record_block_type == b"\x01\x00\x00\x00":
                 header = b"\xf0" + pack(NumberFmt.be_uint, decompressed_size)
-                record_block = lzo.decompress(record_block_compressed[8:],
+                record_block = lzo.decompress(header + record_block_compressed[8:],
                     initSize=decompressed_size, blockSize=1308672)
             elif record_block_type == b"\x02\x00\x00\x00":
                 # decompress
@@ -784,8 +783,8 @@ class MDX(MDict):
                     break
                 
                 record_end = keyList[i + 1][0] if i < keyListLen - 1 else (decompressed_size + offset)
-                index_tuple = (current_pos, compressed_size, decompressed_size, record_start, 
-                    record_end, offset)
+                index_tuple = (current_pos, compressed_size, decompressed_size, record_start - offset, 
+                    record_end - offset)
                 yield (key_text.decode('utf-8'), index_tuple)
                 i += 1
 
@@ -802,21 +801,21 @@ class MDX(MDict):
         ret = []
         f = open(self._fname, 'rb')
         for index in indexes:
-            #这6个变量是保存到trie的数据格式，都是32位保存
-            filePos, compSize, decompSize, startPos, endPos, offset = index
+            #这些变量是保存到trie的数据格式，32位
+            filePos, compSize, decompSize, startIdx, endIdx = index
             f.seek(filePos)
             compressed = f.read(compSize)
             type_ = compressed[:4] #32bit-type, 32bit-adler, data
             if type_ == b"\x00\x00\x00\x00":
                 data = compressed[8:]
             elif type_ == b"\x01\x00\x00\x00":
-                #header = b"\xf0" + pack(">I", decompSize)
-                data = lzo.decompress(compressed[8:], initSize=decompSize, blockSize=1308672)
+                header = b"\xf0" + pack(">I", decompSize)
+                data = lzo.decompress(header + compressed[8:], initSize=decompSize, blockSize=1308672)
             elif type_ == b"\x02\x00\x00\x00":
                 data = zlib.decompress(compressed[8:])
             else:
                 continue
-            record = data[startPos - offset : endPos - offset]
+            record = data[startIdx : endIdx]
             ret.append(record) #.strip(b"\x00"))
 
         f.close()
