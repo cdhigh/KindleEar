@@ -5,7 +5,7 @@ __license__   = 'GPL v3'
 __copyright__ = '2012, Kovid Goyal <kovid@kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
-import struct, re, os
+import struct, re, os, io
 from collections import namedtuple
 from itertools import repeat
 from uuid import uuid4
@@ -72,16 +72,35 @@ def get_first_resource_index(first_image_index, num_of_text_records, first_text_
 
 class Mobi8Reader:
 
-    def __init__(self, mobi6_reader, log, for_tweak=False):
+    def __init__(self, mobi6_reader, log, for_tweak=False, fs=None):
         self.for_tweak = for_tweak
         self.mobi6_reader, self.log = mobi6_reader, log
         self.header = mobi6_reader.book_header
+        self.fs = fs
+        self.output_dir = fs.path if fs else '.'
         self.encrypted_fonts = []
         self.id_re = re.compile(br'''<[^>]+\s(?:id|ID)\s*=\s*['"]([^'"]+)['"]''')
         self.name_re = re.compile(br'''<\s*a\s*\s(?:name|NAME)\s*=\s*['"]([^'"]+)['"]''')
         self.aid_re = re.compile(br'''<[^>]+\s(?:aid|AID)\s*=\s*['"]([^'"]+)['"]''')
 
-    def __call__(self):
+    def write_file(self, fname, data, mode='wb'):
+        fname = os.path.join(self.output_dir, fname)
+        if self.fs:
+            self.fs.write(fname, data, mode)
+        else:
+            with open(fname, mode) as f:
+                f.write(data)
+
+    def read_file(self, fname, mode='rb'):
+        fname = os.path.join(self.output_dir, fname)
+        if self.fs:
+            return self.fs.read(fname, mode)
+        else:
+            with open(fname, mode) as f:
+                return f.read()
+
+    def __call__(self, output_dir=None):
+        self.output_dir = output_dir or self.output_dir
         self.mobi6_reader.check_for_drm()
         self.aid_anchor_suffix = uuid4().hex.encode('utf-8')
         bh = self.mobi6_reader.book_header
@@ -97,9 +116,8 @@ class Mobi8Reader:
 
         self.processed_records = self.mobi6_reader.extract_text(offset=offset)
         self.raw_ml = self.mobi6_reader.mobi_html
-        with open('debug-raw.html', 'wb') as f:
-            f.write(self.raw_ml)
-
+        self.write_file('debug-raw.html', self.raw_ml)
+        
         self.kf8_sections = self.mobi6_reader.sections[offset-1:]
 
         self.cover_offset = getattr(self.header.exth, 'cover_offset', None)
@@ -434,9 +452,7 @@ class Mobi8Reader:
                             fname_idx, font['err']))
                         if font['headers']:
                             self.log.debug('Font record headers: %s'%font['headers'])
-                    with open(href.replace('/', os.sep), 'wb') as f:
-                        f.write(font['font_data'] if font['font_data'] else
-                                font['raw_data'])
+                    self.write_file(href, font['font_data'] if font['font_data'] else font['raw_data'])
                     if font['encrypted']:
                         self.encrypted_fonts.append(href)
                 elif typ == b'CONT':
@@ -448,16 +464,14 @@ class Mobi8Reader:
                     data, imgtype = container.load_image(data)
                     if data is not None:
                         href = 'images/%05d.%s'%(container.resource_index, imgtype)
-                        with open(href.replace('/', os.sep), 'wb') as f:
-                            f.write(data)
+                        self.write_file(href, data)
                 elif typ == b'\xa0\xa0\xa0\xa0' and len(data) == 4 and container is not None:
                     container.resource_index += 1
                 elif container is None:
                     if not (len(data) == len(PLACEHOLDER_GIF) and data == PLACEHOLDER_GIF):
                         imgtype = find_imgtype(data)
                         href = 'images/%05d.%s'%(fname_idx, imgtype)
-                        with open(href.replace('/', os.sep), 'wb') as f:
-                            f.write(data)
+                        self.write_file(href, data)
 
                 resource_map.append(href)
 
@@ -485,7 +499,7 @@ class Mobi8Reader:
                         except:
                             self.log.exception('Failed to read inline ToC')
 
-        opf = OPFCreator(os.getcwd(), mi)
+        opf = OPFCreator(os.getcwd(), mi, self.fs)
         opf.guide = guide
 
         def exclude(path):
@@ -525,15 +539,17 @@ class Mobi8Reader:
         if pwm is not None:
             opf.primary_writing_mode = pwm
 
-        with open('metadata.opf', 'wb') as of, open('toc.ncx', 'wb') as ncx:
-            opf.render(of, ncx, 'toc.ncx')
-        return 'metadata.opf'
+        of = io.BytesIO()
+        ncx = io.BytesIO()
+        opf.render(of, ncx, 'toc.ncx')
+        self.write_file('metadata.opf', of.getvalue())
+        self.write_file('toc.ncx', ncx.getvalue())
+        return self.fs #'metadata.opf'
 
     def read_inline_toc(self, href, frag):
         ans = TOC()
         base_href = '/'.join(href.split('/')[:-1])
-        with open(href.replace('/', os.sep), 'rb') as f:
-            raw = f.read().decode(self.header.codec)
+        raw = self.read_file(href).decode(self.header.codec)
         root = parse_html(raw, log=self.log)
         body = XPath('//h:body')(root)
         reached = False

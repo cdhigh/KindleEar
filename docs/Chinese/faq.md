@@ -37,20 +37,31 @@ KindleEar不保存密码原文，无法取回密码。在登录时密码验证�
 
 <a id="appspotmail"></a>
 ## 入站邮件功能怎么用？
-如果您的应用是部署在Google cloud平台(GAE)，邮箱地址为：xxx@appid.appspotmail.com (xxx为任意合法字符串，appid为您的应用名)。     
+如果您的应用是部署在Google cloud平台(GAE)，邮箱地址为：`xxx@appid.appspotmail.com` (xxx为任意合法字符串，appid为您的应用名)。     
 如果使用Docker compose部署，邮箱地址为： `xxx@domain`，前提是需要开放25端口，并且在DNS服务器正确设置了MX记录。   
 
-1. 要使用此功能，先要添加白名单，如果为 '\*' 则允许所有邮件，否则格式为 `xx@xx.xx` 或 `@xx.xx`。
+1. 要使用此功能，先要添加白名单，如果为 `*` 则允许所有邮件，否则格式为 `xx@xx.xx` 或 `@xx.xx`。  
+
 2. 此邮箱将收到的邮件正文转换为邮件附件推送至你注册的Email邮箱。如果邮件中只有链接（多个链接则每行一个），则抓取链接的网页内容制作成电子书然后再推送。   
+
 3. 如果在邮件主题最后添加了标识 !links，则不论邮件内容如何，KindleEar都只会提取邮件中的链接，然后抓取网页，制作成电子书发送至你的Kindle。这个功能最适合将网络连载网页直接发送至Kindle观看。   
+
 4. 如果在邮件主题后添加了标识 !article，则忽略所有链接，直接将内容转换为电子书发送。   
+
 5. 推送的电子书默认语言为自定义RSS的语言，如需要其他语种，可以在邮件主题后添加标识 !lang=en (将en替换为您需要的语种代码)。     
-6. 默认推送至管理员注册的邮箱，如果要推送至其他用户的邮箱，则使用格式： `username__xxx@domain` 。（注意是双下划线）
-7. 如果将电子书下载链接发送至 `book@domain` 或 `username__book@domain` 则KindleEar直接下载对应的电子书并转发至注册的邮箱（注意后缀名有限制，不能发送可能有安全隐患的文件后缀比如exe等，zip文件能发送，但是zip文件内不能包含可能有安全隐患的文件）。    
+
+6. 默认推送至管理员注册的邮箱，如果要推送至其他用户的邮箱，则使用格式： `username__xxx@domain` 。（注意是双下划线）。   
+
+7. 如果将电子书下载链接发送至 `book@domain` 则KindleEar直接下载对应的电子书并转发至注册的邮箱（注意后缀名有限制，不能发送可能有安全隐患的文件后缀比如exe等，zip文件能发送，但是zip文件内不能包含可能有安全隐患的文件）。    
 GAE可邮件发送的后缀名列表参见：[Mail Python API Overview](https://cloud.google.com/appengine/docs/python/mail/#Python_Sending_mail_with_attachments)
-（book/file/download邮件地址保留为下载电子书使用）
-8. 发送至 `trigger@domain` 或 `username__trigger@domain`，则触发一次手动投递。邮件标题为空或为all则完全等同于网页上的“现在投递”按钮。如果需要推送特定书籍，则在标题上写书籍名字，多个书籍名字使用逗号分隔。   
-9. 发送至 `debug@domain` 的邮件则直接抓取邮件中的链接并直接发送HTML文件至管理员邮箱而不是Kindle邮箱。   
+（book/file/download邮件地址保留为下载电子书使用）。   
+
+8. Amazon不再支持推送mobi文件，如果你有mobi文件('.mobi', '.prc', '.azw', '.azw3', '.pobi') 需要推送给Kindle，可以以附件形式发送邮件至 `convert@domain`，KindleEar将其转换为epub然后再推送给Amazon。   
+注：mobi文件不能有DRM加密，否则转换失败。   
+
+9. 发送至 `trigger@domain`，则触发一次手动投递。邮件标题为空或为all则完全等同于网页上的“现在投递”按钮。如果需要推送特定书籍，则在标题上写书籍名字，多个书籍名字使用逗号分隔。   
+
+10. 发送至 `debug@domain` 的邮件则直接抓取邮件中的链接并直接发送HTML文件至管理员邮箱而不是Kindle邮箱。   
 
 
 ## 有的网站需要登录才能阅读文章的问题如何解决？

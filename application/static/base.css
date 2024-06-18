@@ -1043,22 +1043,21 @@ div.schedule_daytimes label {
 }
 
 .tooltip:hover::before {
-    text-align: left;
+    text-align: center;
     content: attr(data-msg);
     position: absolute;
-    padding: 2px 5px;
+    padding: 8px;
     display: block;
-    min-width: 220px;
+    min-width: 200px;
     color: #333;
-    opacity: 1;
     background-color: #FFFCCC;
     border: 1px solid #333;
-    border-radius: 5px;
-    font-size: 14px;
-    line-height: 18px;
-    bottom: 25px;
+    border-radius: 10px;
+    font-size: 0.8em;
+    /*line-height: 1.2em;*/
+    bottom: 2em;
     /*top: calc(-220%);*/
-    right: 0px;
+    left: 0px;
 }
 
 /* 用于推送记录异常信息太长的鼠标悬停指示 */

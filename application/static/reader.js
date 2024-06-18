@@ -823,9 +823,9 @@ function navClickEvent(event) {
   if (navTitle) {
     var src = navTitle.getAttribute('data-src');
     var span = navTitle.querySelector('.nav-title-text');
-    var text = span ? span.textContent.trim() : '';
-    if (src && text) {
-      openArticle({title: text, src: src});
+    var title = span ? span.textContent.trim() : '';
+    if (src && title) {
+      openArticle({title: title, src: src});
     }
   } else if (navBook) {
     toggleNavBook(navBook);
@@ -891,8 +891,11 @@ function getBookLanguage(art) {
 function openArticle(article) {
   if (article.src) {
     var iframe = document.getElementById('iframe');
-    //iframe.style.height = 'auto'; //规避iframe只能变大不能变小的bug
-    iframe.style.display = "none"; //加载完成后再显示
+    var oldSrc = g_currentArticle.src ? g_currentArticle.src.replace(/#.*$/, '') : '';
+    var newSrc = article.src.replace(/#.*$/, '');
+    if (oldSrc != newSrc) {
+      iframe.style.display = "none"; //加载完成后再显示
+    }
     iframe.src = '/reader/article/' + article.src;
     g_currentArticle = article;
   }

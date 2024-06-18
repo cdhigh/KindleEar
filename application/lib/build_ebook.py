@@ -9,24 +9,28 @@ from calibre.ebooks.conversion.plumber import Plumber
 from calibre.web.feeds.recipes import compile_recipe
 from recipe_helper import GenerateRecipeSource
 from urlopener import UrlOpener
+from application.utils import loc_exc_pos
 
 #从输入格式生成对应的输出格式
-#recipes: 编译后的recipe，为一个列表
+#input_: 如果是recipe，为编译后的recipe(或列表)，或者是一个输入文件名，或一个BytesIO
+#input_fmt: 输入格式， recipe, mobi, ...
 #user: KeUser对象
 #output_fmt: 如果指定，则生成特定格式的书籍，否则使用user.book_cfg('type')
 #options: 额外的一些参数，为一个字典
 # 如: options={'debug_pipeline': path, 'verbose': 1}
 #返回电子书二进制内容
-def recipes_to_ebook(recipes: list, user, options=None, output_fmt=''):
-    if not isinstance(recipes, list):
-        recipes = [recipes]
+def convert_book(input_, input_fmt, user, options=None, output_fmt=''):
     output = io.BytesIO()
-    output_fmt=output_fmt if output_fmt else user.book_cfg('type')
+    output_fmt = output_fmt if output_fmt else user.book_cfg('type')
     options = ke_opts(user, options)
-    plumber = Plumber(recipes, output, input_fmt='recipe', output_fmt=output_fmt, options=options)
-    plumber.run()
-    return output.getvalue()
-
+    plumber = Plumber(input_, output, input_fmt=input_fmt, output_fmt=output_fmt, options=options)
+    try:
+        plumber.run()
+        return output.getvalue()
+    except:
+        default_log.warning(loc_exc_pos('convert_book failed'))
+        return b''
+    
 #仅通过一个url列表构建一本电子书
 #urls: [(title, url),...] or [url,url,...]
 #title: 书籍标题
@@ -84,7 +88,7 @@ def urls_to_book(urls: list, title: str, user, options=None, output_fmt='', lang
     userCss = user.get_extra_css()
     ro.extra_css = f'{ro.extra_css}\n\n{userCss}' if ro.extra_css else userCss #type:ignore
 
-    book = recipes_to_ebook([ro], user, options, output_fmt)
+    book = convert_book(ro, 'recipe', user, options, output_fmt)
     clearPrevDownloads()
     return book
 

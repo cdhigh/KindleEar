@@ -11,8 +11,8 @@ from ..utils import filesizeformat
 from ..back_end.send_mail_adpt import send_to_kindle
 from ..back_end.db_models import *
 from calibre.web.feeds.recipes import compile_recipe
-from ..lib.recipe_helper import *
-from ..lib.build_ebook import recipes_to_ebook
+from recipe_helper import *
+from build_ebook import convert_book
 
 bpWorker = Blueprint('bpWorker', __name__)
 
@@ -111,7 +111,7 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
     for title, roList in recipes.items():
         if len(roList) == 1:
             title = roList[0].title
-        book = recipes_to_ebook(roList, user)
+        book = convert_book(roList, 'recipe', user)
         
         #如果有TTS音频，先推送音频
         ext, audio = MergeAudioSegment(roList)

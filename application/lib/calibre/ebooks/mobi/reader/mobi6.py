@@ -49,7 +49,7 @@ class MobiReader:
     IMAGE_ATTRS = ('lowrecindex', 'recindex', 'hirecindex')
 
     def __init__(self, filename_or_stream, log=None, user_encoding=None, debug=None,
-            try_extra_data_fix=False):
+            try_extra_data_fix=False, fs=None):
         self.log = log or default_log
         self.debug = debug
         self.embedded_mi = None
@@ -74,14 +74,20 @@ class MobiReader:
         self.tag_css_rules = {}
         self.left_margins = {}
         self.text_indents = {}
+        self.fs = fs
 
-        if hasattr(filename_or_stream, 'read'):
+        if isinstance(filename_or_stream, (bytes, bytearray)):
+            raw = filename_or_stream
+        elif hasattr(filename_or_stream, 'read'):
             stream = filename_or_stream
             stream.seek(0)
+            raw = stream.read()
+        elif fs:
+            raw = fs.read(filename_or_stream, 'rb')
         else:
             stream = open(filename_or_stream, 'rb')
-
-        raw = stream.read()
+            raw = stream.read()
+        
         if raw.startswith(b'TPZ'):
             raise TopazError(_('This is an Amazon Topaz book. It cannot be processed.'))
         if raw.startswith(b'\xeaDRMION\xee'):
@@ -159,6 +165,15 @@ class MobiReader:
             if not name:
                 name = self.name
             raise DRMError(name)
+
+    def write_as_utf8(self, path, data):
+        if isinstance(data, str):
+            data = data.encode('utf-8')
+        if self.fs:
+            self.fs.write(path, data, 'wb')
+        else:
+            with open(path, 'wb') as f:
+                f.write(data)
 
     def extract_content(self, output_dir, parse_cache):
         #output_dir = os.path.abspath(output_dir)
@@ -254,7 +269,8 @@ class MobiReader:
                 for x in b:
                     b.remove(x)
                     body.append(x)
-            root.append(head), root.append(body)
+            root.append(head)
+            root.append(body)
         for x in root.xpath('//script'):
             x.getparent().remove(x)
 
@@ -299,38 +315,34 @@ class MobiReader:
         except AttributeError:
             pass
 
-        def write_as_utf8(path, data):
-            if isinstance(data, str):
-                data = data.encode('utf-8')
-            with open(path, 'wb') as f:
-                f.write(data)
-
         parse_cache[htmlfile] = root
         self.htmlfile = htmlfile
+        opf_buf = io.BytesIO()
         ncx = io.BytesIO()
         opf, ncx_manifest_entry = self.create_opf(htmlfile, guide, root)
         self.created_opf_path = os.path.splitext(htmlfile)[0] + '.opf'
-        opf.render(open(self.created_opf_path, 'wb'), ncx,
-            ncx_manifest_entry=ncx_manifest_entry)
+        opf.render(opf_buf, ncx, ncx_manifest_entry=ncx_manifest_entry)
+        self.write_as_utf8(self.created_opf_path, opf_buf.getvalue())
         ncx = ncx.getvalue()
         if ncx:
             ncx_path = os.path.join(os.path.dirname(htmlfile), 'toc.ncx')
-            write_as_utf8(ncx_path, ncx)
+            self.write_as_utf8(ncx_path, ncx)
 
         css = [self.base_css_rules, '\n\n']
         for cls, rule in self.tag_css_rules.items():
             css.append(f'.{cls} {{ {rule} }}\n\n')
-        write_as_utf8('styles.css', ''.join(css))
+        self.write_as_utf8('styles.css', ''.join(css))
 
         if self.book_header.exth is not None or self.embedded_mi is not None:
             self.log.debug('Creating OPF...')
+            opf_buf = io.BytesIO()
             ncx = io.BytesIO()
             opf, ncx_manifest_entry  = self.create_opf(htmlfile, guide, root)
-            opf.render(open(os.path.splitext(htmlfile)[0] + '.opf', 'wb'), ncx,
-                ncx_manifest_entry)
+            opf.render(opf_buf, ncx, ncx_manifest_entry)
+            self.write_as_utf8(os.path.splitext(htmlfile)[0] + '.opf', opf_buf.getvalue())
             ncx = ncx.getvalue()
             if ncx:
-                write_as_utf8(os.path.splitext(htmlfile)[0] + '.ncx', ncx)
+                self.write_as_utf8(os.path.splitext(htmlfile)[0] + '.ncx', ncx)
 
     def read_embedded_metadata(self, root, elem, guide):
         raw = b'<?xml version="1.0" encoding="utf-8" ?>\n<package>' + \
@@ -657,7 +669,7 @@ class MobiReader:
         mi = getattr(self.book_header.exth, 'mi', self.embedded_mi)
         if mi is None:
             mi = MetaInformation(self.book_header.title, [_('Unknown')])
-        opf = OPFCreator(os.path.dirname(htmlfile), mi)
+        opf = OPFCreator(os.path.dirname(htmlfile), mi, self.fs)
         if hasattr(self.book_header.exth, 'cover_offset'):
             opf.cover = 'images/%05d.jpg' % (self.book_header.exth.cover_offset + 1)
         elif mi.cover is not None:
@@ -883,8 +895,10 @@ class MobiReader:
 
     def extract_images(self, processed_records, output_dir):
         self.log.debug('Extracting images...')
-        output_dir = os.path.abspath(os.path.join(output_dir, 'images'))
-        if not os.path.exists(output_dir):
+        output_dir = os.path.join(output_dir, 'images')
+        if self.fs:
+            self.fs.makedirs(output_dir)
+        elif not os.path.exists(output_dir):
             os.makedirs(output_dir)
         image_index = 0
         self.image_names = []
@@ -922,17 +936,21 @@ class MobiReader:
                 except OSError:
                     self.log.warn(f'Ignoring undecodeable GIF image at index {image_index}')
                     continue
-            path = os.path.join(output_dir, '%05d.%s' % (image_index, imgfmt))
-            image_name_map[image_index] = os.path.basename(path)
-            if imgfmt == 'png':
-                with open(path, 'wb') as f:
-                    f.write(data)
-            else:
+            
+            if imgfmt != 'png':
                 try:
-                    save_cover_data_to(data, path, minify_to=(10000, 10000))
+                    imgfmt = 'jpeg'
+                    data = save_cover_data_to(data, data_fmt=imgfmt, minify_to=(10000, 10000))
                 except Exception:
-                    continue
-            self.image_names.append(os.path.basename(path))
+                    data = None
+            if data:
+                if imgfmt == 'jpeg':
+                    imgfmt = 'jpg'
+                path = os.path.join(output_dir, '%05d.%s' % (image_index, imgfmt))
+                image_name_map[image_index] = os.path.basename(path)
+                self.image_names.append(os.path.basename(path))
+                self.write_as_utf8(path, data)
+                
         return image_name_map
 
 

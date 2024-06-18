@@ -4,6 +4,7 @@ __license__ = 'GPL 3'
 __copyright__ = '2009, Kovid Goyal <kovid@kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
+from PIL.Image import isImageType
 import os, re, sys, shutil, pprint, json, io, css_parser, logging, traceback
 from itertools import chain
 from functools import partial
@@ -24,7 +25,7 @@ from calibre.constants import __version__
 from polyglot.builtins import string_or_bytes
 
 from filesystem_dict import FsDictStub
-from application.utils import get_directory_size
+from application.utils import get_directory_size, loc_exc_pos
 from application.base_handler import save_delivery_log
 
 DEBUG_README=b'''
@@ -397,7 +398,7 @@ class Plumber:
             self.oeb = self.input_plugin(self.input_, self.opts, self.input_fmt, self.log, tdir, fs)
         except Exception as e:
             if 'All feeds are empty, aborting.' in str(e):
-                self.log.warning('Failed to execute input plugin: {}'.format(str(e)))
+                self.log.warning('Plumber: All feeds are empty, aborting.')
             else:
                 self.log.warning('Failed to execute input plugin: {}'.format(traceback.format_exc()))
             fs.clear()
@@ -416,11 +417,12 @@ class Plumber:
         #        return
         self.opts_to_mi(self.opts, self.user_metadata)
         if not hasattr(self.oeb, 'manifest'): #从一堆文件里面创建OEBBook实例
+            fs.find_opf_path()
             try:
-                self.oeb = create_oebbook(self.log, self.oeb, self.opts, encoding=self.input_plugin.output_encoding,
+                self.oeb = create_oebbook(self.log, fs, self.opts, encoding=self.input_plugin.output_encoding,
                     removed_items=getattr(self.input_plugin, 'removed_items_to_ignore', ()))
-            except Exception as e:
-                self.log.warning('Failed to create oebbook for recipes: {}'.format(str(e)))
+            except:
+                self.log.warning(loc_exc_pos('Failed to create oebbook'))
                 fs.clear()
                 return
         

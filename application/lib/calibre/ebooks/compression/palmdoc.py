@@ -8,10 +8,11 @@ import io
 from struct import pack
 
 #from calibre_extensions import cPalmdoc
+from .mobi_uncompress import PalmdocReader
 
-
-#def decompress_doc(data):
-#    return cPalmdoc.decompress(data)
+def decompress_doc(data):
+    return PalmdocReader().unpack(data)
+    #return cPalmdoc.decompress(data)
 
 
 def compress_doc(data):

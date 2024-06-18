@@ -14,7 +14,7 @@ from ..back_end.task_queue_adpt import create_delivery_task, create_url2book_tas
 from ..back_end.db_models import KeUser
 from ..back_end.send_mail_adpt import send_to_kindle, send_html_mail
 from ..base_handler import *
-from build_ebook import html_to_book
+from build_ebook import html_to_book, convert_book
 
 try:
     from google.appengine.api import mail as gae_mail
@@ -41,7 +41,6 @@ def ReceiveGaeBounce():
 @bpInBoundEmail.post("/_ah/mail/<path>")
 def ReceiveGaeMail(path):
     message = gae_mail.InboundEmailMessage(request.get_data()) #type:ignore
-
     subject = message.subject if hasattr(message, 'subject') else 'NoSubject'
     
     try:
@@ -73,7 +72,7 @@ def ReceiveMail():
     for part in msg.walk():
         cType = part.get_content_type()
         body = part.get_payload(decode=True)
-        if part.get('Content-Disposition') == 'attachment':
+        if part.get('Content-Disposition', '').startswith('attachment'):
             attachments.append((part.get_filename(), body))
         elif cType == 'text/plain':
             txtBodies.append(body.decode(part.get_content_charset('us-ascii'))) #type:ignore
@@ -119,7 +118,7 @@ def ReceiveMailGlove():
 #htmlBodies: text/html的邮件内容列表
 #attachements: 附件列表，格式为[(fileName, content),...]
 def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: list, htmlBodies: list, attachments: list):
-    adminName = os.getenv('ADMIN_NAME')
+    adminName = os.environ.get('ADMIN_NAME', 'admin')
     userName, dest = ExtractUsernameFromEmail(to) #从接收地址提取账号名和真实地址, 格式：user__to
     userName = userName if userName else adminName
 
@@ -145,10 +144,10 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
         return
 
     if 'save' in inbound_email:
-        SaveInEmailToDb(user, sender, to, subject, txtBodies, htmlBodies)
+        SaveInEmailToDb(user, sender, to, subject, txtBodies, htmlBodies, attachments)
 
     #通过邮件触发一次“现在投递”
-    if dest.lower() == 'trigger':
+    if dest == 'trigger':
         key = app.config['DELIVERY_KEY']
         create_delivery_task({'userName': userName, 'recipeId': subject, 'reason': 'manual', 'key': key})
         return f'A delivery task for "{userName}" is triggered'
@@ -157,17 +156,23 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
         default_log.warning('The inbound email forwarding feature is not yet enabled.')
         return 'The inbound email forwarding feature is not yet enabled.'
 
-    forceToLinks = False #强制提取链接
-    forceToArticle = False #强制发送邮件内容
+    #需要需要，转发mobi为epub
+    if dest == 'convert':
+        ret = TransferMobi(attachments, user)
+        if ret:
+            return 'Sent:<br/>{}'.format('<br/>'.join(ret))
+
+    forceLinks = False #强制提取链接
+    forceArticle = False #强制发送邮件内容
     
     #邮件主题中如果存在 !links ，则强制提取邮件中的链接然后生成电子书
     if subject.endswith('!links') or ' !links ' in subject:
         subject = subject.replace(' !links ', '').replace('!links', '').strip()
-        forceToLinks = True
+        forceLinks = True
     # 如果主题存在 !article ，则强制转换邮件内容为电子书，忽略其中的链接
     elif subject.endswith('!article') or ' !article ' in subject:
         subject = subject.replace(' !article ', '').replace('!article', '').strip()
-        forceToArticle = True
+        forceArticle = True
 
     #设置电子书语种
     language = ''
@@ -181,14 +186,14 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
         return "There is no html body neither text body."
     
     #提取文章的超链接
-    links = [] if forceToArticle else CollectSoupLinks(soup, forceToLinks)
+    links = [] if forceArticle else CollectSoupLinks(soup, forceLinks)
         
     if links:
         #判断是下载文件还是要转发邮件内容
-        isBook = ((dest.lower() in ('book', 'file', 'download')) or
+        isBook = ((dest in ('book', 'file', 'download')) or
             links[0].lower().endswith(('.mobi', '.epub', '.docx', '.pdf', '.txt', '.doc', '.rtf')))
 
-        if dest.lower() == 'debug':
+        if dest == 'debug':
             action = 'debug'
         elif isBook:
             action = 'download'
@@ -319,8 +324,8 @@ def CreateMailSoup(subject: str, txtBodies: list, htmlBodies: list):
     
 #提取Soup的超链接，返回一个列表
 #判断邮件内容是文本还是链接（包括多个链接的情况）
-#forceToLinks: 不管文章内容如何，强制提取链接
-def CollectSoupLinks(soup, forceToLinks):
+#forceLinks: 不管文章内容如何，强制提取链接
+def CollectSoupLinks(soup, forceLinks):
     body = soup.body
     links = []
     emptyLineNum = 0 #放宽一点条件，允许链接之间有一个空行，因为有的应用会添加一个空的<div>
@@ -335,7 +340,7 @@ def CollectSoupLinks(soup, forceToLinks):
             #这个处理是为了去除部分邮件客户端在邮件末尾添加的一个广告链接或签名链接
             if not txt:
                 emptyLineNum += 1
-            if not forceToLinks and emptyLineNum >= 2:
+            if not forceLinks and emptyLineNum >= 2:
                 break
 
     if not links: #如果在显示文本中找不到连接，则通过a标签进行查找
@@ -353,19 +358,39 @@ def CollectSoupLinks(soup, forceToLinks):
             for item in links]
 
     #如果字数太多，则认为直接推送正文内容
-    if not forceToLinks and (len(text) > WORDCNT_THRESHOLD_APMAIL):
+    if not forceLinks and (len(text) > WORDCNT_THRESHOLD_APMAIL):
         links = []
 
     return links
 
 #将接收到的邮件暂存到数据库
 #暂时不支持保存附件
-def SaveInEmailToDb(user, sender, to, subject, txtBodies, htmlBodies):
+def SaveInEmailToDb(user, sender, to, subject, txtBodies, htmlBodies, attachments):
     to = ', '.join(to) if isinstance(to, list) else str(to)
+    attachNames = [{'name': item[0]} for item in attachments]
     size = sum([len(item) for item in [*txtBodies, *htmlBodies]])
+
     #GAE对json字段里面的子字段也有1500字节限制，所以这里只能转换为一个字符串
-    body = json.dumps({'txtBodies': txtBodies, 'htmlBodies': htmlBodies})
+    body = json.dumps({'txtBodies': txtBodies, 'htmlBodies': htmlBodies, 'attachments': attachNames})
     InBox.create(user=user.name, sender=sender, to=to, subject=subject, status='unread', size=size, body=body)
+
+#将接收到的mobi文件转换为epub然后发送到Kindle
+#返回一个已经发送的文件名列表
+def TransferMobi(attachments, user):
+    ret = []
+    if not attachments or (user.book_cfg('type') != 'epub'):
+        return ret
+
+    for fname, attachData in attachments:
+        name, ext = os.path.splitext(fname)
+        if ext in (('.mobi', '.prc', '.azw', '.azw3', '.pobi')):
+            book = convert_book(attachData, ext[1:], user, options={'dont_save_webshelf': True})
+            if book:
+                name = os.path.basename(name) + '.epub'
+                #这里在 "投递日志" 中记录文件后缀，明确表明是转换过的电子书
+                send_to_kindle(user, name, (name, book), fileWithTime=False)
+                ret.append(name)
+    return ret
 
 #webmail网页
 @bpInBoundEmail.route("/webmail", endpoint='WebmailRoute')
@@ -403,10 +428,12 @@ def WebMailContentRoute(id_: str, user: KeUser):
         if body and not isinstance(body, dict):
             body = json.loads(body)
         if body:
-            content = '<br/>'.join(body.get('htmlBodies') or body.get('txtBodies') or [])
-            content = content.replace('\r\n', '<br/>').replace('\n', '<br/>')
+            content = body.get('htmlBodies') or body.get('txtBodies') or []
+            content.append('<br/>') #添加附件名字
+            content.extend([f'&#128206; {item.get("name")}' for item in (body.get('attachments') or [])])
+            content = '<br/>'.join(content).replace('\r\n', '<br/>').replace('\n', '<br/>')
     except Exception as e:
-        default_log.warning('Get mail content failed: {id_}, {e}')
+        default_log.warning(f'Get mail content failed: {id_}, {e}')
         pass
     return {'status': 'ok', 'content': content}
 

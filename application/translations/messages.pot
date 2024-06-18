@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-15 21:09-0300\n"
+"POT-Creation-Date: 2024-06-18 20:21-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -322,13 +322,14 @@ msgstr ""
 #: application/templates/adv_dict.html:49
 #: application/templates/adv_dict.html:66
 #: application/templates/book_translator.html:26
-#: application/templates/dict.html:47
+#: application/templates/word_lookup.html:59
 msgid "Engine"
 msgstr ""
 
 #: application/templates/adv_dict.html:33
 #: application/templates/adv_dict.html:55
-#: application/templates/adv_dict.html:72 application/templates/dict.html:53
+#: application/templates/adv_dict.html:72
+#: application/templates/word_lookup.html:65
 msgid "Database"
 msgstr ""
 
@@ -336,8 +337,9 @@ msgstr ""
 msgid "Other languages"
 msgstr ""
 
-#: application/templates/adv_dict.html:81 application/templates/dict.html:3
-#: application/templates/dict.html:63
+#: application/templates/adv_dict.html:81
+#: application/templates/word_lookup.html:3
+#: application/templates/word_lookup.html:79
 msgid "Word lookup"
 msgstr ""
 
@@ -860,8 +862,8 @@ msgstr ""
 #: application/templates/base.html:116 application/view/admin.py:77
 #: application/view/admin.py:146 application/view/admin.py:193
 #: application/view/extension.py:33 application/view/extension.py:62
-#: application/view/inbound_email.py:425 application/view/inbound_email.py:433
-#: application/view/inbound_email.py:448 application/view/inbound_email.py:469
+#: application/view/inbound_email.py:452 application/view/inbound_email.py:460
+#: application/view/inbound_email.py:475 application/view/inbound_email.py:496
 #: application/view/login.py:229 application/view/login.py:258
 #: application/view/reader.py:118 application/view/reader.py:135
 #: application/view/settings.py:48 application/view/share.py:37
@@ -1110,7 +1112,7 @@ msgid "One key per line"
 msgstr ""
 
 #: application/templates/book_translator.html:40
-#: application/templates/dict.html:39
+#: application/templates/word_lookup.html:51
 msgid "Source language"
 msgstr ""
 
@@ -1182,10 +1184,6 @@ msgstr ""
 
 #: application/templates/debug_cmd.html:3
 msgid "Debug cmd"
-msgstr ""
-
-#: application/templates/dict.html:59
-msgid "Word"
 msgstr ""
 
 #: application/templates/home.html:3
@@ -1424,6 +1422,10 @@ msgid "Online reading"
 msgstr ""
 
 #: application/templates/settings.html:48
+msgid "Retention days for online books"
+msgstr ""
+
+#: application/templates/settings.html:48
 msgid "Web shelf"
 msgstr ""
 
@@ -1465,6 +1467,10 @@ msgid "Book type"
 msgstr ""
 
 #: application/templates/settings.html:104
+msgid "Determines final file size"
+msgstr ""
+
+#: application/templates/settings.html:104
 msgid "Device type"
 msgstr ""
 
@@ -1494,6 +1500,10 @@ msgstr ""
 
 #: application/templates/settings.html:136
 msgid "Remove all hyperlinks"
+msgstr ""
+
+#: application/templates/settings.html:148
+msgid "Sets the lookup dictionary"
 msgstr ""
 
 #: application/templates/settings.html:160
@@ -1587,6 +1597,10 @@ msgstr ""
 
 #: application/templates/webmail.html:21
 msgid "Fwd as Attach"
+msgstr ""
+
+#: application/templates/word_lookup.html:71
+msgid "Word"
 msgstr ""
 
 #: application/view/admin.py:48 application/view/adv.py:434

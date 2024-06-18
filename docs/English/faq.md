@@ -41,19 +41,30 @@ KindleEar does not store passwords in plain text and cannot retrieve them. If lo
 
 <a id="appspotmail"></a>
 ## How to Use the Inbound Mail Function?    
-If your application is deployed on the Google Cloud Platform (GAE), the email address is: xxx@appid.appspotmail.com (where xxx is any valid string, and appid is your application name).  
+If your application is deployed on the Google Cloud Platform (GAE), the email address is: `xxx@appid.appspotmail.com` (where xxx is any valid string, and appid is your application name).  
 If deployed using Docker Compose, the email address is: `xxx@domain`, remember to open port 25 and set MX records correctly in the DNS server.    
 
-1. To use this function, you need to add whitelist first. If set to '\*', it allows all emails. Otherwise, the format should be `xx@xx.xx` or `@xx.xx`.    
+1. To use this function, you need to add whitelist first. If set to `*`, it allows all emails. Otherwise, the format should be `xx@xx.xx` or `@xx.xx`.    
+
 2. This email will convert the received email body into e-book and push them to your registered email. If the email only contains links (one link per line), it will fetch the web content of the links and create an e-book before pushing.    
+
 3. If email subject contains the identifier `!links`, regardless of the email content, KindleEar will only extract the links from the email, then fetch the webpages and send them as e-books to your Kindle. This feature is best suited for sending serialized web content directly to Kindle for viewing.   
+
 4. If the identifier `!article` is present in the subject, all links will be ignored, and the content will be directly converted into an e-book for delivery.      
+
 5. The default language of the e-book is same as of the custom RSS. If you need another language, you can add the identifier `!lang=en` (replace `en` with the language code you need) after the email subject.   
+
 6. By default, the e-book is pushed to the administrator's registered email. If you want to push it to another user's email, use the format: `username__xxx@domain`. (Note the double underscore)   
-7. If you send the e-book download link to `book@domain` or `username__book@domain`, KindleEar will directly download the corresponding e-book and forward it to the registered email. (Note: there are restrictions on file extensions; you cannot send file extensions that may have security risks, such as exe, zip files are allowed, but zip files cannot contain files with potential security risks.)
+
+7. If you send the e-book download link to `book@domain`, KindleEar will directly download the corresponding e-book and forward it to the registered email. (Note: there are restrictions on file extensions; you cannot send file extensions that may have security risks, such as exe, zip files are allowed, but zip files cannot contain files with potential security risks.)    
 The suffix list that GAE can send emails to see: [Mail Python API Overview](https://cloud.google.com/appengine/docs/python/mail/#Python_Sending_mail_with_attachments) (book/file/download email addresses are reserved for downloading e-books).        
-8. Sending to `trigger@domain` or `username__trigger@domain` triggers a manual delivery. If the email subject is empty or 'all', it is equivalent to the "Deliver Now" button on the website. If specific books need to be pushed, write their names in the subject, separated by commas.    
-9. Emails sent to `debug@domain` will directly fetch the links from the email and send HTML files directly to the administrator's email instead of the Kindle mailbox.     
+
+8. Amazon no longer supports pushing mobi format. If you have mobi files ('.mobi', '.prc', '.azw', '.azw3', '.pobi') that need to be sent to your Kindle, you can send them as an attachment via email to `convert@domain`. KindleEar will convert them to epub and then send them to Amazon.   
+Note: Mobi files must not have DRM encryption; otherwise, the conversion will fail.   
+
+9. Sending to `trigger@domain` triggers a manual delivery. If the email subject is empty or 'all', it is equivalent to the "Deliver Now" button on the website. If specific books need to be pushed, write their names in the subject, separated by commas.    
+
+10. Emails sent to `debug@domain` will directly fetch the links from the email and send HTML files directly to the administrator's email instead of the Kindle mailbox.    
 
 
 

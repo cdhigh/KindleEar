@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-15 21:09-0300\n"
+"POT-Creation-Date: 2024-06-18 20:21-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -323,13 +323,14 @@ msgstr "书本语言"
 #: application/templates/adv_dict.html:49
 #: application/templates/adv_dict.html:66
 #: application/templates/book_translator.html:26
-#: application/templates/dict.html:47
+#: application/templates/word_lookup.html:59
 msgid "Engine"
 msgstr "翻译引擎"
 
 #: application/templates/adv_dict.html:33
 #: application/templates/adv_dict.html:55
-#: application/templates/adv_dict.html:72 application/templates/dict.html:53
+#: application/templates/adv_dict.html:72
+#: application/templates/word_lookup.html:65
 msgid "Database"
 msgstr "数据库"
 
@@ -337,8 +338,9 @@ msgstr "数据库"
 msgid "Other languages"
 msgstr "其他语言"
 
-#: application/templates/adv_dict.html:81 application/templates/dict.html:3
-#: application/templates/dict.html:63
+#: application/templates/adv_dict.html:81
+#: application/templates/word_lookup.html:3
+#: application/templates/word_lookup.html:79
 msgid "Word lookup"
 msgstr "单词查询"
 
@@ -861,8 +863,8 @@ msgstr "请选择至少一项。"
 #: application/templates/base.html:116 application/view/admin.py:77
 #: application/view/admin.py:146 application/view/admin.py:193
 #: application/view/extension.py:33 application/view/extension.py:62
-#: application/view/inbound_email.py:425 application/view/inbound_email.py:433
-#: application/view/inbound_email.py:448 application/view/inbound_email.py:469
+#: application/view/inbound_email.py:452 application/view/inbound_email.py:460
+#: application/view/inbound_email.py:475 application/view/inbound_email.py:496
 #: application/view/login.py:229 application/view/login.py:258
 #: application/view/reader.py:118 application/view/reader.py:135
 #: application/view/settings.py:48 application/view/share.py:37
@@ -1111,7 +1113,7 @@ msgid "One key per line"
 msgstr "一行一码"
 
 #: application/templates/book_translator.html:40
-#: application/templates/dict.html:39
+#: application/templates/word_lookup.html:51
 msgid "Source language"
 msgstr "源语言"
 
@@ -1184,10 +1186,6 @@ msgstr "确认修改"
 #: application/templates/debug_cmd.html:3
 msgid "Debug cmd"
 msgstr "调试命令"
-
-#: application/templates/dict.html:59
-msgid "Word"
-msgstr "单词"
 
 #: application/templates/home.html:3
 msgid "Home"
@@ -1425,6 +1423,10 @@ msgid "Online reading"
 msgstr "在线阅读"
 
 #: application/templates/settings.html:48
+msgid "Retention days for online books"
+msgstr "在线阅读书籍的保留天数"
+
+#: application/templates/settings.html:48
 msgid "Web shelf"
 msgstr "网络书架"
 
@@ -1466,6 +1468,10 @@ msgid "Book type"
 msgstr "投递格式"
 
 #: application/templates/settings.html:104
+msgid "Determines final file size"
+msgstr "决定了生成文件的大小"
+
+#: application/templates/settings.html:104
 msgid "Device type"
 msgstr "设备类型"
 
@@ -1496,6 +1502,10 @@ msgstr "移除文本上的链接"
 #: application/templates/settings.html:136
 msgid "Remove all hyperlinks"
 msgstr "移除所有链接"
+
+#: application/templates/settings.html:148
+msgid "Sets the lookup dictionary"
+msgstr "设置查词时使用的词典"
 
 #: application/templates/settings.html:160
 msgid "Oldest article"
@@ -1591,6 +1601,10 @@ msgstr "转发"
 #: application/templates/webmail.html:21
 msgid "Fwd as Attach"
 msgstr "作为附件转发"
+
+#: application/templates/word_lookup.html:71
+msgid "Word"
+msgstr "单词"
 
 #: application/view/admin.py:48 application/view/adv.py:434
 #: application/view/settings.py:76 application/view/translator.py:83
@@ -2123,5 +2137,4 @@ msgstr "此Recipe的网站登录信息已经保存。"
 #: application/view/translator.py:77 application/view/translator.py:160
 msgid "The api key is required."
 msgstr "需要填写api key."
-
 

@@ -45,7 +45,7 @@
         </select>
       </div>
       <div class="pure-control-group">
-        <label>{{_("Web shelf")}}</label>
+        <label class="tooltip" data-msg="{{_('Retention days for online books')}}">{{_("Web shelf")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="webshelf_days">
           {% set onlineDays = user.cfg('webshelf_days') %}
           <option value="0" {% if not onlineDays %}selected="selected"{% endif %}>{{_("No limit")}}</option>
@@ -101,7 +101,7 @@
         </select>
       </div>
       <div class="pure-control-group">
-        <label>{{_("Device type")}}</label>
+        <label class="tooltip" data-msg="{{_('Determines final file size')}}">{{_("Device type")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="device_type">
           {% set currDev = user.book_cfg('device') %}
           {% for dev in output_profiles -%}
@@ -145,7 +145,7 @@
         <input type="text" name="rss_title" value="{{ user.book_cfg('title') }}" required class="pure-u-1 pure-u-sm-1-2" />
       </div>
       <div class="pure-control-group">
-        <label>{{_("Language")}}</label>
+        <label class="tooltip" data-msg="{{_('Sets the lookup dictionary')}}">{{_("Language")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="book_language">
         {% for langCode in langMap -%}
         {% if user.book_cfg('language') == langCode -%}

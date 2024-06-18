@@ -197,7 +197,7 @@ class InputFormatPlugin(Plugin):
         raise NotImplementedError()
 
     #fs: FsDictStub 对象，由它根据情况使用内存缓存或使用磁盘缓存
-    def convert(self, stream, options, file_ext, log, output_dir, fs):
+    def convert(self, stream, opts, file_ext, log, output_dir, fs):
         '''
         This method must be implemented in sub-classes. It must return
         the path to the created OPF file or an :class:`OEBBook` instance.
