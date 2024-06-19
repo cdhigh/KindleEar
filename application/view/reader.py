@@ -231,10 +231,20 @@ def ReaderDictPost(user: KeUser, userDir: str):
     try:
         definition = inst.definition(word, language)
         if not definition and language: #如果查询不到，尝试使用构词法词典获取词根
-            stem = GetWordStem(word, language)
+            hObj = InitHunspell(language)
+            stem = GetWordStem(hObj, word)
             if stem:
+                definition = inst.definition(stem, language) #再次查询
+
+            if not definition:
+                suggests = GetWordSuggestions(hObj, word)
+                if suggests:
+                    sugTxt = ' '.join([f'<a href="https://kindleear/entry/{s}" style="font-size:1.2em;font-weight:bold;margin:10px 20px 5px 0px">{s}</a>' 
+                        for s in suggests])
+                    definition = '<br/>'.join([_("No definitions found for '{}'.").format(word),
+                        _("Did you mean?"), sugTxt])
+            else:
                 word = stem
-                definition = inst.definition(word, language) #再次查询
     except Exception as e:
         #import traceback
         #traceback.print_exc()
@@ -243,9 +253,9 @@ def ReaderDictPost(user: KeUser, userDir: str):
     return {'status': 'ok', 'word': word, 'definition': definition, 
         'dictname': str(inst), 'others': others}
 
-#根据构词法获取词干
+#构建Hunspell实例
 #language: 语种代码，只有前两个字母
-def GetWordStem(word, language):
+def InitHunspell(language):
     try:
         import dictionary
         import hunspell #type:ignore
@@ -268,9 +278,21 @@ def GetWordStem(word, language):
     else:
         return ''
 
+    try:
+        return hunspell.Hunspell(lang=dic, hunspell_data_dir=morphDir)
+    except Exception as e:
+        default_log.warning(f'Init hunspell failed: {e}')
+        return None
+
+#根据构词法获取词干
+#hObj: hunspell 实例
+#word: 要查询的单词
+def GetWordStem(hObj, word) -> str:
+    if not hObj:
+        return ''
+
     stems = []
     try:
-        hObj = hunspell.Hunspell(lang=dic, hunspell_data_dir=morphDir)
         stems = [s for s in hObj.stem(word) if s != word]
         default_log.debug(f'got stem tuple: {stems}')
     except Exception as e:
@@ -280,7 +302,20 @@ def GetWordStem(word, language):
     if isinstance(stem, bytes):
         stem = stem.decode('utf-8')
     return stem
-    
+
+#获取单词的拼写建议
+#hObj: hunspell 实例
+#word: 要查询的单词
+def GetWordSuggestions(hObj, word) -> list:
+    if not hObj:
+        return []
+
+    try:
+        return [(s.decode('utf-8') if isinstance(s, bytes) else s) for s in hObj.suggest(word)]
+    except Exception as e:
+        print(e)
+        return []
+
 #将一个特定的文章制作成电子书推送
 def PushSingleArticle(src: str, title: str, user: KeUser, userDir: str, language: str):
     path = os.path.join(userDir, src).replace('\\', '/')

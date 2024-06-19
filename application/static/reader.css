@@ -318,7 +318,7 @@ body::-webkit-scrollbar-thumb {
   margin-right: auto;
   margin-top: -200px;
   background-color: white;
-  border: 1px solid #ccc;
+  border: 1px solid #302e2e;;
   border-radius: 20px;
   box-shadow: 0px 0px 3px #aaa;
   display: none;

@@ -139,7 +139,7 @@ class IndexedMdx:
             tag.name = 'div'
 
         #删除多媒体资源和脚本
-        for tag in list(soup.find_all(['img', 'script', 'base', 'iframe', 'canvas', 'embed', 'source',
+        for tag in list(soup.find_all(['head', 'img', 'script', 'base', 'iframe', 'canvas', 'embed', 'source',
             'command', 'datalist', 'video', 'audio', 'noscript', 'meta', 'button'])):
             tag.extract()
         
@@ -147,15 +147,12 @@ class IndexedMdx:
         self.inline_css(soup)
         #self.remove_empty_tags(soup)
 
-        tag = soup.head
-        if tag:
-            tag.extract()
-
         #mdict质量良莠不齐，有些词典在html/body外写释义
-        #所以不能直接提取body内容，直接修改为div简单粗暴也有效
-        for tag in (soup.html, soup.body):
+        #所以不能直接提取body内容
+        for name in ('html', 'body'):
+            tag = soup.find(name)
             if tag:
-                tag.name = 'div'
+                tag.unwrap()
         
         return str(soup)
 

@@ -686,7 +686,7 @@ function closeDictDialog(event) {
     event.stopPropagation();
     event.preventDefault();
     var href = target.getAttribute('href') || '';
-    if (href.startsWith('https://kindleear/entry/')) {
+    if (href.indexOf('https://kindleear/entry/') == 0) {
       var word = href.substring(24);
       if (word) {
         translateWord(word);
@@ -991,7 +991,7 @@ function iframeLoadEvent(evt) {
       }
       g_dictMode = false;
       document.getElementById('corner-dict-hint').style.display = 'none';
-    } else if (dictDialog && dictDialog.style.display != 'none') { //关闭查词窗口
+    } else if (dictDialog && dictDialog.style.display == 'block') { //关闭查词窗口
       closeDictDialog();
     } else if (!text) { //没有选择文本才翻页
       clickEvent(event);
