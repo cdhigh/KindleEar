@@ -32,6 +32,9 @@ postconf -e 'local_recipient_maps ='
 # Enable logging to foreground in postlog
 postconf -e 'maillog_file = /dev/stdout'
 
+# Set the max size ~= 30MB
+postconf -e message_size_limit=35000000
+
 #############
 ## Enable TLS
 #############
