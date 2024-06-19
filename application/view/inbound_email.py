@@ -53,8 +53,13 @@ def ReceiveGaeMail(path):
     except:
         htmlBodies = []
 
-    attachments = message.attachments if hasattr(message, 'attachments') else []
-    
+    attachments = []
+    if hasattr(message, 'attachments'):
+        for attachment in message.attachments:
+            filename = attachment.filename
+            if filename:
+                attachments.append((filename, attachment.payload))
+
     return ReceiveMailImpl(sender=message.sender, to=message.to, subject=subject, txtBodies=txtBodies,
         htmlBodies=htmlBodies, attachments=attachments)
 
@@ -73,7 +78,10 @@ def ReceiveMail():
         cType = part.get_content_type()
         body = part.get_payload(decode=True)
         if part.get('Content-Disposition', '').startswith('attachment'):
-            attachments.append((part.get_filename(), body))
+            filename = part.get_filename()
+            if filename:
+                decoded_filename = DecodeSubject(filename)
+                attachments.append((decoded_filename, body))
         elif cType == 'text/plain':
             txtBodies.append(body.decode(part.get_content_charset('us-ascii'))) #type:ignore
         elif cType == 'text/html':
@@ -135,7 +143,7 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
         default_log.warning(f'Spam mail from : {sender}')
         return "Spam mail"
     
-    subject = DecodeSubject(subject or 'NoSubject')
+    subject = DecodeSubject(subject)
 
     #如果需要暂存邮件
     inbound_email = user.cfg('inbound_email')
@@ -222,13 +230,21 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
     
     return 'OK'
 
-
 #解码邮件主题
-def DecodeSubject(subject):
+def DecodeSubject(subject, default='NoSubject'):
     if not subject:
-        subject = 'NoSubject'
+        subject = default
     elif subject.startswith('=?') and subject.endswith('?='):
-        subject = ''.join(str(s, c or 'us-ascii') for s, c in email.header.decode_header(subject)) #type:ignore
+        decoded_parts = []
+        try:
+            for s, c in email.header.decode_header(subject):
+                if isinstance(s, bytes):
+                    decoded_parts.append(s.decode(c or 'us-ascii', errors='replace'))
+                else:
+                    decoded_parts.append(s)
+            return ''.join(decoded_parts).strip()
+        except Exception as e:
+            pass
     else:
         subject = str(email.utils.collapse_rfc2231_value(subject)) #type:ignore
     return subject.strip()
@@ -390,6 +406,8 @@ def TransferMobi(attachments, user):
                 #这里在 "投递日志" 中记录文件后缀，明确表明是转换过的电子书
                 send_to_kindle(user, name, (name, book), fileWithTime=False)
                 ret.append(name)
+        else:
+            default_log.warning(f'Skipping unsupported mail attachment: {fname}')
     return ret
 
 #webmail网页
