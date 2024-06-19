@@ -20,8 +20,6 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: Build and push Docker image
-        env:
-          IMAGE_NAME: kindleear/mailfix
-          TAG_LATEST: latest
         run: |
-          docker buildx build --push --platform=linux/amd64,linux/arm64 -t $IMAGE_NAME:$TAG_LATEST -f docker/postfix/Dockerfile .
+          cd docker/postfix
+          docker buildx build --push --platform=linux/amd64,linux/arm64 -t kindleear/mailfix -f Dockerfile .
