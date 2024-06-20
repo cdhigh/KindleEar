@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-18 20:21-0300\n"
+"POT-Creation-Date: 2024-06-19 21:03-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:179
+#: application/templates/admin.html:3 application/templates/base.html:180
 msgid "Admin"
 msgstr ""
 
@@ -292,7 +292,7 @@ msgid "There are no recipes subscribed"
 msgstr ""
 
 #: application/templates/adv_delivernow.html:18
-#: application/templates/base.html:99
+#: application/templates/base.html:100
 msgid "Sep"
 msgstr ""
 
@@ -453,7 +453,7 @@ msgid "Random"
 msgstr ""
 
 #: application/templates/adv_uploadcover.html:18
-#: application/templates/base.html:124
+#: application/templates/base.html:125
 msgid "Weekday"
 msgstr ""
 
@@ -681,143 +681,147 @@ msgid "[By Time]"
 msgstr ""
 
 #: application/templates/base.html:74
-msgid "[Uncategoried]"
+msgid "[Random]"
 msgstr ""
 
 #: application/templates/base.html:75
-msgid "There are no links found."
+msgid "[Uncategoried]"
 msgstr ""
 
 #: application/templates/base.html:76
-msgid "Invalid report"
+msgid "There are no links found."
 msgstr ""
 
 #: application/templates/base.html:77
-msgid "Are you confirming that this link is invalid or off the cloud?"
+msgid "Invalid report"
 msgstr ""
 
 #: application/templates/base.html:78
+msgid "Are you confirming that this link is invalid or off the cloud?"
+msgstr ""
+
+#: application/templates/base.html:79
 msgid "Customize delivery time"
 msgstr ""
 
-#: application/templates/base.html:79 application/templates/settings.html:72
+#: application/templates/base.html:80 application/templates/settings.html:72
 msgid "Delivery days"
 msgstr ""
 
-#: application/templates/base.html:80 application/templates/settings.html:74
+#: application/templates/base.html:81 application/templates/settings.html:74
 msgid "Mon"
 msgstr ""
 
-#: application/templates/base.html:81 application/templates/settings.html:76
+#: application/templates/base.html:82 application/templates/settings.html:76
 msgid "Tue"
 msgstr ""
 
-#: application/templates/base.html:82 application/templates/settings.html:78
+#: application/templates/base.html:83 application/templates/settings.html:78
 msgid "Wed"
 msgstr ""
 
-#: application/templates/base.html:83 application/templates/settings.html:80
+#: application/templates/base.html:84 application/templates/settings.html:80
 msgid "Thu"
 msgstr ""
 
-#: application/templates/base.html:84 application/templates/settings.html:82
+#: application/templates/base.html:85 application/templates/settings.html:82
 msgid "Fri"
 msgstr ""
 
-#: application/templates/base.html:85 application/templates/settings.html:84
+#: application/templates/base.html:86 application/templates/settings.html:84
 msgid "Sat"
 msgstr ""
 
-#: application/templates/base.html:86 application/templates/settings.html:86
+#: application/templates/base.html:87 application/templates/settings.html:86
 msgid "Sun"
 msgstr ""
 
-#: application/templates/base.html:87
+#: application/templates/base.html:88
 msgid "Delivery times"
 msgstr ""
 
-#: application/templates/base.html:88
+#: application/templates/base.html:89
 msgid "The customized delivery time for the recipe has been successfully saved."
 msgstr ""
 
-#: application/templates/base.html:89
+#: application/templates/base.html:90
 msgid "The account have been deleted."
 msgstr ""
 
-#: application/templates/base.html:90 application/view/share.py:147
+#: application/templates/base.html:91 application/view/share.py:147
 msgid "The username or password is empty."
 msgstr ""
 
-#: application/templates/base.html:91 application/view/admin.py:81
+#: application/templates/base.html:92 application/view/admin.py:81
 #: application/view/admin.py:159 application/view/admin.py:195
 #: application/view/login.py:233 application/view/login.py:291
 msgid "The two new passwords are dismatch."
 msgstr ""
 
-#: application/templates/base.html:92
+#: application/templates/base.html:93
 msgid "Password changed successfully."
 msgstr ""
 
-#: application/templates/base.html:93
+#: application/templates/base.html:94
 msgid "Account added successfully."
 msgstr ""
 
-#: application/templates/base.html:94 application/view/login.py:141
+#: application/templates/base.html:95 application/view/login.py:141
 msgid "login required"
 msgstr ""
 
-#: application/templates/base.html:95
+#: application/templates/base.html:96
 msgid "Upload cover files successfully."
 msgstr ""
 
-#: application/templates/base.html:96
+#: application/templates/base.html:97
 msgid ""
 "Total size of the files you selected exceeds 16MB. Please reduce the "
 "image resolution or upload in batches."
 msgstr ""
 
-#: application/templates/base.html:97
+#: application/templates/base.html:98
 #: application/templates/book_translator.html:3
 #: application/templates/book_translator.html:17
 msgid "Bilingual Translator"
 msgstr ""
 
-#: application/templates/base.html:98
+#: application/templates/base.html:99
 msgid "Upl"
 msgstr ""
 
-#: application/templates/base.html:100
+#: application/templates/base.html:101
 msgid "Log"
 msgstr ""
 
-#: application/templates/base.html:101
+#: application/templates/base.html:102
 msgid "Emb"
 msgstr ""
 
-#: application/templates/base.html:102
+#: application/templates/base.html:103
 msgid "Tr"
 msgstr ""
 
-#: application/templates/base.html:103
+#: application/templates/base.html:104
 msgid "Tts"
 msgstr ""
 
-#: application/templates/base.html:104
+#: application/templates/base.html:105
 msgid ""
 "The test email has been successfully sent to the following addresses. "
 "Please check your inbox or spam folder to confirm its delivery. Depending"
 " on your email server, there may be a slight delay."
 msgstr ""
 
-#: application/templates/base.html:105
+#: application/templates/base.html:106
 msgid "Translating..."
 msgstr ""
 
-#: application/templates/base.html:106
+#: application/templates/base.html:107
 msgid "The configuration validation is correct."
 msgstr ""
 
-#: application/templates/base.html:107 application/templates/logs.html:23
+#: application/templates/base.html:108 application/templates/logs.html:23
 #: application/templates/logs.html:72 application/templates/my.html:17
 #: application/templates/settings.html:117
 #: application/templates/settings.html:118
@@ -825,133 +829,133 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: application/templates/base.html:108
+#: application/templates/base.html:109
 #: application/templates/book_audiolator.html:3
 #: application/templates/book_audiolator.html:20
 msgid "Text to Speech"
 msgstr ""
 
-#: application/templates/base.html:109
+#: application/templates/base.html:110
 msgid "Action"
 msgstr ""
 
-#: application/templates/base.html:110
+#: application/templates/base.html:111
 msgid "File"
 msgstr ""
 
-#: application/templates/base.html:111
+#: application/templates/base.html:112
 msgid "Upload Only"
 msgstr ""
 
-#: application/templates/base.html:112
+#: application/templates/base.html:113
 msgid "Send"
 msgstr ""
 
-#: application/templates/base.html:113 application/templates/logs.html:54
+#: application/templates/base.html:114 application/templates/logs.html:54
 msgid "There is nothing here."
 msgstr ""
 
-#: application/templates/base.html:114
+#: application/templates/base.html:115
 msgid "Please select a single item."
 msgstr ""
 
-#: application/templates/base.html:115 application/templates/reader.html:183
+#: application/templates/base.html:116 application/templates/reader.html:183
 msgid "Please select at least one item."
 msgstr ""
 
-#: application/templates/base.html:116 application/view/admin.py:77
+#: application/templates/base.html:117 application/view/admin.py:77
 #: application/view/admin.py:146 application/view/admin.py:193
 #: application/view/extension.py:33 application/view/extension.py:62
-#: application/view/inbound_email.py:452 application/view/inbound_email.py:460
-#: application/view/inbound_email.py:475 application/view/inbound_email.py:496
+#: application/view/inbound_email.py:470 application/view/inbound_email.py:478
+#: application/view/inbound_email.py:493 application/view/inbound_email.py:514
 #: application/view/login.py:229 application/view/login.py:258
 #: application/view/reader.py:118 application/view/reader.py:135
 #: application/view/settings.py:48 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr ""
 
-#: application/templates/base.html:117
+#: application/templates/base.html:118
 msgid "The email has been sent."
 msgstr ""
 
-#: application/templates/base.html:118 application/templates/webmail.html:29
+#: application/templates/base.html:119 application/templates/webmail.html:29
 msgid "From"
 msgstr ""
 
-#: application/templates/base.html:119 application/templates/logs.html:25
+#: application/templates/base.html:120 application/templates/logs.html:25
 #: application/templates/logs.html:74 application/templates/webmail.html:30
 msgid "To"
 msgstr ""
 
-#: application/templates/base.html:120 application/templates/webmail.html:31
+#: application/templates/base.html:121 application/templates/webmail.html:31
 msgid "Subject"
 msgstr ""
 
-#: application/templates/base.html:121 application/templates/logs.html:22
+#: application/templates/base.html:122 application/templates/logs.html:22
 #: application/templates/logs.html:71 application/templates/settings.html:117
 #: application/templates/settings.html:118
 #: application/templates/webmail.html:32
 msgid "Time"
 msgstr ""
 
-#: application/templates/base.html:122 application/templates/logs.html:24
+#: application/templates/base.html:123 application/templates/logs.html:24
 #: application/templates/logs.html:73 application/templates/webmail.html:33
 msgid "Size"
 msgstr ""
 
-#: application/templates/base.html:123
+#: application/templates/base.html:124
 msgid "Date type"
 msgstr ""
 
-#: application/templates/base.html:125
+#: application/templates/base.html:126
 msgid "Date"
 msgstr ""
 
-#: application/templates/base.html:126
+#: application/templates/base.html:127
 msgid "This setting is prioritized."
 msgstr ""
 
-#: application/templates/base.html:127
+#: application/templates/base.html:128
 msgid "Combine multiple values with commas."
 msgstr ""
 
-#: application/templates/base.html:152 application/templates/home.html:12
+#: application/templates/base.html:153 application/templates/home.html:12
 msgid "Logout"
 msgstr ""
 
-#: application/templates/base.html:154 application/templates/home.html:17
+#: application/templates/base.html:155 application/templates/home.html:17
 #: application/templates/login.html:3 application/templates/login.html:19
 #: application/templates/login.html:30
 msgid "Login"
 msgstr ""
 
-#: application/templates/base.html:156 application/templates/signup.html:3
+#: application/templates/base.html:157 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr ""
 
-#: application/templates/base.html:176 application/templates/home.html:11
+#: application/templates/base.html:177 application/templates/home.html:11
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr ""
 
-#: application/templates/base.html:177 application/templates/settings.html:3
+#: application/templates/base.html:178 application/templates/settings.html:3
 msgid "Settings"
 msgstr ""
 
-#: application/templates/base.html:178 application/templates/logs.html:3
+#: application/templates/base.html:179 application/templates/logs.html:3
 msgid "Logs"
 msgstr ""
 
-#: application/templates/base.html:180
+#: application/templates/base.html:181
 msgid "Advanced"
 msgstr ""
 
-#: application/templates/base.html:181 application/templates/library.html:3
+#: application/templates/base.html:182 application/templates/library.html:3
 msgid "Shared"
 msgstr ""
 
-#: application/templates/base.html:182 application/templates/reader.html:6
+#: application/templates/base.html:183 application/templates/reader.html:6
 msgid "Reader"
 msgstr ""
 
@@ -1855,11 +1859,19 @@ msgstr ""
 msgid "The text is empty."
 msgstr ""
 
-#: application/view/reader.py:291
+#: application/view/reader.py:244
+msgid "No definitions found for '{}'."
+msgstr ""
+
+#: application/view/reader.py:245
+msgid "Did you mean?"
+msgstr ""
+
+#: application/view/reader.py:326
 msgid "Failed to push: {}"
 msgstr ""
 
-#: application/view/reader.py:339
+#: application/view/reader.py:374
 msgid "Failed to create ebook."
 msgstr ""
 

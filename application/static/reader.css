@@ -318,7 +318,7 @@ body::-webkit-scrollbar-thumb {
   margin-right: auto;
   margin-top: -200px;
   background-color: white;
-  border: 1px solid #302e2e;;
+  border: 1px solid #302e2e;
   border-radius: 20px;
   box-shadow: 0px 0px 3px #aaa;
   display: none;
@@ -407,6 +407,7 @@ body::-webkit-scrollbar-thumb {
   min-height: 100px;
   max-height: 350px; /* tr-result - tr-word */
   overflow: hidden;
+  padding: 0px 10px 10px 10px;
 }
 .tr-text-container {
   width: 100%;
@@ -415,6 +416,8 @@ body::-webkit-scrollbar-thumb {
   overflow-y: auto;
 }
 .tr-text {
+  word-break: break-word;
+  box-sizing: border-box;
   margin: 0px auto 10px auto;
   padding: 0px 10px 10px 10px;
   /*text-align: center;*/

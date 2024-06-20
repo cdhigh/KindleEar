@@ -6,6 +6,17 @@ var g_rssByLang = {};
 //由BuildSharedRssByCategory()根据搜索词动态更新此数组
 var g_rssByCat = [];
 
+//将一个数组打乱，返回原数组
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    let temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+  return array;
+}
+
 //排序网友分享库的RSS，先按流行程度（订阅数）倒序，订阅数相同的按时间倒序
 function SortSharedRssDataArray() {
   if (!g_SharedRss) {
@@ -114,16 +125,39 @@ function GetRssListByTime(lang, txt) {
   return byTextTime;
 }
 
+//返回特定关键词搜索的随机排序的列表
+function GetRssShuffledListByText(lang, txt) {
+  rss = g_rssByLang[lang];
+  if (!rss) {
+    return [];
+  }
+
+  txt = txt ? txt.toUpperCase() : '';
+  var byText = [];
+  var title, url;
+  for (var i = 0; i < rss.length; i++) {
+    title = rss[i].t.toUpperCase();
+    url = rss[i].u.toUpperCase();
+    if ((title.indexOf(txt) > -1) || (url.indexOf(txt) > -1)) {
+      byText.push(rss[i])
+    }
+  }
+
+  return shuffleArray(byText);
+}
+
 //根据搜索词动态更新此数组 g_rssByCat[]
 //lang: 用户选择的语言代码，两位字母
 //txt: 搜索词，可以为空
 function BuildSharedRssByCategory(lang, txt) {
   var bySearchText = GetRssListByText(lang, txt);
   var byTextTime = GetRssListByTime(lang, txt);
+  var byShuffled = GetRssShuffledListByText(lang, txt);
 
   g_rssByCat = [];
   g_rssByCat[i18n.catAll] = bySearchText;
   g_rssByCat[i18n.catByTime] = byTextTime;
+  g_rssByCat[i18n.catRandom] = byShuffled;
   for (var idx = 0; idx < bySearchText.length; idx++) {
     var item = bySearchText[idx];
     var category = item.c || i18n.uncategoried; //c:category
@@ -285,6 +319,9 @@ function GeneratePaginationButtons(category, currentPage, maxPage) {
 
 //选择了某一个分类，根据分类填充内容列表
 function SelectCategory(obj, category) {
+  if ((category == i18n.catRandom) && g_rssByCat[i18n.catRandom] && g_rssByCat[i18n.catRandom].length > 0) {
+    shuffleArray(g_rssByCat[i18n.catRandom]);
+  }
   HightlightCategory($(obj).parent());
   ToPage(category, 1);
 };
