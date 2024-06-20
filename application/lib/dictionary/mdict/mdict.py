@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #mdx离线词典接口
-#!/usr/bin/env python3
-# -*- coding:utf-8 -*-
-#stardict离线词典支持
 import os
 from bs4 import BeautifulSoup
 from application.utils import xml_escape
@@ -100,7 +97,7 @@ class IndexedMdx:
         word = word.lower().strip()
         #和mdict官方应用一样，输入:about返回词典基本信息
         if word == ':about':
-            return self.dictHtmlInfo()
+            return self.dict_html_info()
 
         indexes = self.trie[word] if word in self.trie else None
         ret = self.get_content_by_Index(indexes)
@@ -144,8 +141,9 @@ class IndexedMdx:
             tag.extract()
         
         self.adjust_css(soup)
-        self.inline_css(soup)
+        self.justify_css_path(soup)
         #self.remove_empty_tags(soup)
+        #self.convert_dict_tag(soup)
 
         #mdict质量良莠不齐，有些词典在html/body外写释义
         #所以不能直接提取body内容
@@ -169,27 +167,32 @@ class IndexedMdx:
                     del newStyle['height']
                 element['style'] = "; ".join(f"{k}: {v}" for k, v in newStyle.items())
 
-    #将外部单独css文件的样式内联到html标签中
-    def inline_css(self, soup):
-        link = soup.find('link', attrs={'rel': 'stylesheet', 'href': True})
-        if link:
-            link.extract()
-        return #碰到稍微复杂一些的CSS文件性能就比较低下，暂时屏蔽对CSS文件的支持
-
-        link.extract()
-        css = ''
-        link = os.path.join(os.path.dirname(self.mdxFilename), link['href']) #type:ignore
-        if os.path.exists(link):
-            with open(link, 'r', encoding='utf-8') as f:
-                css = f.read().strip()
-
-        if not css:
+    def justify_css_path(self, soup):
+        dictDir = os.environ.get('DICTIONARY_DIR')
+        if not dictDir or not os.path.exists(dictDir):
             return
 
-        parsed = {} #css文件的样式字典
-        cssRules = []
+        link = soup.find('link', attrs={'rel': 'stylesheet', 'href': True})
+        if link:
+            link['href'] = '/reader/css/' + link['href']
 
-        import css_parser
+    #将外部单独css文件的样式内联到html标签中，现在不使用了，直接修改css链接
+    def inline_css(self, soup):
+        link = soup.find('link', attrs={'rel': 'stylesheet', 'href': True})
+        if not link:
+            return
+
+        link.extract()
+        cssPath = os.path.join(os.path.dirname(self.mdxFilename), link['href'])  # type: ignore
+        if not os.path.exists(cssPath):
+            return
+        try:
+            with open(cssPath, 'r', encoding='utf-8') as f:
+                css = f.read().strip()
+        except:
+            return
+
+        import css_parser #大部分词典都没有外挂css，可以尽量晚的引入css_parser
         parser = css_parser.CSSParser()
         try:
             stylesheet = parser.parseString(css)
@@ -197,30 +200,35 @@ class IndexedMdx:
         except Exception as e:
             default_log.warning(f'parse css failed: {self.mdxFilename}: {e}')
             return
-        
+
+        parsed = {}
         for rule in cssRules:
             if rule.type == rule.STYLE_RULE:
-                selector = rule.selectorText
-                if ':' in selector: #伪元素
-                    continue
+                #css_parser对伪元素支持不好，要去掉
+                selectors = [item.strip() for item in rule.selectorText.split(',') 
+                    if (':' not in item) and item.strip()]
                 styles = {}
                 for style in rule.style:
                     if style.name != 'height':
                         styles[style.name] = style.value
-                parsed[selector] = styles
+                for selector in selectors:
+                    parsed[selector] = styles
 
-        #内联样式
-        for selector, styles in parsed.items():
-            try:
-                elements = soup.select(selector)
-            except NotImplementedError as e:
-                default_log.debug(f"Skipping unsupported selector: {selector}")
-                continue
-            for element in elements:
-                existing = element.get('style', '')
-                newStyle = dict(item.split(":") for item in existing.split(";") if item)
-                newStyle.update(styles)
-                element['style'] = "; ".join(f"{k}: {v}" for k, v in newStyle.items())
+        def apply_styles(tag, styles):
+            existing = tag.get('style', '')
+            newStyle = dict(item.split(":") for item in existing.split(";") if item)
+            newStyle.update(styles)
+            tag['style'] = ";".join(f"{k}:{v}" for k, v in newStyle.items())
+
+        for tag in soup.find_all(True):
+            tagStyles = parsed.get(tag.name, {})
+            classStyles = {}
+            if tag.has_attr('class'):
+                for item in tag['class']:
+                    classStyles.update(parsed.get(f'.{item}', {}))
+
+            idStyles = parsed.get(f'#{tag["id"]}', {}) if tag.has_attr('id') else {}
+            apply_styles(tag, {**tagStyles, **classStyles, **idStyles})
 
     #删除空白元素
     def remove_empty_tags(self, soup, preserve_tags=None):
@@ -237,7 +245,7 @@ class IndexedMdx:
             tag.decompose()
 
     #返回当前词典的基本信息，html格式
-    def dictHtmlInfo(self):
+    def dict_html_info(self):
         ret = []
         header = self.mdx.header.copy()
         ret.append('<strong>{}</strong><hr/>'.format(header.pop('Title', '')))

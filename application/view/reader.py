@@ -253,6 +253,13 @@ def ReaderDictPost(user: KeUser, userDir: str):
     return {'status': 'ok', 'word': word, 'definition': definition, 
         'dictname': str(inst), 'others': others}
 
+#获取词典外挂的CSS
+@bpReader.route("/reader/css/<path:path>", endpoint='ReaderDictCssRoute')
+@login_required()
+def ReaderDictCssRoute(path: str, user: KeUser):
+    dictDir = app.config['DICTIONARY_DIR']
+    return send_from_directory(dictDir, path) if dictDir and os.path.exists(dictDir) else ''
+
 #构建Hunspell实例
 #language: 语种代码，只有前两个字母
 def InitHunspell(language):
@@ -311,7 +318,7 @@ def GetWordSuggestions(hObj, word) -> list:
         return []
 
     try:
-        return [(s.decode('utf-8') if isinstance(s, bytes) else s) for s in hObj.suggest(word)]
+        return [s for s in hObj.suggest(word) if s != word]
     except Exception as e:
         print(e)
         return []
