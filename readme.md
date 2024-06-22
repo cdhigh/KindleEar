@@ -2,12 +2,13 @@ __English__ · [简体中文](readme_zh.md)
 
 ---
 
-**[project documentation](https://cdhigh.github.io/KindleEar)**     
+**[Project documentation](https://cdhigh.github.io/KindleEar)**     
 
 
 
-[Demo Site](https://kindleear.onrender.com/)  
-Note: The demo site is a free service hosted on Render. It may take around 50 seconds to start up the first time you open it. The login credentials are `admin/admin`. All data will be automatically cleared after a period of inactivity, so feel free to perform any operations. You can use it to test ebook pushing.        
+[Demo Site1](https://kindleear.koyeb.app/)  
+[Demo Site2](https://kindleear.onrender.com/)  
+Note: The demo site is a free service hosted on Koyeb/Render. It may take around 50 seconds to start up the first time you open render demo site. The login username and password are `admin/admin`. All data will be automatically cleared after a period of inactivity, so feel free to perform any operations. You can use it to test ebook pushing.        
 
 
 

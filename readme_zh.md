@@ -5,8 +5,9 @@
 **[项目文档](https://cdhigh.github.io/KindleEar)**    
 
 
-[体验站点](https://kindleear.onrender.com/)    
-注：体验站点是在render上搭建的免费服务，第一次打开会大约有50s的启动时间，登录账号密码为 `admin/admin`，一段时间不活动后所有数据会被自动清除，所以可以大胆放心的进行任何操作，你可以进行电子书推送测试。  
+[体验站点1](https://kindleear.koyeb.app/)  
+[体验站点2](https://kindleear.onrender.com/)    
+注：体验站点是在koyeb/render上搭建的免费服务，render第一次打开会大约有50s的启动时间，登录账号密码为 `admin/admin`，一段时间不活动后所有数据会被自动清除，所以可以大胆放心的进行任何操作，你可以进行电子书推送测试。  
 
 
 
