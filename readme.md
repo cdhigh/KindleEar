@@ -2,6 +2,15 @@ __English__ · [简体中文](readme_zh.md)
 
 ---
 
+**[project documentation](https://cdhigh.github.io/KindleEar)**     
+
+
+
+[Demo Site](https://kindleear.onrender.com/)  
+Note: The demo site is a free service hosted on Render. It may take around 50 seconds to start up the first time you open it. The login credentials are `admin/admin`. All data will be automatically cleared after a period of inactivity, so feel free to perform any operations. You can use it to test ebook pushing.        
+
+
+
 # Announcement
 June 1, 2024  **Release of KindleEar 3.1, includes an online reader optimized for e-ink (Docker only).**  
 
@@ -34,9 +43,6 @@ Support online reading too, including an online reader specifically optimized fo
 * Powerful and convenient email forwarding service   
 * Integration with systems like Evernote/Pocket/Instapaper/wallabag   
 
-
-
-For other details, please refer to the **[project documentation](https://cdhigh.github.io/KindleEar)**.
 
 
 

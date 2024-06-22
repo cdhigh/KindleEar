@@ -2,6 +2,14 @@
 
 ---
 
+**[项目文档](https://cdhigh.github.io/KindleEar)**    
+
+
+[体验站点](https://kindleear.onrender.com/)    
+注：体验站点是在render上搭建的免费服务，第一次打开会大约有50s的启动时间，登录账号密码为 `admin/admin`，一段时间不活动后所有数据会被自动清除，所以可以大胆放心的进行任何操作，你可以进行电子书推送测试。  
+
+
+
 2024-06-01  **KindleEar 3.1 版本发布，新增一个为墨水屏特别优化的在线阅读器(仅Docker版本)**     
 
 **主要新特性:**
@@ -34,8 +42,6 @@
 * 强大而且方便的邮件中转服务
 * 和Evernote/Pocket/Instapaper/wallabag等系统的集成
 
-
-其他细节请参考 **[项目文档](https://cdhigh.github.io/KindleEar)**
 
 
 
