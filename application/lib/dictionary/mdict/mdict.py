@@ -174,7 +174,10 @@ class IndexedMdx:
 
         link = soup.find('link', attrs={'rel': 'stylesheet', 'href': True})
         if link:
-            link['href'] = '/reader/css/' + link['href']
+            mdxDir = os.path.dirname(self.mdxFilename)
+            cssFile = os.path.join(mdxDir, link['href'])
+            newHref = os.path.relpath(cssFile, dictDir)
+            link['href'] = '/reader/css/' + newHref.replace('\\', '/')
 
     #将外部单独css文件的样式内联到html标签中，现在不使用了，直接修改css链接
     def inline_css(self, soup):

@@ -165,14 +165,18 @@ function startQueryDict(word) {
 function showTrResult(word, text, dictname) {
   var engineDiv = $('#tr_engine');
   var resultDiv = $('#tr_result');
+  var resultElement = resultDiv[0];
   engineDiv.html('From: <strong>' + dictname + '</strong>');
-  resultDiv.empty();
-  if (!text) {
-    engineDiv.css('display', 'none');
-    resultDiv.html('No definitions found for "' + word + '"');
-  } else {
-    engineDiv.css('display', 'inline-block');
-    resultDiv.html(text.replace(/\n/g, '<br/>'));
+  engineDiv.css('display', text ? 'inline-block' : 'none');
+  text = text ? text.replace(/\n/g, '<br/>') : ('No definitions found for "' + word + '"');
+  if (resultElement.attachShadow) { //使用shadow dom技术隔离css
+    //console.log('This browser supports Shadow DOM.');
+    if (!resultElement.shadowRoot) { //在第一个执行attachShadow后，这个变量会自动被设置
+      resultElement.attachShadow({mode: 'open'});
+    }
+    $(resultElement.shadowRoot).html(text);
+  } else { //不支持shadow dom的浏览器
+    resultDiv.html(text);
   }
 }
 

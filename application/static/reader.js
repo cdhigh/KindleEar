@@ -226,6 +226,7 @@ function showDictDialog(word, text, dictname, others) {
   var titleDiv = document.getElementById('tr-word');
   var textWrap = document.getElementById('tr-text-container');
   var textDiv = document.getElementById('tr-text');
+  //候选词典下拉列表
   var ostr = ['<option value="">▽ ' + (dictname || '') + '</option>'];
   for (var i = 0; i < others.length; i++) {
     var elem = others[i];
@@ -240,7 +241,16 @@ function showDictDialog(word, text, dictname, others) {
   }
   dictNameDiv.innerHTML = ostr.join('');
   titleDiv.innerHTML = word;
-  textDiv.innerHTML = text.replace(/\n/g, '<br/>');
+  text = text ? text.replace(/\n/g, '<br/>') : '';
+  if (textDiv.attachShadow) { //使用shadow dom技术可以隔离css
+    if (!textDiv.shadowRoot) { //在第一个执行attachShadow后，这个变量会自动被设置
+      textDiv.attachShadow({mode: 'open'});
+      //console.log('This browser supports Shadow DOM.');
+    }
+    textDiv.shadowRoot.innerHTML = text;
+  } else {
+    textDiv.innerHTML = text;
+  }
   textDiv.style.textAlign = text.length > 50 ? 'left' : 'center';
   var y = Math.max(event.clientY - content.scrollTop, 0);
   var height = content.clientHeight;
@@ -265,6 +275,29 @@ function showDictDialog(word, text, dictname, others) {
     scrlDown.style.display = 'none';
     textDiv.style.paddingRight = '10px';
   }
+}
+
+//关闭查词窗口
+function closeDictDialog(event) {
+  //点击了一个单词链接，处理词条跳转
+  var target = event ? event.target || event.srcElement : null;
+  if (target && (target.tagName == 'A')) {
+    event.stopPropagation();
+    event.preventDefault();
+    var href = target.getAttribute('href') || '';
+    if (href.indexOf('https://kindleear/entry/') == 0) {
+      var word = href.substring(24);
+      if (word) {
+        translateWord(word);
+        return;
+      }
+    }
+  }
+
+  g_dictMode = false;
+  document.getElementById('tr-text').innerHTML = '';
+  document.getElementById('tr-result').style.display = 'none';
+  document.getElementById('corner-dict-hint').style.display = 'none';
 }
 
 //查词窗口向上滚动
@@ -676,28 +709,6 @@ function toggleDictMode() {
   document.getElementById('tr-result').style.display = 'none';
   document.getElementById('corner-dict-hint').style.display = g_dictMode ? 'block' : 'none';
   hideNavbar();
-}
-
-//关闭查词窗口
-function closeDictDialog(event) {
-  //处理词典内词条跳转
-  var target = event ? event.target || event.srcElement : null;
-  if (target && (target.tagName == 'A')) {
-    event.stopPropagation();
-    event.preventDefault();
-    var href = target.getAttribute('href') || '';
-    if (href.indexOf('https://kindleear/entry/') == 0) {
-      var word = href.substring(24);
-      if (word) {
-        translateWord(word);
-        return;
-      }
-    }
-  }
-
-  g_dictMode = false;
-  document.getElementById('tr-result').style.display = 'none';
-  document.getElementById('corner-dict-hint').style.display = 'none';
 }
 
 //根据是否使能墨水屏模式，设置相应的元素属性

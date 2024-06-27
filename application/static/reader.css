@@ -96,8 +96,8 @@ body::-webkit-scrollbar-thumb {
   cursor: pointer;
 }
 
-/* small screen, ink mode, pw3/voyage=1448x1072 */
-@media (max-width: 1072px) {
+/* small screen */
+@media (max-width: 599px) {
   ::-webkit-scrollbar {
     display: none;
     width: 0px;
@@ -121,7 +121,46 @@ body::-webkit-scrollbar-thumb {
   .pos-indicator {
     display: block;
   }
+  .nav-footer {
+    height: 60px;
+  }
   .nav-footer button {
+    margin: 0px 3px;
+    width: 30px;
+    height: 30px;
+  }
+}
+
+/* small screen, ink mode, pw3/voyage=1448x1072 */
+@media (min-width: 600px) and (max-width: 1072px) {
+  ::-webkit-scrollbar {
+    display: none;
+    width: 0px;
+    height: 0px;
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: transparent;
+    display: none;
+  }
+  .navbar {
+    display: none;
+    right: 20px;
+    bottom: 0px;
+  }
+  .container {
+    margin: 0px 10px 0px 0px;
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  .pos-indicator {
+    display: block;
+  }
+  .nav-footer {
+    height: 80px;
+  }
+  .nav-footer button {
+    margin: 0px 10px;
     width: 50px;
     height: 50px;
   }
@@ -141,7 +180,11 @@ body::-webkit-scrollbar-thumb {
   .pos-indicator, .nav-indicator, button#closeNavBtn {
     display: none;
   }
+  .nav-footer {
+    height: 80px;
+  }
   .nav-footer button {
+    margin: 0px 10px;
     width: 40px;
     height: 40px;
   }
@@ -239,7 +282,7 @@ body::-webkit-scrollbar-thumb {
   bottom: 0px;
   left: 0px;
   width: 99%;
-  height: 80px;
+  /* height: 80px; */ /* in media query */
   padding: 5px 5px 10px 5px;
   background-color: white;
   border-top: 1px solid #ccc;
@@ -257,10 +300,10 @@ body::-webkit-scrollbar-thumb {
   vertical-align: middle;
   text-align: center;
   padding: 0px;
-  margin: 0px 10px;
   border: none;
   background: none;
-  /*width: 50px;
+  /*margin: 0px 10px;
+  width: 50px;
   height: 50px;*/ /* in media query */
   cursor: pointer;
 }
@@ -289,7 +332,7 @@ body::-webkit-scrollbar-thumb {
   background-color: white;
 }
 .nav-popmenu-row {
-  height: 70px;
+  /*height: 70px;*/ /* in media query */
   width: 100%;
   border-bottom: 1px solid #ddd;
   vertical-align: middle;
@@ -307,6 +350,26 @@ body::-webkit-scrollbar-thumb {
   text-align: center;
   vertical-align: middle;
   font-size: 0.9em;
+}
+@media (max-height: 499px) {
+  .nav-popmenu-row {
+    height: auto;
+  }
+}
+@media (min-height: 500px) and (max-height: 767px) {
+  .nav-popmenu-row {
+    height: 60px;
+  }
+}
+@media (min-height: 768px) and (max-height: 1023px) {
+  .nav-popmenu-row {
+    height: 80px;
+  }
+}
+@media (min-height: 1024px) {
+  .nav-popmenu-row {
+    height: 100px;
+  }
 }
 
 .tr-result {

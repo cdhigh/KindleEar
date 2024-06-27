@@ -73,12 +73,14 @@ def LoginPost():
             user.custom = custom
             user.save()
         
-        if not user.cfg('sender') or (nameHash == pwdHash):
+        if next_url:
+            url = next_url
+        elif not user.cfg('sender') or (nameHash == pwdHash):
             url = url_for('bpAdmin.AdminAccountChange', name=name)
         elif not user.cfg('kindle_email'):
             url = url_for("bpSettings.Settings")
         else:
-            url = next_url if next_url else url_for("bpLogs.Mylogs")
+            url = url_for("bpLogs.Mylogs")
         default_log.info(f"Login event: {name}")
         return redirect(url)
     else:  #账号或密码错
