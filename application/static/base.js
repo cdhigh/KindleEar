@@ -968,7 +968,7 @@ function DeleteUploadRecipe(id, title) {
   });
 }
 
-//在页面下发插入bookmarklet
+//在页面下方插入bookmarklet
 function insertBookmarkletGmailThis(subscribeUrl, mailPrefix) {
   var parser = $('<a>', {href: subscribeUrl});
   var host = parser.prop('hostname');

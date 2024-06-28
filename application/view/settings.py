@@ -3,6 +3,7 @@
 #设置页面
 #Author: cdhigh <https://github.com/cdhigh>
 import os, textwrap
+from urllib.parse import urlparse
 from flask import Blueprint, render_template, request, redirect, session, current_app as app
 from flask_babel import gettext as _
 from calibre.customize.profiles import output_profiles
@@ -200,16 +201,19 @@ def SetLang(langCode):
     if langCode not in supported_languages:
         langCode = "en"
     session['langCode'] = langCode
-    url = request.args.get('next', '/')
+    url = request.args.get('next', '/').replace('\\', '')
+    parts = urlparse(url)
+    if parts.netloc or parts.scheme:
+        url = '/'
     return redirect(url)
-
+    
 #Babel选择显示哪种语言的回调函数
 def get_locale():
     try:
-        langCode = session.get('langCode')
+        langCode = session.get('langCode') or request.accept_languages.best_match(supported_languages)
     except: #Working outside of request context
         langCode = 'en'
-    return langCode if langCode else request.accept_languages.best_match(supported_languages)
+    return langCode or ''
 
 #各种语言的语种代码和文字描述的对应关系
 def LangMap():

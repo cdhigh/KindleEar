@@ -361,17 +361,11 @@ body::-webkit-scrollbar-thumb {
     height: 60px;
   }
 }
-@media (min-height: 768px) and (max-height: 1023px) {
+@media (min-height: 768px) {
   .nav-popmenu-row {
     height: 80px;
   }
 }
-@media (min-height: 1024px) {
-  .nav-popmenu-row {
-    height: 100px;
-  }
-}
-
 .tr-result {
   position: absolute;
   top: 50%;

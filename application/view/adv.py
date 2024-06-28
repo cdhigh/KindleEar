@@ -5,6 +5,7 @@
 import re, io, textwrap, json
 from urllib.parse import unquote, urljoin, urlparse
 from bs4 import BeautifulSoup
+from html import escape
 from flask import Blueprint, url_for, render_template, redirect, session, send_file, abort, current_app as app
 from flask_babel import gettext as _
 from PIL import Image
@@ -456,7 +457,7 @@ def DbImage(id_: str, user: KeUser):
 @login_required()
 def AdvOAuth2(authType: str, user: KeUser):
     if authType.lower() != 'pocket':
-        return 'Auth Type ({}) Unsupported!'.format(authType)
+        return 'Auth Type ({}) Unsupported!'.format(escape(authType))
         
     cbUrl = urljoin(app.config['APP_DOMAIN'], '/oauth2cb/pocket?redirect={}'.format(url_for("bpAdv.AdvArchive")))
     pocket = Pocket(app.config['POCKET_CONSUMER_KEY'], cbUrl)
@@ -475,7 +476,7 @@ def AdvOAuth2(authType: str, user: KeUser):
 @login_required()
 def AdvOAuth2Callback(authType: str, user: KeUser):
     if authType.lower() != 'pocket':
-        return 'Auth Type ({}) Unsupported!'.format(authType)
+        return 'Auth Type ({}) Unsupported!'.format(escape(authType))
         
     pocket = Pocket(app.config['POCKET_CONSUMER_KEY'])
     request_token = session.get('pocket_request_token', '')

@@ -28,8 +28,8 @@ class HeuristicProcessor:
         self.linereg = re.compile('(?<=<p).*?(?=</p>)', re.IGNORECASE|re.DOTALL)
         self.blankreg = re.compile(r'\s*(?P<openline><p(?!\sclass=\"(softbreak|whitespace)\")[^>]*>)\s*(?P<closeline></p>)', re.IGNORECASE)
         self.anyblank = re.compile(r'\s*(?P<openline><p[^>]*>)\s*(?P<closeline></p>)', re.IGNORECASE)
-        self.multi_blank = re.compile(r'(\s*<p[^>]*>\s*</p>(\s*<div[^>]*>\s*</div>\s*)*){2,}(?!\s*<h\d)', re.IGNORECASE)
-        self.any_multi_blank = re.compile(r'(\s*<p[^>]*>\s*</p>(\s*<div[^>]*>\s*</div>\s*)*){2,}', re.IGNORECASE)
+        self.multi_blank = re.compile(r'(\s*<p[^>]*>\s*</p>(?:\s*<div[^>]*>\s*</div>\s*)*){2,}(?!\s*<h\d)', re.IGNORECASE)
+        self.any_multi_blank = re.compile(r'(\s*<p[^>]*>\s*</p>(?:\s*<div[^>]*>\s*</div>\s*)*){2,}', re.IGNORECASE)
         self.line_open = (
             r"<(?P<outer>p|div)[^>]*>\s*(<(?P<inner1>font|span|[ibu])[^>]*>)?\s*"
             r"(<(?P<inner2>font|span|[ibu])[^>]*>)?\s*(<(?P<inner3>font|span|[ibu])[^>]*>)?\s*")
@@ -500,10 +500,10 @@ class HeuristicProcessor:
             em = base_em + (em_per_line * lines)
             if to_merge.find('whitespace'):
                 newline = self.any_multi_blank.sub('\n<p class="whitespace'+str(int(em * 10))+
-                                                   '" style="text-align:center; margin-top:'+str(em)+'em"> </p>', match.group(0))
+                                                   '" style="text-align:center; margin-top:'+str(em)+'em"> </p>', to_merge)
             else:
                 newline = self.any_multi_blank.sub('\n<p class="softbreak'+str(int(em * 10))+
-                                                   '" style="text-align:center; margin-top:'+str(em)+'em"> </p>', match.group(0))
+                                                   '" style="text-align:center; margin-top:'+str(em)+'em"> </p>', to_merge)
             return newline
 
         html = self.any_multi_blank.sub(merge_matches, html)

@@ -41,28 +41,21 @@ def reader_route_preprocess(forAjax=False):
 def ReaderRoute():
     userName = request.args.get('username')
     password = request.args.get('password')
-    key = request.args.get('key')
-    user = get_login_user()
+    
     #为了方便在墨水屏上使用，如果没有登录的话，可以使用查询字符串传递用户名和密码
-    if not user and userName:
+    if userName and password:
         user = KeUser.get_or_none(KeUser.name == userName)
-        if user:
-            isValidKey = key and (key == user.share_links.get('key'))
-            try:
-                isValidPassword = password and (user.passwd_hash == user.hash_text(password))
-                if isValidKey or isValidPassword:
-                    session['login'] = 1
-                    session['userName'] = userName
-                    session['role'] = 'admin' if userName == app.config['ADMIN_NAME'] else 'user'
-                else:
-                    user = None
-            except Exception as e:
-                default_log.warning(f"Failed to hash password and username: {e}")
-                user = None
+        if user and user.verify_password(password):
+            session['login'] = 1
+            session['userName'] = userName
+            session['role'] = 'admin' if userName == app.config['ADMIN_NAME'] else 'user'
+        else:
+            time.sleep(5) #防止暴力破解
+            user = None
+    else:
+        user = get_login_user()
 
     if not user:
-        if userName and (password or key):
-            time.sleep(5) #防止暴力破解
         return redirect(url_for("bpLogin.Login", next=url_for('bpReader.ReaderRoute')))
 
     oebDir = app.config['EBOOK_SAVE_DIR']
@@ -78,10 +71,8 @@ def ReaderRoute():
     initArticle = url_for('bpReader.ReaderArticleNoFoundRoute', tips='')
     params = user.cfg('reader_params')
     shareKey = user.share_links.get('key')
-    if (get_locale() or '').startswith('zh'):
-        helpPage = 'https://cdhigh.github.io/KindleEar/Chinese/reader.html'
-    else:
-        helpPage = 'https://cdhigh.github.io/KindleEar/English/reader.html'
+    docLang = 'Chinese' if get_locale().startswith('zh') else 'English'
+    helpPage = f'https://cdhigh.github.io/KindleEar/{docLang}/reader.html'
     return render_template('reader.html', oebBooks=oebBooks, initArticle=initArticle, params=params,
         shareKey=shareKey, comicTitle=comicTitle, helpPage=helpPage)
 
@@ -135,6 +126,8 @@ def ReaderDeletePost(user: KeUser, userDir: str):
         return _("Some parameters are missing or wrong.")
 
     for book in books.split('|'):
+        if '..' in book: #防范文件系统路径攻击
+            continue
         bkDir = os.path.join(userDir, book)
         dateDir = os.path.dirname(bkDir)
         if os.path.exists(bkDir):
@@ -325,6 +318,9 @@ def GetWordSuggestions(hObj, word) -> list:
 
 #将一个特定的文章制作成电子书推送
 def PushSingleArticle(src: str, title: str, user: KeUser, userDir: str, language: str):
+    if '..' in src:
+        return _('Failed to push: {}').format('insecurity path expression')
+
     path = os.path.join(userDir, src).replace('\\', '/')
     try:
         with open(path, 'r', encoding='utf-8') as f:

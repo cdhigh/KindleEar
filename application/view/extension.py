@@ -4,6 +4,7 @@
 #Author: cdhigh<https://github.com/cdhigh>
 import json, re
 from urllib.parse import unquote, urljoin
+from html import escape
 from bs4 import BeautifulSoup
 from flask import Blueprint, request, make_response, current_app as app
 from flask_babel import gettext as _
@@ -28,7 +29,7 @@ def ExtRemoveJsRoute():
     url = args.get('url')
     user = KeUser.get_or_none(KeUser.name == userName)
     if not user or user.share_links.get('key') != key:
-        return HTML_TPL.format(_("The username '{}' does not exist.").format(userName))
+        return HTML_TPL.format(_("The username '{}' does not exist.").format(escape(userName)))
     elif not url:
         return HTML_TPL.format(_("Some parameters are missing or wrong."))
 
@@ -44,7 +45,7 @@ def ExtRemoveJsRoute():
         resp.headers['Access-Control-Allow-Origin'] = '*' #允许跨域访问CSS/FONT之类的
         return resp
     else:
-        return HTML_TPL.format(GetRespErrorInfo(resp, url))
+        return HTML_TPL.format(GetRespErrorInfo(resp, escape(url)))
 
 
 #接受扩展程序的请求，下载一个页面，将js全部去掉，根据特定的规则提取正文内容，然后返回
@@ -70,7 +71,7 @@ def ExtRenderWithRules():
     opener = UrlOpener()
     resp = opener.open(unquote(url))
     if resp.status_code != 200:
-        return HTML_TPL.format(GetRespErrorInfo(resp, url))
+        return HTML_TPL.format(GetRespErrorInfo(resp, escape(url)))
 
     encoding = resp.encoding or resp.apparent_encoding or 'utf-8'
     rawHtml = resp.text

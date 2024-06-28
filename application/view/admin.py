@@ -158,63 +158,52 @@ def AdminAccountChangePost(name: str, user: KeUser):
         elif (p1 or p2) and (p1 != p2):
             tips = _("The two new passwords are dismatch.")
         else:
-            try:
-                if p1 or p2:
-                    dbItem.passwd_hash = dbItem.hash_text(p1)
-            except:
-                tips = _("The password includes non-ascii chars.")
+            if p1 and p2: #只有提供了两个密码才修改数据库中保存的密码
+                dbItem.passwd_hash = dbItem.hash_text(p1)
+            
+            dbItem.expiration_days = expiration
+            if expiration:
+                dbItem.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
             else:
-                dbItem.expiration_days = expiration
-                if expiration:
-                    dbItem.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
-                else:
-                    dbItem.expires = None
-                if smType == 'admin':
-                    dbItem.send_mail_service = {'service': 'admin'}
-                elif dbItem.send_mail_service.get('service') == 'admin': #从和管理员一致变更为独立设置
-                    dbItem.send_mail_service = {}
-                dbItem.set_cfg('email', email)
-                dbItem.save()
-                tips = _("Change success.")
+                dbItem.expires = None
+            if smType == 'admin':
+                dbItem.send_mail_service = {'service': 'admin'}
+            elif dbItem.send_mail_service.get('service') == 'admin': #从和管理员一致变更为独立设置
+                dbItem.send_mail_service = {}
+            dbItem.set_cfg('email', email)
+            dbItem.save()
+            tips = _("Change success.")
     
     return render_template('user_account.html', tips=tips, formTitle=_('Edit account'), 
         submitTitle=_('Change'), user=dbItem, tab='admin')
 
 #修改一个账号的密码，返回执行结果字符串
 def ChangePassword(user, orgPwd, p1, p2, email, shareKey):
-    try:
-        oldPwd = user.hash_text(orgPwd)
-        newPwd = user.hash_text(p1)
-    except:
-        return _("The password includes non-ascii chars.")
-
-    tips = _("Changes saved successfully.")
     if not email or not shareKey:
         tips = _("Some parameters are missing or wrong.")
     elif p1 != p2:
         tips = _("The two new passwords are dismatch.")
+    elif any((orgPwd, p1, p2)) and not user.verify_password(orgPwd):
+        #如果不修改密码，则三个密码都必须为空，有任何一个不为空，都表示要修改密码
+        tips = _("The old password is wrong.")
     else:
-        if not (orgPwd or p1 or p2): # 如果不修改密码，则三个密码都必须为空
-            newPwd = user.passwd_hash
-            oldPwd = user.passwd_hash
+        tips = _("Changes saved successfully.")
 
-        if user.passwd_hash != oldPwd:
-            tips = _("The old password is wrong.")
-        else:
-            user.passwd_hash = newPwd
-            user.set_cfg('email', email)
-            shareLinks = user.share_links
-            shareLinks['key'] = shareKey
-            user.share_links = shareLinks
-            if user.name == app.config['ADMIN_NAME']: #如果管理员修改email，也同步更新其他用户的发件地址
+        if any((orgPwd, p1, p2)):
+            user.passwd_hash = user.hash_text(p1)
+        user.set_cfg('email', email)
+        shareLinks = user.share_links
+        shareLinks['key'] = shareKey
+        user.share_links = shareLinks
+        if user.name == app.config['ADMIN_NAME']: #如果管理员修改email，也同步更新其他用户的发件地址
+            user.set_cfg('sender', email)
+            SyncSenderAddress(user)
+        else: #其他人修改自己的email，根据设置确定是否要同步到发件地址
+            sm_service = user.send_mail_service
+            if not sm_service or sm_service.get('service', 'admin') != 'admin':
                 user.set_cfg('sender', email)
-                SyncSenderAddress(user)
-            else: #其他人修改自己的email，根据设置确定是否要同步到发件地址
-                sm_service = user.send_mail_service
-                if not sm_service or sm_service.get('service', 'admin') != 'admin':
-                    user.set_cfg('sender', email)
                     
-            user.save()
+        user.save()
     return tips
 
 #将管理员的email同步到所有用户

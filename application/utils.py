@@ -177,15 +177,68 @@ def xml_unescape(txt):
     txt = txt.replace("&apos;", "'")
     return txt
 
-#-----------以下几个函数为安全相关的
-def new_secret_key(length=12):
+#-----------以下为安全相关的工具函数--------------------
+
+#使用此密码管理器逐步将以前的md5哈希的密码迁移到sha256密码
+#尽管sha256不是密码哈希算法，但是已经足够好(配合加盐16字节)
+#PBKDF2在3.10之后默认不提供，其他更好的bcrypt/scrypt等不是标准库
+class PasswordManager:
+    def __init__(self, secretKey: str):
+        """secretKey: 密码的salt"""
+        self.secretKey = secretKey
+        #迭代计算次数，大多数免费VPS性能不强，次数太多了影响正常使用体验
+        #何况sha256不是专门的密码哈希算法，单纯增加迭代次数带来的安全性提升有限
+        self.iterations = 1000
+    
+    def migrate_password(self, stored_hash: str, password: str) -> str:
+        """密码校验和哈希迁移函数，校验成功返回sha256哈希，否则返回空串
+        stored_hash: 数据库保存的密码哈希值
+        password: 需要校验的密码"""
+        password = password or ''
+        if len(stored_hash) == 32:  #MD5哈希长度为32，sha256哈希长度为64(base64后44字节)
+            pwd_hash = ''
+            try:
+                pwd_hash = hashlib.md5((password + self.secretKey).encode('utf-8')).hexdigest()
+            except Exception as e:
+                print(f'PasswordManager migrate_password hash failed: {e}')
+            return self.create_hash(password) if pwd_hash == stored_hash else ''
+        else:
+            return stored_hash if self.verify_password(stored_hash, password) else ''
+
+    def create_hash(self, password: str) -> str:
+        """创建密码的sha256哈希结果，返回base64字符串"""
+        hash_value = self._sha256_hash(password)
+        return base64.b64encode(hash_value).decode('utf-8')
+
+    def verify_password(self, stored_hash: str, password: str) -> bool:
+        """使用sha256算法校验密码是否正确
+        stored_hash: 数据库保存的密码哈希值
+        password: 需要校验的密码"""
+        try:
+            decoded = base64.b64decode(stored_hash or '')
+            return self._sha256_hash(password) == decoded
+        except Exception as e:
+            print(f'PasswordManager b64decode password failed: {e}')
+            return False
+        
+    def _sha256_hash(self, password: str) -> bytes:
+        """计算密码的hash值，返回bytes"""
+        result = ((password or '') + self.secretKey).encode('utf-8')
+        for _ in range(self.iterations):
+            result = hashlib.sha256(result).digest()
+        return result
+
+def new_secret_key(length=16):
+    """生成一个安全密钥，为了更通用，只包含数字和ASCII大小写字母，不包含特殊字符"""
     allchars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz'
     return ''.join([secrets.choice(allchars) for i in range(length)])
 
 def ke_encrypt(txt: str, key: str):
+    """简单可逆加密"""
     return _ke_auth_code(txt, key, 'encode')
     
 def ke_decrypt(txt: str, key: str):
+    """简单可逆解密"""
     return _ke_auth_code(txt, key, 'decode')
 
 def _ke_auth_code(txt: str, key: str, act: str='decode'):

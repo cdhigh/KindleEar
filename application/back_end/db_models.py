@@ -3,9 +3,9 @@
 #数据库结构定义，使用这个文件隔离sql和nosql的差异，尽量向外提供一致的接口
 #Visit <https://github.com/cdhigh/KindleEar> for the latest version
 #Author: cdhigh <https://github.com/cdhigh>
-import os, sys, random, hashlib, datetime
+import os, sys, random, datetime
 from operator import attrgetter
-from ..utils import ke_encrypt, ke_decrypt, tz_now
+from ..utils import PasswordManager, ke_encrypt, ke_decrypt, tz_now
 
 if os.getenv('DATABASE_URL', '').startswith(("datastore", "mongodb", "redis", "pickle")):
     from .db_models_nosql import *
@@ -136,12 +136,20 @@ class KeUser(MyBaseModel): # kindleEar User
         return srv
 
     #使用自身的密钥加密和解密字符串
-    def encrypt(self, txt):
+    def encrypt(self, txt) -> str:
         return ke_encrypt((txt or ''), self.cfg('secret_key')) #type:ignore
-    def decrypt(self, txt):
+    def decrypt(self, txt) -> str:
         return ke_decrypt((txt or ''), self.cfg('secret_key')) #type:ignore
-    def hash_text(self, txt):
-        return hashlib.md5((txt + self.cfg('secret_key')).encode('utf-8')).hexdigest()
+    def hash_text(self, txt) -> str:
+        return PasswordManager(self.cfg('secret_key')).create_hash(txt)
+    def verify_password(self, password) -> bool:
+        new_hash = PasswordManager(self.cfg('secret_key')).migrate_password(self.passwd_hash, password)
+        if not new_hash:
+            return False
+        if new_hash != self.passwd_hash: #迁移至更安全的hash
+            self.passwd_hash = new_hash
+            self.save()
+        return True
 
     #自定义字典的设置
     def set_custom(self, item, value):

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-#登录页面
+#登录页面和相关登录函数，包括重置密码，新建账号等
 #Author: cdhigh <https://github.com/cdhigh>
-import hashlib, datetime, time, json
+import datetime, time, json
 from urllib.parse import urljoin, urlencode
 from flask import Blueprint, url_for, render_template, redirect, session, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import send_html_mail
-from ..utils import new_secret_key, hide_email
+from ..utils import new_secret_key, hide_email, PasswordManager
 
 bpLogin = Blueprint('bpLogin', __name__)
 
@@ -46,21 +46,8 @@ def LoginPost():
     
     adminName = app.config['ADMIN_NAME']
     isFirstTime = CreateAccountIfNotExist(adminName) #确认管理员账号是否存在
-    pwdHash = ''
-    nameHash = ''
     user = KeUser.get_or_none(KeUser.name == name)
-    if user:
-        try:
-            pwdHash = user.hash_text(passwd)
-            nameHash = user.hash_text(name)
-        except Exception as e:
-            default_log.warning(f"Failed to hash password and username: {str(e)}")
-            user = None
-        else:
-            if user.passwd_hash != pwdHash:
-                user = None
-    
-    if user:
+    if user and user.verify_password(passwd):
         session['login'] = 1
         session['userName'] = name
         session['role'] = 'admin' if name == adminName else 'user'
@@ -68,14 +55,12 @@ def LoginPost():
             user.expires = datetime.datetime.utcnow() + datetime.timedelta(days=user.expiration_days)
             user.save()
         if 'resetpwd' in user.custom: #成功登录后清除复位密码的设置
-            custom = user.custom
-            custom.pop('resetpwd', None)
-            user.custom = custom
+            user.set_custom('resetpwd', None)
             user.save()
         
         if next_url:
             url = next_url
-        elif not user.cfg('sender') or (nameHash == pwdHash):
+        elif not user.cfg('sender') or (name == passwd):
             url = url_for('bpAdmin.AdminAccountChange', name=name)
         elif not user.cfg('kindle_email'):
             url = url_for("bpSettings.Settings")
@@ -103,15 +88,10 @@ def CreateAccountIfNotExist(name, password=None, email='', sender=None, sm_servi
         return False
 
     password = password if password else name
-    secretKey = new_secret_key()
-    shareKey = new_secret_key(length=4)
-    try:
-        pwdHash = hashlib.md5((password + secretKey).encode('utf-8')).hexdigest()
-        nameHash = hashlib.md5((name + secretKey).encode('utf-8')).hexdigest() #避免名字非法
-    except Exception as e:
-        default_log.warning(f'CreateAccountIfNotExist failed to hash password and name: {str(e)}')
-        return False
-
+    secretKey = new_secret_key(length=16)
+    shareKey = new_secret_key(length=6)
+    pwdHash = PasswordManager(secretKey).create_hash(password)
+    
     adminName = app.config['ADMIN_NAME']
     if sm_service is None:
         sm_service = {}
@@ -280,15 +260,10 @@ def reset_pwd_final_step(user, token, new_p1, new_p2):
     pre_time = pre_set.get('expires') or (now - datetime.timedelta(hours=1)).timestamp()
     if (token == pre_set.get('token')) and (now.timestamp() < pre_time):
         if new_p1 == new_p2:
-            try:
-                pwd = user.hash_text(new_p1)
-            except:
-                tips = _("The password includes non-ascii chars.")
-            else:
-                user.set_custom('resetpwd', None)
-                user.passwd_hash = pwd
-                user.save()
-                return 'ok'
+            user.set_custom('resetpwd', None)
+            user.passwd_hash = user.hash_text(new_p1)
+            user.save()
+            return 'ok'
         else:
             return _("The two new passwords are dismatch.")
     else:
