@@ -58,7 +58,7 @@ def ExtRenderWithRules():
     ruleStr = args.get('rules', '')
     user = KeUser.get_or_none(KeUser.name == userName)
     if not user or user.share_links.get('key') != key:
-        return HTML_TPL.format(_("The username '{}' does not exist.").format(userName))
+        return HTML_TPL.format(_("The username '{}' does not exist.").format(escape(userName)))
     elif not url or not ruleStr:
         return HTML_TPL.format(_("Some parameters are missing or wrong."))
 

@@ -59,7 +59,8 @@ def LoginPost():
             user.save()
         
         if next_url:
-            url = next_url
+            parts = urlparse(next_url)
+            url = url_for("bpLogs.Mylogs") if parts.netloc or parts.scheme else next_url
         elif not user.cfg('sender') or (name == passwd):
             url = url_for('bpAdmin.AdminAccountChange', name=name)
         elif not user.cfg('kindle_email'):
