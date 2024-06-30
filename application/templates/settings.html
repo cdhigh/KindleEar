@@ -248,7 +248,9 @@
     </p>
     {% else -%}
     <p style="color:red;">
-      {{_("You have not yet set up your email address. Please go to the 'Admin' page to add your email address firstly.")}}
+      {% autoescape off -%}
+      {{_("You have not yet set up your email address. Please go to the %(admin)s page to add your email address firstly.", admin='<a href="/account/change">' + _("Admin") + '</a>')|safe}}
+      {% endautoescape -%}
     </p>
     {% endif %}
     <hr/>

@@ -14,6 +14,9 @@
   {% if tips -%}
   <div class="notice-box">{{tips|safe}}</div>
   {% endif -%}
+  {% if demoMode -%}
+  <div class="notice-box">{{_("You are in DEMO mode. Logging out will delete all data.")}}</div>
+  {% endif %}
   <form action="" method="POST" class="pure-form pure-form-aligned">
     <fieldset>
       <legend>{{_("Login")}}</legend>

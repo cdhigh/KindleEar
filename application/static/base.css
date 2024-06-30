@@ -209,8 +209,15 @@ button {
 }
 
 .banner-head h1 {
-    margin: 0 0 .67em;
+    margin: 0 0 .67em 0;
     font-size: 3.8em;
+    color: white;
+    font-weight: 200;
+    text-shadow: 0 1px 1px black;
+}
+.banner-head h2 {
+    margin: 0 0 .67em 0;
+    font-size: 1.5em;
     color: white;
     font-weight: 200;
     text-shadow: 0 1px 1px black;

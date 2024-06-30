@@ -22,17 +22,19 @@ def Login():
     # 则增加一个管理员帐号 ADMIN_NAME，密码 ADMIN_NAME，后续可以修改密码
     tips = ''
     adminName = app.config['ADMIN_NAME']
-    next_url = request.args.get('next', '')
+    nextUrl = request.args.get('next', '')
     if CreateAccountIfNotExist(adminName):
         tips = (_("Please use {}/{} to login at first time.").format(adminName, adminName))
     
-    return render_template('login.html', tips=tips, next=next_url)
+    demoMode = (app.config['DEMO_MODE'] == 'yes')
+    return render_template('login.html', tips=tips, next=nextUrl, demoMode=demoMode)
 
 @bpLogin.post("/login")
 def LoginPost():
     name = request.form.get('username', '').strip()
     passwd = request.form.get('password', '')
-    next_url = request.form.get('next', '')
+    nextUrl = request.form.get('next', '')
+    demoMode = (app.config['DEMO_MODE'] == 'yes')
     tips = ''
     if not name:
         tips = _("Username is empty.")
@@ -42,7 +44,7 @@ def LoginPost():
         tips = _("The username includes unsafe chars.")
 
     if tips:
-        return render_template('login.html', tips=tips, next=next_url)
+        return render_template('login.html', tips=tips, next=nextUrl, demoMode=demoMode)
     
     adminName = app.config['ADMIN_NAME']
     isFirstTime = CreateAccountIfNotExist(adminName) #确认管理员账号是否存在
@@ -58,9 +60,9 @@ def LoginPost():
             user.set_custom('resetpwd', None)
             user.save()
         
-        if next_url:
-            parts = urlparse(next_url)
-            url = url_for("bpLogs.Mylogs") if parts.netloc or parts.scheme else next_url
+        if nextUrl:
+            parts = urlparse(nextUrl)
+            url = url_for("bpLogs.Mylogs") if parts.netloc or parts.scheme else nextUrl
         elif not user.cfg('sender') or (name == passwd):
             url = url_for('bpAdmin.AdminAccountChange', name=name)
         elif not user.cfg('kindle_email'):
@@ -80,7 +82,7 @@ def LoginPost():
         session.pop('login', None)
         session.pop('userName', None)
         session.pop('role', None)
-        return render_template('login.html', userName=name, tips=tips, next=next_url)
+        return render_template('login.html', userName=name, tips=tips, next=nextUrl, demoMode=demoMode)
 
 #判断账号是否存在
 #如果账号不存在，创建一个，并返回True，否则返回False
@@ -116,6 +118,8 @@ def Logout():
     session.pop('login', None)
     session.pop('userName', None)
     session.pop('role', None)
+    if app.config['DEMO_MODE'] == 'yes':
+        delete_database_all_data()
     return redirect('/')
 
 #for ajax parser, if login required, retuan a dict 

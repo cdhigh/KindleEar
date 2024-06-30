@@ -6,7 +6,11 @@
 {% block content -%}
 <div class="banner">
   <div class="banner-head">
+    {% if demoMode -%}
+    <h2>{{_("You are in DEMO mode. Logging out will delete all data.")}}</h2>
+    {% else -%}
     <h1>{{_("Sharing Joyful News Every Step of the Way")}}</h1>
+    {% endif -%}
       {% if session.get('userName') -%}
       <a class="pure-button pure-button-primary" href="/my" style="margin-bottom: 10px;">{{_("Feeds")}}</a>
       <a class="pure-button pure-button-primary" href="/logout" style="margin-left:.6em; margin-bottom: 10px;">{{_('Logout')}}</a>

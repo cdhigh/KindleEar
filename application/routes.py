@@ -11,7 +11,8 @@ bpHome = Blueprint('bpHome', __name__)
 
 @bpHome.route('/')
 def Home():
-    return render_template('home.html')
+    demoMode = (current_app.config['DEMO_MODE'] == 'yes')
+    return render_template('home.html', demoMode=demoMode)
 
 @bpHome.route('/images/<path:image_file>')
 def ImageFileRoute(image_file):

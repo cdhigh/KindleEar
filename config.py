@@ -67,3 +67,6 @@ HIDE_MAIL_TO_LOCAL = "yes"
 
 #'debug', 'info', 'warning', 'error', 'critical'
 LOG_LEVEL = "warning"
+
+#if in demo mode
+DEMO_MODE = 'no'

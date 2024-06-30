@@ -295,7 +295,10 @@ function closeDictDialog(event) {
   }
 
   g_dictMode = false;
-  document.getElementById('tr-text').innerHTML = '';
+  var textDiv = document.getElementById('tr-text');
+  if (!textDiv.shadowRoot) { //如果是shadow dom，则不清除之前的翻译，让下一次的CSS渲染快一点
+    textDiv.innerHTML = '';
+  }
   document.getElementById('tr-result').style.display = 'none';
   document.getElementById('corner-dict-hint').style.display = 'none';
 }

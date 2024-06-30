@@ -325,3 +325,12 @@ def create_database_tables():
         AppInfo.set_value(AppInfo.dbSchemaVersion, appVer)
     
     return 'Created database tables successfully'
+
+#删除所有表格的所有数据，相当于恢复出厂设置
+def delete_database_all_data():
+    for model in [KeUser, UserBlob, Recipe, BookedRecipe, DeliverLog, WhiteList,
+        SharedRss, SharedRssCategory, LastDelivered, InBox, AppInfo]:
+        try:
+            model.delete().execute()
+        except:
+            pass

@@ -109,7 +109,13 @@ def AdminDeleteAccountAjax(user: KeUser):
         dbItem.erase_traces() #删除账号订阅的书，白名单，过滤器等，完全的清理其痕迹
         dbItem.delete_instance()
         return {'status': 'ok'}
-    
+
+#修改自己的密码
+@bpAdmin.route("/account/change", endpoint='AdminAccountChangeSelf')
+@login_required()
+def AdminAccountChangeSelf(user: KeUser):
+    return redirect(url_for('bpAdmin.AdminAccountChange', name=user.name), code=307)
+
 #修改密码，可能是修改自己的密码或管理员修改其他用户的密码
 @bpAdmin.route("/account/change/<name>", endpoint='AdminAccountChange')
 @login_required()
