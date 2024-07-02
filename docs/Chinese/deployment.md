@@ -178,9 +178,9 @@ sudo docker compose -f docker-compose-nginx.yml up -d
 4. 使用docker-compose的版本更新方法      
 
 ```bash
-sudo docker compose pull
-sudo docker compose up -d --remove-orphans
-sudo docker image prune
+sudo docker compose pull && \
+sudo docker compose up -d --remove-orphans && \
+sudo docker image prune -f
 ```
 
 

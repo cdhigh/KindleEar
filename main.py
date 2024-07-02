@@ -25,6 +25,7 @@ builtins.__dict__['default_log'] = calibre_log
 builtins.__dict__['appDir'] = appDir
 builtins.__dict__['appVer'] = __Version__
 sys.path.insert(0, os.path.join(appDir, 'application', 'lib'))
+sys.path.insert(0, appDir)
 
 #合并config.py配置信息到os.environ，如果对应环境变量存在，则不会覆盖
 def set_env():

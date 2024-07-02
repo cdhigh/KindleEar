@@ -3,7 +3,7 @@
 #登录页面和相关登录函数，包括重置密码，新建账号等
 #Author: cdhigh <https://github.com/cdhigh>
 import datetime, time, json
-from urllib.parse import urljoin, urlencode
+from urllib.parse import urljoin, urlencode, urlparse
 from flask import Blueprint, url_for, render_template, redirect, session, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *

@@ -183,9 +183,9 @@ If HTTPS for Nginx is needed, copy the SSL certificate fullchain.pem/privkey.pem
 4. Method for Updating Using Docker Compose     
 
 ```bash
-sudo docker compose pull
-sudo docker compose up -d --remove-orphans
-sudo docker image prune
+sudo docker compose pull && \
+sudo docker compose up -d --remove-orphans && \
+sudo docker image prune -f
 ```
 
 
