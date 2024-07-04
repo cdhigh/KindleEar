@@ -53,6 +53,8 @@ function BuildSharedRssByLang() {
   var userLang = BrowserLanguage();
   var hasUserLangRss = false;
   var hasEnRss = false;
+  var langPick = $("#shared_rss_lang_pick");
+  langPick.empty();
   for (var idx = 0; idx < g_SharedRss.length; idx++) {
     var item = g_SharedRss[idx];
     lang = item.l ? item.l : 'und'; //l=language
@@ -73,21 +75,23 @@ function BuildSharedRssByLang() {
     if (!g_rssByLang[lang]) {
       g_rssByLang[lang] = [];
       var $newLangOpt = $('<option value="{0}">{1}</option>'.format(lang, LanguageName(lang)));
-      $("#shared_rss_lang_pick").append($newLangOpt);
+      langPick.append($newLangOpt);
     }
     g_rssByLang[lang].push(item);
   }
   //自动触发和用户浏览器同样语种的选项
   if (hasUserLangRss) {
-    $("#shared_rss_lang_pick").find("option[value='" + userLang + "']").attr("selected", true);
-    $("#shared_rss_lang_pick").val(userLang).trigger('change');
+    langPick.find("option[value='" + userLang + "']").attr("selected", true);
+    langPick.val(userLang).trigger('change');
   } else if (hasEnRss) { //如果有英语则选择英语源
-    $("#shared_rss_lang_pick").find("option[value='en']").attr("selected", true);
-    $("#shared_rss_lang_pick").val('en').trigger('change');
-  } else { //最后只能选择第一个语言
-    var firstChild = $("#shared_rss_lang_pick").children().first();
-    firstChild.attr("selected", true);
-    firstChild.trigger('change');
+    langPick.find("option[value='en']").attr("selected", true);
+    langPick.val('en').trigger('change');
+  } else { //否则选择第一个语言
+    var firstChild = langPick.children().first();
+    if (firstChild) {
+      firstChild.attr("selected", true);
+      firstChild.trigger('change');
+    }
   }
 }
 
