@@ -157,25 +157,33 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
 #在已订阅的Recipe或自定义RSS列表创建Recipe源码列表
 #返回一个字典，键名为title，元素为 [BookedRecipe, Recipe, src]
 def GetAllRecipeSrc(user, idList):
-    srcDict = {}
-    for bked in filter(bool, [BookedRecipe.get_or_none(BookedRecipe.recipe_id == id_) for id_ in idList]):
-        recipeId = bked.recipe_id
-        recipeType, dbId = Recipe.type_and_id(recipeId)
-        if recipeType == 'builtin':
-            bnInfo = GetBuiltinRecipeInfo(recipeId)
-            src = GetBuiltinRecipeSource(recipeId)
-            if bnInfo and src:
-                srcDict[bnInfo.get('title', '')] = [bked, bnInfo, src]
-            continue
-        
-        recipe = Recipe.get_by_id_or_none(dbId)
+    bkeds = []
+    for id_ in idList:
+        recipeType, dbId = Recipe.type_and_id(id_)
+        bked = BookedRecipe.get_or_none(BookedRecipe.recipe_id == id_)
+        #针对没有启用自定义RSS推送的情况，创建一个临时BookedRecipe对象但不保存到数据库
+        recipe = Recipe.get_by_id_or_none(dbId) if (not bked and (recipeType == 'custom')) else None
         if recipe:
+            bked = BookedRecipe(recipe_id=id_, separated=recipe.custom.get('separated', False),
+                user=user.name, title=recipe.title, description=recipe.description)
+        bkeds.append({'recipeId': id_, 'recipeType': recipeType, 'dbId': dbId, 'bked': bked, 
+            'recipe': recipe})
+
+    srcDict = {}
+    for item in bkeds:
+        recipe = item['recipe']
+        if item['recipeType'] == 'builtin':
+            bnInfo = GetBuiltinRecipeInfo(item['recipeId'])
+            src = GetBuiltinRecipeSource(item['recipeId'])
+            if bnInfo and src:
+                srcDict[bnInfo.get('title', '')] = [item['bked'], bnInfo, src]
+        elif recipe:
             title = recipe.title
-            if recipeType == 'upload': #上传的Recipe
-                srcDict[title] = [bked, recipe, recipe.src]
+            if item['recipeType'] == 'upload': #上传的Recipe
+                srcDict[title] = [item['bked'], recipe, recipe.src]
             else: #自定义RSS
                 src = GenerateRecipeSource(title, [(title, recipe.url)], user, isfulltext=recipe.isfulltext)
-                srcDict[title] = [bked, recipe, src]
+                srcDict[title] = [item['bked'], recipe, src]
     return srcDict
 
 #返回可用的mp3cat执行文件路径

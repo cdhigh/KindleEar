@@ -78,20 +78,31 @@ def MultiUserDelivery():
 #idList: recipe id列表，id格式：custom:xx,upload:xx,builtin:xx，为空则推送指定账号下所有订阅
 def SingleUserDelivery(userName: str, idList: list=None):
     user = KeUser.get_or_none(KeUser.name == userName)
-    if not user or not user.cfg('kindle_email'):
+    if not user or ('email' in user.cfg('delivery_mode') and not user.cfg('kindle_email')):
         return render_template('autoback.html', tips=_('The username does not exist or the email is empty.'))
 
-    sent = []
     #这里不判断特定账号是否已经订阅了指定的书籍，只要提供就推送
     if idList:
-        recipesToPush = list(filter(bool, map(user.get_booked_recipe, idList)))
+        toPush = []
+        for id_ in idList:
+            recipeType, dbId = Recipe.type_and_id(id_)
+            bked = user.get_booked_recipe(id_)
+            #如果没有启用自定义RSS推送
+            r = Recipe.get_by_id_or_none(dbId) if (not bked and (recipeType == 'custom')) else None
+            if r:
+                toPush.append({'id_': r.recipe_id, 'separated': r.custom.get('separated', False), 
+                    'title': r.title})
+            elif bked:
+                toPush.append({'id_': bked.recipe_id, 'separated': bked.separated, 'title': bked.title})
     else: #推送特定账号所有订阅的书籍
-        recipesToPush = user.get_booked_recipe()
+        toPush = [{'id_': r.recipe_id, 'separated': r.separated, 'title': r.title}
+            for r in user.get_booked_recipe()]
     
+    sent = []
     bkQueue = defaultdict(list)
-    for bkRecipe in recipesToPush: #BookedRecipe实例
-        queueOneBook(bkQueue, user, bkRecipe.recipe_id, bkRecipe.separated, reason='manual')
-        sent.append(f'<i>{bkRecipe.title}</i>')
+    for bked in toPush:
+        queueOneBook(bkQueue, user, bked['id_'], bked['separated'], reason='manual')
+        sent.append(f'<i>{bked["title"]}</i>')
     flushQueueToPush(bkQueue, reason='manual')
     
     if sent:

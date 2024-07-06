@@ -11,23 +11,30 @@
       {% if recipes|length == 0 -%}
         <div class="box">{{ _("There are no recipes subscribed") }}</div>
       {% endif -%}
-      {% set userName = session.get('userName', '') -%}
       {% for item in recipes -%}
       <label for="{{item.recipe_id}}" class="pure-checkbox box">
-        <input id="{{item.recipe_id}}" type="checkbox" class="deliver_now_rss_id" checked="1" onclick="UpdateDeliverLink('{{userName}}','{{deliveryKey}}');" />
+        <input id="{{item.recipe_id}}" type="checkbox" class="deliver_now_rss_id" checked="1" onclick="UpdateDeliverLink('{{user.name}}','{{deliveryKey}}');" />
         <span>{{item.title}}</span>{% if item.separated %}<sup>{{_('Sep')}}</sup>{%endif%}
       </label>
       {% endfor -%}
       {% if recipes|length > 0 -%}
       <div class="cornerControls" style="padding:.5em 0;text-align:center;">
-        <a onclick="SelectDeliverAll();UpdateDeliverLink('{{userName}}','{{deliveryKey}}');return false;" href="#" class="actionButton">{{_("Select all")}}</a>
-        <a onclick="SelectDeliverNone();UpdateDeliverLink('{{userName}}','{{deliveryKey}}');return false;" href="#" class="actionButton">{{_("Select none")}}</a>
+        <a onclick="SelectDeliverAll();UpdateDeliverLink('{{user.name}}','{{deliveryKey}}');return false;" href="#" class="actionButton">{{_("Select all")}}</a>
+        <a onclick="SelectDeliverNone();UpdateDeliverLink('{{user.name}}','{{deliveryKey}}');return false;" href="#" class="actionButton">{{_("Select none")}}</a>
       </div>
       {% endif -%}
     </div>
     <div style="text-align:center;">
-        <a href="/deliver?u={{userName}}&key={{deliveryKey}}" value="{{ _('Deliver') }}" id="deliverNowButton" class="pure-button pure-button-primary pure-input-rounded">{{ _('Deliver') }}</a>
+        <a href="/deliver?u={{user.name}}&key={{deliveryKey}}" value="{{ _('Deliver') }}" id="deliverNowButton" class="pure-button pure-button-primary pure-input-rounded">{{ _('Deliver') }}</a>
     </div>
   </fieldset>
 </div>
+{% endblock -%}
+{% block js -%}
+<script type="text/javascript">
+$(document).ready(function() {
+  SelectDeliverAll();
+  UpdateDeliverLink('{{user.name}}', '{{deliveryKey}}');
+});
+</script>
 {% endblock -%}

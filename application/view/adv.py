@@ -32,6 +32,12 @@ def adv_render_template(tpl, advCurr, **kwargs):
 @login_required()
 def AdvDeliverNow(user: KeUser):
     recipes = user.get_booked_recipe()
+    if user.cfg('enable_send') != 'all': #添加自定义RSS
+        rss = [BookedRecipe(recipe_id=r.recipe_id, separated=r.custom.get('separated', False),
+                user=user.name, title=r.title, description=r.description)
+                for r in user.all_custom_rss()]
+        recipes = rss + recipes
+        
     deliveryKey = app.config['DELIVERY_KEY']
     return adv_render_template('adv_delivernow.html', 'deliverNow', user=user, recipes=recipes,
         deliveryKey=deliveryKey)

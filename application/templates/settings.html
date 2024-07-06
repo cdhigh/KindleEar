@@ -32,7 +32,7 @@
       </div>
       <div class="pure-control-group">
         <label><em class="required">*</em> {{_("Kindle E-mail")}}</label>
-        <input type="email" name="kindle_email" value="{{user.cfg('kindle_email')}}" placeholder="{{_('Seperated by comma')}}" class="pure-u-1 pure-u-sm-1-2" required multiple />
+        <input type="email" name="kindle_email" value="{{user.cfg('kindle_email')}}" placeholder="{{_('Seperated by comma')}}" class="pure-u-1 pure-u-sm-1-2" multiple />
       </div>
       {% if g.allowReader -%}
       <div class="pure-control-group">
@@ -142,7 +142,7 @@
       <legend>{{_("Custom RSS")}}</legend>
       <div class="pure-control-group">
         <label><em class="required">*</em> {{_("Title")}}</label>
-        <input type="text" name="rss_title" value="{{ user.book_cfg('title') }}" required class="pure-u-1 pure-u-sm-1-2" />
+        <input type="text" name="rss_title" value="{{ user.book_cfg('title') }}" class="pure-u-1 pure-u-sm-1-2" />
       </div>
       <div class="pure-control-group">
         <label class="tooltip" data-msg="{{_('Sets the lookup dictionary')}}">{{_("Language")}}</label>

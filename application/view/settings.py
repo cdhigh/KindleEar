@@ -37,47 +37,36 @@ def Settings(user: KeUser):
 @login_required()
 def SettingsPost(user: KeUser):
     form = request.form
-    keMail = form.get('kindle_email', '').strip(';, ')
-    myTitle = form.get('rss_title')
+    base_config = user.base_config
+    book_config = user.book_config
 
-    send_mail_service = BuildSmSrvDict(user, form)
-    if not keMail:
-        tips = _("Kindle E-mail is requied!")
-    elif not myTitle:
-        tips = _("Title is requied!")
-    elif not send_mail_service:
-        tips = _("Some parameters are missing or wrong.")
-    else:
-        base_config = user.base_config
-        book_config = user.book_config
+    enable_send = form.get('enable_send')
+    base_config['enable_send'] = enable_send if enable_send in ('all', 'recipes') else ''
+    base_config['kindle_email'] = form.get('kindle_email', '').strip(';, ')
+    base_config['delivery_mode'] = form.get('delivery_mode', 'email') if app.config['EBOOK_SAVE_DIR'] else 'email'
+    base_config['webshelf_days'] = str_to_int(form.get('webshelf_days', '7'))
+    base_config['timezone'] = float(form.get('timezone', '0'))
+    user.send_time = int(form.get('send_time', '0'))
+    book_config['type'] = form.get('book_type', 'epub')
+    book_config['device'] = form.get('device_type', 'kindle')
+    book_config['title_fmt'] = form.get('title_fmt', '')
+    allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    user.send_days = [weekday for weekday, day in enumerate(allDays) if str_to_bool(form.get(day, ''))]
+    book_config['mode'] = form.get('book_mode', '')
+    book_config['rm_links'] = form.get('remove_hyperlinks', '')
+    book_config['author_fmt'] = form.get('author_format', '') #修正Kindle 5.9.x固件的bug【将作者显示为日期】
+    book_config['title'] = form.get('rss_title') or 'KindleEar'
+    book_config['language'] = form.get("book_language", "en")
+    book_config['oldest_article'] = int(form.get('oldest', 7))
+    book_config['time_fmt'] = form.get('time_fmt', '')
+    user.base_config = base_config
+    user.book_config = book_config
+    user.send_mail_service = BuildSmSrvDict(user, form)
+    user.save()
+    tips = _("Settings Saved!")
 
-        enable_send = form.get('enable_send')
-        base_config['enable_send'] = enable_send if enable_send in ('all', 'recipes') else ''
-        base_config['kindle_email'] = keMail
-        base_config['delivery_mode'] = form.get('delivery_mode', 'email') if app.config['EBOOK_SAVE_DIR'] else 'email'
-        base_config['webshelf_days'] = str_to_int(form.get('webshelf_days', '7'))
-        base_config['timezone'] = float(form.get('timezone', '0'))
-        user.send_time = int(form.get('send_time', '0'))
-        book_config['type'] = form.get('book_type', 'epub')
-        book_config['device'] = form.get('device_type', 'kindle')
-        book_config['title_fmt'] = form.get('title_fmt', '')
-        allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        user.send_days = [weekday for weekday, day in enumerate(allDays) if str_to_bool(form.get(day, ''))]
-        book_config['mode'] = form.get('book_mode', '')
-        book_config['rm_links'] = form.get('remove_hyperlinks', '')
-        book_config['author_fmt'] = form.get('author_format', '') #修正Kindle 5.9.x固件的bug【将作者显示为日期】
-        book_config['title'] = myTitle
-        book_config['language'] = form.get("book_language", "en")
-        book_config['oldest_article'] = int(form.get('oldest', 7))
-        book_config['time_fmt'] = form.get('time_fmt', '')
-        user.base_config = base_config
-        user.book_config = book_config
-        user.send_mail_service = send_mail_service
-        user.save()
-        tips = _("Settings Saved!")
-
-        #根据自定义RSS的使能设置，将自定义RSS添加进订阅列表或从订阅列表移除
-        UpdateBookedCustomRss(user)
+    #根据自定义RSS的使能设置，将自定义RSS添加进订阅列表或从订阅列表移除
+    UpdateBookedCustomRss(user)
     
     sm_services = avaliable_sm_services()
     return render_template('settings.html', tab='set', user=user, tips=tips, langMap=LangMap(), 
@@ -85,11 +74,11 @@ def SettingsPost(user: KeUser):
 
 #构建发送邮件服务配置字典，返回空字典表示出错
 #form: request.form 实例
-def BuildSmSrvDict(user: KeUser, form):
+def BuildSmSrvDict(user: KeUser, form) -> dict:
     srv = user.send_mail_service.copy()
-    srvType = form.get('sm_service', '')
     #service==admin 说明和管理员的设置一致
     if user.name == os.getenv('ADMIN_NAME') or srv.get('service') != 'admin':
+        srvType = form.get('sm_service', '')
         srv['service'] = srvType
         srv['apikey'] = form.get('sm_apikey', '')
         srv['secret_key'] = form.get('sm_secret_key', '')
@@ -98,7 +87,7 @@ def BuildSmSrvDict(user: KeUser, form):
         srv['username'] = form.get('sm_username', '')
         srv['password'] = user.encrypt(form.get('sm_password', ''))
         srv['save_path'] = form.get('sm_save_path', '')
-        validations = {
+        validations = { #根据选择的发送邮件服务类型进行简单校验
             'sendgrid': lambda srv: srv['apikey'],
             'mailjet': lambda srv: srv['apikey'] and srv['secret_key'],
             'smtp': lambda srv: all((srv['host'], srv['port'], srv['password'])), #部分smtp不需要账号名
