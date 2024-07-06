@@ -202,7 +202,7 @@ def get_locale():
         langCode = session.get('langCode') or request.accept_languages.best_match(supported_languages)
     except: #Working outside of request context
         langCode = 'en'
-    return langCode or ''
+    return langCode or 'en'
 
 #各种语言的语种代码和文字描述的对应关系
 def LangMap():
