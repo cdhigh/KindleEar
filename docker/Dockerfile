@@ -26,15 +26,16 @@ RUN mkdir -p /usr/kindleear /data
 WORKDIR /usr/kindleear
 COPY --from=builder /usr/kindleear/config.py /usr/kindleear/requirements.txt ./
 COPY --from=builder /usr/kindleear/tools/mp3cat /usr/local/bin/mp3cat
+COPY ./docker/run_docker.sh /usr/local/bin/run_docker.sh
 COPY ./docker/gunicorn.conf.py ./main.py ./
 
 #apk add libstdc++ && \
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
-    chmod +x /usr/local/bin/mp3cat
+    chmod +x /usr/local/bin/mp3cat /usr/local/bin/run_docker.sh
 
 COPY ./application/ ./application/
 
 EXPOSE 8000
 
-CMD ["/usr/local/bin/gunicorn", "-c", "/usr/kindleear/gunicorn.conf.py", "main:app"]
+CMD ["/usr/local/bin/run_docker.sh"]
