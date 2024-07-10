@@ -173,8 +173,9 @@ function showTrResult(word, text, dictname) {
     //console.log('This browser supports Shadow DOM.');
     if (!resultElement.shadowRoot) { //在第一个执行attachShadow后，这个变量会自动被设置
       resultElement.attachShadow({mode: 'open'});
+      resultElement.shadowRoot.addEventListener('click', AClickEvent);
     }
-    $(resultElement.shadowRoot).html(text);
+    resultElement.shadowRoot.innerHTML = text;
   } else { //不支持shadow dom的浏览器
     resultDiv.html(text);
   }
@@ -182,7 +183,9 @@ function showTrResult(word, text, dictname) {
 
 //将一个新词添加到历史列表
 function addToHistory(word) {
-  g_history.push(word);
+  if ((g_history.length == 0) || (g_history[g_history.length - 1] != word)) {
+    g_history.push(word);
+  }
   g_currHisIdx = g_history.length - 1;
   if (g_history.length > 1) {
     $('#history-back').removeClass('pure-button-disabled');
@@ -214,6 +217,24 @@ function historyForward() {
   }
 }
 
+//添加链接事件
+function AClickEvent(event) {
+  var target = event ? event.target : null;
+  if (!target) {
+    return;
+  }
+  var href = $(target).attr('href') || '';
+  if (href.startsWith('https://kindleear/entry/')) {
+    event.preventDefault();
+    event.stopPropagation();
+    var word = href.substring(24);
+    if (word) {
+      startQueryDict(word);
+      addToHistory(word);
+    }
+  }
+}
+
 //注册各种事件
 function regEvents() {
   $("#search_for").keydown(function(event) {
@@ -224,18 +245,7 @@ function regEvents() {
   });
 
   //点击词典内的跳转，可以直接查其他词
-  $('#tr_result').on('click', 'a', function(event) {
-    var href = $(this).attr('href');
-    if (href.startsWith('https://kindleear/entry/')) {
-      event.preventDefault();
-      event.stopPropagation();
-      var word = href.substring(24);
-      if (word) {
-        startQueryDict(word);
-        addToHistory(word);
-      }
-    }
-  });
+  $('#tr_result').on('click', 'a', AClickEvent);
 }
 
 //自动选择上次使用的词典

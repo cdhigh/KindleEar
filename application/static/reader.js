@@ -245,6 +245,7 @@ function showDictDialog(word, text, dictname, others) {
   if (textDiv.attachShadow) { //使用shadow dom技术可以隔离css
     if (!textDiv.shadowRoot) { //在第一个执行attachShadow后，这个变量会自动被设置
       textDiv.attachShadow({mode: 'open'});
+      textDiv.shadowRoot.addEventListener('click', closeDictDialog);
       //console.log('This browser supports Shadow DOM.');
     }
     textDiv.shadowRoot.innerHTML = text;
@@ -289,8 +290,10 @@ function closeDictDialog(event) {
       var word = href.substring(24);
       if (word) {
         translateWord(word);
-        return;
+        return false;
       }
+    } else if (href && g_allowLinks) {
+      openLinkInNewTab(href);
     }
   }
 
@@ -398,10 +401,19 @@ function iFrameEvent(event) {
     document.getElementById('iframe').style.height = g_iframeScrollHeight + 'px';
   } else if (data.type == 'click') {
     if (data.href && g_allowLinks) {
-      window.location.href = data.href; //覆盖原先的阅读界面
+      openLinkInNewTab(data.href);
     } else {
       clickEvent(data.event);
     }
+  }
+}
+
+//自适应在新tab中打开链接
+function openLinkInNewTab(url) {
+  if (window.open) {
+    window.open(url, '_blank');
+  } else {
+    window.location.href = url;
   }
 }
 
@@ -989,7 +1001,7 @@ function iframeLoadEvent(evt) {
       event.preventDefault();
       var href = target.getAttribute('href');
       if (href && g_allowLinks) {
-        window.location.href = href; //kindle不支持window.open()
+        openLinkInNewTab(href);
         return;
       }
     }
