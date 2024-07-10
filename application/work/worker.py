@@ -74,6 +74,7 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
     recipes = defaultdict(list) #用于保存编译好的recipe代码对象
     userCss = user.get_extra_css()
     combine_css = lambda c1, c2=userCss: f'{c1}\n\n{c2}' if c1 else c2
+
     for title, (bked, recipeDb, src) in srcDict.items():
         try:
             ro = compile_recipe(src)
@@ -162,8 +163,8 @@ def GetAllRecipeSrc(user, idList):
         recipeType, dbId = Recipe.type_and_id(id_)
         bked = BookedRecipe.get_or_none(BookedRecipe.recipe_id == id_)
         #针对没有启用自定义RSS推送的情况，创建一个临时BookedRecipe对象但不保存到数据库
-        recipe = Recipe.get_by_id_or_none(dbId) if (not bked and (recipeType == 'custom')) else None
-        if recipe:
+        recipe = Recipe.get_by_id_or_none(dbId) if (recipeType != 'builtin') else None
+        if not bked and recipe:
             bked = BookedRecipe(recipe_id=id_, separated=recipe.custom.get('separated', False),
                 user=user.name, title=recipe.title, description=recipe.description)
         bkeds.append({'recipeId': id_, 'recipeType': recipeType, 'dbId': dbId, 'bked': bked, 
