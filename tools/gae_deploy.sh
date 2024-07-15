@@ -29,9 +29,20 @@ if python ${SH_DIR}/update_req.py gae[$@]; then
   gcloud beta app deploy --quiet --version=1 ${KE_DIR}/cron.yaml
   gcloud beta app deploy --quiet --version=1 ${KE_DIR}/queue.yaml
   gcloud beta app deploy --quiet --version=1 ${KE_DIR}/dispatch.yaml
-  echo -e "The deployment is completed."
-  echo -e "The access address is: https://$GOOGLE_CLOUD_PROJECT.appspot.com"
+
+  echo -e "\nDeleting repositories (build cache)..."
+  REPOS=$(gcloud beta artifacts repositories list 2>/dev/null)
+  REPO=$(echo "$REPOS" | grep -oP '(?<=REPOSITORY: ).*')
+  LOC=$(echo "$REPOS" | grep -oP '(?<=LOCATION: ).*')
+  if [[ -n "$REPO" && -n "$LOC" ]]; then
+    gcloud beta artifacts repositories delete $REPO --location=$LOC --quiet
+  else
+    echo "REPO or LOC is empty. Skipping delete command."
+  fi
+
+  echo "The deployment is completed."
+  echo "The access address is: https://$GOOGLE_CLOUD_PROJECT.appspot.com"
 else
-  echo -e "Error: Update requirements failed. The deployment is terminated."
+  echo "Error: Update requirements failed. The deployment is terminated."
   exit 1
 fi

@@ -1,4 +1,4 @@
-runtime: python38
+runtime: python310
 service: worker
 
 #Adjust this if "out of memory"
