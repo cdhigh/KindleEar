@@ -38,6 +38,7 @@ if python ${SH_DIR}/update_req.py gae[$@]; then
     gcloud beta artifacts repositories delete $REPO --location=$LOC --quiet
   else
     echo "REPO or LOC is empty. Skipping delete command."
+    echo "You can delete manually artifacts in https://console.cloud.google.com/artifacts"
   fi
 
   echo "The deployment is completed."
