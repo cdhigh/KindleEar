@@ -245,7 +245,7 @@ class OEBReader:
                         break
                 if is_invalid:
                     continue
-                if not self.oeb.container.exists(href):
+                if not self.oeb.container.isfile(href): #fixed from calibre exists() -> isfile()
                     if href not in warned:
                         self.logger.warn('Referenced file %r not found' % href)
                         warned.add(href)
