@@ -25,8 +25,8 @@ RUN apk add --no-cache git && \
 
 #choose mp3cat by arch
 RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-        rm -f /usr/kindleear/tools/mp3cat; \
-        mv /usr/kindleear/tools/arm64_mp3cat /usr/kindleear/tools/mp3cat; \
+        rm -f /usr/kindleear/tools/mp3cat/mp3cat; \
+        mv /usr/kindleear/tools/mp3cat/arm64_mp3cat /usr/kindleear/tools/mp3cat/mp3cat; \
     fi
 
 #step 2
@@ -39,7 +39,7 @@ USER root
 RUN mkdir -p /usr/kindleear /data
 WORKDIR /usr/kindleear
 COPY --from=builder /usr/kindleear/config.py /usr/kindleear/requirements.txt ./
-COPY --from=builder /usr/kindleear/tools/mp3cat /usr/local/bin/mp3cat
+COPY --from=builder /usr/kindleear/tools/mp3cat/mp3cat /usr/local/bin/mp3cat
 COPY ./docker/run_docker.sh /usr/local/bin/run_docker.sh
 COPY ./docker/gunicorn.conf.py ./main.py ./
 
