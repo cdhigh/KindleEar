@@ -26,6 +26,7 @@ rm -rf ${KE_DIR}/calibre
 git clone --depth 1 https://github.com/kovidgoyal/calibre ${KE_DIR}/calibre
 rm -f ${KE_DIR}/application/recipes/builtin_recipes.*
 mv -f ${KE_DIR}/calibre/recipes/*.recipe ${KE_DIR}/application/recipes/
+rm -rf ${KE_DIR}/calibre
 python3 -m venv ${KE_DIR}/myenv
 source ${KE_DIR}/myenv/bin/activate
 pip3 install --upgrade pip
