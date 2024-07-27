@@ -87,7 +87,7 @@ def serialize_collection(mapping_of_recipe_classes):
 </recipe_collection>'''.encode()
 
 #old_recipes_dir: recipes extracted from builtin_recipes.zip
-def serialize_builtin_recipes(recipes_dir, old_recipes_dir):
+def serialize_builtin_recipes(recipes_dir, old_recipes_dir, quiet_print):
     recipe_mapping = {}
     skipped = 0
     for recipe_id, f in iterate_recipe_files(recipes_dir, old_recipes_dir):
@@ -96,7 +96,7 @@ def serialize_builtin_recipes(recipes_dir, old_recipes_dir):
             try:
                 recipe_class = compile_recipe(stream.read())
             except Exception as e:
-                print(f'Failed to compile: {f}, skipped. Error:\n{e}')
+                quiet_print(f'Failed to compile: {f}, skipped. Error:\n{e}')
                 skipped += 1
                 continue
         if recipe_class is not None:
@@ -123,7 +123,8 @@ def newer(targets, sources):
 
     return newest_source > oldest_target
 
-def archive_builtin_recipes(recipes_dir):
+def archive_builtin_recipes(recipes_dir, quiet):
+    quiet_print = lambda x: x if quiet else print
     xml_name = os.path.join(recipes_dir, 'builtin_recipes.xml')
     zip_name = os.path.join(recipes_dir, 'builtin_recipes.zip')
     try:
@@ -133,7 +134,7 @@ def archive_builtin_recipes(recipes_dir):
 
     old_recipes_dir = ''
     if files and os.path.exists(zip_name):
-        print('\tFound builtin_recipes.zip, extracting')
+        quiet_print('\tFound builtin_recipes.zip, extracting')
         old_recipes_dir = tempfile.mkdtemp(prefix='builtin_recipes_')
         with zipfile.ZipFile(zip_name, 'r') as zfile:
             zfile.extractall(old_recipes_dir)
@@ -142,8 +143,8 @@ def archive_builtin_recipes(recipes_dir):
 
     created = []
     if newer(xml_name, files):
-        print('\tCreating builtin_recipes.xml')
-        num, skipped, xml = serialize_builtin_recipes(recipes_dir, old_recipes_dir)
+        quiet_print('\tCreating builtin_recipes.xml')
+        num, skipped, xml = serialize_builtin_recipes(recipes_dir, old_recipes_dir, quiet_print)
         if num:
             with open(xml_name, 'wb') as f:
                 f.write(xml)
@@ -164,7 +165,7 @@ def archive_builtin_recipes(recipes_dir):
     #            files.append(f)
     
     if newer(zip_name, files):
-        print('\tCreating builtin_recipes.zip')
+        quiet_print('\tCreating builtin_recipes.zip')
         with zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_STORED) as zf:
             for n in sorted(files, key=os.path.basename):
                 with open(n, 'rb') as f:
@@ -180,13 +181,18 @@ def archive_builtin_recipes(recipes_dir):
     return created
 
 def main():
-    print('\n---------------------------------------------------')
-    print('The script will create the "builtin_recipes.xml" and "builtin_recipes.zip"\n'
-        'from the recipes directory.')
-    print('---------------------------------------------------')
-    confirm = input('Press Y to continue, or N to exit : ')
+    quiet = False
+    if len(sys.argv) > 1 and sys.argv[1] == '-q':
+        confirm = 'y'
+        quiet = True
+    else:
+        print('\n---------------------------------------------------')
+        print('The script will create the "builtin_recipes.xml" and "builtin_recipes.zip"\n'
+            'from the recipes directory.')
+        print('---------------------------------------------------')
+        confirm = input('Press Y to continue, or N to exit : ')
     if confirm.strip().lower() == 'y':
-        created = archive_builtin_recipes(recipesDir)
+        archive_builtin_recipes(recipesDir, quiet)
 
 if __name__ == '__main__':
     sys.exit(main())
