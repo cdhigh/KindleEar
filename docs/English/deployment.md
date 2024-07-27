@@ -36,19 +36,7 @@ kindleear/tools/gae_deploy.sh
 kindleear/tools/gae_deploy.sh B1,1,t2,15m
 ```
 
-**Note 2:** If you want to trim the built-in Recipe file to keep only the languages you need, you can add a line before the `kindleear/tools/gae_deploy.sh` command.    
-If you don't want any of the built-in recipes, you can directly delete `application/recipes/*.xml, *.zip`.
-
-```bash
-# Modify the list after trim_recipes.py to keep desired languages.
-rm -rf kindleear && \
-git clone --depth 1 https://github.com/cdhigh/kindleear.git && \
-chmod +x kindleear/tools/gae_deploy.sh && \
-python kindleear/tools/trim_recipes.py en,zh && \
-kindleear/tools/gae_deploy.sh B1,1,t2,15m
-```
-
-3. Refer to the [Other Instructions](#gae_other_instructions) section for additional information, such as troubleshooting the 'Unauthorized sender' issue.    
+2. Refer to the [Other Instructions](#gae_other_instructions) section for additional information, such as troubleshooting the 'Unauthorized sender' issue.    
 
 
 

@@ -35,19 +35,7 @@ kindleear/tools/gae_deploy.sh
 kindleear/tools/gae_deploy.sh B1,1,t2,15m
 ```
 
-**注2：** 如果想精简内置Recipe文件，仅保留你需要的语种，可以在 `kindleear/tools/gae_deploy.sh` 命令前增加一行。
-假如内置的Recipe你一个都不想要，可以直接删除 `application/recipes/*.xml, *.zip`。      
-
-```bash
-# Modify the list after trim_recipes.py to keep desired languages.
-rm -rf kindleear && \
-git clone --depth 1 https://github.com/cdhigh/kindleear.git && \
-chmod +x kindleear/tools/gae_deploy.sh && \
-python kindleear/tools/trim_recipes.py en,zh && \
-kindleear/tools/gae_deploy.sh B1,1,t2,15m
-```
-
-3. 如需要GAE部署的更多信息，请参考 [其他说明](#gae_other_instructions) 章节，比如怎么解决 "Unauthorized sender" 错误等。    
+2. 如需要GAE部署的更多信息，请参考 [其他说明](#gae_other_instructions) 章节，比如怎么解决 "Unauthorized sender" 错误等。    
 
 
 

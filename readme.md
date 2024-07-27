@@ -6,9 +6,9 @@ __English__ · [简体中文](readme_zh.md)
 
 
 
-[Demo Site1](https://kindleear.koyeb.app/)  
-[Demo Site2](https://kindleear.onrender.com/)  
-Note: The demo site is a free service hosted on Koyeb/Render. It may take around 50 seconds to start up the first time you open render demo site. The login username and password are `admin/admin`. All data will be automatically cleared after a period of inactivity, so feel free to perform any operations. You can use it to test ebook pushing.        
+[Demo site1](https://kindleear.koyeb.app/)  
+[Demo site2](https://kindleear.onrender.com/)  
+Note: These demo sites are free services hosted on Koyeb/Render. It may take around 50 seconds for the **Render** demo site to start up the first time you open it. The login username and password are `admin/admin`. All data will be automatically cleared after a period of inactivity, so feel free to perform any operations. You can use it to test ebook pushing.        
 
 
 
