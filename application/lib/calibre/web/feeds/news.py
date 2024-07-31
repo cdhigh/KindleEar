@@ -1120,9 +1120,6 @@ class BasicNewsRecipe(Recipe):
                 if not h_tag.get_text(strip=True):
                     h_tag.string = title
 
-        #job_info.article.url才是真实的url，对于内嵌内容RSS，job_info.url为一个临时文件名
-        self.append_share_links(soup, url=job_info.article.url)
-        
         ans = self.postprocess_html(soup, first_fetch)
 
         # Nuke HTML5 tags
@@ -1141,6 +1138,10 @@ class BasicNewsRecipe(Recipe):
         #If translation need, translator propery is set by WorkerImpl
         if self.translator.get('enable') and (tts_enable != 'audio_only'):
             self.translate_html(soup, title)
+
+        #添加分享链接，需要在翻译之后，避免翻译新添加的链接文字
+        #job_info.article.url才是真实的url，对于内嵌内容RSS，job_info.url为一个临时文件名
+        self.append_share_links(soup, url=job_info.article.url)
 
         if job_info:
             try:
