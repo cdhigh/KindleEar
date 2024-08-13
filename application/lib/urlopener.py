@@ -45,10 +45,15 @@ class UrlOpener:
         self.host = host
         self.timeout = timeout or 60
         #addheaders不使用字典是为了和mechanize接口兼容
-        self.addheaders = [ #下面的代码假定第一个元素为 'User-Agent'
+        #为了下面的代码方便，第一个元素必须为 'User-Agent'
+        self.addheaders = [
             ('User-Agent', "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)"),
+            #('User-Agent', "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko"), #IE11
+            #('User-Agent', "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"),
             ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"),
-            ("Accept-Encoding", "gzip, deflate"),]
+            ("Accept-Encoding", "gzip, deflate"),
+            ('Accept-Language', "en,*"),
+        ]
         headers = headers.items() if isinstance(headers, dict) else (headers or [])
         self.addheaders.extend([(key, value) for key, value in headers])
         if user_agent:

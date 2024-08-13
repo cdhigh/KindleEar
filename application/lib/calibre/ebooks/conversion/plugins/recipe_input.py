@@ -14,6 +14,7 @@ from calibre.utils.localization import canonicalize_lang
 from calibre.ebooks.metadata import MetaInformation
 from calibre.ebooks.metadata.opf2 import OPFCreator
 from calibre.ebooks.metadata.toc import TOC
+from application.utils import loc_exc_pos
 
 class RecipeDisabled(Exception):
     pass
@@ -85,12 +86,8 @@ class RecipeInput(InputFormatPlugin):
                     ro.masthead_url = None
                 indexFile = ro.download()
             except Exception as e:
-                if str(e) == 'No articles downloaded, aborting':
-                    msg = f'Recipe "{recipe.title}": {e}'
-                else:
-                    msg = f'Failed to execute recipe "{recipe.title}": {e}'
-                log.warning(msg)
-                log.debug(traceback.format_exc())
+                log.warning(loc_exc_pos(f'Failed to execute recipe "{recipe.title}"'))
+                #log.debug(traceback.format_exc())
                 continue
 
             if indexFile and ro.feed_objects:
