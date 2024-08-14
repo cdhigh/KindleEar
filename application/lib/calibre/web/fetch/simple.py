@@ -421,9 +421,14 @@ class RecursiveFetcher:
         for tag in soup.find_all('img', src=True):
             if 'alt' not in tag.attrs:
                 tag['alt'] = 'img'
-            if 'srcset' in tag.attrs: #https://bugs.launchpad.net/bugs/1713986
-                del tag['srcset']
-
+                
+            #https://bugs.launchpad.net/bugs/1713986
+            for attrib in ['srcset', 'height', 'width', 'border', 'align', 'style']:
+                try:
+                    del tag[attrib]
+                except KeyError:
+                    pass
+            
             iurl = tag['src']
             if iurl.startswith('data:'):
                 try:
