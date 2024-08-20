@@ -23,7 +23,7 @@ def adv_render_template(tpl, advCurr, **kwargs):
     kwargs.setdefault('tab', 'advset')
     kwargs.setdefault('tips', '')
     kwargs.setdefault('adminName', app.config['ADMIN_NAME'])
-    print(kwargs.get('tips'))
+    #print(kwargs.get('tips'))
     return render_template(tpl, advCurr=advCurr, **kwargs)
 
 #现在推送

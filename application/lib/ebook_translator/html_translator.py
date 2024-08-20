@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 # 调用在线翻译服务，翻译html文件，移植了calibre的 Ebook Translator 插件的在线翻译接口实现
-import time, copy
+import re, time, copy
 from bs4 import BeautifulSoup, NavigableString
 from ebook_translator.engines import *
 from application.utils import loc_exc_pos
@@ -108,17 +108,29 @@ class HtmlTranslator:
                 return True
             return False
 
+        #过滤掉不需要翻译的tag
+        def _tag_is_filtered(tag):
+            return tag.name in ('pre', 'code', 'abbr', 'style', 'script', 'textarea',
+                'input', 'select', 'link', 'img', 'option', 'datalist')
+
         #递归函数，用于遍历BeautifulSoup元素的所有子节点并提取文本内容
-        def _extract(tag):
+        #tag: 开始的BeautifulSoup元素
+        #position: 翻译后的文本显示的位置
+        def _extract(tag, position):
             for child in tag.find_all(recursive=False):
-                if _contains_text(child):
+                if _contains_text(child) and not _tag_is_filtered(child):
                     text = str(child).strip()
-                    if text and child.name not in ('pre', 'code', 'abbr', 'style', 'script', 'textarea',
-                        'input', 'select', 'link', 'img', 'option', 'datalist'):
+                    if text:
+                        #因为非AI翻译容易误翻译超链接里面的内容，所以这里去掉超链接
+                        if position != 'replace' and '<a' in text:
+                            text = re.sub(r'<a\b[^>]*>', '<u>', text)
+                            text = text.replace('</a>', '</u>')
                         elements.append((child, text))
                 else:
-                    _extract(child)
-        _extract(soup.body)
+                    _extract(child, position)
+
+        position = self.params.get('position', 'below')
+        _extract(soup.body, position)
         return elements
 
     #将翻译结果添加到DOM树

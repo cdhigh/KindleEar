@@ -8,7 +8,7 @@ from flask import Blueprint, request, url_for, render_template, redirect, curren
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
-from ..utils import str_to_int
+from ..utils import str_to_int, utcnow
 from .login import CreateAccountIfNotExist
 
 bpAdmin = Blueprint('bpAdmin', __name__)
@@ -169,7 +169,7 @@ def AdminAccountChangePost(name: str, user: KeUser):
             
             dbItem.expiration_days = expiration
             if expiration:
-                dbItem.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
+                dbItem.expires = utcnow() + datetime.timedelta(days=expiration)
             else:
                 dbItem.expires = None
             if smType == 'admin':

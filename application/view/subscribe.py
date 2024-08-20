@@ -9,7 +9,7 @@ from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
 from ..back_end.task_queue_adpt import create_notifynewsubs_task
-from ..utils import str_to_bool, xml_escape
+from ..utils import str_to_bool, xml_escape, utcnow
 from ..lib.urlopener import UrlOpener
 from ..lib.recipe_helper import GetBuiltinRecipeInfo, GetBuiltinRecipeSource
 from .library import LIBRARY_MGR, SUBSCRIBED_FROM_LIBRARY, LIBRARY_GETSRC, buildKeUrl
@@ -205,7 +205,7 @@ def UpdateBookedCustomRss(user: KeUser):
     if user.cfg('enable_send') == 'all': #添加自定义RSS的订阅
         for rss in custom_rss:
             BookedRecipe.get_or_create(recipe_id=rss.recipe_id, defaults={'user': userName, 
-                'title': rss.title, 'description': rss.description, 'time': datetime.datetime.utcnow(),
+                'title': rss.title, 'description': rss.description, 'time': utcnow(),
                 'translator': rss.translator, 'tts': rss.tts, 'custom': rss.custom,
                 'separated': rss.custom.get('separated', False)})
     elif custom_rss: #删除订阅
@@ -351,7 +351,7 @@ def SaveRecipeIfCorrect(user: KeUser, src: str):
         raise Exception(_('The recipe is already in the library.'))
 
     params = {"title": recipe.title, "description": recipe.description, "type_": 'upload', 
-        "needs_subscription": recipe.needs_subscription, "src": src, "time": datetime.datetime.utcnow(),
+        "needs_subscription": recipe.needs_subscription, "src": src, "time": utcnow(),
         "user": user.name, "language": recipe.language}
     dbInst = Recipe.create(**params)
     params.pop('src')

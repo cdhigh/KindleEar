@@ -9,7 +9,7 @@ from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import send_html_mail
-from ..utils import new_secret_key, hide_email, PasswordManager
+from ..utils import new_secret_key, hide_email, PasswordManager, utcnow
 
 bpLogin = Blueprint('bpLogin', __name__)
 
@@ -54,7 +54,7 @@ def LoginPost():
         session['userName'] = name
         session['role'] = 'admin' if name == adminName else 'user'
         if user.expires and user.expiration_days > 0: #用户登陆后自动续期
-            user.expires = datetime.datetime.utcnow() + datetime.timedelta(days=user.expiration_days)
+            user.expires = utcnow() + datetime.timedelta(days=user.expiration_days)
             user.save()
         if 'resetpwd' in user.custom: #成功登录后清除复位密码的设置
             user.set_custom('resetpwd', None)
@@ -109,7 +109,7 @@ def CreateAccountIfNotExist(name, password=None, email='', sender=None, sm_servi
     user = KeUser(name=name, passwd_hash=pwdHash, expires=None, expiration_days=expiration, 
         share_links={'key': shareKey}, base_config=base_config, send_mail_service=sm_service)
     if expiration:
-        user.expires = datetime.datetime.utcnow() + datetime.timedelta(days=expiration)
+        user.expires = utcnow() + datetime.timedelta(days=expiration)
     user.save()
     return True
 
@@ -139,7 +139,7 @@ def ResetPasswordGet():
     user = KeUser.get_or_none(KeUser.name == name) if name else None
     if user and token: #重设密码的最后一步
         pre_set = user.custom.get('resetpwd', {})
-        now = datetime.datetime.utcnow()
+        now = utcnow()
         pre_time = pre_set.get('expires') or (now - datetime.timedelta(hours=1)).timestamp()
         if (token == pre_set.get('token')) and (now.timestamp() < pre_time):
             return render_template('reset_password.html', tips='', userName=name, firstStep=False,
@@ -178,7 +178,7 @@ def ResetPasswordPost():
         return render_template('reset_password.html', tips=tips, userName=name, firstStep=True)
     else:
         token = new_secret_key(length=24)
-        expires = (datetime.datetime.utcnow() + datetime.timedelta(days=1)).timestamp()
+        expires = (utcnow() + datetime.timedelta(days=1)).timestamp()
         user.set_custom('resetpwd', {'token': token, 'expires': expires})
         user.save()
         tips = send_resetpwd_email(user, token)
@@ -261,7 +261,7 @@ def send_resetpwd_email(user, token):
 #重置密码的最后一步，校验密码，写入数据库
 def reset_pwd_final_step(user, token, new_p1, new_p2):
     pre_set = user.custom.get('resetpwd', {})
-    now = datetime.datetime.utcnow()
+    now = utcnow()
     pre_time = pre_set.get('expires') or (now - datetime.timedelta(hours=1)).timestamp()
     if (token == pre_set.get('token')) and (now.timestamp() < pre_time):
         if new_p1 == new_p2:

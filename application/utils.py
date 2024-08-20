@@ -75,6 +75,10 @@ def time_str(fmt="%Y-%m-%d %H:%M", tz=0):
 def tz_now(tz=0):
     return datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=tz)))
 
+#python 3.12弃用datetime.datetime.utcnow()后使用此函数代替
+def utcnow():
+    return datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+
 #隐藏真实email地址，使用星号代替部分字符
 #输入单个email字符串或列表，返回部分隐藏的字符串
 def hide_email(email):

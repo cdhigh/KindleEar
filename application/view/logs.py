@@ -8,6 +8,7 @@ from flask import Blueprint, render_template, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
+from ..utils import utcnow
 
 bpLogs = Blueprint('bpLogs', __name__)
 
@@ -35,7 +36,7 @@ def RemoveLogsRoute():
 def RemoveLogs():
     ret = []
     #停止过期用户的推送
-    now = datetime.datetime.utcnow()
+    now = utcnow()
     cnt = 0
     for user in KeUser.select():
         if user.cfg('enable_send') and user.expires and (user.expires < now):
@@ -68,7 +69,7 @@ def GetOrderedDeliverLog(userName, limit):
 #删除过期的收件箱内容
 def RemoveOldEmail(user: KeUser):
     cnt = 0
-    now = datetime.datetime.utcnow()
+    now = utcnow()
     inbound_email = user.cfg('inbound_email')
     keep_in_email_days = user.cfg('keep_in_email_days')
     if ('save' in inbound_email) and keep_in_email_days:

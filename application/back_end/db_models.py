@@ -3,9 +3,9 @@
 #数据库结构定义，使用这个文件隔离sql和nosql的差异，尽量向外提供一致的接口
 #Visit <https://github.com/cdhigh/KindleEar> for the latest version
 #Author: cdhigh <https://github.com/cdhigh>
-import os, sys, random, datetime
+import os, random, datetime
 from operator import attrgetter
-from ..utils import PasswordManager, ke_encrypt, ke_decrypt, tz_now
+from ..utils import PasswordManager, ke_encrypt, ke_decrypt, utcnow
 
 if os.getenv('DATABASE_URL', '').startswith(("datastore", "mongodb", "redis", "pickle")):
     from .db_models_nosql import *
@@ -20,7 +20,7 @@ class KeUser(MyBaseModel): # kindleEar User
     send_time = IntegerField(default=6)
     expiration_days = IntegerField(default=0) #账号超期设置值，0为永久有效
     expires = DateTimeField(null=True) #超过了此日期后账号自动停止推送
-    created_time = DateTimeField(default=datetime.datetime.utcnow)
+    created_time = DateTimeField(default=utcnow)
 
     #email,sender,kindle_email,secret_key,enable_send,timezone,inbound_email,
     #keep_in_email_days,delivery_mode,webshelf_days,reader_params
@@ -170,7 +170,7 @@ class KeUser(MyBaseModel): # kindleEar User
 class UserBlob(MyBaseModel):
     name = CharField()
     user = CharField()
-    time = DateTimeField(default=datetime.datetime.utcnow)
+    time = DateTimeField(default=utcnow)
     data = BlobField(null=True, index=False)
 
 #RSS订阅源，包括自定义RSS，上传的recipe，内置在zip里面的builtin_recipe不包括在内
@@ -183,7 +183,7 @@ class Recipe(MyBaseModel):
     type_ = CharField() #'custom','upload'
     needs_subscription = BooleanField(default=False) #是否需要登陆网页，只有上传的recipe才有意义
     src = TextField(default='', index=False) #保存上传的recipe的unicode字符串表示，已经解码
-    time = DateTimeField(default=datetime.datetime.utcnow) #源被加入的时间，用于排序
+    time = DateTimeField(default=utcnow) #源被加入的时间，用于排序
     user = CharField() #哪个账号创建的，和nosql一致，保存用户名
     language = CharField(default='')
     translator = JSONField(default=JSONField.dict_default) #用于自定义RSS的备份，实际使用的是BookedRecipe
@@ -218,7 +218,7 @@ class BookedRecipe(MyBaseModel):
     encrypted_pwd = CharField(default='')
     send_days = JSONField(default=JSONField.dict_default) #{'type':'weekday/date','days':[]}
     send_times = JSONField(default=JSONField.list_default)
-    time = DateTimeField(default=datetime.datetime.utcnow) #源被订阅的时间，用于排序
+    time = DateTimeField(default=utcnow) #源被订阅的时间，用于排序
     translator = JSONField(default=JSONField.dict_default)
     tts = JSONField(default=JSONField.dict_default)
     custom = JSONField(default=JSONField.dict_default) #留着扩展，避免后续一些小特性还需要升级数据表结构
@@ -239,14 +239,14 @@ class DeliverLog(MyBaseModel):
     to = CharField()
     size = IntegerField(default=0)
     time_str = CharField() #每个用户的时区可能不同，为显示方便，创建记录时就生成推送时间字符串
-    datetime = DateTimeField(default=datetime.datetime.utcnow)
+    datetime = DateTimeField(default=utcnow)
     book = CharField(default='')
     status = CharField()
     
 class WhiteList(MyBaseModel):
     mail = CharField()
     user = CharField()
-    time = DateTimeField(default=datetime.datetime.utcnow)
+    time = DateTimeField(default=utcnow)
 
 #Shared RSS links from other users [for kindleear.appspot.com only]
 class SharedRss(MyBaseModel):
@@ -259,11 +259,11 @@ class SharedRss(MyBaseModel):
     src = TextField(default='', index=False) #保存分享的recipe的unicode字符串表示，已经解码
     description = CharField(default='')
     creator = CharField(default='') #保存贡献者的md5
-    created_time = DateTimeField(default=datetime.datetime.utcnow)
+    created_time = DateTimeField(default=utcnow)
     subscribed = IntegerField(default=0) #for sort
-    last_subscribed_time = DateTimeField(default=datetime.datetime.utcnow, index=True)
+    last_subscribed_time = DateTimeField(default=utcnow, index=True)
     invalid_report_days = IntegerField(default=0) #some one reported it is a invalid link
-    last_invalid_report_time = DateTimeField(default=datetime.datetime.utcnow) #a rss will be deleted after some days of reported_invalid
+    last_invalid_report_time = DateTimeField(default=utcnow) #a rss will be deleted after some days of reported_invalid
     custom = JSONField(default=JSONField.dict_default)
 
     #返回数据库中所有的分类
@@ -275,7 +275,7 @@ class SharedRss(MyBaseModel):
 class SharedRssCategory(MyBaseModel):
     name = CharField()
     language = CharField(default='')
-    last_updated = DateTimeField(default=datetime.datetime.utcnow)
+    last_updated = DateTimeField(default=utcnow)
 
 class LastDelivered(MyBaseModel):
     user = CharField()
@@ -283,7 +283,7 @@ class LastDelivered(MyBaseModel):
     url = CharField(default='')
     num = IntegerField(default=0)
     record = CharField(default='')
-    datetime = DateTimeField(default=datetime.datetime.utcnow)
+    datetime = DateTimeField(default=utcnow)
 
 class InBox(MyBaseModel):
     user = CharField()
@@ -292,7 +292,7 @@ class InBox(MyBaseModel):
     subject = CharField()
     status = CharField()
     size = IntegerField(default=0)
-    datetime = DateTimeField(default=datetime.datetime.utcnow)
+    datetime = DateTimeField(default=utcnow)
     body = TextField(default='', index=False)
     attachments = CharField(default='') #存放UserBlob的数据库id，逗号分割
 

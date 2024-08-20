@@ -19,7 +19,7 @@ from calibre.ebooks.metadata.opf2 import OPFCreator
 from calibre.ebooks.metadata.toc import TOC
 from calibre.ptempfile import PersistentTemporaryFile, PersistentTemporaryDirectory
 from calibre.utils.img import save_cover_data_to
-from calibre.utils.date import now as nowf
+from calibre.utils.date import now as nowf, utcnow
 from calibre.utils.localization import canonicalize_lang, ngettext
 from calibre.utils.threadpool import NoResultsPending, ThreadPool, WorkRequest
 from calibre.web import Recipe
@@ -2210,7 +2210,7 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
         added = set()
         #这里oldest_article和其他的recipe不一样，这个参数表示在这个区间内不会重复推送
         oldestSeconds = 24 * 3600 * self.oldest_article
-        now = datetime.datetime.utcnow()
+        now = utcnow()
         for obj in main_urls: #type:ignore
             main_title, main_url = (self.title, obj) if isinstance(obj, str) else obj
             feed = Feed()

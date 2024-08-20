@@ -7,7 +7,7 @@ from operator import attrgetter
 from flask import Blueprint, request, Response, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
-from ..utils import str_to_bool, str_to_int
+from ..utils import str_to_bool, str_to_int, utcnow
 from ..back_end.db_models import *
 
 #几个"官方"服务的地址
@@ -109,7 +109,7 @@ def SharedLibraryOfficalAjax():
     if category:
         dbItem = SharedRssCategory.get_or_none(SharedRssCategory.name == category)
         if dbItem:
-            dbItem.last_updated = datetime.datetime.utcnow()
+            dbItem.last_updated = utcnow()
             dbItem.save()
         else:
             SharedRssCategory.create(name=category, language=lang)
@@ -122,13 +122,13 @@ def SharedLibraryOfficalAjax():
 
 #更新共享库的最新时间信息
 def UpdateLastSharedRssTime():
-    now = datetime.datetime.utcnow()
+    now = utcnow()
     AppInfo.set_value(AppInfo.lastSharedRssTime, str(int(now.timestamp())))
     
 #共享库的订阅源信息管理
 @bpLibraryOffical.post(LIBRARY_MGR + "<mgrType>")
 def SharedLibraryMgrOffical(mgrType):
-    now = datetime.datetime.utcnow()
+    now = utcnow()
     form = request.form
     
     if mgrType == LIBRARY_GETSRC: #获取一个共享recipe的源代码

@@ -44,7 +44,7 @@ def init_app(name, cfgMap, set_env, debug=False):
         session.permanent = True
         app.permanent_session_lifetime = datetime.timedelta(days=31)
         g.version = appVer
-        g.now = datetime.datetime.utcnow
+        g.now = lambda: datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
         g.allowSignup = (app.config['ALLOW_SIGNUP'] == 'yes')
         g.allowReader = app.config['EBOOK_SAVE_DIR']
         
