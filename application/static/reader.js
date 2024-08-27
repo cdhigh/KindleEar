@@ -5,7 +5,7 @@
 var g_iframeScrollHeight = 500; //在 iframeLoadEvent 里更新
 //var g_iframeClientHeight = 500;
 var g_currentArticle = {}; //{title:,src:,}
-var g_dictMode = false;
+var g_dictMode = false; //当前是否处于查词模式
 const g_trTextContainerHeight = 350; //350px在reader.css定义tr-text-container和tr-result-text
 
 //对古董浏览器兼容性最好的判断一个变量是否为空的语法
@@ -641,6 +641,8 @@ function toggleNavPopMenu() {
   allowIcon.innerHTML = g_allowLinks ? '✔' : '☐';
   var actIcon = document.getElementById('topleft-activate-dict').querySelector('.check-icon');
   actIcon.innerHTML = g_topleftDict ? '✔' : '☐';
+  var darkIcon = document.getElementById('dark-mode').querySelector('.check-icon');
+  darkIcon.innerHTML = g_darkMode ? '✔' : '☐';
   menu.style.display = (menu.style.display == 'block') ? 'none' : 'block';
 }
 
@@ -709,6 +711,33 @@ function toggleTopleftDict() {
   var actIcon = document.getElementById('topleft-activate-dict').querySelector('.check-icon');
   actIcon.innerHTML = g_topleftDict ? '✔' : '☐';
   saveSettings();
+}
+
+//切换黑暗模式
+function toggleDarkMode() {
+  g_darkMode = !g_darkMode;
+  var darkIcon = document.getElementById('dark-mode').querySelector('.check-icon');
+  darkIcon.innerHTML = g_darkMode ? '✔' : '☐';
+  saveSettings();
+  setDarkModeStyle();
+}
+
+//根据黑暗模式开关，设置当前界面的样式
+function setDarkModeStyle() {
+  var tag;
+  if (g_darkMode) {
+    //document.body.style.backgroundColor = '#121212';
+    //document.body.style.color = '#e0e0e0';
+    //tag = document.getElementById('corner-dict-hint');
+    //tag.style.borderColor = '#ffffff transparent transparent transparent';
+    //tag = document.getElementById('navbar');
+    //tag.style.backgroundColor = '#121212';
+    //tag.style.color = '#e0e0e0';
+  } else {
+    //tag = document.getElementById('corner-dict-hint')
+    //tag.style.borderColor = '#291E1E transparent transparent transparent';
+  }
+  iframe.src = iframe.src; //强制刷新一次
 }
 
 //是否允许墨水屏模式
@@ -1045,6 +1074,23 @@ function adjustIFrameStyle(iframe) {
   body.style.webkitTapHighlightColor = 'transparent';
   body.style.webkitTouchCallout = 'none';
 
+  if (g_darkMode) { //黑暗模式
+    body.style.backgroundColor = '#121212';
+    body.style.color = '#e0e0e0';
+    var links = doc.querySelectorAll('a');
+    for (var i = 0; i < links.length; i++) {
+      links[i].style.color = '#bb86fc';
+    }
+  } else {
+    //注释以下代码，使用默认值
+    //body.style.backgroundColor = '#ffffff';
+    //body.style.color = '#000000';
+    //var links = doc.querySelectorAll('a');
+    //for (var i = 0; i < links.length; i++) {
+    //  links[i].style.color = '#1a0dab';
+    //}
+  }
+
   var images = doc.querySelectorAll('img');
   for (var i = 0; i < images.length; i++) {
     images[i].style.maxWidth = '100%';
@@ -1098,5 +1144,6 @@ document.addEventListener('DOMContentLoaded', function() {
   iframe.addEventListener('load', iframeLoadEvent);
   populateBooks(1);
   iframe.style.display = "none"; //加载完成后再显示
-  iframe.src = iframe.src; //强制刷新一次，避免偶尔出现不能点击的情况
+  //iframe.src = iframe.src; //强制刷新一次，避免偶尔出现不能点击的情况
+  setDarkModeStyle();
 });

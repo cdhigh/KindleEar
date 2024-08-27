@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-29 20:53-0300\n"
+"POT-Creation-Date: 2024-08-26 15:24-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -245,7 +245,7 @@ msgstr ""
 
 #: application/templates/adv_base.html:66
 #: application/templates/adv_base.html:70 application/templates/adv_dict.html:3
-#: application/templates/adv_dict.html:13 application/templates/reader.html:127
+#: application/templates/adv_dict.html:13 application/templates/reader.html:134
 msgid "Dictionary"
 msgstr ""
 
@@ -292,20 +292,20 @@ msgstr ""
 msgid "There are no recipes subscribed"
 msgstr ""
 
-#: application/templates/adv_delivernow.html:18
+#: application/templates/adv_delivernow.html:17
 #: application/templates/base.html:100
 msgid "Sep"
 msgstr ""
 
-#: application/templates/adv_delivernow.html:23
+#: application/templates/adv_delivernow.html:22
 msgid "Select all"
 msgstr ""
 
-#: application/templates/adv_delivernow.html:24
+#: application/templates/adv_delivernow.html:23
 msgid "Select none"
 msgstr ""
 
-#: application/templates/adv_delivernow.html:29
+#: application/templates/adv_delivernow.html:28
 msgid "Deliver"
 msgstr ""
 
@@ -487,7 +487,7 @@ msgstr ""
 msgid "Click to back"
 msgstr ""
 
-#: application/templates/base.html:24 application/templates/reader.html:181
+#: application/templates/base.html:24 application/templates/reader.html:189
 msgid "Confirm Deletion"
 msgstr ""
 
@@ -523,7 +523,7 @@ msgstr ""
 msgid "Share"
 msgstr ""
 
-#: application/templates/base.html:34 application/templates/reader.html:182
+#: application/templates/base.html:34 application/templates/reader.html:190
 msgid "Are you sure to delete?"
 msgstr ""
 
@@ -571,7 +571,7 @@ msgstr ""
 msgid "Thank you for sharing."
 msgstr ""
 
-#: application/templates/base.html:46 application/templates/reader.html:152
+#: application/templates/base.html:46 application/templates/reader.html:159
 msgid "Close"
 msgstr ""
 
@@ -860,7 +860,7 @@ msgstr ""
 msgid "Please select a single item."
 msgstr ""
 
-#: application/templates/base.html:116 application/templates/reader.html:183
+#: application/templates/base.html:116 application/templates/reader.html:191
 msgid "Please select at least one item."
 msgstr ""
 
@@ -871,7 +871,7 @@ msgstr ""
 #: application/view/inbound_email.py:493 application/view/inbound_email.py:514
 #: application/view/login.py:216 application/view/login.py:245
 #: application/view/reader.py:109 application/view/reader.py:126
-#: application/view/settings.py:49 application/view/share.py:37
+#: application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr ""
 
@@ -1322,58 +1322,62 @@ msgstr ""
 msgid "Allow click links"
 msgstr ""
 
-#: application/templates/reader.html:82
+#: application/templates/reader.html:83
 msgid "Top-left dict mode"
 msgstr ""
 
-#: application/templates/reader.html:88
+#: application/templates/reader.html:89
+msgid "Dark mode"
+msgstr ""
+
+#: application/templates/reader.html:95
 msgid "eInk mode"
 msgstr ""
 
-#: application/templates/reader.html:94
+#: application/templates/reader.html:101
 msgid "Increase font size"
 msgstr ""
 
-#: application/templates/reader.html:100
+#: application/templates/reader.html:107
 msgid "Decrease font size"
 msgstr ""
 
-#: application/templates/reader.html:106
+#: application/templates/reader.html:113
 msgid "Visualize Touch Regions"
 msgstr ""
 
-#: application/templates/reader.html:112
+#: application/templates/reader.html:119
 msgid "Help"
 msgstr ""
 
-#: application/templates/reader.html:118
+#: application/templates/reader.html:125
 #: application/templates/reader_404.html:135
 msgid "Menu"
 msgstr ""
 
-#: application/templates/reader.html:132
+#: application/templates/reader.html:139
 msgid "Collapse all"
 msgstr ""
 
-#: application/templates/reader.html:137
+#: application/templates/reader.html:144
 msgid "Expand all"
 msgstr ""
 
-#: application/templates/reader.html:142
+#: application/templates/reader.html:149
 #: application/templates/reader_404.html:140
 msgid "Prev"
 msgstr ""
 
-#: application/templates/reader.html:147
+#: application/templates/reader.html:154
 #: application/templates/reader_404.html:143
 msgid "Next page"
 msgstr ""
 
-#: application/templates/reader.html:184
+#: application/templates/reader.html:192
 msgid "Pushed successfully."
 msgstr ""
 
-#: application/templates/reader.html:185
+#: application/templates/reader.html:193
 msgid "There are currently no books or articles being read."
 msgstr ""
 
@@ -1613,8 +1617,8 @@ msgstr ""
 msgid "Word"
 msgstr ""
 
-#: application/view/admin.py:48 application/view/adv.py:435
-#: application/view/settings.py:77 application/view/translator.py:83
+#: application/view/admin.py:48 application/view/adv.py:441
+#: application/view/settings.py:66 application/view/translator.py:83
 #: application/view/translator.py:167
 msgid "Settings Saved!"
 msgstr ""
@@ -1668,93 +1672,93 @@ msgstr ""
 msgid "Changes saved successfully."
 msgstr ""
 
-#: application/view/adv.py:94 application/view/adv.py:95
-#: application/view/adv.py:96 application/view/adv.py:97
-#: application/view/adv.py:98 application/view/adv.py:99
 #: application/view/adv.py:100 application/view/adv.py:101
 #: application/view/adv.py:102 application/view/adv.py:103
+#: application/view/adv.py:104 application/view/adv.py:105
+#: application/view/adv.py:106 application/view/adv.py:107
+#: application/view/adv.py:108 application/view/adv.py:109
 msgid "Append hyperlink '{}' to article"
 msgstr ""
 
-#: application/view/adv.py:94 application/view/adv.py:95
-#: application/view/adv.py:96 application/view/adv.py:97
-#: application/view/adv.py:98
+#: application/view/adv.py:100 application/view/adv.py:101
+#: application/view/adv.py:102 application/view/adv.py:103
+#: application/view/adv.py:104
 msgid "Save to {}"
 msgstr ""
 
-#: application/view/adv.py:94
+#: application/view/adv.py:100
 msgid "evernote"
 msgstr ""
 
-#: application/view/adv.py:95
+#: application/view/adv.py:101
 msgid "wiz"
 msgstr ""
 
-#: application/view/adv.py:96
+#: application/view/adv.py:102
 msgid "pocket"
 msgstr ""
 
-#: application/view/adv.py:97
+#: application/view/adv.py:103
 msgid "instapaper"
 msgstr ""
 
-#: application/view/adv.py:98
+#: application/view/adv.py:104
 msgid "wallabag"
 msgstr ""
 
-#: application/view/adv.py:99 application/view/adv.py:100
-#: application/view/adv.py:101 application/view/adv.py:102
+#: application/view/adv.py:105 application/view/adv.py:106
+#: application/view/adv.py:107 application/view/adv.py:108
 msgid "Share on {}"
 msgstr ""
 
-#: application/view/adv.py:99
+#: application/view/adv.py:105
 msgid "weibo"
 msgstr ""
 
-#: application/view/adv.py:100
+#: application/view/adv.py:106
 msgid "facebook"
 msgstr ""
 
-#: application/view/adv.py:102
+#: application/view/adv.py:108
 msgid "tumblr"
 msgstr ""
 
-#: application/view/adv.py:103
+#: application/view/adv.py:109
 msgid "Open in browser"
 msgstr ""
 
-#: application/view/adv.py:104
+#: application/view/adv.py:110
 msgid "Append qrcode of url to article"
 msgstr ""
 
-#: application/view/adv.py:368 application/view/share.py:54
+#: application/view/adv.py:374 application/view/share.py:54
 #: application/view/subscribe.py:247
 msgid "Unknown command: {}"
 msgstr ""
 
-#: application/view/adv.py:437
+#: application/view/adv.py:443
 msgid "The format is invalid."
 msgstr ""
 
-#: application/view/adv.py:469
+#: application/view/adv.py:475
 msgid "Authorization Error!<br/>{}"
 msgstr ""
 
-#: application/view/adv.py:490
+#: application/view/adv.py:496
 msgid "Success authorized by Pocket!"
 msgstr ""
 
-#: application/view/adv.py:496
+#: application/view/adv.py:502
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr ""
 
-#: application/view/adv.py:517
+#: application/view/adv.py:523
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 
-#: application/view/adv.py:530
+#: application/view/adv.py:536
 msgid "Request type [{}] unsupported"
 msgstr ""
 
@@ -1763,11 +1767,11 @@ msgstr ""
 msgid "The username does not exist or the email is empty."
 msgstr ""
 
-#: application/view/deliver.py:98
+#: application/view/deliver.py:109
 msgid "The following recipes has been added to the push queue."
 msgstr ""
 
-#: application/view/deliver.py:101
+#: application/view/deliver.py:112
 msgid "There are no recipes to deliver."
 msgstr ""
 
@@ -1859,206 +1863,198 @@ msgstr ""
 msgid "The article is missing?"
 msgstr ""
 
-#: application/view/reader.py:188 application/view/translator.py:116
+#: application/view/reader.py:190 application/view/translator.py:116
 #: application/view/translator.py:200
 msgid "The text is empty."
 msgstr ""
 
-#: application/view/reader.py:237
+#: application/view/reader.py:239
 msgid "No definitions found for '{}'."
 msgstr ""
 
-#: application/view/reader.py:238
+#: application/view/reader.py:240
 msgid "Did you mean?"
 msgstr ""
 
-#: application/view/reader.py:322 application/view/reader.py:329
+#: application/view/reader.py:324 application/view/reader.py:331
 msgid "Failed to push: {}"
 msgstr ""
 
-#: application/view/reader.py:377
+#: application/view/reader.py:379
 msgid "Failed to create ebook."
 msgstr ""
 
-#: application/view/settings.py:45
-msgid "Kindle E-mail is requied!"
-msgstr ""
-
-#: application/view/settings.py:47
-msgid "Title is requied!"
-msgstr ""
-
-#: application/view/settings.py:141
+#: application/view/settings.py:130
 msgid ""
 "You have not yet set up your email address. Please go to the 'Admin' page"
 " to add your email address firstly."
 msgstr ""
 
-#: application/view/settings.py:220
+#: application/view/settings.py:209
 msgid "English"
 msgstr ""
 
-#: application/view/settings.py:221
+#: application/view/settings.py:210
 msgid "Chinese"
 msgstr ""
 
-#: application/view/settings.py:222
+#: application/view/settings.py:211
 msgid "French"
 msgstr ""
 
-#: application/view/settings.py:223
+#: application/view/settings.py:212
 msgid "Spanish"
 msgstr ""
 
-#: application/view/settings.py:224
+#: application/view/settings.py:213
 msgid "Portuguese"
 msgstr ""
 
-#: application/view/settings.py:225
+#: application/view/settings.py:214
 msgid "German"
 msgstr ""
 
-#: application/view/settings.py:226
+#: application/view/settings.py:215
 msgid "Italian"
 msgstr ""
 
-#: application/view/settings.py:227
+#: application/view/settings.py:216
 msgid "Japanese"
 msgstr ""
 
-#: application/view/settings.py:228
+#: application/view/settings.py:217
 msgid "Russian"
 msgstr ""
 
-#: application/view/settings.py:229
+#: application/view/settings.py:218
 msgid "Turkish"
 msgstr ""
 
-#: application/view/settings.py:230
+#: application/view/settings.py:219
 msgid "Korean"
 msgstr ""
 
-#: application/view/settings.py:231
+#: application/view/settings.py:220
 msgid "Arabic"
 msgstr ""
 
-#: application/view/settings.py:232
+#: application/view/settings.py:221
 msgid "Czech"
 msgstr ""
 
-#: application/view/settings.py:233
+#: application/view/settings.py:222
 msgid "Dutch"
 msgstr ""
 
-#: application/view/settings.py:234
+#: application/view/settings.py:223
 msgid "Greek"
 msgstr ""
 
-#: application/view/settings.py:235
+#: application/view/settings.py:224
 msgid "Hindi"
 msgstr ""
 
-#: application/view/settings.py:236
+#: application/view/settings.py:225
 msgid "Malaysian"
 msgstr ""
 
-#: application/view/settings.py:237
+#: application/view/settings.py:226
 msgid "Bengali"
 msgstr ""
 
-#: application/view/settings.py:238
+#: application/view/settings.py:227
 msgid "Persian"
 msgstr ""
 
-#: application/view/settings.py:239
+#: application/view/settings.py:228
 msgid "Urdu"
 msgstr ""
 
-#: application/view/settings.py:240
+#: application/view/settings.py:229
 msgid "Swahili"
 msgstr ""
 
-#: application/view/settings.py:241
+#: application/view/settings.py:230
 msgid "Vietnamese"
 msgstr ""
 
-#: application/view/settings.py:242
+#: application/view/settings.py:231
 msgid "Punjabi"
 msgstr ""
 
-#: application/view/settings.py:243
+#: application/view/settings.py:232
 msgid "Javanese"
 msgstr ""
 
-#: application/view/settings.py:244
+#: application/view/settings.py:233
 msgid "Tagalog"
 msgstr ""
 
-#: application/view/settings.py:245
+#: application/view/settings.py:234
 msgid "Hausa"
 msgstr ""
 
-#: application/view/settings.py:246
+#: application/view/settings.py:235
 msgid "Thai"
 msgstr ""
 
-#: application/view/settings.py:247
+#: application/view/settings.py:236
 msgid "Polish"
 msgstr ""
 
-#: application/view/settings.py:248
+#: application/view/settings.py:237
 msgid "Romanian"
 msgstr ""
 
-#: application/view/settings.py:249
+#: application/view/settings.py:238
 msgid "Hungarian"
 msgstr ""
 
-#: application/view/settings.py:250
+#: application/view/settings.py:239
 msgid "Swedish"
 msgstr ""
 
-#: application/view/settings.py:251
+#: application/view/settings.py:240
 msgid "Hebrew"
 msgstr ""
 
-#: application/view/settings.py:252
+#: application/view/settings.py:241
 msgid "Norwegian"
 msgstr ""
 
-#: application/view/settings.py:253
+#: application/view/settings.py:242
 msgid "Finnish"
 msgstr ""
 
-#: application/view/settings.py:254
+#: application/view/settings.py:243
 msgid "Danish"
 msgstr ""
 
-#: application/view/settings.py:255
+#: application/view/settings.py:244
 msgid "Ukrainian"
 msgstr ""
 
-#: application/view/settings.py:256
+#: application/view/settings.py:245
 msgid "Tamil"
 msgstr ""
 
-#: application/view/settings.py:257
+#: application/view/settings.py:246
 msgid "Marathi"
 msgstr ""
 
-#: application/view/settings.py:258
+#: application/view/settings.py:247
 msgid "Burmese"
 msgstr ""
 
-#: application/view/settings.py:259
+#: application/view/settings.py:248
 msgid "Amharic"
 msgstr ""
 
-#: application/view/settings.py:260
+#: application/view/settings.py:249
 msgid "Azerbaijani"
 msgstr ""
 
-#: application/view/settings.py:261
+#: application/view/settings.py:250
 msgid "Kazakh"
 msgstr ""
 

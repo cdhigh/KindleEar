@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-29 20:53-0300\n"
+"POT-Creation-Date: 2024-08-26 15:24-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: tr_TR\n"
@@ -246,7 +246,7 @@ msgstr "Gelen Posta"
 
 #: application/templates/adv_base.html:66
 #: application/templates/adv_base.html:70 application/templates/adv_dict.html:3
-#: application/templates/adv_dict.html:13 application/templates/reader.html:127
+#: application/templates/adv_dict.html:13 application/templates/reader.html:134
 msgid "Dictionary"
 msgstr "Sözlük"
 
@@ -293,20 +293,20 @@ msgstr "Seçilen tarifleri şimdi teslim edin."
 msgid "There are no recipes subscribed"
 msgstr "Abone olunan tarif yok"
 
-#: application/templates/adv_delivernow.html:18
+#: application/templates/adv_delivernow.html:17
 #: application/templates/base.html:100
 msgid "Sep"
 msgstr "Sep"
 
-#: application/templates/adv_delivernow.html:23
+#: application/templates/adv_delivernow.html:22
 msgid "Select all"
 msgstr "Hepsini seç"
 
-#: application/templates/adv_delivernow.html:24
+#: application/templates/adv_delivernow.html:23
 msgid "Select none"
 msgstr "Hiçbirini seçme"
 
-#: application/templates/adv_delivernow.html:29
+#: application/templates/adv_delivernow.html:28
 msgid "Deliver"
 msgstr "Şimdi gönder"
 
@@ -494,7 +494,7 @@ msgstr "5 saniye sonra otomatik olarak önceki sayfaya döneceksiniz."
 msgid "Click to back"
 msgstr "Geri dönmek için tıklayınız"
 
-#: application/templates/base.html:24 application/templates/reader.html:181
+#: application/templates/base.html:24 application/templates/reader.html:189
 msgid "Confirm Deletion"
 msgstr "Silmeyi Onayla"
 
@@ -530,7 +530,7 @@ msgstr "Tam Metin"
 msgid "Share"
 msgstr "Paylaş"
 
-#: application/templates/base.html:34 application/templates/reader.html:182
+#: application/templates/base.html:34 application/templates/reader.html:190
 msgid "Are you sure to delete?"
 msgstr "Silmek istediğinizden emin misiniz?"
 
@@ -578,7 +578,7 @@ msgstr "Dil kodu geçersiz"
 msgid "Thank you for sharing."
 msgstr "Paylaştığınız için teşekkür ederiz."
 
-#: application/templates/base.html:46 application/templates/reader.html:152
+#: application/templates/base.html:46 application/templates/reader.html:159
 msgid "Close"
 msgstr "Kapat"
 
@@ -876,7 +876,7 @@ msgstr "Burada hiçbir şey yok."
 msgid "Please select a single item."
 msgstr "Lütfen tek bir öğe seçin."
 
-#: application/templates/base.html:116 application/templates/reader.html:183
+#: application/templates/base.html:116 application/templates/reader.html:191
 msgid "Please select at least one item."
 msgstr "Lütfen en az bir öğe seçin."
 
@@ -887,7 +887,7 @@ msgstr "Lütfen en az bir öğe seçin."
 #: application/view/inbound_email.py:493 application/view/inbound_email.py:514
 #: application/view/login.py:216 application/view/login.py:245
 #: application/view/reader.py:109 application/view/reader.py:126
-#: application/view/settings.py:49 application/view/share.py:37
+#: application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr "Bazı parametreler eksik veya yanlış."
 
@@ -1349,58 +1349,62 @@ msgstr "Seçili kitapları sil"
 msgid "Allow click links"
 msgstr "Bağlantıları tıklamaya izin ver"
 
-#: application/templates/reader.html:82
+#: application/templates/reader.html:83
 msgid "Top-left dict mode"
 msgstr "Üst sol sözlük modu"
 
-#: application/templates/reader.html:88
+#: application/templates/reader.html:89
+msgid "Dark mode"
+msgstr "Karanlık modu"
+
+#: application/templates/reader.html:95
 msgid "eInk mode"
 msgstr "eInk modu"
 
-#: application/templates/reader.html:94
+#: application/templates/reader.html:101
 msgid "Increase font size"
 msgstr "Yazı tipi boyutunu artır"
 
-#: application/templates/reader.html:100
+#: application/templates/reader.html:107
 msgid "Decrease font size"
 msgstr "Yazı tipi boyutunu azalt"
 
-#: application/templates/reader.html:106
+#: application/templates/reader.html:113
 msgid "Visualize Touch Regions"
 msgstr "Dokunma bölgelerini görselleştir"
 
-#: application/templates/reader.html:112
+#: application/templates/reader.html:119
 msgid "Help"
 msgstr "Yardım"
 
-#: application/templates/reader.html:118
+#: application/templates/reader.html:125
 #: application/templates/reader_404.html:135
 msgid "Menu"
 msgstr "Menü"
 
-#: application/templates/reader.html:132
+#: application/templates/reader.html:139
 msgid "Collapse all"
 msgstr "Tümünü daralt"
 
-#: application/templates/reader.html:137
+#: application/templates/reader.html:144
 msgid "Expand all"
 msgstr "Tümünü genişlet"
 
-#: application/templates/reader.html:142
+#: application/templates/reader.html:149
 #: application/templates/reader_404.html:140
 msgid "Prev"
 msgstr "Önceki"
 
-#: application/templates/reader.html:147
+#: application/templates/reader.html:154
 #: application/templates/reader_404.html:143
 msgid "Next page"
 msgstr "Sonraki sayfa"
 
-#: application/templates/reader.html:184
+#: application/templates/reader.html:192
 msgid "Pushed successfully."
 msgstr "Başarıyla itildi"
 
-#: application/templates/reader.html:185
+#: application/templates/reader.html:193
 msgid "There are currently no books or articles being read."
 msgstr "Şu anda okunan herhangi bir kitap veya makale bulunmamaktadır."
 
@@ -1647,8 +1651,8 @@ msgstr "Ek olarak ilet"
 msgid "Word"
 msgstr "Kelime"
 
-#: application/view/admin.py:48 application/view/adv.py:435
-#: application/view/settings.py:77 application/view/translator.py:83
+#: application/view/admin.py:48 application/view/adv.py:441
+#: application/view/settings.py:66 application/view/translator.py:83
 #: application/view/translator.py:167
 msgid "Settings Saved!"
 msgstr "Ayarlar Kaydedildi!"
@@ -1702,83 +1706,83 @@ msgstr "Eski şifre yanlış."
 msgid "Changes saved successfully."
 msgstr "Değişiklikler başarıyla kaydedildi."
 
-#: application/view/adv.py:94 application/view/adv.py:95
-#: application/view/adv.py:96 application/view/adv.py:97
-#: application/view/adv.py:98 application/view/adv.py:99
 #: application/view/adv.py:100 application/view/adv.py:101
 #: application/view/adv.py:102 application/view/adv.py:103
+#: application/view/adv.py:104 application/view/adv.py:105
+#: application/view/adv.py:106 application/view/adv.py:107
+#: application/view/adv.py:108 application/view/adv.py:109
 msgid "Append hyperlink '{}' to article"
 msgstr "'{}' linkini makaleye ekle"
 
-#: application/view/adv.py:94 application/view/adv.py:95
-#: application/view/adv.py:96 application/view/adv.py:97
-#: application/view/adv.py:98
+#: application/view/adv.py:100 application/view/adv.py:101
+#: application/view/adv.py:102 application/view/adv.py:103
+#: application/view/adv.py:104
 msgid "Save to {}"
 msgstr "{} kaydedildi"
 
-#: application/view/adv.py:94
+#: application/view/adv.py:100
 msgid "evernote"
 msgstr "evernote"
 
-#: application/view/adv.py:95
+#: application/view/adv.py:101
 msgid "wiz"
 msgstr "wiz"
 
-#: application/view/adv.py:96
+#: application/view/adv.py:102
 msgid "pocket"
 msgstr "pocket"
 
-#: application/view/adv.py:97
+#: application/view/adv.py:103
 msgid "instapaper"
 msgstr "instapaper"
 
-#: application/view/adv.py:98
+#: application/view/adv.py:104
 msgid "wallabag"
 msgstr "wallabag"
 
-#: application/view/adv.py:99 application/view/adv.py:100
-#: application/view/adv.py:101 application/view/adv.py:102
+#: application/view/adv.py:105 application/view/adv.py:106
+#: application/view/adv.py:107 application/view/adv.py:108
 msgid "Share on {}"
 msgstr "{} üzerinde paylaş"
 
-#: application/view/adv.py:99
+#: application/view/adv.py:105
 msgid "weibo"
 msgstr "weibo"
 
-#: application/view/adv.py:100
+#: application/view/adv.py:106
 msgid "facebook"
 msgstr "facebook"
 
-#: application/view/adv.py:102
+#: application/view/adv.py:108
 msgid "tumblr"
 msgstr "tumblr"
 
-#: application/view/adv.py:103
+#: application/view/adv.py:109
 msgid "Open in browser"
 msgstr "Tarayıcıda aç"
 
-#: application/view/adv.py:104
+#: application/view/adv.py:110
 msgid "Append qrcode of url to article"
 msgstr "Makaleye URL'nin QR kodunu ekle"
 
-#: application/view/adv.py:368 application/view/share.py:54
+#: application/view/adv.py:374 application/view/share.py:54
 #: application/view/subscribe.py:247
 msgid "Unknown command: {}"
 msgstr "Bilinmeyen komut: {}"
 
-#: application/view/adv.py:437
+#: application/view/adv.py:443
 msgid "The format is invalid."
 msgstr "Format geçersiz."
 
-#: application/view/adv.py:469
+#: application/view/adv.py:475
 msgid "Authorization Error!<br/>{}"
 msgstr "Yetkilendirme Hatası!<br/>{}"
 
-#: application/view/adv.py:490
+#: application/view/adv.py:496
 msgid "Success authorized by Pocket!"
 msgstr "Pocket tarafından yetkilendirilen başarı!"
 
-#: application/view/adv.py:496
+#: application/view/adv.py:502
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
@@ -1786,13 +1790,13 @@ msgstr ""
 "Pocket yetkilendirme isteği başarısız oldu!<hr/>Aşağıdaki ayrıntılara "
 "bakın:<br/><br/>{}"
 
-#: application/view/adv.py:517
+#: application/view/adv.py:523
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 "Instapaper servisi bir hata ile karşılaştı. Lütfen daha sonra tekrar "
 "deneyin."
 
-#: application/view/adv.py:530
+#: application/view/adv.py:536
 msgid "Request type [{}] unsupported"
 msgstr "İstek türü [{}] desteklenmiyor"
 
@@ -1801,11 +1805,11 @@ msgstr "İstek türü [{}] desteklenmiyor"
 msgid "The username does not exist or the email is empty."
 msgstr "Kullanıcı adı mevcut değil veya e-posta boş."
 
-#: application/view/deliver.py:98
+#: application/view/deliver.py:109
 msgid "The following recipes has been added to the push queue."
 msgstr "Aşağıdaki tarifler itme kuyruğuna eklendi."
 
-#: application/view/deliver.py:101
+#: application/view/deliver.py:112
 msgid "There are no recipes to deliver."
 msgstr "Teslim edilecek tarif yok."
 
@@ -1903,36 +1907,28 @@ msgstr ""
 msgid "The article is missing?"
 msgstr "Makale eksik mi?"
 
-#: application/view/reader.py:188 application/view/translator.py:116
+#: application/view/reader.py:190 application/view/translator.py:116
 #: application/view/translator.py:200
 msgid "The text is empty."
 msgstr "Metin boş."
 
-#: application/view/reader.py:237
+#: application/view/reader.py:239
 msgid "No definitions found for '{}'."
 msgstr "'{}' için tanım bulunamadı."
 
-#: application/view/reader.py:238
+#: application/view/reader.py:240
 msgid "Did you mean?"
 msgstr "Demek istediniz mi?"
 
-#: application/view/reader.py:322 application/view/reader.py:329
+#: application/view/reader.py:324 application/view/reader.py:331
 msgid "Failed to push: {}"
 msgstr "İtilemedi: {}"
 
-#: application/view/reader.py:377
+#: application/view/reader.py:379
 msgid "Failed to create ebook."
 msgstr "E-kitap oluşturulamadı."
 
-#: application/view/settings.py:45
-msgid "Kindle E-mail is requied!"
-msgstr "Kindle E-mail adresi gerekli!"
-
-#: application/view/settings.py:47
-msgid "Title is requied!"
-msgstr "Başlık zorunlu!"
-
-#: application/view/settings.py:141
+#: application/view/settings.py:130
 msgid ""
 "You have not yet set up your email address. Please go to the 'Admin' page"
 " to add your email address firstly."
@@ -1940,171 +1936,171 @@ msgstr ""
 "Email adresinizi henüz ayarlamadınız. Lütfen e-posta adresinizi eklemek "
 "için 'Yönetim' sayfasına öncelikle gidin."
 
-#: application/view/settings.py:220
+#: application/view/settings.py:209
 msgid "English"
 msgstr "İngilizce"
 
-#: application/view/settings.py:221
+#: application/view/settings.py:210
 msgid "Chinese"
 msgstr "Çince"
 
-#: application/view/settings.py:222
+#: application/view/settings.py:211
 msgid "French"
 msgstr "Fransızca"
 
-#: application/view/settings.py:223
+#: application/view/settings.py:212
 msgid "Spanish"
 msgstr "İspanyolca"
 
-#: application/view/settings.py:224
+#: application/view/settings.py:213
 msgid "Portuguese"
 msgstr "Portekizce"
 
-#: application/view/settings.py:225
+#: application/view/settings.py:214
 msgid "German"
 msgstr "Almanca"
 
-#: application/view/settings.py:226
+#: application/view/settings.py:215
 msgid "Italian"
 msgstr "İtalyanca"
 
-#: application/view/settings.py:227
+#: application/view/settings.py:216
 msgid "Japanese"
 msgstr "Japonca"
 
-#: application/view/settings.py:228
+#: application/view/settings.py:217
 msgid "Russian"
 msgstr "Rusça"
 
-#: application/view/settings.py:229
+#: application/view/settings.py:218
 msgid "Turkish"
 msgstr "Türkçe"
 
-#: application/view/settings.py:230
+#: application/view/settings.py:219
 msgid "Korean"
 msgstr "Koreli"
 
-#: application/view/settings.py:231
+#: application/view/settings.py:220
 msgid "Arabic"
 msgstr "Arapça"
 
-#: application/view/settings.py:232
+#: application/view/settings.py:221
 msgid "Czech"
 msgstr "Çek"
 
-#: application/view/settings.py:233
+#: application/view/settings.py:222
 msgid "Dutch"
 msgstr "Flemenkçe"
 
-#: application/view/settings.py:234
+#: application/view/settings.py:223
 msgid "Greek"
 msgstr "Yunan"
 
-#: application/view/settings.py:235
+#: application/view/settings.py:224
 msgid "Hindi"
 msgstr "Hintçe"
 
-#: application/view/settings.py:236
+#: application/view/settings.py:225
 msgid "Malaysian"
 msgstr "Malezyalı"
 
-#: application/view/settings.py:237
+#: application/view/settings.py:226
 msgid "Bengali"
 msgstr "Bengal"
 
-#: application/view/settings.py:238
+#: application/view/settings.py:227
 msgid "Persian"
 msgstr "Farsça"
 
-#: application/view/settings.py:239
+#: application/view/settings.py:228
 msgid "Urdu"
 msgstr "Urduca"
 
-#: application/view/settings.py:240
+#: application/view/settings.py:229
 msgid "Swahili"
 msgstr "Svahili"
 
-#: application/view/settings.py:241
+#: application/view/settings.py:230
 msgid "Vietnamese"
 msgstr "Vietnam"
 
-#: application/view/settings.py:242
+#: application/view/settings.py:231
 msgid "Punjabi"
 msgstr "Pencap"
 
-#: application/view/settings.py:243
+#: application/view/settings.py:232
 msgid "Javanese"
 msgstr "Cava"
 
-#: application/view/settings.py:244
+#: application/view/settings.py:233
 msgid "Tagalog"
 msgstr "Tagalog"
 
-#: application/view/settings.py:245
+#: application/view/settings.py:234
 msgid "Hausa"
 msgstr "Hausa"
 
-#: application/view/settings.py:246
+#: application/view/settings.py:235
 msgid "Thai"
 msgstr "Taylandca"
 
-#: application/view/settings.py:247
+#: application/view/settings.py:236
 msgid "Polish"
 msgstr "Lehçe"
 
-#: application/view/settings.py:248
+#: application/view/settings.py:237
 msgid "Romanian"
 msgstr "Rumen"
 
-#: application/view/settings.py:249
+#: application/view/settings.py:238
 msgid "Hungarian"
 msgstr "Macarca"
 
-#: application/view/settings.py:250
+#: application/view/settings.py:239
 msgid "Swedish"
 msgstr "İsveççe"
 
-#: application/view/settings.py:251
+#: application/view/settings.py:240
 msgid "Hebrew"
 msgstr "İbranice"
 
-#: application/view/settings.py:252
+#: application/view/settings.py:241
 msgid "Norwegian"
 msgstr "Norveççe"
 
-#: application/view/settings.py:253
+#: application/view/settings.py:242
 msgid "Finnish"
 msgstr "Fince"
 
-#: application/view/settings.py:254
+#: application/view/settings.py:243
 msgid "Danish"
 msgstr "Danca"
 
-#: application/view/settings.py:255
+#: application/view/settings.py:244
 msgid "Ukrainian"
 msgstr "Ukraynaca"
 
-#: application/view/settings.py:256
+#: application/view/settings.py:245
 msgid "Tamil"
 msgstr "Tamilce"
 
-#: application/view/settings.py:257
+#: application/view/settings.py:246
 msgid "Marathi"
 msgstr "Marathi"
 
-#: application/view/settings.py:258
+#: application/view/settings.py:247
 msgid "Burmese"
 msgstr "Burmaca"
 
-#: application/view/settings.py:259
+#: application/view/settings.py:248
 msgid "Amharic"
 msgstr "Amharca"
 
-#: application/view/settings.py:260
+#: application/view/settings.py:249
 msgid "Azerbaijani"
 msgstr "Azerbaycanca"
 
-#: application/view/settings.py:261
+#: application/view/settings.py:250
 msgid "Kazakh"
 msgstr "Kazakça"
 
@@ -2205,4 +2201,3 @@ msgstr "Bu tarifin giriş bilgileri kaydedildi."
 #: application/view/translator.py:77 application/view/translator.py:160
 msgid "The api key is required."
 msgstr "API anahtarı gereklidir."
-

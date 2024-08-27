@@ -76,10 +76,17 @@
           <span class="check-icon"></span>
           <span>{{_("Allow click links")}}</span>
         </div>
-      </div><div class="nav-popmenu-row" id="topleft-activate-dict" onclick="toggleTopleftDict()">
+      </div>
+      <div class="nav-popmenu-row" id="topleft-activate-dict" onclick="toggleTopleftDict()">
         <div class="nav-popmenu-item">
           <span class="check-icon"></span>
           <span>{{_("Top-left dict mode")}}</span>
+        </div>
+      </div>
+      <div class="nav-popmenu-row" id="dark-mode" onclick="toggleDarkMode()">
+        <div class="nav-popmenu-item">
+          <span class="check-icon"></span>
+          <span>{{_("Dark mode")}}</span>
         </div>
       </div>
       <!-- <div class="nav-popmenu-row" id="ink-mode" onclick="toggleInkMode()">
@@ -175,6 +182,7 @@
     var g_topleftDict = {{params.get('topleftDict', 1) | int}};
     var g_inkMode = {{params.get('inkMode', 1) | int}};
     var g_fontSize = {{params.get('fontSize', 1.0) | float}};
+    var g_darkMode = {{params.get('darkMode', 0) | int}};
     var g_shareKey = "{{shareKey}}";
     
     var i18n = {

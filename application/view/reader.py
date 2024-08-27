@@ -153,9 +153,11 @@ def ReaderSettingsPost(user: KeUser, userDir: str):
     fontSize = str_to_float(form.get('fontSize', '1.0'), 1.0)
     allowLinks = 1 if str_to_bool(form.get('allowLinks', 'true')) else 0
     topleftDict = 1 if str_to_bool(form.get('topleftDict', 'true')) else 0
-    inkMode = str_to_int(form.get('inkMode', '1'), 1)
+    darkMode = 1 if str_to_bool(form.get('darkMode', 'true')) else 0
+    inkMode = 1 if str_to_bool(form.get('inkMode', 'true')) else 0
     params = user.cfg('reader_params')
-    params.update({'fontSize': fontSize, 'allowLinks': allowLinks, 'inkMode': inkMode, 'topleftDict': topleftDict})
+    params.update({'fontSize': fontSize, 'allowLinks': allowLinks, 'inkMode': inkMode, 
+        'topleftDict': topleftDict, 'darkMode': darkMode})
     user.set_cfg('reader_params', params)
     user.save()
     return {'status': 'ok'}

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-29 20:53-0300\n"
+"POT-Creation-Date: 2024-08-26 15:24-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -246,7 +246,7 @@ msgstr "入站邮件"
 
 #: application/templates/adv_base.html:66
 #: application/templates/adv_base.html:70 application/templates/adv_dict.html:3
-#: application/templates/adv_dict.html:13 application/templates/reader.html:127
+#: application/templates/adv_dict.html:13 application/templates/reader.html:134
 msgid "Dictionary"
 msgstr "词典"
 
@@ -293,20 +293,20 @@ msgstr "现在推送选择的Recipe"
 msgid "There are no recipes subscribed"
 msgstr "没有任何被订阅的Recipe"
 
-#: application/templates/adv_delivernow.html:18
+#: application/templates/adv_delivernow.html:17
 #: application/templates/base.html:100
 msgid "Sep"
 msgstr "Sep"
 
-#: application/templates/adv_delivernow.html:23
+#: application/templates/adv_delivernow.html:22
 msgid "Select all"
 msgstr "选择全部"
 
-#: application/templates/adv_delivernow.html:24
+#: application/templates/adv_delivernow.html:23
 msgid "Select none"
 msgstr "取消全部"
 
-#: application/templates/adv_delivernow.html:29
+#: application/templates/adv_delivernow.html:28
 msgid "Deliver"
 msgstr "推送"
 
@@ -488,7 +488,7 @@ msgstr "5秒钟后自动返回上一页"
 msgid "Click to back"
 msgstr "点击直接返回"
 
-#: application/templates/base.html:24 application/templates/reader.html:181
+#: application/templates/base.html:24 application/templates/reader.html:189
 msgid "Confirm Deletion"
 msgstr "确认删除"
 
@@ -524,7 +524,7 @@ msgstr "全文RSS"
 msgid "Share"
 msgstr "分享"
 
-#: application/templates/base.html:34 application/templates/reader.html:182
+#: application/templates/base.html:34 application/templates/reader.html:190
 msgid "Are you sure to delete?"
 msgstr "您确认要删除吗？"
 
@@ -572,7 +572,7 @@ msgstr "语言代码不合法"
 msgid "Thank you for sharing."
 msgstr "谢谢您的分享。"
 
-#: application/templates/base.html:46 application/templates/reader.html:152
+#: application/templates/base.html:46 application/templates/reader.html:159
 msgid "Close"
 msgstr "关闭"
 
@@ -861,7 +861,7 @@ msgstr "这里什么都没有。"
 msgid "Please select a single item."
 msgstr "请选择单独一项。"
 
-#: application/templates/base.html:116 application/templates/reader.html:183
+#: application/templates/base.html:116 application/templates/reader.html:191
 msgid "Please select at least one item."
 msgstr "请选择至少一项。"
 
@@ -872,7 +872,7 @@ msgstr "请选择至少一项。"
 #: application/view/inbound_email.py:493 application/view/inbound_email.py:514
 #: application/view/login.py:216 application/view/login.py:245
 #: application/view/reader.py:109 application/view/reader.py:126
-#: application/view/settings.py:49 application/view/share.py:37
+#: application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr "一些参数为空或错误。"
 
@@ -1323,58 +1323,62 @@ msgstr "删除选择的书本"
 msgid "Allow click links"
 msgstr "允许点击链接"
 
-#: application/templates/reader.html:82
+#: application/templates/reader.html:83
 msgid "Top-left dict mode"
 msgstr "左上角激活词典"
 
-#: application/templates/reader.html:88
+#: application/templates/reader.html:89
+msgid "Dark mode"
+msgstr "黑暗模式"
+
+#: application/templates/reader.html:95
 msgid "eInk mode"
 msgstr "墨水屏模式"
 
-#: application/templates/reader.html:94
+#: application/templates/reader.html:101
 msgid "Increase font size"
 msgstr "增大字号"
 
-#: application/templates/reader.html:100
+#: application/templates/reader.html:107
 msgid "Decrease font size"
 msgstr "缩小字号"
 
-#: application/templates/reader.html:106
+#: application/templates/reader.html:113
 msgid "Visualize Touch Regions"
 msgstr "显示触摸区域图示"
 
-#: application/templates/reader.html:112
+#: application/templates/reader.html:119
 msgid "Help"
 msgstr "帮助"
 
-#: application/templates/reader.html:118
+#: application/templates/reader.html:125
 #: application/templates/reader_404.html:135
 msgid "Menu"
 msgstr "菜单"
 
-#: application/templates/reader.html:132
+#: application/templates/reader.html:139
 msgid "Collapse all"
 msgstr "折叠所有"
 
-#: application/templates/reader.html:137
+#: application/templates/reader.html:144
 msgid "Expand all"
 msgstr "展开所有"
 
-#: application/templates/reader.html:142
+#: application/templates/reader.html:149
 #: application/templates/reader_404.html:140
 msgid "Prev"
 msgstr "前一页"
 
-#: application/templates/reader.html:147
+#: application/templates/reader.html:154
 #: application/templates/reader_404.html:143
 msgid "Next page"
 msgstr "下一页"
 
-#: application/templates/reader.html:184
+#: application/templates/reader.html:192
 msgid "Pushed successfully."
 msgstr "推送成功。"
 
-#: application/templates/reader.html:185
+#: application/templates/reader.html:193
 msgid "There are currently no books or articles being read."
 msgstr "当前没有正在阅读的书籍或文章。"
 
@@ -1616,8 +1620,8 @@ msgstr "作为附件转发"
 msgid "Word"
 msgstr "单词"
 
-#: application/view/admin.py:48 application/view/adv.py:435
-#: application/view/settings.py:77 application/view/translator.py:83
+#: application/view/admin.py:48 application/view/adv.py:441
+#: application/view/settings.py:66 application/view/translator.py:83
 #: application/view/translator.py:167
 msgid "Settings Saved!"
 msgstr "设置已保存!"
@@ -1671,93 +1675,93 @@ msgstr "原密码错误。"
 msgid "Changes saved successfully."
 msgstr "账号设置已更新。"
 
-#: application/view/adv.py:94 application/view/adv.py:95
-#: application/view/adv.py:96 application/view/adv.py:97
-#: application/view/adv.py:98 application/view/adv.py:99
 #: application/view/adv.py:100 application/view/adv.py:101
 #: application/view/adv.py:102 application/view/adv.py:103
+#: application/view/adv.py:104 application/view/adv.py:105
+#: application/view/adv.py:106 application/view/adv.py:107
+#: application/view/adv.py:108 application/view/adv.py:109
 msgid "Append hyperlink '{}' to article"
 msgstr "在每篇文章后附加 '{}' 超链接"
 
-#: application/view/adv.py:94 application/view/adv.py:95
-#: application/view/adv.py:96 application/view/adv.py:97
-#: application/view/adv.py:98
+#: application/view/adv.py:100 application/view/adv.py:101
+#: application/view/adv.py:102 application/view/adv.py:103
+#: application/view/adv.py:104
 msgid "Save to {}"
 msgstr "保存到 {}"
 
-#: application/view/adv.py:94
+#: application/view/adv.py:100
 msgid "evernote"
 msgstr "evernote"
 
-#: application/view/adv.py:95
+#: application/view/adv.py:101
 msgid "wiz"
 msgstr "为知笔记"
 
-#: application/view/adv.py:96
+#: application/view/adv.py:102
 msgid "pocket"
 msgstr "pocket"
 
-#: application/view/adv.py:97
+#: application/view/adv.py:103
 msgid "instapaper"
 msgstr "instapaper"
 
-#: application/view/adv.py:98
+#: application/view/adv.py:104
 msgid "wallabag"
 msgstr "wallabag"
 
-#: application/view/adv.py:99 application/view/adv.py:100
-#: application/view/adv.py:101 application/view/adv.py:102
+#: application/view/adv.py:105 application/view/adv.py:106
+#: application/view/adv.py:107 application/view/adv.py:108
 msgid "Share on {}"
 msgstr "分享到 {}"
 
-#: application/view/adv.py:99
+#: application/view/adv.py:105
 msgid "weibo"
 msgstr "微博"
 
-#: application/view/adv.py:100
+#: application/view/adv.py:106
 msgid "facebook"
 msgstr "facebook"
 
-#: application/view/adv.py:102
+#: application/view/adv.py:108
 msgid "tumblr"
 msgstr "tumblr"
 
-#: application/view/adv.py:103
+#: application/view/adv.py:109
 msgid "Open in browser"
 msgstr "在浏览器打开"
 
-#: application/view/adv.py:104
+#: application/view/adv.py:110
 msgid "Append qrcode of url to article"
 msgstr "在每篇文章后附加文章链接的二维码"
 
-#: application/view/adv.py:368 application/view/share.py:54
+#: application/view/adv.py:374 application/view/share.py:54
 #: application/view/subscribe.py:247
 msgid "Unknown command: {}"
 msgstr "未知命令：{}"
 
-#: application/view/adv.py:437
+#: application/view/adv.py:443
 msgid "The format is invalid."
 msgstr "格式非法。"
 
-#: application/view/adv.py:469
+#: application/view/adv.py:475
 msgid "Authorization Error!<br/>{}"
 msgstr "申请授权过程失败！<br/>{}"
 
-#: application/view/adv.py:490
+#: application/view/adv.py:496
 msgid "Success authorized by Pocket!"
 msgstr "已经成功获得Pocket的授权！"
 
-#: application/view/adv.py:496
+#: application/view/adv.py:502
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr "申请Pocket授权失败!<hr/>错误信息参考如下：<br/><br/>{}"
 
-#: application/view/adv.py:517
+#: application/view/adv.py:523
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr "Instapaper服务器异常，请稍候再试。"
 
-#: application/view/adv.py:530
+#: application/view/adv.py:536
 msgid "Request type [{}] unsupported"
 msgstr "不支持你请求的命令类型 [{}]"
 
@@ -1766,11 +1770,11 @@ msgstr "不支持你请求的命令类型 [{}]"
 msgid "The username does not exist or the email is empty."
 msgstr "用户名不存在或email为空。"
 
-#: application/view/deliver.py:98
+#: application/view/deliver.py:109
 msgid "The following recipes has been added to the push queue."
 msgstr "下列Recipe已经被添加到推送队列。"
 
-#: application/view/deliver.py:101
+#: application/view/deliver.py:112
 msgid "There are no recipes to deliver."
 msgstr "没有需要推送的Recipe。"
 
@@ -1862,206 +1866,198 @@ msgstr "你可以点击下面的链接来重置你的KindleEar密码。"
 msgid "The article is missing?"
 msgstr "文章丢失了？"
 
-#: application/view/reader.py:188 application/view/translator.py:116
+#: application/view/reader.py:190 application/view/translator.py:116
 #: application/view/translator.py:200
 msgid "The text is empty."
 msgstr "文本为空。"
 
-#: application/view/reader.py:237
+#: application/view/reader.py:239
 msgid "No definitions found for '{}'."
 msgstr "未找到“{}”的定义。"
 
-#: application/view/reader.py:238
+#: application/view/reader.py:240
 msgid "Did you mean?"
 msgstr "您是指？"
 
-#: application/view/reader.py:322 application/view/reader.py:329
+#: application/view/reader.py:324 application/view/reader.py:331
 msgid "Failed to push: {}"
 msgstr "推送失败: {}"
 
-#: application/view/reader.py:377
+#: application/view/reader.py:379
 msgid "Failed to create ebook."
 msgstr "创建电子书失败。"
 
-#: application/view/settings.py:45
-msgid "Kindle E-mail is requied!"
-msgstr "Kindle E-mail必须填写！"
-
-#: application/view/settings.py:47
-msgid "Title is requied!"
-msgstr "书籍标题不能为空！"
-
-#: application/view/settings.py:141
+#: application/view/settings.py:130
 msgid ""
 "You have not yet set up your email address. Please go to the 'Admin' page"
 " to add your email address firstly."
 msgstr "您尚未设置您的email地址，请先到“账号管理”页面添加您的email地址。"
 
-#: application/view/settings.py:220
+#: application/view/settings.py:209
 msgid "English"
 msgstr "英语"
 
-#: application/view/settings.py:221
+#: application/view/settings.py:210
 msgid "Chinese"
 msgstr "中文"
 
-#: application/view/settings.py:222
+#: application/view/settings.py:211
 msgid "French"
 msgstr "法语"
 
-#: application/view/settings.py:223
+#: application/view/settings.py:212
 msgid "Spanish"
 msgstr "西班牙语"
 
-#: application/view/settings.py:224
+#: application/view/settings.py:213
 msgid "Portuguese"
 msgstr "葡萄牙语"
 
-#: application/view/settings.py:225
+#: application/view/settings.py:214
 msgid "German"
 msgstr "德语"
 
-#: application/view/settings.py:226
+#: application/view/settings.py:215
 msgid "Italian"
 msgstr "意大利语"
 
-#: application/view/settings.py:227
+#: application/view/settings.py:216
 msgid "Japanese"
 msgstr "日语"
 
-#: application/view/settings.py:228
+#: application/view/settings.py:217
 msgid "Russian"
 msgstr "俄语"
 
-#: application/view/settings.py:229
+#: application/view/settings.py:218
 msgid "Turkish"
 msgstr "土耳其语"
 
-#: application/view/settings.py:230
+#: application/view/settings.py:219
 msgid "Korean"
 msgstr "韩语"
 
-#: application/view/settings.py:231
+#: application/view/settings.py:220
 msgid "Arabic"
 msgstr "阿拉伯语"
 
-#: application/view/settings.py:232
+#: application/view/settings.py:221
 msgid "Czech"
 msgstr "捷克语"
 
-#: application/view/settings.py:233
+#: application/view/settings.py:222
 msgid "Dutch"
 msgstr "荷兰语"
 
-#: application/view/settings.py:234
+#: application/view/settings.py:223
 msgid "Greek"
 msgstr "希腊语"
 
-#: application/view/settings.py:235
+#: application/view/settings.py:224
 msgid "Hindi"
 msgstr "印地语"
 
-#: application/view/settings.py:236
+#: application/view/settings.py:225
 msgid "Malaysian"
 msgstr "马来西亚语"
 
-#: application/view/settings.py:237
+#: application/view/settings.py:226
 msgid "Bengali"
 msgstr "孟加拉语"
 
-#: application/view/settings.py:238
+#: application/view/settings.py:227
 msgid "Persian"
 msgstr "波斯语"
 
-#: application/view/settings.py:239
+#: application/view/settings.py:228
 msgid "Urdu"
 msgstr "乌尔都语"
 
-#: application/view/settings.py:240
+#: application/view/settings.py:229
 msgid "Swahili"
 msgstr "斯瓦希里语"
 
-#: application/view/settings.py:241
+#: application/view/settings.py:230
 msgid "Vietnamese"
 msgstr "越南语"
 
-#: application/view/settings.py:242
+#: application/view/settings.py:231
 msgid "Punjabi"
 msgstr "旁遮普语"
 
-#: application/view/settings.py:243
+#: application/view/settings.py:232
 msgid "Javanese"
 msgstr "爪哇语"
 
-#: application/view/settings.py:244
+#: application/view/settings.py:233
 msgid "Tagalog"
 msgstr "他加禄语"
 
-#: application/view/settings.py:245
+#: application/view/settings.py:234
 msgid "Hausa"
 msgstr "豪萨语"
 
-#: application/view/settings.py:246
+#: application/view/settings.py:235
 msgid "Thai"
 msgstr "泰语"
 
-#: application/view/settings.py:247
+#: application/view/settings.py:236
 msgid "Polish"
 msgstr "波兰语"
 
-#: application/view/settings.py:248
+#: application/view/settings.py:237
 msgid "Romanian"
 msgstr "罗马尼亚语"
 
-#: application/view/settings.py:249
+#: application/view/settings.py:238
 msgid "Hungarian"
 msgstr "匈牙利语"
 
-#: application/view/settings.py:250
+#: application/view/settings.py:239
 msgid "Swedish"
 msgstr "瑞典语"
 
-#: application/view/settings.py:251
+#: application/view/settings.py:240
 msgid "Hebrew"
 msgstr "希伯来语"
 
-#: application/view/settings.py:252
+#: application/view/settings.py:241
 msgid "Norwegian"
 msgstr "挪威语"
 
-#: application/view/settings.py:253
+#: application/view/settings.py:242
 msgid "Finnish"
 msgstr "芬兰语"
 
-#: application/view/settings.py:254
+#: application/view/settings.py:243
 msgid "Danish"
 msgstr "丹麦语"
 
-#: application/view/settings.py:255
+#: application/view/settings.py:244
 msgid "Ukrainian"
 msgstr "乌克兰语"
 
-#: application/view/settings.py:256
+#: application/view/settings.py:245
 msgid "Tamil"
 msgstr "泰米尔语"
 
-#: application/view/settings.py:257
+#: application/view/settings.py:246
 msgid "Marathi"
 msgstr "马拉地语"
 
-#: application/view/settings.py:258
+#: application/view/settings.py:247
 msgid "Burmese"
 msgstr "缅甸语"
 
-#: application/view/settings.py:259
+#: application/view/settings.py:248
 msgid "Amharic"
 msgstr "阿姆哈拉语"
 
-#: application/view/settings.py:260
+#: application/view/settings.py:249
 msgid "Azerbaijani"
 msgstr "阿塞拜疆语"
 
-#: application/view/settings.py:261
+#: application/view/settings.py:250
 msgid "Kazakh"
 msgstr "哈萨克语"
 
@@ -2160,4 +2156,3 @@ msgstr "此Recipe的网站登录信息已经保存。"
 #: application/view/translator.py:77 application/view/translator.py:160
 msgid "The api key is required."
 msgstr "需要填写api key."
-
