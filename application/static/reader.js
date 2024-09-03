@@ -669,7 +669,7 @@ function decreaseFontSize() {
 //将目前的配置保存到服务器
 function saveSettings() {
   ajax_post('/reader/settings', {fontSize: g_fontSize, allowLinks: g_allowLinks, inkMode: g_inkMode,
-    topleftDict: g_topleftDict});
+    darkMode: g_darkMode, topleftDict: g_topleftDict});
 }
 
 //显示触摸区域图示

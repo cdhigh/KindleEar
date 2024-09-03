@@ -119,13 +119,13 @@ class HtmlTranslator:
         def _extract(tag, position):
             for child in tag.find_all(recursive=False):
                 if _contains_text(child) and not _tag_is_filtered(child):
-                    text = str(child).strip()
-                    if text:
-                        #因为非AI翻译容易误翻译超链接里面的内容，所以这里去掉超链接
-                        if position != 'replace' and '<a' in text:
-                            text = re.sub(r'<a\b[^>]*>', '<u>', text)
-                            text = text.replace('</a>', '</u>')
-                        elements.append((child, text))
+                    text = str(child).strip() if position == 'replace' else child.get_text()
+                    elements.append((child, text))
+                    #if text:
+                    #    #因为非AI翻译容易误翻译超链接里面的内容，所以这里去掉超链接
+                    #    if position != 'replace' and '<a' in text:
+                    #        text = re.sub(r'<a\b[^>]*>', '<u>', text)
+                    #        text = text.replace('</a>', '</u>')
                 else:
                     _extract(child, position)
 
@@ -148,7 +148,9 @@ class HtmlTranslator:
         transTag = transTag.contents[0]
         if isinstance(transTag, NavigableString):
             oldTxt = str(transTag)
-            transTag = soup.new_tag('span')
+            transTagName = 'span' if tag.name in ('title', 'tr', 'td', 'th', 'thead', 'tbody', 'table', 
+                'ul', 'ol', 'li', 'a') else tag.name
+            transTag = soup.new_tag(transTagName)
             transTag.string = oldTxt
         
         if origStyle:
