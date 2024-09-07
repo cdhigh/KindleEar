@@ -1063,7 +1063,15 @@ function adjustIFrameStyle(iframe) {
   var doc = iframe.contentWindow.document || iframe.contentDocument;
   var body = doc.body;
   iframe.style.display = "block";
+  //添加一个元素规避chrome对iframe高度计算不准确的问题
+  if (!isMobile()) {
+    iframe.style.height = '10000px';
+    var newDiv = doc.createElement('div');
+    newDiv.innerHTML = '<br/><p>■ END</p><br/><br/>';
+    body.appendChild(newDiv);
+  }
   iframe.style.height = 'auto';
+
   body.style.textAlign = 'justify';
   body.style.wordWrap = 'break-word';
   body.style.hyphens = 'auto';
