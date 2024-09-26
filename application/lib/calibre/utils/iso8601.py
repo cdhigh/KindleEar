@@ -13,7 +13,7 @@ UNDEFINED_DATE = datetime(101,1,1, tzinfo=utc_tz)
 def parse_iso8601(date_string, assume_utc=False, as_utc=True, require_aware=False):
     if not date_string:
         return UNDEFINED_DATE
-    yourdate = parser.parse(datestring)
+    yourdate = parser.parse(date_string)
     return yourdate.astimezone(utc_tz if as_utc else local_tz)
 
 
