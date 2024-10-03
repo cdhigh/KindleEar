@@ -144,7 +144,7 @@ class BasicNewsRecipe(Recipe):
 
     #: Number of simultaneous downloads. Set to 1 if the server is picky.
     #: Automatically reduced to 1 if :attr:`BasicNewsRecipe.delay` > 0
-    simultaneous_downloads = 5
+    simultaneous_downloads = 3
 
     #: Timeout for fetching files from server in seconds
     timeout                = 60
@@ -969,7 +969,7 @@ class BasicNewsRecipe(Recipe):
 
         if self.test:
             self.max_articles_per_feed = self.test[1]
-            self.simultaneous_downloads = min(4, self.simultaneous_downloads)
+            self.simultaneous_downloads = min(3, self.simultaneous_downloads)
 
         if self.debug:
             self.verbose = True

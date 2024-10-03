@@ -80,11 +80,17 @@ def send_to_kindle(user, title, attachment, fileWithTime=True, to=None):
 
 #统一的发送邮件函数
 def send_mail(user, to, subject, body, attachments=None, html=None):
-    if not isinstance(to, list):
+    sender = user.cfg('sender')
+    if not sender:
+        raise ValueError('Email of sender is empty')
+    if not to:
+        raise ValueError('Email of recipient is empty')
+    elif not isinstance(to, list):
         to = to.split(',')
+        
     sm_service = user.get_send_mail_service()
     srv_type = sm_service.get('service', '')
-    data = {'sender': user.cfg('sender'), 'to': to, 'subject': subject, 'body': body}
+    data = {'sender': sender, 'to': to, 'subject': subject, 'body': body}
     if attachments:
         data['attachments'] = attachments
     if html:

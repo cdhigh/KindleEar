@@ -790,7 +790,7 @@ function ShowShareDialog(id, title){
     'no','oc','oj','or','om','os','pa','fa','pi','pl','pt','ps','qu','rm','ro','ro','rn','ru','sg','sa','si','sk','sk',
     'sl','se','sm','sn','sd','so','st','es','sq','sc','sr','ss','su','sw','sv','ty','ta','tt','te','tg','tl','th','bo',
     'ti','to','tn','ts','tk','tr','tw','ug','uk','ur','uz','ve','vi','vo','cy','wa','wo','xh','yi','yo','za','zh','zu'];
-  var languages = ['en','fr','zh','es','pt','de','it','ja','ru','tr','ko','ar','cs','nl','el','hi','ms','bn','fa','ur',
+  var languages = ['en','zh','es','fr','pt','de','it','ja','ru','tr','ko','ar','cs','nl','el','hi','ms','bn','fa','ur',
     'sw','vi','pa','jv','tl','ha','da','in','no','pl','ro','sv','th'];
   var userLang = BrowserLanguage();
   var ostr = [`<h3 style="margin:0px auto;text-align:center;">${i18n.shareLinksHappiness}</h3>
@@ -813,7 +813,7 @@ function ShowShareDialog(id, title){
           <select onchange="this.nextElementSibling.value=this.value;DisplayShareRssLang()">
             <option value=""></option>`);
   for (var lang of languages) {
-    ostr.push(`<option value="${lang}">${lang}</option>`);
+    ostr.push(`<option value="${lang}">${LanguageName(lang)}</option>`);
   }
   ostr.push(`</select>
           <input type="text" name="category" oninput="DisplayShareRssLang()" value="${userLang}" id="txt_share_rss_lang" />
