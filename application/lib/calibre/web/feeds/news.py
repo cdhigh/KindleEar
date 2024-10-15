@@ -2318,7 +2318,7 @@ class CalibrePeriodical(BasicNewsRecipe):
         br.select_form(name='login')
         br['username'] = self.username
         br['password'] = self.password
-        raw = br.submit_selected().content
+        raw = br.submit().read()
         if 'href="/my-account"' not in raw:
             raise LoginFailed(
                     _('Failed to log in, check your username and password for'

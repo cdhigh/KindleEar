@@ -142,17 +142,17 @@ class HtmlTranslator:
         origStyle = self.params.get('orig_style', '')
         transStyle = self.params.get('trans_style', '')
         trans = trans.replace('&lt;', '<').replace('&gt;', '>')
-        transTag = BeautifulSoup(trans, 'html.parser') #'html.parser'解析器不会自动添加<html><body>
-        if not transTag.contents:
-            return
-        transTag = transTag.contents[0]
-        if isinstance(transTag, NavigableString):
-            oldTxt = str(transTag)
+        #纯文本，不是html
+        if '<' not in trans or '>' not in trans:
             transTagName = 'span' if tag.name in ('title', 'tr', 'td', 'th', 'thead', 'tbody', 'table', 
                 'ul', 'ol', 'li', 'a') else tag.name
             transTag = soup.new_tag(transTagName)
-            transTag.string = oldTxt
-        
+            transTag.string = trans
+        else:
+            transTag = BeautifulSoup(trans, 'html.parser') #'html.parser'解析器不会自动添加<html><body>
+            if not transTag.contents:
+                return
+            transTag = transTag.contents[0]
         if origStyle:
             old = tag.get('style')
             tag['style'] = f'{old};{origStyle}' if old else origStyle

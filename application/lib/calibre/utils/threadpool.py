@@ -47,6 +47,7 @@ __license__ = 'Python license'
 
 # standard library modules
 import threading
+
 from polyglot import queue
 
 # exceptions
@@ -72,7 +73,7 @@ class WorkerThread(threading.Thread):
     """
 
     def __init__(self, requestsQueue, resultsQueue, **kwds):
-        """Set up thread in daemonic mode and start it immediatedly.
+        """Set up thread in daemonic mode and start it immediately.
 
         requestsQueue and resultQueue are instances of queue.Queue passed
         by the ThreadPool class when it creates a new worker thread.
@@ -96,9 +97,9 @@ class WorkerThread(threading.Thread):
                 break  # and exit
             try:
                 self.resultQueue.put(
-                    (request, request.callable(request.args, **request.kwds))
+                    (request, request.callable(*request.args, **request.kwds))
                 )
-            except Exception as e:
+            except:
                 request.exception = True
                 import traceback
                 self.resultQueue.put((request, traceback.format_exc()))

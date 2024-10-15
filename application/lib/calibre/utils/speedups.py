@@ -9,14 +9,15 @@ class ReadOnlyFileBuffer:
 
     ''' A zero copy implementation of a file like object. Uses memoryviews for efficiency. '''
 
-    def __init__(self, raw):
+    def __init__(self, raw: bytes, name: str = ''):
         self.sz, self.mv = len(raw), (raw if isinstance(raw, memoryview) else memoryview(raw))
         self.pos = 0
+        self.name: str = name
 
     def tell(self):
         return self.pos
 
-    def read(self, n=None):
+    def read(self, n = None) -> memoryview:
         if n is None:
             ans = self.mv[self.pos:]
             self.pos = self.sz
@@ -34,6 +35,9 @@ class ReadOnlyFileBuffer:
             self.pos += pos
         self.pos = max(0, min(self.pos, self.sz))
         return self.pos
+
+    def seekable(self):
+        return True
 
     def getvalue(self):
         return self.mv
