@@ -55,3 +55,4 @@ plugins = Plugins()
 config_dir = ""
 DEBUG = False
 CONFIG_DIR_MODE = 0o700
+cache_dir = ''
