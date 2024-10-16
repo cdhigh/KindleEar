@@ -1906,7 +1906,7 @@ class BasicNewsRecipe(Recipe):
             self.aborted_articles.append((request.feed, request.article))
         else:
             self.log.error('Failed to download article:{} from {}'.format(request.article.title, request.article.url))
-            self.log.debug(traceback)
+            self.log.info(traceback)
             self.log.debug('\n')
             self.failed_downloads.append((request.feed, request.article, traceback))
 
