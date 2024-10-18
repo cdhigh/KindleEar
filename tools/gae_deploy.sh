@@ -29,7 +29,7 @@ mv -f ${KE_DIR}/calibre/recipes/*.recipe ${KE_DIR}/application/recipes/
 rm -rf ${KE_DIR}/calibre
 python3 -m venv ${KE_DIR}/myenv
 source ${KE_DIR}/myenv/bin/activate
-pip3 install --upgrade pip
+#pip3 install --upgrade pip
 pip3 install --no-cache-dir -q -r ${KE_DIR}/requirements.txt
 python3 ${KE_DIR}/tools/archive_builtin_recipes.py -q
 rm -f ${KE_DIR}/application/recipes/*.recipe > /dev/null 2>&1

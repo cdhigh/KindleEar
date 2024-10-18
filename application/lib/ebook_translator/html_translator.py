@@ -141,18 +141,26 @@ class HtmlTranslator:
         position = self.params.get('position', 'below')
         origStyle = self.params.get('orig_style', '')
         transStyle = self.params.get('trans_style', '')
-        trans = trans.replace('&lt;', '<').replace('&gt;', '>')
-        #纯文本，不是html
-        if '<' not in trans or '>' not in trans:
-            transTagName = 'span' if tag.name in ('title', 'tr', 'td', 'th', 'thead', 'tbody', 'table', 
-                'ul', 'ol', 'li', 'a') else tag.name
-            transTag = soup.new_tag(transTagName)
-            transTag.string = trans
+        trans = trans.replace('&lt;', '<').replace('&gt;', '>').replace('< /', '</')
+
+        #内嵌函数，将一个纯文本包裹在一个html标签中，返回新标签对象
+        def _wrapPureString(tagName, txt):
+            if tagName in ('title', 'tr', 'td', 'th', 'thead', 'tbody', 'table', 'ul', 'ol', 'li', 'a'):
+                tagName = 'span'
+            newTag = soup.new_tag(tagName)
+            newTag.string = str(txt)
+            return newTag
+
+        #有效的html文本
+        if '<' in trans and '>' in trans:
+            transSoup = BeautifulSoup(trans, 'html.parser') #'html.parser'解析器不会自动添加<html><body>
+            transTag = transSoup.contents[0] if transSoup.contents else trans
         else:
-            transTag = BeautifulSoup(trans, 'html.parser') #'html.parser'解析器不会自动添加<html><body>
-            if not transTag.contents:
-                return
-            transTag = transTag.contents[0]
+            transTag = _wrapPureString(tag.name, trans)
+
+        if isinstance(transTag, (str, NavigableString)):
+            transTag = _wrapPureString(tag.name, transTag)
+
         if origStyle:
             old = tag.get('style')
             tag['style'] = f'{old};{origStyle}' if old else origStyle

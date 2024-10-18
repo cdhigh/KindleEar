@@ -7,6 +7,6 @@ from .youdao import YoudaoTranslate
 from .baidu import BaiduTranslate
 from .microsoft import MicrosoftEdgeTranslate
 
-builtin_translate_engines = (GoogleFreeTranslate, ChatgptTranslate, AzureChatgptTranslate,
-    GeminiPro, DeeplTranslate, DeeplProTranslate, DeeplFreeTranslate,
-    MicrosoftEdgeTranslate, YoudaoTranslate, BaiduTranslate)
+builtin_translate_engines = (MicrosoftEdgeTranslate, GoogleFreeTranslate, ChatgptTranslate,
+    AzureChatgptTranslate, GeminiPro, DeeplTranslate, DeeplProTranslate, DeeplFreeTranslate,
+    YoudaoTranslate, BaiduTranslate)
