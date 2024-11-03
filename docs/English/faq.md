@@ -48,9 +48,9 @@ If deployed using Docker Compose, the email address is: `xxx@domain`, remember t
 
 2. This email will convert the received email body into e-book and push them to your registered email. If the email only contains links (one link per line), it will fetch the web content of the links and create an e-book before pushing.    
 
-3. If email subject contains the identifier `!links`, regardless of the email content, KindleEar will only extract the links from the email, then fetch the webpages and send them as e-books to your Kindle. This feature is best suited for sending serialized web content directly to Kindle for viewing.   
+3. If email's address is `links@domain` or subject contains the identifier `!links`, regardless of the email content, KindleEar will only extract the links from the email, then fetch the webpages and send them as e-books to your Kindle. This feature is best suited for sending serialized web content directly to Kindle for viewing.   
 
-4. If the identifier `!article` is present in the subject, all links will be ignored, and the content will be directly converted into an e-book for delivery.      
+4. If email's address is `article@domain` or the identifier `!article` is present in the subject, all links will be ignored, and the content will be directly converted into an e-book for delivery.      
 
 5. The default language of the e-book is same as of the custom RSS. If you need another language, you can add the identifier `!lang=en` (replace `en` with the language code you need) after the email subject.   
 

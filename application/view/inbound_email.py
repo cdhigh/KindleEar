@@ -170,8 +170,8 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
         if ret:
             return 'Sent:<br/>{}'.format('<br/>'.join(ret))
 
-    forceLinks = False #强制提取链接
-    forceArticle = False #强制发送邮件内容
+    forceLinks = bool(dest == 'links') #强制提取链接
+    forceArticle = bool(dest == 'article') #强制发送邮件内容
     
     #邮件主题中如果存在 !links ，则强制提取邮件中的链接然后生成电子书
     if subject.endswith('!links') or ' !links ' in subject:
