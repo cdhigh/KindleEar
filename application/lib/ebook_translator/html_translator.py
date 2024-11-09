@@ -100,10 +100,11 @@ class HtmlTranslator:
     #提取soup包含文本的节点，返回一个列表 [(tag, text),...]
     def extract_soup_text(self, soup):
         elements = []
+        maxLen = self.translator.max_len_per_request
 
         #确定soup节点是否直接包含文本元素
         def _contains_text(tag):
-            if (tag.name == 'table' or tag.string is not None or 
+            if ((tag.name == 'table') or (tag.string is not None) or 
                 [x for x in tag.children if isinstance(x, NavigableString) and str(x).strip()]):
                 return True
             return False
@@ -113,21 +114,28 @@ class HtmlTranslator:
             return tag.name in ('pre', 'code', 'abbr', 'style', 'script', 'textarea',
                 'input', 'select', 'link', 'img', 'option', 'datalist')
 
+        #判断节点没有子标签节点，只有文本
+        def _tag_has_only_text(tag):
+            return all(isinstance(e, NavigableString) for e in tag.children)
+
         #递归函数，用于遍历BeautifulSoup元素的所有子节点并提取文本内容
         #tag: 开始的BeautifulSoup元素
         #position: 翻译后的文本显示的位置
         def _extract(tag, position):
             for child in tag.find_all(recursive=False):
                 if _contains_text(child) and not _tag_is_filtered(child):
-                    text = str(child).strip() if position == 'replace' else child.get_text()
-                    elements.append((child, text))
+                    text = str(child).strip() if position == 'replace' else child.get_text().strip()
+                    if text and _tag_has_only_text(child) or len(text) < maxLen:
+                        elements.append((child, text))
+                        continue
+
                     #if text:
                     #    #因为非AI翻译容易误翻译超链接里面的内容，所以这里去掉超链接
                     #    if position != 'replace' and '<a' in text:
                     #        text = re.sub(r'<a\b[^>]*>', '<u>', text)
                     #        text = text.replace('</a>', '</u>')
-                else:
-                    _extract(child, position)
+                
+                _extract(child, position)
 
         position = self.params.get('position', 'below')
         _extract(soup.body, position)

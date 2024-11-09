@@ -824,11 +824,12 @@ function populateBooks(expandLevel) {
         if (!article || !article.src || !article.title) {
           continue;
         }
+        var sTitle = article.title.replace(/"/g, '&quot;');
         ostr.push(
              '<div class="nav-title" data-src="' + article.src +'">' +
                 '<div>' +
                   articleSvgIcon() +
-                  '<span class="nav-title-text">' + article.title + '</span>' +
+                  '<span class="nav-title-text" title="' + sTitle + '">' + article.title + '</span>' +
                 '</div>' +
               '</div>');
       }

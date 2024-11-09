@@ -22,6 +22,7 @@ class Base:
     request_attempt = 3
     request_timeout = 10.0
     max_error_count = 10
+    max_len_per_request = 3000
 
     def __init__(self, config=None):
         self.source_lang = None #语种显示的名字
