@@ -27,10 +27,10 @@ def MySubscription(user: KeUser):
     url_to_add = args.get('url_to_add', '').strip()
     isfulltext = str_to_bool(args.get('isfulltext'))
     my_custom_rss = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.url, Recipe.isfulltext, 
-        Recipe.translator, Recipe.tts, Recipe.custom]) for item in user.all_custom_rss()]
+        Recipe.translator, Recipe.tts, Recipe.summarizer, Recipe.custom]) for item in user.all_custom_rss()]
 
     my_uploaded_recipes = [item.to_dict(only=[Recipe.id, Recipe.title, Recipe.description, Recipe.needs_subscription, 
-        Recipe.language, Recipe.translator, Recipe.tts]) for item in user.all_uploaded_recipe()]
+        Recipe.language, Recipe.translator, Recipe.summarizer, Recipe.tts]) for item in user.all_uploaded_recipe()]
 
     my_booked_recipes = [item.to_dict(exclude=[BookedRecipe.encrypted_pwd])
         for item in user.get_booked_recipe() if not item.recipe_id.startswith('custom:')]
@@ -40,17 +40,20 @@ def MySubscription(user: KeUser):
         item['id'] = 'custom:{}'.format(item['id'])
         item['tr_enable'] = item['translator'].get('enable')
         item['tts_enable'] = item['tts'].get('enable')
+        item['summary_enable'] = item['summarizer'].get('enable')
         item['separated'] = item['custom'].get('separated', False)
     for item in my_uploaded_recipes:
         item['id'] = 'upload:{}'.format(item['id'])
         item['language'] = item['language'].lower().replace('-', '_').split('_')[0]
         item['tr_enable'] = item['translator'].get('enable')
         item['tts_enable'] = item['tts'].get('enable')
+        item['summary_enable'] = item['summarizer'].get('enable')
     for item in my_booked_recipes:
         if not isinstance(item['send_days'], dict): #处理以前版本的不兼容修改
             item['send_days'] = {}
         item['tr_enable'] = item['translator'].get('enable')
         item['tts_enable'] = item['tts'].get('enable')
+        item['summary_enable'] = item['summarizer'].get('enable')
         
     my_custom_rss = json.dumps(my_custom_rss, separators=(',', ':'))
     my_uploaded_recipes=json.dumps(my_uploaded_recipes, separators=(',', ':'))
@@ -206,7 +209,7 @@ def UpdateBookedCustomRss(user: KeUser):
         for rss in custom_rss:
             BookedRecipe.get_or_create(recipe_id=rss.recipe_id, defaults={'user': userName, 
                 'title': rss.title, 'description': rss.description, 'time': utcnow(),
-                'translator': rss.translator, 'tts': rss.tts, 'custom': rss.custom,
+                'translator': rss.translator, 'tts': rss.tts, 'summarizer': rss.summarizer, 'custom': rss.custom,
                 'separated': rss.custom.get('separated', False)})
     elif custom_rss: #删除订阅
         ids = [rss.recipe_id for rss in custom_rss]

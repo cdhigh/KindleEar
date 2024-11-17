@@ -441,6 +441,7 @@ class BasicNewsRecipe(Recipe):
     # set by worker.py
     translator = {}
     tts = {}
+    summarizer = {}
     delivery_reason = 'cron'
 
     # See the built-in recipes for examples of these settings.
@@ -1130,12 +1131,16 @@ class BasicNewsRecipe(Recipe):
         #for x in ans.find_all('mark'):
         #    x.name = 'strong'
 
-        #If tts need, tts propery is set by WorkerImpl
+        #If tts need, 'tts' propery is set by WorkerImpl
         tts_enable = self.tts.get('enable')
         if tts_enable:
             self.audiofy_html(soup, title, job_info)
 
-        #If translation need, translator propery is set by WorkerImpl
+        #If ai-summarization need, 'summarizer' propery is set by WorkerImpl
+        if self.summarizer.get('enable'):
+            self.summarize_html(soup, title)
+
+        #If translation need, 'translator' propery is set by WorkerImpl
         if self.translator.get('enable') and (tts_enable != 'audio_only'):
             self.translate_html(soup, title)
 
@@ -1534,9 +1539,9 @@ class BasicNewsRecipe(Recipe):
                 self.jobs.append(req)
 
         self.jobs_done = 0
-        trans_enable = self.translator.get('enable') or self.tts.get('enable')
-        #如果翻译使能，则不能使用多线程，否则容易触发流量告警导致IP被封锁
-        if (self.simultaneous_downloads > 1) and not trans_enable:
+        ai_enable = self.translator.get('enable') or self.tts.get('enable') or self.summarizer.get('enable')
+        #如果翻译/AI使能，则不能使用多线程，否则容易触发流量告警导致IP被封锁
+        if (self.simultaneous_downloads > 1) and not ai_enable:
             tp = ThreadPool(self.simultaneous_downloads)
             for req in self.jobs:
                 tp.putRequest(req, block=True, timeout=0)
@@ -2060,8 +2065,8 @@ class BasicNewsRecipe(Recipe):
     #调用在线翻译服务平台，翻译html
     def translate_html(self, soup, title):
         from ebook_translator import HtmlTranslator
-        translator = HtmlTranslator(self.translator, self.simultaneous_downloads)
         self.log.info(f'Translating html [{title}]')
+        translator = HtmlTranslator(self.translator, self.simultaneous_downloads)
         translator.translate_soup(soup)
 
     #翻译Feed的title，toc时用到
@@ -2110,6 +2115,12 @@ class BasicNewsRecipe(Recipe):
                     self.log.warning(f'Failed to write "{filename}": {e}')
         else:
             self.log.warning(f'Failed to audiofy "{title}": {ret["error"]}')
+
+    #调用AI服务给html写一个摘要
+    def summarize_html(self, soup, title):
+        from ebook_summarizer import HtmlSummarizer
+        self.log.info(f'Summarizing html [{title}]')
+        HtmlSummarizer(self.summarizer).summarize_soup(soup)
 
 class CustomIndexRecipe(BasicNewsRecipe):
 

@@ -5,12 +5,14 @@
 #Author: cdhigh <https://github.com/cdhigh>
 import os, random, datetime
 from operator import attrgetter
-from ..utils import PasswordManager, ke_encrypt, ke_decrypt, utcnow
+from ..utils import PasswordManager, ke_encrypt, ke_decrypt, utcnow, compare_version
 
 if os.getenv('DATABASE_URL', '').startswith(("datastore", "mongodb", "redis", "pickle")):
     from .db_models_nosql import *
+    DB_CATEGORY = 'nosql'
 else:
     from .db_models_sql import *
+    DB_CATEGORY = 'sql'
 
 class KeUser(MyBaseModel): # kindleEar User
     name = CharField(unique=True)
@@ -188,6 +190,7 @@ class Recipe(MyBaseModel):
     language = CharField(default='')
     translator = JSONField(default=JSONField.dict_default) #用于自定义RSS的备份，实际使用的是BookedRecipe
     tts = JSONField(default=JSONField.dict_default) #用于自定义RSS的备份，实际使用的是BookedRecipe
+    summarizer = JSONField(default=JSONField.dict_default) #用于自定义RSS的备份，实际使用的是BookedRecipe
     custom = JSONField(default=JSONField.dict_default) #留着扩展，避免后续一些小特性还需要升级数据表结构
 
     #在程序内其他地方使用的id，在数据库内则使用 self.id
@@ -221,6 +224,7 @@ class BookedRecipe(MyBaseModel):
     time = DateTimeField(default=utcnow) #源被订阅的时间，用于排序
     translator = JSONField(default=JSONField.dict_default)
     tts = JSONField(default=JSONField.dict_default)
+    summarizer = JSONField(default=JSONField.dict_default)
     custom = JSONField(default=JSONField.dict_default) #留着扩展，避免后续一些小特性还需要升级数据表结构
     
     @property
@@ -319,12 +323,25 @@ class AppInfo(MyBaseModel):
         
 #创建数据库表格，一个数据库只需要创建一次
 def create_database_tables():
-    dbInstance.create_tables([KeUser, UserBlob, Recipe, BookedRecipe, DeliverLog, WhiteList,
-        SharedRss, SharedRssCategory, LastDelivered, InBox, AppInfo], safe=True)
-    if not AppInfo.get_value(AppInfo.dbSchemaVersion):
+    if DB_CATEGORY != 'sql':
+        return
+
+    try:
+        connect_database()
+        if not AppInfo.table_exists():
+            default_log.warning("Database not found. Creating new database...")
+            dbInstance.create_tables([KeUser, UserBlob, Recipe, BookedRecipe, DeliverLog, WhiteList,
+                SharedRss, SharedRssCategory, LastDelivered, InBox, AppInfo], safe=True)
+            AppInfo.set_value(AppInfo.dbSchemaVersion, appVer)
+            default_log.warning("Created database tables successfully.")
+        else:
+            check_upgrade_database()
+    except OperationalError:
+        default_log.warning("Database not initialized or connection error. Creating new database...")
+        dbInstance.create_tables([KeUser, UserBlob, Recipe, BookedRecipe, DeliverLog, WhiteList,
+            SharedRss, SharedRssCategory, LastDelivered, InBox, AppInfo], safe=True)
         AppInfo.set_value(AppInfo.dbSchemaVersion, appVer)
-    
-    return 'Created database tables successfully'
+        default_log.warning("Created database tables successfully.")
 
 #删除所有表格的所有数据，相当于恢复出厂设置
 def delete_database_all_data():
@@ -334,3 +351,20 @@ def delete_database_all_data():
             model.delete().execute()
         except:
             pass
+
+#升级数据库，仅用于SQL数据库
+def check_upgrade_database():
+    if DB_CATEGORY != 'sql':
+        return
+
+    dbSchemaVersion = AppInfo.get_value(AppInfo.dbSchemaVersion, appVer)
+    #v3.2版本给两个表添加了 summarizer 列
+    if compare_version(dbSchemaVersion, '3.2') > 0:
+        default_log.warning(f"Upgrading database to version {appVer}...")
+        try:
+            dbInstance.execute_sql("ALTER TABLE recipe ADD COLUMN summarizer TEXT DEFAULT '{}';")
+            dbInstance.execute_sql("ALTER TABLE bookedrecipe ADD COLUMN summarizer TEXT DEFAULT '{}';")
+            AppInfo.set_value(AppInfo.dbSchemaVersion, appVer)
+        except OperationalError as e:
+            default_log.warning(f"Column already exists or another issue occurred: {e}")
+

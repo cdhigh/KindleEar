@@ -766,6 +766,9 @@ select[id="shared_rss_lang_pick"] {
 .btn-G { /* G为深绿色背景 */
     background: linear-gradient(to bottom, rgba(76, 171, 5, 0.6) 50%, rgba(24, 87, 24, 0.8) 50%);
 }
+.btn-H { /* H为较深青蓝色的背景 */
+    background: linear-gradient(to bottom, rgba(77, 178, 178, 0.6) 50%, rgba(38, 128, 128, 0.8) 50%);
+}
 
 .lib-header {
     display: flex;
@@ -944,6 +947,9 @@ div.schedule_daytimes label {
 }
 .icon-tts:before {
   content: "\e692";
+}
+.icon-ai:before {
+  content: "\e68a";
 }
 
 /* upload cover images */

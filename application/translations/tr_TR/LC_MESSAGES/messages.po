@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-08-26 15:24-0300\n"
+"POT-Creation-Date: 2024-11-17 17:57-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: tr_TR\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:180
+#: application/templates/admin.html:3 application/templates/base.html:182
 #: application/templates/settings.html:252
 msgid "Admin"
 msgstr "Yönetim"
@@ -225,6 +225,7 @@ msgstr "Ana bilgisayar"
 #: application/templates/adv_dict.html:79
 #: application/templates/adv_inboundmail.html:34
 #: application/templates/book_audiolator.html:113
+#: application/templates/book_summarizer.html:84
 #: application/templates/book_translator.html:80
 #: application/templates/settings.html:258
 msgid "Save settings"
@@ -294,7 +295,7 @@ msgid "There are no recipes subscribed"
 msgstr "Abone olunan tarif yok"
 
 #: application/templates/adv_delivernow.html:17
-#: application/templates/base.html:100
+#: application/templates/base.html:101
 msgid "Sep"
 msgstr "Sep"
 
@@ -323,6 +324,7 @@ msgstr "Kitap dili"
 #: application/templates/adv_dict.html:27
 #: application/templates/adv_dict.html:49
 #: application/templates/adv_dict.html:66
+#: application/templates/book_summarizer.html:23
 #: application/templates/book_translator.html:26
 #: application/templates/word_lookup.html:59
 msgid "Engine"
@@ -376,6 +378,7 @@ msgstr ""
 "yapılandırmanız gerekmektedir."
 
 #: application/templates/adv_inboundmail.html:16
+#: application/templates/book_summarizer.html:19
 #: application/templates/book_translator.html:22
 msgid "Disable"
 msgstr "Devre dışı bırak"
@@ -461,7 +464,7 @@ msgid "Random"
 msgstr "Rastgele"
 
 #: application/templates/adv_uploadcover.html:18
-#: application/templates/base.html:125
+#: application/templates/base.html:127
 msgid "Weekday"
 msgstr "Hafta içi gün"
 
@@ -552,6 +555,7 @@ msgstr "Kategori"
 
 #: application/templates/base.html:39
 #: application/templates/book_audiolator.html:58
+#: application/templates/book_summarizer.html:43
 #: application/templates/settings.html:148
 msgid "Language"
 msgstr "Dil"
@@ -801,26 +805,36 @@ msgid "Bilingual Translator"
 msgstr "Çift Dilli Çevirmen"
 
 #: application/templates/base.html:99
+#: application/templates/book_summarizer.html:3
+#: application/templates/book_summarizer.html:14
+msgid "AI Summarizer"
+msgstr "Yapay Zeka Özetleyici"
+
+#: application/templates/base.html:100
 msgid "Upl"
 msgstr "Upl"
 
-#: application/templates/base.html:101
+#: application/templates/base.html:102
 msgid "Log"
 msgstr "Log"
 
-#: application/templates/base.html:102
+#: application/templates/base.html:103
 msgid "Emb"
 msgstr "Emb"
 
-#: application/templates/base.html:103
+#: application/templates/base.html:104
 msgid "Tr"
 msgstr "Tr"
 
-#: application/templates/base.html:104
+#: application/templates/base.html:105
 msgid "Tts"
 msgstr "Tts"
 
-#: application/templates/base.html:105
+#: application/templates/base.html:106
+msgid "Ai"
+msgstr "Ai"
+
+#: application/templates/base.html:107
 msgid ""
 "The test email has been successfully sent to the following addresses. "
 "Please check your inbox or spam folder to confirm its delivery. Depending"
@@ -830,15 +844,15 @@ msgstr ""
 "gelen kutunuzu veya spam klasörünüzü kontrol edin. E-posta sunucunuza "
 "bağlı olarak hafif bir gecikme olabilir."
 
-#: application/templates/base.html:106
-msgid "Translating..."
-msgstr "Translating..."
+#: application/templates/base.html:108
+msgid "Processing..."
+msgstr "İşleniyor..."
 
-#: application/templates/base.html:107
+#: application/templates/base.html:109
 msgid "The configuration validation is correct."
 msgstr "Konfigürasyon doğrulaması doğru."
 
-#: application/templates/base.html:108 application/templates/logs.html:23
+#: application/templates/base.html:110 application/templates/logs.html:23
 #: application/templates/logs.html:72 application/templates/my.html:17
 #: application/templates/settings.html:117
 #: application/templates/settings.html:118
@@ -846,41 +860,41 @@ msgstr "Konfigürasyon doğrulaması doğru."
 msgid "Title"
 msgstr "Başlık"
 
-#: application/templates/base.html:109
+#: application/templates/base.html:111
 #: application/templates/book_audiolator.html:3
 #: application/templates/book_audiolator.html:20
 msgid "Text to Speech"
 msgstr "Metin Okuma"
 
-#: application/templates/base.html:110
+#: application/templates/base.html:112
 msgid "Action"
 msgstr "Eylem"
 
-#: application/templates/base.html:111
+#: application/templates/base.html:113
 msgid "File"
 msgstr "Dosya"
 
-#: application/templates/base.html:112
+#: application/templates/base.html:114
 msgid "Upload Only"
 msgstr "Yalnızca Yükle"
 
-#: application/templates/base.html:113
+#: application/templates/base.html:115
 msgid "Send"
 msgstr "Gönder"
 
-#: application/templates/base.html:114 application/templates/logs.html:54
+#: application/templates/base.html:116 application/templates/logs.html:54
 msgid "There is nothing here."
 msgstr "Burada hiçbir şey yok."
 
-#: application/templates/base.html:115
+#: application/templates/base.html:117
 msgid "Please select a single item."
 msgstr "Lütfen tek bir öğe seçin."
 
-#: application/templates/base.html:116 application/templates/reader.html:191
+#: application/templates/base.html:118 application/templates/reader.html:191
 msgid "Please select at least one item."
 msgstr "Lütfen en az bir öğe seçin."
 
-#: application/templates/base.html:117 application/view/admin.py:77
+#: application/templates/base.html:119 application/view/admin.py:77
 #: application/view/admin.py:152 application/view/admin.py:189
 #: application/view/extension.py:34 application/view/extension.py:63
 #: application/view/inbound_email.py:470 application/view/inbound_email.py:478
@@ -891,92 +905,93 @@ msgstr "Lütfen en az bir öğe seçin."
 msgid "Some parameters are missing or wrong."
 msgstr "Bazı parametreler eksik veya yanlış."
 
-#: application/templates/base.html:118
+#: application/templates/base.html:120
 msgid "The email has been sent."
 msgstr "E-posta gönderildi."
 
-#: application/templates/base.html:119 application/templates/webmail.html:29
+#: application/templates/base.html:121 application/templates/webmail.html:29
 msgid "From"
 msgstr "Gönderen"
 
-#: application/templates/base.html:120 application/templates/logs.html:25
+#: application/templates/base.html:122 application/templates/logs.html:25
 #: application/templates/logs.html:74 application/templates/webmail.html:30
 msgid "To"
 msgstr "Kime"
 
-#: application/templates/base.html:121 application/templates/webmail.html:31
+#: application/templates/base.html:123 application/templates/webmail.html:31
 msgid "Subject"
 msgstr "Konu"
 
-#: application/templates/base.html:122 application/templates/logs.html:22
+#: application/templates/base.html:124 application/templates/logs.html:22
 #: application/templates/logs.html:71 application/templates/settings.html:117
 #: application/templates/settings.html:118
 #: application/templates/webmail.html:32
 msgid "Time"
 msgstr "Zaman"
 
-#: application/templates/base.html:123 application/templates/logs.html:24
+#: application/templates/base.html:125 application/templates/logs.html:24
 #: application/templates/logs.html:73 application/templates/webmail.html:33
 msgid "Size"
 msgstr "Boyut"
 
-#: application/templates/base.html:124
+#: application/templates/base.html:126
 msgid "Date type"
 msgstr "Tarih türü"
 
-#: application/templates/base.html:126
+#: application/templates/base.html:128
 msgid "Date"
 msgstr "Tarih"
 
-#: application/templates/base.html:127
+#: application/templates/base.html:129
 msgid "This setting is prioritized."
 msgstr "Bu ayar önceliklidir."
 
-#: application/templates/base.html:128
+#: application/templates/base.html:130
 msgid "Combine multiple values with commas."
 msgstr "Birden fazla değeri virgülle birleştirin."
 
-#: application/templates/base.html:153 application/templates/home.html:16
+#: application/templates/base.html:155 application/templates/home.html:16
 msgid "Logout"
 msgstr "Çıkış"
 
-#: application/templates/base.html:155 application/templates/home.html:21
+#: application/templates/base.html:157 application/templates/home.html:21
 #: application/templates/login.html:3 application/templates/login.html:22
 #: application/templates/login.html:33
 msgid "Login"
 msgstr "Giriş"
 
-#: application/templates/base.html:157 application/templates/signup.html:3
+#: application/templates/base.html:159 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr "Kaydol"
 
-#: application/templates/base.html:177 application/templates/home.html:15
+#: application/templates/base.html:179 application/templates/home.html:15
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr "RSSler"
 
-#: application/templates/base.html:178 application/templates/settings.html:3
+#: application/templates/base.html:180 application/templates/settings.html:3
 msgid "Settings"
 msgstr "Ayarlar"
 
-#: application/templates/base.html:179 application/templates/logs.html:3
+#: application/templates/base.html:181 application/templates/logs.html:3
 msgid "Logs"
 msgstr "Kayıtlar"
 
-#: application/templates/base.html:181
+#: application/templates/base.html:183
 msgid "Advanced"
 msgstr "Gelişmiş"
 
-#: application/templates/base.html:182 application/templates/library.html:3
+#: application/templates/base.html:184 application/templates/library.html:3
 msgid "Shared"
 msgstr "Paylaşılan"
 
-#: application/templates/base.html:183 application/templates/reader.html:6
+#: application/templates/base.html:185 application/templates/reader.html:6
 msgid "Reader"
 msgstr "Okuyucu"
 
 #: application/templates/book_audiolator.html:22
+#: application/templates/book_summarizer.html:16
 #: application/templates/book_translator.html:19
 msgid "State"
 msgstr "Durum"
@@ -1006,11 +1021,13 @@ msgid "TTS Engine"
 msgstr "TTS Motoru"
 
 #: application/templates/book_audiolator.html:41
+#: application/templates/book_summarizer.html:35
 #: application/templates/book_translator.html:32
 msgid "Api Host"
 msgstr "Api Host"
 
 #: application/templates/book_audiolator.html:42
+#: application/templates/book_summarizer.html:36
 msgid "Empty to use default endpoint"
 msgstr "Varsayılan uç noktayı kullanmak için boş bırakın"
 
@@ -1019,6 +1036,7 @@ msgid "Region"
 msgstr "Bölge"
 
 #: application/templates/book_audiolator.html:53
+#: application/templates/book_summarizer.html:39
 #: application/templates/book_translator.html:36
 msgid "Api Key"
 msgstr "Api Key"
@@ -1094,11 +1112,13 @@ msgid "Extra loud"
 msgstr "Ekstra yüksek sesli"
 
 #: application/templates/book_audiolator.html:105
+#: application/templates/book_summarizer.html:76
 #: application/templates/book_translator.html:72
 msgid "Apply to all subscribed recipes"
 msgstr "Tüm abone olunan tarifelere uygula"
 
 #: application/templates/book_audiolator.html:110
+#: application/templates/book_summarizer.html:81
 #: application/templates/book_translator.html:77
 msgid ""
 "Note: Enabling this feature will significantly increase consumed CPU "
@@ -1108,11 +1128,13 @@ msgstr ""
 "ölçüde artırır."
 
 #: application/templates/book_audiolator.html:119
+#: application/templates/book_summarizer.html:90
 #: application/templates/book_translator.html:86
 msgid "Test (Please save settings firstly)"
 msgstr "Test (Lütfen önce ayarları kaydedin)"
 
 #: application/templates/book_audiolator.html:121
+#: application/templates/book_summarizer.html:92
 #: application/templates/book_translator.html:88
 msgid "Text"
 msgstr "Metin"
@@ -1122,13 +1144,35 @@ msgid "Your browser does not support the audio element."
 msgstr "Tarayıcınız ses öğesini desteklemiyor."
 
 #: application/templates/book_audiolator.html:132
+#: application/templates/book_summarizer.html:101
 #: application/templates/book_translator.html:97
 msgid "Test"
 msgstr "Test"
 
+#: application/templates/book_summarizer.html:18
 #: application/templates/book_translator.html:21
 msgid "Enable"
 msgstr "Etkinleştir"
+
+#: application/templates/book_summarizer.html:29
+msgid "Model"
+msgstr "Model"
+
+#: application/templates/book_summarizer.html:45
+msgid "Auto"
+msgstr "Otomatik"
+
+#: application/templates/book_summarizer.html:56
+msgid "Summary size"
+msgstr "Özet Boyutu"
+
+#: application/templates/book_summarizer.html:70
+msgid "Summary style"
+msgstr "Özet Tarzı"
+
+#: application/templates/book_summarizer.html:96
+msgid "Summary"
+msgstr "Özet"
 
 #: application/templates/book_translator.html:37
 msgid "One key per line"
@@ -1652,8 +1696,8 @@ msgid "Word"
 msgstr "Kelime"
 
 #: application/view/admin.py:48 application/view/adv.py:441
-#: application/view/settings.py:66 application/view/translator.py:83
-#: application/view/translator.py:167
+#: application/view/settings.py:66 application/view/translator.py:85
+#: application/view/translator.py:169 application/view/translator.py:250
 msgid "Settings Saved!"
 msgstr "Ayarlar Kaydedildi!"
 
@@ -1766,7 +1810,7 @@ msgid "Append qrcode of url to article"
 msgstr "Makaleye URL'nin QR kodunu ekle"
 
 #: application/view/adv.py:374 application/view/share.py:54
-#: application/view/subscribe.py:247
+#: application/view/subscribe.py:250
 msgid "Unknown command: {}"
 msgstr "Bilinmeyen komut: {}"
 
@@ -1821,9 +1865,9 @@ msgstr "Kurallar parametresi geçersiz."
 msgid "Cannot fetch data from {}, status: {}"
 msgstr "{}, durumundan veri alınamıyor: {}"
 
-#: application/view/library.py:48 application/view/subscribe.py:235
-#: application/view/subscribe.py:377 application/view/subscribe.py:406
-#: application/view/subscribe.py:413 application/view/translator.py:28
+#: application/view/library.py:48 application/view/subscribe.py:238
+#: application/view/subscribe.py:380 application/view/subscribe.py:409
+#: application/view/subscribe.py:416 application/view/translator.py:30
 msgid "The recipe does not exist."
 msgstr "Tarif mevcut değil."
 
@@ -1907,8 +1951,8 @@ msgstr ""
 msgid "The article is missing?"
 msgstr "Makale eksik mi?"
 
-#: application/view/reader.py:190 application/view/translator.py:116
-#: application/view/translator.py:200
+#: application/view/reader.py:190 application/view/translator.py:118
+#: application/view/translator.py:202 application/view/translator.py:283
 msgid "The text is empty."
 msgstr "Metin boş."
 
@@ -2135,46 +2179,47 @@ msgstr "Aşağıdaki ayrıntılara bakın:"
 msgid "Unknown: {}"
 msgstr "Bilinmeyen: {}"
 
-#: application/view/subscribe.py:78 application/view/subscribe.py:164
+#: application/view/subscribe.py:81 application/view/subscribe.py:167
 msgid "Duplicated subscription!"
 msgstr "Duplicated subscription!"
 
-#: application/view/subscribe.py:123
+#: application/view/subscribe.py:126
 msgid "The Title or Url is empty."
 msgstr "Başlık veya URL boş."
 
-#: application/view/subscribe.py:136
+#: application/view/subscribe.py:139
 msgid "Failed to fetch the recipe."
 msgstr "Tarif alınamadı."
 
-#: application/view/subscribe.py:150 application/view/subscribe.py:328
+#: application/view/subscribe.py:153 application/view/subscribe.py:331
 msgid "Failed to save the recipe. Error:"
 msgstr "Tarif kaydedilemedi. Hata:"
 
-#: application/view/subscribe.py:192
+#: application/view/subscribe.py:195
 msgid "The Rss does not exist."
 msgstr "Rss mevcut değil."
 
-#: application/view/subscribe.py:275
+#: application/view/subscribe.py:278
 msgid "You can only delete the uploaded recipe."
 msgstr "Yalnızca yüklenen tarifi silebilirsiniz."
 
-#: application/view/subscribe.py:280
+#: application/view/subscribe.py:283
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "Tarif abone olunmuş, silmeden önce aboneliği iptal edin."
 
-#: application/view/subscribe.py:301 application/view/translator.py:49
-#: application/view/translator.py:99 application/view/translator.py:112
-#: application/view/translator.py:135 application/view/translator.py:183
-#: application/view/translator.py:196
+#: application/view/subscribe.py:304 application/view/translator.py:51
+#: application/view/translator.py:101 application/view/translator.py:114
+#: application/view/translator.py:137 application/view/translator.py:185
+#: application/view/translator.py:198 application/view/translator.py:227
+#: application/view/translator.py:266 application/view/translator.py:279
 msgid "This recipe has not been subscribed to yet."
 msgstr "Bu tarife henüz abone olunmadı."
 
-#: application/view/subscribe.py:315
+#: application/view/subscribe.py:318
 msgid "Can not read uploaded file, Error:"
 msgstr "Yüklenen dosya okunamıyor, Hata:"
 
-#: application/view/subscribe.py:323
+#: application/view/subscribe.py:326
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
@@ -2182,22 +2227,23 @@ msgstr ""
 "Tarif çözümlenemedi. Lütfen tarifinizin utf-8 kodlamasında "
 "kaydedildiğinden emin olun."
 
-#: application/view/subscribe.py:346
+#: application/view/subscribe.py:349
 msgid "Cannot find any subclass of BasicNewsRecipe."
 msgstr "BasicNewsRecipe sınıfının hiçbir alt sınıfı bulunamıyor."
 
-#: application/view/subscribe.py:351
+#: application/view/subscribe.py:354
 msgid "The recipe is already in the library."
 msgstr "Tarif zaten kütüphanede."
 
-#: application/view/subscribe.py:384
+#: application/view/subscribe.py:387
 msgid "The login information for this recipe has been cleared."
 msgstr "Bu tarifin giriş bilgileri temizlendi."
 
-#: application/view/subscribe.py:388
+#: application/view/subscribe.py:391
 msgid "The login information for this recipe has been saved."
 msgstr "Bu tarifin giriş bilgileri kaydedildi."
 
-#: application/view/translator.py:77 application/view/translator.py:160
+#: application/view/translator.py:79 application/view/translator.py:162
 msgid "The api key is required."
 msgstr "API anahtarı gereklidir."
+

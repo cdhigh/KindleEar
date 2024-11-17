@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-#文本翻译器和文本转语音
+#包含 文本翻译器，文本转语音，文章摘要总结 的路由
+#Author: cdhigh <https://github.com/cdhigh>
 import json, base64, secrets
 from functools import wraps
 from flask import Blueprint, render_template, request, url_for
 from flask_babel import gettext as _
-from ..utils import str_to_bool
+from ..utils import str_to_bool, str_to_int
 from ..base_handler import *
 from ..back_end.db_models import *
 from ..lib.recipe_helper import GetBuiltinRecipeInfo
 from ebook_translator import get_trans_engines, HtmlTranslator
 from ebook_tts import get_tts_engines, HtmlAudiolator
+from ebook_summarizer import get_summarizer_engines, HtmlSummarizer
 
 bpTranslator = Blueprint('bpTranslator', __name__)
 
@@ -208,6 +210,82 @@ def BookTTSTestPost(recipeType, recipe, user, recipeId):
         data['audio'] = base64.b64encode(data['audio']).decode('utf-8') #type: ignore
         
     return data
+
+#文章摘要总结的配置页面
+@bpTranslator.route("/summarizer/<recipeId>", endpoint='BookSummarizerRoute')
+@login_required()
+@translator_route_preprocess()
+def BookSummarizerRoute(recipeType, recipe, user, recipeId):
+    from .settings import LangMap
+    tips = ''
+    bkRecipe = user.get_booked_recipe(recipeId)
+    if recipeType == 'custom':
+        params = recipe.summarizer #自定义RSS的Recipe和BookedRecipe的summarizer属性一致
+    elif bkRecipe:
+        params = bkRecipe.summarizer
+    else:
+        tips = _('This recipe has not been subscribed to yet.')
+        params = {}
+
+    engines = json.dumps(get_summarizer_engines(), separators=(',', ':'))
+    return render_template('book_summarizer.html', tab="my", tips=tips, params=params, title=recipe.title,
+        recipeId=recipeId, engines=engines, langMap=LangMap())
+
+#修改书籍AI文章摘要总结的设置
+@bpTranslator.post("/summarizer/<recipeId>", endpoint='BookSummarizerPost')
+@login_required()
+@translator_route_preprocess()
+def BookSummarizerPost(recipeType, recipe, user, recipeId):
+    #构建配置参数
+    from .settings import LangMap
+    form = request.form
+    engineName = form.get('engine', '')
+    apiHost = form.get('api_host', '')
+    apiHost = f'https://{apiHost}' if apiHost and not apiHost.startswith('http') else apiHost
+    params = {'enable': str_to_bool(form.get('enable', '')),  'engine': engineName, 
+        'model': form.get('model', ''), 'api_host': apiHost, 'api_key': form.get('api_key', ''), 
+        'summary_lang': form.get('summary_lang', ''), 
+        'summary_size': str_to_int(form.get('summary_size', ''), 200), 'summary_style': form.get('summary_style', ''),}
+
+    tips = _("Settings Saved!")
+    apply_all = str_to_bool(form.get('apply_all', ''))
+    if apply_all: #所有的Recipe使用同样的配置
+        for item in [*user.all_custom_rss(), *user.get_booked_recipe()]:
+            item.summarizer = params
+            item.save()
+    else:
+        bkRecipe = user.get_booked_recipe(recipeId)
+        if recipeType == 'custom': #自定义RSS先保存到Recipe，需要的时候再同步到BookedRecipe
+            recipe.summarizer = params
+            recipe.save()
+
+        if bkRecipe:
+            bkRecipe.summarizer = params
+            bkRecipe.save()
+        elif recipeType != 'custom':
+            tips = _('This recipe has not been subscribed to yet.')
+    
+    engines = json.dumps(get_summarizer_engines(), separators=(',', ':'))
+    return render_template('book_summarizer.html', tab="my", tips=tips, params=params, title=recipe.title,
+        recipeId=recipeId, engines=engines, langMap=LangMap())
+
+#测试Recipe的AI文章摘要总结设置是否正确
+@bpTranslator.post("/summarizer/test/<recipeId>", endpoint='BookSummarizerTestPost')
+@login_required(forAjax=True)
+@translator_route_preprocess(forAjax=True)
+def BookSummarizerTestPost(recipeType, recipe, user, recipeId):
+    bkRecipe = recipe if recipeType == 'custom' else user.get_booked_recipe(recipeId)
+    if not bkRecipe:
+        return {'status': _('This recipe has not been subscribed to yet.')}
+
+    text = request.form.get('text')
+    if not text:
+        return {'status': _('The text is empty.')}
+
+    summarizer = HtmlSummarizer(bkRecipe.summarizer)
+    data = summarizer.summarize_text(text)
+    status = data['error'] if data['error'] else 'ok' #type:ignore
+    return {'status': status, 'summary': data['summary']} #type:ignore
 
 famous_quotes = [
     "I have a dream. - Martin Luther King Jr.",

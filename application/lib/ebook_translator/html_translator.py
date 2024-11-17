@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 # 调用在线翻译服务，翻译html文件，移植了calibre的 Ebook Translator 插件的在线翻译接口实现
 import re, time, copy
-from bs4 import BeautifulSoup, NavigableString
+from bs4 import BeautifulSoup, NavigableString, Tag
 from ebook_translator.engines import *
 from application.utils import loc_exc_pos
 
@@ -123,6 +123,10 @@ class HtmlTranslator:
         #position: 翻译后的文本显示的位置
         def _extract(tag, position):
             for child in tag.find_all(recursive=False):
+                #跳过AI自动生成的摘要
+                if isinstance(child, Tag) and 'ai_generated_summary' in child.get('class', []):
+                    continue
+
                 if _contains_text(child) and not _tag_is_filtered(child):
                     text = str(child).strip() if position == 'replace' else child.get_text().strip()
                     if text and _tag_has_only_text(child) or len(text) < maxLen:

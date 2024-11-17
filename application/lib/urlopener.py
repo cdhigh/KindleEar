@@ -3,6 +3,7 @@
 """requests默认没有使用超时时间，有时候会卡死，使用此模块封装超时时间和一些表单功能
 为了尽量兼容calibre使用的mechanize无头浏览器，加了很多有用没用的接口
 """
+#Author: cdhigh <https://github.com/cdhigh>
 import sys, requests, weakref, re, traceback, time
 from functools import wraps
 from types import MethodType
@@ -92,13 +93,21 @@ class UrlOpener:
             resp = self.open_remote_url(url, data, headers, timeout, method, **kwargs)
 
         return self.patch_response(resp)
+
+    def get(self, *args, **kwargs):
+        kwargs['method'] = 'GET'
+        return self.open(*args, **kwargs)
+    def post(self, *args, **kwargs):
+        kwargs['method'] = 'POST'
+        return self.open(*args, **kwargs)
     
     #远程连接互联网的url
     @UrlRetry(max_retries=2, delay=2, backoff=2)
     def open_remote_url(self, url, data, headers, timeout, method, **kwargs):
         timeout = timeout if timeout else self.timeout
         headers = self.get_headers(url, headers)
-        method = 'POST' if data and (method != 'GET') else 'GET'
+        jsonData = kwargs.get('json', None)
+        method = 'POST' if (data or jsonData) and (method != 'GET') else 'GET'
         url = self.build_url(url, data, method)
         if method == 'GET':
             req_func = self.session.get #type:ignore

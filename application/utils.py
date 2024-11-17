@@ -181,6 +181,42 @@ def xml_unescape(txt):
     txt = txt.replace("&apos;", "'")
     return txt
 
+#比较两个版本号，确定新版本号是否比老版本号更新，需要的时候可以切换到 packaging.version.parse
+#版本号格式为：1.1或1.1.0
+# newVer > currVer: 正数
+# newVer == currVer: 0
+# newVer < currVer: 负数
+def compare_version(currVer: str, newVer: str):
+    if not currVer or not newVer:
+        return 0
+
+    #去掉开头的非数字，比如字符 'V'
+    while currVer and not currVer[0].isdigit():
+        currVer = currVer[1:]
+    while newVer and not newVer[0].isdigit():
+        newVer = newVer[1:]
+
+    if not currVer or not newVer:
+        return 0
+
+    currV = currVer.split('.')
+    newV = newVer.split('.')
+    currVLen = len(currV)
+    newVLen = len(newV)
+    for idx in range(min(currVLen, newVLen)):
+       vn = str_to_int(newV[idx]) #版本后的非数值字段变成零，相当于不比较
+       vc = str_to_int(currV[idx])
+       if vn != vc:
+           return vn - vc
+    
+    #如果前面的都一样，但新版本字符串比当前版本字符串要多一个字段，则说明是小更新版本
+    if currVLen == newVLen:
+        return 0
+    elif newVLen > currVLen:
+        return 1
+    else:
+        return -1
+
 #-----------以下为安全相关的工具函数--------------------
 
 #使用此密码管理器逐步将以前的md5哈希的密码迁移到sha256密码

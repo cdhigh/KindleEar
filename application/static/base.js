@@ -300,6 +300,9 @@ function PopulateMyCustomRss() {
     if (rss.tts_enable) {
       row_str.push('<sup>{0}</sup>'.format(i18n.abbrTts));
     }
+    if (rss.summary_enable) {
+      row_str.push('<sup>{0}</sup>'.format(i18n.abbrSummary));
+    }
     row_str.push('</div><div class="summaryRow"><a target="_blank" href="{0}">'.format(url));
     if (url.length > 100) {
       row_str.push(url.substring(0, 100) + '...');
@@ -313,6 +316,7 @@ function PopulateMyCustomRss() {
     //汉堡按钮弹出菜单代码
     var fTpl = "{0}('{1}','{2}')";
     var fTplAll = "{0}(event,'{1}','{2}','{3}',{4})"; //id,title,url,isfulltext
+    hamb_arg.push({klass: 'btn-H', title: i18n.aiSummarizer, icon: 'icon-ai', act: "/summarizer/" + id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-F', title: i18n.biTranslator, icon: 'icon-translate', act: "/translator/" + id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-D', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', id, title)});
@@ -354,6 +358,9 @@ function PopulateMySubscribed() {
     if (recipe.tts_enable) {
       row_str.push('<sup>{0}</sup>'.format(i18n.abbrTts));
     }
+    if (recipe.summary_enable) {
+      row_str.push('<sup>{0}</sup>'.format(i18n.abbrSummary));
+    }
     row_str.push('</div><div class="summaryRow">');
     if (desc.length > 100) {
       row_str.push(desc.substring(0, 100) + '...');
@@ -369,6 +376,7 @@ function PopulateMySubscribed() {
     if (need_subs) {
         hamb_arg.push({klass: 'btn-C', title: i18n.subscriptionInfo, icon: 'icon-key', act: fTpl.format('AskForSubscriptionInfo', recipe_id, recipe.account)});
     }
+    hamb_arg.push({klass: 'btn-H', title: i18n.aiSummarizer, icon: 'icon-ai', act: "/summarizer/" + recipe_id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-F', title: i18n.biTranslator, icon: 'icon-translate', act: "/translator/" + recipe_id.replace(':', '__')});
     hamb_arg.push({klass: 'btn-G', title: i18n.tts, icon: 'icon-tts', act: "/tts/" + recipe_id.replace(':', '__')});
     if (recipe_id.startsWith("upload:")) { //只有自己上传的recipe才能分享，内置的不用分享
@@ -1422,7 +1430,7 @@ function TestTranslator(recipeId) {
   var text = $('#translator_test_src_text').val();
   //console.log(text);
   var divDst = $('#translator_test_dst_text');
-  divDst.val(i18n.translating);
+  divDst.val(i18n.processing);
   recipeId = recipeId.replace(':', '__');
   MakeAjaxRequest("/translator/test/" + recipeId, "POST", {recipeId: recipeId, text: text}, function (resp) {
     divDst.val(resp.text);
@@ -1435,6 +1443,7 @@ function TestTranslator(recipeId) {
 //根据当前可选的TTS引擎列表 g_tts_engines 填充下拉框，currEngineName为Recipe的当前配置
 function PopulateTTSFields(currEngineName) {
   var engineSel = $('#tts_engine');
+  engineSel.empty();
   for (var name in g_tts_engines) {
     var selected = (currEngineName == name) ? 'selected="selected"' : '';
     var txt = '<option value="{0}" {1}>{2}</option>'.format(name, selected, g_tts_engines[name].alias);
@@ -1574,6 +1583,48 @@ function TestTTS(recipeId) {
   });
 }
 ///[end] book_audiolator.html
+
+///[start] book_summarizer.html
+//根据当前可选的AI引擎列表 g_ai_engines 填充下拉框，currEngineName 为Recipe的当前配置
+function PopulateSummarizerFields(currEngineName) {
+  var engineSel = $('#summarizer_engine');
+  engineSel.empty();
+  for (var name in g_ai_engines) {
+    var selected = (currEngineName == name) ? 'selected="selected"' : '';
+    var txt = '<option value="{0}" {1}>{2}</option>'.format(name, selected, name);
+    engineSel.append($(txt));
+  }
+}
+
+//选择一个AI引擎后填充对应引擎的model列表
+//model: 当前recipe的model
+function SummarizerEngineFieldChanged(model) {
+  let hasSelected = false;
+  var engineName = $('#summarizer_engine').val();
+  var engine = g_ai_engines[engineName];
+  
+  let modelSel = $('#summarizer_model');
+  let models = engine.models || [];
+  modelSel.empty();
+  for (const item of models) {
+    let selected = (item == model) ? 'selected="selected"' : '';
+    let txt = '<option value="{0}" {1}>{2}</option>'.format(item, selected, item);
+    modelSel.append($(txt));
+  }
+}
+
+//测试文章摘要设置
+function TestSummarizer(recipeId) {
+  var text = $('#summarizer_test_src_text').val();
+  var divDst = $('#summarizer_test_dst_text');
+  divDst.val(i18n.processing);
+  recipeId = recipeId.replace(':', '__');
+  MakeAjaxRequest("/summarizer/test/" + recipeId, "POST", {recipeId: recipeId, text: text}, function (resp) {
+    divDst.val(resp.summary);
+  });
+}
+///[end] book_summarizer.html
+
 ///[start] settings.html
 //点击文本设置对应周内日checkbox的选中状态
 function ToggleWeekBtn(btnName) {

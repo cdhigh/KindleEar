@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block titleTag -%}
+<title>{{_("AI Summarizer")}} - KindleEar</title>
+{% endblock -%}
+{% set lang = params.get('summary_lang', '') %}
+{% set summarySize = params.get('summary_size', 200) %}
+{% block content -%}
+<div class="main">
+  <form class="pure-form pure-form-aligned" action="" method="POST">
+    {% if tips -%}
+    <div class="notice-box error">{{tips|safe}}</div>
+    {% endif -%}
+    <fieldset>
+      <legend>{{_("AI Summarizer")}} [{{title}}]</legend>
+      <div class="pure-control-group">
+        <label>{{_("State")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="enable" id="summarizer_state">
+          <option value="1" {% if params.get('enable', '') %}selected="selected"{% endif %}>{{_('Enable')}}</option>
+          <option value="0" {% if not params.get('enable', '') %}selected="selected"{% endif %}>{{_('Disable')}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Engine")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="engine" id="summarizer_engine" onchange="SummarizerEngineFieldChanged()">
+          <!-- 由脚本填充 -->
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Model")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="model" id="summarizer_model">
+          <!-- 由脚本填充 -->
+        </select>
+      </div>
+      <div class="pure-control-group" id="summarizer_api_host">
+        <label> {{_("Api Host")}}</label>
+        <input type="text" name="api_host" id="api_host_input" value="{{params.get('api_host', '')}}" placeholder="{{_('Empty to use default endpoint')}}" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group" id="summarizer_api_key">
+        <label> {{_("Api Key")}}</label>
+        <input type="text" name="api_key" id="api_key_input" value="{{params.get('api_key', '')}}" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Language")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="summary_lang">
+          <option value="" {% if not lang %}selected="selected"{% endif %}>[{{_("Auto")}}]</option>
+        {% for langCode in langMap -%}
+        {% if lang == langCode -%}
+          <option value="{{langCode}}" selected="selected">{{langMap[langCode]}}</option>
+        {% else -%}
+          <option value="{{langCode}}">{{langMap[langCode]}}</option>
+        {% endif -%}
+        {% endfor -%}
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Summary size")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="summary_size" id="summary_size">
+          <option value="100" {% if summarySize == 100 %}selected="selected"{% endif %}>100</option>
+          <option value="200" {% if summarySize == 200 %}selected="selected"{% endif %}>200</option>
+          <option value="300" {% if summarySize == 300 %}selected="selected"{% endif %}>300</option>
+          <option value="400" {% if summarySize == 400 %}selected="selected"{% endif %}>400</option>
+          <option value="500" {% if summarySize == 500 %}selected="selected"{% endif %}>500</option>
+          <option value="600" {% if summarySize == 600 %}selected="selected"{% endif %}>600</option>
+          <option value="700" {% if summarySize == 700 %}selected="selected"{% endif %}>700</option>
+          <option value="800" {% if summarySize == 800 %}selected="selected"{% endif %}>800</option>
+          <option value="900" {% if summarySize == 900 %}selected="selected"{% endif %}>900</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Summary style")}}</label>
+        <input type="text" name="summary_style" value="{{params.get('summary_style', '')}}" placeholder="color:#2c1234" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <br/>
+      <label>
+        <input type="checkbox" name="apply_all" />
+        {{_("Apply to all subscribed recipes")}}
+      </label>
+      <input type="hidden" value="{{recipeId}}" name="recipeId" id="recipeId">
+    </fieldset>
+    <p style="text-align:center;color:red;margin:20px 0px 30px 0px;border:solid 1px silver;">
+      {{_("Note: Enabling this feature will significantly increase consumed CPU instance hours.")}}
+    </p>
+    <p style="text-align:center;">
+      <input type="submit" class="pure-button pure-button-primary pure-input-rounded" value="{{_('Save settings')}}" />
+    </p>
+  </form>
+  <hr/>
+  <form class="pure-form pure-form-aligned" action="" method="POST">
+    <fieldset>
+      <legend>{{_("Test (Please save settings firstly)")}}</legend>
+      <div class="pure-control-group">
+        <label>{{_("Text")}}</label>
+        <textarea class="pure-u-1 pure-u-sm-1-2" name="summarizer_test_src_text" id="summarizer_test_src_text" rows="4"></textarea>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Summary")}}</label>
+        <textarea class="pure-u-1 pure-u-sm-1-2" name="summarizer_test_dst_text" id="summarizer_test_dst_text"  rows="4" readonly></textarea>
+      </div>
+    </fieldset>
+    <p style="text-align:center;">
+      <input type="button" class="pure-button pure-button-primary pure-input-rounded" value="{{_('Test')}}" onclick="TestSummarizer('{{recipeId}}')" />
+    </p>
+  </form>
+</div>
+{% endblock -%}
+
+{% block js -%}
+<script type="text/javascript">
+var g_ai_engines = {{engines|safe}};
+
+$(document).ready(function() {
+  PopulateSummarizerFields("{{params['engine']}}");
+  SummarizerEngineFieldChanged("{{params['model']}}");
+});
+</script>
+{% endblock -%}

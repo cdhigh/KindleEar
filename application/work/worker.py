@@ -93,6 +93,7 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
         ro.extra_css = combine_css(ro.extra_css) #type:ignore
         ro.translator = bked.translator.copy() #设置网页翻译器信息
         ro.tts = bked.tts.copy() #文本转语音设置，需要中途修改tts内容
+        ro.summarizer = bked.summarizer.copy() #AI摘要器的配置信息
         
         #如果需要登录网站
         if ro.needs_subscription:

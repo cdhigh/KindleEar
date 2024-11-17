@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-08-26 15:24-0300\n"
+"POT-Creation-Date: 2024-11-17 17:57-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:180
+#: application/templates/admin.html:3 application/templates/base.html:182
 #: application/templates/settings.html:252
 msgid "Admin"
 msgstr "账号管理"
@@ -225,6 +225,7 @@ msgstr "主机"
 #: application/templates/adv_dict.html:79
 #: application/templates/adv_inboundmail.html:34
 #: application/templates/book_audiolator.html:113
+#: application/templates/book_summarizer.html:84
 #: application/templates/book_translator.html:80
 #: application/templates/settings.html:258
 msgid "Save settings"
@@ -294,7 +295,7 @@ msgid "There are no recipes subscribed"
 msgstr "没有任何被订阅的Recipe"
 
 #: application/templates/adv_delivernow.html:17
-#: application/templates/base.html:100
+#: application/templates/base.html:101
 msgid "Sep"
 msgstr "Sep"
 
@@ -323,10 +324,11 @@ msgstr "书本语言"
 #: application/templates/adv_dict.html:27
 #: application/templates/adv_dict.html:49
 #: application/templates/adv_dict.html:66
+#: application/templates/book_summarizer.html:23
 #: application/templates/book_translator.html:26
 #: application/templates/word_lookup.html:59
 msgid "Engine"
-msgstr "翻译引擎"
+msgstr "引擎"
 
 #: application/templates/adv_dict.html:33
 #: application/templates/adv_dict.html:55
@@ -374,6 +376,7 @@ msgid ""
 msgstr "为了使能入站邮件功能，还需要配置白名单列表。"
 
 #: application/templates/adv_inboundmail.html:16
+#: application/templates/book_summarizer.html:19
 #: application/templates/book_translator.html:22
 msgid "Disable"
 msgstr "禁止"
@@ -455,7 +458,7 @@ msgid "Random"
 msgstr "随机"
 
 #: application/templates/adv_uploadcover.html:18
-#: application/templates/base.html:125
+#: application/templates/base.html:127
 msgid "Weekday"
 msgstr "周内日"
 
@@ -546,6 +549,7 @@ msgstr "类别"
 
 #: application/templates/base.html:39
 #: application/templates/book_audiolator.html:58
+#: application/templates/book_summarizer.html:43
 #: application/templates/settings.html:148
 msgid "Language"
 msgstr "语言"
@@ -789,41 +793,51 @@ msgid "Bilingual Translator"
 msgstr "双语翻译器"
 
 #: application/templates/base.html:99
+#: application/templates/book_summarizer.html:3
+#: application/templates/book_summarizer.html:14
+msgid "AI Summarizer"
+msgstr "AI生成摘要"
+
+#: application/templates/base.html:100
 msgid "Upl"
 msgstr "Upl"
 
-#: application/templates/base.html:101
+#: application/templates/base.html:102
 msgid "Log"
 msgstr "Log"
 
-#: application/templates/base.html:102
+#: application/templates/base.html:103
 msgid "Emb"
 msgstr "Emb"
 
-#: application/templates/base.html:103
+#: application/templates/base.html:104
 msgid "Tr"
 msgstr "Tr"
 
-#: application/templates/base.html:104
+#: application/templates/base.html:105
 msgid "Tts"
 msgstr "Tts"
 
-#: application/templates/base.html:105
+#: application/templates/base.html:106
+msgid "Ai"
+msgstr "Ai"
+
+#: application/templates/base.html:107
 msgid ""
 "The test email has been successfully sent to the following addresses. "
 "Please check your inbox or spam folder to confirm its delivery. Depending"
 " on your email server, there may be a slight delay."
 msgstr "测试邮件已经成功发送到以下地址， 请打开收件箱或垃圾箱确认是否到达，根据服务器不同，可能稍有延迟。"
 
-#: application/templates/base.html:106
-msgid "Translating..."
-msgstr "正在翻译..."
+#: application/templates/base.html:108
+msgid "Processing..."
+msgstr "正在处理..."
 
-#: application/templates/base.html:107
+#: application/templates/base.html:109
 msgid "The configuration validation is correct."
 msgstr "配置校验正确。"
 
-#: application/templates/base.html:108 application/templates/logs.html:23
+#: application/templates/base.html:110 application/templates/logs.html:23
 #: application/templates/logs.html:72 application/templates/my.html:17
 #: application/templates/settings.html:117
 #: application/templates/settings.html:118
@@ -831,41 +845,41 @@ msgstr "配置校验正确。"
 msgid "Title"
 msgstr "书籍标题"
 
-#: application/templates/base.html:109
+#: application/templates/base.html:111
 #: application/templates/book_audiolator.html:3
 #: application/templates/book_audiolator.html:20
 msgid "Text to Speech"
 msgstr "文本转语音"
 
-#: application/templates/base.html:110
+#: application/templates/base.html:112
 msgid "Action"
 msgstr "动作"
 
-#: application/templates/base.html:111
+#: application/templates/base.html:113
 msgid "File"
 msgstr "文件"
 
-#: application/templates/base.html:112
+#: application/templates/base.html:114
 msgid "Upload Only"
 msgstr "仅上传"
 
-#: application/templates/base.html:113
+#: application/templates/base.html:115
 msgid "Send"
 msgstr "发送"
 
-#: application/templates/base.html:114 application/templates/logs.html:54
+#: application/templates/base.html:116 application/templates/logs.html:54
 msgid "There is nothing here."
 msgstr "这里什么都没有。"
 
-#: application/templates/base.html:115
+#: application/templates/base.html:117
 msgid "Please select a single item."
 msgstr "请选择单独一项。"
 
-#: application/templates/base.html:116 application/templates/reader.html:191
+#: application/templates/base.html:118 application/templates/reader.html:191
 msgid "Please select at least one item."
 msgstr "请选择至少一项。"
 
-#: application/templates/base.html:117 application/view/admin.py:77
+#: application/templates/base.html:119 application/view/admin.py:77
 #: application/view/admin.py:152 application/view/admin.py:189
 #: application/view/extension.py:34 application/view/extension.py:63
 #: application/view/inbound_email.py:470 application/view/inbound_email.py:478
@@ -876,92 +890,93 @@ msgstr "请选择至少一项。"
 msgid "Some parameters are missing or wrong."
 msgstr "一些参数为空或错误。"
 
-#: application/templates/base.html:118
+#: application/templates/base.html:120
 msgid "The email has been sent."
 msgstr "邮件已经成功发送。"
 
-#: application/templates/base.html:119 application/templates/webmail.html:29
+#: application/templates/base.html:121 application/templates/webmail.html:29
 msgid "From"
 msgstr "发件人"
 
-#: application/templates/base.html:120 application/templates/logs.html:25
+#: application/templates/base.html:122 application/templates/logs.html:25
 #: application/templates/logs.html:74 application/templates/webmail.html:30
 msgid "To"
 msgstr "收件人"
 
-#: application/templates/base.html:121 application/templates/webmail.html:31
+#: application/templates/base.html:123 application/templates/webmail.html:31
 msgid "Subject"
 msgstr "主题"
 
-#: application/templates/base.html:122 application/templates/logs.html:22
+#: application/templates/base.html:124 application/templates/logs.html:22
 #: application/templates/logs.html:71 application/templates/settings.html:117
 #: application/templates/settings.html:118
 #: application/templates/webmail.html:32
 msgid "Time"
 msgstr "时间"
 
-#: application/templates/base.html:123 application/templates/logs.html:24
+#: application/templates/base.html:125 application/templates/logs.html:24
 #: application/templates/logs.html:73 application/templates/webmail.html:33
 msgid "Size"
 msgstr "大小"
 
-#: application/templates/base.html:124
+#: application/templates/base.html:126
 msgid "Date type"
 msgstr "日期类型"
 
-#: application/templates/base.html:126
+#: application/templates/base.html:128
 msgid "Date"
 msgstr "日期"
 
-#: application/templates/base.html:127
+#: application/templates/base.html:129
 msgid "This setting is prioritized."
 msgstr "此设置具有更高优先级。"
 
-#: application/templates/base.html:128
+#: application/templates/base.html:130
 msgid "Combine multiple values with commas."
 msgstr "使用逗号分隔多个数值。"
 
-#: application/templates/base.html:153 application/templates/home.html:16
+#: application/templates/base.html:155 application/templates/home.html:16
 msgid "Logout"
 msgstr "退出"
 
-#: application/templates/base.html:155 application/templates/home.html:21
+#: application/templates/base.html:157 application/templates/home.html:21
 #: application/templates/login.html:3 application/templates/login.html:22
 #: application/templates/login.html:33
 msgid "Login"
 msgstr "登录"
 
-#: application/templates/base.html:157 application/templates/signup.html:3
+#: application/templates/base.html:159 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr "注册"
 
-#: application/templates/base.html:177 application/templates/home.html:15
+#: application/templates/base.html:179 application/templates/home.html:15
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr "我的订阅"
 
-#: application/templates/base.html:178 application/templates/settings.html:3
+#: application/templates/base.html:180 application/templates/settings.html:3
 msgid "Settings"
 msgstr "设置"
 
-#: application/templates/base.html:179 application/templates/logs.html:3
+#: application/templates/base.html:181 application/templates/logs.html:3
 msgid "Logs"
 msgstr "投递日志"
 
-#: application/templates/base.html:181
+#: application/templates/base.html:183
 msgid "Advanced"
 msgstr "高级设置"
 
-#: application/templates/base.html:182 application/templates/library.html:3
+#: application/templates/base.html:184 application/templates/library.html:3
 msgid "Shared"
 msgstr "网友分享"
 
-#: application/templates/base.html:183 application/templates/reader.html:6
+#: application/templates/base.html:185 application/templates/reader.html:6
 msgid "Reader"
 msgstr "在线阅读"
 
 #: application/templates/book_audiolator.html:22
+#: application/templates/book_summarizer.html:16
 #: application/templates/book_translator.html:19
 msgid "State"
 msgstr "状态"
@@ -991,11 +1006,13 @@ msgid "TTS Engine"
 msgstr "TTS引擎"
 
 #: application/templates/book_audiolator.html:41
+#: application/templates/book_summarizer.html:35
 #: application/templates/book_translator.html:32
 msgid "Api Host"
 msgstr "主机"
 
 #: application/templates/book_audiolator.html:42
+#: application/templates/book_summarizer.html:36
 msgid "Empty to use default endpoint"
 msgstr "留空为使用默认端点"
 
@@ -1004,6 +1021,7 @@ msgid "Region"
 msgstr "区域"
 
 #: application/templates/book_audiolator.html:53
+#: application/templates/book_summarizer.html:39
 #: application/templates/book_translator.html:36
 msgid "Api Key"
 msgstr "Api Key"
@@ -1079,11 +1097,13 @@ msgid "Extra loud"
 msgstr "超级高"
 
 #: application/templates/book_audiolator.html:105
+#: application/templates/book_summarizer.html:76
 #: application/templates/book_translator.html:72
 msgid "Apply to all subscribed recipes"
 msgstr "应用到当前所有已订阅Recipe"
 
 #: application/templates/book_audiolator.html:110
+#: application/templates/book_summarizer.html:81
 #: application/templates/book_translator.html:77
 msgid ""
 "Note: Enabling this feature will significantly increase consumed CPU "
@@ -1091,11 +1111,13 @@ msgid ""
 msgstr "注意：启用此特性会显著增加CPU实例小时数的消耗。"
 
 #: application/templates/book_audiolator.html:119
+#: application/templates/book_summarizer.html:90
 #: application/templates/book_translator.html:86
 msgid "Test (Please save settings firstly)"
 msgstr "测试 (请先保存设置)"
 
 #: application/templates/book_audiolator.html:121
+#: application/templates/book_summarizer.html:92
 #: application/templates/book_translator.html:88
 msgid "Text"
 msgstr "原文"
@@ -1105,13 +1127,35 @@ msgid "Your browser does not support the audio element."
 msgstr "您的浏览器不支持audio标签。"
 
 #: application/templates/book_audiolator.html:132
+#: application/templates/book_summarizer.html:101
 #: application/templates/book_translator.html:97
 msgid "Test"
 msgstr "测试"
 
+#: application/templates/book_summarizer.html:18
 #: application/templates/book_translator.html:21
 msgid "Enable"
 msgstr "启用"
+
+#: application/templates/book_summarizer.html:29
+msgid "Model"
+msgstr "Model"
+
+#: application/templates/book_summarizer.html:45
+msgid "Auto"
+msgstr "自动"
+
+#: application/templates/book_summarizer.html:56
+msgid "Summary size"
+msgstr "摘要大小"
+
+#: application/templates/book_summarizer.html:70
+msgid "Summary style"
+msgstr "摘要样式"
+
+#: application/templates/book_summarizer.html:96
+msgid "Summary"
+msgstr "摘要"
 
 #: application/templates/book_translator.html:37
 msgid "One key per line"
@@ -1621,8 +1665,8 @@ msgid "Word"
 msgstr "单词"
 
 #: application/view/admin.py:48 application/view/adv.py:441
-#: application/view/settings.py:66 application/view/translator.py:83
-#: application/view/translator.py:167
+#: application/view/settings.py:66 application/view/translator.py:85
+#: application/view/translator.py:169 application/view/translator.py:250
 msgid "Settings Saved!"
 msgstr "设置已保存!"
 
@@ -1735,7 +1779,7 @@ msgid "Append qrcode of url to article"
 msgstr "在每篇文章后附加文章链接的二维码"
 
 #: application/view/adv.py:374 application/view/share.py:54
-#: application/view/subscribe.py:247
+#: application/view/subscribe.py:250
 msgid "Unknown command: {}"
 msgstr "未知命令：{}"
 
@@ -1786,9 +1830,9 @@ msgstr "规则参数非法。"
 msgid "Cannot fetch data from {}, status: {}"
 msgstr "无法从 {} 获取数据，状态： {}"
 
-#: application/view/library.py:48 application/view/subscribe.py:235
-#: application/view/subscribe.py:377 application/view/subscribe.py:406
-#: application/view/subscribe.py:413 application/view/translator.py:28
+#: application/view/library.py:48 application/view/subscribe.py:238
+#: application/view/subscribe.py:380 application/view/subscribe.py:409
+#: application/view/subscribe.py:416 application/view/translator.py:30
 msgid "The recipe does not exist."
 msgstr "此Recipe不存在。"
 
@@ -1866,8 +1910,8 @@ msgstr "你可以点击下面的链接来重置你的KindleEar密码。"
 msgid "The article is missing?"
 msgstr "文章丢失了？"
 
-#: application/view/reader.py:190 application/view/translator.py:116
-#: application/view/translator.py:200
+#: application/view/reader.py:190 application/view/translator.py:118
+#: application/view/translator.py:202 application/view/translator.py:283
 msgid "The text is empty."
 msgstr "文本为空。"
 
@@ -2092,67 +2136,70 @@ msgstr "下面是一些技术细节："
 msgid "Unknown: {}"
 msgstr "未知: {}"
 
-#: application/view/subscribe.py:78 application/view/subscribe.py:164
+#: application/view/subscribe.py:81 application/view/subscribe.py:167
 msgid "Duplicated subscription!"
 msgstr "重复的订阅!"
 
-#: application/view/subscribe.py:123
+#: application/view/subscribe.py:126
 msgid "The Title or Url is empty."
 msgstr "标题或URL为空。"
 
-#: application/view/subscribe.py:136
+#: application/view/subscribe.py:139
 msgid "Failed to fetch the recipe."
 msgstr "抓取Recipe失败。"
 
-#: application/view/subscribe.py:150 application/view/subscribe.py:328
+#: application/view/subscribe.py:153 application/view/subscribe.py:331
 msgid "Failed to save the recipe. Error:"
 msgstr "保存Recipe失败。错误："
 
-#: application/view/subscribe.py:192
+#: application/view/subscribe.py:195
 msgid "The Rss does not exist."
 msgstr "此RSS不存在。"
 
-#: application/view/subscribe.py:275
+#: application/view/subscribe.py:278
 msgid "You can only delete the uploaded recipe."
 msgstr "您只能删除你自己上传的Recipe。"
 
-#: application/view/subscribe.py:280
+#: application/view/subscribe.py:283
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "此Recipe已经被订阅，请先取消订阅然后再删除。"
 
-#: application/view/subscribe.py:301 application/view/translator.py:49
-#: application/view/translator.py:99 application/view/translator.py:112
-#: application/view/translator.py:135 application/view/translator.py:183
-#: application/view/translator.py:196
+#: application/view/subscribe.py:304 application/view/translator.py:51
+#: application/view/translator.py:101 application/view/translator.py:114
+#: application/view/translator.py:137 application/view/translator.py:185
+#: application/view/translator.py:198 application/view/translator.py:227
+#: application/view/translator.py:266 application/view/translator.py:279
 msgid "This recipe has not been subscribed to yet."
 msgstr "此Recipe尚未被订阅。"
 
-#: application/view/subscribe.py:315
+#: application/view/subscribe.py:318
 msgid "Can not read uploaded file, Error:"
 msgstr "无法读取上传的文件，错误："
 
-#: application/view/subscribe.py:323
+#: application/view/subscribe.py:326
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
 msgstr "解码Recipe失败，请确保您的Recipe为utf-8编码。"
 
-#: application/view/subscribe.py:346
+#: application/view/subscribe.py:349
 msgid "Cannot find any subclass of BasicNewsRecipe."
 msgstr "无法找到BasicNewsRecipe的任何子类。"
 
-#: application/view/subscribe.py:351
+#: application/view/subscribe.py:354
 msgid "The recipe is already in the library."
 msgstr "此Recipe已经在新闻源中。"
 
-#: application/view/subscribe.py:384
+#: application/view/subscribe.py:387
 msgid "The login information for this recipe has been cleared."
 msgstr "此Recipe的网站登录信息已经被删除。"
 
-#: application/view/subscribe.py:388
+#: application/view/subscribe.py:391
 msgid "The login information for this recipe has been saved."
 msgstr "此Recipe的网站登录信息已经保存。"
 
-#: application/view/translator.py:77 application/view/translator.py:160
+#: application/view/translator.py:79 application/view/translator.py:162
 msgid "The api key is required."
 msgstr "需要填写api key."
+
+
