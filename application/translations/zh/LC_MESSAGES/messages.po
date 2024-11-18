@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-17 17:57-0300\n"
+"POT-Creation-Date: 2024-11-18 13:20-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -225,7 +225,7 @@ msgstr "主机"
 #: application/templates/adv_dict.html:79
 #: application/templates/adv_inboundmail.html:34
 #: application/templates/book_audiolator.html:113
-#: application/templates/book_summarizer.html:84
+#: application/templates/book_summarizer.html:88
 #: application/templates/book_translator.html:80
 #: application/templates/settings.html:258
 msgid "Save settings"
@@ -1013,8 +1013,9 @@ msgstr "主机"
 
 #: application/templates/book_audiolator.html:42
 #: application/templates/book_summarizer.html:36
-msgid "Empty to use default endpoint"
-msgstr "留空为使用默认端点"
+#: application/templates/book_summarizer.html:75
+msgid "Leave empty to use default"
+msgstr "不填则使用默认值"
 
 #: application/templates/book_audiolator.html:46
 msgid "Region"
@@ -1097,13 +1098,13 @@ msgid "Extra loud"
 msgstr "超级高"
 
 #: application/templates/book_audiolator.html:105
-#: application/templates/book_summarizer.html:76
+#: application/templates/book_summarizer.html:80
 #: application/templates/book_translator.html:72
 msgid "Apply to all subscribed recipes"
 msgstr "应用到当前所有已订阅Recipe"
 
 #: application/templates/book_audiolator.html:110
-#: application/templates/book_summarizer.html:81
+#: application/templates/book_summarizer.html:85
 #: application/templates/book_translator.html:77
 msgid ""
 "Note: Enabling this feature will significantly increase consumed CPU "
@@ -1111,13 +1112,13 @@ msgid ""
 msgstr "注意：启用此特性会显著增加CPU实例小时数的消耗。"
 
 #: application/templates/book_audiolator.html:119
-#: application/templates/book_summarizer.html:90
+#: application/templates/book_summarizer.html:94
 #: application/templates/book_translator.html:86
 msgid "Test (Please save settings firstly)"
 msgstr "测试 (请先保存设置)"
 
 #: application/templates/book_audiolator.html:121
-#: application/templates/book_summarizer.html:92
+#: application/templates/book_summarizer.html:96
 #: application/templates/book_translator.html:88
 msgid "Text"
 msgstr "原文"
@@ -1127,7 +1128,7 @@ msgid "Your browser does not support the audio element."
 msgstr "您的浏览器不支持audio标签。"
 
 #: application/templates/book_audiolator.html:132
-#: application/templates/book_summarizer.html:101
+#: application/templates/book_summarizer.html:105
 #: application/templates/book_translator.html:97
 msgid "Test"
 msgstr "测试"
@@ -1146,14 +1147,22 @@ msgid "Auto"
 msgstr "自动"
 
 #: application/templates/book_summarizer.html:56
-msgid "Summary size"
-msgstr "摘要大小"
+msgid "Summary words"
+msgstr "摘要字数"
 
 #: application/templates/book_summarizer.html:70
 msgid "Summary style"
 msgstr "摘要样式"
 
-#: application/templates/book_summarizer.html:96
+#: application/templates/book_summarizer.html:74
+msgid "Placeholders available:"
+msgstr "可用的占位符:"
+
+#: application/templates/book_summarizer.html:74
+msgid "Custom prompt"
+msgstr "自定义prompt"
+
+#: application/templates/book_summarizer.html:100
 msgid "Summary"
 msgstr "摘要"
 
@@ -1665,8 +1674,8 @@ msgid "Word"
 msgstr "单词"
 
 #: application/view/admin.py:48 application/view/adv.py:441
-#: application/view/settings.py:66 application/view/translator.py:85
-#: application/view/translator.py:169 application/view/translator.py:250
+#: application/view/settings.py:66 application/view/translator.py:87
+#: application/view/translator.py:171 application/view/translator.py:253
 msgid "Settings Saved!"
 msgstr "设置已保存!"
 
@@ -1910,8 +1919,8 @@ msgstr "你可以点击下面的链接来重置你的KindleEar密码。"
 msgid "The article is missing?"
 msgstr "文章丢失了？"
 
-#: application/view/reader.py:190 application/view/translator.py:118
-#: application/view/translator.py:202 application/view/translator.py:283
+#: application/view/reader.py:190 application/view/translator.py:120
+#: application/view/translator.py:204 application/view/translator.py:286
 msgid "The text is empty."
 msgstr "文本为空。"
 
@@ -2165,10 +2174,10 @@ msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "此Recipe已经被订阅，请先取消订阅然后再删除。"
 
 #: application/view/subscribe.py:304 application/view/translator.py:51
-#: application/view/translator.py:101 application/view/translator.py:114
-#: application/view/translator.py:137 application/view/translator.py:185
-#: application/view/translator.py:198 application/view/translator.py:227
-#: application/view/translator.py:266 application/view/translator.py:279
+#: application/view/translator.py:103 application/view/translator.py:116
+#: application/view/translator.py:139 application/view/translator.py:187
+#: application/view/translator.py:200 application/view/translator.py:229
+#: application/view/translator.py:269 application/view/translator.py:282
 msgid "This recipe has not been subscribed to yet."
 msgstr "此Recipe尚未被订阅。"
 
@@ -2198,8 +2207,7 @@ msgstr "此Recipe的网站登录信息已经被删除。"
 msgid "The login information for this recipe has been saved."
 msgstr "此Recipe的网站登录信息已经保存。"
 
-#: application/view/translator.py:79 application/view/translator.py:162
+#: application/view/translator.py:81 application/view/translator.py:164
 msgid "The api key is required."
 msgstr "需要填写api key."
-
 

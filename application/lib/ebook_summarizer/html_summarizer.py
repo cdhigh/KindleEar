@@ -4,6 +4,7 @@
 #Author: cdhigh <https://github.com/cdhigh>
 import re, time
 import simple_ai_provider
+from application.utils import loc_exc_pos
 
 def get_summarizer_engines():
     return simple_ai_provider._PROV_AI_LIST
@@ -32,22 +33,22 @@ class HtmlSummarizer:
         if chunkSize < 2000:
             chunkSize = 2000
 
-        summarySize = self.params.get('summary_size', 200)
+        words = self.params.get('summary_words', 200)
         summary = ''
         errMsg = ''
         lang = self.params.get('summary_lang', '')
         if lang:
             summaryTips = (f"Summarize the following text in {lang}. The summary should accurately represent the content "
-                f"and be no more than {summarySize} words:\n\n")
+                f"and be no more than {words} words:\n\n")
         else:
             summaryTips = (f"Summarize the following text in the same language as the original text. The summary should accurately represent the content "
-            f"and be no more than {summarySize} words:\n\n")
+            f"and be no more than {words} words:\n\n")
 
         text = re.sub(r'<[^>]+>', '', text)[:chunkSize]
-        #try:
-        summary = self.aiAgent.chat(f"{summaryTips}{text}")
-        #except Exception as e:
-        #errMsg = str(e)
+        try:
+            summary = self.aiAgent.chat(f"{summaryTips}{text}")
+        except Exception as e:
+            errMsg = str(e)
 
         return {'error': errMsg, 'summary': summary}
 
@@ -71,40 +72,37 @@ class HtmlSummarizer:
         #将文本分块，这个分块比较粗糙，可能按照段落分块会更好，但是考虑到AI的适应能力比较强，
         #并且仅用于生成摘要，所以这个简单方案还是可以接受的
         chunks = [text[i:i + chunkSize] for i in range(0, len(text), chunkSize)]
-        summarySize = self.params.get('summary_size', 200)
+        words = self.params.get('summary_words', 0) or 200
         interval = self.engineProperty.get('request_interval', 0)
-        summary = None
-
+        summaryTips = self.params.get('custom_prompt', '')
         lang = self.params.get('summary_lang', '')
-        if lang:
-            summaryTips = f"Please refine or update the summary based on the following text block, ensuring the summary is in the language: {lang}, and make it more accurately reflect the article content:\n\n"
+        if summaryTips: #使用自定义prompt
+            summaryTips = summaryTips.replace('{lang}', lang).replace('{words}', str(words))
+        elif lang:
+            summaryTips = f"Please improve and update the existing summary of the following text block(s), ensuring the summary is written in the language of {lang}. The updated summary should accurately reflect the content while distilling key points, arguments, and conclusions, and should not exceed {words} words:"
         else:
-            summaryTips = f"Please refine or update the summary based on the following text block, ensuring the summary is in the same language as the article/preset summary, and make it more accurately reflect the article content:\n\n"
-        errMsg = ''
+            summaryTips = f"Please improve and update the existing summary of the following text block(s), ensuring it is in the same language as the article and preset summary, while accurately reflecting the content and distilling key points, arguments, and conclusions. The updated summary should not exceed {words} words:"
+            
+        summary = None
         for i, chunk in enumerate(chunks[:maxIterations]):
-            prompt = (
-                f"The current summary is:\n{summary}\n\n{summaryTips}"
-                f"Text block {i + 1}:\n{chunk}\n\n"
-                f"Please generate an updated summary of no more than {summarySize} words."
-            )
+            prompt = f"Existing summary:\n{summary}\n\n{summaryTips}\n\nText block {i + 1}:\n{chunk}\n\n"
+
             try:
                 summary = self.aiAgent.chat(prompt)
-            except Exception as e:
-                errMsg = str(e)
-                break
+            except:
+                default_log.info(loc_exc_pos('Error in summary_soup'))
+                return
+
             if interval > 0:
                 time.sleep(interval)
 
-        if errMsg:
-            default_log.info(f'Error in summary_soup: {errMsg}')
-            return
-
         #将摘要插在文章标题之后
-        summaryTag = soup.new_tag('p', attrs={'class': 'ai_generated_summary'})
+        summaryTag = soup.new_tag('p', attrs={'class': 'ai_generated_summary', 
+            'data-aiagent': str(self.aiAgent)})
         style = self.params.get('summary_style', '')
         if style:
             summaryTag['style'] = style
-        b = soup.new_tag('b')
+        b = soup.new_tag('b', attrs={'class': 'ai_summary_hint'})
         b.string = 'AI-Generated Summary: '
         summaryTag.append(b)
         summaryTag.append(summary)

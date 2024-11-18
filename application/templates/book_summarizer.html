@@ -2,8 +2,8 @@
 {% block titleTag -%}
 <title>{{_("AI Summarizer")}} - KindleEar</title>
 {% endblock -%}
-{% set lang = params.get('summary_lang', '') %}
-{% set summarySize = params.get('summary_size', 200) %}
+{% set lang = params.get('summary_lang', '') -%}
+{% set words = params.get('summary_words', 200) -%}
 {% block content -%}
 <div class="main">
   <form class="pure-form pure-form-aligned" action="" method="POST">
@@ -33,7 +33,7 @@
       </div>
       <div class="pure-control-group" id="summarizer_api_host">
         <label> {{_("Api Host")}}</label>
-        <input type="text" name="api_host" id="api_host_input" value="{{params.get('api_host', '')}}" placeholder="{{_('Empty to use default endpoint')}}" class="pure-u-1 pure-u-sm-1-2" />
+        <input type="text" name="api_host" id="api_host_input" value="{{params.get('api_host', '')}}" placeholder="{{_('Leave empty to use default')}}" class="pure-u-1 pure-u-sm-1-2" />
       </div>
       <div class="pure-control-group" id="summarizer_api_key">
         <label> {{_("Api Key")}}</label>
@@ -53,22 +53,26 @@
         </select>
       </div>
       <div class="pure-control-group">
-        <label>{{_("Summary size")}}</label>
-        <select class="pure-u-1 pure-u-sm-1-2" name="summary_size" id="summary_size">
-          <option value="100" {% if summarySize == 100 %}selected="selected"{% endif %}>100</option>
-          <option value="200" {% if summarySize == 200 %}selected="selected"{% endif %}>200</option>
-          <option value="300" {% if summarySize == 300 %}selected="selected"{% endif %}>300</option>
-          <option value="400" {% if summarySize == 400 %}selected="selected"{% endif %}>400</option>
-          <option value="500" {% if summarySize == 500 %}selected="selected"{% endif %}>500</option>
-          <option value="600" {% if summarySize == 600 %}selected="selected"{% endif %}>600</option>
-          <option value="700" {% if summarySize == 700 %}selected="selected"{% endif %}>700</option>
-          <option value="800" {% if summarySize == 800 %}selected="selected"{% endif %}>800</option>
-          <option value="900" {% if summarySize == 900 %}selected="selected"{% endif %}>900</option>
+        <label>{{_("Summary words")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="summary_words">
+          <option value="100" {% if words == 100 %}selected="selected"{% endif %}>100</option>
+          <option value="200" {% if words == 200 %}selected="selected"{% endif %}>200</option>
+          <option value="300" {% if words == 300 %}selected="selected"{% endif %}>300</option>
+          <option value="400" {% if words == 400 %}selected="selected"{% endif %}>400</option>
+          <option value="500" {% if words == 500 %}selected="selected"{% endif %}>500</option>
+          <option value="600" {% if words == 600 %}selected="selected"{% endif %}>600</option>
+          <option value="700" {% if words == 700 %}selected="selected"{% endif %}>700</option>
+          <option value="800" {% if words == 800 %}selected="selected"{% endif %}>800</option>
+          <option value="900" {% if words == 900 %}selected="selected"{% endif %}>900</option>
         </select>
       </div>
       <div class="pure-control-group">
         <label>{{_("Summary style")}}</label>
-        <input type="text" name="summary_style" value="{{params.get('summary_style', '')}}" placeholder="color:#2c1234" class="pure-u-1 pure-u-sm-1-2" />
+        <input type="text" name="summary_style" value="{{params.get('summary_style', '')}}" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
+      <div class="pure-control-group">
+        <label class="tooltip" data-msg="{{_('Placeholders available:')}} {lang}, {words}">{{_("Custom prompt")}}</label>
+        <textarea name="custom_prompt" placeholder="{{_('Leave empty to use default')}}" rows="4" class="pure-u-1 pure-u-sm-1-2">{{params.get('custom_prompt', '')}}</textarea>
       </div>
       <br/>
       <label>

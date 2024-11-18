@@ -67,10 +67,12 @@ def BookTranslatorPost(recipeType, recipe, user, recipeId):
     apiHost = f'https://{apiHost}' if apiHost and not apiHost.startswith('http') else apiHost
     apiKeys = form.get('api_keys', '')
     apiKeys = apiKeys.split('\n') if apiKeys else []
+    origStyle = form.get('orig_style', '').replace('{', '').replace('}', '').replace('\n', '')
+    transStyle = form.get('trans_style', '').replace('{', '').replace('}', '').replace('\n', '')
     params = {'enable': str_to_bool(form.get('enable', '')), 'engine': engineName,
         'api_host': apiHost, 'api_keys': apiKeys, 'src_lang': form.get('src_lang', ''), 
         'dst_lang': form.get('dst_lang', 'en'), 'position': form.get('position', 'below'),
-        'orig_style': form.get('orig_style', ''), 'trans_style': form.get('trans_style', '')}
+        'orig_style': origStyle, 'trans_style': transStyle}
 
     engines = get_trans_engines()
     engine = engines.get(engineName, None)
@@ -242,10 +244,11 @@ def BookSummarizerPost(recipeType, recipe, user, recipeId):
     engineName = form.get('engine', '')
     apiHost = form.get('api_host', '')
     apiHost = f'https://{apiHost}' if apiHost and not apiHost.startswith('http') else apiHost
+    style = form.get('summary_style', '').replace('{', '').replace('}', '').replace('\n', '')
     params = {'enable': str_to_bool(form.get('enable', '')),  'engine': engineName, 
         'model': form.get('model', ''), 'api_host': apiHost, 'api_key': form.get('api_key', ''), 
-        'summary_lang': form.get('summary_lang', ''), 
-        'summary_size': str_to_int(form.get('summary_size', ''), 200), 'summary_style': form.get('summary_style', ''),}
+        'summary_lang': form.get('summary_lang', ''), 'custom_prompt': form.get('custom_prompt', '').strip(),
+        'summary_words': str_to_int(form.get('summary_words', ''), 200), 'summary_style': style,}
 
     tips = _("Settings Saved!")
     apply_all = str_to_bool(form.get('apply_all', ''))

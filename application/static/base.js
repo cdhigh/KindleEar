@@ -108,65 +108,68 @@ function RegisterHideHambClick() {
 
 //连接服务器获取内置recipe列表，并按照语言建立一个字典all_builtin_recipes，字典键为语言，值为信息字典列表
 function FetchBuiltinRecipesXml() {
-  var hasUserLangRss = false;
-  var hasEnRss = false;
+  //添加上传的recipe的语言代码
+  var langPick = $("#language_pick");
+  my_uploaded_recipes.forEach(item => {
+    var lang = item['language'];
+    if (lang && !all_builtin_recipes[lang]) {
+      all_builtin_recipes[lang] = [];
+      langPick.append($('<option value="{0}">{1}</option>'.format(lang, LanguageName(lang))));
+    }
+  });
+
   //这个是静态文件，flask和浏览器会通过etag来自动使用本地缓存
   $.get('/recipes/builtin_recipes.xml', function(xml) {
+    //这里面的代码是异步执行的
+    var hasUserLangRss = false;
+    var hasEnRss = false;
     var userLang = BrowserLanguage();
+    var langPick = $("#language_pick");
     $(xml).find("recipe").each(function() {
-      var title=$(this).attr("title");
-      var language=$(this).attr("language").toLowerCase();
-      var subs=$(this).attr("needs_subscription");
+      var title = $(this).attr("title");
+      var lang = $(this).attr("language").toLowerCase();
+      var subs = $(this).attr("needs_subscription");
       subs = ((subs == 'yes') || (subs == 'optional')) ? true : false;
-      var description=$(this).attr("description").substring(0, 200);
-      var id=$(this).attr("id");
+      var description = $(this).attr("description").substring(0, 200);
+      var id = $(this).attr("id");
 
       //忽略各国语言方言，仅取'_'前的部分
-      language = language.replace('-', '_');
-      var dashIndex = language.indexOf('_');
+      lang = lang.replace('-', '_');
+      var dashIndex = lang.indexOf('_');
       if (dashIndex != -1) {
-        language = language.substring(0, dashIndex);
+        lang = lang.substring(0, dashIndex);
       }
-      if (language == userLang) {
+      if (lang == userLang) {
         hasUserLangRss = true;
       }
-      if (language == 'en') {
+      if (lang == 'en') {
         hasEnRss = true;
       }
 
-      if (!all_builtin_recipes[language]) {
-        all_builtin_recipes[language] = [];
-        var $newLangOpt = $('<option value="{0}">{1}</option>'.format(language, LanguageName(language)));
-        $("#language_pick").append($newLangOpt);
+      if (!all_builtin_recipes[lang]) {
+        all_builtin_recipes[lang] = [];
+        langPick.append($('<option value="{0}">{1}</option>'.format(lang, LanguageName(lang))));
       }
-      all_builtin_recipes[language].push({title: title, description: description, needs_subscription: subs, id: id});
+      all_builtin_recipes[lang].push({title: title, description: description, needs_subscription: subs, id: id});
     });
+
     //自动触发和用户浏览器同样语种的选项
+    var langItem;
     if (hasUserLangRss) {
-      $("#language_pick").find("option[value='{0}']".format(userLang)).attr("selected", true);
-      $("#language_pick").val(userLang).trigger('change');
+      langItem = langPick.find("option[value='{0}']".format(userLang));
     } else if (hasEnRss) { //如果有英语则选择英语源
-      $("#language_pick").find("option[value='en']").attr("selected", true);
-      $("#language_pick").val('en').trigger('change');
+      langItem = langPick.find("option[value='en']");
     } else { //最后只能选择第一个语言
-      var firstChild = $("#language_pick").children().first();
-      firstChild.attr("selected", true);
-      firstChild.trigger('change');
+      langItem = $("#language_pick").children().first();
+    }
+    if (langItem) {
+      langItem.attr("selected", true);
+      langItem.trigger('change');
     }
   }).fail(function(jqXHR, textStatus, errorThrown) {
     console.log("Failed to fetch '/recipes/builtin_recipes.xml': " + errorThrown);
   });
 
-  //添加上传的recipe中存在，但是内置库不存在的语言代码
-  my_uploaded_recipes.forEach(item => {
-    var language = item['language'];
-    if (language && !all_builtin_recipes[language]) {
-      all_builtin_recipes[language] = [];
-      var $newLangOpt = $('<option value="{0}">{1}</option>'.format(language, LanguageName(language)));
-      $("#language_pick").append($newLangOpt);
-    }
-  });
-  
   PopulateLibrary('');
 }
 
@@ -229,13 +232,14 @@ function AppendRecipeToLibrary(div, id) {
   hamb_arg = [];
   var fTpl = "{0}('{1}','{2}')";
   if (id.startsWith("upload:")) { //增加汉堡按钮弹出菜单代码
-    hamb_arg.push({klass: 'btn-A', title: i18n.delete, icon: 'icon-delete', act: fTpl.format('DeleteUploadRecipe', id, title)});
     hamb_arg.push({klass: 'btn-E', title: i18n.share, icon: 'icon-share', act: fTpl.format('StartShareRss', id, title)});
   }
   hamb_arg.push({klass: 'btn-B', title: i18n.viewSrc, icon: 'icon-source', act: "/viewsrc/" + id.replace(':', '__')});
   hamb_arg.push({klass: 'btn-C', title: i18n.subscriSep, icon: 'icon-push', act: fTpl.format('SubscribeRecipe', id, '1')});
   hamb_arg.push({klass: 'btn-D', title: i18n.subscribe, icon: 'icon-subscribe', act: fTpl.format('SubscribeRecipe', id, '0')});
-  
+  if (id.startsWith("upload:")) { //增加汉堡按钮弹出菜单代码
+    hamb_arg.push({klass: 'btn-A', title: i18n.delete, icon: 'icon-delete', act: fTpl.format('DeleteUploadRecipe', id, title)});
+  }
   row_str.push(AddHamburgerButton(hamb_arg));
   row_str.push('</div>');
   var new_item = $(row_str.join(''));

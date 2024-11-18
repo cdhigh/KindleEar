@@ -106,8 +106,8 @@ class UrlOpener:
     def open_remote_url(self, url, data, headers, timeout, method, **kwargs):
         timeout = timeout if timeout else self.timeout
         headers = self.get_headers(url, headers)
-        jsonData = kwargs.get('json', None)
-        method = 'POST' if (data or jsonData) and (method != 'GET') else 'GET'
+        if not method:
+            method = 'POST' if (data or kwargs.get('json', None)) else 'GET'
         url = self.build_url(url, data, method)
         if method == 'GET':
             req_func = self.session.get #type:ignore

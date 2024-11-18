@@ -19,7 +19,7 @@ _PROV_AI_LIST = {
     'Openai': {
         'models': ['GPT-4o mini', 'GPT-4o', 'GPT-4 Turbo', 'gpt-3.5-turbo', 'GPT-3.5 Turbo Instruct'],
         'request_interval': 10,
-        'context_size': 4096},
+        'context_size': 4000},
     'Anthropic': {
         'models': ['claude-2', 'claude-3', 'claude-1'],
         'request_interval': 6,
@@ -27,7 +27,7 @@ _PROV_AI_LIST = {
     'Grok': {
         'models': ['grok-beta'], 
         'request_interval': 6,
-        'context_size': 4096},
+        'context_size': 4000},
     'Mistral': {
         'models': ['open-mistral-7b', 'mistral-small-latest', 'open-mixtral-8x7b', 'open-mixtral-8x22b', 'mistral-small-2402',
             'mistral-small-2409', 'mistral-medium', 'mistral-large-2402', 'mistral-large-2407',
@@ -38,20 +38,15 @@ _PROV_AI_LIST = {
         'models': ['gemma2-9b-it', 'gemma-7b-it', 'llama-guard-3-8b', 'llama3-70b-8192', 'llama3-8b-8192',
             'mixtral-8x7b-32768'], 
         'request_interval': 2,
-        'context_size': 8192},
-    
-    # 'cohere': {
-    #     'models': ['command-xlarge-nightly'],
-    #     'request_interval': 6,
-    #     'context_size': 2048},
-    # 'alibaba': {
-    #     'models': ['tongyi-qianwen-base'],
-    #     'request_interval': 6,
-    #     'context_size': 4096},
-    # 'baidu': {
+        'context_size': 8000},
+    'Alibaba': {
+        'models': ['qwen-turbo', 'qwen-plus', 'qwen-long'],
+        'request_interval': 1,
+        'context_size': 130000},
+    # 'Baidu': {
     #     'models': ['ernie-bot'],
     #     'request_interval': 6,
-    #     'context_size': 4096},
+    #     'context_size': 4000},
 }
 
 class SimpleAiProvider:
@@ -62,6 +57,9 @@ class SimpleAiProvider:
         self.model = model if model in _PROV_AI_LIST.get(name, {}).get('models', []) else ''
         self.api_host = api_host
         self.opener = UrlOpener()
+
+    def __repr__(self):
+        return f'{self.name}({self.model})'
 
     #返回支持的AI供应商列表，返回一个python字典
     def ai_list(self):
@@ -84,11 +82,9 @@ class SimpleAiProvider:
             return self._mistral_chat(message)
         elif name == 'Groq':
             return self._groq_chat(message)
-        # elif name == "cohere":
-        #     return self._cohere_chat(message)
-        # elif name == "alibaba":
-        #     return self._alibaba_chat(message)
-        # elif name == "baidu":
+        elif name == "Alibaba":
+            return self._alibaba_chat(message)
+        # elif name == "Baidu":
         #     return self._baidu_chat(message)
         else:
             raise ValueError(f"Unsupported provider: {name}")
@@ -135,19 +131,6 @@ class SimpleAiProvider:
         contents = response.json()["candidates"][0]["content"]
         return contents['parts'][0]['text']
 
-    #cohere的chat接口
-    def _cohere_chat(self, message):
-        url = self.api_host if self.api_host else 'https://api.cohere.ai/v1/generate'
-        headers = {"Authorization": f"Bearer {self.api_key}"}
-        payload = {
-            "model": self.model or _PROV_AI_LIST['cohere']['models'][0],
-            "text": message,
-            "max_tokens": 300
-        }
-        response = self.opener.post(url, headers=headers, json=payload)
-        response.raise_for_status()
-        return response.json()["generations"][0]["text"]
-
     #grok的chat接口
     def _grok_chat(self, message):
         #直接使用openai兼容接口
@@ -163,21 +146,11 @@ class SimpleAiProvider:
         #直接使用openai兼容接口
         return self._openai_chat(message, defaultUrl='https://api.groq.com/openai/v1/chat/completions')
 
+    #通义千问
     def _alibaba_chat(self, message):
-        url = self.api_host if self.api_host else 'https://api.aliyun.com/v1/ai/chat'
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-        payload = {
-            "model": self.model or _PROV_AI_LIST['alibaba']['models'][0],
-            "messages": [{"role": "user", "content": message}] if isinstance(message, str) else message,
-            "max_tokens": 300
-        }
-        response = self.opener.post(url, headers=headers, json=payload)
-        response.raise_for_status()
-        return response.json()["choices"][0]["content"]
-
+        #直接使用openai兼容接口
+        return self._openai_chat(message, defaultUrl='https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions')
+        
     def _baidu_chat(self, message):
         url = self.api_host if self.api_host else 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/ernie-bot'
         headers = {"Content-Type": "application/json"}

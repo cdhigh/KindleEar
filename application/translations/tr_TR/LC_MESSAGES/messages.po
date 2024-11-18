@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-17 17:57-0300\n"
+"POT-Creation-Date: 2024-11-18 13:20-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: tr_TR\n"
@@ -225,7 +225,7 @@ msgstr "Ana bilgisayar"
 #: application/templates/adv_dict.html:79
 #: application/templates/adv_inboundmail.html:34
 #: application/templates/book_audiolator.html:113
-#: application/templates/book_summarizer.html:84
+#: application/templates/book_summarizer.html:88
 #: application/templates/book_translator.html:80
 #: application/templates/settings.html:258
 msgid "Save settings"
@@ -1028,8 +1028,9 @@ msgstr "Api Host"
 
 #: application/templates/book_audiolator.html:42
 #: application/templates/book_summarizer.html:36
-msgid "Empty to use default endpoint"
-msgstr "Varsayılan uç noktayı kullanmak için boş bırakın"
+#: application/templates/book_summarizer.html:75
+msgid "Leave empty to use default"
+msgstr "Boş bırakın, varsayılan değeri kullanın"
 
 #: application/templates/book_audiolator.html:46
 msgid "Region"
@@ -1112,13 +1113,13 @@ msgid "Extra loud"
 msgstr "Ekstra yüksek sesli"
 
 #: application/templates/book_audiolator.html:105
-#: application/templates/book_summarizer.html:76
+#: application/templates/book_summarizer.html:80
 #: application/templates/book_translator.html:72
 msgid "Apply to all subscribed recipes"
 msgstr "Tüm abone olunan tarifelere uygula"
 
 #: application/templates/book_audiolator.html:110
-#: application/templates/book_summarizer.html:81
+#: application/templates/book_summarizer.html:85
 #: application/templates/book_translator.html:77
 msgid ""
 "Note: Enabling this feature will significantly increase consumed CPU "
@@ -1128,13 +1129,13 @@ msgstr ""
 "ölçüde artırır."
 
 #: application/templates/book_audiolator.html:119
-#: application/templates/book_summarizer.html:90
+#: application/templates/book_summarizer.html:94
 #: application/templates/book_translator.html:86
 msgid "Test (Please save settings firstly)"
 msgstr "Test (Lütfen önce ayarları kaydedin)"
 
 #: application/templates/book_audiolator.html:121
-#: application/templates/book_summarizer.html:92
+#: application/templates/book_summarizer.html:96
 #: application/templates/book_translator.html:88
 msgid "Text"
 msgstr "Metin"
@@ -1144,7 +1145,7 @@ msgid "Your browser does not support the audio element."
 msgstr "Tarayıcınız ses öğesini desteklemiyor."
 
 #: application/templates/book_audiolator.html:132
-#: application/templates/book_summarizer.html:101
+#: application/templates/book_summarizer.html:105
 #: application/templates/book_translator.html:97
 msgid "Test"
 msgstr "Test"
@@ -1163,14 +1164,22 @@ msgid "Auto"
 msgstr "Otomatik"
 
 #: application/templates/book_summarizer.html:56
-msgid "Summary size"
-msgstr "Özet Boyutu"
+msgid "Summary words"
+msgstr "Özet kelimeleri"
 
 #: application/templates/book_summarizer.html:70
 msgid "Summary style"
 msgstr "Özet Tarzı"
 
-#: application/templates/book_summarizer.html:96
+#: application/templates/book_summarizer.html:74
+msgid "Placeholders available:"
+msgstr "Mevcut yer tutucular:"
+
+#: application/templates/book_summarizer.html:74
+msgid "Custom prompt"
+msgstr "Özel prompt"
+
+#: application/templates/book_summarizer.html:100
 msgid "Summary"
 msgstr "Özet"
 
@@ -1696,8 +1705,8 @@ msgid "Word"
 msgstr "Kelime"
 
 #: application/view/admin.py:48 application/view/adv.py:441
-#: application/view/settings.py:66 application/view/translator.py:85
-#: application/view/translator.py:169 application/view/translator.py:250
+#: application/view/settings.py:66 application/view/translator.py:87
+#: application/view/translator.py:171 application/view/translator.py:253
 msgid "Settings Saved!"
 msgstr "Ayarlar Kaydedildi!"
 
@@ -1951,8 +1960,8 @@ msgstr ""
 msgid "The article is missing?"
 msgstr "Makale eksik mi?"
 
-#: application/view/reader.py:190 application/view/translator.py:118
-#: application/view/translator.py:202 application/view/translator.py:283
+#: application/view/reader.py:190 application/view/translator.py:120
+#: application/view/translator.py:204 application/view/translator.py:286
 msgid "The text is empty."
 msgstr "Metin boş."
 
@@ -2208,10 +2217,10 @@ msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "Tarif abone olunmuş, silmeden önce aboneliği iptal edin."
 
 #: application/view/subscribe.py:304 application/view/translator.py:51
-#: application/view/translator.py:101 application/view/translator.py:114
-#: application/view/translator.py:137 application/view/translator.py:185
-#: application/view/translator.py:198 application/view/translator.py:227
-#: application/view/translator.py:266 application/view/translator.py:279
+#: application/view/translator.py:103 application/view/translator.py:116
+#: application/view/translator.py:139 application/view/translator.py:187
+#: application/view/translator.py:200 application/view/translator.py:229
+#: application/view/translator.py:269 application/view/translator.py:282
 msgid "This recipe has not been subscribed to yet."
 msgstr "Bu tarife henüz abone olunmadı."
 
@@ -2243,7 +2252,7 @@ msgstr "Bu tarifin giriş bilgileri temizlendi."
 msgid "The login information for this recipe has been saved."
 msgstr "Bu tarifin giriş bilgileri kaydedildi."
 
-#: application/view/translator.py:79 application/view/translator.py:162
+#: application/view/translator.py:81 application/view/translator.py:164
 msgid "The api key is required."
 msgstr "API anahtarı gereklidir."
 
