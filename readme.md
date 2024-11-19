@@ -6,14 +6,14 @@ __English__ · [简体中文](readme_zh.md)
 
 
 
-[Demo site1](https://kindleear.koyeb.app/)  
-[Demo site2](https://kindleear.onrender.com/)  
-Note: These demo sites are free services hosted on Koyeb/Render. It may take around 50 seconds for the **Render** demo site to start up the first time you open it. The login username and password are `admin/admin`. All data will be automatically cleared after a period of inactivity, so feel free to perform any operations. You can use it to test ebook pushing.        
+[Demo site](https://kindleear.koyeb.app/)  
+Note: The demo site is a free service hosted on Koyeb. The login username and password are `admin/admin`. All data will be automatically cleared after a period of inactivity, so feel free to perform any operations. You can use it to test ebook pushing.        
 
 
 
 # Announcement
-June 1, 2024  **Release of KindleEar 3.1, includes an online reader optimized for e-ink (Docker only).**  
+Nov 19, 2024  **Release of KindleEar 3.2, featuring an AI-driven article summarizer.**    
+Api Gemini/Grok/Mistral/Groq are free to use by now.    
 
 **Significant Updates:**
 * Full support for Python 3    
@@ -22,6 +22,7 @@ June 1, 2024  **Release of KindleEar 3.1, includes an online reader optimized fo
 * Support email delivery and online reading (Docker version), built-in online reader optimized for e-ink screens   
 * Support for Calibre's recipe format without the need for modification    
 * Built-in library of over a thousand Calibre recipe files    
+* AI-driven summaries to help you stay updated on news in less time
 * Integrated bilingual translation feature, breaking language barriers for effortless information     retrieval and language learning    
 * Built-in text-to-speech functionality, transforming daily news into audio for easy consumption without reading   
 * Includes a browser extension, enabling effortless creation of web scraping recipe without coding, facilitating seamless content delivery from any website (brag)     

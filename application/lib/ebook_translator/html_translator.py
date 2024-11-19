@@ -51,6 +51,7 @@ class HtmlTranslator:
 
         count = len(data)
         ret = []
+        interval = self.translator.request_interval
         for idx, item in enumerate(data, 1):
             text = item['text']
             item['error'] = ''
@@ -65,8 +66,10 @@ class HtmlTranslator:
             else:
                 item['error'] = _('The input text is empty')
             ret.append(item)
-            if (idx < count) and (self.translator.request_interval > 0.01):
-                time.sleep(self.translator.request_interval)
+            #if (idx < count) and (interval > 0.01):
+            #最后一个请求还是需要延时，否则下一篇文章的首次请求可能失败
+            if interval > 0.01:
+                time.sleep(interval)
 
         if retList:
             return ret

@@ -93,7 +93,8 @@ class HtmlSummarizer:
                 default_log.info(loc_exc_pos('Error in summarize_soup'))
                 return
 
-            if (i < iterNum) and (interval > 0.01):
+            #if (i < iterNum) and (interval > 0.01):
+            if interval > 0.01: #最后一个请求还是需要延时，否则下一篇文章的首次请求可能失败
                 time.sleep(interval)
 
         #将摘要插在文章标题之后
