@@ -155,16 +155,22 @@ function FetchBuiltinRecipesXml() {
 
     //自动触发和用户浏览器同样语种的选项
     var langItem;
+    var langEnItem = langPick.find("option[value='en']");
     if (hasUserLangRss) {
       langItem = langPick.find("option[value='{0}']".format(userLang));
+      langItem.prependTo(langPick);
     } else if (hasEnRss) { //如果有英语则选择英语源
-      langItem = langPick.find("option[value='en']");
+      langItem = langEnItem;
     } else { //最后只能选择第一个语言
       langItem = $("#language_pick").children().first();
     }
     if (langItem) {
+      langItem.prependTo(langPick); //英语或浏览器语言置顶
       langItem.attr("selected", true);
       langItem.trigger('change');
+    }
+    if (langEnItem) {
+      langEnItem.prependTo(langPick); //英语置顶
     }
   }).fail(function(jqXHR, textStatus, errorThrown) {
     console.log("Failed to fetch '/recipes/builtin_recipes.xml': " + errorThrown);
