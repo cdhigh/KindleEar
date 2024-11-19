@@ -38,7 +38,7 @@ class HtmlAudiolator:
 
         count = len(data)
         ret = []
-        for idx, item in enumerate(data):
+        for idx, item in enumerate(data, 1):
             text = item['text']
             item['error'] = ''
             item['audio'] = ''
@@ -52,7 +52,7 @@ class HtmlAudiolator:
             else:
                 item['error'] = _('The input text is empty')
             ret.append(item)
-            if (idx < count - 1) and (self.audiolator.request_interval > 0.01):
+            if (idx < count) and (self.audiolator.request_interval > 0.01):
                 time.sleep(self.audiolator.request_interval)
 
         if retList:

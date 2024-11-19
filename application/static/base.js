@@ -305,7 +305,7 @@ function PopulateMyCustomRss() {
       row_str.push('<sup>{0}</sup>'.format(i18n.abbrTts));
     }
     if (rss.summary_enable) {
-      row_str.push('<sup>{0}</sup>'.format(i18n.abbrSummary));
+      row_str.push('<sup>{0}</sup>'.format(i18n.abbrAi));
     }
     row_str.push('</div><div class="summaryRow"><a target="_blank" href="{0}">'.format(url));
     if (url.length > 100) {
@@ -363,7 +363,7 @@ function PopulateMySubscribed() {
       row_str.push('<sup>{0}</sup>'.format(i18n.abbrTts));
     }
     if (recipe.summary_enable) {
-      row_str.push('<sup>{0}</sup>'.format(i18n.abbrSummary));
+      row_str.push('<sup>{0}</sup>'.format(i18n.abbrAi));
     }
     row_str.push('</div><div class="summaryRow">');
     if (desc.length > 100) {
@@ -1595,24 +1595,23 @@ function PopulateSummarizerFields(currEngineName) {
   engineSel.empty();
   for (var name in g_ai_engines) {
     var selected = (currEngineName == name) ? 'selected="selected"' : '';
-    var txt = '<option value="{0}" {1}>{2}</option>'.format(name, selected, name);
+    var txt = '<option value="{0}" {1}>{0}</option>'.format(name, selected);
     engineSel.append($(txt));
   }
 }
 
 //选择一个AI引擎后填充对应引擎的model列表
-//model: 当前recipe的model
+//model: 当前recipe的model名字
 function SummarizerEngineFieldChanged(model) {
   let hasSelected = false;
   var engineName = $('#summarizer_engine').val();
-  var engine = g_ai_engines[engineName];
+  var models = g_ai_engines[engineName] || [];
   
   let modelSel = $('#summarizer_model');
-  let models = engine.models || [];
   modelSel.empty();
   for (const item of models) {
-    let selected = (item == model) ? 'selected="selected"' : '';
-    let txt = '<option value="{0}" {1}>{2}</option>'.format(item, selected, item);
+    let selected = (item.name == model) ? 'selected="selected"' : '';
+    let txt = '<option value="{0}" {1}>{0}</option>'.format(item.name, selected);
     modelSel.append($(txt));
   }
 }

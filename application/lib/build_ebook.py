@@ -109,6 +109,7 @@ def html_to_book(html: str, title: str, user, imgs=None, options=None, output_fm
     return output.getvalue()
 
 #获取KindleEar定制的电子书转换参数
+#calibre_options 常用配置项： extra_css
 def ke_opts(user, options=None):
     opt = user.custom.get('calibre_options')
     opt = opt.copy() if isinstance(opt, dict) else {}

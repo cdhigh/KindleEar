@@ -248,7 +248,7 @@ def BookSummarizerPost(recipeType, recipe, user, recipeId):
     params = {'enable': str_to_bool(form.get('enable', '')),  'engine': engineName, 
         'model': form.get('model', ''), 'api_host': apiHost, 'api_key': form.get('api_key', ''), 
         'summary_lang': form.get('summary_lang', ''), 'custom_prompt': form.get('custom_prompt', '').strip(),
-        'summary_words': str_to_int(form.get('summary_words', ''), 200), 'summary_style': style,}
+        'summary_words': str_to_int(form.get('summary_words', ''), 100), 'summary_style': style,}
 
     tips = _("Settings Saved!")
     apply_all = str_to_bool(form.get('apply_all', ''))

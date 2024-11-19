@@ -12,16 +12,15 @@ def get_summarizer_engines():
 class HtmlSummarizer:
     def __init__(self, params: dict):
         self.params = params
-        engineName = self.params.get('engine')
-        if engineName not in simple_ai_provider._PROV_AI_LIST:
-            engineName = 'gemini'
-        self.engineName = engineName
-        self.engineProperty = simple_ai_provider._PROV_AI_LIST.get(engineName, {})
-        self.aiAgent = self.create_engine(self.engineName, params)
+        name = self.params.get('engine')
+        if name not in simple_ai_provider._PROV_AI_LIST:
+            default_log.warning(f'Unsupported provider {name}, fallback to gemini')
+            name = 'gemini'
+        self.aiAgent = self.create_engine(name, params)
     
     #创建一个AI封装实例
-    def create_engine(self, engineName, params):
-        return simple_ai_provider.SimpleAiProvider(engineName, params.get('api_key', ''), 
+    def create_engine(self, name, params):
+        return simple_ai_provider.SimpleAiProvider(name, params.get('api_key', ''), 
             model=params.get('model', ''), api_host=params.get('api_host', ''))
 
     #给一段文字做摘要，记住不要太长
@@ -29,26 +28,24 @@ class HtmlSummarizer:
     def summarize_text(self, text):
         #token是字节数根据不同的语种不能很好的对应，比如对应英语大约一个token对应4字节左右，
         #中文对应1-2字节，这里采用保守策略，一个token对应1字节，然后减去prompt的花销
-        chunkSize = self.engineProperty.get('context_size', 4096) - 200
-        if chunkSize < 2000:
-            chunkSize = 2000
+        chunkSize = self.aiAgent.context_size - 200
+        if chunkSize < 3500:
+            chunkSize = 3500
 
-        words = self.params.get('summary_words', 200)
+        words = self.params.get('summary_words', 100)
         summary = ''
         errMsg = ''
         lang = self.params.get('summary_lang', '')
         if lang:
-            summaryTips = (f"Summarize the following text in {lang}. The summary should accurately represent the content "
-                f"and be no more than {words} words:\n\n")
+            summaryTips = f"Summarize the following text in the language of {lang}. The summary should accurately represent the content and be no more than {words} words:\n\n"
         else:
-            summaryTips = (f"Summarize the following text in the same language as the original text. The summary should accurately represent the content "
-            f"and be no more than {words} words:\n\n")
+            summaryTips = f"Summarize the following text in the same language as the original text. The summary should accurately represent the content and be no more than {words} words:\n\n"
 
         text = re.sub(r'<[^>]+>', '', text)[:chunkSize]
         try:
             summary = self.aiAgent.chat(f"{summaryTips}{text}")
-        except Exception as e:
-            errMsg = str(e)
+        except:
+            errMsg = loc_exc_pos('Error in summarize_text')
 
         return {'error': errMsg, 'summary': summary}
 
@@ -62,18 +59,19 @@ class HtmlSummarizer:
             return
         text = body.get_text()
 
-        #token是字节数根据不同的语种不能很好的对应，比如对应英语大约一个token对应4字节左右，
-        #中文对应1-2字节，这里采用保守策略，一个token对应1字节，然后减去prompt的花销大约500字节
-        if not chunkSize:
-            chunkSize = self.engineProperty.get('context_size', 4096) - 500
-        if chunkSize < 2000:
-            chunkSize = 2000
+        words = self.params.get('summary_words', 0) or 100
 
-        #将文本分块，这个分块比较粗糙，可能按照段落分块会更好，但是考虑到AI的适应能力比较强，
-        #并且仅用于生成摘要，所以这个简单方案还是可以接受的
+        #token是字节数根据不同的语种不能很好的对应，比如对应英语大约一个token对应4字节左右，
+        #中文对应1-2字节，这里采用保守策略，一个token对应1字节，然后减去prompt的花销
+        if not chunkSize:
+            chunkSize = self.aiAgent.context_size - words - 300
+        if chunkSize < 3500:
+            chunkSize = 3500
+
+        #将文本分块，这个分块比较粗糙，甚至会将单词断开，可能按照段落分块会更好，
+        #但是考虑到AI的适应能力比较强，并且仅用于生成摘要，所以这个简单方案还是可以接受的
         chunks = [text[i:i + chunkSize] for i in range(0, len(text), chunkSize)]
-        words = self.params.get('summary_words', 0) or 200
-        interval = self.engineProperty.get('request_interval', 0)
+        
         summaryTips = self.params.get('custom_prompt', '')
         lang = self.params.get('summary_lang', '')
         if summaryTips: #使用自定义prompt
@@ -84,16 +82,18 @@ class HtmlSummarizer:
             summaryTips = f"Please improve and update the existing summary of the following text block(s), ensuring it is in the same language as the article and preset summary, while accurately reflecting the content and distilling key points, arguments, and conclusions. The updated summary should not exceed {words} words:"
             
         summary = None
-        for i, chunk in enumerate(chunks[:maxIterations]):
-            prompt = f"Existing summary:\n{summary}\n\n{summaryTips}\n\nText block {i + 1}:\n{chunk}\n\n"
+        interval = self.aiAgent.request_interval
+        iterNum = min(maxIterations, len(chunks))
+        for i, chunk in enumerate(chunks[:iterNum], 1):
+            prompt = f"{summaryTips}\n\nExisting summary:\n{summary}\n\nText block {i}:\n{chunk}\n\n"
 
             try:
                 summary = self.aiAgent.chat(prompt)
             except:
-                default_log.info(loc_exc_pos('Error in summary_soup'))
+                default_log.info(loc_exc_pos('Error in summarize_soup'))
                 return
 
-            if interval > 0:
+            if (i < iterNum) and (interval > 0.01):
                 time.sleep(interval)
 
         #将摘要插在文章标题之后

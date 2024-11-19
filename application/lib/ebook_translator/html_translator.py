@@ -51,7 +51,7 @@ class HtmlTranslator:
 
         count = len(data)
         ret = []
-        for idx, item in enumerate(data):
+        for idx, item in enumerate(data, 1):
             text = item['text']
             item['error'] = ''
             item['translated'] = ''
@@ -65,7 +65,7 @@ class HtmlTranslator:
             else:
                 item['error'] = _('The input text is empty')
             ret.append(item)
-            if (idx < count - 1) and (self.translator.request_interval > 0.01):
+            if (idx < count) and (self.translator.request_interval > 0.01):
                 time.sleep(self.translator.request_interval)
 
         if retList:
@@ -82,7 +82,7 @@ class HtmlTranslator:
         failed = 0
         elements = self.extract_soup_text(soup)
         count = len(elements)
-        for idx, (tag, text) in enumerate(elements):
+        for idx, (tag, text) in enumerate(elements, 1):
             try:
                 trans = self.translator.translate(text)
                 if trans:
@@ -93,7 +93,7 @@ class HtmlTranslator:
             except:
                 default_log.warning(loc_exc_pos('translate_soup failed'))
                 failed += 1
-            if (idx < count - 1) and (self.translator.request_interval > 0.01):
+            if (idx < count) and (self.translator.request_interval > 0.01):
                 time.sleep(self.translator.request_interval)
         return (success, failed)
 

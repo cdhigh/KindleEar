@@ -4,62 +4,94 @@
 #Author: cdhigh <https://github.com/cdhigh>
 # 使用示例：
 #provider = SimpleAiProvider("openai", api_key="xxxxxx")
-#response = provider.chat("你好，请告诉我天气预报")
+#response = provider.chat("你好，请讲一个笑话")
 #response = provider.chat([{"role": "system", "content": "你是一个专业的物理学家。"},{"role": "user", "content": "黑洞是怎么形成的？"}])
 #import requests
 from urlopener import UrlOpener
 
-#支持的AI服务商列表，models里面的第一项请设置为默认要实现的model
-#这里的 context_size 其实应该根据model不同而设置，为简单起见，就使用一个最低值
+#支持的AI服务商列表，models里面的第一项请设置为默认要使用的model
+#rpm(requests per minute)是针对免费用户的，如果是付费用户，一般会高很多，可以自己修改
+#大语言模型发展迅速，估计没多久这些数据会全部过时
+#{'name': '', 'rpm': , 'context': },
 _PROV_AI_LIST = {
-    'Gemini': {
-        'models': ['gemini-1.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-pro'], 
-        'request_interval': 4,
-        'context_size': 8000},
-    'Openai': {
-        'models': ['GPT-4o mini', 'GPT-4o', 'GPT-4 Turbo', 'gpt-3.5-turbo', 'GPT-3.5 Turbo Instruct'],
-        'request_interval': 10,
-        'context_size': 4000},
-    'Anthropic': {
-        'models': ['claude-2', 'claude-3', 'claude-1'],
-        'request_interval': 6,
-        'context_size': 100000},
-    'Grok': {
-        'models': ['grok-beta'], 
-        'request_interval': 6,
-        'context_size': 4000},
-    'Mistral': {
-        'models': ['open-mistral-7b', 'mistral-small-latest', 'open-mixtral-8x7b', 'open-mixtral-8x22b', 'mistral-small-2402',
-            'mistral-small-2409', 'mistral-medium', 'mistral-large-2402', 'mistral-large-2407',
-            'mistral-large-2411'],
-        'request_interval': 1,
-        'context_size': 32000},
-    'Groq': {
-        'models': ['gemma2-9b-it', 'gemma-7b-it', 'llama-guard-3-8b', 'llama3-70b-8192', 'llama3-8b-8192',
-            'mixtral-8x7b-32768'], 
-        'request_interval': 2,
-        'context_size': 8000},
-    'Alibaba': {
-        'models': ['qwen-turbo', 'qwen-plus', 'qwen-long'],
-        'request_interval': 1,
-        'context_size': 130000},
-    # 'Baidu': {
-    #     'models': ['ernie-bot'],
-    #     'request_interval': 6,
-    #     'context_size': 4000},
+    'Gemini': [
+        {'name': 'gemini-1.5-flash', 'rpm': 15, 'context': 128000}, #其实支持100万
+        {'name': 'gemini-1.5-flash-8b', 'rpm': 15, 'context': 128000}, 
+        {'name': 'gemini-1.5-pro', 'rpm': 2, 'context': 128000},],
+    'Openai': [
+        {'name': 'gpt-4o-mini', 'rpm': 3, 'context': 128000},
+        {'name': 'gpt-4o', 'rpm': 3, 'context': 128000},
+        {'name': 'gpt-4-turbo', 'rpm': 3, 'context': 128000},
+        {'name': 'gpt-3.5-turbo', 'rpm': 3, 'context': 16000},
+        {'name': 'gpt-3.5-turbo-instruct', 'rpm': 3, 'context': 4000},],
+    'Anthropic': [
+        {'name': 'claude-2', 'rpm': 5, 'context': 100000},
+        {'name': 'claude-3', 'rpm': 5, 'context': 200000},
+        {'name': 'claude-2.1', 'rpm': 5, 'context': 100000},],
+    'Grok': [
+        {'name': 'grok-beta', 'rpm': 10, 'context': 128000},],
+    'Mistral': [
+        {'name': 'open-mistral-7b', 'rpm': 60, 'context': 32000},
+        {'name': 'mistral-small-latest', 'rpm': 60, 'context': 32000},
+        {'name': 'open-mixtral-8x7b', 'rpm': 60, 'context': 32000},
+        {'name': 'open-mixtral-8x22b', 'rpm': 60, 'context': 64000},
+        {'name': 'mistral-medium-latest', 'rpm': 60, 'context': 32000},
+        {'name': 'mistral-large-latest', 'rpm': 60, 'context': 128000},
+        {'name': 'pixtral-12b-2409', 'rpm': 60, 'context': 128000},],
+    'Groq': [
+        {'name': 'gemma2-9b-it', 'rpm': 30, 'context': 8000},
+        {'name': 'gemma-7b-it', 'rpm': 30, 'context': 8000},
+        {'name': 'llama-guard-3-8b', 'rpm': 30, 'context': 8000},
+        {'name': 'llama3-70b-8192', 'rpm': 30, 'context': 8000},
+        {'name': 'llama3-8b-8192', 'rpm': 30, 'context': 8000},
+        {'name': 'mixtral-8x7b-32768', 'rpm': 30, 'context': 32000},],
+    'Alibaba': [
+        {'name': 'qwen-turbo', 'rpm': 60, 'context': 128000}, #其实支持100万
+        {'name': 'qwen-plus', 'rpm': 60, 'context': 128000},
+        {'name': 'qwen-long', 'rpm': 60, 'context': 128000},
+        {'name': 'qwen-max', 'rpm': 60, 'context': 32000},],
 }
 
 class SimpleAiProvider:
     #name: AI提供商的名字
     def __init__(self, name, api_key, model=None, api_host=None):
+        if name not in _PROV_AI_LIST:
+            raise ValueError(f"Unsupported provider: {name}")
         self.name = name
         self.api_key = api_key
-        self.model = model if model in _PROV_AI_LIST.get(name, {}).get('models', []) else ''
+        
+        index = 0
+        for idx, item in enumerate(_PROV_AI_LIST[name]):
+            if model == item['name']:
+                index = idx
+                break
+        
+        item = _PROV_AI_LIST[name][index]
+        self._model = item['name']
+        self._rpm = item['rpm']
+        self._context = item['context']
+        if self._rpm <= 0:
+            self._rpm = 2
+        if self._context < 4000:
+            self._context = 4000
         self.api_host = api_host
         self.opener = UrlOpener()
 
+    @property
+    def model(self):
+        return self._model
+    @property
+    def rpm(self):
+        return self._rpm
+    @property
+    def request_interval(self):
+        return (60 / self._rpm) if (self._rpm > 0) else 30
+    @property
+    def context_size(self):
+        return self._context
+
     def __repr__(self):
-        return f'{self.name}({self.model})'
+        return f'{self.name}({self._model})'
 
     #返回支持的AI供应商列表，返回一个python字典
     def ai_list(self):
@@ -84,8 +116,6 @@ class SimpleAiProvider:
             return self._groq_chat(message)
         elif name == "Alibaba":
             return self._alibaba_chat(message)
-        # elif name == "Baidu":
-        #     return self._baidu_chat(message)
         else:
             raise ValueError(f"Unsupported provider: {name}")
 
@@ -95,7 +125,7 @@ class SimpleAiProvider:
         headers = {'Authorization': f"Bearer {self.api_key}",
             'Content-Type': 'application/json'}
         payload = {
-            "model": self.model or _PROV_AI_LIST['openai']['models'][0],
+            "model": self._model,
             "messages": [{"role": "user", "content": message}] if isinstance(message, str) else message
         }
         response = self.opener.post(url, headers=headers, json=payload)
@@ -111,7 +141,7 @@ class SimpleAiProvider:
             'x-api-key': self.api_key}
         payload = {
             "prompt": f"\n\nHuman: {message}\n\nAssistant:",
-            "model": self.model or _PROV_AI_LIST['anthropic']['models'][0],
+            "model": self._model,
             "max_tokens_to_sample": 256,
         }
         response = self.opener.post(url, headers=headers, json=payload)
@@ -120,11 +150,10 @@ class SimpleAiProvider:
 
     #gemini的chat接口
     def _gemini_chat(self, message):
-        model = self.model or _PROV_AI_LIST['gemini']['models'][0]
         if self.api_host:
             url = f'{self.api_host}?key={self.api_key}'
         else:
-            url = f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={self.api_key}'
+            url = f'https://generativelanguage.googleapis.com/v1beta/models/{self._model}:generateContent?key={self.api_key}'
         payload = {'contents': [{'parts': [{'text': message}]}]}
         response = self.opener.post(url, json=payload)
         response.raise_for_status()
@@ -157,7 +186,7 @@ class SimpleAiProvider:
         params = {"access_token": self.api_key}
         payload = {
             "messages": [{"role": "user", "content": message}] if isinstance(message, str) else message,
-            "model": self.model or _PROV_AI_LIST['baidu']['models'][0],
+            "model": self._model,
             "max_tokens": 300
         }
         response = self.opener.post(url, headers=headers, params=params, json=payload)
@@ -166,5 +195,5 @@ class SimpleAiProvider:
 
 if __name__ == '__main__':
     provider = SimpleAiProvider("gemini", api_key="xxx")
-    response = provider.chat("你好，请告诉我天气预报")
+    response = provider.chat("你好，请讲一个笑话")
     print(response)
