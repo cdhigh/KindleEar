@@ -25,7 +25,7 @@ from calibre.constants import __version__
 from polyglot.builtins import string_or_bytes
 
 from filesystem_dict import FsDictStub
-from application.utils import get_directory_size, loc_exc_pos
+from application.ke_utils import get_directory_size, loc_exc_pos
 from application.base_handler import save_delivery_log
 
 DEBUG_README=b'''

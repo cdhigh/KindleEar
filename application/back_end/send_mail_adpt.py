@@ -6,7 +6,7 @@
 #https://cloud.google.com/appengine/docs/standard/python3/reference/services/bundled/google/appengine/api/mail
 #https://cloud.google.com/appengine/docs/standard/python3/services/mail
 import os, datetime, zipfile, base64
-from ..utils import str_to_bool, sanitize_filename
+from ..ke_utils import str_to_bool, sanitize_filename
 from ..base_handler import save_delivery_log
 
 #google.appengine will apply patch for os.env module
@@ -207,7 +207,7 @@ def mailjet_send_mail(apikey, secret_key, sender, to, subject, body, html=None, 
 def save_mail_to_local(dest_dir, subject, body, attachments=None, html=None, **kwargs):
     attachments = attachments or []
     mailDir = os.path.join(appDir, dest_dir)
-    if not os.path.exists(mailDir):
+    if not os.path.isdir(mailDir):
         os.makedirs(mailDir)
 
     now = str(datetime.datetime.now().strftime('%H-%M-%S'))

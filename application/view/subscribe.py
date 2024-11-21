@@ -9,7 +9,7 @@ from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
 from ..back_end.task_queue_adpt import create_notifynewsubs_task
-from ..utils import str_to_bool, xml_escape, utcnow
+from ..ke_utils import str_to_bool, xml_escape, utcnow
 from ..lib.urlopener import UrlOpener
 from ..lib.recipe_helper import GetBuiltinRecipeInfo, GetBuiltinRecipeSource
 from .library import LIBRARY_MGR, SUBSCRIBED_FROM_LIBRARY, LIBRARY_GETSRC, buildKeUrl

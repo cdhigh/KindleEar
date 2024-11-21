@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #mdx离线词典接口
+#Author: cdhigh <https://github.com/cdhigh>
 import os
 from bs4 import BeautifulSoup
-from application.utils import xml_escape
+from application.ke_utils import xml_escape, loc_exc_pos
 from .readmdict import MDX
 try:
     import marisa_trie
@@ -38,20 +39,25 @@ class MDict:
     def __init__(self, database='', host=None):
         self.database = database
         self.dictionary = None
+        self.initError = None
         if database in self.databases:
             try:
                 self.dictionary = IndexedMdx(database)
-            except Exception as e:
-                default_log.warning(f'Instantiate mdict failed: {self.databases[database]}: {e}')
+            except:
+                self.initError = loc_exc_pos(f'Init mdict failed: {self.databases[database]}')
+                default_log.warning(self.initError)
         else:
-            default_log.warning(f'dict not found: {self.databases[database]}')
+            self.initError = f'Dict not found: {self.databases[database]}'
+            default_log.warning(self.initError)
 
     #返回当前使用的词典名字
     def __repr__(self):
         return 'mdict [{}]'.format(self.databases.get(self.database, ''))
         
     def definition(self, word, language=''):
-        return self.dictionary.get(word) if self.dictionary else ''
+        if self.initError:
+            return self.initError
+        return self.dictionary.get(word)
 
 #经过词典树缓存的Mdx
 class IndexedMdx:
@@ -94,18 +100,23 @@ class IndexedMdx:
     def get(self, word):
         if not self.trie:
             return ''
-        word = word.lower().strip()
+        
         #和mdict官方应用一样，输入:about返回词典基本信息
         if word == ':about':
             return self.dict_html_info()
 
-        indexes = self.trie[word] if word in self.trie else None
+        for wd in [word, word.lower(), word.capitalize()]:
+            if wd in self.trie:
+                indexes = self.trie[word]
+                break
+        else:
+            return ''
+
         ret = self.get_content_by_Index(indexes)
         if ret.startswith('@@@LINK='):
             word = ret[8:].strip()
-            if word:
-                indexes = self.trie[word] if word in self.trie else None
-                ret = self.get_content_by_Index(indexes)
+            if word and word in self.trie:
+                ret = self.get_content_by_Index(self.trie[word])
         return ret
         
     def __contains__(self, word) -> bool:

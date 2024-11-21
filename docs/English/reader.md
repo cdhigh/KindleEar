@@ -50,7 +50,10 @@ The extracted word is sent to your deployed KindleEar site for translation, and 
 ### Installing Dictionaries
 1. KindleEar supports online dictionaries such as [dict.org](https://dict.org/), [dict.cc](https://www.dict.cc/), [dict.cn](http://dict.cn/), [Merriam-Webster](https://www.merriam-webster.com/), [Oxford](https://www.oxfordlearnersdictionaries.com/). These dictionaries require no installation and are ready to use out of the box.    
 
-2. KindleEar also supports offline dictionaries in the stardict format. After downloading the corresponding dictionary, unzip it into the `data/dict` directory. You can organize different dictionaries into subdirectories. Then, restart the KindleEar service to refresh the dictionary list.    
+2. KindleEar also supports offline dictionaries in the mdict/stardict/lingvo format. After downloading the corresponding dictionary, unzip it into the `data/dict` directory. You can organize different dictionaries into subdirectories. Then, restart the KindleEar service to refresh the dictionary list.    
+  * mdict: Requires `.mdx` file only. If there is a `.css`, it must be in the same directory.    
+  * stardict: Requires `.ifo`, `.idx`, and `.dict` (or `.dict.dz`).   
+  * lingvo: Only the `.dsl`. requires extracting it into `dsl` if you have `dsl.dz`.  
 
 3. The first time you look up a word in the offline dictionary, it may be slow because it needs to create an index file (suffix: trie), After that, it will be much faster. 
 If you are using a large dictionary (for example, above several hundred megabytes), the indexing process will consume a significant amount of memory. If the server has limited memory, the indexing might fail. You can first use the dictionary on your local machine to look up a word and generate the "trie" file, then copy it to the corresponding directory on the server.    

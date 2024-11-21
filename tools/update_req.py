@@ -12,35 +12,37 @@ def new_secret_key(length=12):
     allchars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz'
     return ''.join([secrets.choice(allchars) for i in range(length)])
 
-REQ_COMM = [('requests', '~=2.32.0'),
+REQ_COMM = [
+    ('requests', '~=2.32.0'),
+    ('PySocks', '~=1.7.1'),
     ('chardet', '~=5.2.0'),
-    ('pillow', '~=10.3.0'),
-    ('lxml', '~=5.2.0'),
-    ('lxml_html_clean', '~=0.1.1'),
+    ('pillow', '~=10.4.0'),
+    ('lxml', '~=5.3.0'),
+    ('lxml-html-clean', '~=0.4.1'),
     ('sendgrid', '~=6.11.0'),
-    ('mailjet_rest', '~=1.3.4'),
+    ('mailjet-rest', '~=1.3.4'),
     ('python-dateutil', '~=2.9.0'),
-    ('css_parser', '~=1.0.10'),
-    ('beautifulsoup4', '~=4.12.2'),
+    ('css-parser', '~=1.0.10'),
+    ('beautifulsoup4', '~=4.12.3'),
     ('html2text', '~=2024.2.26'),
     ('html5lib', '~=1.1'),
     ('#html5-parser', '~=0.4.0'),
     ('gunicorn', '~=22.0.0'),
-    ('Flask', '~=3.0.3'),
+    ('Flask', '~=3.1.0'),
     ('flask-babel', '~=4.0.0'),
     ('six', '~=1.16.0'),
     ('feedparser', '~=6.0.11'),
     ('qrcode', '~=7.4.2'),
-    ('gtts', '~=2.5.1'),
-    ('edge-tts', '~=6.1.11'),
+    ('gtts', '~=2.5.4'),
+    ('edge-tts', '~=6.1.18'),
     ('justext', '~=3.0.1'),
 ]
 
 REQ_DB = {
-    'sqlite': [('peewee', '~=3.17.1'),],
-    'mysql': [('peewee', '~=3.17.1'), ('pymysql', '~=1.1.0'),],
-    'postgresql': [('peewee', '~=3.17.1'), ('psycopg2-binary', '~=2.9.9'),],
-    'cockroachdb': [('peewee', '~=3.17.1'), ('psycopg2-binary', '~=2.9.9'),],
+    'sqlite': [('peewee', '~=3.17.8'),],
+    'mysql': [('peewee', '~=3.17.8'), ('pymysql', '~=1.1.1'),],
+    'postgresql': [('peewee', '~=3.17.8'), ('psycopg2-binary', '~=2.9.9'),],
+    'cockroachdb': [('peewee', '~=3.17.8'), ('psycopg2-binary', '~=2.9.9'),],
     'datastore': [('weedata', '>=0.2.7,<1.0.0'), ('google-cloud-datastore', '~=2.19.0'),],
     'mongodb': [('weedata', '>=0.2.7,<1.0.0'), ('pymongo', '~=4.6.3'),],
     'redis': [('weedata', '>=0.2.7,<1.0.0'), ('redis', '~=5.0.3'),],
@@ -56,9 +58,9 @@ REQ_TASK = {
 
 REQ_PLAT = {'gae': [('appengine-python-standard', '~=1.1.6'),
         ('google-cloud-texttospeech', '~=2.16.3')],
-    'docker': [('chunspell', '~=2.0.4'), ('marisa_trie', '~=1.2.0'), ('indexed-gzip', '~=1.8.7')], #docker/amd64 basic libs
-    'dockerArm': [('chunspell', '~=2.0.4'), ('marisa_trie', '~=1.2.0'), ('indexed-gzip', '~=1.8.7')], #docker/arm64 basic libs
-    'dockerAll': [('weedata', '>=0.2.7,<1.0.0'),('pymysql', '~=1.1.0'), #docker[all] install all libs
+    'docker': [('chunspell', '~=2.0.4'), ('marisa-trie', '~=1.2.1'), ('indexed-gzip', '~=1.9.1')], #docker/amd64 basic libs
+    'dockerArm': [('chunspell', '~=2.0.4'), ('marisa-trie', '~=1.2.1'), ('indexed-gzip', '~=1.9.1')], #docker/arm64 basic libs
+    'dockerAll': [('weedata', '>=0.2.7,<1.0.0'),('pymysql', '~=1.1.1'), #docker[all] install all libs
         ('psycopg2-binary', '~=2.9.9'),('pymongo', '~=4.6.3'),('redis', '~=5.0.3'),
         ('celery', '~=5.3.6'),('flask-rq2', '~=18.3'),('sqlalchemy', '~=2.0.29')],
 }

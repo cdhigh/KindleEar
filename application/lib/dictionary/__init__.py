@@ -8,10 +8,11 @@ from .merriam_webster import MerriamWebster
 from .oxford_learners import OxfordLearners
 from .stardict import StarDict
 from .mdict import MDict
+from .lingvo import LingvoDict
 
 all_dict_engines = {DictOrg.name: DictOrg, DictCn.name: DictCn, DictCc.name: DictCc,
     MerriamWebster.name: MerriamWebster, OxfordLearners.name: OxfordLearners,
-    StarDict.name: StarDict, MDict.name: MDict}
+    StarDict.name: StarDict, MDict.name: MDict, LingvoDict.name: LingvoDict}
 
 #创建一个词典实例
 def CreateDictInst(engine, database, host=None):

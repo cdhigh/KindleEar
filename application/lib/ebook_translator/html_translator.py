@@ -4,7 +4,7 @@
 import re, time, copy
 from bs4 import BeautifulSoup, NavigableString, Tag
 from ebook_translator.engines import *
-from application.utils import loc_exc_pos
+from application.ke_utils import loc_exc_pos
 
 #生成一个当前所有支持的翻译引擎的字典，在网页内使用
 def get_trans_engines():

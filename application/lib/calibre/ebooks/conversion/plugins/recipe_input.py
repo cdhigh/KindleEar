@@ -14,7 +14,7 @@ from calibre.utils.localization import canonicalize_lang
 from calibre.ebooks.metadata import MetaInformation
 from calibre.ebooks.metadata.opf2 import OPFCreator
 from calibre.ebooks.metadata.toc import TOC
-from application.utils import loc_exc_pos
+from application.ke_utils import loc_exc_pos
 
 class RecipeDisabled(Exception):
     pass

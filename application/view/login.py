@@ -9,7 +9,7 @@ from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import send_html_mail
-from ..utils import new_secret_key, hide_email, PasswordManager, utcnow
+from ..ke_utils import new_secret_key, hide_email, PasswordManager, utcnow
 
 bpLogin = Blueprint('bpLogin', __name__)
 

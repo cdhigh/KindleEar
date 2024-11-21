@@ -4,7 +4,7 @@
 #Author: cdhigh <https://github.com/cdhigh>
 import re, time
 import simple_ai_provider
-from application.utils import loc_exc_pos
+from application.ke_utils import loc_exc_pos
 
 def get_summarizer_engines():
     return simple_ai_provider._PROV_AI_LIST

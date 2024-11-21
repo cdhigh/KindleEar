@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 #stardict离线词典支持
-import os
+#Author: cdhigh <https://github.com/cdhigh>
+import os, re
+from application.ke_utils import loc_exc_pos
 from .pystardict import PyStarDict
 
 #获取本地的stardict文件列表，只有列表，没有校验是否有效
 def getStarDictList():
     dictDir = os.environ.get('DICTIONARY_DIR')
-    if not dictDir or not os.path.exists(dictDir):
+    if not dictDir or not os.path.isdir(dictDir):
         return {}
 
     ret = {}
@@ -32,23 +34,33 @@ class StarDict:
     def __init__(self, database='', host=None):
         self.database = database
         self.dictionary = None
+        self.initError = None
         if database in self.databases:
             try:
                 self.dictionary = PyStarDict(database)
             except Exception as e:
-                default_log.warning(f'Instantiate stardict failed: {self.databases[database]}: {e}')
+                self.initError = loc_exc_pos(f'Init stardict failed: {self.databases[database]}')
+                default_log.warning(self.initError)
+        else:
+            self.initError = f'Dict not found: {self.databases[database]}'
+            default_log.warning(self.initError)
 
     #返回当前使用的词典名字
     def __repr__(self):
         return 'stardict [{}]'.format(self.databases.get(self.database, ''))
         
     def definition(self, word, language=''):
-        word = word.lower().strip()
-        ret = self.dictionary.get(word) if self.dictionary else ''
+        if self.initError:
+            return self.initError
+        
+        ret = self.dictionary.get(word)
         if isinstance(ret, bytes):
             ret = ret.decode('utf-8')
+        #每条释义的前面添加一个换行
+        ret = re.sub(r'(<b>\s*\d+</b>)', r'<br/>\1', ret, flags=re.IGNORECASE)
         lines = [line.strip() for line in str(ret).split('\n') if line.strip()]
-        if lines and lines[0] in (word, f'<b>{word}</b>'):
+        if lines and lines[0] in (word, f'<b>{word}</b>'): #去掉开头的词条
             lines = lines[1:]
-        return '\n'.join(lines)
+
+        return '<br/>'.join(lines)
 

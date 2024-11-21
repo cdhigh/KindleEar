@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-18 13:20-0300\n"
+"POT-Creation-Date: 2024-11-21 10:11-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,6 +28,7 @@ msgstr ""
 
 #: application/templates/admin.html:19
 #: application/templates/adv_calibre_options.html:18
+#: application/templates/adv_proxy.html:18
 msgid "Save"
 msgstr ""
 
@@ -269,6 +270,13 @@ msgstr ""
 
 #: application/templates/adv_base.html:102
 #: application/templates/adv_base.html:106
+#: application/templates/adv_proxy.html:3
+#: application/templates/adv_proxy.html:12
+msgid "Proxy"
+msgstr ""
+
+#: application/templates/adv_base.html:111
+#: application/templates/adv_base.html:115
 #: application/templates/adv_calibre_options.html:12
 msgid "Calibre Options"
 msgstr ""
@@ -434,6 +442,18 @@ msgstr ""
 
 #: application/templates/adv_inboundmail.html:59
 msgid "Please input mail address"
+msgstr ""
+
+#: application/templates/adv_proxy.html:13
+msgid "Supports"
+msgstr ""
+
+#: application/templates/adv_proxy.html:24
+#: application/templates/adv_proxy.html:29
+#: application/templates/book_audiolator.html:132
+#: application/templates/book_summarizer.html:105
+#: application/templates/book_translator.html:97
+msgid "Test"
 msgstr ""
 
 #: application/templates/adv_uploadcover.html:3
@@ -1126,12 +1146,6 @@ msgstr ""
 msgid "Your browser does not support the audio element."
 msgstr ""
 
-#: application/templates/book_audiolator.html:132
-#: application/templates/book_summarizer.html:105
-#: application/templates/book_translator.html:97
-msgid "Test"
-msgstr ""
-
 #: application/templates/book_summarizer.html:18
 #: application/templates/book_translator.html:21
 msgid "Enable"
@@ -1670,9 +1684,10 @@ msgstr ""
 msgid "Word"
 msgstr ""
 
-#: application/view/admin.py:48 application/view/adv.py:441
-#: application/view/settings.py:66 application/view/translator.py:87
-#: application/view/translator.py:171 application/view/translator.py:253
+#: application/view/admin.py:48 application/view/adv.py:431
+#: application/view/adv.py:483 application/view/settings.py:66
+#: application/view/translator.py:87 application/view/translator.py:171
+#: application/view/translator.py:253
 msgid "Settings Saved!"
 msgstr ""
 
@@ -1725,93 +1740,93 @@ msgstr ""
 msgid "Changes saved successfully."
 msgstr ""
 
-#: application/view/adv.py:100 application/view/adv.py:101
-#: application/view/adv.py:102 application/view/adv.py:103
-#: application/view/adv.py:104 application/view/adv.py:105
-#: application/view/adv.py:106 application/view/adv.py:107
-#: application/view/adv.py:108 application/view/adv.py:109
+#: application/view/adv.py:101 application/view/adv.py:102
+#: application/view/adv.py:103 application/view/adv.py:104
+#: application/view/adv.py:105 application/view/adv.py:106
+#: application/view/adv.py:107 application/view/adv.py:108
+#: application/view/adv.py:109 application/view/adv.py:110
 msgid "Append hyperlink '{}' to article"
 msgstr ""
 
-#: application/view/adv.py:100 application/view/adv.py:101
-#: application/view/adv.py:102 application/view/adv.py:103
-#: application/view/adv.py:104
+#: application/view/adv.py:101 application/view/adv.py:102
+#: application/view/adv.py:103 application/view/adv.py:104
+#: application/view/adv.py:105
 msgid "Save to {}"
 msgstr ""
 
-#: application/view/adv.py:100
+#: application/view/adv.py:101
 msgid "evernote"
 msgstr ""
 
-#: application/view/adv.py:101
+#: application/view/adv.py:102
 msgid "wiz"
 msgstr ""
 
-#: application/view/adv.py:102
+#: application/view/adv.py:103
 msgid "pocket"
 msgstr ""
 
-#: application/view/adv.py:103
+#: application/view/adv.py:104
 msgid "instapaper"
 msgstr ""
 
-#: application/view/adv.py:104
+#: application/view/adv.py:105
 msgid "wallabag"
 msgstr ""
 
-#: application/view/adv.py:105 application/view/adv.py:106
-#: application/view/adv.py:107 application/view/adv.py:108
+#: application/view/adv.py:106 application/view/adv.py:107
+#: application/view/adv.py:108 application/view/adv.py:109
 msgid "Share on {}"
 msgstr ""
 
-#: application/view/adv.py:105
+#: application/view/adv.py:106
 msgid "weibo"
 msgstr ""
 
-#: application/view/adv.py:106
+#: application/view/adv.py:107
 msgid "facebook"
 msgstr ""
 
-#: application/view/adv.py:108
+#: application/view/adv.py:109
 msgid "tumblr"
 msgstr ""
 
-#: application/view/adv.py:109
+#: application/view/adv.py:110
 msgid "Open in browser"
 msgstr ""
 
-#: application/view/adv.py:110
+#: application/view/adv.py:111
 msgid "Append qrcode of url to article"
 msgstr ""
 
-#: application/view/adv.py:374 application/view/share.py:54
+#: application/view/adv.py:375 application/view/share.py:54
 #: application/view/subscribe.py:250
 msgid "Unknown command: {}"
 msgstr ""
 
-#: application/view/adv.py:443
+#: application/view/adv.py:433 application/view/adv.py:485
 msgid "The format is invalid."
 msgstr ""
 
-#: application/view/adv.py:475
+#: application/view/adv.py:517
 msgid "Authorization Error!<br/>{}"
 msgstr ""
 
-#: application/view/adv.py:496
+#: application/view/adv.py:538
 msgid "Success authorized by Pocket!"
 msgstr ""
 
-#: application/view/adv.py:502
+#: application/view/adv.py:544
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr ""
 
-#: application/view/adv.py:523
+#: application/view/adv.py:565
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 
-#: application/view/adv.py:536
+#: application/view/adv.py:578
 msgid "Request type [{}] unsupported"
 msgstr ""
 

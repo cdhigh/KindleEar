@@ -11,7 +11,7 @@ from flask import Blueprint, render_template, session, request, send_from_direct
 from flask_babel import gettext as _
 from build_ebook import html_to_book
 from ..base_handler import *
-from ..utils import xml_escape, xml_unescape, str_to_int, str_to_float, str_to_bool
+from ..ke_utils import xml_escape, xml_unescape, str_to_int, str_to_float, str_to_bool
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import send_to_kindle
 from .settings import get_locale, LangMap
@@ -130,7 +130,7 @@ def ReaderDeletePost(user: KeUser, userDir: str):
             continue
         bkDir = os.path.join(userDir, book)
         dateDir = os.path.dirname(bkDir)
-        if os.path.exists(bkDir):
+        if os.path.isdir(bkDir):
             try:
                 shutil.rmtree(bkDir)
             except Exception as e:
@@ -253,7 +253,7 @@ def ReaderDictPost(user: KeUser, userDir: str):
 @login_required()
 def ReaderDictCssRoute(path: str, user: KeUser):
     dictDir = app.config['DICTIONARY_DIR']
-    return send_from_directory(dictDir, path) if dictDir and os.path.exists(dictDir) else ''
+    return send_from_directory(dictDir, path) if dictDir and os.path.isdir(dictDir) else ''
 
 #构建Hunspell实例
 #language: 语种代码，只有前两个字母
@@ -269,7 +269,7 @@ def InitHunspell(language):
     dictDir = app.config['DICTIONARY_DIR'] or ''
     morphDir = os.path.join(dictDir, 'morphology') if dictDir else ''
     dics = []
-    if morphDir and os.path.exists(morphDir):
+    if morphDir and os.path.isdir(morphDir):
         dics.extend([os.path.splitext(e)[0] for e in os.listdir(morphDir) if e.endswith('.dic') and e.startswith(language)])
 
     if dics:
@@ -380,7 +380,7 @@ def PushSingleArticle(src: str, title: str, user: KeUser, userDir: str, language
 
 #获取当前用户保存的所有电子书，返回一个列表[{date:, books: [{title:, articles:[{title:, src:}],},...]}, ]
 def GetSavedOebList(userDir: str) -> list:
-    if not os.path.exists(userDir):
+    if not os.path.isdir(userDir):
         return []
 
     ret = []
@@ -405,7 +405,7 @@ def GetSavedOebList(userDir: str) -> list:
 
 #从content.opf里面提取文章元信息，返回一个字典 {title:,language:,}
 def ExtractBookMeta(opfFile: str) -> dict:
-    if not os.path.exists(opfFile):
+    if not os.path.isfile(opfFile):
         return {}
 
     try:
@@ -427,7 +427,7 @@ def ExtractBookMeta(opfFile: str) -> dict:
 
 #从toc.ncx里面提取文章列表，返回一个字典列表 [{title:,'src':,}]
 def ExtractArticleList(ncxFile: str, prefix: str) -> list:
-    if not os.path.exists(ncxFile):
+    if not os.path.isfile(ncxFile):
         return []
 
     try:

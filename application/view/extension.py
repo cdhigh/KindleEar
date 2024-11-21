@@ -10,7 +10,7 @@ from flask import Blueprint, request, make_response, current_app as app
 from flask_babel import gettext as _
 from calibre.web.feeds.news import get_tags_from_rules
 from ..base_handler import *
-from ..utils import xml_escape
+from ..ke_utils import xml_escape
 from ..back_end.db_models import *
 from urlopener import UrlOpener
 

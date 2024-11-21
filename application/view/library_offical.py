@@ -7,7 +7,7 @@ from operator import attrgetter
 from flask import Blueprint, request, Response, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
-from ..utils import str_to_bool, str_to_int, utcnow
+from ..ke_utils import str_to_bool, str_to_int, utcnow
 from ..back_end.db_models import *
 
 #几个"官方"服务的地址
@@ -75,8 +75,6 @@ def SharedLibraryOfficalAjax():
         return respDict
 
     #将贡献者的网址加密
-    #from apps.utils import hide_website
-    #creator = hide_website(creator)
     creator = hashlib.md5(creator.encode('utf-8')).hexdigest()
 
     #判断是否存在，如果存在，则更新分类或必要的信息，同时返回成功

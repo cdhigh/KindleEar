@@ -1,0 +1,43 @@
+{% extends "adv_base.html" %}
+{% block titleTag -%}
+<title>{{ _("Proxy") }} - KindleEar</title>
+{% endblock -%}
+
+{% block advcontent -%}
+<form class="pure-form" action="" method="POST">
+  <fieldset>
+    {% if tips -%}
+    <div class="notice-box error">{{tips}}</div>
+    {% endif -%}
+    <legend>{{_("Proxy")}}</legend>
+    <p><small>{{_("Supports")}}: http, https, socks4, socks4a, socks5, socks5h</small></p>
+    <div class="box">
+      <input type="text" name="proxy" placeholder="http://username:password@host:port" class="pure-input-1" value="{{proxy}}" />
+    </div>
+    <div style="text-align:center;margin-top:20px;">
+      <input type="submit" value="{{_('Save')}}" class="pure-button pure-button-primary pure-input-rounded" />
+    </div>
+  </fieldset>
+</form>
+<form class="pure-form" action="" onsubmit="return false;">
+  <fieldset>
+    <legend>{{_("Test")}}</legend>
+    <div class="box-list">
+      <div class="box">
+        <input type="text" name="test_url" id="test_url" placeholder="https://www.google.com" class="pure-input-1" oninput="UpdateProxyTestHref(this.value)" onkeydown="TriggerBtnTestProxy(event)" />
+        <div class="cornerControls">
+          <a class="actionButton add" id="btn_test_proxy" href="/fwd" target="_blank">{{_("Test")}}</a>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+</form>
+{% endblock -%}
+{% block js -%}
+<script type="text/javascript">
+$(document).ready(function(){
+  //mimeType, formId, fileInputId, upBtnId, delBtnId, previewTagId, progressId
+  AjaxFileUpload.init('text', '#uploadForm', '#css_file', '#fileSubmit', '#deletecss', '#cssPreview');
+});
+</script>
+{% endblock -%}

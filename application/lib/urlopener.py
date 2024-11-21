@@ -40,6 +40,8 @@ def UrlRetry(max_retries, delay, backoff=1, logger=default_log):
     return decorator
 
 class UrlOpener:
+    _proxies = {}
+
     #headers 可以传入一个字典或元祖列表
     #file_stub 用于本地文件读取，如果为None，则使用python的open()函数
     def __init__(self, *, host=None, timeout=60, headers=None, file_stub=None, user_agent=None, **kwargs):
@@ -62,6 +64,8 @@ class UrlOpener:
 
         self.fs = file_stub #FsDictStub
         self.session = requests.session()
+        if self._proxies:
+            self.session.proxies.update(self._proxies)
         self.prevRespRef = None #对Response实例的一个弱引用
         self.form = None
         self.soup = None
@@ -102,6 +106,7 @@ class UrlOpener:
         return self.open(*args, **kwargs)
     
     #远程连接互联网的url
+    #正常情况不会抛出异常，可以通过传入 throw_exception=True 抛出异常
     @UrlRetry(max_retries=2, delay=2, backoff=2)
     def open_remote_url(self, url, data, headers, timeout, method, **kwargs):
         timeout = timeout if timeout else self.timeout
@@ -115,14 +120,24 @@ class UrlOpener:
         else:
             req_func = self.session.post #type:ignore
         
+        throwException = kwargs.pop('throw_exception', None)
+        kwargs.setdefault('proxies', self._proxies)
+        
         try:
             resp = req_func(url, data=data, headers=headers, timeout=timeout, allow_redirects=True, 
                 verify=False, **kwargs)
-        except:
-            resp = requests.models.Response()
-            resp.status_code = 555
-            default_log.warning(f"open_remote_url: {method} {url} failed: {traceback.format_exc()}")
-            
+        except Exception as e:
+            if throwException:
+                raise
+            else:
+                resp = requests.models.Response()
+                resp.status_code = 555
+                resp.reason = str(e)
+                default_log.warning(f"open_remote_url: {method} {url} failed: {traceback.format_exc()}")
+
+        if throwException:
+            resp.raise_for_status()
+
         #有些网页头部没有编码信息，则使用chardet检测编码，否则requests会认为text类型的编码为"ISO-8859-1"
         contentType = resp.headers.get("Content-Type", "").lower()
         if 'text/html' in contentType and "charset" not in contentType:
@@ -366,6 +381,13 @@ class UrlOpener:
         pass
     def response(self):
         return self.prevRespRef() if self.prevRespRef else None
+
+    @classmethod
+    def set_proxy(cls, url):
+        if url and url.startswith(('http', 'socks')):
+            cls._proxies = {'http': url, 'https': url}
+        else:
+            cls._proxies = {}
 
     @classmethod
     def CodeMap(cls, errCode):

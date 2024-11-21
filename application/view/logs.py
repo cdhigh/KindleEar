@@ -8,7 +8,7 @@ from flask import Blueprint, render_template, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
-from ..utils import utcnow
+from ..ke_utils import utcnow
 
 bpLogs = Blueprint('bpLogs', __name__)
 
@@ -51,7 +51,7 @@ def RemoveLogs():
         
     #清理临时目录
     tmpDir = os.environ.get('KE_TEMP_DIR')
-    if tmpDir and os.path.exists(tmpDir):
+    if tmpDir and os.path.isdir(tmpDir):
         ret.append(DeleteOldFiles(tmpDir, 1))
 
     #清理30天之前的推送记录

@@ -9,7 +9,7 @@ from calibre.ebooks.conversion.plumber import Plumber
 from calibre.web.feeds.recipes import compile_recipe
 from recipe_helper import GenerateRecipeSource
 from urlopener import UrlOpener
-from application.utils import loc_exc_pos
+from application.ke_utils import loc_exc_pos
 
 #从输入格式生成对应的输出格式
 #input_: 如果是recipe，为编译后的recipe(或列表)，或者是一个输入文件名，或一个BytesIO

@@ -1740,3 +1740,19 @@ function DictEngineFieldChanged(idx) {
 }
 
 ///[end] adv_dict.html
+
+///[start] adv_proxy.html
+//测试代理服务器文本框有变化后，将网址更新到测试按钮
+function UpdateProxyTestHref(url) {
+  $('#btn_test_proxy').attr('href', '/fwd?url=' + encodeURIComponent(url));
+}
+
+//按下回车键触发 "测试" 链接按钮
+function TriggerBtnTestProxy(event) {
+  if (event.key === "Enter") {
+    console.log('enter');
+    event.preventDefault();
+    window.open($('#btn_test_proxy').attr("href"), "_blank");
+  }
+}
+///[end] adv_proxy.html

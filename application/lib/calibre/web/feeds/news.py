@@ -34,7 +34,7 @@ from urlopener import UrlOpener
 from requests_file import LocalFileAdapter
 from filesystem_dict import FsDictStub
 from application.back_end.db_models import LastDelivered
-from application.utils import loc_exc_pos
+from application.ke_utils import loc_exc_pos
 
 MASTHEAD_SIZE = (600, 60)
 DEFAULT_MASTHEAD_IMAGE = 'mastheadImage.gif'

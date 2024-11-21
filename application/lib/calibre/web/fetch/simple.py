@@ -32,7 +32,7 @@ from polyglot.urllib import (HTTPError,
     URLError, quote, url2pathname, urljoin, urlparse, urlsplit, urlunparse,
     urlunsplit, urlopen
 )
-from application.utils import loc_exc_pos
+from application.ke_utils import loc_exc_pos
 
 class AbortArticle(Exception):
     pass

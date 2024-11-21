@@ -7,7 +7,7 @@ from flask import Blueprint, request, current_app as app
 from bs4 import BeautifulSoup
 from calibre.web.feeds.news import recursive_fetch_url
 from ..base_handler import *
-from ..utils import filesizeformat, hide_email
+from ..ke_utils import filesizeformat, hide_email
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import send_to_kindle, send_mail
 from urlopener import UrlOpener
@@ -44,7 +44,10 @@ def Url2BookImpl(userName, urls, title, key, action='', text='', language=''):
         return "The user does not exist."
     
     urls = urls.split('|') if urls else []
-
+    
+    #设置全局代理
+    UrlOpener.set_proxy(user.cfg('proxy'))
+    
     if urls and action == 'download': #直接下载电子书并推送
         return u2lDownloadFile(user, urls, title)
     elif action == 'debug': #调试目的，将链接直接下载，发送到管理员邮箱

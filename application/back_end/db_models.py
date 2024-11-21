@@ -5,7 +5,7 @@
 #Author: cdhigh <https://github.com/cdhigh>
 import os, random, datetime
 from operator import attrgetter
-from ..utils import PasswordManager, ke_encrypt, ke_decrypt, utcnow, compare_version
+from ..ke_utils import PasswordManager, ke_encrypt, ke_decrypt, utcnow, compare_version
 
 if os.getenv('DATABASE_URL', '').startswith(("datastore", "mongodb", "redis", "pickle")):
     from .db_models_nosql import *
@@ -46,7 +46,7 @@ class KeUser(MyBaseModel): # kindleEar User
             return {'email': '', 'kindle_email': '', 'secret_key': '', 'timezone': 0,
                 'inbound_email': 'save,forward', 'keep_in_email_days': 1,
                 'delivery_mode': 'email,local', 'webshelf_days': 7,
-                'reader_params': {}}.get(item, value)
+                'reader_params': {}, 'proxy': ''}.get(item, value)
         else:
             return value
     def set_cfg(self, item, value):

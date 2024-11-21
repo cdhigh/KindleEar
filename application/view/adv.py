@@ -6,12 +6,13 @@ import re, io, textwrap, json
 from urllib.parse import unquote, urljoin, urlparse
 from bs4 import BeautifulSoup
 from html import escape
-from flask import Blueprint, url_for, render_template, redirect, session, send_file, abort, current_app as app
+from flask import (Blueprint, url_for, render_template, redirect, session, send_file, 
+                    abort, Response, current_app as app)
 from flask_babel import gettext as _
 from PIL import Image
 from ..base_handler import *
 from ..back_end.db_models import *
-from ..utils import ke_decrypt, str_to_int, str_to_bool, safe_eval, xml_escape, xml_unescape
+from ..ke_utils import ke_decrypt, str_to_int, str_to_bool, safe_eval, xml_escape, xml_unescape
 from ..lib.pocket import Pocket
 from ..lib.wallabag import WallaBag
 from ..lib.urlopener import UrlOpener
@@ -20,9 +21,12 @@ from .settings import UpdateBookedCustomRss, LangMap
 bpAdv = Blueprint('bpAdv', __name__)
 
 def adv_render_template(tpl, advCurr, **kwargs):
+    user = kwargs.get('user', None)
     kwargs.setdefault('tab', 'advset')
     kwargs.setdefault('tips', '')
     kwargs.setdefault('adminName', app.config['ADMIN_NAME'])
+    if user:
+        kwargs.setdefault('hasProxy', bool(user.cfg('proxy')))
     #print(kwargs.get('tips'))
     return render_template(tpl, advCurr=advCurr, **kwargs)
 
@@ -411,6 +415,47 @@ def AdvDictPost(user: KeUser):
     user.set_cfg('reader_params', params)
     user.save()
     return redirect(url_for('bpAdv.AdvDict'))
+
+#打开代理设置页面
+@bpAdv.route("/adv/proxy", endpoint='AdvProxy')
+@login_required()
+def AdvProxy(user: KeUser):
+    proxy = user.cfg('proxy')
+    return adv_render_template('adv_proxy.html', 'proxy', proxy=proxy, user=user, tips='')
+
+#设置代理地址
+@bpAdv.post("/adv/proxy", endpoint='AdvProxyPost')
+@login_required()
+def AdvProxyPost(user: KeUser):
+    proxy = request.form.get('proxy', '').lower()
+    if not proxy or proxy.startswith(('http', 'socks')):
+        user.set_cfg('proxy', proxy)
+        user.save()
+        tips = _("Settings Saved!")
+    else:
+        tips = _("The format is invalid.")
+    return adv_render_template('adv_proxy.html', 'proxy', proxy=proxy, user=user, tips=tips)
+
+#测试代理是否正常
+@bpAdv.route("/fwd", endpoint='AdvFwdRoute')
+@login_required()
+def AdvFwdRoute(user: KeUser):
+    UrlOpener.set_proxy(user.cfg('proxy'))
+    url = request.args.get('url')
+    if url:
+        url = unquote(url)
+        if not url.startswith('http'):
+            url = 'https://' + url
+        try:
+            resp = UrlOpener().open(url)
+            headers = dict(resp.headers)
+            headers.pop('Transfer-Encoding', None)
+            headers.pop('Content-Encoding', None)
+            return Response(resp.content, status=resp.status_code, headers=headers)
+        except Exception as e:
+            return str(e)
+    else:
+        return 'param "url" is empty'
 
 #设置calibre的参数
 @bpAdv.route("/adv/calibre", endpoint='AdvCalibreOptions')

@@ -70,6 +70,23 @@
             <a href="/adv/dict" class="pure-menu-link">{{_("Dictionary")}}</a>
           </li>
           {% endif -%}
+          {% if advCurr=='proxy' -%}
+          <li class="pure-menu-item pure-menu-selected">
+            <span>{{_("Proxy")}}
+              {%if hasProxy -%}
+              <sup style="font-size:0.8em;margin-left:-5px;font-weight:bold;font-style:normal;border:none;">●</sup>
+              {% endif -%}
+            </span>
+          </li>
+          {% else -%}
+          <li class="pure-menu-item">
+            <a href="/adv/proxy" class="pure-menu-link">{{_("Proxy")}}
+            {%if hasProxy -%}
+            <sup style="font-size:0.8em;margin-left:-5px;font-weight:bold;font-style:normal;border:none;">●</sup>
+            {% endif -%}
+            </a>
+          </li>
+          {% endif -%}
           {% if advCurr=='import' -%}
           <li class="pure-menu-item pure-menu-selected">
             <span>{{_("Import Feeds")}}</span>

@@ -34,7 +34,7 @@ def init_task_queue_service(app):
         transport_opts = {'data_folder_in': dir_in, 'data_folder_out': dir_out, 'processed_folder': dir_procsed, 
             'store_processed': True}
         for d in [dir_, dir_in, dir_out, dir_procsed]:
-            if not os.path.exists(d):
+            if not os.path.isdir(d):
                 os.makedirs(d)
         broker_url = 'filesystem://'
 

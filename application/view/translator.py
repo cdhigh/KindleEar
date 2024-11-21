@@ -6,7 +6,7 @@ import json, base64, secrets
 from functools import wraps
 from flask import Blueprint, render_template, request, url_for
 from flask_babel import gettext as _
-from ..utils import str_to_bool, str_to_int
+from ..ke_utils import str_to_bool, str_to_int
 from ..base_handler import *
 from ..back_end.db_models import *
 from ..lib.recipe_helper import GetBuiltinRecipeInfo

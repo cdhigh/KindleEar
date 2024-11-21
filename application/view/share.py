@@ -11,7 +11,7 @@ import readability
 from ..base_handler import *
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import send_html_mail
-from ..utils import hide_email, ke_decrypt
+from ..ke_utils import hide_email, ke_decrypt
 from pocket import Pocket
 from wallabag import WallaBag
 from urlopener import UrlOpener

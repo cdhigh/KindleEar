@@ -7,9 +7,10 @@ from typing import Union
 from collections import defaultdict
 from flask import Blueprint, request, current_app as app
 from ..base_handler import *
-from ..utils import filesizeformat
+from ..ke_utils import filesizeformat
 from ..back_end.send_mail_adpt import send_to_kindle
 from ..back_end.db_models import *
+from urlopener import UrlOpener
 from calibre.web.feeds.recipes import compile_recipe
 from recipe_helper import *
 from build_ebook import convert_book
@@ -69,6 +70,9 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
 
     startTime = time.time()
 
+    #设置全局代理
+    UrlOpener.set_proxy(user.cfg('proxy'))
+    
     #编译recipe
     srcDict = GetAllRecipeSrc(user, recipeId) #返回一个字典，键名为title，元素为 [BookedRecipe, Recipe, src]
     recipes = defaultdict(list) #用于保存编译好的recipe代码对象
@@ -239,7 +243,7 @@ def MergeAudioSegment(roList):
             except Exception as e:
                 default_log.warning('Failed to merge mp3 by pymp3cat: {e}')
 
-        if mergedFiles and os.path.exists(outputFile):
+        if mergedFiles and os.path.isfile(outputFile):
             chapters.append(outputFile)
 
 
@@ -268,7 +272,7 @@ def MergeAudioSegment(roList):
             except Exception as e:
                 info = 'Failed merge mp3 by pymp3cat: {e}'
 
-        if not info and mergedFiles and os.path.exists(outputFile):
+        if not info and mergedFiles and os.path.isfile(outputFile):
             try:
                 with open(outputFile, 'rb') as f:
                     data = f.read()

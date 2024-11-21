@@ -58,7 +58,11 @@ class PyStarDict:
         return f'{self.__class__} {self.ifo.bookname}'
 
     def get(self, word, default=''): #type:ignore
-        return self[word] if word in self.idx else default
+        for wd in [word, word.lower(), word.capitalize()]:
+            if wd in self.idx:
+                return self[wd]
+        else:
+            return default
 
     def has_key(self, k):
         return k in self
@@ -178,7 +182,7 @@ class _StarDictIdx:
         bytes_size = int(container.ifo.idxoffsetbits / 8)
         offset_format = 'L' if bytes_size == 4 else 'Q'
         trie_fmt = f">{offset_format}L"
-        if os.path.exists(trie_filename):
+        if os.path.isfile(trie_filename):
             try:
                 self.trie = marisa_trie.RecordTrie(trie_fmt) #type:ignore
                 self.trie.load(trie_filename)
@@ -451,7 +455,7 @@ def open_file(regular, gz):
     Open regular file if it exists, gz file otherwise.
     If no file exists, raise ValueError.
     """
-    if os.path.exists(regular):
+    if os.path.isfile(regular):
         try:
             return open(regular, 'rb')
         except Exception as e:
@@ -460,7 +464,7 @@ def open_file(regular, gz):
     #压缩索引文件后缀一般是gz，使用gzip压缩, 
     #压缩数据文件后缀一般是dz，使用dictzip压缩，dictzip使用与 gzip 相同的压缩算法和文件格式，
     #但是它提供一个表可以用来在文件中随机访问压缩块。
-    if os.path.exists(gz):
+    if os.path.isfile(gz):
         try:
             return igzip.IndexedGzipFile(gz) if igzip else gzip.open(gz, 'rb') #type:ignore
         except Exception as e:

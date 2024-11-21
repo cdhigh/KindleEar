@@ -8,7 +8,7 @@ from flask import Blueprint, render_template, request, redirect, session, curren
 from flask_babel import gettext as _
 from calibre.customize.profiles import output_profiles
 from ..base_handler import *
-from ..utils import str_to_bool, str_to_int
+from ..ke_utils import str_to_bool, str_to_int
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import avaliable_sm_services, send_mail
 from .subscribe import UpdateBookedCustomRss
