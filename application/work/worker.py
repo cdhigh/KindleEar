@@ -146,13 +146,13 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
         elif not audio:
             save_delivery_log(user, title, 0, status='nonews')
 
-    elaspTime = (time.time() - startTime) / 60.0
+    elapsedTime = (time.time() - startTime) / 60.0
     if ret:
         ret = '\n'.join(ret)
         if '\n' in ret:
-            ret += f'\nConsumed time: {elaspTime:.1f} minutes.'
+            ret += f'\nTime taken: {elapsedTime:.1f} minutes.'
         else:
-            ret += f' [Consumed time: {elaspTime:.1f} minutes].'
+            ret += f' [Time taken: {elapsedTime:.1f} minutes].'
     else:
         titles = ', '.join(recipes.keys())
         ret = f"There are no new feeds available: {userName}: [{titles}]"

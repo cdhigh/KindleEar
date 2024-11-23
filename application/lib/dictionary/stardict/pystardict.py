@@ -3,16 +3,8 @@
 #stardict词典支持，基于 <https://github.com/lig/pystardict> 修改
 import os, re, logging
 from struct import unpack
-try:
-    import indexed_gzip as igzip
-except:
-    import gzip
-    igzip = None
-
-try:
-    import marisa_trie
-except:
-    marisa_trie = None
+import indexed_gzip
+import marisa_trie
 
 #外部接口
 class PyStarDict:
@@ -456,18 +448,20 @@ def open_file(regular, gz):
     If no file exists, raise ValueError.
     """
     if os.path.isfile(regular):
-        try:
-            return open(regular, 'rb')
-        except Exception as e:
-            raise Exception('regular file opening error: "{}"'.format(e))
-
+        return open(regular, 'rb')
+        
     #压缩索引文件后缀一般是gz，使用gzip压缩, 
     #压缩数据文件后缀一般是dz，使用dictzip压缩，dictzip使用与 gzip 相同的压缩算法和文件格式，
     #但是它提供一个表可以用来在文件中随机访问压缩块。
     if os.path.isfile(gz):
-        try:
-            return igzip.IndexedGzipFile(gz) if igzip else gzip.open(gz, 'rb') #type:ignore
-        except Exception as e:
-            raise Exception('gz file opening error: "{}"'.format(e))
-
+        #生成加速随机存取的索引文件
+        gzidxFileName = os.path.splitext(gz)[0] + '.gzidx'
+        if not os.path.isfile(gzidxFileName):
+            file = indexed_gzip.IndexedGzipFile(gz)
+            file.build_full_index()
+            file.export_index(gzidxFileName)
+        else:
+            file = BglFile(gz, index_file=gzidxFileName)
+        return file
+        
     raise ValueError('Neither regular nor gz file exists')
