@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-23 21:29-0300\n"
+"POT-Creation-Date: 2024-11-24 09:32-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: tr_TR\n"
@@ -386,6 +386,7 @@ msgstr ""
 "yapılandırmanız gerekmektedir."
 
 #: application/templates/adv_inboundmail.html:16
+#: application/templates/adv_uploadcover.html:15
 #: application/templates/book_summarizer.html:19
 #: application/templates/book_translator.html:22
 msgid "Disable"
@@ -470,25 +471,37 @@ msgid "Upload cover image"
 msgstr "Kapak resmi yükle"
 
 #: application/templates/adv_uploadcover.html:10
-msgid "Upload cover images from local with an aspect ratio of approximately 0.65."
+msgid ""
+"Upload cover images from local with an aspect ratio of approximately "
+"0.625."
 msgstr ""
-"Yaklaşık 0.65 en boy oranına sahip kapak resimlerini yerel olarak "
+"Yaklaşık 0.625 en boy oranına sahip kapak resimlerini yerel olarak "
 "yükleyin."
 
-#: application/templates/adv_uploadcover.html:15
-msgid "Rule to pick cover images"
-msgstr "Kapak resimlerini seçme kuralı"
+#: application/templates/adv_uploadcover.html:13
+msgid "Include cover"
+msgstr "Kapak Dahil"
 
-#: application/templates/adv_uploadcover.html:17
+#: application/templates/adv_uploadcover.html:16
+#: application/templates/book_summarizer.html:18
+#: application/templates/book_translator.html:21
+msgid "Enable"
+msgstr "Etkinleştir"
+
+#: application/templates/adv_uploadcover.html:20
+msgid "Rule for cover"
+msgstr "Kapak Kuralı"
+
+#: application/templates/adv_uploadcover.html:22
 msgid "Random"
 msgstr "Rastgele"
 
-#: application/templates/adv_uploadcover.html:18
+#: application/templates/adv_uploadcover.html:23
 #: application/templates/base.html:127
 msgid "Weekday"
 msgstr "Hafta içi gün"
 
-#: application/templates/adv_uploadcover.html:42
+#: application/templates/adv_uploadcover.html:49
 msgid "Upload/Update"
 msgstr "Yükle/Güncelle"
 
@@ -1168,11 +1181,6 @@ msgstr "Metin"
 msgid "Your browser does not support the audio element."
 msgstr "Tarayıcınız ses öğesini desteklemiyor."
 
-#: application/templates/book_summarizer.html:18
-#: application/templates/book_translator.html:21
-msgid "Enable"
-msgstr "Etkinleştir"
-
 #: application/templates/book_summarizer.html:29
 msgid "Model"
 msgstr "Model"
@@ -1722,8 +1730,8 @@ msgstr "Ek olarak ilet"
 msgid "Word"
 msgstr "Kelime"
 
-#: application/view/admin.py:48 application/view/adv.py:434
-#: application/view/adv.py:486 application/view/settings.py:66
+#: application/view/admin.py:48 application/view/adv.py:437
+#: application/view/adv.py:489 application/view/settings.py:66
 #: application/view/translator.py:87 application/view/translator.py:171
 #: application/view/translator.py:253
 msgid "Settings Saved!"
@@ -1837,24 +1845,24 @@ msgstr "Tarayıcıda aç"
 msgid "Append qrcode of url to article"
 msgstr "Makaleye URL'nin QR kodunu ekle"
 
-#: application/view/adv.py:378 application/view/share.py:54
+#: application/view/adv.py:381 application/view/share.py:54
 #: application/view/subscribe.py:250
 msgid "Unknown command: {}"
 msgstr "Bilinmeyen komut: {}"
 
-#: application/view/adv.py:436 application/view/adv.py:488
+#: application/view/adv.py:439 application/view/adv.py:491
 msgid "The format is invalid."
 msgstr "Format geçersiz."
 
-#: application/view/adv.py:520
+#: application/view/adv.py:523
 msgid "Authorization Error!<br/>{}"
 msgstr "Yetkilendirme Hatası!<br/>{}"
 
-#: application/view/adv.py:541
+#: application/view/adv.py:544
 msgid "Success authorized by Pocket!"
 msgstr "Pocket tarafından yetkilendirilen başarı!"
 
-#: application/view/adv.py:547
+#: application/view/adv.py:550
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
@@ -1862,13 +1870,13 @@ msgstr ""
 "Pocket yetkilendirme isteği başarısız oldu!<hr/>Aşağıdaki ayrıntılara "
 "bakın:<br/><br/>{}"
 
-#: application/view/adv.py:568
+#: application/view/adv.py:571
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 "Instapaper servisi bir hata ile karşılaştı. Lütfen daha sonra tekrar "
 "deneyin."
 
-#: application/view/adv.py:581
+#: application/view/adv.py:584
 msgid "Request type [{}] unsupported"
 msgstr "İstek türü [{}] desteklenmiyor"
 

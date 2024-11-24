@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-23 21:29-0300\n"
+"POT-Creation-Date: 2024-11-24 09:32-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -383,6 +383,7 @@ msgid ""
 msgstr ""
 
 #: application/templates/adv_inboundmail.html:16
+#: application/templates/adv_uploadcover.html:15
 #: application/templates/book_summarizer.html:19
 #: application/templates/book_translator.html:22
 msgid "Disable"
@@ -465,23 +466,35 @@ msgid "Upload cover image"
 msgstr ""
 
 #: application/templates/adv_uploadcover.html:10
-msgid "Upload cover images from local with an aspect ratio of approximately 0.65."
+msgid ""
+"Upload cover images from local with an aspect ratio of approximately "
+"0.625."
 msgstr ""
 
-#: application/templates/adv_uploadcover.html:15
-msgid "Rule to pick cover images"
+#: application/templates/adv_uploadcover.html:13
+msgid "Include cover"
 msgstr ""
 
-#: application/templates/adv_uploadcover.html:17
+#: application/templates/adv_uploadcover.html:16
+#: application/templates/book_summarizer.html:18
+#: application/templates/book_translator.html:21
+msgid "Enable"
+msgstr ""
+
+#: application/templates/adv_uploadcover.html:20
+msgid "Rule for cover"
+msgstr ""
+
+#: application/templates/adv_uploadcover.html:22
 msgid "Random"
 msgstr ""
 
-#: application/templates/adv_uploadcover.html:18
+#: application/templates/adv_uploadcover.html:23
 #: application/templates/base.html:127
 msgid "Weekday"
 msgstr ""
 
-#: application/templates/adv_uploadcover.html:42
+#: application/templates/adv_uploadcover.html:49
 msgid "Upload/Update"
 msgstr ""
 
@@ -1150,11 +1163,6 @@ msgstr ""
 msgid "Your browser does not support the audio element."
 msgstr ""
 
-#: application/templates/book_summarizer.html:18
-#: application/templates/book_translator.html:21
-msgid "Enable"
-msgstr ""
-
 #: application/templates/book_summarizer.html:29
 msgid "Model"
 msgstr ""
@@ -1688,8 +1696,8 @@ msgstr ""
 msgid "Word"
 msgstr ""
 
-#: application/view/admin.py:48 application/view/adv.py:434
-#: application/view/adv.py:486 application/view/settings.py:66
+#: application/view/admin.py:48 application/view/adv.py:437
+#: application/view/adv.py:489 application/view/settings.py:66
 #: application/view/translator.py:87 application/view/translator.py:171
 #: application/view/translator.py:253
 msgid "Settings Saved!"
@@ -1803,34 +1811,34 @@ msgstr ""
 msgid "Append qrcode of url to article"
 msgstr ""
 
-#: application/view/adv.py:378 application/view/share.py:54
+#: application/view/adv.py:381 application/view/share.py:54
 #: application/view/subscribe.py:250
 msgid "Unknown command: {}"
 msgstr ""
 
-#: application/view/adv.py:436 application/view/adv.py:488
+#: application/view/adv.py:439 application/view/adv.py:491
 msgid "The format is invalid."
 msgstr ""
 
-#: application/view/adv.py:520
+#: application/view/adv.py:523
 msgid "Authorization Error!<br/>{}"
 msgstr ""
 
-#: application/view/adv.py:541
+#: application/view/adv.py:544
 msgid "Success authorized by Pocket!"
 msgstr ""
 
-#: application/view/adv.py:547
+#: application/view/adv.py:550
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr ""
 
-#: application/view/adv.py:568
+#: application/view/adv.py:571
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 
-#: application/view/adv.py:581
+#: application/view/adv.py:584
 msgid "Request type [{}] unsupported"
 msgstr ""
 

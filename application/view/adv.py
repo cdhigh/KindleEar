@@ -277,6 +277,7 @@ def AdvUploadCoverImage(user: KeUser):
     covers = {}
     jsonCovers = ''
     if user:
+        covers['enable'] = user.covers.get('enable', '')
         covers['order'] = user.covers.get('order', 'random')
         for idx in range(7):
             coverName = f'cover{idx}'
@@ -292,11 +293,13 @@ def AdvUploadCoverAjaxPost(user: KeUser):
     MAX_WIDTH = 832
     MAX_HEIGHT = 1280
     ret = {'status': 'ok'}
+    form = request.form
     covers = user.covers
-    covers['order'] = request.form.get('order', 'random')
+    covers['enable'] = form.get('enable', '')
+    covers['order'] = form.get('order', 'random')
     for idx in range(7):
         coverName = f'cover{idx}'
-        upload = request.files.get(coverName) or request.form.get(coverName)
+        upload = request.files.get(coverName) or form.get(coverName)
         if not upload:
             continue
 

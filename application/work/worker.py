@@ -98,6 +98,10 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
         ro.translator = bked.translator.copy() #设置网页翻译器信息
         ro.tts = bked.tts.copy() #文本转语音设置，需要中途修改tts内容
         ro.summarizer = bked.summarizer.copy() #AI摘要器的配置信息
+
+        #如果书籍没有设置封面，则使用用户全局设置
+        if ro.cover_url is None and not user.covers.get('enable', ''):
+            ro.cover_url = False
         
         #如果需要登录网站
         if ro.needs_subscription:

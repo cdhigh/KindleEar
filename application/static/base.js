@@ -1310,6 +1310,7 @@ function SetCoverToDefaultImg(idx) {
 function startUploadCoversToServer(url) {
   var totalSize = 0;
   var fileDatas = new FormData();
+  fileDatas.append('enable', $('#enableCover').val());
   fileDatas.append('order', $('#coverOrder').val());
   for (var idx = 0; idx < 7; idx++) {
     var coverName = 'cover' + idx;

@@ -35,7 +35,7 @@ class KeUser(MyBaseModel): # kindleEar User
     book_config = JSONField(default=JSONField.dict_default)
     
     share_links = JSONField(default=JSONField.dict_default) #evernote/wiz/pocket/instapaper包含子字典，微博/facebook/twitter等仅包含0/1
-    covers = JSONField(default=JSONField.dict_default) #保存封面图片数据库ID {'order':,'cover0':,...'cover6':}
+    covers = JSONField(default=JSONField.dict_default) #保存封面图片数据库ID {'enable':,'order':,'cover0':,...'cover6':}
     send_mail_service = JSONField(default=JSONField.dict_default) #{'service':,...}
     custom = JSONField(default=JSONField.dict_default) #留着扩展，避免后续一些小特性还需要升级数据表结构
     
