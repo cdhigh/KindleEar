@@ -32,7 +32,7 @@ def convert_book(input_, input_fmt, user, options=None, output_fmt=''):
         return b''
     
 #仅通过一个url列表构建一本电子书
-#urls: [(title, url),...] or [url,url,...]
+#urls: [(title, url),...] or [url, url,...]
 #title: 书籍标题
 #user: KeUser对象
 #output_fmt: 如果指定，则生成特定格式的书籍，否则使用 user.book_cfg('type')
@@ -49,14 +49,18 @@ def urls_to_book(urls: list, title: str, user, options=None, output_fmt='', lang
                 print(f'Delete failed: {item}: {e}')
                 pass
 
-    for idx, url in enumerate(urls[:]):
-        if not sysTmpDir or not isinstance(url, str): #如果没有使用临时目录则无法提取下载
-            urls[idx] = (title, url) if isinstance(url, str) else url
+    titleUrls = urls[:]
+    #规整化urls列表元素格式，同时预下载文章内容，提取文章的标题
+    #这一步主要是能让每篇文章都使用真实的标题
+    for idx, url in enumerate(titleUrls):
+        #如果没有使用临时目录则无法提取下载
+        if not sysTmpDir or not isinstance(url, str):
+            titleUrls[idx] = (title, url) if isinstance(url, str) else url
             continue
 
         resp = UrlOpener().open(url)
         if resp.status_code != 200:
-            urls[idx] = (title, url)
+            titleUrls[idx] = (title, url)
             continue
 
         with PersistentTemporaryFile(suffix='.html', dir=sysTmpDir) as pt:
@@ -64,14 +68,14 @@ def urls_to_book(urls: list, title: str, user, options=None, output_fmt='', lang
             try:
                 pt.write(resp.content)
             except Exception as e:
-                urls[idx] = (title, url)
+                titleUrls[idx] = (title, url)
                 default_log.warning(f'Prev download html failed: {url}: {e}')
             else: #提取标题
                 match = re.search(r'<title[^>]*>(.*?)</title>', resp.text, re.I|re.M|re.S)
                 uTitle = match.group(1).strip() if match else title
-                urls[idx] = (uTitle, 'file://' + pt.name)
+                titleUrls[idx] = (uTitle, 'file://' + pt.name)
 
-    src = GenerateRecipeSource(title, urls, user, base='UrlNewsRecipe', max_articles=100, 
+    src = GenerateRecipeSource(title, titleUrls, user, base='UrlNewsRecipe', max_articles=100, 
         cover_url=False, language=language)
     try:
         ro = compile_recipe(src)

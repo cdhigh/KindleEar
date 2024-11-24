@@ -1728,9 +1728,12 @@ function DictEngineFieldChanged(idx) {
   var engine = engineSel.val();
   dbSel.empty();
   var databases = g_dictEngines[engine].databases;
-  if (!databases) {
+  if (!databases || Object.keys(databases).length === 0) {
+    var txt = `<option value="${name}" ${selected}>${databases[name]}</option>`;
+    dbSel.append($(`<option value="" disabled selected>[${i18n.putFileInDict}]</option>`));
     return;
   }
+
   var currDb = g_dictParams[idx].database;
   for (var name in databases) {
     var selected = (currDb == name) ? 'selected="selected"' : '';

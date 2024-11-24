@@ -47,7 +47,7 @@ class MDict:
                 self.initError = loc_exc_pos(f'Init mdict failed: {self.databases[database]}')
                 default_log.warning(self.initError)
         else:
-            self.initError = f'Dict not found: {self.databases[database]}'
+            self.initError = f'Dict not found: {database}'
             default_log.warning(self.initError)
 
     #返回当前使用的词典名字

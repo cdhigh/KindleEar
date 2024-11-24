@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-21 10:11-0300\n"
+"POT-Creation-Date: 2024-11-23 21:29-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:182
+#: application/templates/admin.html:3 application/templates/base.html:183
 #: application/templates/settings.html:252
 msgid "Admin"
 msgstr "账号管理"
@@ -253,31 +253,31 @@ msgid "Dictionary"
 msgstr "词典"
 
 #: application/templates/adv_base.html:75
-#: application/templates/adv_base.html:79
-#: application/templates/adv_import.html:8
-msgid "Import Feeds"
-msgstr "导入订阅列表"
-
-#: application/templates/adv_base.html:84
-#: application/templates/adv_base.html:88
-msgid "Cover Image"
-msgstr "封面图像"
-
-#: application/templates/adv_base.html:93
-#: application/templates/adv_base.html:97
-#: application/templates/adv_uploadcss.html:3
-msgid "Stylesheet"
-msgstr "样式表"
-
-#: application/templates/adv_base.html:102
-#: application/templates/adv_base.html:106
+#: application/templates/adv_base.html:83
 #: application/templates/adv_proxy.html:3
 #: application/templates/adv_proxy.html:12
 msgid "Proxy"
 msgstr "代理服务器"
 
-#: application/templates/adv_base.html:111
-#: application/templates/adv_base.html:115
+#: application/templates/adv_base.html:92
+#: application/templates/adv_base.html:96
+#: application/templates/adv_import.html:8
+msgid "Import Feeds"
+msgstr "导入订阅列表"
+
+#: application/templates/adv_base.html:101
+#: application/templates/adv_base.html:105
+msgid "Cover Image"
+msgstr "封面图像"
+
+#: application/templates/adv_base.html:110
+#: application/templates/adv_base.html:114
+#: application/templates/adv_uploadcss.html:3
+msgid "Stylesheet"
+msgstr "样式表"
+
+#: application/templates/adv_base.html:119
+#: application/templates/adv_base.html:123
 #: application/templates/adv_calibre_options.html:12
 msgid "Calibre Options"
 msgstr "Calibre配置"
@@ -955,43 +955,47 @@ msgstr "此设置具有更高优先级。"
 msgid "Combine multiple values with commas."
 msgstr "使用逗号分隔多个数值。"
 
-#: application/templates/base.html:155 application/templates/home.html:16
+#: application/templates/base.html:131
+msgid "Put dictionary in dict folder"
+msgstr "将字典放入 dict 目录"
+
+#: application/templates/base.html:156 application/templates/home.html:16
 msgid "Logout"
 msgstr "退出"
 
-#: application/templates/base.html:157 application/templates/home.html:21
+#: application/templates/base.html:158 application/templates/home.html:21
 #: application/templates/login.html:3 application/templates/login.html:22
 #: application/templates/login.html:33
 msgid "Login"
 msgstr "登录"
 
-#: application/templates/base.html:159 application/templates/signup.html:3
+#: application/templates/base.html:160 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr "注册"
 
-#: application/templates/base.html:179 application/templates/home.html:15
+#: application/templates/base.html:180 application/templates/home.html:15
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr "我的订阅"
 
-#: application/templates/base.html:180 application/templates/settings.html:3
+#: application/templates/base.html:181 application/templates/settings.html:3
 msgid "Settings"
 msgstr "设置"
 
-#: application/templates/base.html:181 application/templates/logs.html:3
+#: application/templates/base.html:182 application/templates/logs.html:3
 msgid "Logs"
 msgstr "投递日志"
 
-#: application/templates/base.html:183
+#: application/templates/base.html:184
 msgid "Advanced"
 msgstr "高级设置"
 
-#: application/templates/base.html:184 application/templates/library.html:3
+#: application/templates/base.html:185 application/templates/library.html:3
 msgid "Shared"
 msgstr "网友分享"
 
-#: application/templates/base.html:185 application/templates/reader.html:6
+#: application/templates/base.html:186 application/templates/reader.html:6
 msgid "Reader"
 msgstr "在线阅读"
 
@@ -1687,8 +1691,8 @@ msgstr "作为附件转发"
 msgid "Word"
 msgstr "单词"
 
-#: application/view/admin.py:48 application/view/adv.py:431
-#: application/view/adv.py:483 application/view/settings.py:66
+#: application/view/admin.py:48 application/view/adv.py:434
+#: application/view/adv.py:486 application/view/settings.py:66
 #: application/view/translator.py:87 application/view/translator.py:171
 #: application/view/translator.py:253
 msgid "Settings Saved!"
@@ -1743,93 +1747,93 @@ msgstr "原密码错误。"
 msgid "Changes saved successfully."
 msgstr "账号设置已更新。"
 
-#: application/view/adv.py:101 application/view/adv.py:102
-#: application/view/adv.py:103 application/view/adv.py:104
-#: application/view/adv.py:105 application/view/adv.py:106
-#: application/view/adv.py:107 application/view/adv.py:108
-#: application/view/adv.py:109 application/view/adv.py:110
+#: application/view/adv.py:104 application/view/adv.py:105
+#: application/view/adv.py:106 application/view/adv.py:107
+#: application/view/adv.py:108 application/view/adv.py:109
+#: application/view/adv.py:110 application/view/adv.py:111
+#: application/view/adv.py:112 application/view/adv.py:113
 msgid "Append hyperlink '{}' to article"
 msgstr "在每篇文章后附加 '{}' 超链接"
 
-#: application/view/adv.py:101 application/view/adv.py:102
-#: application/view/adv.py:103 application/view/adv.py:104
-#: application/view/adv.py:105
+#: application/view/adv.py:104 application/view/adv.py:105
+#: application/view/adv.py:106 application/view/adv.py:107
+#: application/view/adv.py:108
 msgid "Save to {}"
 msgstr "保存到 {}"
 
-#: application/view/adv.py:101
+#: application/view/adv.py:104
 msgid "evernote"
 msgstr "evernote"
 
-#: application/view/adv.py:102
+#: application/view/adv.py:105
 msgid "wiz"
 msgstr "为知笔记"
 
-#: application/view/adv.py:103
+#: application/view/adv.py:106
 msgid "pocket"
 msgstr "pocket"
 
-#: application/view/adv.py:104
+#: application/view/adv.py:107
 msgid "instapaper"
 msgstr "instapaper"
 
-#: application/view/adv.py:105
+#: application/view/adv.py:108
 msgid "wallabag"
 msgstr "wallabag"
 
-#: application/view/adv.py:106 application/view/adv.py:107
-#: application/view/adv.py:108 application/view/adv.py:109
+#: application/view/adv.py:109 application/view/adv.py:110
+#: application/view/adv.py:111 application/view/adv.py:112
 msgid "Share on {}"
 msgstr "分享到 {}"
 
-#: application/view/adv.py:106
+#: application/view/adv.py:109
 msgid "weibo"
 msgstr "微博"
 
-#: application/view/adv.py:107
+#: application/view/adv.py:110
 msgid "facebook"
 msgstr "facebook"
 
-#: application/view/adv.py:109
+#: application/view/adv.py:112
 msgid "tumblr"
 msgstr "tumblr"
 
-#: application/view/adv.py:110
+#: application/view/adv.py:113
 msgid "Open in browser"
 msgstr "在浏览器打开"
 
-#: application/view/adv.py:111
+#: application/view/adv.py:114
 msgid "Append qrcode of url to article"
 msgstr "在每篇文章后附加文章链接的二维码"
 
-#: application/view/adv.py:375 application/view/share.py:54
+#: application/view/adv.py:378 application/view/share.py:54
 #: application/view/subscribe.py:250
 msgid "Unknown command: {}"
 msgstr "未知命令：{}"
 
-#: application/view/adv.py:433 application/view/adv.py:485
+#: application/view/adv.py:436 application/view/adv.py:488
 msgid "The format is invalid."
 msgstr "格式非法。"
 
-#: application/view/adv.py:517
+#: application/view/adv.py:520
 msgid "Authorization Error!<br/>{}"
 msgstr "申请授权过程失败！<br/>{}"
 
-#: application/view/adv.py:538
+#: application/view/adv.py:541
 msgid "Success authorized by Pocket!"
 msgstr "已经成功获得Pocket的授权！"
 
-#: application/view/adv.py:544
+#: application/view/adv.py:547
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr "申请Pocket授权失败!<hr/>错误信息参考如下：<br/><br/>{}"
 
-#: application/view/adv.py:565
+#: application/view/adv.py:568
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr "Instapaper服务器异常，请稍候再试。"
 
-#: application/view/adv.py:578
+#: application/view/adv.py:581
 msgid "Request type [{}] unsupported"
 msgstr "不支持你请求的命令类型 [{}]"
 
@@ -2225,3 +2229,4 @@ msgstr "此Recipe的网站登录信息已经保存。"
 #: application/view/translator.py:81 application/view/translator.py:164
 msgid "The api key is required."
 msgstr "需要填写api key."
+

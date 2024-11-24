@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-21 10:11-0300\n"
+"POT-Creation-Date: 2024-11-23 21:29-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: application/templates/admin.html:3 application/templates/base.html:182
+#: application/templates/admin.html:3 application/templates/base.html:183
 #: application/templates/settings.html:252
 msgid "Admin"
 msgstr ""
@@ -252,31 +252,31 @@ msgid "Dictionary"
 msgstr ""
 
 #: application/templates/adv_base.html:75
-#: application/templates/adv_base.html:79
-#: application/templates/adv_import.html:8
-msgid "Import Feeds"
-msgstr ""
-
-#: application/templates/adv_base.html:84
-#: application/templates/adv_base.html:88
-msgid "Cover Image"
-msgstr ""
-
-#: application/templates/adv_base.html:93
-#: application/templates/adv_base.html:97
-#: application/templates/adv_uploadcss.html:3
-msgid "Stylesheet"
-msgstr ""
-
-#: application/templates/adv_base.html:102
-#: application/templates/adv_base.html:106
+#: application/templates/adv_base.html:83
 #: application/templates/adv_proxy.html:3
 #: application/templates/adv_proxy.html:12
 msgid "Proxy"
 msgstr ""
 
-#: application/templates/adv_base.html:111
-#: application/templates/adv_base.html:115
+#: application/templates/adv_base.html:92
+#: application/templates/adv_base.html:96
+#: application/templates/adv_import.html:8
+msgid "Import Feeds"
+msgstr ""
+
+#: application/templates/adv_base.html:101
+#: application/templates/adv_base.html:105
+msgid "Cover Image"
+msgstr ""
+
+#: application/templates/adv_base.html:110
+#: application/templates/adv_base.html:114
+#: application/templates/adv_uploadcss.html:3
+msgid "Stylesheet"
+msgstr ""
+
+#: application/templates/adv_base.html:119
+#: application/templates/adv_base.html:123
 #: application/templates/adv_calibre_options.html:12
 msgid "Calibre Options"
 msgstr ""
@@ -954,43 +954,47 @@ msgstr ""
 msgid "Combine multiple values with commas."
 msgstr ""
 
-#: application/templates/base.html:155 application/templates/home.html:16
+#: application/templates/base.html:131
+msgid "Put dictionary in dict folder"
+msgstr ""
+
+#: application/templates/base.html:156 application/templates/home.html:16
 msgid "Logout"
 msgstr ""
 
-#: application/templates/base.html:157 application/templates/home.html:21
+#: application/templates/base.html:158 application/templates/home.html:21
 #: application/templates/login.html:3 application/templates/login.html:22
 #: application/templates/login.html:33
 msgid "Login"
 msgstr ""
 
-#: application/templates/base.html:159 application/templates/signup.html:3
+#: application/templates/base.html:160 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
 msgstr ""
 
-#: application/templates/base.html:179 application/templates/home.html:15
+#: application/templates/base.html:180 application/templates/home.html:15
 #: application/templates/my.html:3
 msgid "Feeds"
 msgstr ""
 
-#: application/templates/base.html:180 application/templates/settings.html:3
+#: application/templates/base.html:181 application/templates/settings.html:3
 msgid "Settings"
 msgstr ""
 
-#: application/templates/base.html:181 application/templates/logs.html:3
+#: application/templates/base.html:182 application/templates/logs.html:3
 msgid "Logs"
 msgstr ""
 
-#: application/templates/base.html:183
+#: application/templates/base.html:184
 msgid "Advanced"
 msgstr ""
 
-#: application/templates/base.html:184 application/templates/library.html:3
+#: application/templates/base.html:185 application/templates/library.html:3
 msgid "Shared"
 msgstr ""
 
-#: application/templates/base.html:185 application/templates/reader.html:6
+#: application/templates/base.html:186 application/templates/reader.html:6
 msgid "Reader"
 msgstr ""
 
@@ -1684,8 +1688,8 @@ msgstr ""
 msgid "Word"
 msgstr ""
 
-#: application/view/admin.py:48 application/view/adv.py:431
-#: application/view/adv.py:483 application/view/settings.py:66
+#: application/view/admin.py:48 application/view/adv.py:434
+#: application/view/adv.py:486 application/view/settings.py:66
 #: application/view/translator.py:87 application/view/translator.py:171
 #: application/view/translator.py:253
 msgid "Settings Saved!"
@@ -1740,93 +1744,93 @@ msgstr ""
 msgid "Changes saved successfully."
 msgstr ""
 
-#: application/view/adv.py:101 application/view/adv.py:102
-#: application/view/adv.py:103 application/view/adv.py:104
-#: application/view/adv.py:105 application/view/adv.py:106
-#: application/view/adv.py:107 application/view/adv.py:108
-#: application/view/adv.py:109 application/view/adv.py:110
+#: application/view/adv.py:104 application/view/adv.py:105
+#: application/view/adv.py:106 application/view/adv.py:107
+#: application/view/adv.py:108 application/view/adv.py:109
+#: application/view/adv.py:110 application/view/adv.py:111
+#: application/view/adv.py:112 application/view/adv.py:113
 msgid "Append hyperlink '{}' to article"
 msgstr ""
 
-#: application/view/adv.py:101 application/view/adv.py:102
-#: application/view/adv.py:103 application/view/adv.py:104
-#: application/view/adv.py:105
+#: application/view/adv.py:104 application/view/adv.py:105
+#: application/view/adv.py:106 application/view/adv.py:107
+#: application/view/adv.py:108
 msgid "Save to {}"
 msgstr ""
 
-#: application/view/adv.py:101
+#: application/view/adv.py:104
 msgid "evernote"
 msgstr ""
 
-#: application/view/adv.py:102
+#: application/view/adv.py:105
 msgid "wiz"
 msgstr ""
 
-#: application/view/adv.py:103
+#: application/view/adv.py:106
 msgid "pocket"
 msgstr ""
 
-#: application/view/adv.py:104
+#: application/view/adv.py:107
 msgid "instapaper"
 msgstr ""
 
-#: application/view/adv.py:105
+#: application/view/adv.py:108
 msgid "wallabag"
 msgstr ""
 
-#: application/view/adv.py:106 application/view/adv.py:107
-#: application/view/adv.py:108 application/view/adv.py:109
+#: application/view/adv.py:109 application/view/adv.py:110
+#: application/view/adv.py:111 application/view/adv.py:112
 msgid "Share on {}"
 msgstr ""
 
-#: application/view/adv.py:106
+#: application/view/adv.py:109
 msgid "weibo"
 msgstr ""
 
-#: application/view/adv.py:107
+#: application/view/adv.py:110
 msgid "facebook"
 msgstr ""
 
-#: application/view/adv.py:109
+#: application/view/adv.py:112
 msgid "tumblr"
 msgstr ""
 
-#: application/view/adv.py:110
+#: application/view/adv.py:113
 msgid "Open in browser"
 msgstr ""
 
-#: application/view/adv.py:111
+#: application/view/adv.py:114
 msgid "Append qrcode of url to article"
 msgstr ""
 
-#: application/view/adv.py:375 application/view/share.py:54
+#: application/view/adv.py:378 application/view/share.py:54
 #: application/view/subscribe.py:250
 msgid "Unknown command: {}"
 msgstr ""
 
-#: application/view/adv.py:433 application/view/adv.py:485
+#: application/view/adv.py:436 application/view/adv.py:488
 msgid "The format is invalid."
 msgstr ""
 
-#: application/view/adv.py:517
+#: application/view/adv.py:520
 msgid "Authorization Error!<br/>{}"
 msgstr ""
 
-#: application/view/adv.py:538
+#: application/view/adv.py:541
 msgid "Success authorized by Pocket!"
 msgstr ""
 
-#: application/view/adv.py:544
+#: application/view/adv.py:547
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr ""
 
-#: application/view/adv.py:565
+#: application/view/adv.py:568
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 
-#: application/view/adv.py:578
+#: application/view/adv.py:581
 msgid "Request type [{}] unsupported"
 msgstr ""
 
