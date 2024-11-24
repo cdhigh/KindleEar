@@ -105,7 +105,7 @@ class IndexedMdx:
         if word == ':about':
             return self.dict_html_info()
 
-        for wd in [word, word.lower(), word.capitalize()]:
+        for wd in [word, word.lower(), word.capitalize(), word.upper()]:
             if wd in self.trie:
                 indexes = self.trie[word]
                 break

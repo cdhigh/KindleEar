@@ -50,7 +50,7 @@ class PyStarDict:
         return f'{self.__class__} {self.ifo.bookname}'
 
     def get(self, word, default=''): #type:ignore
-        for wd in [word, word.lower(), word.capitalize()]:
+        for wd in [word, word.lower(), word.capitalize(), word.upper()]:
             if wd in self.idx:
                 return self[wd]
         else:

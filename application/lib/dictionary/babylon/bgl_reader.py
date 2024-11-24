@@ -20,7 +20,7 @@ TERM_B = 0xB
 RESOURCE = 2
 CHARSET = {
     0x41: "cp1252", #Default
-    0x42: "ISO-8859-1", #Latin
+    0x42: "utf-8", #Latin, 原来是 ISO-8859-1，但是部分词典乱码
     0x43: "ISO-8859-2", #Eastern European
     0x44: "cp1251", #Cyriilic
     0x45: "cp932",#Japanese
@@ -103,17 +103,21 @@ def unpack_term11(data: bytes, wordOnly=True) -> (bytes, bytes):
         definition = definition[:sepIdx]
     return word, definition
 
-def resilient_decode(data: bytes, encoding: str, fallback: str = 'latin1') -> str:
+def resilient_decode(data: bytes, encoding: str, fallback: str='latin1') -> str:
     """decode data to string with encoding, and try fallback when errors occur"""
-    ret = ''
-    while len(data) > 0:
-        try:
-            ret += data.decode(encoding)
-            break
-        except UnicodeDecodeError as e:
-            ret += data[e.start:e.end].decode(fallback)
-            data = data[e.end:]
-    return ret
+    #ret = ''
+    #while len(data) > 0:
+    #    try:
+    #        ret += data.decode(encoding)
+    #        break
+    #    except UnicodeDecodeError as e:
+    #        ret += data[e.start:e.end].decode(fallback)
+    #        data = data[e.end:]
+    #return ret
+    try:
+        return data.decode(encoding)
+    except UnicodeDecodeError:
+        return data.decode(fallback)
 
 #封装类文件对象，读取和移动文件指针都添加一个偏移
 class OffsetFileWrapper:
@@ -220,30 +224,44 @@ class BglReader:
 
     #查询一个单词的释义
     def query(self, word, default=''):
-        for wd in [word, word.lower(), word.capitalize()]:
+        for wd in [word, word.lower(), word.capitalize(), word.upper()]:
             if wd in self.trie:
                 break
         else:
             return default
 
-        pos = int.from_bytes(self.trie[wd][0], byteorder='big')
+        definitions = []
+        elems = self.trie[wd][0]
         if self.resetBeforeParse:
             self.bglFile.reset()
-        self.bglFile.seek(pos)
-        self.gzipPos = pos
-        pos, recType, data = self.readRecord()
-        if recType is None:
-            return default
-
-        _, definition = self.decodeWordRecord(recType, data, wordOnly=False)
-        return self.justifyDefinition(definition)
+        for i in range(0, len(elems), 4): #每4字节一个释义，合并所有释义
+            pos = int.from_bytes(elems[i: i + 4], byteorder='big')
+            self.bglFile.seek(pos)
+            self.gzipPos = pos
+            _, recType, data = self.readRecord()
+            if recType is not None:
+                _, definition = self.decodeWordRecord(recType, data, wordOnly=False)
+                definitions.append(definition)
+        return self.justifyDefinition('<br/>'.join(definitions))
 
     #分析索引数据，构建前缀树
     def buildTrie(self):
         encoding = self.encoding
-        records = [(word, pos.to_bytes(4, byteorder='big')) for word, pos in self.wordList()]
-        self.trie = marisa_trie.BytesTrie(records) #type:ignore
+        records = {}
+        for word, pos in self.wordList():
+            if word in records: #每4个字节一个释义，最大支持 2**32 字节的文件
+                records[word] += pos.to_bytes(4, byteorder='big')
+            else:
+                records[word] = pos.to_bytes(4, byteorder='big')
+        
+        self.trie = marisa_trie.BytesTrie((word, pos) for word, pos in records.items()) #type:ignore
         self.trie.save(self.trieFileName)
+
+        #测试使用 TODO
+        #with open(self.trieFileName + '.json', 'w', encoding='utf-8') as f:
+        #    import json, binascii
+        #    json.dump({word: f'0x{binascii.hexlify(pos).decode("ascii")}' for word, pos in records.items()}, 
+        #        f, ensure_ascii=False, indent=2)
 
         #同时保存内容编码
         with open(self.encFileName, 'w', encoding='utf-8') as f:
@@ -273,7 +291,6 @@ class BglReader:
             word = self.justifyWord(word)
             if word:
                 yield (word, pos)
-        #bglFile.close()
 
     #当前只分析单词块，返回 word, definition
     #wordOnly: =True - 不解码释义部分，节省时间
@@ -350,9 +367,10 @@ class BglReader:
         word = re.sub(r'&#(\d+);', lambda match: chr(int(match.group(1))), word)
         word = re.sub(r'&#x([0-9A-Fa-f]+);', lambda match: chr(int(match.group(1), 16)), word)
         word = re.sub(r'\s+', ' ', word)
-        return word
+        return word.strip()
 
     def justifyDefinition(self, definition):
+        #print(definition) #TODO
         if not definition:
             return ''
 
@@ -366,7 +384,12 @@ class BglReader:
         for a in soup.find_all('a', href=True):
             href = a['href']
             if href.startswith('bword://'):
-                a['href'] = f'https://kindleear/entry/{href[8:].strip()}'
+                bword1 = href[8:].strip()
+                bword2 = (a.string or bword1).strip()
+                if bword1 in self.trie:
+                    a['href'] = f'https://kindleear/entry/{bword1}'
+                else:
+                    a['href'] = f'https://kindleear/entry/{bword2}'
             else:
                 a.extract()
 

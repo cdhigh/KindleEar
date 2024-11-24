@@ -112,7 +112,7 @@ class DslReader:
 
     #查词接口
     def get(self, word, default=''): #type:ignore
-        for wd in [word, word.lower(), word.capitalize()]:
+        for wd in [word, word.lower(), word.capitalize(), word.upper()]:
             if wd in self.trie:
                 break
         else:

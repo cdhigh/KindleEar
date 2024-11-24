@@ -45,10 +45,11 @@ KindleEar支持邮件推送和在线阅读，内置一个为电子墨水屏进�
 
 ### 安装词典
 1. KindleEar支持在线词典 [dict.org](https://dict.org/), [dict.cc](https://www.dict.cc/), [dict.cn](http://dict.cn/), [韦氏词典](https://www.merriam-webster.com/)，[牛津词典](https://www.oxfordlearnersdictionaries.com/)， 这几个词典不需要安装，开箱即用。    
-2. 在线词典很方便，但是避免有时候因为网络原因不是太稳定，所以如果要稳定使用，最好还是使用离线词典，为此，KindleEar同时支持 mdict/stardict/lingvo 格式词典，下载对应的词典后，解压到 `data/dict` 目录（可以使用子目录整理不同的词典）。   
+2. 在线词典很方便，但是避免有时候因为网络原因不是太稳定，所以如果要稳定使用，最好还是使用离线词典，为此，KindleEar同时支持 mdict/stardict/lingvo/babylon 格式词典，下载对应的词典后，解压到 `data/dict` 目录（可以使用子目录整理不同的词典）。   
   * mdict: 只需要 mdx 文件，如果有css，则需要位于同样目录   
   * stardict: 需要 ifo, idx, dict 或 dict.dz   
-  * lingvo: 只需要 dsl 文件，不支持 dsl.dz，需要将 dsl.dz 解压缩为 dsl     
+  * lingvo: 只需要 dsl 文件，不支持 dsl.dz，需要将 dsl.dz 解压缩为 dsl (使用gzip/7zip/winrar等软件)     
+  * babylon: 只需要 bgl 文件 （如果查词乱码，可以修改 \*.enc 文件为准确的编码）    
 3. 离线词典第一次查词会比较慢，因为要创建索引文件(后缀为trie)，之后就很快了。 
 如果要使用大型词典（比如几百兆以上），在生成索引的过程中会消耗比较多的内存，如你的服务器内存比较小，可能会创建索引失败，你可以在你的本地机器先使用对应词典查一次单词，待本地生成trie文件后，拷贝到服务器对应目录即可。   
 4. 已经默认支持美式英语的构词法规则，可以查询单词时态语态复数等变形，如果需要支持其他语种的构词法，请下载对应的hunspell格式的文件（.dic/.aff），然后拷贝到 `data/dict/morphology` (请直接创建此目录) ，注意不要存放到子目录下，KindleEar会自动使用和书本语言相匹配的构词法规则。   
