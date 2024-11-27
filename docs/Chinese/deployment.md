@@ -178,7 +178,7 @@ sudo docker image prune -f
 tail -n 100 ./data/gunicorn.error.log
 tail -n 100 ./data/gunicorn.access.log
 ```
-5.2. 设置环境变量后： `USE_DOCKER_LOGS='yes'`
+5.2. 设置环境变量后： `USE_DOCKER_LOGS="yes"`
 ```bash
 docker logs container_name
 ```
@@ -203,7 +203,7 @@ sudo usermod -aG docker your-username
     3.2.2 在"存储空间设置"里面添加一个文件夹映射到 `/data`，比如 `/docker/data` 映射到 `/data`，权限为"读取/写入"
 4. 启动完成后使用 http://ip:8001 访问。  
 5. 如果需要链接分享功能，可以设置环境变量 `APP_DOMAIN`。 
-6. 如果希望使用群晖网页管理页面的logs查看KindleEar的异常记录，可以设置环境变量 `USE_DOCKER_LOGS='yes'`。   
+6. 如果希望使用群晖网页管理页面的logs查看KindleEar的异常记录，可以设置环境变量 `USE_DOCKER_LOGS="yes"`。   
 
 
 
