@@ -178,10 +178,15 @@ sudo docker image prune -f
 
 
 5. To check log files
-
+5.1. Default   
 ```bash
 tail -n 100 ./data/gunicorn.error.log
 tail -n 100 ./data/gunicorn.access.log
+```
+
+5.2. After setting the environment variable: `USE_DOCKER_LOGS='yes'`   
+```bash
+docker logs container_name
 ```
 
 
@@ -204,6 +209,8 @@ sudo usermod -aG docker your-username
       3.2.2. In the "Volume Settings", add a folder mapped to `/data`, for example, map `/docker/data` to `/data`, with "Read/Write" permissions.
 4. After starting, access it via http://ip:8001.
 5. If you need the link sharing feature, you can set the environment variable `APP_DOMAIN`.   
+6. To view KindleEar's error logs through the Synology web management interface, you can set the environment variable `USE_DOCKER_LOGS='yes'`.    
+
 
 
 <a id="oracle-cloud"></a>

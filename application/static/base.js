@@ -344,9 +344,17 @@ function PopulateMyCustomRss() {
 function PopulateMySubscribed() {
   var $div = $('#mysubscribed');
   $div.empty();
-  for (var idx = 0; idx < my_booked_recipes.length; idx++) {
+  var bookNum = my_booked_recipes.length;
+  if (bookNum > 0) {
+    $('#legend_mysubscribed').show();
+    $div.show();
+  } else {
+    $('#legend_mysubscribed').hide();
+    $div.hide();
+  }
+  
+  for (var idx = 0; idx < bookNum; idx++) {
     var recipe = my_booked_recipes[idx];
-    
     var title = escapeXml(recipe.title);
     var desc = recipe.description;
     var need_subs = recipe.needs_subscription;
