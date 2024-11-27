@@ -11,7 +11,7 @@ keyfile = os.getenv('GUNI_KEY')
 #example: https://github.com/benoitc/gunicorn/blob/master/gunicorn/glogging.py
 if os.getenv('USE_DOCKER_LOGS') == 'yes':
     accesslog = "/data/gunicorn.access.log"
-    loglevel = os.getenv.get('LOG_LEVEL') or 'info'
+    loglevel = os.getenv('LOG_LEVEL') or 'info'
 else:
     #accesslog = "/data/gunicorn.access.log"
     #errorlog = "/data/gunicorn.error.log"
@@ -23,13 +23,13 @@ else:
         "root": {"level": "info", "handlers": ["error_file"]},
         'loggers': {
             "gunicorn.error": {
-                "level": os.getenv.get('LOG_LEVEL') or 'info', 
+                "level": os.getenv('LOG_LEVEL') or 'info', 
                 "handlers": ["error_file"],
                 "propagate": False,
                 "qualname": "gunicorn.error"
             },
             "gunicorn.access": {
-                "level": os.getenv.get('LOG_LEVEL') or 'info',
+                "level": os.getenv('LOG_LEVEL') or 'info',
                 "handlers": ["access_file"],
                 "propagate": False,
                 "qualname": "gunicorn.access"
