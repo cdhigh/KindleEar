@@ -5,6 +5,9 @@ bind = "0.0.0.0:8000"
 workers = 1
 threads = 3
 enable_stdio_inheritance = True
+#accesslog = "/data/gunicorn.access.log"
+#errorlog = "/data/gunicorn.error.log"
+#loglevel = "info"
 #preload_app = True
 certfile = os.getenv('GUNI_CERT')
 keyfile = os.getenv('GUNI_KEY')
@@ -12,25 +15,23 @@ keyfile = os.getenv('GUNI_KEY')
 if os.getenv('USE_DOCKER_LOGS') == 'yes':
     accesslog = "/data/gunicorn.access.log"
     errorlog = "-"
-    loglevel = os.getenv('LOG_LEVEL') or 'info'
+    loglevel = os.getenv('LOG_LEVEL') or 'INFO'
+    capture_output = False
 else:
-    #accesslog = "/data/gunicorn.access.log"
-    #errorlog = "/data/gunicorn.error.log"
-    #loglevel = "info"
     capture_output = True
     logconfig_dict = {
         'version': 1,
         'disable_existing_loggers': False,
-        "root": {"level": "info", "handlers": ["error_file"]},
+        "root": {"level": "INFO", "handlers": ["error_file"]},
         'loggers': {
             "gunicorn.error": {
-                "level": os.getenv('LOG_LEVEL') or 'info', 
+                "level": os.getenv("LOG_LEVEL") or "INFO", 
                 "handlers": ["error_file"],
                 "propagate": False,
                 "qualname": "gunicorn.error"
             },
             "gunicorn.access": {
-                "level": os.getenv('LOG_LEVEL') or 'info',
+                "level": os.getenv("LOG_LEVEL") or "INFO",
                 "handlers": ["access_file"],
                 "propagate": False,
                 "qualname": "gunicorn.access"
