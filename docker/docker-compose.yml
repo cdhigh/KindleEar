@@ -16,7 +16,7 @@ services:
        APP_DOMAIN: http://example.com
        LOG_LEVEL: warning
        TZ: Etc/GMT+0
-       USE_DOCKER_LOGS: ${USE_DOCKER_LOGS}
+       USE_DOCKER_LOGS: ${USE_DOCKER_LOGS:-}
        
   caddy:
     container_name: caddy
