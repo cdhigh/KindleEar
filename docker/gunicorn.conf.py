@@ -13,14 +13,18 @@ certfile = os.getenv('GUNI_CERT')
 keyfile = os.getenv('GUNI_KEY')
 #example: https://github.com/benoitc/gunicorn/blob/master/gunicorn/glogging.py
 capture_output = True
+useDockerLogs = bool(os.getenv("USE_DOCKER_LOGS") == "yes")
 logconfig_dict = {
     'version': 1,
     'disable_existing_loggers': False,
-    "root": {"level": "INFO", "handlers": ["error_file"]},
+    "root": {
+        "level": "INFO", 
+        "handlers": ["console"] if useDockerLogs else ["error_file"],
+    },
     'loggers': {
         "gunicorn.error": {
             "level": "INFO", 
-            "handlers": ["error_file"],
+            "handlers": ["console"] if useDockerLogs else ["error_file"],
             "propagate": False,
             "qualname": "gunicorn.error"
         },
@@ -45,7 +49,13 @@ logconfig_dict = {
             "backupCount": 1,
             "formatter": "access",
             "filename": "/data/gunicorn.access.log"
-        }
+        },
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "generic",
+            "stream": "ext://sys.stdout",
+        },
     },
     'formatters':{
         "generic": {
