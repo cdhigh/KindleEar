@@ -58,7 +58,7 @@ class StarDict:
             ret = ret.decode('utf-8')
         #每条释义的前面添加一个换行
         ret = re.sub(r'(<b>\s*\d+</b>)', r'<br/>\1', ret, flags=re.IGNORECASE)
-        lines = [line.strip() for line in str(ret).split('\n') if line.strip()]
+        lines = [line.strip() for line in str(ret).splitlines() if line.strip()]
         if lines and lines[0] in (word, f'<b>{word}</b>'): #去掉开头的词条
             lines = lines[1:]
 

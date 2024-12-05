@@ -142,7 +142,7 @@ class HtmlAudiolator:
         for item in step1:
             if len(item) > max_len + 1: #拆分
                 subItems = []
-                for line in item.split('\n'): #按照回车进行分割
+                for line in item.splitlines(): #按照回车进行分割
                     if len(line) > max_len:
                         #再按照空格进行分割
                         words = line.split()

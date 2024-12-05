@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 #一些高级设置功能页面
 #Author: cdhigh <https://github.com/cdhigh>
-import re, io, textwrap, json
+import re, io, textwrap, json, base64
 from urllib.parse import unquote, urljoin, urlparse
 from bs4 import BeautifulSoup
 from html import escape
@@ -440,26 +440,47 @@ def AdvProxyPost(user: KeUser):
     return adv_render_template('adv_proxy.html', 'proxy', proxy=proxy, user=user, tips=tips)
 
 #测试代理是否正常
-@bpAdv.route("/fwd", endpoint='AdvFwdRoute')
-@login_required()
-def AdvFwdRoute(user: KeUser):
-    UrlOpener.set_proxy(user.cfg('proxy'))
-    url = request.args.get('url')
-    if url:
-        url = unquote(url)
-        if not url.startswith('http'):
-            url = 'https://' + url
-        try:
-            resp = UrlOpener().open(url)
-            headers = dict(resp.headers)
-            headers.pop('Transfer-Encoding', None)
-            headers.pop('Content-Encoding', None)
-            return Response(resp.content, status=resp.status_code, headers=headers)
-        except Exception as e:
-            return str(e)
-    else:
-        return 'param "url" is empty'
+#这个函数很强大，简单的利用都可以用来临时翻墙了
+#登录状态只需要 url 一个参数，否则需要 url, username, key, enc(可选)
+@bpAdv.route("/fwd", methods=['GET', 'POST'])
+def AdvFwdRoute():
+    #要不是正在登录状态，要不就传递用户名和分享密码
+    user = get_login_user()
+    args = request.args
+    url = args.get('url')
+    enc = args.get('enc')
+    if not user:
+        name = args.get('username')
+        user = KeUser.get_or_none(KeUser.name == name) if name else None
+        if user and user.share_links.get('key') != args.get('key'):
+            user = None
 
+    if not url or not user:
+        return _("Some parameters are missing or wrong."), 400
+
+    #为避免url泄露，可以在客户端简单"加密"
+    if enc == 'base64':
+        url = base64.b64decode(url).decode('utf-8')
+    elif enc == 'ke':
+        url = ke_decrypt(url, user.cfg('secret_key'))
+
+    UrlOpener.set_proxy(user.cfg('proxy'))
+    url = unquote(url)
+    if not url.startswith('http'):
+        url = 'https://' + url
+    inHeaders = {k: v for k, v in request.headers if k != 'Host'}
+    try:
+        if request.method == 'GET':
+            resp = UrlOpener().get(url, headers=inHeaders)
+        else:
+            resp = UrlOpener().post(url, data=request.data, headers=inHeaders)
+        headers = dict(resp.headers)
+        headers.pop('Transfer-Encoding', None)
+        headers.pop('Content-Encoding', None)
+        return Response(resp.content, status=resp.status_code, headers=headers)
+    except Exception as e:
+        return f"Unexpected error: {str(e)}", 500
+    
 #设置calibre的参数
 @bpAdv.route("/adv/calibre", endpoint='AdvCalibreOptions')
 @login_required()

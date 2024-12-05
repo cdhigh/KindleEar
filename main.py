@@ -4,7 +4,7 @@
 # Visit <https://github.com/cdhigh/KindleEar> for the latest version
 # Author: cdhigh <https://github.com/cdhigh>
 
-__Version__ = '3.2.1'
+__Version__ = '3.2.2'
 
 import os, sys, builtins, logging
 from application.lib import clogging

@@ -29,7 +29,7 @@ _PROV_AI_LIST = {
         {'name': 'claude-3', 'rpm': 5, 'context': 200000},
         {'name': 'claude-2.1', 'rpm': 5, 'context': 100000},],
     'Grok': [
-        {'name': 'grok-beta', 'rpm': 10, 'context': 128000},],
+        {'name': 'grok-beta', 'rpm': 60, 'context': 128000},],
     'Mistral': [
         {'name': 'open-mistral-7b', 'rpm': 60, 'context': 32000},
         {'name': 'mistral-small-latest', 'rpm': 60, 'context': 32000},
@@ -135,15 +135,23 @@ class SimpleAiProvider:
     #anthropic的chat接口
     def _anthropic_chat(self, message):
         url = self.api_host if self.api_host else 'https://api.anthropic.com/v1/complete'
-        headers = {'Accept': 'application/json',
-            'Anthropic-Version': '2023-06-01',
-            'Content-Type': 'application/json',
-            'x-api-key': self.api_key}
-        payload = {
-            "prompt": f"\n\nHuman: {message}\n\nAssistant:",
-            "model": self._model,
-            "max_tokens_to_sample": 256,
-        }
+        headers = {'Accept': 'application/json', 'Anthropic-Version': '2023-06-01',
+            'Content-Type': 'application/json', 'x-api-key': self.api_key}
+
+        if isinstance(message, list): #将openai的payload格式转换为anthropic的格式
+            msg = []
+            for item in message:
+                role = 'Human' if (item.get('role') != 'assistant') else 'Assistant'
+                content = item.get('content', '')
+                msg.append(f"\n\n{role}: {content}")
+            prompt = ''.join(msg) + "\n\nAssistant:"
+            payload = {"prompt": prompt, "model": self.model, "max_tokens_to_sample": 256}
+        elif isinstance(message, dict):
+            payload = message
+        else:
+            prompt = f"\n\nHuman: {message}\n\nAssistant:"
+            payload = {"prompt": prompt, "model": self.model, "max_tokens_to_sample": 256}
+
         response = self.opener.post(url, headers=headers, json=payload)
         response.raise_for_status()
         return response.json()["completion"]
@@ -154,7 +162,18 @@ class SimpleAiProvider:
             url = f'{self.api_host}?key={self.api_key}'
         else:
             url = f'https://generativelanguage.googleapis.com/v1beta/models/{self._model}:generateContent?key={self.api_key}'
-        payload = {'contents': [{'parts': [{'text': message}]}]}
+        
+        if isinstance(message, list): #将openai的payload格式转换为gemini的格式
+            msg = []
+            for item in message:
+                role = 'user' if (item.get('role') != 'assistant') else 'model'
+                content = item.get('content', '')
+                msg.append({'role': role, 'parts': [{'text': content}]})
+            payload = {'contents': msg}
+        elif isinstance(message, dict):
+            payload = message
+        else:
+            payload = {'contents': [{'role': 'user', 'parts': [{'text': message}]}]}
         response = self.opener.post(url, json=payload)
         response.raise_for_status()
         contents = response.json()["candidates"][0]["content"]

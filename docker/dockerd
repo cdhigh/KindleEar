@@ -1,5 +1,0 @@
-FROM --platform=$TARGETPLATFORM golang:latest
-LABEL maintainer="cppla <i@cpp.la>"
-WORKDIR /app
-RUN go install github.com/dmulholl/mp3cat@latest
-CMD ["sh"]

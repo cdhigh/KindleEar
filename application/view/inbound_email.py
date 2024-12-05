@@ -283,7 +283,7 @@ def ConvertTextToHtml(subject, text):
 
     #转换纯文本到html时需要将里面的文本链接变成tag a
     bodyUrls = []
-    for line in text.split('\n'):
+    for line in text.splitlines():
         line = line.strip()
         if not line:
             continue
