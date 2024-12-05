@@ -465,7 +465,7 @@ def AdvFwdRoute():
         url = ke_decrypt(url, user.cfg('secret_key'))
 
     UrlOpener.set_proxy(user.cfg('proxy'))
-    url = unquote(url)
+    url = unquote(url) if '%' in url else url
     if not url.startswith('http'):
         url = 'https://' + url
     inHeaders = {k: v for k, v in request.headers if k != 'Host'}
@@ -475,8 +475,8 @@ def AdvFwdRoute():
         else:
             resp = UrlOpener().post(url, data=request.data, headers=inHeaders)
         headers = dict(resp.headers)
-        headers.pop('Transfer-Encoding', None)
-        headers.pop('Content-Encoding', None)
+        headers.pop('Transfer-Encoding', None) #服务器处理分块的头标识
+        #headers.pop('Content-Encoding', None) #服务器压缩数据的头标识
         return Response(resp.content, status=resp.status_code, headers=headers)
     except Exception as e:
         return f"Unexpected error: {str(e)}", 500
