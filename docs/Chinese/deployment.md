@@ -292,6 +292,7 @@ sudo nginx -t #test if nginx config file is correct
 
 #set gunicorn auto start
 sudo cp ./tools/nginx/gunicorn.service /usr/lib/systemd/system/gunicorn.service
+sudo chmod 644 /usr/lib/systemd/system/gunicorn.service
 sudo systemctl daemon-reload
 sudo systemctl start gunicorn
 sudo systemctl status gunicorn

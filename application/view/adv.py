@@ -476,7 +476,7 @@ def AdvFwdRoute():
             resp = UrlOpener().post(url, data=request.data, headers=inHeaders)
         headers = dict(resp.headers)
         headers.pop('Transfer-Encoding', None) #服务器处理分块的头标识
-        #headers.pop('Content-Encoding', None) #服务器压缩数据的头标识
+        headers.pop('Content-Encoding', None) #服务器压缩数据的头标识，requests已经解压了
         return Response(resp.content, status=resp.status_code, headers=headers)
     except Exception as e:
         return f"Unexpected error: {str(e)}", 500

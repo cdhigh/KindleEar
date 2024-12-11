@@ -40,6 +40,8 @@ sudo docker login
 sudo docker push kindleear/kindleear:tag
 sudo docker push kindleear/kindleear
 sudo docker load -i kindleear.tar
+docker buildx ls
+docker buildx rm xname
 ```
 
 # 电子书简要生成流程
