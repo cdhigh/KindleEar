@@ -174,8 +174,7 @@ def GetAllRecipeSrc(user, idList):
         #针对没有启用自定义RSS推送的情况，创建一个临时BookedRecipe对象但不保存到数据库
         recipe = Recipe.get_by_id_or_none(dbId) if (recipeType != 'builtin') else None
         if not bked and recipe:
-            bked = BookedRecipe(recipe_id=id_, separated=recipe.custom.get('separated', False),
-                user=user.name, title=recipe.title, description=recipe.description)
+            bked = recipe.cloneToBookedRecipe()
         bkeds.append({'recipeId': id_, 'recipeType': recipeType, 'dbId': dbId, 'bked': bked, 
             'recipe': recipe})
 

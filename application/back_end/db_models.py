@@ -209,6 +209,12 @@ class Recipe(MyBaseModel):
         else:
             return '', id_
 
+    #根据本实例信息创建一个BookedRecipe实例，但不保存到数据库
+    def cloneToBookedRecipe(self):
+        return BookedRecipe(recipe_id=self.recipe_id, separated=self.custom.get('separated', False),
+            user=self.user, title=self.title, description=self.description, needs_subscription=self.needs_subscription,
+            translator=self.translator, tts=self.tts, summarizer=self.summarizer)
+
 #已经被订阅的Recipe信息，包括自定义RSS/上传的recipe/内置builtin_recipe
 class BookedRecipe(MyBaseModel):
     recipe_id = CharField() #这个ID不是Recipe数据库ID，而是 builtin:xxx, upload:xxx, custom:xxx
