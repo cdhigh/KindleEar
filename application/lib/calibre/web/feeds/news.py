@@ -1319,7 +1319,7 @@ class BasicNewsRecipe(Recipe):
             from calibre.utils.cleantext import clean_xml_chars
 
             # Truncating the string could cause a dangling UTF-16 half-surrogate, which will cause lxml to barf, clean it
-            ans = clean_xml_chars(ans) + '\u2026'
+            ans = clean_xml_chars(ans) + '…'
         return ans
 
     #生成Feed对应的html内容，一个Feed就是根据一个Rss xml生成的html，里面会有多篇文章
@@ -2068,24 +2068,37 @@ class BasicNewsRecipe(Recipe):
         translator = HtmlTranslator(self.translator, self.simultaneous_downloads)
         translator.translate_soup(soup)
 
-    #翻译Feed的title，toc时用到
+    #翻译Feed的title/text_summary，toc时用到
     def translate_titles(self, feeds):
         from ebook_translator import HtmlTranslator
         translator = HtmlTranslator(self.translator, self.simultaneous_downloads)
         position = self.translator.get('position', 'below')
-        titles = []
+        texts = []
+        #内嵌函数
+        def _addTextItem(obj, attr):
+            return texts.append({'text': getattr(obj, attr, None), 'obj': obj, 'attr': attr})
+
         for feed in feeds:
-            titles.append({'text': feed.title, 'obj': feed})
+            _addTextItem(feed, 'title')
+            _addTextItem(feed, 'description')
             for article in feed:
-                titles.append({'text': article.title, 'obj': article})
-        newTitles = translator.translate_text(titles)
-        for item in [e for e in newTitles if not e['error']]:
+                _addTextItem(article, 'title')
+                _addTextItem(article, 'text_summary')
+                
+        newTitles = translator.translate_text(texts)
+        for item in newTitles:
+            if item['error'] or item['translated'] == item['text']:
+                continue
+                
+            obj = item['obj']
+            attr = item['attr']
+            sep = ' ' if attr == 'title' else '<br/>'
             if position in ('below', 'right'):
-                item['obj'].title = item['text'] + ' ' + item['translated']
+                setattr(obj, attr, item['text'] + sep + item['translated'])
             elif position in ('above', 'left'):
-                item['obj'].title = item['translated'] + ' ' + item['text']
+                setattr(obj, attr, item['translated'] + sep + item['text'])
             else: #replace
-                item['obj'].title = item['translated']
+                setattr(obj, attr, item['translated'])
 
     #调用在线TTS服务平台，将html转为语音
     #每个音频片段都会调用一次callback(audioDict, title, feed_index, article_index)

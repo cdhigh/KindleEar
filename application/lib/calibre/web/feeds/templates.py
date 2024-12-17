@@ -11,7 +11,7 @@ from lxml import html, etree
 from lxml.html.builder import HTML, HEAD, META, TITLE, STYLE, DIV, BODY, \
         STRONG, BR, SPAN, A, HR, UL, LI, H2, H3, IMG, P as PT, \
         TABLE, TD, TR
-
+from lxml.html import fromstring
 from calibre import strftime, isbytestring
 from calibre.utils.localization import _
 
@@ -169,7 +169,8 @@ class FeedTemplate(Template):
                 ),
                 attrs('calibre_feed_image')))
         if getattr(feed, 'description', None):
-            d = DIV(clean_xml_chars(feed.description), attrs('calibre_feed_description', rescale=80))
+            feedDesc = fromstring(clean_xml_chars(feed.description)) #保留里面的<br/>
+            d = DIV(feedDesc, attrs('calibre_feed_description', rescale=80))
             d.append(BR())
             div.append(d)
         ul = UL(attrs('calibre_article_list'))
@@ -184,8 +185,8 @@ class FeedTemplate(Template):
                             style='padding-bottom:0.5em')
                     )
             if article.summary:
-                li.append(DIV(clean_xml_chars(cutoff(article.text_summary)),
-                    attrs('article_description', rescale=70)))
+                artiSummary = fromstring(clean_xml_chars(cutoff(article.text_summary))) #保留里面的<br/>
+                li.append(DIV(artiSummary, attrs('article_description', rescale=70)))
             ul.append(li)
         div.append(ul)
         #div.append(self.get_navbar(f, feeds, top=False))
