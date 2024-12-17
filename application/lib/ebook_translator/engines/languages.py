@@ -1,4 +1,5 @@
 google = {
+    'English': 'en',
     'Afrikaans': 'af',
     'Albanian': 'sq',
     'Amharic': 'am',
@@ -25,7 +26,6 @@ google = {
     'Dhivehi': 'dv',
     'Dogri': 'doi',
     'Dutch': 'nl',
-    'English': 'en',
     'Esperanto': 'eo',
     'Estonian': 'et',
     'Ewe': 'ee',
@@ -179,12 +179,12 @@ gemini = {
 
 deepl = {
     'source': {
+        'English': 'EN',
         'Bulgarian': 'BG',
         'Czech': 'CS',
         'Danish': 'DA',
         'German': 'DE',
         'Greek': 'EL',
-        'English': 'EN',
         'Spanish': 'ES',
         'Estonian': 'ET',
         'Finnish': 'FI',
@@ -210,14 +210,14 @@ deepl = {
         'Chinese': 'ZH'
     },
     'target': {
+        'English': 'EN',
+        'English (British)': 'EN-GB',
+        'English (American)': 'EN-US',
         'Bulgarian': 'BG',
         'Czech': 'CS',
         'Danish': 'DA',
         'German': 'DE',
         'Greek': 'EL',
-        'English': 'EN',
-        'English (British)': 'EN-GB',
-        'English (American)': 'EN-US',
         'Spanish': 'ES',
         'Estonian': 'ET',
         'Finnish': 'FI',
@@ -247,6 +247,7 @@ deepl = {
 }
 
 microsoft = {
+    'English': 'en',
     'Afrikaans': 'af',
     'Albanian': 'sq',
     'Amharic': 'am',
@@ -270,7 +271,6 @@ microsoft = {
     'Dari': 'prs',
     'Divehi': 'dv',
     'Dutch': 'nl',
-    'English': 'en',
     'Estonian': 'et',
     'Faroese': 'fo',
     'Fijian': 'fj',

@@ -337,7 +337,7 @@ class BasicNewsRecipe(Recipe):
     #:     ]
     #:
     #: will remove everything from `<!--Article ends here-->` to `</body>`.
-    preprocess_regexps    = []
+    preprocess_regexps    = [(re.compile(r'\r\n?|\n'), ''),]
 
     #: The CSS that is used to style the templates, i.e., the navigation bars and
     #: the Tables of Contents. Rather than overriding this variable, you should
@@ -1121,15 +1121,14 @@ class BasicNewsRecipe(Recipe):
                 if not h_tag.get_text(strip=True):
                     h_tag.string = title
 
-        ans = self.postprocess_html(soup, first_fetch)
+        soup = self.postprocess_html(soup, first_fetch)
 
         # Nuke HTML5 tags
-        for x in ans.find_all(['article', 'aside', 'header', 'footer', 'nav', 'main',
-            'figcaption', 'figure', 'section', 'time']):
+        for x in soup.find_all(['article', 'aside', 'header', 'footer', 'nav', 'main',
+            'figcaption', 'figure', 'section']):
             x.name = 'div'
-
-        #for x in ans.find_all('mark'):
-        #    x.name = 'strong'
+        for x in soup.find_all(['bdo', 'kbd', 'mark', 'time']):
+            x.name = 'span'
 
         #If tts need, 'tts' propery is set by WorkerImpl
         tts_enable = self.tts.get('enable')
@@ -1158,8 +1157,8 @@ class BasicNewsRecipe(Recipe):
                 self.log.exception('Failed to get article object for postprocessing')
                 pass
             else:
-                self.populate_article_metadata(article, ans, first_fetch)
-        return ans
+                self.populate_article_metadata(article, soup, first_fetch)
+        return soup
 
     #在文章末尾添加分享链接
     def append_share_links(self, soup, url):
