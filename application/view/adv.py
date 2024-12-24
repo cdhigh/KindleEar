@@ -398,7 +398,7 @@ def AdvDict(user: KeUser):
         if hasattr(dic, 'refresh'):
             dic.refresh()
     
-    engines = {name: {'databases': klass.databases} for name,klass in all_dict_engines.items()}
+    engines = {name: {'databases': klass.databases, 'mode': klass.mode} for name,klass in all_dict_engines.items()}
     return adv_render_template('adv_dict.html', 'dictionary', user=user, engines=engines, 
         dictParams=dictParams, tips='', langMap=LangMap())
     

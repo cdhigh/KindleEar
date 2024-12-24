@@ -28,6 +28,7 @@ def getMDictFileList():
 
 class MDict:
     name = "mdict"
+    mode = "offline"
     #词典列表，键为词典缩写，值为词典描述
     databases = getMDictFileList()
 

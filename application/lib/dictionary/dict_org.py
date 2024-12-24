@@ -6,6 +6,7 @@ from .dictclient import Connection, Database
 
 class DictOrg:
     name = "dict.org"
+    mode = "online"
     #词典列表，键为词典缩写，值为词典描述
     databases = {"!": "First match",
         "gcide": "The Collaborative International Dictionary of English v.0.48",

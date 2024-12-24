@@ -6,6 +6,7 @@ from urlopener import UrlOpener
 
 class DictCn:
     name = "dict.cn"
+    mode = "online"
     #词典列表，键为词典缩写，值为词典描述
     databases = {"english": "English-Chinese Translation Dictionary"}
 

@@ -174,7 +174,7 @@ def ReaderDictRoute(user: KeUser, userDir: str):
         if hasattr(dic, 'refresh'):
             dic.refresh()
     
-    engines = {name: {'databases': klass.databases} for name,klass in all_dict_engines.items()}
+    engines = {name: {'databases': klass.databases, 'mode': klass.mode} for name,klass in all_dict_engines.items()}
     return render_template('word_lookup.html', user=user, engines=engines, tips='', langMap=LangMap())
 
 #Api查词

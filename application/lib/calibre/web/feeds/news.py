@@ -2074,9 +2074,10 @@ class BasicNewsRecipe(Recipe):
         translator = HtmlTranslator(self.translator, self.simultaneous_downloads)
         position = self.translator.get('position', 'below')
         texts = []
+
         #内嵌函数
         def _addTextItem(obj, attr):
-            return texts.append({'text': getattr(obj, attr, None), 'obj': obj, 'attr': attr})
+            texts.append({'text': getattr(obj, attr, None), 'obj': obj, 'attr': attr})
 
         for feed in feeds:
             _addTextItem(feed, 'title')
@@ -2101,7 +2102,6 @@ class BasicNewsRecipe(Recipe):
                 setattr(obj, attr, item['translated'])
 
     #调用在线TTS服务平台，将html转为语音
-    #每个音频片段都会调用一次callback(audioDict, title, feed_index, article_index)
     def audiofy_html(self, soup, title, job_info):
         from ebook_tts import HtmlAudiolator
         audiolator = HtmlAudiolator(self.tts)

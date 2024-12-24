@@ -63,7 +63,7 @@ class UrlOpener:
             self.addheaders[0] = ('User-Agent', user_agent)
 
         self.fs = file_stub #FsDictStub
-        self.session = requests.session()
+        self.session = requests.Session()
         if self._proxies:
             self.session.proxies.update(self._proxies)
         self.prevRespRef = None #对Response实例的一个弱引用

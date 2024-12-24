@@ -41,6 +41,7 @@ class Result(object):
 
 class DictCc:
     name = "dict.cc"
+    mode = "online"
     #词典列表，键为词典缩写，值为词典描述
     databases = {"en": "English",
         "de": "German",

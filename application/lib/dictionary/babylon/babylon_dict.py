@@ -23,6 +23,7 @@ def getBglDictList():
 
 class BabylonDict:
     name = "babylon"
+    mode = "offline"
     #词典列表，键为词典缩写，值为词典描述
     databases = getBglDictList()
 

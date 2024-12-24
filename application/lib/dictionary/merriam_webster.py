@@ -8,6 +8,7 @@ from urlopener import UrlOpener
 
 class MerriamWebster:
     name = "webster's"
+    mode = "online"
     #词典列表，键为词典缩写，值为词典描述
     databases = {"english": "Webster's New International Dictionary"}
 

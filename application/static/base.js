@@ -1716,16 +1716,28 @@ function SendTestEmail() {
 
 //根据词典引擎列表 g_dictEngines 和 当前配置 g_dictParams 填充下拉框
 function PopulateDictFields() {
-  for (var idx = 0; idx < 3; idx++) {
-    var cfg = g_dictParams[idx];
-    var engineSel = $('#dict_engine' + idx);
+  for (let idx = 0; idx < 3; idx++) {
+    const cfg = g_dictParams[idx];
+    const engineSel = $('#dict_engine' + idx);
     engineSel.empty();
-    var engineName = cfg.engine;
-    for (var name in g_dictEngines) {
-      var selected = (engineName == name) ? 'selected="selected"' : '';
-      var txt = `<option value="${name}" ${selected}>${name}</option>`;
-      engineSel.append($(txt));
+    const engineName = cfg.engine;
+    const groupedEngines = {'Online': [], 'Offline': []};
+    for (const name in g_dictEngines) { //分组词典引擎
+      const mode = g_dictEngines[name].mode;
+      groupedEngines[(mode === 'online') ? 'Online' : 'Offline'].push(name);
     }
+
+    //添加选项到engineSel
+    ['Online', 'Offline'].forEach((group) => {
+      if (groupedEngines[group].length) {
+        const grp = $('<optgroup>', { label: group });
+        groupedEngines[group].forEach((name) => {
+          const selected = (engineName === name) ? 'selected' : '';
+          grp.append($(`<option value="${name}" ${selected}>${name}</option>`));
+        });
+        engineSel.append(grp);
+      }
+    });
   }
 }
 
