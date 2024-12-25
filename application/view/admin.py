@@ -24,7 +24,7 @@ def Admin(user: KeUser):
         mailSrv = AppInfo.get_value(AppInfo.newUserMailService, 'admin')
         signupType = AppInfo.get_value(AppInfo.signupType, 'oneTimeCode')
         inviteCodes = AppInfo.get_value(AppInfo.inviteCodes, '')
-        return render_template('admin.html', title='Admin', tab='admin', users=users, adminName=adminName,
+        return render_template('admin.html', title='Account', tab='admin', users=users, adminName=adminName,
             mailSrv=mailSrv, signupType=signupType, inviteCodes=inviteCodes, tips='')
     else:
         return render_template('change_password.html', tips='', tab='admin', user=user, shareKey=user.share_links.get('key'))
@@ -44,7 +44,7 @@ def AdminPost(user: KeUser):
     AppInfo.set_value(AppInfo.signupType, signupType)
     AppInfo.set_value(AppInfo.inviteCodes, inviteCodes)
     users = sorted(KeUser.get_all(), key=attrgetter('created_time'))
-    return render_template('admin.html', title='Admin', tab='admin', users=users, adminName=adminName,
+    return render_template('admin.html', title='Account', tab='admin', users=users, adminName=adminName,
             mailSrv=mailSrv, signupType=signupType, inviteCodes=inviteCodes, tips=_("Settings Saved!"))
 
 #管理员添加一个账号

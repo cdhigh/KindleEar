@@ -11,6 +11,7 @@ tests/tools/*
 tests/rss/*
 tests/debug_mail/*
 tests/cov_html/*
+tests/pobackup/*
 .idea/
 datastore/
 .coverage

@@ -1,100 +1,103 @@
-# Translations template for PROJECT.
+# Chinese translations for KindleEar.
 # Copyright (C) 2024 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
+# This file is distributed under the same license as the KindleEar project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
+"Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2024-12-25 20:15-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language-Team: KindleEar <LL@li.org>\n"
+"Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "Generated-By: Babel 2.14.0\n"
 
 #: application/templates/admin.html:3 application/templates/base.html:53
 #: application/templates/base.html:192 application/templates/settings.html:252
 msgid "Account"
-msgstr ""
+msgstr "アカウント"
 
 #: application/templates/admin.html:19
 msgid "Signup settings"
-msgstr ""
+msgstr "サインアップ設定"
 
 #: application/templates/admin.html:19
 #: application/templates/adv_calibre_options.html:18
 #: application/templates/adv_proxy.html:18
 msgid "Save"
-msgstr ""
+msgstr "保存"
 
 #: application/templates/admin.html:21
 #: application/templates/user_account.html:31
 msgid "Email service"
-msgstr ""
+msgstr "メールサービス"
 
 #: application/templates/admin.html:23
 #: application/templates/user_account.html:34
 msgid "Same as admin"
-msgstr ""
+msgstr "管理者と同じ"
 
 #: application/templates/admin.html:24
 #: application/templates/user_account.html:35
 msgid "Independent"
-msgstr ""
+msgstr "独立"
 
 #: application/templates/admin.html:28
 msgid "Signup type"
-msgstr ""
+msgstr "サインアップタイプ"
 
 #: application/templates/admin.html:30
 msgid "Public"
-msgstr ""
+msgstr "公開"
 
 #: application/templates/admin.html:31
 msgid "One time code"
-msgstr ""
+msgstr "一回限りのコード"
 
 #: application/templates/admin.html:32
 msgid "Permanent code"
-msgstr ""
+msgstr "永久コード"
 
 #: application/templates/admin.html:36
 msgid "Invitation codes"
-msgstr ""
+msgstr "招待コード"
 
 #: application/templates/admin.html:37
 msgid "one code per line"
-msgstr ""
+msgstr "1行ごとにコード"
 
 #: application/templates/admin.html:43
 msgid "Accounts"
-msgstr ""
+msgstr "アカウント"
 
 #: application/templates/admin.html:43
 #: application/templates/adv_inboundmail.html:61
 #: application/templates/my.html:34 application/view/admin.py:57
 #: application/view/admin.py:64 application/view/admin.py:91
 msgid "Add"
-msgstr ""
+msgstr "追加"
 
 #: application/templates/admin.html:54
-#: application/templates/adv_archive.html:69 application/templates/home.html:19
-#: application/templates/login.html:24 application/templates/logs.html:70
+#: application/templates/adv_archive.html:69
+#: application/templates/home.html:19 application/templates/login.html:24
+#: application/templates/logs.html:70
 #: application/templates/reset_password.html:19
 #: application/templates/reset_password.html:20
-#: application/templates/settings.html:230 application/templates/signup.html:21
+#: application/templates/settings.html:230
+#: application/templates/signup.html:21
 #: application/templates/user_account.html:15
 msgid "Username"
-msgstr ""
+msgstr "ユーザー名"
 
 #: application/templates/admin.html:55
 msgid "AutoSend"
-msgstr ""
+msgstr "自動送信"
 
 #: application/templates/admin.html:56
 #: application/templates/change_password.html:27
@@ -102,28 +105,28 @@ msgstr ""
 #: application/templates/signup.html:33
 #: application/templates/user_account.html:27
 msgid "Email"
-msgstr ""
+msgstr "Email"
 
 #: application/templates/admin.html:57
 #: application/templates/user_account.html:39
 msgid "Expiration"
-msgstr ""
+msgstr "有効期限"
 
 #: application/templates/admin.html:58
 msgid "Operation"
-msgstr ""
+msgstr "操作"
 
 #: application/templates/admin.html:65
 msgid "Yes"
-msgstr ""
+msgstr "はい"
 
 #: application/templates/admin.html:65
 msgid "No"
-msgstr ""
+msgstr "いいえ"
 
 #: application/templates/admin.html:68
 msgid "Never"
-msgstr ""
+msgstr "決して"
 
 #: application/templates/admin.html:70
 #: application/templates/adv_inboundmail.html:26
@@ -131,95 +134,97 @@ msgstr ""
 #: application/templates/settings.html:170
 #: application/templates/user_account.html:43
 msgid "7 Days"
-msgstr ""
+msgstr "7日間"
 
 #: application/templates/admin.html:72
 #: application/templates/user_account.html:44
 msgid "1 Month"
-msgstr ""
+msgstr "1ヶ月"
 
 #: application/templates/admin.html:74
 #: application/templates/user_account.html:45
 msgid "3 Months"
-msgstr ""
+msgstr "3ヶ月"
 
 #: application/templates/admin.html:76
 #: application/templates/user_account.html:46
 msgid "6 Months"
-msgstr ""
+msgstr "6ヶ月"
 
 #: application/templates/admin.html:78
 #: application/templates/user_account.html:47
 msgid "1 Year"
-msgstr ""
+msgstr "1年"
 
 #: application/templates/admin.html:80
 #: application/templates/user_account.html:48
 msgid "2 Years"
-msgstr ""
+msgstr "2年"
 
 #: application/templates/admin.html:85
 #: application/templates/change_password.html:3
 #: application/templates/change_password.html:13 application/view/admin.py:129
 #: application/view/admin.py:183
 msgid "Edit account"
-msgstr ""
+msgstr "アカウントを編集"
 
 #: application/templates/admin.html:89
 #: application/templates/adv_inboundmail.html:54
 #: application/templates/adv_uploadcss.html:31
 #: application/templates/base.html:25 application/templates/webmail.html:22
 msgid "Delete"
-msgstr ""
+msgstr "削除"
 
 #: application/templates/adv_archive.html:3
 #: application/templates/adv_archive.html:14
 #: application/templates/adv_base.html:57
 #: application/templates/adv_base.html:61
 msgid "Archive"
-msgstr ""
+msgstr "アーカイブ"
 
 #: application/templates/adv_archive.html:15
 msgid "Append hyperlinks for archiving or sharing."
-msgstr ""
+msgstr "アーカイブまたは共有用のハイパーリンクを追加。"
 
 #: application/templates/adv_archive.html:40
 msgid "Authorized"
-msgstr ""
+msgstr "認証済み"
 
 #: application/templates/adv_archive.html:42
 msgid "Authorize"
-msgstr ""
+msgstr "認証"
 
 #: application/templates/adv_archive.html:53
 msgid "Email or Username"
-msgstr ""
+msgstr "メールアドレスまたはユーザー名"
 
 #: application/templates/adv_archive.html:56
-#: application/templates/adv_archive.html:72 application/templates/base.html:54
-#: application/templates/home.html:20 application/templates/login.html:28
-#: application/templates/settings.html:234 application/templates/signup.html:25
+#: application/templates/adv_archive.html:72
+#: application/templates/base.html:54 application/templates/home.html:20
+#: application/templates/login.html:28 application/templates/settings.html:234
+#: application/templates/signup.html:25
 #: application/templates/user_account.html:19
 msgid "Password"
-msgstr ""
+msgstr "パスワード"
 
 #: application/templates/adv_archive.html:59
-#: application/templates/adv_archive.html:75 application/templates/base.html:64
+#: application/templates/adv_archive.html:75
+#: application/templates/base.html:64
 msgid "Verify"
-msgstr ""
+msgstr "確認"
 
 #: application/templates/adv_archive.html:78
 msgid "client_id"
-msgstr ""
+msgstr "client_id"
 
 #: application/templates/adv_archive.html:81
 msgid "client_secret"
-msgstr ""
+msgstr "client_secret"
 
 #: application/templates/adv_archive.html:84
 #: application/templates/settings.html:222
 msgid "Host"
-msgstr ""
+msgstr "ホスト"
 
 #: application/templates/adv_archive.html:119
 #: application/templates/adv_dict.html:79
@@ -229,13 +234,13 @@ msgstr ""
 #: application/templates/book_translator.html:80
 #: application/templates/settings.html:258
 msgid "Save settings"
-msgstr ""
+msgstr "設定を保存"
 
 #: application/templates/adv_base.html:39
 #: application/templates/adv_base.html:43
 #: application/templates/adv_delivernow.html:8
 msgid "Deliver Now"
-msgstr ""
+msgstr "今すぐ配信"
 
 #: application/templates/adv_base.html:48
 #: application/templates/adv_base.html:52
@@ -243,87 +248,89 @@ msgstr ""
 #: application/templates/adv_inboundmail.html:9
 #: application/templates/adv_inboundmail.html:14
 msgid "Inbound Mail"
-msgstr ""
+msgstr "受信メール"
 
 #: application/templates/adv_base.html:66
-#: application/templates/adv_base.html:70 application/templates/adv_dict.html:3
-#: application/templates/adv_dict.html:13 application/templates/reader.html:134
+#: application/templates/adv_base.html:70
+#: application/templates/adv_dict.html:3
+#: application/templates/adv_dict.html:13
+#: application/templates/reader.html:134
 msgid "Dictionary"
-msgstr ""
+msgstr "辞書"
 
 #: application/templates/adv_base.html:75
 #: application/templates/adv_base.html:83
 #: application/templates/adv_proxy.html:3
 #: application/templates/adv_proxy.html:12
 msgid "Proxy"
-msgstr ""
+msgstr "プロキシ"
 
 #: application/templates/adv_base.html:92
 #: application/templates/adv_base.html:96
 #: application/templates/adv_import.html:8
 msgid "Import Feeds"
-msgstr ""
+msgstr "フィードをインポート"
 
 #: application/templates/adv_base.html:101
 #: application/templates/adv_base.html:105
 msgid "Cover Image"
-msgstr ""
+msgstr "カバー画像"
 
 #: application/templates/adv_base.html:110
 #: application/templates/adv_base.html:114
 #: application/templates/adv_uploadcss.html:3
 msgid "Stylesheet"
-msgstr ""
+msgstr "スタイルシート"
 
 #: application/templates/adv_base.html:119
 #: application/templates/adv_base.html:123
 #: application/templates/adv_calibre_options.html:3
 #: application/templates/adv_calibre_options.html:12
 msgid "Calibre Options"
-msgstr ""
+msgstr "Calibreオプション"
 
 #: application/templates/adv_calibre_options.html:13
 msgid "Set the parameters for Calibre, in JSON dictionary format."
-msgstr ""
+msgstr "CalibreのパラメータをJSON辞書形式で設定します。"
 
 #: application/templates/adv_delivernow.html:3
 msgid "Deliver now"
-msgstr ""
+msgstr "今すぐ配信"
 
 #: application/templates/adv_delivernow.html:9
 msgid "Deliver selected recipes now."
-msgstr ""
+msgstr "選択したレシピを今すぐ配信。"
 
 #: application/templates/adv_delivernow.html:12
 msgid "There are no recipes subscribed"
-msgstr ""
+msgstr "購読中のレシピはありません。"
 
 #: application/templates/adv_delivernow.html:17
 #: application/templates/base.html:101
 msgid "Sep"
-msgstr ""
+msgstr "Sep"
 
 #: application/templates/adv_delivernow.html:22
 msgid "Select all"
-msgstr ""
+msgstr "すべて選択"
 
 #: application/templates/adv_delivernow.html:23
 msgid "Select none"
-msgstr ""
+msgstr "選択解除"
 
 #: application/templates/adv_delivernow.html:28
 msgid "Deliver"
-msgstr ""
+msgstr "配信"
 
 #: application/templates/adv_dict.html:15
 msgid "Set up dictionaries for online reading."
-msgstr ""
+msgstr "オンラインリーディング用の辞書を設定します。"
 
 #: application/templates/adv_dict.html:18
 #: application/templates/adv_dict.html:40
 #: application/templates/adv_dict.html:62
 msgid "Book language"
-msgstr ""
+msgstr "本の言語"
 
 #: application/templates/adv_dict.html:27
 #: application/templates/adv_dict.html:49
@@ -332,119 +339,119 @@ msgstr ""
 #: application/templates/book_translator.html:26
 #: application/templates/word_lookup.html:59
 msgid "Engine"
-msgstr ""
+msgstr "エンジン"
 
 #: application/templates/adv_dict.html:33
 #: application/templates/adv_dict.html:55
 #: application/templates/adv_dict.html:72
 #: application/templates/word_lookup.html:65
 msgid "Database"
-msgstr ""
+msgstr "データベース"
 
 #: application/templates/adv_dict.html:63
 msgid "Other languages"
-msgstr ""
+msgstr "他の言語"
 
 #: application/templates/adv_dict.html:81
 #: application/templates/word_lookup.html:3
 #: application/templates/word_lookup.html:79
 msgid "Word lookup"
-msgstr ""
+msgstr "単語検索"
 
 #: application/templates/adv_dict.html:86 application/view/reader.py:29
 #: application/view/reader.py:86
 msgid "Online reading feature has not been activated yet."
-msgstr ""
+msgstr "オンラインリーディング機能はまだ有効化されていません。"
 
 #: application/templates/adv_import.html:3
 #: application/templates/adv_import.html:19
 msgid "Import"
-msgstr ""
+msgstr "インポート"
 
 #: application/templates/adv_import.html:9
 msgid "Import custom rss from an OPML file."
-msgstr ""
+msgstr "OPMLファイルからカスタムRSSをインポート。"
 
 #: application/templates/adv_import.html:15
 msgid "Import as fulltext rss by default"
-msgstr ""
+msgstr "デフォルトで全文RSSとしてインポート"
 
 #: application/templates/adv_import.html:20
 msgid "Download"
-msgstr ""
+msgstr "ダウンロード"
 
 #: application/templates/adv_inboundmail.html:11
 msgid ""
 "To enable the inbound email feature, you also need to configure the "
 "whitelist."
-msgstr ""
+msgstr "受信メール機能を有効にするには、ホワイトリストの設定も必要です。"
 
 #: application/templates/adv_inboundmail.html:16
 #: application/templates/adv_uploadcover.html:15
 #: application/templates/book_summarizer.html:19
 #: application/templates/book_translator.html:22
 msgid "Disable"
-msgstr ""
+msgstr "無効化"
 
 #: application/templates/adv_inboundmail.html:17
 msgid "Forward Only"
-msgstr ""
+msgstr "転送のみ"
 
 #: application/templates/adv_inboundmail.html:18
 msgid "Save Only"
-msgstr ""
+msgstr "保存のみ"
 
 #: application/templates/adv_inboundmail.html:19
 msgid "Save and Forward"
-msgstr ""
+msgstr "保存して転送"
 
 #: application/templates/adv_inboundmail.html:23
 msgid "Email Retention"
-msgstr ""
+msgstr "メール保存期間"
 
 #: application/templates/adv_inboundmail.html:25
 #: application/templates/settings.html:52
 #: application/templates/settings.html:164
 msgid "1 Day"
-msgstr ""
+msgstr "1日"
 
 #: application/templates/adv_inboundmail.html:27
 #: application/templates/settings.html:59
 msgid "30 Days"
-msgstr ""
+msgstr "30日間"
 
 #: application/templates/adv_inboundmail.html:28
 #: application/templates/settings.html:51
 #: application/templates/settings.html:163
 msgid "No limit"
-msgstr ""
+msgstr "制限なし"
 
 #: application/templates/adv_inboundmail.html:36
 msgid "Open webmail"
-msgstr ""
+msgstr "Webメールを開く"
 
 #: application/templates/adv_inboundmail.html:44
 msgid "White List"
-msgstr ""
+msgstr "ホワイトリスト"
 
 #: application/templates/adv_inboundmail.html:46
 #, python-format
 msgid ""
 "Emails sent to %(name)sxxx@%(mailHost)s will be forwarded to your kindle "
 "email."
-msgstr ""
+msgstr "%(name)sxxx@%(mailHost)sに送信されたメールは、あなたのKindleメールに転送されます。"
 
 #: application/templates/adv_inboundmail.html:47
 msgid "Example"
-msgstr ""
+msgstr "例"
 
 #: application/templates/adv_inboundmail.html:59
 msgid "Please input mail address"
-msgstr ""
+msgstr "メールアドレスを入力してください"
 
 #: application/templates/adv_proxy.html:13
 msgid "Supports"
-msgstr ""
+msgstr "サポート"
 
 #: application/templates/adv_proxy.html:24
 #: application/templates/adv_proxy.html:29
@@ -452,415 +459,415 @@ msgstr ""
 #: application/templates/book_summarizer.html:105
 #: application/templates/book_translator.html:97
 msgid "Test"
-msgstr ""
+msgstr "テスト"
 
 #: application/templates/adv_uploadcover.html:3
 msgid "Cover image"
-msgstr ""
+msgstr "カバー画像"
 
 #: application/templates/adv_uploadcover.html:9
 msgid "Upload cover image"
-msgstr ""
+msgstr "カバー画像をアップロード"
 
 #: application/templates/adv_uploadcover.html:10
 msgid ""
-"Upload cover images from local with an aspect ratio of approximately "
-"0.625."
-msgstr ""
+"Upload cover images from local with an aspect ratio of approximately 0.625."
+msgstr "アスペクト比0.625のローカルカバー画像をアップロードしてください。"
 
 #: application/templates/adv_uploadcover.html:13
 msgid "Include cover"
-msgstr ""
+msgstr "カバーを含む"
 
 #: application/templates/adv_uploadcover.html:16
 #: application/templates/book_summarizer.html:18
 #: application/templates/book_translator.html:21
 msgid "Enable"
-msgstr ""
+msgstr "有効化"
 
 #: application/templates/adv_uploadcover.html:20
 msgid "Rule for cover"
-msgstr ""
+msgstr "カバーのルール"
 
 #: application/templates/adv_uploadcover.html:22
 msgid "Random"
-msgstr ""
+msgstr "ランダム"
 
 #: application/templates/adv_uploadcover.html:23
 #: application/templates/base.html:127
 msgid "Weekday"
-msgstr ""
+msgstr "平日"
 
 #: application/templates/adv_uploadcover.html:49
 msgid "Upload/Update"
-msgstr ""
+msgstr "アップロード/更新"
 
 #: application/templates/adv_uploadcss.html:22
 msgid "Upload stylesheet"
-msgstr ""
+msgstr "スタイルシートをアップロード"
 
 #: application/templates/adv_uploadcss.html:23
 msgid "Upload a stylesheet from local (accept utf-8 only)."
-msgstr ""
+msgstr "ローカルからスタイルシートをアップロード（UTF-8のみ対応）。"
 
 #: application/templates/adv_uploadcss.html:30
 msgid "Upload"
-msgstr ""
+msgstr "アップロード"
 
 #: application/templates/autoback.html:3
 msgid "Auto back"
-msgstr ""
+msgstr "自動戻る"
 
 #: application/templates/autoback.html:28
 msgid "Auto back to previous page after 5 seconds"
-msgstr ""
+msgstr "5秒後に前のページに自動で戻る"
 
 #: application/templates/autoback.html:29
 #: application/templates/tipsback.html:15
 msgid "Click to back"
-msgstr ""
+msgstr "戻るにはクリック"
 
 #: application/templates/base.html:24 application/templates/reader.html:189
 msgid "Confirm Deletion"
-msgstr ""
+msgstr "削除を確認"
 
 #: application/templates/base.html:26
 msgid "Delete (Ctrl for no confirm)"
-msgstr ""
+msgstr "削除（確認なしでCtrl）"
 
 #: application/templates/base.html:27
 msgid "View Source Code"
-msgstr ""
+msgstr "ソースコードを表示"
 
 #: application/templates/base.html:28
 msgid "Subscribe (Deliver Separately)"
-msgstr ""
+msgstr "購読（個別配信）"
 
 #: application/templates/base.html:29
 msgid "Subscribe"
-msgstr ""
+msgstr "購読"
 
 #: application/templates/base.html:30
 msgid "Cannot add this custom rss, Error:"
-msgstr ""
+msgstr "このカスタムRSSを追加できません、エラー："
 
 #: application/templates/base.html:31
 msgid "Cannot delete this feed, Error:"
-msgstr ""
+msgstr "このフィードを削除できません、エラー："
 
 #: application/templates/base.html:32
 msgid "Fulltext"
-msgstr ""
+msgstr "全文"
 
 #: application/templates/base.html:33 application/templates/base.html:43
 msgid "Share"
-msgstr ""
+msgstr "共有"
 
 #: application/templates/base.html:34 application/templates/reader.html:190
 msgid "Are you sure to delete?"
-msgstr ""
+msgstr "本当に削除しますか？"
 
 #: application/templates/base.html:35
 msgid "Report to the server that this feed is invalid."
-msgstr ""
+msgstr "このフィードが無効であることをサーバーに報告します。"
 
 #: application/templates/base.html:36
 msgid "Are you sure to REMOVE ALL CUSTOM RSS?"
-msgstr ""
+msgstr "すべてのカスタムRSSを削除してもよろしいですか？"
 
 #: application/templates/base.html:37
 msgid "Share links, share happiness"
-msgstr ""
+msgstr "リンクを共有し、幸福を共有する"
 
 #: application/templates/base.html:38
 msgid "Category"
-msgstr ""
+msgstr "カテゴリー"
 
 #: application/templates/base.html:39
 #: application/templates/book_audiolator.html:58
 #: application/templates/book_summarizer.html:43
 #: application/templates/settings.html:148
 msgid "Language"
-msgstr ""
+msgstr "言語"
 
 #: application/templates/base.html:40
 msgid ""
 "Please write a category in text field if the one you wish is not in the "
 "list."
-msgstr ""
+msgstr "希望のカテゴリーがリストにない場合は、テキストフィールドに書いてください。"
 
 #: application/templates/base.html:41
 msgid "Ok"
-msgstr ""
+msgstr "OK"
 
 #: application/templates/base.html:42
 msgid "Cancel"
-msgstr ""
+msgstr "キャンセル"
 
 #: application/templates/base.html:44
 msgid "Language code invalid"
-msgstr ""
+msgstr "言語コードが無効です"
 
 #: application/templates/base.html:45
 msgid "Thank you for sharing."
-msgstr ""
+msgstr "共有ありがとうございます。"
 
 #: application/templates/base.html:46 application/templates/reader.html:159
 msgid "Close"
-msgstr ""
+msgstr "閉じる"
 
 #: application/templates/base.html:47
 msgid "Unsubscribe"
-msgstr ""
+msgstr "購読解除"
 
 #: application/templates/base.html:48
 msgid "Cannot subscribe this recipe, Error:"
-msgstr ""
+msgstr "このレシピを購読できません、エラー："
 
 #: application/templates/base.html:49
 msgid "Are you sure to Unsubscribe ({0})?"
-msgstr ""
+msgstr "本当に購読解除しますか（{0}）？"
 
 #: application/templates/base.html:50
 msgid "Cannot unsubscribe this recipe, Error:"
-msgstr ""
+msgstr "このレシピを購読解除できません、エラー："
 
 #: application/templates/base.html:51
 msgid "The recipe is already subscribed."
-msgstr ""
+msgstr "このレシピは既に購読されています。"
 
 #: application/templates/base.html:52
 msgid "Website login lnformation"
-msgstr ""
+msgstr "ウェブサイトのログイン情報"
 
 #: application/templates/base.html:55
 msgid "Submit"
-msgstr ""
+msgstr "送信"
 
 #: application/templates/base.html:56
 msgid ""
 "If any field is left blank, the server will clear the saved login "
 "information."
-msgstr ""
+msgstr "任意のフィールドが空白のままだと、サーバーは保存されたログイン情報をクリアします。"
 
 #: application/templates/base.html:57
 msgid "Cannot set the website login information, Error:"
-msgstr ""
+msgstr "ウェブサイトのログイン情報を設定できません、エラー："
 
 #: application/templates/base.html:58 application/templates/my.html:58
 msgid "Upload custom recipe"
-msgstr ""
+msgstr "カスタムレシピをアップロード"
 
 #: application/templates/base.html:59
 msgid "Congratulations"
-msgstr ""
+msgstr "おめでとうございます"
 
 #: application/templates/base.html:60
 msgid "Thanks"
-msgstr ""
+msgstr "ありがとうございます"
 
 #: application/templates/base.html:61
 msgid ""
-"Your recipe has been uploaded, and it can be found in the Library "
-"section. If you dont see it, please make sure to switch to the correct "
-"language."
-msgstr ""
+"Your recipe has been uploaded, and it can be found in the Library section. "
+"If you dont see it, please make sure to switch to the correct language."
+msgstr "レシピがアップロードされました。ライブラリセクションで見つけることができます。見当たらない場合は、正しい言語に切り替えてください。"
 
 #: application/templates/base.html:62
 msgid "Your recipe have been deleted."
-msgstr ""
+msgstr "レシピは削除されました。"
 
 #: application/templates/base.html:63
 msgid "Kindleify Selection"
-msgstr ""
+msgstr "Kindleify選択"
 
 #: application/templates/base.html:65
 msgid "Verified"
-msgstr ""
+msgstr "確認済み"
 
 #: application/templates/base.html:66 application/view/login.py:79
 #: application/view/share.py:157
 msgid "The username does not exist or password is wrong."
-msgstr ""
+msgstr "ユーザー名が存在しないか、パスワードが間違っています。"
 
 #: application/templates/base.html:67
 msgid "The file you chosen is not an acceptable type."
-msgstr ""
+msgstr "選択したファイルは許可されたタイプではありません。"
 
 #: application/templates/base.html:68
 msgid "The file have been uploaded successfully."
-msgstr ""
+msgstr "ファイルは正常にアップロードされました。"
 
 #: application/templates/base.html:69 application/templates/library.html:67
 msgid "This feed has been successfully subscribed."
-msgstr ""
+msgstr "このフィードは正常に購読されました。"
 
 #: application/templates/base.html:70
 msgid "Thank you for your feedback, this feed will be reviewed soon."
-msgstr ""
+msgstr "フィードバックありがとうございます。このフィードは近日中にレビューされます。"
 
 #: application/templates/base.html:71
 msgid "Are you confirming to share the recipe ({0})?"
-msgstr ""
+msgstr "レシピ({0})を共有することを確認しますか？"
 
 #: application/templates/base.html:72
 msgid "[All]"
-msgstr ""
+msgstr "[すべて]"
 
 #: application/templates/base.html:73
 msgid "[By Time]"
-msgstr ""
+msgstr "[時間順]"
 
 #: application/templates/base.html:74
 msgid "[Random]"
-msgstr ""
+msgstr "[ランダム]"
 
 #: application/templates/base.html:75
 msgid "[Uncategoried]"
-msgstr ""
+msgstr "[カテゴリなし]"
 
 #: application/templates/base.html:76
 msgid "There are no links found."
-msgstr ""
+msgstr "リンクが見つかりません。"
 
 #: application/templates/base.html:77
 msgid "Invalid report"
-msgstr ""
+msgstr "無効なレポート"
 
 #: application/templates/base.html:78
 msgid "Are you confirming that this link is invalid or off the cloud?"
-msgstr ""
+msgstr "このリンクが無効か、クラウド外であることを確認しますか？"
 
 #: application/templates/base.html:79
 msgid "Customize delivery time"
-msgstr ""
+msgstr "配達時間をカスタマイズ"
 
 #: application/templates/base.html:80 application/templates/settings.html:72
 msgid "Delivery days"
-msgstr ""
+msgstr "配達日"
 
 #: application/templates/base.html:81 application/templates/settings.html:74
 msgid "Mon"
-msgstr ""
+msgstr "月"
 
 #: application/templates/base.html:82 application/templates/settings.html:76
 msgid "Tue"
-msgstr ""
+msgstr "火"
 
 #: application/templates/base.html:83 application/templates/settings.html:78
 msgid "Wed"
-msgstr ""
+msgstr "水"
 
 #: application/templates/base.html:84 application/templates/settings.html:80
 msgid "Thu"
-msgstr ""
+msgstr "木"
 
 #: application/templates/base.html:85 application/templates/settings.html:82
 msgid "Fri"
-msgstr ""
+msgstr "金"
 
 #: application/templates/base.html:86 application/templates/settings.html:84
 msgid "Sat"
-msgstr ""
+msgstr "土"
 
 #: application/templates/base.html:87 application/templates/settings.html:86
 msgid "Sun"
-msgstr ""
+msgstr "日"
 
 #: application/templates/base.html:88
 msgid "Delivery times"
-msgstr ""
+msgstr "配達時間"
 
 #: application/templates/base.html:89
-msgid "The customized delivery time for the recipe has been successfully saved."
-msgstr ""
+msgid ""
+"The customized delivery time for the recipe has been successfully saved."
+msgstr "レシピのカスタマイズされた配達時間は正常に保存されました。"
 
 #: application/templates/base.html:90
 msgid "The account have been deleted."
-msgstr ""
+msgstr "アカウントは削除されました。"
 
 #: application/templates/base.html:91 application/view/share.py:147
 msgid "The username or password is empty."
-msgstr ""
+msgstr "ユーザー名またはパスワードが空です。"
 
 #: application/templates/base.html:92 application/view/admin.py:81
 #: application/view/admin.py:165 application/view/admin.py:191
 #: application/view/login.py:220 application/view/login.py:273
 msgid "The two new passwords are dismatch."
-msgstr ""
+msgstr "2つの新しいパスワードが一致しません。"
 
 #: application/templates/base.html:93
 msgid "Password changed successfully."
-msgstr ""
+msgstr "パスワードが正常に変更されました。"
 
 #: application/templates/base.html:94
 msgid "Account added successfully."
-msgstr ""
+msgstr "アカウントが正常に追加されました。"
 
 #: application/templates/base.html:95 application/view/login.py:128
 msgid "login required"
-msgstr ""
+msgstr "ログインが必要です"
 
 #: application/templates/base.html:96
 msgid "Upload cover files successfully."
-msgstr ""
+msgstr "カバーファイルは正常にアップロードされました。"
 
 #: application/templates/base.html:97
 msgid ""
-"Total size of the files you selected exceeds 16MB. Please reduce the "
-"image resolution or upload in batches."
-msgstr ""
+"Total size of the files you selected exceeds 16MB. Please reduce the image "
+"resolution or upload in batches."
+msgstr "選択したファイルの合計サイズが16MBを超えています。画像の解像度を下げるか、バッチでアップロードしてください。"
 
 #: application/templates/base.html:98
 #: application/templates/book_translator.html:3
 #: application/templates/book_translator.html:17
 msgid "Bilingual Translator"
-msgstr ""
+msgstr "バイリンガル翻訳者"
 
 #: application/templates/base.html:99
 #: application/templates/book_summarizer.html:3
 #: application/templates/book_summarizer.html:14
 msgid "AI Summarizer"
-msgstr ""
+msgstr "AI要約者"
 
 #: application/templates/base.html:100
 msgid "Upl"
-msgstr ""
+msgstr "Upl"
 
 #: application/templates/base.html:102
 msgid "Log"
-msgstr ""
+msgstr "Log"
 
 #: application/templates/base.html:103
 msgid "Emb"
-msgstr ""
+msgstr "Emb"
 
 #: application/templates/base.html:104
 msgid "Tr"
-msgstr ""
+msgstr "Tr"
 
 #: application/templates/base.html:105
 msgid "Tts"
-msgstr ""
+msgstr "Tts"
 
 #: application/templates/base.html:106
 msgid "Ai"
-msgstr ""
+msgstr "Ai"
 
 #: application/templates/base.html:107
 msgid ""
-"The test email has been successfully sent to the following addresses. "
-"Please check your inbox or spam folder to confirm its delivery. Depending"
-" on your email server, there may be a slight delay."
+"The test email has been successfully sent to the following addresses. Please"
+" check your inbox or spam folder to confirm its delivery. Depending on your "
+"email server, there may be a slight delay."
 msgstr ""
+"テストメールは以下のアドレスに正常に送信されました。受信箱またはスパムフォルダを確認して、配信を確認してください。メールサーバーによっては、若干の遅延が生じる場合があります。"
 
 #: application/templates/base.html:108
 msgid "Processing..."
-msgstr ""
+msgstr "処理中..."
 
 #: application/templates/base.html:109
 msgid "The configuration validation is correct."
-msgstr ""
+msgstr "設定の検証は正しいです。"
 
 #: application/templates/base.html:110 application/templates/logs.html:23
 #: application/templates/logs.html:72 application/templates/my.html:17
@@ -868,41 +875,41 @@ msgstr ""
 #: application/templates/settings.html:118
 #: application/templates/settings.html:144
 msgid "Title"
-msgstr ""
+msgstr "タイトル"
 
 #: application/templates/base.html:111
 #: application/templates/book_audiolator.html:3
 #: application/templates/book_audiolator.html:20
 msgid "Text to Speech"
-msgstr ""
+msgstr "テキスト読み上げ"
 
 #: application/templates/base.html:112
 msgid "Action"
-msgstr ""
+msgstr "アクション"
 
 #: application/templates/base.html:113
 msgid "File"
-msgstr ""
+msgstr "ファイル"
 
 #: application/templates/base.html:114
 msgid "Upload Only"
-msgstr ""
+msgstr "アップロードのみ"
 
 #: application/templates/base.html:115
 msgid "Send"
-msgstr ""
+msgstr "送信"
 
 #: application/templates/base.html:116 application/templates/logs.html:54
 msgid "There is nothing here."
-msgstr ""
+msgstr "ここには何もありません。"
 
 #: application/templates/base.html:117
 msgid "Please select a single item."
-msgstr ""
+msgstr "1つの項目を選択してください。"
 
 #: application/templates/base.html:118 application/templates/reader.html:191
 msgid "Please select at least one item."
-msgstr ""
+msgstr "少なくとも1つの項目を選択してください。"
 
 #: application/templates/base.html:119 application/view/admin.py:77
 #: application/view/admin.py:152 application/view/admin.py:189
@@ -913,224 +920,224 @@ msgstr ""
 #: application/view/login.py:245 application/view/reader.py:109
 #: application/view/reader.py:126 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
-msgstr ""
+msgstr "いくつかのパラメータが不足しているか、間違っています。"
 
 #: application/templates/base.html:120
 msgid "The email has been sent."
-msgstr ""
+msgstr "メールは送信されました。"
 
 #: application/templates/base.html:121 application/templates/webmail.html:29
 msgid "From"
-msgstr ""
+msgstr "差出人"
 
 #: application/templates/base.html:122 application/templates/logs.html:25
 #: application/templates/logs.html:74 application/templates/webmail.html:30
 msgid "To"
-msgstr ""
+msgstr "宛先"
 
 #: application/templates/base.html:123 application/templates/webmail.html:31
 msgid "Subject"
-msgstr ""
+msgstr "件名"
 
 #: application/templates/base.html:124 application/templates/logs.html:22
 #: application/templates/logs.html:71 application/templates/settings.html:117
 #: application/templates/settings.html:118
 #: application/templates/webmail.html:32
 msgid "Time"
-msgstr ""
+msgstr "時間"
 
 #: application/templates/base.html:125 application/templates/logs.html:24
 #: application/templates/logs.html:73 application/templates/webmail.html:33
 msgid "Size"
-msgstr ""
+msgstr "サイズ"
 
 #: application/templates/base.html:126
 msgid "Date type"
-msgstr ""
+msgstr "日付タイプ"
 
 #: application/templates/base.html:128
 msgid "Date"
-msgstr ""
+msgstr "日付"
 
 #: application/templates/base.html:129
 msgid "This setting is prioritized."
-msgstr ""
+msgstr "この設定は優先されています。"
 
 #: application/templates/base.html:130
 msgid "Combine multiple values with commas."
-msgstr ""
+msgstr "複数の値をカンマで区切って結合してください。"
 
 #: application/templates/base.html:131
 msgid "Put dictionary in dict folder"
-msgstr ""
+msgstr "辞書をdictフォルダに入れてください"
 
 #: application/templates/base.html:156 application/templates/home.html:16
 msgid "Logout"
-msgstr ""
+msgstr "ログアウト"
 
 #: application/templates/base.html:158 application/templates/home.html:21
 #: application/templates/login.html:3 application/templates/login.html:22
 #: application/templates/login.html:33
 msgid "Login"
-msgstr ""
+msgstr "ログイン"
 
 #: application/templates/base.html:160 application/templates/signup.html:3
 #: application/templates/signup.html:19 application/templates/signup.html:43
 msgid "Signup"
-msgstr ""
+msgstr "サインアップ"
 
 #: application/templates/base.html:189 application/templates/home.html:15
 #: application/templates/my.html:3
 msgid "Feeds"
-msgstr ""
+msgstr "フィード"
 
 #: application/templates/base.html:190 application/templates/settings.html:3
 msgid "Settings"
-msgstr ""
+msgstr "設定"
 
 #: application/templates/base.html:191 application/templates/logs.html:3
 msgid "Logs"
-msgstr ""
+msgstr "ログ"
 
 #: application/templates/base.html:193
 msgid "Advanced"
-msgstr ""
+msgstr "詳細"
 
 #: application/templates/base.html:194 application/templates/library.html:3
 msgid "Shared"
-msgstr ""
+msgstr "共有"
 
 #: application/templates/base.html:195 application/templates/reader.html:6
 msgid "Reader"
-msgstr ""
+msgstr "リーダー"
 
 #: application/templates/book_audiolator.html:22
 #: application/templates/book_summarizer.html:16
 #: application/templates/book_translator.html:19
 msgid "State"
-msgstr ""
+msgstr "状態"
 
 #: application/templates/book_audiolator.html:24
 msgid "Send Ebook and Audio"
-msgstr ""
+msgstr "電子書籍とオーディオを送信"
 
 #: application/templates/book_audiolator.html:25
 msgid "Send Audio only"
-msgstr ""
+msgstr "音声のみを送信"
 
 #: application/templates/book_audiolator.html:26
 msgid "Disable TTS"
-msgstr ""
+msgstr "TTSを無効にする"
 
 #: application/templates/book_audiolator.html:30
 msgid "Send Audio To"
-msgstr ""
+msgstr "音声を送信先"
 
 #: application/templates/book_audiolator.html:31
 msgid "Empty to use Kindle_email"
-msgstr ""
+msgstr "Kindle_emailを使用するには空にしてください"
 
 #: application/templates/book_audiolator.html:35
 msgid "TTS Engine"
-msgstr ""
+msgstr "TTSエンジン"
 
 #: application/templates/book_audiolator.html:41
 #: application/templates/book_summarizer.html:35
 #: application/templates/book_translator.html:32
 msgid "Api Host"
-msgstr ""
+msgstr "APIホスト"
 
 #: application/templates/book_audiolator.html:42
 #: application/templates/book_summarizer.html:36
 #: application/templates/book_summarizer.html:75
 msgid "Leave empty to use default"
-msgstr ""
+msgstr "デフォルトを使用するには空にしてください"
 
 #: application/templates/book_audiolator.html:46
 msgid "Region"
-msgstr ""
+msgstr "地域"
 
 #: application/templates/book_audiolator.html:53
 #: application/templates/book_summarizer.html:39
 #: application/templates/book_translator.html:36
 msgid "Api Key"
-msgstr ""
+msgstr "Api Key"
 
 #: application/templates/book_audiolator.html:66
 msgid "Voice name"
-msgstr ""
+msgstr "音声名"
 
 #: application/templates/book_audiolator.html:73
 msgid "Voice speed"
-msgstr ""
+msgstr "音声の速さ"
 
 #: application/templates/book_audiolator.html:75
 msgid "Extra slow"
-msgstr ""
+msgstr "極端に遅い"
 
 #: application/templates/book_audiolator.html:76
 msgid "Slow"
-msgstr ""
+msgstr "遅い"
 
 #: application/templates/book_audiolator.html:77
 #: application/templates/book_audiolator.html:87
 #: application/templates/book_audiolator.html:97
 msgid "Medium"
-msgstr ""
+msgstr "普通"
 
 #: application/templates/book_audiolator.html:78
 msgid "Fast"
-msgstr ""
+msgstr "速い"
 
 #: application/templates/book_audiolator.html:79
 msgid "Extra fast"
-msgstr ""
+msgstr "極端に速い"
 
 #: application/templates/book_audiolator.html:83
 msgid "Voice pitch"
-msgstr ""
+msgstr "音声の高さ"
 
 #: application/templates/book_audiolator.html:85
 msgid "Extra low"
-msgstr ""
+msgstr "極端に低い"
 
 #: application/templates/book_audiolator.html:86
 msgid "Low"
-msgstr ""
+msgstr "低い"
 
 #: application/templates/book_audiolator.html:88
 msgid "High"
-msgstr ""
+msgstr "高い"
 
 #: application/templates/book_audiolator.html:89
 msgid "Extra high"
-msgstr ""
+msgstr "極端に高い"
 
 #: application/templates/book_audiolator.html:93
 msgid "Voice volume"
-msgstr ""
+msgstr "音量"
 
 #: application/templates/book_audiolator.html:95
 msgid "Extra soft"
-msgstr ""
+msgstr "極端に小さい"
 
 #: application/templates/book_audiolator.html:96
 msgid "Soft"
-msgstr ""
+msgstr "小さい"
 
 #: application/templates/book_audiolator.html:98
 msgid "Loud"
-msgstr ""
+msgstr "大きい"
 
 #: application/templates/book_audiolator.html:99
 msgid "Extra loud"
-msgstr ""
+msgstr "極端に大きい"
 
 #: application/templates/book_audiolator.html:105
 #: application/templates/book_summarizer.html:80
 #: application/templates/book_translator.html:72
 msgid "Apply to all subscribed recipes"
-msgstr ""
+msgstr "すべての購読レシピに適用"
 
 #: application/templates/book_audiolator.html:110
 #: application/templates/book_summarizer.html:85
@@ -1138,110 +1145,110 @@ msgstr ""
 msgid ""
 "Note: Enabling this feature will significantly increase consumed CPU "
 "instance hours."
-msgstr ""
+msgstr "注意：この機能を有効にすると、消費されるCPUインスタンス時間が大幅に増加します。"
 
 #: application/templates/book_audiolator.html:119
 #: application/templates/book_summarizer.html:94
 #: application/templates/book_translator.html:86
 msgid "Test (Please save settings firstly)"
-msgstr ""
+msgstr "テスト（設定を先に保存してください）"
 
 #: application/templates/book_audiolator.html:121
 #: application/templates/book_summarizer.html:96
 #: application/templates/book_translator.html:88
 msgid "Text"
-msgstr ""
+msgstr "テキスト"
 
 #: application/templates/book_audiolator.html:127
 msgid "Your browser does not support the audio element."
-msgstr ""
+msgstr "あなたのブラウザは音声要素をサポートしていません。"
 
 #: application/templates/book_summarizer.html:29
 msgid "Model"
-msgstr ""
+msgstr "Model"
 
 #: application/templates/book_summarizer.html:45
 msgid "Auto"
-msgstr ""
+msgstr "自動"
 
 #: application/templates/book_summarizer.html:56
 msgid "Summary words"
-msgstr ""
+msgstr "要約の単語"
 
 #: application/templates/book_summarizer.html:70
 msgid "Summary style"
-msgstr ""
+msgstr "要約スタイル"
 
 #: application/templates/book_summarizer.html:74
 msgid "Placeholders available:"
-msgstr ""
+msgstr "使用可能なプレースホルダー："
 
 #: application/templates/book_summarizer.html:74
 msgid "Custom prompt"
-msgstr ""
+msgstr "カスタムプロンプト"
 
 #: application/templates/book_summarizer.html:100
 msgid "Summary"
-msgstr ""
+msgstr "要約"
 
 #: application/templates/book_translator.html:37
 msgid "One key per line"
-msgstr ""
+msgstr "1行ごとに1つのキー"
 
 #: application/templates/book_translator.html:40
 #: application/templates/word_lookup.html:51
 msgid "Source language"
-msgstr ""
+msgstr "ソース言語"
 
 #: application/templates/book_translator.html:46
 msgid "Target language"
-msgstr ""
+msgstr "ターゲット言語"
 
 #: application/templates/book_translator.html:52
 msgid "Translation Position"
-msgstr ""
+msgstr "翻訳位置"
 
 #: application/templates/book_translator.html:54
 msgid "Below original"
-msgstr ""
+msgstr "オリジナルの下"
 
 #: application/templates/book_translator.html:55
 msgid "Above original"
-msgstr ""
+msgstr "オリジナルの上"
 
 #: application/templates/book_translator.html:56
 msgid "Left to original"
-msgstr ""
+msgstr "オリジナルの左"
 
 #: application/templates/book_translator.html:57
 msgid "Right to original"
-msgstr ""
+msgstr "オリジナルの右"
 
 #: application/templates/book_translator.html:58
 msgid "Translated text only"
-msgstr ""
+msgstr "翻訳されたテキストのみ"
 
 #: application/templates/book_translator.html:62
 msgid "Original text style"
-msgstr ""
+msgstr "オリジナルテキストスタイル"
 
 #: application/templates/book_translator.html:66
 msgid "Translated text style"
-msgstr ""
+msgstr "翻訳テキストスタイル"
 
 #: application/templates/book_translator.html:92
 msgid "Translation"
-msgstr ""
+msgstr "翻訳"
 
 #: application/templates/change_password.html:15
 msgid "Old password"
-msgstr ""
+msgstr "旧パスワード"
 
 #: application/templates/change_password.html:19
 #: application/templates/reset_password.html:31
 #: application/templates/reset_password.html:32
 msgid "New password"
-msgstr ""
+msgstr "新しいパスワード"
 
 #: application/templates/change_password.html:23
 #: application/templates/reset_password.html:35
@@ -1249,501 +1256,506 @@ msgstr ""
 #: application/templates/signup.html:29
 #: application/templates/user_account.html:23
 msgid "Confirm password"
-msgstr ""
+msgstr "パスワード確認"
 
 #: application/templates/change_password.html:31
 msgid "Share key"
-msgstr ""
+msgstr "共有キー"
 
 #: application/templates/change_password.html:37
 msgid "Confirm Change"
-msgstr ""
+msgstr "変更を確認"
 
 #: application/templates/debug_cmd.html:3
 msgid "Debug cmd"
-msgstr ""
+msgstr "デバッグコマンド"
 
 #: application/templates/home.html:3
 msgid "Home"
-msgstr ""
+msgstr "ホーム"
 
 #: application/templates/home.html:10 application/templates/login.html:18
 msgid "You are in DEMO mode. Logging out will delete all data."
-msgstr ""
+msgstr "デモモードです。ログアウトするとすべてのデータが削除されます。"
 
 #: application/templates/home.html:12
 msgid "Sharing Joyful News Every Step of the Way"
-msgstr ""
+msgstr "すべてのステップで喜ばしいニュースを共有"
 
 #: application/templates/home.html:31
 msgid "Inherited From Calibre"
-msgstr ""
+msgstr "Calibreから継承"
 
 #: application/templates/home.html:34
 #, python-format
 msgid ""
 "Empowered by %(calibre)s, you can easily create e-books on a Python-"
-"supported online platform and seamlessly transfer them to your e-reader "
-"or other reading devices."
+"supported online platform and seamlessly transfer them to your e-reader or "
+"other reading devices."
 msgstr ""
+"%(calibre)sによってサポートされ、Python対応のオンラインプラットフォームで簡単に電子書籍を作成し、電子リーダーや他の読書デバイスにシームレスに転送できます。"
 
 #: application/templates/home.html:42
 msgid "Share Your Ideas"
-msgstr ""
+msgstr "アイデアを共有"
 
 #: application/templates/home.html:45
 #, python-format
 msgid ""
 "With the open-source %(kindleear)s application, you can set up your own "
-"server to deliver daily news feeds to your e-reader and effortlessly "
-"share the service with friends."
+"server to deliver daily news feeds to your e-reader and effortlessly share "
+"the service with friends."
 msgstr ""
+"オープンソースの%(kindleear)sアプリケーションを使って、自分のサーバーを設定し、電子リーダーに毎日のニュースフィードを配信し、簡単にサービスを友達と共有できます。"
 
 #: application/templates/library.html:50 application/templates/my.html:61
 msgid "Search"
-msgstr ""
+msgstr "検索"
 
 #: application/templates/login.html:38 application/view/login.py:197
 #: application/view/login.py:204
 msgid ""
 "The website does not allow registration. You can ask the owner for an "
 "account."
-msgstr ""
+msgstr "このウェブサイトでは登録を許可していません。アカウントについてはオーナーに問い合わせてください。"
 
 #: application/templates/logs.html:11
 msgid "Only display last 20 logs"
-msgstr ""
+msgstr "最後の20件のログのみ表示"
 
 #: application/templates/logs.html:26 application/templates/logs.html:75
 msgid "Status"
-msgstr ""
+msgstr "状態"
 
 #: application/templates/logs.html:58
 msgid "Logs of other users"
-msgstr ""
+msgstr "他のユーザーのログ"
 
 #: application/templates/my.html:12 application/templates/settings.html:142
 msgid "Custom RSS"
-msgstr ""
+msgstr "カスタムRSS"
 
 #: application/templates/my.html:23
 msgid "Content Embedded"
-msgstr ""
+msgstr "コンテンツ埋め込み"
 
 #: application/templates/my.html:27
 msgid "Deliver Separately"
-msgstr ""
+msgstr "個別に配信"
 
 #: application/templates/my.html:46
 msgid "Subscribed"
-msgstr ""
+msgstr "購読済み"
 
 #: application/templates/my.html:51
 msgid "Library"
-msgstr ""
+msgstr "ライブラリ"
 
 #: application/templates/my.html:51
 msgid "get more recipes"
-msgstr ""
+msgstr "もっとrecipesを取得"
 
 #: application/templates/my.html:68
 msgid "Subscription to selected recipe successful."
-msgstr ""
+msgstr "選択したレシピの購読に成功しました。"
 
 #: application/templates/my.html:71
 msgid "Bookmarklet"
-msgstr ""
+msgstr "ブックマークレット"
 
 #: application/templates/my.html:75
 msgid "Send to Kindle"
-msgstr ""
+msgstr "Kindleに送信"
 
 #: application/templates/my.html:79
 msgid "Subscribe with KindleEar"
-msgstr ""
+msgstr "KindleEarで購読"
 
 #: application/templates/my.html:82
 msgid "Drag and drop this link to your bookmarks"
-msgstr ""
+msgstr "このリンクをブックマークにドラッグアンドドロップ"
 
 #: application/templates/my.html:86
 msgid "Chrome extension"
-msgstr ""
+msgstr "Chrome拡張機能"
 
 #: application/templates/my.html:87
 msgid "Edge extension"
-msgstr ""
+msgstr "Edge拡張機能"
 
 #: application/templates/my.html:89
 msgid "Browser extensions also available"
-msgstr ""
+msgstr "ブラウザ拡張機能も利用可能"
 
 #: application/templates/reader.html:57
 msgid "Push current book"
-msgstr ""
+msgstr "現在の本をプッシュ"
 
 #: application/templates/reader.html:63
 msgid "Push current article"
-msgstr ""
+msgstr "現在の記事をプッシュ"
 
 #: application/templates/reader.html:71
 msgid "Delete selected books"
-msgstr ""
+msgstr "選択した本を削除"
 
 #: application/templates/reader.html:77
 msgid "Allow click links"
-msgstr ""
+msgstr "リンクのクリックを許可"
 
 #: application/templates/reader.html:83
 msgid "Top-left dict mode"
-msgstr ""
+msgstr "左上辞書モード"
 
 #: application/templates/reader.html:89
 msgid "Dark mode"
-msgstr ""
+msgstr "ダークモード"
 
 #: application/templates/reader.html:95
 msgid "eInk mode"
-msgstr ""
+msgstr "eInkモード"
 
 #: application/templates/reader.html:101
 msgid "Increase font size"
-msgstr ""
+msgstr "フォントサイズを大きくする"
 
 #: application/templates/reader.html:107
 msgid "Decrease font size"
-msgstr ""
+msgstr "フォントサイズを小さくする"
 
 #: application/templates/reader.html:113
 msgid "Visualize Touch Regions"
-msgstr ""
+msgstr "タッチ領域を視覚化"
 
 #: application/templates/reader.html:119
 msgid "Help"
-msgstr ""
+msgstr "ヘルプ"
 
 #: application/templates/reader.html:125
 #: application/templates/reader_404.html:135
 msgid "Menu"
-msgstr ""
+msgstr "メニュー"
 
 #: application/templates/reader.html:139
 msgid "Collapse all"
-msgstr ""
+msgstr "すべて折りたたむ"
 
 #: application/templates/reader.html:144
 msgid "Expand all"
-msgstr ""
+msgstr "すべて展開"
 
 #: application/templates/reader.html:149
 #: application/templates/reader_404.html:140
 msgid "Prev"
-msgstr ""
+msgstr "前へ"
 
 #: application/templates/reader.html:154
 #: application/templates/reader_404.html:143
 msgid "Next page"
-msgstr ""
+msgstr "次のページ"
 
 #: application/templates/reader.html:192
 msgid "Pushed successfully."
-msgstr ""
+msgstr "正常にプッシュされました。"
 
 #: application/templates/reader.html:193
 msgid "There are currently no books or articles being read."
-msgstr ""
+msgstr "現在、読まれている本や記事はありません。"
 
 #: application/templates/reset_password.html:3
 #: application/templates/reset_password.html:41
 msgid "Reset password"
-msgstr ""
+msgstr "パスワードをリセット"
 
 #: application/templates/settings.html:14
-msgid "Your account will pause after {0}, please log in again before it expires."
-msgstr ""
+msgid ""
+"Your account will pause after {0}, please log in again before it expires."
+msgstr "{0}後にアカウントが一時停止されます。期限前に再ログインしてください。"
 
 #: application/templates/settings.html:23
 msgid "Base"
-msgstr ""
+msgstr "ベース"
 
 #: application/templates/settings.html:25
 msgid "Auto delivery"
-msgstr ""
+msgstr "自動配信"
 
 #: application/templates/settings.html:28
 msgid "Recipes and custom RSS"
-msgstr ""
+msgstr "RecipesとカスタムRSS"
 
 #: application/templates/settings.html:29
 msgid "Recipes only"
-msgstr ""
+msgstr "Recipesのみ"
 
 #: application/templates/settings.html:30
 msgid "Disable all"
-msgstr ""
+msgstr "すべて無効"
 
 #: application/templates/settings.html:34
 msgid "Kindle E-mail"
-msgstr ""
+msgstr "Kindle Eメール"
 
 #: application/templates/settings.html:35
 msgid "Seperated by comma"
-msgstr ""
+msgstr "カンマ区切り"
 
 #: application/templates/settings.html:39
 msgid "Delivery mode"
-msgstr ""
+msgstr "配信モード"
 
 #: application/templates/settings.html:42
 msgid "Email delivery & online reading"
-msgstr ""
+msgstr "メール配信＆オンライン読書"
 
 #: application/templates/settings.html:43
 msgid "Email delivery"
-msgstr ""
+msgstr "メール配信"
 
 #: application/templates/settings.html:44
 msgid "Online reading"
-msgstr ""
+msgstr "オンライン読書"
 
 #: application/templates/settings.html:48
 msgid "Retention days for online books"
-msgstr ""
+msgstr "オンライン書籍の保持日数"
 
 #: application/templates/settings.html:48
 msgid "Web shelf"
-msgstr ""
+msgstr "ウェブ棚"
 
 #: application/templates/settings.html:53
 #: application/templates/settings.html:165
 msgid "2 Days"
-msgstr ""
+msgstr "2日"
 
 #: application/templates/settings.html:54
 #: application/templates/settings.html:166
 msgid "3 Days"
-msgstr ""
+msgstr "3日"
 
 #: application/templates/settings.html:55
 #: application/templates/settings.html:167
 msgid "4 Days"
-msgstr ""
+msgstr "4日"
 
 #: application/templates/settings.html:56
 #: application/templates/settings.html:168
 msgid "5 Days"
-msgstr ""
+msgstr "5日"
 
 #: application/templates/settings.html:57
 #: application/templates/settings.html:169
 msgid "6 Days"
-msgstr ""
+msgstr "6日"
 
 #: application/templates/settings.html:64
 msgid "Time zone"
-msgstr ""
+msgstr "タイムゾーン"
 
 #: application/templates/settings.html:89
 msgid "Delivery time"
-msgstr ""
+msgstr "配信時間"
 
 #: application/templates/settings.html:97
 msgid "Book type"
-msgstr ""
+msgstr "書籍タイプ"
 
 #: application/templates/settings.html:104
 msgid "Determines final file size"
-msgstr ""
+msgstr "最終ファイルサイズを決定"
 
 #: application/templates/settings.html:104
 msgid "Device type"
-msgstr ""
+msgstr "デバイスタイプ"
 
 #: application/templates/settings.html:113
 msgid "Title format"
-msgstr ""
+msgstr "タイトル形式"
 
 #: application/templates/settings.html:116
 msgid "Title Only"
-msgstr ""
+msgstr "タイトルのみ"
 
 #: application/templates/settings.html:130
 msgid "Remove hyperlinks"
-msgstr ""
+msgstr "ハイパーリンクを削除"
 
 #: application/templates/settings.html:133
 msgid "Do not remove hyperlinks"
-msgstr ""
+msgstr "ハイパーリンクを削除しない"
 
 #: application/templates/settings.html:134
 msgid "Remove image links"
-msgstr ""
+msgstr "画像リンクを削除"
 
 #: application/templates/settings.html:135
 msgid "Remove text links"
-msgstr ""
+msgstr "テキストリンクを削除"
 
 #: application/templates/settings.html:136
 msgid "Remove all hyperlinks"
-msgstr ""
+msgstr "すべてのハイパーリンクを削除"
 
 #: application/templates/settings.html:148
 msgid "Sets the lookup dictionary"
-msgstr ""
+msgstr "検索辞書を設定"
 
 #: application/templates/settings.html:160
 msgid "Oldest article"
-msgstr ""
+msgstr "最古の記事"
 
 #: application/templates/settings.html:174
 msgid "Time format"
-msgstr ""
+msgstr "時間形式"
 
 #: application/templates/settings.html:187
 msgid "Author format"
-msgstr ""
+msgstr "著者形式"
 
 #: application/templates/settings.html:204
 msgid "Send Mail Service"
-msgstr ""
+msgstr "メール送信サービス"
 
 #: application/templates/settings.html:206
 msgid "Service"
-msgstr ""
+msgstr "サービス"
 
 #: application/templates/settings.html:214
 msgid "ApiKey"
-msgstr ""
+msgstr "ApiKey"
 
 #: application/templates/settings.html:218
 msgid "SecretKey"
-msgstr ""
+msgstr "SecretKey"
 
 #: application/templates/settings.html:226
 msgid "Port"
-msgstr ""
+msgstr "ポート"
 
 #: application/templates/settings.html:238
 msgid "Save path"
-msgstr ""
+msgstr "保存パス"
 
 #: application/templates/settings.html:246
 #, python-format
 msgid ""
-"Important: Please activate your kindle firstly, then goto %(personal)s "
-"Page and add %(sender)s to 'Approved Personal Document E-mail List'."
+"Important: Please activate your kindle firstly, then goto %(personal)s Page "
+"and add %(sender)s to 'Approved Personal Document E-mail List'."
 msgstr ""
+"重要: "
+"まずKindleを有効化してください。その後、%(personal)sページに移動し、%(sender)sを「承認された個人文書のEメールリスト」に追加してください。"
 
 #: application/templates/settings.html:246
 msgid "Personal Document Settings"
-msgstr ""
+msgstr "個人文書設定"
 
 #: application/templates/settings.html:252
 #, python-format
 msgid ""
-"You have not yet set up your email address. Please go to the %(admin)s "
-"page to add your email address firstly."
-msgstr ""
+"You have not yet set up your email address. Please go to the %(admin)s page "
+"to add your email address firstly."
+msgstr "まだメールアドレスを設定していません。まず、%(admin)sページに移動してメールアドレスを追加してください。"
 
 #: application/templates/settings.html:260
 msgid "Send Test Email"
-msgstr ""
+msgstr "テストメールを送信"
 
 #: application/templates/signup.html:38
 msgid "Invitation code"
-msgstr ""
+msgstr "招待コード"
 
 #: application/templates/user_account.html:3
 msgid "User account"
-msgstr ""
+msgstr "ユーザーアカウント"
 
 #: application/templates/user_account.html:42
 msgid "Never expire"
-msgstr ""
+msgstr "期限なし"
 
 #: application/templates/webmail.html:3
 msgid "Webmail"
-msgstr ""
+msgstr "ウェブメール"
 
 #: application/templates/webmail.html:17
 msgid "Refresh"
-msgstr ""
+msgstr "更新"
 
 #: application/templates/webmail.html:18
 msgid "Read/Unread"
-msgstr ""
+msgstr "既読/未読"
 
 #: application/templates/webmail.html:19
 msgid "Reply"
-msgstr ""
+msgstr "返信"
 
 #: application/templates/webmail.html:20
 msgid "Forward"
-msgstr ""
+msgstr "転送"
 
 #: application/templates/webmail.html:21
 msgid "Fwd as Attach"
-msgstr ""
+msgstr "添付ファイルとして転送"
 
 #: application/templates/word_lookup.html:71
 msgid "Word"
-msgstr ""
+msgstr "単語"
 
 #: application/view/admin.py:48 application/view/adv.py:437
 #: application/view/adv.py:510 application/view/settings.py:66
 #: application/view/translator.py:87 application/view/translator.py:171
 #: application/view/translator.py:253
 msgid "Settings Saved!"
-msgstr ""
+msgstr "設定が保存されました！"
 
 #: application/view/admin.py:57 application/view/admin.py:64
 #: application/view/admin.py:91
 msgid "Add account"
-msgstr ""
+msgstr "アカウントを追加"
 
 #: application/view/admin.py:63 application/view/admin.py:103
 #: application/view/admin.py:135
 msgid "You do not have sufficient privileges."
-msgstr ""
+msgstr "十分な権限がありません。"
 
 #: application/view/admin.py:79 application/view/login.py:44
 #: application/view/login.py:222
 msgid "The username includes unsafe chars."
-msgstr ""
+msgstr "ユーザー名に安全でない文字が含まれています。"
 
 #: application/view/admin.py:83 application/view/login.py:224
 msgid "Already exist the username."
-msgstr ""
+msgstr "そのユーザー名は既に存在します。"
 
 #: application/view/admin.py:88
 msgid "The password includes non-ascii chars."
-msgstr ""
+msgstr "パスワードに非ASCII文字が含まれています。"
 
 #: application/view/admin.py:107 application/view/admin.py:132
 #: application/view/admin.py:163 application/view/extension.py:32
 #: application/view/extension.py:61
 msgid "The username '{}' does not exist."
-msgstr ""
+msgstr "ユーザー名 '{}' は存在しません。"
 
 #: application/view/admin.py:123
 msgid "The password will not be changed if the fields are empties."
-msgstr ""
+msgstr "フィールドが空であれば、パスワードは変更されません。"
 
 #: application/view/admin.py:130 application/view/admin.py:184
 msgid "Change"
-msgstr ""
+msgstr "変更"
 
 #: application/view/admin.py:181
 msgid "Change success."
-msgstr ""
+msgstr "変更が成功しました。"
 
 #: application/view/admin.py:194
 msgid "The old password is wrong."
-msgstr ""
+msgstr "旧パスワードが間違っています。"
 
 #: application/view/admin.py:196
 msgid "Changes saved successfully."
-msgstr ""
+msgstr "変更が正常に保存されました。"
 
 #: application/view/adv.py:104 application/view/adv.py:105
 #: application/view/adv.py:106 application/view/adv.py:107
@@ -1751,504 +1763,504 @@ msgstr ""
 #: application/view/adv.py:110 application/view/adv.py:111
 #: application/view/adv.py:112 application/view/adv.py:113
 msgid "Append hyperlink '{}' to article"
-msgstr ""
+msgstr "記事にハイパーリンク '{}' を追加"
 
 #: application/view/adv.py:104 application/view/adv.py:105
 #: application/view/adv.py:106 application/view/adv.py:107
 #: application/view/adv.py:108
 msgid "Save to {}"
-msgstr ""
+msgstr "{} に保存"
 
 #: application/view/adv.py:104
 msgid "evernote"
-msgstr ""
+msgstr "evernote"
 
 #: application/view/adv.py:105
 msgid "wiz"
-msgstr ""
+msgstr "wiz"
 
 #: application/view/adv.py:106
 msgid "pocket"
-msgstr ""
+msgstr "pocket"
 
 #: application/view/adv.py:107
 msgid "instapaper"
-msgstr ""
+msgstr "instapaper"
 
 #: application/view/adv.py:108
 msgid "wallabag"
-msgstr ""
+msgstr "wallabag"
 
 #: application/view/adv.py:109 application/view/adv.py:110
 #: application/view/adv.py:111 application/view/adv.py:112
 msgid "Share on {}"
-msgstr ""
+msgstr "{} で共有"
 
 #: application/view/adv.py:109
 msgid "weibo"
-msgstr ""
+msgstr "微博"
 
 #: application/view/adv.py:110
 msgid "facebook"
-msgstr ""
+msgstr "facebook"
 
 #: application/view/adv.py:112
 msgid "tumblr"
-msgstr ""
+msgstr "tumblr"
 
 #: application/view/adv.py:113
 msgid "Open in browser"
-msgstr ""
+msgstr "ブラウザで開く"
 
 #: application/view/adv.py:114
 msgid "Append qrcode of url to article"
-msgstr ""
+msgstr "記事にURLのQRコードを追加"
 
 #: application/view/adv.py:381 application/view/share.py:54
 #: application/view/subscribe.py:250
 msgid "Unknown command: {}"
-msgstr ""
+msgstr "不明なコマンド: {}"
 
 #: application/view/adv.py:439 application/view/adv.py:512
 msgid "The format is invalid."
-msgstr ""
+msgstr "形式が無効です。"
 
 #: application/view/adv.py:544
 msgid "Authorization Error!<br/>{}"
-msgstr ""
+msgstr "認証エラー!<br/>{}"
 
 #: application/view/adv.py:565
 msgid "Success authorized by Pocket!"
-msgstr ""
+msgstr "Pocketによる認証に成功しました！"
 
 #: application/view/adv.py:571
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
-msgstr ""
+msgstr "Pocketの認証リクエストに失敗しました！<hr/>詳細は以下をご覧ください：<br/><br/>{}"
 
 #: application/view/adv.py:592
 msgid "The Instapaper service encountered an error. Please try again later."
-msgstr ""
+msgstr "Instapaperサービスでエラーが発生しました。後ほど再試行してください。"
 
 #: application/view/adv.py:605
 msgid "Request type [{}] unsupported"
-msgstr ""
+msgstr "リクエストタイプ [{}] はサポートされていません"
 
 #: application/view/deliver.py:82 application/view/login.py:169
 #: application/view/share.py:41
 msgid "The username does not exist or the email is empty."
-msgstr ""
+msgstr "ユーザー名が存在しないか、メールアドレスが空です。"
 
 #: application/view/deliver.py:109
 msgid "The following recipes has been added to the push queue."
-msgstr ""
+msgstr "次のレシピがプッシュキューに追加されました。"
 
 #: application/view/deliver.py:112
 msgid "There are no recipes to deliver."
-msgstr ""
+msgstr "配信するレシピはありません。"
 
 #: application/view/extension.py:69
 msgid "The rules parameter is invalid."
-msgstr ""
+msgstr "ルールのパラメータが無効です。"
 
 #: application/view/library.py:32
 msgid "Cannot fetch data from {}, status: {}"
-msgstr ""
+msgstr "{} からデータを取得できません、ステータス: {}"
 
 #: application/view/library.py:48 application/view/subscribe.py:238
 #: application/view/subscribe.py:380 application/view/subscribe.py:409
 #: application/view/subscribe.py:416 application/view/translator.py:30
 msgid "The recipe does not exist."
-msgstr ""
+msgstr "レシピは存在しません。"
 
 #: application/view/login.py:27 application/view/login.py:76
 msgid "Please use {}/{} to login at first time."
-msgstr ""
+msgstr "初回ログインには {}/{} を使用してください。"
 
 #: application/view/login.py:40
 msgid "Username is empty."
-msgstr ""
+msgstr "ユーザー名が空です。"
 
 #: application/view/login.py:42
 msgid "The len of username reached the limit of 25 chars."
-msgstr ""
+msgstr "ユーザー名の長さが25文字の制限に達しました。"
 
 #: application/view/login.py:80
 msgid "Forgot password?"
-msgstr ""
+msgstr "パスワードを忘れましたか？"
 
 #: application/view/login.py:148 application/view/login.py:275
 msgid "The token is wrong or expired."
-msgstr ""
+msgstr "トークンが間違っているか期限切れです。"
 
 #: application/view/login.py:151
 msgid "Please input the correct username and email to reset password."
-msgstr ""
+msgstr "パスワードをリセットするには、正しいユーザー名とメールアドレスを入力してください。"
 
 #: application/view/login.py:153
 msgid "The email of account '{name}' is {email}."
-msgstr ""
+msgstr "アカウント '{name}' のメールアドレスは {email} です。"
 
 #: application/view/login.py:174
 msgid "Reset password success, Please close this page and login again."
-msgstr ""
+msgstr "パスワードのリセットに成功しました。このページを閉じて、再度ログインしてください。"
 
 #: application/view/login.py:177
 msgid "The email you input is not associated with this account."
-msgstr ""
+msgstr "入力されたメールアドレスはこのアカウントに関連付けられていません。"
 
 #: application/view/login.py:186
 msgid "The link to reset your password has been sent to your email."
-msgstr ""
+msgstr "パスワードをリセットするためのリンクがメールで送信されました。"
 
 #: application/view/login.py:187
 msgid "Please check your email inbox within 24 hours."
-msgstr ""
+msgstr "24時間以内にメールボックスを確認してください。"
 
 #: application/view/login.py:218
 msgid "The invitation code is invalid."
-msgstr ""
+msgstr "招待コードは無効です。"
 
 #: application/view/login.py:226
 msgid ""
 "Failed to create an account. Please contact the administrator for "
 "assistance."
-msgstr ""
+msgstr "アカウントの作成に失敗しました。管理者にお問い合わせください。"
 
 #: application/view/login.py:236
 msgid "Successfully created account."
-msgstr ""
+msgstr "アカウントが正常に作成されました。"
 
 #: application/view/login.py:247
 msgid "Reset KindleEar password"
-msgstr ""
+msgstr "KindleEarのパスワードをリセット"
 
 #: application/view/login.py:248
 msgid "This is an automated email. Please do not reply to it."
-msgstr ""
+msgstr "これは自動送信されたメールです。返信しないでください。"
 
 #: application/view/login.py:249
 msgid "You can click the following link to reset your KindleEar password."
-msgstr ""
+msgstr "以下のリンクをクリックしてKindleEarのパスワードをリセットできます。"
 
 #: application/view/reader.py:88
 msgid "The article is missing?"
-msgstr ""
+msgstr "記事が見つかりませんか？"
 
 #: application/view/reader.py:190 application/view/translator.py:120
 #: application/view/translator.py:204 application/view/translator.py:286
 msgid "The text is empty."
-msgstr ""
+msgstr "テキストが空です。"
 
 #: application/view/reader.py:239
 msgid "No definitions found for '{}'."
-msgstr ""
+msgstr "'{}' の定義が見つかりません。"
 
 #: application/view/reader.py:240
 msgid "Did you mean?"
-msgstr ""
+msgstr "意味しましたか？"
 
 #: application/view/reader.py:324 application/view/reader.py:331
 msgid "Failed to push: {}"
-msgstr ""
+msgstr "プッシュに失敗しました: {}"
 
 #: application/view/reader.py:379
 msgid "Failed to create ebook."
-msgstr ""
+msgstr "電子書籍の作成に失敗しました。"
 
 #: application/view/settings.py:130
 msgid ""
-"You have not yet set up your email address. Please go to the 'Account' "
-"page to add your email address firstly."
-msgstr ""
+"You have not yet set up your email address. Please go to the 'Account' page "
+"to add your email address firstly."
+msgstr "まだメールアドレスを設定していません。まず「アカウント」ページに移動して、メールアドレスを追加してください。"
 
 #: application/view/settings.py:214
 msgid "English"
-msgstr ""
+msgstr "英語"
 
 #: application/view/settings.py:215
 msgid "Simplified Chinese"
-msgstr ""
+msgstr "简体中文"
 
 #: application/view/settings.py:216
 msgid "Traditional Chinese"
-msgstr ""
+msgstr "繁體中文"
 
 #: application/view/settings.py:217
 msgid "French"
-msgstr ""
+msgstr "フランス語"
 
 #: application/view/settings.py:218
 msgid "Spanish"
-msgstr ""
+msgstr "スペイン語"
 
 #: application/view/settings.py:219
 msgid "Portuguese"
-msgstr ""
+msgstr "ポルトガル語"
 
 #: application/view/settings.py:220
 msgid "German"
-msgstr ""
+msgstr "ドイツ語"
 
 #: application/view/settings.py:221
 msgid "Italian"
-msgstr ""
+msgstr "イタリア語"
 
 #: application/view/settings.py:222
 msgid "Japanese"
-msgstr ""
+msgstr "日本語"
 
 #: application/view/settings.py:223
 msgid "Russian"
-msgstr ""
+msgstr "ロシア語"
 
 #: application/view/settings.py:224
 msgid "Turkish"
-msgstr ""
+msgstr "トルコ語"
 
 #: application/view/settings.py:225
 msgid "Korean"
-msgstr ""
+msgstr "韓国語"
 
 #: application/view/settings.py:226
 msgid "Arabic"
-msgstr ""
+msgstr "アラビア語"
 
 #: application/view/settings.py:227
 msgid "Czech"
-msgstr ""
+msgstr "チェコ語"
 
 #: application/view/settings.py:228
 msgid "Dutch"
-msgstr ""
+msgstr "オランダ語"
 
 #: application/view/settings.py:229
 msgid "Greek"
-msgstr ""
+msgstr "ギリシャ語"
 
 #: application/view/settings.py:230
 msgid "Hindi"
-msgstr ""
+msgstr "ヒンディー語"
 
 #: application/view/settings.py:231
 msgid "Malaysian"
-msgstr ""
+msgstr "マレー語"
 
 #: application/view/settings.py:232
 msgid "Bengali"
-msgstr ""
+msgstr "ベンガル語"
 
 #: application/view/settings.py:233
 msgid "Persian"
-msgstr ""
+msgstr "ペルシャ語"
 
 #: application/view/settings.py:234
 msgid "Urdu"
-msgstr ""
+msgstr "ウルドゥー語"
 
 #: application/view/settings.py:235
 msgid "Swahili"
-msgstr ""
+msgstr "スワヒリ語"
 
 #: application/view/settings.py:236
 msgid "Vietnamese"
-msgstr ""
+msgstr "ベトナム語"
 
 #: application/view/settings.py:237
 msgid "Punjabi"
-msgstr ""
+msgstr "パンジャビ語"
 
 #: application/view/settings.py:238
 msgid "Javanese"
-msgstr ""
+msgstr "ジャワ語"
 
 #: application/view/settings.py:239
 msgid "Tagalog"
-msgstr ""
+msgstr "タガログ語"
 
 #: application/view/settings.py:240
 msgid "Hausa"
-msgstr ""
+msgstr "ハウサ語"
 
 #: application/view/settings.py:241
 msgid "Thai"
-msgstr ""
+msgstr "タイ語"
 
 #: application/view/settings.py:242
 msgid "Polish"
-msgstr ""
+msgstr "ポーランド語"
 
 #: application/view/settings.py:243
 msgid "Romanian"
-msgstr ""
+msgstr "ルーマニア語"
 
 #: application/view/settings.py:244
 msgid "Hungarian"
-msgstr ""
+msgstr "ハンガリー語"
 
 #: application/view/settings.py:245
 msgid "Swedish"
-msgstr ""
+msgstr "スウェーデン語"
 
 #: application/view/settings.py:246
 msgid "Hebrew"
-msgstr ""
+msgstr "ヘブライ語"
 
 #: application/view/settings.py:247
 msgid "Norwegian"
-msgstr ""
+msgstr "ノルウェー語"
 
 #: application/view/settings.py:248
 msgid "Finnish"
-msgstr ""
+msgstr "フィンランド語"
 
 #: application/view/settings.py:249
 msgid "Danish"
-msgstr ""
+msgstr "デンマーク語"
 
 #: application/view/settings.py:250
 msgid "Ukrainian"
-msgstr ""
+msgstr "ウクライナ語"
 
 #: application/view/settings.py:251
 msgid "Tamil"
-msgstr ""
+msgstr "タミル語"
 
 #: application/view/settings.py:252
 msgid "Marathi"
-msgstr ""
+msgstr "マラーティー語"
 
 #: application/view/settings.py:253
 msgid "Burmese"
-msgstr ""
+msgstr "ビルマ語"
 
 #: application/view/settings.py:254
 msgid "Amharic"
-msgstr ""
+msgstr "アムハラ語"
 
 #: application/view/settings.py:255
 msgid "Azerbaijani"
-msgstr ""
+msgstr "アゼルバイジャン語"
 
 #: application/view/settings.py:256
 msgid "Kazakh"
-msgstr ""
+msgstr "カザフ語"
 
 #: application/view/settings.py:257
 msgid "Serbian"
-msgstr ""
+msgstr "セルビア語"
 
 #: application/view/settings.py:258
 msgid "Croatian"
-msgstr ""
+msgstr "Hrvatski"
 
 #: application/view/settings.py:259
 msgid "Slovak"
-msgstr ""
+msgstr "Slovenčina"
 
 #: application/view/settings.py:260
 msgid "Bulgarian"
-msgstr ""
+msgstr "Български"
 
 #: application/view/settings.py:261
 msgid "Icelandic"
-msgstr ""
+msgstr "Íslenska"
 
 #: application/view/settings.py:262
 msgid "Lithuanian"
-msgstr ""
+msgstr "Lietuvių"
 
 #: application/view/settings.py:263
 msgid "Latvian"
-msgstr ""
+msgstr "Latviešu"
 
 #: application/view/settings.py:264
 msgid "Estonian"
-msgstr ""
+msgstr "Eesti"
 
 #: application/view/settings.py:265
 msgid "Macedonian"
-msgstr ""
+msgstr "Македонски"
 
 #: application/view/settings.py:266
 msgid "Albanian"
-msgstr ""
+msgstr "Shqip"
 
 #: application/view/settings.py:267
 msgid "Galician"
-msgstr ""
+msgstr "Galego"
 
 #: application/view/settings.py:268
 msgid "Welsh"
-msgstr ""
+msgstr "Cymraeg"
 
 #: application/view/settings.py:269
 msgid "Basque"
-msgstr ""
+msgstr "Euskara"
 
 #: application/view/settings.py:270
 msgid "Nepali"
-msgstr ""
+msgstr "नेपाली"
 
 #: application/view/share.py:60
 msgid "There is no {} email yet."
-msgstr ""
+msgstr "{}のメールアドレスはまだ存在しません。"
 
 #: application/view/share.py:108 application/view/share.py:133
 #: application/view/share.py:155 application/view/share.py:177
 msgid "Saved to your {} account."
-msgstr ""
+msgstr "{}アカウントに保存されました。"
 
 #: application/view/share.py:111 application/view/share.py:129
 #: application/view/share.py:158 application/view/share.py:179
 msgid "Failed save to {}."
-msgstr ""
+msgstr "{}への保存に失敗しました。"
 
 #: application/view/share.py:112 application/view/share.py:130
 #: application/view/share.py:159 application/view/share.py:180
 msgid "Reason :"
-msgstr ""
+msgstr "理由："
 
 #: application/view/share.py:121
 msgid "Unauthorized {} account!"
-msgstr ""
+msgstr "{}アカウントは認証されていません！"
 
 #: application/view/share.py:134
 msgid "See details below:"
-msgstr ""
+msgstr "詳細は以下をご覧ください："
 
 #: application/view/share.py:157
 msgid "Unknown: {}"
-msgstr ""
+msgstr "不明: {}"
 
 #: application/view/subscribe.py:81 application/view/subscribe.py:167
 msgid "Duplicated subscription!"
-msgstr ""
+msgstr "重複したサブスクリプション！"
 
 #: application/view/subscribe.py:126
 msgid "The Title or Url is empty."
-msgstr ""
+msgstr "タイトルまたはURLが空です。"
 
 #: application/view/subscribe.py:139
 msgid "Failed to fetch the recipe."
-msgstr ""
+msgstr "レシピの取得に失敗しました。"
 
 #: application/view/subscribe.py:153 application/view/subscribe.py:331
 msgid "Failed to save the recipe. Error:"
-msgstr ""
+msgstr "レシピの保存に失敗しました。エラー："
 
 #: application/view/subscribe.py:195
 msgid "The Rss does not exist."
-msgstr ""
+msgstr "RSSは存在しません。"
 
 #: application/view/subscribe.py:278
 msgid "You can only delete the uploaded recipe."
-msgstr ""
+msgstr "アップロードされたレシピのみ削除できます。"
 
 #: application/view/subscribe.py:283
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
-msgstr ""
+msgstr "このレシピはすでにサブスクライブされています。削除する前に解除してください。"
 
 #: application/view/subscribe.py:304 application/view/translator.py:51
 #: application/view/translator.py:103 application/view/translator.py:116
@@ -2256,35 +2268,34 @@ msgstr ""
 #: application/view/translator.py:200 application/view/translator.py:229
 #: application/view/translator.py:269 application/view/translator.py:282
 msgid "This recipe has not been subscribed to yet."
-msgstr ""
+msgstr "このレシピはまだサブスクライブされていません。"
 
 #: application/view/subscribe.py:318
 msgid "Can not read uploaded file, Error:"
-msgstr ""
+msgstr "アップロードされたファイルを読み取れません。エラー："
 
 #: application/view/subscribe.py:326
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
-msgstr ""
+msgstr "レシピのデコードに失敗しました。レシピがUTF-8エンコーディングで保存されていることを確認してください。"
 
 #: application/view/subscribe.py:349
 msgid "Cannot find any subclass of BasicNewsRecipe."
-msgstr ""
+msgstr "BasicNewsRecipeのサブクラスが見つかりません。"
 
 #: application/view/subscribe.py:354
 msgid "The recipe is already in the library."
-msgstr ""
+msgstr "このレシピはすでにライブラリにあります。"
 
 #: application/view/subscribe.py:387
 msgid "The login information for this recipe has been cleared."
-msgstr ""
+msgstr "このレシピのログイン情報は削除されました。"
 
 #: application/view/subscribe.py:391
 msgid "The login information for this recipe has been saved."
-msgstr ""
+msgstr "このレシピのログイン情報は保存されました。"
 
 #: application/view/translator.py:81 application/view/translator.py:164
 msgid "The api key is required."
-msgstr ""
-
+msgstr "APIキーが必要です。"

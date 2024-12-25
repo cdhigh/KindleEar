@@ -7,13 +7,13 @@ import simple_ai_provider
 from application.ke_utils import loc_exc_pos
 
 def get_summarizer_engines():
-    return simple_ai_provider._PROV_AI_LIST
+    return simple_ai_provider.AI_LIST
 
 class HtmlSummarizer:
     def __init__(self, params: dict):
         self.params = params
         name = self.params.get('engine')
-        if name not in simple_ai_provider._PROV_AI_LIST:
+        if name not in simple_ai_provider.AI_LIST:
             default_log.warning(f'Unsupported provider {name}, fallback to gemini')
             name = 'gemini'
         self.aiAgent = self.create_engine(name, params)
@@ -21,7 +21,7 @@ class HtmlSummarizer:
     #创建一个AI封装实例
     def create_engine(self, name, params):
         return simple_ai_provider.SimpleAiProvider(name, params.get('api_key', ''), 
-            model=params.get('model', ''), api_host=params.get('api_host', ''))
+            model=params.get('model', ''), apiHost=params.get('api_host', ''))
 
     #给一段文字做摘要，记住不要太长
     #返回 {'error': '', 'summary': ''}

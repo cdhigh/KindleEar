@@ -134,6 +134,20 @@ button {
     padding: 1em .5em;
 }
 
+/* 语言选择框 */
+.home-menu .language-select {
+    border: none;
+    background: none;
+    outline: none;
+    padding: 5px;
+    font-size: 0.6em;
+    color: #333;
+    text-align: center;
+}
+.home-menu .language-select:focus {
+    outline: none;
+}
+
 .app-menu {
     background-color: #0078e7;
 }

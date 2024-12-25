@@ -94,6 +94,16 @@ function MakeAjaxRequest(url, method, data, callback) {
   });
 }
 
+///[start] base.html
+//选择其他语种进行页面显示
+function handleLanguageChange() {
+  const lang = $('#languageSelect').val();
+  MakeAjaxRequest(`/setlocale`, "POST", {'lang': lang}, function (resp) {
+    location.reload(); //刷新页面
+  });
+}
+///[end] base.html
+
 ///[start] my.html
 var show_menu_box = false;
 
@@ -1620,7 +1630,7 @@ function PopulateSummarizerFields(currEngineName) {
 function SummarizerEngineFieldChanged(model) {
   let hasSelected = false;
   var engineName = $('#summarizer_engine').val();
-  var models = g_ai_engines[engineName] || [];
+  var models = g_ai_engines[engineName].models || [];
   
   let modelSel = $('#summarizer_model');
   modelSel.empty();

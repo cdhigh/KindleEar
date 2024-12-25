@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-#设置页面
+#设置页面，页面显示语言的设置逻辑也在这里
 #Author: cdhigh <https://github.com/cdhigh>
 import os, textwrap
 from urllib.parse import urlparse
@@ -15,9 +15,9 @@ from .subscribe import UpdateBookedCustomRss
 
 bpSettings = Blueprint('bpSettings', __name__)
 
-supported_languages = ['zh', 'tr_TR', 'en']
+SUPPORTED_LANGUAGES = ['en', 'zh', 'de', 'es', 'fr', 'it', 'ja', 'ko', 'pt', 'ru', 'tr']
 
-all_timezones = {'UTC-12:00': -12, 'UTC-11:00': -11, 'UTC-10:00': -10, 'UTC-9:30': -9.5,
+ALL_TIMEZONES = {'UTC-12:00': -12, 'UTC-11:00': -11, 'UTC-10:00': -10, 'UTC-9:30': -9.5,
     'UTC-9:00': -9, 'UTC-8:00': -8, 'UTC-7:00': -7, 'UTC-6:00': -6, 'UTC-5:00': -5,
     'UTC-4:00': -4, 'UTC-3:30': -3.5, 'UTC-3:00': -3, 'UTC-2:00': -2, 'UTC-1:00': -1,
     'UTC': 0, 'UTC+1:00': 1, 'UTC+2:00': 2, 'UTC+3:00': 3, 'UTC+3:30': 3.5,
@@ -31,7 +31,7 @@ all_timezones = {'UTC-12:00': -12, 'UTC-11:00': -11, 'UTC-10:00': -10, 'UTC-9:30
 def Settings(user: KeUser):
     sm_services = avaliable_sm_services()
     return render_template('settings.html', tab='set', user=user, tips='', langMap=LangMap(), 
-        sm_services=sm_services, all_timezones=all_timezones, output_profiles=output_profiles)
+        sm_services=sm_services, all_timezones=ALL_TIMEZONES, output_profiles=output_profiles)
 
 @bpSettings.post("/settings", endpoint='SettingsPost')
 @login_required()
@@ -70,7 +70,7 @@ def SettingsPost(user: KeUser):
     
     sm_services = avaliable_sm_services()
     return render_template('settings.html', tab='set', user=user, tips=tips, langMap=LangMap(), 
-        sm_services=sm_services, all_timezones=all_timezones, output_profiles=output_profiles)
+        sm_services=sm_services, all_timezones=ALL_TIMEZONES, output_profiles=output_profiles)
 
 #构建发送邮件服务配置字典，返回空字典表示出错
 #form: request.form 实例
@@ -127,7 +127,7 @@ def SendTestEmailPost(user: KeUser):
         except Exception as e:
             status = str(e)
     else:
-        status = _("You have not yet set up your email address. Please go to the 'Admin' page to add your email address firstly.")
+        status = _("You have not yet set up your email address. Please go to the 'Account' page to add your email address firstly.")
 
     return {'status': status, 'emails': emails}
 
@@ -183,31 +183,37 @@ def DisplayEnv(user: KeUser):
     strEnv.append("<pre><p>" + 'appDir'.rjust(28) + " | " + appDir + "</p></pre>")
     return ''.join(strEnv)
 
-#设置国际化语种
-@bpSettings.route("/setlocale/<langCode>")
-def SetLang(langCode):
-    global supported_languages
-    if langCode not in supported_languages:
+#设置国际化语种，这个函数不管是否登录都可以执行
+@bpSettings.route("/setlocale", methods=['GET', 'POST'])
+def SetLang():
+    form = request.args if request.method == 'GET' else request.form
+    langCode = form.get('lang', 'en')
+    if langCode not in SUPPORTED_LANGUAGES:
         langCode = "en"
     session['langCode'] = langCode
-    url = request.args.get('next', '/').replace('\\', '')
-    parts = urlparse(url)
-    if parts.netloc or parts.scheme:
-        url = '/'
-    return redirect(url)
+    if request.method == 'GET': #GET访问则重定向，让客户端刷新
+        url = form.get('next', '/').replace('\\', '')
+        parts = urlparse(url)
+        if parts.netloc or parts.scheme:
+            url = '/'
+        return redirect(url)
+    else: #POST访问则返回json
+        return {'status': 'ok', 'lang': langCode}
     
 #Babel选择显示哪种语言的回调函数
 def get_locale():
     try:
-        langCode = session.get('langCode') or request.accept_languages.best_match(supported_languages)
+        langCode = session.get('langCode') or request.accept_languages.best_match(SUPPORTED_LANGUAGES)
     except: #Working outside of request context
         langCode = 'en'
     return langCode or 'en'
 
 #各种语言的语种代码和文字描述的对应关系
 def LangMap():
-    return {"en-us": _("English"),
-        "zh-cn": _("Chinese"),
+    return {
+        "en-us": _("English"),
+        "zh-cn": _("Simplified Chinese"),
+        "zh-tw": _("Traditional Chinese"),
         "fr-fr": _("French"),
         "es-es": _("Spanish"),
         "pt-br": _("Portuguese"),
@@ -247,4 +253,18 @@ def LangMap():
         "my": _("Burmese"),
         "am": _("Amharic"),
         "az": _("Azerbaijani"),
-        "kk": _("Kazakh"),}
+        "kk": _("Kazakh"),
+        "sr": _("Serbian"),
+        "hr": _("Croatian"),
+        "sk": _("Slovak"),
+        "bg": _("Bulgarian"),
+        "is": _("Icelandic"),
+        "lt": _("Lithuanian"),
+        "lv": _("Latvian"),
+        "et": _("Estonian"),
+        "mk": _("Macedonian"),
+        "sq": _("Albanian"),
+        "gl": _("Galician"),
+        "cy": _("Welsh"),
+        "eu": _("Basque"),
+        "ne": _("Nepali"),}
