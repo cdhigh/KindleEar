@@ -347,7 +347,7 @@ function clickEvent(event) {
   } else if ((x < ww / 5) && (y < wh * 0.7)) { //左侧往回翻页 (宽20%,高50%)
     pageUp(content, navbar);
   } else { //右侧往前翻页
-    pageDown(content, navbar);
+    pageDown(content, navbar, event.ctrlKey || event.metaKey);
   }
 }
 
@@ -359,7 +359,7 @@ function pageUp(content, navbar) {
     navbar.style.display = 'none';
   } else if (g_inkMode) {
     var scrollTop = content.scrollTop;
-    if (scrollTop <= 0) {
+    if (scrollTop <= 1) {
       openPrevArticle();
     } else {
       content.scrollTop = Math.max(0, scrollTop - content.clientHeight + 40);
@@ -373,17 +373,32 @@ function eventPreventDefault(event) {
 }
 
 //往下翻页
-function pageDown(content, navbar) {
+//所有参数都是可选的
+function pageDown(content, navbar, ctrlKey) {
   content = content || document.getElementById('content');
   navbar = navbar || document.getElementById('navbar');
   if (isMobile() && (navbar.style.display == "block")) {
     navbar.style.display = 'none';
   } else if (g_inkMode) {
+    var iframe = document.getElementById('iframe');
+    var iframeHeight = parseInt(iframe.style.height);
     var scrollTop = content.scrollTop;
     var scrollHeight = g_iframeScrollHeight || content.scrollHeight;
-    if (scrollTop >= scrollHeight - content.clientHeight) {
-      openNextArticle();
-    } else {
+    //alert(scrollTop >= scrollHeight - content.clientHeight);
+    //已经到页末, -2是考虑浮点误差，其实-1就可以
+    if (scrollTop >= scrollHeight - content.clientHeight - 2) {
+      //规避chrome的iframe高度计算不准的bug，使用Ctrl+Click手动扩展iframe高度
+      if (ctrlKey && iframeHeight) {
+        var newHeight = iframeHeight + 200; //每次增长200px
+        iframe.style.height = newHeight + 'px';
+        g_iframeScrollHeight = newHeight;
+        content.scrollTop = newHeight;
+      } else {
+        openNextArticle();
+      }
+    } else if (ctrlKey) { //跳到页末
+      content.scrollTop = scrollHeight;
+    } else { //翻页
       content.scrollTop = Math.min(scrollTop + content.clientHeight - 40, scrollHeight);
     }
   }

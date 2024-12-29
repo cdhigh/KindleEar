@@ -1,0 +1,21 @@
+FROM python:3.9.19-alpine
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+USER root
+RUN mkdir -p /usr/kindleear /data
+WORKDIR /usr/kindleear
+COPY ./tools/update_req.py ./tools/update_req.py
+COPY ./main.py ./config.py ./docker/gunicorn.conf.py ./
+COPY ./tools/mp3cat/mp3cat /usr/local/bin/mp3cat
+COPY ./docker/run_docker.sh /usr/local/bin/run_docker.sh
+RUN python /usr/kindleear/tools/update_req.py docker $TARGETPLATFORM && \
+    pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    chmod +x /usr/local/bin/mp3cat /usr/local/bin/run_docker.sh
+
+COPY ./application/ ./application/
+
+EXPOSE 8000
+
+CMD ["/usr/local/bin/run_docker.sh"]

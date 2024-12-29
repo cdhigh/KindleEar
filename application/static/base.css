@@ -201,10 +201,10 @@ button {
 
 .banner {
     padding: 6em 0;
-    background: #262626 url('banner-bg.png') center center no-repeat fixed;
+    background: #262626 url('/static/banner-bg.png') center center no-repeat fixed;
     text-align: center;
     background-size: cover;
-    filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='banner-bg.png', sizingMethod='scale');
+    filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/static/banner-bg.png', sizingMethod='scale');
     width: 100%;
     display: table;
 }

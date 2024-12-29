@@ -77,3 +77,8 @@ As for where to download Hunspell/MySpell morphology files, you can search on we
 After entering the dictionary lookup mode, a dictionary indicator will appear in the top-left corner of the page. Click on the word you want to look up, and the lookup mode will automatically exit after the lookup.   
 
 3. Click anywhere inside the pop-up dictionary box to close it.   
+
+
+## Known Bugs  
+1. Incomplete content display for some articles in Chrome  
+This issue is caused by incorrect iframe height calculation in the Chrome web engine. Currently, there is no optimal solution. If you encounter this situation, you can manually extend the height of the reading page by using **Ctrl+Click**, which increases the height by 200 pixels with each click, allowing more content to be displayed.   

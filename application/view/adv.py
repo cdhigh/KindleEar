@@ -442,7 +442,7 @@ def AdvProxyPost(user: KeUser):
 #测试代理是否正常
 #这个函数很强大，简单的利用都可以用来临时翻墙了
 #登录状态只需要 url 一个参数，否则需要 url, username, key, enc(可选)
-@bpAdv.route("/fwd", methods=['GET', 'POST'])
+@bpAdv.route("/fwd", methods=['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'])
 def AdvFwdRoute():
     #要不是正在登录状态，要不就传递用户名和分享密码
     user = get_login_user()
@@ -465,20 +465,38 @@ def AdvFwdRoute():
         url = ke_decrypt(url, user.cfg('secret_key'))
 
     UrlOpener.set_proxy(user.cfg('proxy'))
+    opener = UrlOpener(timeout=(5, 30)) #(connect time, read time)
     url = unquote(url) if '%' in url else url
     if not url.startswith('http'):
         url = 'https://' + url
     inHeaders = {k: v for k, v in request.headers if k != 'Host'}
+    inHeaders['Connection'] = 'close' #禁止长连接
     try:
         if request.method == 'GET':
-            resp = UrlOpener().get(url, headers=inHeaders)
-        else:
-            resp = UrlOpener().post(url, data=request.data, headers=inHeaders)
+            resp = opener.get(url, headers=inHeaders, stream=True)
+        elif request.method == 'POST':
+            resp = opener.post(url, data=request.data, headers=inHeaders, stream=True)
+        elif request.method == 'PUT':
+            resp = opener.put(url, data=request.data, headers=inHeaders, stream=True)
+        elif request.method == 'DELETE':
+            resp = opener.delete(url, headers=inHeaders, stream=True)
+        elif request.method == 'OPTIONS': # 如果是 OPTIONS 请求，返回服务器支持的方法
+            return Response(status=200, headers={'Allow': 'GET, POST, PUT, DELETE, OPTIONS'})
+        #print(f'Fetched: {len(resp.content)}') #TODO
         headers = dict(resp.headers)
-        headers.pop('Transfer-Encoding', None) #服务器处理分块的头标识
-        headers.pop('Content-Encoding', None) #服务器压缩数据的头标识，requests已经解压了
-        return Response(resp.content, status=resp.status_code, headers=headers)
+
+        #如果使用.content返回，需要去掉Content-Encoding
+        #使用.raw.read()返回原始二进制则需要保留Content-Encoding让客户端解压
+        for item in ['Transfer-Encoding', 'Content-Security-Policy', 'Content-Security-Policy-Report-Only']: #'Content-Encoding'
+            headers.pop(item, None)
+            headers.pop(item.lower(), None)
+        
+        headers['Access-Control-Allow-Origin'] = '*'
+        headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return Response(resp.raw.read(), status=resp.status_code, headers=headers)
     except Exception as e:
+        print(f'Unexpected error: {str(e)}') #TODO
         return f"Unexpected error: {str(e)}", 500
     
 #设置calibre的参数
