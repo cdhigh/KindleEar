@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # encoding: UTF-8
 #使用SMTP发送邮件
-
-import smtplib, json
+#Author: cdhigh <https://github.com/cdhigh>
+import smtplib
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.encoders import encode_base64
@@ -11,12 +11,12 @@ from email.mime.multipart import MIMEMultipart
 def smtp_send_mail(sender, to, subject, body, host, username, password, port=None, 
     html=None, attachments=None, encoding='utf-8'):
     if ':' in host:
-        host, port = host.split(':', 2)
+        host, port = host.split(':', 1)
         port = int(port)
     elif not port:
         port = 587 #587-TLS, 465-SSL, 25-Nocrpt
     
-    to = to if isinstance(to, list) else [to]
+    to = [to] if isinstance(to, str) else to
     message = MIMEMultipart('alternative') if html else MIMEMultipart()
     message['Subject'] = subject
     message['From'] = sender
@@ -32,9 +32,9 @@ def smtp_send_mail(sender, to, subject, body, host, username, password, port=Non
         encode_base64(part)
         message.attach(part)
 
-    klass = smtplib.SMTP if port != 465 else smtplib.SMTP_SSL
+    klass = smtplib.SMTP_SSL if port == 465 else smtplib.SMTP
     with klass(host=host, port=port) as server:
-        server.set_debuglevel(0) #0-no debug info, 1-base, 2- verbose
+        #server.set_debuglevel(0) #0-no debug info, 1-base, 2- verbose
         server.connect(host, port)
         server.ehlo()
         if port == 587:

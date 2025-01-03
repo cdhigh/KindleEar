@@ -384,7 +384,7 @@ function pageDown(content, navbar, ctrlKey) {
     var iframeHeight = parseInt(iframe.style.height);
     var scrollTop = content.scrollTop;
     var scrollHeight = g_iframeScrollHeight || content.scrollHeight;
-    //alert(scrollTop >= scrollHeight - content.clientHeight);
+    
     //已经到页末, -2是考虑浮点误差，其实-1就可以
     if (scrollTop >= scrollHeight - content.clientHeight - 2) {
       //规避chrome的iframe高度计算不准的bug，使用Ctrl+Click手动扩展iframe高度
@@ -407,7 +407,7 @@ function pageDown(content, navbar, ctrlKey) {
 //iframe发送过来的消息，配合reader-inject.js使用，初始版本使用，现已废弃
 //初始版本的方案是在iframe中注入脚本，和主页面互发消息，可以跨域使用，但是增加了复杂性
 //现在版本直接操纵iframe页面，python代码和js代码都更简单，但是不能跨域
-function iFrameEvent(event) {
+function iFrameEvent_Deprecated(event) {
   var data = event.data;
   //console.log('iFrameEvent: ' + JSON.stringify(data));
   g_iframeScrollHeight = data.scrollHeight;
@@ -1038,6 +1038,20 @@ function iframeLoadEvent(evt) {
   var iframe = document.getElementById('iframe');
   adjustIFrameStyle(iframe);
   var doc = iframe.contentDocument || iframe.contentWindow.document;
+  // 监听内容变化
+  if (window.MutationObserver) {
+    var observer = new MutationObserver(function(mutations) {
+      recalculateHeight(iframe, doc);
+    });
+    
+    observer.observe(doc.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      characterData: true
+    });
+  }
+
   doc.addEventListener('click', function(event) {
     //处理链接的点击事件
     var target = event.target || event.srcElement;
@@ -1070,7 +1084,9 @@ function iframeLoadEvent(evt) {
   });
 
   //只有PC有键盘快捷键
-  doc.addEventListener('keydown', documentKeyDownEvent);
+  if (!isMobile()) {
+    doc.addEventListener('keydown', documentKeyDownEvent);
+  }
 }
 
 //每次iframe加载完成后调整其样式和容器高度
@@ -1081,10 +1097,12 @@ function adjustIFrameStyle(iframe) {
   iframe.style.display = "block";
   //添加一个元素规避chrome对iframe高度计算不准确的问题
   if (!isMobile()) {
-    iframe.style.height = '10000px';
-    var newDiv = doc.createElement('div');
-    newDiv.innerHTML = '<br/><p>■ END</p><br/><br/>';
-    body.appendChild(newDiv);
+    iframe.style.height = '999999px';
+    var spacer = doc.createElement('div');
+    spacer.id = 'ke-height-spacer';
+    spacer.innerHTML = '<div style="clear:both;"></div><br/><p>■ END</p><br/><br/>';
+    body.appendChild(spacer);
+    body.offsetHeight; //强制重排
   }
   iframe.style.height = 'auto';
 
@@ -1117,14 +1135,48 @@ function adjustIFrameStyle(iframe) {
 
   var images = doc.querySelectorAll('img');
   for (var i = 0; i < images.length; i++) {
-    images[i].style.maxWidth = '100%';
-    images[i].style.height = 'auto';
+    var img = images[i];
+    img.style.maxWidth = '100%';
+    img.style.height = 'auto';
+    // 添加图片加载完成后重新计算高度
+    if (!img.complete) {
+      img.addEventListener('load', function() {
+        recalculateHeight(iframe, doc);
+      });
+    }
   }
 
-  var vh = getViewportHeight();
+  recalculateHeight(iframe, doc);
+}
+
+//计算iframe最终高度
+function recalculateHeight(iframe, doc) {
+  var body = doc.body;
   var html = doc.documentElement;
-  var height = Math.max(body.scrollHeight, body.clientHeight, body.offsetHeight,
-        html.scrollHeight, html.clientHeight, html.offsetHeight, vh) + 40;
+  var vh = getViewportHeight();
+  
+  // 获取所有内容元素的高度
+  //var allElements = body.getElementsByTagName('*');
+  //var maxHeight = 0;
+  //for (var i = 0; i < allElements.length; i++) {
+  //  var elem = allElements[i];
+  //  var bottom = elem.offsetTop + elem.offsetHeight;
+  //  maxHeight = Math.max(maxHeight, bottom);
+  //}
+
+  // 获取spacer元素的位置
+  var spacer = doc.getElementById('ke-height-spacer');
+  var spacerBottom = spacer ? (spacer.offsetTop + spacer.offsetHeight) : 0;
+  
+  var height = Math.max(
+    spacerBottom,
+    body.scrollHeight,
+    body.offsetHeight,
+    html.scrollHeight,
+    html.offsetHeight,
+    vh
+  );
+  height += 40;
   iframe.style.height = height + 'px';
   g_iframeScrollHeight = height;
 }
@@ -1168,6 +1220,6 @@ document.addEventListener('DOMContentLoaded', function() {
   iframe.addEventListener('load', iframeLoadEvent);
   populateBooks(1);
   iframe.style.display = "none"; //加载完成后再显示
-  //iframe.src = iframe.src; //强制刷新一次，避免偶尔出现不能点击的情况
+  iframe.src = iframe.src; //强制刷新一次，避免偶尔出现不能点击的情况
   setDarkModeStyle();
 });

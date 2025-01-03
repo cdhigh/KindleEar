@@ -56,14 +56,23 @@ docker buildx rm xname
 # 关于i18n翻译
 * javascript的翻译没有采用其他复杂或引入其他依赖的方案，而是简单粗暴的在base.html里面将要翻译的字段预先翻译，
 然后保存到一个全局字典对象。
-* 文本字符串有修改后，逐个执行两个脚本。
-第一个脚本提取文本到messages.pot并将文本更新到messages.po，翻译后使用第二个脚本编译为messages.mo
+* 文本字符串有修改后，逐个执行几个脚本。
+第一个脚本提取文本到messages.pot并将文本更新到messages.po；
+手工翻译中文后，执行第二个python脚本，调用AI自动翻译其他语言的po文件；
+翻译后使用第三个脚本将po文件编译为mo文件；
 ```bat
 tools\pybabel_extract.bat
+tools\pybabel_auto_translate.py
 tools\pybabel_compile.bat
 ```
 * 翻译空白字符条目 msgstr ""
 * 在po后查找fuzzy，更新翻译后，将fuzzy标识行删除
+
+
+# Cmder执行run_flask.bat调试环境快捷方式    
+```
+C:\Windows\Cmder\Cmder.exe /x "/cmd D:\Programer\Project\KindleEar\tools\run_flask.bat"
+```
 
 
 # 申请Let’s Encrypt ssl证书
