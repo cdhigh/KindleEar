@@ -5,7 +5,7 @@
 ~=2.31.0 : >=2.31.0,==2.31.*
 >=0.2.3,<1.0.0
 """
-import re, os, sys, subprocess, secrets
+import re, os, sys, subprocess, secrets, datetime
 from itertools import chain
 
 def new_secret_key(length=12):
@@ -142,7 +142,7 @@ def dockerize_config_py(cfgFile, arg):
 def gae_location():
     try:
         output = subprocess.check_output(['gcloud', 'beta', 'app', 'describe'], universal_newlines=True)
-        lines = output.split('\n')
+        lines = output.splitlines()
         for line in lines:
             if 'locationId:' in line:
                 loc = line[11:].strip()
@@ -272,22 +272,41 @@ def update_worker_yaml(workerYamlFile, arg):
             f.write('\n'.join(lines))
         print('\n'.join(ret))
 
+#update build date in main.py
+def update_build_date(mainFile):
+    buildDate = datetime.datetime.now().strftime('%Y%m%d')
+    with open(mainFile, 'r', encoding='utf-8') as f:
+        lines = f.read().splitlines()
+    for idx in range(len(lines)):
+        match = re.match(r'^__BuildDate__\s*=\s*[\'\"]\d{8}[\'\"].*', lines[idx])
+        if match:
+            lines[idx] = f"__BuildDate__ = '{buildDate}'"
+            break
+    else:
+        print('Cannot find __BuildDate__ line in main.py. Please verify it.')
+        return
+
+    with open(mainFile, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(lines) + '\n')
+
 if __name__ == '__main__':
     thisDir = os.path.abspath(os.path.dirname(__file__))
     cfgFile = os.path.normpath(os.path.join(thisDir, '..', 'config.py'))
     reqFile = os.path.normpath(os.path.join(thisDir, '..', 'requirements.txt'))
     workerYamlFile = os.path.normpath(os.path.join(thisDir, '..', 'worker.yaml'))
+    mainFile = os.path.normpath(os.path.join(thisDir, '..', 'main.py'))
     if not os.path.exists(cfgFile):
         cfgFile = os.path.normpath(os.path.join(thisDir, 'config.py'))
         reqFile = os.path.normpath(os.path.join(thisDir, 'requirements.txt'))
         workerYamlFile = os.path.normpath(os.path.join(thisDir, 'worker.yaml'))
+        mainFile = os.path.normpath(os.path.join(thisDir, 'main.py'))
 
     dockerArgs = ''
     gaeify = False
     arg1 = sys.argv[1] if len(sys.argv) >= 2 else ''
     arg2 = sys.argv[2] if len(sys.argv) >= 3 else '' #TARGETPLATFORM
     if arg1 == '--help':
-        print('This script can help you to update config.py and requirements.txt.')
+        print('This script will update config.py, requirements.txt and main.py.')
         print('Command arguments:')
         print('  docker              : prepare for docker image')
         print('  docker[all]         : prepare for docker image, install all libs')
@@ -297,16 +316,16 @@ if __name__ == '__main__':
         print('  empty               : do not modify config.py, only update requirements.txt')
         sys.exit(1)
     elif arg1.startswith('docker'):
-        print('\nUpdating config.py and requirements.txt for Docker deployment.\n')
+        print('\nUpdating config.py, requirements.txt and main.py for Docker deployment.\n')
         dockerize_config_py(cfgFile, arg1)
         dockerArgs = arg1
     elif arg1.startswith('gae'):
-        print('\nUpdating config.py and requirements.txt for GAE deployment.\n')
+        print('\nUpdating config.py, requirements.txt and main.py for GAE deployment.\n')
         gaeify_config_py(cfgFile)
         update_worker_yaml(workerYamlFile, arg1)
         gaeify = True
-    else:
-        print('\nThis script can help you to update requirements.txt.\n')
+    elif arg1 != '-y':
+        print('\nThis script will update requirements.txt and main.py.\n')
         usrInput = input('Press y to continue :')
         if usrInput.lower() != 'y':
             sys.exit(1)
@@ -334,5 +353,6 @@ if __name__ == '__main__':
         extras.update(dockerArgs.split('[')[-1].rstrip(']').split(','))
 
     write_req(reqFile, db, task, plat, *extras)
-    print(f'Finished create {reqFile}')
+    update_build_date(mainFile)
+    print(f'Finished update {os.path.basename(reqFile)} and {os.path.basename(mainFile)}')
     sys.exit(0)

@@ -5,6 +5,7 @@
 # Author: cdhigh <https://github.com/cdhigh>
 
 __Version__ = '3.3'
+__BuildDate__ = '20250109'
 
 import os, sys, builtins, logging
 from application.lib import clogging
@@ -24,6 +25,7 @@ if not calibre_log.handlers:
 builtins.__dict__['default_log'] = calibre_log
 builtins.__dict__['appDir'] = appDir
 builtins.__dict__['appVer'] = __Version__
+builtins.__dict__['appBuildDate'] = __BuildDate__
 sys.path.insert(0, os.path.join(appDir, 'application', 'lib'))
 sys.path.insert(0, appDir)
 

@@ -43,7 +43,8 @@ def init_app(name, cfgMap, set_env, debug=False):
     def BeforeRequest():
         session.permanent = True
         app.permanent_session_lifetime = datetime.timedelta(days=31)
-        g.version = appVer
+        #appVer: KindleEar代码版本，appBuildDate: 更多的反映recipe库的最新版本日期
+        g.version = f'{appVer}({appBuildDate})'
         g.now = lambda: datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
         g.allowSignup = (app.config['ALLOW_SIGNUP'] == 'yes')
         g.allowReader = app.config['EBOOK_SAVE_DIR']

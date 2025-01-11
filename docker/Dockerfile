@@ -38,10 +38,10 @@ ENV PYTHONUNBUFFERED=1
 USER root
 RUN mkdir -p /usr/kindleear /data
 WORKDIR /usr/kindleear
-COPY --from=builder /usr/kindleear/config.py /usr/kindleear/requirements.txt ./
+COPY --from=builder /usr/kindleear/config.py /usr/kindleear/requirements.txt /usr/kindleear/main.py ./
 COPY --from=builder /usr/kindleear/tools/mp3cat/mp3cat /usr/local/bin/mp3cat
 COPY ./docker/run_docker.sh /usr/local/bin/run_docker.sh
-COPY ./docker/gunicorn.conf.py ./main.py ./
+COPY ./docker/gunicorn.conf.py ./
 
 #apk add libstdc++ && \
 RUN pip install --upgrade pip && \
