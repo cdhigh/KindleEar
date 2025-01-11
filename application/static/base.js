@@ -908,7 +908,8 @@ function StartShareRss(id, title) {
 //打开上传Recipe对话框，选择一个文件后上传
 function OpenUploadRecipeDialog() {
   var ostr = `<h3 style="padding:0px;margin:0px auto 30px auto;text-align:center;">${i18n.uploadCustomRecipe}</h3>
-    <form class="pure-form pure-form-aligned">
+    <form class="pure-form pure-form-aligned" id="upload_recipe_form" ondragover="UploadRecipeDragOver(event)" 
+      ondragleave="UploadRecipeLeave(event)" ondrop="UploadRecipeDrop(event)">
       <fieldset>
         <div class="pure-control-group">
           <label for="recipe_file">${i18n.file}</label>
@@ -976,6 +977,29 @@ function OpenUploadRecipeDialog() {
       }
     });
   }).catch(function(){});
+}
+
+//拖放文件到上传recipe对话框 - 进入事件，添加视觉反馈
+function UploadRecipeDragOver(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  $('#upload_recipe_form').css('border', '2px dashed #4CAF50');
+}
+
+//拖放文件到上传recipe对话框 - 离开事件
+function UploadRecipeLeave(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  $('#upload_recipe_form').css('border', '');
+}
+
+//拖放文件到上传recipe对话框 - 放下事件
+function UploadRecipeDrop(event) {
+  UploadRecipeLeave(event);
+  const files = event.dataTransfer.files;
+  if (files && files.length > 0) {
+    document.getElementById('recipe_file').files = files;
+  }
 }
 
 //删除一个已经上传的Recipe
