@@ -2233,7 +2233,7 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
         added = set()
         #这里oldest_article和其他的recipe不一样，这个参数表示在这个区间内不会重复推送
         oldestSeconds = 24 * 3600 * self.oldest_article
-        now = utcnow()
+        now = utcnow().replace(tzinfo=None)
         for obj in main_urls: #type:ignore
             main_title, main_url = (self.title, obj) if isinstance(obj, str) else obj
             feed = Feed()
