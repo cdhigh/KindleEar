@@ -21,7 +21,7 @@ msgstr ""
 #: application/templates/admin.html:3 application/templates/base.html:53
 #: application/templates/base.html:192 application/templates/settings.html:252
 msgid "Account"
-msgstr "账号管理"
+msgstr "账号"
 
 #: application/templates/admin.html:19
 msgid "Signup settings"

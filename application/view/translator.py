@@ -80,7 +80,8 @@ def BookTranslatorPost(recipeType, recipe, user, recipeId):
         if not apiKeys:
             tips = _('The api key is required.')
             return render_template('book_translator.html', tab="my", tips=tips, params=params, title=recipe.title,
-                recipeId=recipeId, engines=json.dumps(engines, separators=(',', ':')))
+                recipeId=recipeId, engines=json.dumps(engines, separators=(',', ':')),
+                famous=secrets.choice(famous_quotes))
     else:
         params['api_host'] = ''
 
@@ -231,7 +232,7 @@ def BookSummarizerRoute(recipeType, recipe, user, recipeId):
 
     engines = json.dumps(get_summarizer_engines(), separators=(',', ':'))
     return render_template('book_summarizer.html', tab="my", tips=tips, params=params, title=recipe.title,
-        recipeId=recipeId, engines=engines, langMap=LangMap())
+        recipeId=recipeId, engines=engines, langMap=LangMap(), famous=secrets.choice(famous_quotes))
 
 #修改书籍AI文章摘要总结的设置
 @bpTranslator.post("/summarizer/<recipeId>", endpoint='BookSummarizerPost')
@@ -270,7 +271,7 @@ def BookSummarizerPost(recipeType, recipe, user, recipeId):
     
     engines = json.dumps(get_summarizer_engines(), separators=(',', ':'))
     return render_template('book_summarizer.html', tab="my", tips=tips, params=params, title=recipe.title,
-        recipeId=recipeId, engines=engines, langMap=LangMap())
+        recipeId=recipeId, engines=engines, langMap=LangMap(), famous=secrets.choice(famous_quotes))
 
 #测试Recipe的AI文章摘要总结设置是否正确
 @bpTranslator.post("/summarizer/test/<recipeId>", endpoint='BookSummarizerTestPost')

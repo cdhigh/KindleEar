@@ -18,10 +18,14 @@ AI_LIST = {
     'google': {'host': 'https://generativelanguage.googleapis.com', 'models': [
         {'name': 'gemini-1.5-flash', 'rpm': 15, 'context': 128000}, #其实支持100万
         {'name': 'gemini-1.5-flash-8b', 'rpm': 15, 'context': 128000}, 
-        {'name': 'gemini-1.5-pro', 'rpm': 2, 'context': 128000},],},
+        {'name': 'gemini-1.5-pro', 'rpm': 2, 'context': 128000},
+        {'name': 'gemini-2.0-flash-exp', 'rpm': 10, 'context': 128000},
+        {'name': 'gemini-2.0-flash-thinking-exp', 'rpm': 10, 'context': 128000},],},
     'openai': {'host': 'https://api.openai.com', 'models': [
         {'name': 'gpt-4o-mini', 'rpm': 3, 'context': 128000},
         {'name': 'gpt-4o', 'rpm': 3, 'context': 128000},
+        {'name': 'o1', 'rpm': 3, 'context': 200000},
+        {'name': 'o1-mini', 'rpm': 3, 'context': 200000},
         {'name': 'gpt-4-turbo', 'rpm': 3, 'context': 128000},
         {'name': 'gpt-3.5-turbo', 'rpm': 3, 'context': 16000},
         {'name': 'gpt-3.5-turbo-instruct', 'rpm': 3, 'context': 4000},],},
@@ -39,7 +43,8 @@ AI_LIST = {
         {'name': 'open-mixtral-8x22b', 'rpm': 60, 'context': 64000},
         {'name': 'mistral-medium-latest', 'rpm': 60, 'context': 32000},
         {'name': 'mistral-large-latest', 'rpm': 60, 'context': 128000},
-        {'name': 'pixtral-12b-2409', 'rpm': 60, 'context': 128000},],},
+        {'name': 'pixtral-12b-2409', 'rpm': 60, 'context': 128000},
+        {'name': 'codestral-2501', 'rpm': 60, 'context': 256000},],},
     'groq': {'host': 'https://api.groq.com', 'models': [
         {'name': 'gemma2-9b-it', 'rpm': 30, 'context': 8000},
         {'name': 'gemma-7b-it', 'rpm': 30, 'context': 8000},
@@ -74,9 +79,10 @@ class SimpleAiProvider:
         self.host = '' #如果提供多个api host，这个变量保存当前使用的host
         self._models = AI_LIST[name]['models']
         
-        #如果传入的model不在列表中，默认使用第一个
+        #如果传入的model不在列表中，默认使用第一个的参数
         item = next((m for m in self._models if m['name'] == model), self._models[0])
-        self.model = item['name']
+        #self.model = item['name']
+        self.model = model or item['name']
         self.rpm = item['rpm']
         self.context_size = item['context']
         if self.rpm <= 0:
@@ -131,6 +137,15 @@ class SimpleAiProvider:
         else:
             raise ValueError(f"Unsupported provider: {name}")
 
+    #返回当前服务提供商支持的models列表
+    def models(self, prebuild=True):
+        if self.name in ('openai', 'xai'):
+            return self._openai_models()
+        elif self.name == 'google':
+            return self._google_models()
+        else:
+            return [item['name'] for item in self._models]
+
     #openai的chat接口
     def _openai_chat(self, message, path='v1/chat/completions'):
         url = urljoin(self.apiHost, path)
@@ -152,6 +167,14 @@ class SimpleAiProvider:
         resp = self.opener.post(url, headers=headers, json=payload)
         resp.raise_for_status()
         return resp.json()["choices"][0]["message"]["content"]
+
+    #openai的models接口
+    def _openai_models(self):
+        url = urljoin(self.apiHost, 'v1/models')
+        headers = {'Authorization': f'Bearer {self.apiKey}', 'Content-Type': 'application/json'}
+        resp = self.opener.get(url, headers=headers)
+        resp.raise_for_status()
+        return [item['id'] for item in resp.json()['data']]
 
     #anthropic的chat接口
     def _anthropic_chat(self, message, path='v1/complete'):
@@ -195,6 +218,15 @@ class SimpleAiProvider:
         resp.raise_for_status()
         contents = resp.json()["candidates"][0]["content"]
         return contents['parts'][0]['text']
+
+    #google的models接口
+    def _google_models(self):
+        url = urljoin(self.apiHost, f'v1beta/models?key={self.apiKey}&pageSize=100')
+        headers = {'Content-Type': 'application/json'}
+        resp = self.opener.get(url, headers=headers)
+        resp.raise_for_status()
+        _trim = lambda x: x[7:] if x.startswith('models/') else x
+        return [_trim(item['name']) for item in resp.json()['models']]
 
     #xai的chat接口
     def _xai_chat(self, message):
