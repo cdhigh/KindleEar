@@ -4,6 +4,7 @@
 #Author: cdhigh<https://github.com/cdhigh>
 import os, sys, time
 from typing import Union
+from types import MethodType
 from collections import defaultdict
 from flask import Blueprint, request, current_app as app
 from ..base_handler import *
@@ -78,6 +79,7 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
     recipes = defaultdict(list) #用于保存编译好的recipe代码对象
     userCss = user.get_extra_css()
     combine_css = lambda c1, c2=userCss: f'{c1}\n\n{c2}' if c1 else c2
+    coverEnable = None if user.covers.get('enable', '') else False
 
     for title, (bked, recipeDb, src) in srcDict.items():
         try:
@@ -99,9 +101,12 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
         ro.tts = bked.tts.copy() #文本转语音设置，需要中途修改tts内容
         ro.summarizer = bked.summarizer.copy() #AI摘要器的配置信息
 
-        #如果书籍没有设置封面，则使用用户全局设置
-        if ro.cover_url is None and not user.covers.get('enable', ''):
-            ro.cover_url = False
+        #多个书籍：使用用户全局设置
+        #单一书籍：如果书籍没有设置封面，则使用用户全局设置
+        if ((len(srcDict) > 1) or 
+            ((coverEnable == False) and (ro.get_cover_url() is None))):
+            ro.cover_url = coverEnable
+            ro.get_cover_url = MethodType(lambda self: coverEnable, ro)
         
         #如果需要登录网站
         if ro.needs_subscription:
