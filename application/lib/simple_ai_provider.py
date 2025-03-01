@@ -19,7 +19,7 @@ AI_LIST = {
         {'name': 'gemini-1.5-flash', 'rpm': 15, 'context': 128000}, #其实支持100万
         {'name': 'gemini-1.5-flash-8b', 'rpm': 15, 'context': 128000}, 
         {'name': 'gemini-1.5-pro', 'rpm': 2, 'context': 128000},
-        {'name': 'gemini-2.0-flash-exp', 'rpm': 10, 'context': 128000},
+        {'name': 'gemini-2.0-flash', 'rpm': 10, 'context': 128000},
         {'name': 'gemini-2.0-flash-thinking-exp', 'rpm': 10, 'context': 128000},],},
     'openai': {'host': 'https://api.openai.com', 'models': [
         {'name': 'gpt-4o-mini', 'rpm': 3, 'context': 128000},
@@ -35,7 +35,8 @@ AI_LIST = {
         {'name': 'claude-2.1', 'rpm': 5, 'context': 100000},],},
     'xai': {'host': 'https://api.x.ai', 'models': [
         {'name': 'grok-beta', 'rpm': 60, 'context': 128000},
-        {'name': 'grok-2', 'rpm': 60, 'context': 128000},],},
+        {'name': 'grok-2', 'rpm': 60, 'context': 128000},
+        {'name': 'grok-3', 'rpm': 60, 'context': 128000},],},
     'mistral': {'host': 'https://api.mistral.ai', 'models': [
         {'name': 'open-mistral-7b', 'rpm': 60, 'context': 32000},
         {'name': 'mistral-small-latest', 'rpm': 60, 'context': 32000},
