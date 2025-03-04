@@ -99,8 +99,8 @@ class RecipeInput(InputFormatPlugin):
                 recipe_objects.append(ro)
 
             #可能会有些副作用，前面的conversion_options会影响后面的recipe
-            for key, val in ro.conversion_options.items():
-                setattr(opts, key, val)
+            #for key, val in ro.conversion_options.items():
+            #    setattr(opts, key, val)
 
         if not feeds: #让上层处理
             raise Exception('All feeds are empty, aborting.')
@@ -341,10 +341,7 @@ class RecipeInput(InputFormatPlugin):
         if not isinstance(desc, str):
             desc = desc.decode('utf-8', 'replace')
         mi.comments = (_('Articles in this issue:') + '\n' + '\n'.join(article_titles)) + '\n\n' + desc
-
-        language = canonicalize_lang(recipe1.language if onlyRecipe else self.user.book_cfg('language'))
-        if language is not None:
-            mi.language = language
+        mi.languages = [recipe1.language]
         mi.pubdate = pdate
         mi.identifier = str(uuid.uuid4())
         return mi

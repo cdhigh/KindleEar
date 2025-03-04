@@ -5,7 +5,7 @@ __copyright__ = '2009, Kovid Goyal <kovid@kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
 from PIL.Image import isImageType
-import os, re, sys, shutil, pprint, json, io, css_parser, logging, traceback
+import os, re, sys, shutil, pprint, json, io, css_parser, logging, traceback, copy
 from itertools import chain
 from functools import partial
 from calibre.customize.conversion import OptionRecommendation, DummyReporter, InputFormatPlugin
@@ -75,7 +75,6 @@ class CompositeProgressReporter:
 
 ARCHIVE_FMTS = ('zip', 'rar', 'oebzip')
 
-
 class Plumber:
 
     '''
@@ -109,8 +108,8 @@ class Plumber:
                     output_fmt = '.oeb'
                 output_fmt = output_fmt[1:].lower()
 
-        self.input_plugin = plugin_for_input_format(input_fmt)
-        self.output_plugin = plugin_for_output_format(output_fmt)
+        self.input_plugin = copy.deepcopy(plugin_for_input_format(input_fmt))
+        self.output_plugin = copy.deepcopy(plugin_for_output_format(output_fmt))
         if self.output_plugin is None:
             raise ValueError(f'No plugin to handle output format: {output_fmt}')
 
@@ -363,7 +362,7 @@ class Plumber:
         '''
         # Setup baseline option values
         self.setup_options()
-        
+
         css_parser.log.setLevel(logging.WARN) #type:ignore
         #get_types_map()  # Ensure the mimetypes module is initialized
         debug_pipeline = self.opts.debug_pipeline #type:ignore
@@ -415,7 +414,8 @@ class Plumber:
         #    self.dump_input(self.oeb, tdir)
         #    if self.abort_after_input_dump:
         #        return
-        self.opts_to_mi(self.opts, self.user_metadata)
+        #self.opts_to_mi(self.opts, self.user_metadata)
+        
         if not hasattr(self.oeb, 'manifest'): #从一堆文件里面创建OEBBook实例
             fs.find_opf_path()
             try:

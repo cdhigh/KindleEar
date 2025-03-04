@@ -83,41 +83,41 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
 
     for title, (bked, recipeDb, src) in srcDict.items():
         try:
-            ro = compile_recipe(src)
+            rc = compile_recipe(src) #返回为一个类，而不是实例
         except Exception as e:
             log.warning('Failed to compile recipe {}: {}'.format(title, str(e)))
             continue
-        if not ro:
+        if not rc:
             log.warning('Failed to compile recipe {}: {}'.format(title, 'Cannot find any subclass of BasicNewsRecipe.'))
             continue
 
-        if not ro.language or ro.language == 'und':
-            ro.language = user.book_cfg('language')
+        if (len(srcDict) > 1) or (rc.language in (None, '', 'und')):
+            rc.language = user.book_cfg('language')
             
-        ro.delivery_reason = reason
+        rc.delivery_reason = reason
         #合并自定义css
-        ro.extra_css = combine_css(ro.extra_css) #type:ignore
-        ro.translator = bked.translator.copy() #设置网页翻译器信息
-        ro.tts = bked.tts.copy() #文本转语音设置，需要中途修改tts内容
-        ro.summarizer = bked.summarizer.copy() #AI摘要器的配置信息
+        rc.extra_css = combine_css(rc.extra_css) #type:ignore
+        rc.translator = bked.translator.copy() #设置网页翻译器信息
+        rc.tts = bked.tts.copy() #文本转语音设置，需要中途修改tts内容
+        rc.summarizer = bked.summarizer.copy() #AI摘要器的配置信息
 
         #多个书籍：使用用户全局设置
         #单一书籍：如果书籍没有设置封面，则使用用户全局设置
         if ((len(srcDict) > 1) or 
-            ((coverEnable == False) and (ro.cover_url is None) and ('get_cover_url' not in type(ro).__dict__))):
-            ro.cover_url = coverEnable
-            ro.get_cover_url = MethodType(lambda self: coverEnable, ro)
+            ((coverEnable == False) and (rc.cover_url is None) and ('get_cover_url' not in rc.__dict__))):
+            rc.cover_url = coverEnable
+            rc.get_cover_url = MethodType(lambda self: coverEnable, rc)
         
         #如果需要登录网站
-        if ro.needs_subscription:
-            ro.username = bked.account #type:ignore
-            ro.password = bked.password #type:ignore
+        if rc.needs_subscription:
+            rc.username = bked.account #type:ignore
+            rc.password = bked.password #type:ignore
         
         if bked.separated:
-            recipes[ro.title].append(ro)
+            recipes[rc.title].append(rc)
         else:
-            recipes[user.book_cfg('title')].append(ro)
-    
+            recipes[user.book_cfg('title')].append(rc)
+        
     #逐个生成电子书推送
     lastSendTime = 0
     bookType = user.book_cfg('type')
