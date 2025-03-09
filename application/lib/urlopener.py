@@ -163,14 +163,18 @@ class UrlOpener:
     def build_url(self, url, data, method):
         if url.startswith("//"):
             url = f'https:{url}'
-        elif url.startswith('www'):
+        elif url.lower().startswith('www'):
             url = f'https://{url}'
 
-        if not url.startswith('http') and self.host:
-            url = urljoin(self.host, url)
+        if not url.lower().startswith('http'):
+            if self.host:
+                url = urljoin(self.host, url)
+            elif self.prevRespRef: #通过前一个请求获取主机名
+                resp = self.prevRespRef()
+                url = urljoin(resp.url, url) if resp else url
 
         parts = urlparse(url)._replace(fragment='')
-        if method == 'GET' and data:
+        if method.upper() == 'GET' and data:
             query = parse_qs(parts.query)
             query.update(data)
             query = urlencode(query, doseq=True)
@@ -261,11 +265,16 @@ class UrlOpener:
             resp.status_code = 555
             return self.patch_response(resp)
 
-        action = self.form.get('action') or resp.url
+        action = self.form.get('action')
+        if not action:
+            action = resp.url
+        elif not action.lower().startswith(('http', 'www')):
+            action = urljoin(resp.url, action)
         method = self.form.get('method', 'GET').upper()
         payload = self.form.get_all_values()
         return self.open(action, data=payload, method=method)
 
+    #别名函数
     submit_selected = submit
 
     #找到一个符合条件的url

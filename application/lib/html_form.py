@@ -11,6 +11,7 @@ class HTMLForm:
     def __init__(self, form):
         self.form = form
         self._data = {}
+        self.attrs = form.attrs.copy()
     
     #获取表单的属性，比如action等
     def get(self, attr, default=None):
