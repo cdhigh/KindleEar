@@ -4,7 +4,6 @@
 #Author: cdhigh<https://github.com/cdhigh>
 import os, sys, time
 from typing import Union
-from types import MethodType
 from collections import defaultdict
 from flask import Blueprint, request, current_app as app
 from ..base_handler import *
@@ -106,7 +105,7 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
         if ((len(srcDict) > 1) or 
             ((coverEnable == False) and (rc.cover_url is None) and ('get_cover_url' not in rc.__dict__))):
             rc.cover_url = coverEnable
-            rc.get_cover_url = MethodType(lambda self: coverEnable, rc)
+            rc.get_cover_url = lambda self: getattr(self, 'cover_url', None)
         
         #如果需要登录网站
         if rc.needs_subscription:
