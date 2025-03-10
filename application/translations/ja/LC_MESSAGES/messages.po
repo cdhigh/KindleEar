@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-12-25 20:15-0300\n"
+"POT-Creation-Date: 2025-03-10 19:49-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: KindleEar <LL@li.org>\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Generated-By: Babel 2.14.0\n"
 
 #: application/templates/admin.html:3 application/templates/base.html:53
-#: application/templates/base.html:192 application/templates/settings.html:252
+#: application/templates/base.html:192 application/templates/settings.html:263
 msgid "Account"
 msgstr "アカウント"
 
@@ -89,7 +89,7 @@ msgstr "追加"
 #: application/templates/logs.html:70
 #: application/templates/reset_password.html:19
 #: application/templates/reset_password.html:20
-#: application/templates/settings.html:230
+#: application/templates/settings.html:241
 #: application/templates/signup.html:21
 #: application/templates/user_account.html:15
 msgid "Username"
@@ -131,7 +131,7 @@ msgstr "決して"
 #: application/templates/admin.html:70
 #: application/templates/adv_inboundmail.html:26
 #: application/templates/settings.html:58
-#: application/templates/settings.html:170
+#: application/templates/settings.html:181
 #: application/templates/user_account.html:43
 msgid "7 Days"
 msgstr "7日間"
@@ -201,7 +201,7 @@ msgstr "メールアドレスまたはユーザー名"
 #: application/templates/adv_archive.html:56
 #: application/templates/adv_archive.html:72
 #: application/templates/base.html:54 application/templates/home.html:20
-#: application/templates/login.html:28 application/templates/settings.html:234
+#: application/templates/login.html:28 application/templates/settings.html:245
 #: application/templates/signup.html:25
 #: application/templates/user_account.html:19
 msgid "Password"
@@ -222,7 +222,7 @@ msgid "client_secret"
 msgstr "client_secret"
 
 #: application/templates/adv_archive.html:84
-#: application/templates/settings.html:222
+#: application/templates/settings.html:233
 msgid "Host"
 msgstr "ホスト"
 
@@ -232,7 +232,7 @@ msgstr "ホスト"
 #: application/templates/book_audiolator.html:113
 #: application/templates/book_summarizer.html:88
 #: application/templates/book_translator.html:80
-#: application/templates/settings.html:258
+#: application/templates/settings.html:269
 msgid "Save settings"
 msgstr "設定を保存"
 
@@ -390,6 +390,7 @@ msgstr "受信メール機能を有効にするには、ホワイトリストの
 #: application/templates/adv_uploadcover.html:15
 #: application/templates/book_summarizer.html:19
 #: application/templates/book_translator.html:22
+#: application/templates/settings.html:143
 msgid "Disable"
 msgstr "無効化"
 
@@ -411,7 +412,7 @@ msgstr "メール保存期間"
 
 #: application/templates/adv_inboundmail.html:25
 #: application/templates/settings.html:52
-#: application/templates/settings.html:164
+#: application/templates/settings.html:175
 msgid "1 Day"
 msgstr "1日"
 
@@ -422,7 +423,7 @@ msgstr "30日間"
 
 #: application/templates/adv_inboundmail.html:28
 #: application/templates/settings.html:51
-#: application/templates/settings.html:163
+#: application/templates/settings.html:174
 msgid "No limit"
 msgstr "制限なし"
 
@@ -585,7 +586,7 @@ msgstr "カテゴリー"
 #: application/templates/base.html:39
 #: application/templates/book_audiolator.html:58
 #: application/templates/book_summarizer.html:43
-#: application/templates/settings.html:148
+#: application/templates/settings.html:159
 msgid "Language"
 msgstr "言語"
 
@@ -873,7 +874,7 @@ msgstr "設定の検証は正しいです。"
 #: application/templates/logs.html:72 application/templates/my.html:17
 #: application/templates/settings.html:117
 #: application/templates/settings.html:118
-#: application/templates/settings.html:144
+#: application/templates/settings.html:155
 msgid "Title"
 msgstr "タイトル"
 
@@ -1331,7 +1332,7 @@ msgstr "状態"
 msgid "Logs of other users"
 msgstr "他のユーザーのログ"
 
-#: application/templates/my.html:12 application/templates/settings.html:142
+#: application/templates/my.html:12 application/templates/settings.html:153
 msgid "Custom RSS"
 msgstr "カスタムRSS"
 
@@ -1525,27 +1526,27 @@ msgid "Web shelf"
 msgstr "ウェブ棚"
 
 #: application/templates/settings.html:53
-#: application/templates/settings.html:165
+#: application/templates/settings.html:176
 msgid "2 Days"
 msgstr "2日"
 
 #: application/templates/settings.html:54
-#: application/templates/settings.html:166
+#: application/templates/settings.html:177
 msgid "3 Days"
 msgstr "3日"
 
 #: application/templates/settings.html:55
-#: application/templates/settings.html:167
+#: application/templates/settings.html:178
 msgid "4 Days"
 msgstr "4日"
 
 #: application/templates/settings.html:56
-#: application/templates/settings.html:168
+#: application/templates/settings.html:179
 msgid "5 Days"
 msgstr "5日"
 
 #: application/templates/settings.html:57
-#: application/templates/settings.html:169
+#: application/templates/settings.html:180
 msgid "6 Days"
 msgstr "6日"
 
@@ -1597,47 +1598,67 @@ msgstr "テキストリンクを削除"
 msgid "Remove all hyperlinks"
 msgstr "すべてのハイパーリンクを削除"
 
-#: application/templates/settings.html:148
+#: application/templates/settings.html:140
+msgid "Navbar"
+msgstr "ナビゲーションバー"
+
+#: application/templates/settings.html:144
+msgid "Top Center"
+msgstr "上部中央"
+
+#: application/templates/settings.html:145
+msgid "Top Left"
+msgstr "上部左"
+
+#: application/templates/settings.html:146
+msgid "Bottom Center"
+msgstr "下部中央"
+
+#: application/templates/settings.html:147
+msgid "Bottom Left"
+msgstr "下部左"
+
+#: application/templates/settings.html:159
 msgid "Sets the lookup dictionary"
 msgstr "検索辞書を設定"
 
-#: application/templates/settings.html:160
+#: application/templates/settings.html:171
 msgid "Oldest article"
 msgstr "最古の記事"
 
-#: application/templates/settings.html:174
+#: application/templates/settings.html:185
 msgid "Time format"
 msgstr "時間形式"
 
-#: application/templates/settings.html:187
+#: application/templates/settings.html:198
 msgid "Author format"
 msgstr "著者形式"
 
-#: application/templates/settings.html:204
+#: application/templates/settings.html:215
 msgid "Send Mail Service"
 msgstr "メール送信サービス"
 
-#: application/templates/settings.html:206
+#: application/templates/settings.html:217
 msgid "Service"
 msgstr "サービス"
 
-#: application/templates/settings.html:214
+#: application/templates/settings.html:225
 msgid "ApiKey"
 msgstr "ApiKey"
 
-#: application/templates/settings.html:218
+#: application/templates/settings.html:229
 msgid "SecretKey"
 msgstr "SecretKey"
 
-#: application/templates/settings.html:226
+#: application/templates/settings.html:237
 msgid "Port"
 msgstr "ポート"
 
-#: application/templates/settings.html:238
+#: application/templates/settings.html:249
 msgid "Save path"
 msgstr "保存パス"
 
-#: application/templates/settings.html:246
+#: application/templates/settings.html:257
 #, python-format
 msgid ""
 "Important: Please activate your kindle firstly, then goto %(personal)s Page "
@@ -1646,18 +1667,18 @@ msgstr ""
 "重要: "
 "まずKindleを有効化してください。その後、%(personal)sページに移動し、%(sender)sを「承認された個人文書のEメールリスト」に追加してください。"
 
-#: application/templates/settings.html:246
+#: application/templates/settings.html:257
 msgid "Personal Document Settings"
 msgstr "個人文書設定"
 
-#: application/templates/settings.html:252
+#: application/templates/settings.html:263
 #, python-format
 msgid ""
 "You have not yet set up your email address. Please go to the %(admin)s page "
 "to add your email address firstly."
 msgstr "まだメールアドレスを設定していません。まず、%(admin)sページに移動してメールアドレスを追加してください。"
 
-#: application/templates/settings.html:260
+#: application/templates/settings.html:271
 msgid "Send Test Email"
 msgstr "テストメールを送信"
 
@@ -1702,9 +1723,9 @@ msgid "Word"
 msgstr "単語"
 
 #: application/view/admin.py:48 application/view/adv.py:437
-#: application/view/adv.py:510 application/view/settings.py:66
-#: application/view/translator.py:87 application/view/translator.py:171
-#: application/view/translator.py:253
+#: application/view/adv.py:528 application/view/settings.py:67
+#: application/view/translator.py:88 application/view/translator.py:172
+#: application/view/translator.py:254
 msgid "Settings Saved!"
 msgstr "設定が保存されました！"
 
@@ -1821,29 +1842,29 @@ msgstr "記事にURLのQRコードを追加"
 msgid "Unknown command: {}"
 msgstr "不明なコマンド: {}"
 
-#: application/view/adv.py:439 application/view/adv.py:512
+#: application/view/adv.py:439 application/view/adv.py:530
 msgid "The format is invalid."
 msgstr "形式が無効です。"
 
-#: application/view/adv.py:544
+#: application/view/adv.py:562
 msgid "Authorization Error!<br/>{}"
 msgstr "認証エラー!<br/>{}"
 
-#: application/view/adv.py:565
+#: application/view/adv.py:583
 msgid "Success authorized by Pocket!"
 msgstr "Pocketによる認証に成功しました！"
 
-#: application/view/adv.py:571
+#: application/view/adv.py:589
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr "Pocketの認証リクエストに失敗しました！<hr/>詳細は以下をご覧ください：<br/><br/>{}"
 
-#: application/view/adv.py:592
+#: application/view/adv.py:610
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr "Instapaperサービスでエラーが発生しました。後ほど再試行してください。"
 
-#: application/view/adv.py:605
+#: application/view/adv.py:623
 msgid "Request type [{}] unsupported"
 msgstr "リクエストタイプ [{}] はサポートされていません"
 
@@ -1948,8 +1969,8 @@ msgstr "以下のリンクをクリックしてKindleEarのパスワードをリ
 msgid "The article is missing?"
 msgstr "記事が見つかりませんか？"
 
-#: application/view/reader.py:190 application/view/translator.py:120
-#: application/view/translator.py:204 application/view/translator.py:286
+#: application/view/reader.py:190 application/view/translator.py:121
+#: application/view/translator.py:205 application/view/translator.py:287
 msgid "The text is empty."
 msgstr "テキストが空です。"
 
@@ -1969,237 +1990,237 @@ msgstr "プッシュに失敗しました: {}"
 msgid "Failed to create ebook."
 msgstr "電子書籍の作成に失敗しました。"
 
-#: application/view/settings.py:130
+#: application/view/settings.py:131
 msgid ""
 "You have not yet set up your email address. Please go to the 'Account' page "
 "to add your email address firstly."
 msgstr "まだメールアドレスを設定していません。まず「アカウント」ページに移動して、メールアドレスを追加してください。"
 
-#: application/view/settings.py:214
+#: application/view/settings.py:215
 msgid "English"
 msgstr "英語"
 
-#: application/view/settings.py:215
+#: application/view/settings.py:216
 msgid "Simplified Chinese"
 msgstr "简体中文"
 
-#: application/view/settings.py:216
+#: application/view/settings.py:217
 msgid "Traditional Chinese"
 msgstr "繁體中文"
 
-#: application/view/settings.py:217
+#: application/view/settings.py:218
 msgid "French"
 msgstr "フランス語"
 
-#: application/view/settings.py:218
+#: application/view/settings.py:219
 msgid "Spanish"
 msgstr "スペイン語"
 
-#: application/view/settings.py:219
+#: application/view/settings.py:220
 msgid "Portuguese"
 msgstr "ポルトガル語"
 
-#: application/view/settings.py:220
+#: application/view/settings.py:221
 msgid "German"
 msgstr "ドイツ語"
 
-#: application/view/settings.py:221
+#: application/view/settings.py:222
 msgid "Italian"
 msgstr "イタリア語"
 
-#: application/view/settings.py:222
+#: application/view/settings.py:223
 msgid "Japanese"
 msgstr "日本語"
 
-#: application/view/settings.py:223
+#: application/view/settings.py:224
 msgid "Russian"
 msgstr "ロシア語"
 
-#: application/view/settings.py:224
+#: application/view/settings.py:225
 msgid "Turkish"
 msgstr "トルコ語"
 
-#: application/view/settings.py:225
+#: application/view/settings.py:226
 msgid "Korean"
 msgstr "韓国語"
 
-#: application/view/settings.py:226
+#: application/view/settings.py:227
 msgid "Arabic"
 msgstr "アラビア語"
 
-#: application/view/settings.py:227
+#: application/view/settings.py:228
 msgid "Czech"
 msgstr "チェコ語"
 
-#: application/view/settings.py:228
+#: application/view/settings.py:229
 msgid "Dutch"
 msgstr "オランダ語"
 
-#: application/view/settings.py:229
+#: application/view/settings.py:230
 msgid "Greek"
 msgstr "ギリシャ語"
 
-#: application/view/settings.py:230
+#: application/view/settings.py:231
 msgid "Hindi"
 msgstr "ヒンディー語"
 
-#: application/view/settings.py:231
+#: application/view/settings.py:232
 msgid "Malaysian"
 msgstr "マレー語"
 
-#: application/view/settings.py:232
+#: application/view/settings.py:233
 msgid "Bengali"
 msgstr "ベンガル語"
 
-#: application/view/settings.py:233
+#: application/view/settings.py:234
 msgid "Persian"
 msgstr "ペルシャ語"
 
-#: application/view/settings.py:234
+#: application/view/settings.py:235
 msgid "Urdu"
 msgstr "ウルドゥー語"
 
-#: application/view/settings.py:235
+#: application/view/settings.py:236
 msgid "Swahili"
 msgstr "スワヒリ語"
 
-#: application/view/settings.py:236
+#: application/view/settings.py:237
 msgid "Vietnamese"
 msgstr "ベトナム語"
 
-#: application/view/settings.py:237
+#: application/view/settings.py:238
 msgid "Punjabi"
 msgstr "パンジャビ語"
 
-#: application/view/settings.py:238
+#: application/view/settings.py:239
 msgid "Javanese"
 msgstr "ジャワ語"
 
-#: application/view/settings.py:239
+#: application/view/settings.py:240
 msgid "Tagalog"
 msgstr "タガログ語"
 
-#: application/view/settings.py:240
+#: application/view/settings.py:241
 msgid "Hausa"
 msgstr "ハウサ語"
 
-#: application/view/settings.py:241
+#: application/view/settings.py:242
 msgid "Thai"
 msgstr "タイ語"
 
-#: application/view/settings.py:242
+#: application/view/settings.py:243
 msgid "Polish"
 msgstr "ポーランド語"
 
-#: application/view/settings.py:243
+#: application/view/settings.py:244
 msgid "Romanian"
 msgstr "ルーマニア語"
 
-#: application/view/settings.py:244
+#: application/view/settings.py:245
 msgid "Hungarian"
 msgstr "ハンガリー語"
 
-#: application/view/settings.py:245
+#: application/view/settings.py:246
 msgid "Swedish"
 msgstr "スウェーデン語"
 
-#: application/view/settings.py:246
+#: application/view/settings.py:247
 msgid "Hebrew"
 msgstr "ヘブライ語"
 
-#: application/view/settings.py:247
+#: application/view/settings.py:248
 msgid "Norwegian"
 msgstr "ノルウェー語"
 
-#: application/view/settings.py:248
+#: application/view/settings.py:249
 msgid "Finnish"
 msgstr "フィンランド語"
 
-#: application/view/settings.py:249
+#: application/view/settings.py:250
 msgid "Danish"
 msgstr "デンマーク語"
 
-#: application/view/settings.py:250
+#: application/view/settings.py:251
 msgid "Ukrainian"
 msgstr "ウクライナ語"
 
-#: application/view/settings.py:251
+#: application/view/settings.py:252
 msgid "Tamil"
 msgstr "タミル語"
 
-#: application/view/settings.py:252
+#: application/view/settings.py:253
 msgid "Marathi"
 msgstr "マラーティー語"
 
-#: application/view/settings.py:253
+#: application/view/settings.py:254
 msgid "Burmese"
 msgstr "ビルマ語"
 
-#: application/view/settings.py:254
+#: application/view/settings.py:255
 msgid "Amharic"
 msgstr "アムハラ語"
 
-#: application/view/settings.py:255
+#: application/view/settings.py:256
 msgid "Azerbaijani"
 msgstr "アゼルバイジャン語"
 
-#: application/view/settings.py:256
+#: application/view/settings.py:257
 msgid "Kazakh"
 msgstr "カザフ語"
 
-#: application/view/settings.py:257
+#: application/view/settings.py:258
 msgid "Serbian"
 msgstr "セルビア語"
 
-#: application/view/settings.py:258
+#: application/view/settings.py:259
 msgid "Croatian"
 msgstr "Hrvatski"
 
-#: application/view/settings.py:259
+#: application/view/settings.py:260
 msgid "Slovak"
 msgstr "Slovenčina"
 
-#: application/view/settings.py:260
+#: application/view/settings.py:261
 msgid "Bulgarian"
 msgstr "Български"
 
-#: application/view/settings.py:261
+#: application/view/settings.py:262
 msgid "Icelandic"
 msgstr "Íslenska"
 
-#: application/view/settings.py:262
+#: application/view/settings.py:263
 msgid "Lithuanian"
 msgstr "Lietuvių"
 
-#: application/view/settings.py:263
+#: application/view/settings.py:264
 msgid "Latvian"
 msgstr "Latviešu"
 
-#: application/view/settings.py:264
+#: application/view/settings.py:265
 msgid "Estonian"
 msgstr "Eesti"
 
-#: application/view/settings.py:265
+#: application/view/settings.py:266
 msgid "Macedonian"
 msgstr "Македонски"
 
-#: application/view/settings.py:266
+#: application/view/settings.py:267
 msgid "Albanian"
 msgstr "Shqip"
 
-#: application/view/settings.py:267
+#: application/view/settings.py:268
 msgid "Galician"
 msgstr "Galego"
 
-#: application/view/settings.py:268
+#: application/view/settings.py:269
 msgid "Welsh"
 msgstr "Cymraeg"
 
-#: application/view/settings.py:269
+#: application/view/settings.py:270
 msgid "Basque"
 msgstr "Euskara"
 
-#: application/view/settings.py:270
+#: application/view/settings.py:271
 msgid "Nepali"
 msgstr "नेपाली"
 
@@ -2263,10 +2284,10 @@ msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "このレシピはすでにサブスクライブされています。削除する前に解除してください。"
 
 #: application/view/subscribe.py:304 application/view/translator.py:51
-#: application/view/translator.py:103 application/view/translator.py:116
-#: application/view/translator.py:139 application/view/translator.py:187
-#: application/view/translator.py:200 application/view/translator.py:229
-#: application/view/translator.py:269 application/view/translator.py:282
+#: application/view/translator.py:104 application/view/translator.py:117
+#: application/view/translator.py:140 application/view/translator.py:188
+#: application/view/translator.py:201 application/view/translator.py:230
+#: application/view/translator.py:270 application/view/translator.py:283
 msgid "This recipe has not been subscribed to yet."
 msgstr "このレシピはまだサブスクライブされていません。"
 
@@ -2296,6 +2317,6 @@ msgstr "このレシピのログイン情報は削除されました。"
 msgid "The login information for this recipe has been saved."
 msgstr "このレシピのログイン情報は保存されました。"
 
-#: application/view/translator.py:81 application/view/translator.py:164
+#: application/view/translator.py:81 application/view/translator.py:165
 msgid "The api key is required."
 msgstr "APIキーが必要です。"

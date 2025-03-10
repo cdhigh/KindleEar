@@ -6,6 +6,8 @@ import os, sys, datetime, shutil, polib
 sys.path.insert(0, 'D:/Programer/Project/autopo')
 from autopo import createAiAgent, translateFile
 
+cfgFile = 'D:/Programer/Project/autopo/google.json'
+
 thisDir = os.path.dirname(os.path.abspath(__file__))
 appDir = os.path.normpath(os.path.join(thisDir, '..'))
 bakDir = os.path.join(appDir, 'tests', 'pobackup')
@@ -26,7 +28,7 @@ if refPercent != 100:
         sys.exit(0)
 
 startTime = datetime.datetime.now()
-agent = createAiAgent()
+agent = createAiAgent(cfgFile)
 for lang in ['de', 'es', 'fr', 'it', 'ja', 'ko', 'pt', 'ru', 'tr']:
     fileName = os.path.join(appDir, 'application', 'translations', lang, 'LC_MESSAGES', 'messages.po')
     shutil.copy(fileName, os.path.join(bakDir, f'{lang}.po')) #先备份

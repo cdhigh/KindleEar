@@ -136,6 +136,17 @@
           <option value="all" {% if rm_links=='all' %}selected="selected"{% endif %}>{{_("Remove all hyperlinks")}}</option>
         </select>
       </div>
+      <div class="pure-control-group">
+        <label>{{_("Navbar")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="navbar">
+          {% set navbar = user.book_cfg('navbar') %}
+          <option value="" {% if not navbar %}selected="selected"{% endif %}>{{_("Disable")}}</option>
+          <option value="top_center" {% if navbar=='top_center' %}selected="selected"{% endif %}>{{_("Top Center")}}</option>
+          <option value="top_left" {% if navbar=='top_left' %}selected="selected"{% endif %}>{{_("Top Left")}}</option>
+          <option value="bottom_center" {% if navbar=='bottom_center' %}selected="selected"{% endif %}>{{_("Bottom Center")}}</option>
+          <option value="bottom_left" {% if navbar=='bottom_left' %}selected="selected"{% endif %}>{{_("Bottom Left")}}</option>
+        </select>
+      </div>
     </fieldset>
 
     <fieldset id="adv_fieldset">

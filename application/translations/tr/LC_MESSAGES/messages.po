@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-12-25 20:15-0300\n"
+"POT-Creation-Date: 2025-03-10 19:49-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: tr <LL@li.org>\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Generated-By: Babel 2.14.0\n"
 
 #: application/templates/admin.html:3 application/templates/base.html:53
-#: application/templates/base.html:192 application/templates/settings.html:252
+#: application/templates/base.html:192 application/templates/settings.html:263
 msgid "Account"
 msgstr "Yönetim"
 
@@ -89,7 +89,7 @@ msgstr "Ekle"
 #: application/templates/logs.html:70
 #: application/templates/reset_password.html:19
 #: application/templates/reset_password.html:20
-#: application/templates/settings.html:230
+#: application/templates/settings.html:241
 #: application/templates/signup.html:21
 #: application/templates/user_account.html:15
 msgid "Username"
@@ -131,7 +131,7 @@ msgstr "Asla"
 #: application/templates/admin.html:70
 #: application/templates/adv_inboundmail.html:26
 #: application/templates/settings.html:58
-#: application/templates/settings.html:170
+#: application/templates/settings.html:181
 #: application/templates/user_account.html:43
 msgid "7 Days"
 msgstr "7 Günlük"
@@ -201,7 +201,7 @@ msgstr "Kullanıcı adı"
 #: application/templates/adv_archive.html:56
 #: application/templates/adv_archive.html:72
 #: application/templates/base.html:54 application/templates/home.html:20
-#: application/templates/login.html:28 application/templates/settings.html:234
+#: application/templates/login.html:28 application/templates/settings.html:245
 #: application/templates/signup.html:25
 #: application/templates/user_account.html:19
 msgid "Password"
@@ -222,7 +222,7 @@ msgid "client_secret"
 msgstr "client_secret"
 
 #: application/templates/adv_archive.html:84
-#: application/templates/settings.html:222
+#: application/templates/settings.html:233
 msgid "Host"
 msgstr "Ana bilgisayar"
 
@@ -232,7 +232,7 @@ msgstr "Ana bilgisayar"
 #: application/templates/book_audiolator.html:113
 #: application/templates/book_summarizer.html:88
 #: application/templates/book_translator.html:80
-#: application/templates/settings.html:258
+#: application/templates/settings.html:269
 msgid "Save settings"
 msgstr "Ayarları kaydet"
 
@@ -392,6 +392,7 @@ msgstr ""
 #: application/templates/adv_uploadcover.html:15
 #: application/templates/book_summarizer.html:19
 #: application/templates/book_translator.html:22
+#: application/templates/settings.html:143
 msgid "Disable"
 msgstr "Devre dışı bırak"
 
@@ -413,7 +414,7 @@ msgstr "E-posta Saklama"
 
 #: application/templates/adv_inboundmail.html:25
 #: application/templates/settings.html:52
-#: application/templates/settings.html:164
+#: application/templates/settings.html:175
 msgid "1 Day"
 msgstr "1 Günlük"
 
@@ -424,7 +425,7 @@ msgstr "30 Gün"
 
 #: application/templates/adv_inboundmail.html:28
 #: application/templates/settings.html:51
-#: application/templates/settings.html:163
+#: application/templates/settings.html:174
 msgid "No limit"
 msgstr "Sınırlama yok."
 
@@ -590,7 +591,7 @@ msgstr "Kategori"
 #: application/templates/base.html:39
 #: application/templates/book_audiolator.html:58
 #: application/templates/book_summarizer.html:43
-#: application/templates/settings.html:148
+#: application/templates/settings.html:159
 msgid "Language"
 msgstr "Dil"
 
@@ -888,7 +889,7 @@ msgstr "Konfigürasyon doğrulaması doğru."
 #: application/templates/logs.html:72 application/templates/my.html:17
 #: application/templates/settings.html:117
 #: application/templates/settings.html:118
-#: application/templates/settings.html:144
+#: application/templates/settings.html:155
 msgid "Title"
 msgstr "Başlık"
 
@@ -1354,7 +1355,7 @@ msgstr "Durum"
 msgid "Logs of other users"
 msgstr "Diğer kullanıcıların işlem kayıtları"
 
-#: application/templates/my.html:12 application/templates/settings.html:142
+#: application/templates/my.html:12 application/templates/settings.html:153
 msgid "Custom RSS"
 msgstr "Özel RSS"
 
@@ -1550,27 +1551,27 @@ msgid "Web shelf"
 msgstr "Web kitaplık"
 
 #: application/templates/settings.html:53
-#: application/templates/settings.html:165
+#: application/templates/settings.html:176
 msgid "2 Days"
 msgstr "2 Günlük"
 
 #: application/templates/settings.html:54
-#: application/templates/settings.html:166
+#: application/templates/settings.html:177
 msgid "3 Days"
 msgstr "3 Günlük"
 
 #: application/templates/settings.html:55
-#: application/templates/settings.html:167
+#: application/templates/settings.html:178
 msgid "4 Days"
 msgstr "4 Günlük"
 
 #: application/templates/settings.html:56
-#: application/templates/settings.html:168
+#: application/templates/settings.html:179
 msgid "5 Days"
 msgstr "5 Günlük"
 
 #: application/templates/settings.html:57
-#: application/templates/settings.html:169
+#: application/templates/settings.html:180
 msgid "6 Days"
 msgstr "6 Günlük"
 
@@ -1622,47 +1623,67 @@ msgstr "Metin bağlantılarını kaldır"
 msgid "Remove all hyperlinks"
 msgstr "Tüm bağlantıları kaldır"
 
-#: application/templates/settings.html:148
+#: application/templates/settings.html:140
+msgid "Navbar"
+msgstr "Navigasyon Çubuğu"
+
+#: application/templates/settings.html:144
+msgid "Top Center"
+msgstr "Üst Orta"
+
+#: application/templates/settings.html:145
+msgid "Top Left"
+msgstr "Üst Sol"
+
+#: application/templates/settings.html:146
+msgid "Bottom Center"
+msgstr "Alt Orta"
+
+#: application/templates/settings.html:147
+msgid "Bottom Left"
+msgstr "Alt Sol"
+
+#: application/templates/settings.html:159
 msgid "Sets the lookup dictionary"
 msgstr "Sözlük aramasını ayarlar"
 
-#: application/templates/settings.html:160
+#: application/templates/settings.html:171
 msgid "Oldest article"
 msgstr "En eski içerik?"
 
-#: application/templates/settings.html:174
+#: application/templates/settings.html:185
 msgid "Time format"
 msgstr "Zaman formatı"
 
-#: application/templates/settings.html:187
+#: application/templates/settings.html:198
 msgid "Author format"
 msgstr "Başlık Formatı"
 
-#: application/templates/settings.html:204
+#: application/templates/settings.html:215
 msgid "Send Mail Service"
 msgstr "Posta servisi gönder"
 
-#: application/templates/settings.html:206
+#: application/templates/settings.html:217
 msgid "Service"
 msgstr "Servis"
 
-#: application/templates/settings.html:214
+#: application/templates/settings.html:225
 msgid "ApiKey"
 msgstr "ApiKey"
 
-#: application/templates/settings.html:218
+#: application/templates/settings.html:229
 msgid "SecretKey"
 msgstr "SecretKey"
 
-#: application/templates/settings.html:226
+#: application/templates/settings.html:237
 msgid "Port"
 msgstr "Port"
 
-#: application/templates/settings.html:238
+#: application/templates/settings.html:249
 msgid "Save path"
 msgstr "Kayıt yolu"
 
-#: application/templates/settings.html:246
+#: application/templates/settings.html:257
 #, python-format
 msgid ""
 "Important: Please activate your kindle firstly, then goto %(personal)s Page "
@@ -1672,11 +1693,11 @@ msgstr ""
 "Sayfasına gidin ve %(sender)s'yi 'Onaylanmış Kişisel Belge E-posta "
 "Listesi'ne ekleyin."
 
-#: application/templates/settings.html:246
+#: application/templates/settings.html:257
 msgid "Personal Document Settings"
 msgstr "Ayarları kaydet"
 
-#: application/templates/settings.html:252
+#: application/templates/settings.html:263
 #, python-format
 msgid ""
 "You have not yet set up your email address. Please go to the %(admin)s page "
@@ -1685,7 +1706,7 @@ msgstr ""
 "Henüz e-posta adresinizi ayarlamadınız. Lütfen öncelikle e-posta adresinizi "
 "eklemek için %(admin)s sayfasına gidin."
 
-#: application/templates/settings.html:260
+#: application/templates/settings.html:271
 msgid "Send Test Email"
 msgstr "Test E-postası Gönder"
 
@@ -1730,9 +1751,9 @@ msgid "Word"
 msgstr "Kelime"
 
 #: application/view/admin.py:48 application/view/adv.py:437
-#: application/view/adv.py:510 application/view/settings.py:66
-#: application/view/translator.py:87 application/view/translator.py:171
-#: application/view/translator.py:253
+#: application/view/adv.py:528 application/view/settings.py:67
+#: application/view/translator.py:88 application/view/translator.py:172
+#: application/view/translator.py:254
 msgid "Settings Saved!"
 msgstr "Ayarlar Kaydedildi!"
 
@@ -1849,19 +1870,19 @@ msgstr "Makaleye URL'nin QR kodunu ekle"
 msgid "Unknown command: {}"
 msgstr "Bilinmeyen komut: {}"
 
-#: application/view/adv.py:439 application/view/adv.py:512
+#: application/view/adv.py:439 application/view/adv.py:530
 msgid "The format is invalid."
 msgstr "Format geçersiz."
 
-#: application/view/adv.py:544
+#: application/view/adv.py:562
 msgid "Authorization Error!<br/>{}"
 msgstr "Yetkilendirme Hatası!<br/>{}"
 
-#: application/view/adv.py:565
+#: application/view/adv.py:583
 msgid "Success authorized by Pocket!"
 msgstr "Pocket tarafından yetkilendirilen başarı!"
 
-#: application/view/adv.py:571
+#: application/view/adv.py:589
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
@@ -1869,13 +1890,13 @@ msgstr ""
 "Pocket yetkilendirme isteği başarısız oldu!<hr/>Aşağıdaki ayrıntılara "
 "bakın:<br/><br/>{}"
 
-#: application/view/adv.py:592
+#: application/view/adv.py:610
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 "Instapaper servisi bir hata ile karşılaştı. Lütfen daha sonra tekrar "
 "deneyin."
 
-#: application/view/adv.py:605
+#: application/view/adv.py:623
 msgid "Request type [{}] unsupported"
 msgstr "İstek türü [{}] desteklenmiyor"
 
@@ -1986,8 +2007,8 @@ msgstr ""
 msgid "The article is missing?"
 msgstr "Makale eksik mi?"
 
-#: application/view/reader.py:190 application/view/translator.py:120
-#: application/view/translator.py:204 application/view/translator.py:286
+#: application/view/reader.py:190 application/view/translator.py:121
+#: application/view/translator.py:205 application/view/translator.py:287
 msgid "The text is empty."
 msgstr "Metin boş."
 
@@ -2007,7 +2028,7 @@ msgstr "İtilemedi: {}"
 msgid "Failed to create ebook."
 msgstr "E-kitap oluşturulamadı."
 
-#: application/view/settings.py:130
+#: application/view/settings.py:131
 msgid ""
 "You have not yet set up your email address. Please go to the 'Account' page "
 "to add your email address firstly."
@@ -2015,231 +2036,231 @@ msgstr ""
 "Email adresinizi henüz ayarlamadınız. Lütfen e-posta adresinizi eklemek için"
 " 'Yönetim' sayfasına öncelikle gidin."
 
-#: application/view/settings.py:214
+#: application/view/settings.py:215
 msgid "English"
 msgstr "İngilizce"
 
-#: application/view/settings.py:215
+#: application/view/settings.py:216
 msgid "Simplified Chinese"
 msgstr "简体中文"
 
-#: application/view/settings.py:216
+#: application/view/settings.py:217
 msgid "Traditional Chinese"
 msgstr "繁体中文"
 
-#: application/view/settings.py:217
+#: application/view/settings.py:218
 msgid "French"
 msgstr "Fransızca"
 
-#: application/view/settings.py:218
+#: application/view/settings.py:219
 msgid "Spanish"
 msgstr "İspanyolca"
 
-#: application/view/settings.py:219
+#: application/view/settings.py:220
 msgid "Portuguese"
 msgstr "Portekizce"
 
-#: application/view/settings.py:220
+#: application/view/settings.py:221
 msgid "German"
 msgstr "Almanca"
 
-#: application/view/settings.py:221
+#: application/view/settings.py:222
 msgid "Italian"
 msgstr "İtalyanca"
 
-#: application/view/settings.py:222
+#: application/view/settings.py:223
 msgid "Japanese"
 msgstr "Japonca"
 
-#: application/view/settings.py:223
+#: application/view/settings.py:224
 msgid "Russian"
 msgstr "Rusça"
 
-#: application/view/settings.py:224
+#: application/view/settings.py:225
 msgid "Turkish"
 msgstr "Türkçe"
 
-#: application/view/settings.py:225
+#: application/view/settings.py:226
 msgid "Korean"
 msgstr "Koreli"
 
-#: application/view/settings.py:226
+#: application/view/settings.py:227
 msgid "Arabic"
 msgstr "Arapça"
 
-#: application/view/settings.py:227
+#: application/view/settings.py:228
 msgid "Czech"
 msgstr "Çek"
 
-#: application/view/settings.py:228
+#: application/view/settings.py:229
 msgid "Dutch"
 msgstr "Flemenkçe"
 
-#: application/view/settings.py:229
+#: application/view/settings.py:230
 msgid "Greek"
 msgstr "Yunan"
 
-#: application/view/settings.py:230
+#: application/view/settings.py:231
 msgid "Hindi"
 msgstr "Hintçe"
 
-#: application/view/settings.py:231
+#: application/view/settings.py:232
 msgid "Malaysian"
 msgstr "Malezyalı"
 
-#: application/view/settings.py:232
+#: application/view/settings.py:233
 msgid "Bengali"
 msgstr "Bengal"
 
-#: application/view/settings.py:233
+#: application/view/settings.py:234
 msgid "Persian"
 msgstr "Farsça"
 
-#: application/view/settings.py:234
+#: application/view/settings.py:235
 msgid "Urdu"
 msgstr "Urduca"
 
-#: application/view/settings.py:235
+#: application/view/settings.py:236
 msgid "Swahili"
 msgstr "Svahili"
 
-#: application/view/settings.py:236
+#: application/view/settings.py:237
 msgid "Vietnamese"
 msgstr "Vietnam"
 
-#: application/view/settings.py:237
+#: application/view/settings.py:238
 msgid "Punjabi"
 msgstr "Pencap"
 
-#: application/view/settings.py:238
+#: application/view/settings.py:239
 msgid "Javanese"
 msgstr "Cava"
 
-#: application/view/settings.py:239
+#: application/view/settings.py:240
 msgid "Tagalog"
 msgstr "Tagalog"
 
-#: application/view/settings.py:240
+#: application/view/settings.py:241
 msgid "Hausa"
 msgstr "Hausa"
 
-#: application/view/settings.py:241
+#: application/view/settings.py:242
 msgid "Thai"
 msgstr "Taylandca"
 
-#: application/view/settings.py:242
+#: application/view/settings.py:243
 msgid "Polish"
 msgstr "Lehçe"
 
-#: application/view/settings.py:243
+#: application/view/settings.py:244
 msgid "Romanian"
 msgstr "Rumen"
 
-#: application/view/settings.py:244
+#: application/view/settings.py:245
 msgid "Hungarian"
 msgstr "Macarca"
 
-#: application/view/settings.py:245
+#: application/view/settings.py:246
 msgid "Swedish"
 msgstr "İsveççe"
 
-#: application/view/settings.py:246
+#: application/view/settings.py:247
 msgid "Hebrew"
 msgstr "İbranice"
 
-#: application/view/settings.py:247
+#: application/view/settings.py:248
 msgid "Norwegian"
 msgstr "Norveççe"
 
-#: application/view/settings.py:248
+#: application/view/settings.py:249
 msgid "Finnish"
 msgstr "Fince"
 
-#: application/view/settings.py:249
+#: application/view/settings.py:250
 msgid "Danish"
 msgstr "Danca"
 
-#: application/view/settings.py:250
+#: application/view/settings.py:251
 msgid "Ukrainian"
 msgstr "Ukraynaca"
 
-#: application/view/settings.py:251
+#: application/view/settings.py:252
 msgid "Tamil"
 msgstr "Tamilce"
 
-#: application/view/settings.py:252
+#: application/view/settings.py:253
 msgid "Marathi"
 msgstr "Marathi"
 
-#: application/view/settings.py:253
+#: application/view/settings.py:254
 msgid "Burmese"
 msgstr "Burmaca"
 
-#: application/view/settings.py:254
+#: application/view/settings.py:255
 msgid "Amharic"
 msgstr "Amharca"
 
-#: application/view/settings.py:255
+#: application/view/settings.py:256
 msgid "Azerbaijani"
 msgstr "Azerbaycanca"
 
-#: application/view/settings.py:256
+#: application/view/settings.py:257
 msgid "Kazakh"
 msgstr "Kazakça"
 
-#: application/view/settings.py:257
+#: application/view/settings.py:258
 msgid "Serbian"
 msgstr "Српски"
 
-#: application/view/settings.py:258
+#: application/view/settings.py:259
 msgid "Croatian"
 msgstr "Hrvatski"
 
-#: application/view/settings.py:259
+#: application/view/settings.py:260
 msgid "Slovak"
 msgstr "Slovenčina"
 
-#: application/view/settings.py:260
+#: application/view/settings.py:261
 msgid "Bulgarian"
 msgstr "Български"
 
-#: application/view/settings.py:261
+#: application/view/settings.py:262
 msgid "Icelandic"
 msgstr "Íslenska"
 
-#: application/view/settings.py:262
+#: application/view/settings.py:263
 msgid "Lithuanian"
 msgstr "Lietuvių"
 
-#: application/view/settings.py:263
+#: application/view/settings.py:264
 msgid "Latvian"
 msgstr "Latviešu"
 
-#: application/view/settings.py:264
+#: application/view/settings.py:265
 msgid "Estonian"
 msgstr "Eesti"
 
-#: application/view/settings.py:265
+#: application/view/settings.py:266
 msgid "Macedonian"
 msgstr "Македонски"
 
-#: application/view/settings.py:266
+#: application/view/settings.py:267
 msgid "Albanian"
 msgstr "Shqip"
 
-#: application/view/settings.py:267
+#: application/view/settings.py:268
 msgid "Galician"
 msgstr "Galego"
 
-#: application/view/settings.py:268
+#: application/view/settings.py:269
 msgid "Welsh"
 msgstr "Cymraeg"
 
-#: application/view/settings.py:269
+#: application/view/settings.py:270
 msgid "Basque"
 msgstr "Euskara"
 
-#: application/view/settings.py:270
+#: application/view/settings.py:271
 msgid "Nepali"
 msgstr "नेपाली"
 
@@ -2303,10 +2324,10 @@ msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "Tarif abone olunmuş, silmeden önce aboneliği iptal edin."
 
 #: application/view/subscribe.py:304 application/view/translator.py:51
-#: application/view/translator.py:103 application/view/translator.py:116
-#: application/view/translator.py:139 application/view/translator.py:187
-#: application/view/translator.py:200 application/view/translator.py:229
-#: application/view/translator.py:269 application/view/translator.py:282
+#: application/view/translator.py:104 application/view/translator.py:117
+#: application/view/translator.py:140 application/view/translator.py:188
+#: application/view/translator.py:201 application/view/translator.py:230
+#: application/view/translator.py:270 application/view/translator.py:283
 msgid "This recipe has not been subscribed to yet."
 msgstr "Bu tarife henüz abone olunmadı."
 
@@ -2338,6 +2359,6 @@ msgstr "Bu tarifin giriş bilgileri temizlendi."
 msgid "The login information for this recipe has been saved."
 msgstr "Bu tarifin giriş bilgileri kaydedildi."
 
-#: application/view/translator.py:81 application/view/translator.py:164
+#: application/view/translator.py:81 application/view/translator.py:165
 msgid "The api key is required."
 msgstr "API anahtarı gereklidir."

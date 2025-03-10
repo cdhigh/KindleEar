@@ -54,6 +54,7 @@ def SettingsPost(user: KeUser):
     user.send_days = [weekday for weekday, day in enumerate(allDays) if str_to_bool(form.get(day, ''))]
     book_config['mode'] = form.get('book_mode', '')
     book_config['rm_links'] = form.get('remove_hyperlinks', '')
+    book_config['navbar'] = form.get('navbar', '')
     book_config['author_fmt'] = form.get('author_format', '') #修正Kindle 5.9.x固件的bug【将作者显示为日期】
     book_config['title'] = form.get('rss_title') or 'KindleEar'
     book_config['language'] = form.get("book_language", "en")

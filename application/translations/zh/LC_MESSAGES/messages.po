@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-12-25 20:15-0300\n"
+"POT-Creation-Date: 2025-03-10 19:49-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Generated-By: Babel 2.14.0\n"
 
 #: application/templates/admin.html:3 application/templates/base.html:53
-#: application/templates/base.html:192 application/templates/settings.html:252
+#: application/templates/base.html:192 application/templates/settings.html:263
 msgid "Account"
 msgstr "账号"
 
@@ -88,7 +88,7 @@ msgstr "添加"
 #: application/templates/login.html:24 application/templates/logs.html:70
 #: application/templates/reset_password.html:19
 #: application/templates/reset_password.html:20
-#: application/templates/settings.html:230 application/templates/signup.html:21
+#: application/templates/settings.html:241 application/templates/signup.html:21
 #: application/templates/user_account.html:15
 msgid "Username"
 msgstr "用户名"
@@ -129,7 +129,7 @@ msgstr "永不过期"
 #: application/templates/admin.html:70
 #: application/templates/adv_inboundmail.html:26
 #: application/templates/settings.html:58
-#: application/templates/settings.html:170
+#: application/templates/settings.html:181
 #: application/templates/user_account.html:43
 msgid "7 Days"
 msgstr "一星期"
@@ -199,7 +199,7 @@ msgstr "邮箱或用户名"
 #: application/templates/adv_archive.html:56
 #: application/templates/adv_archive.html:72 application/templates/base.html:54
 #: application/templates/home.html:20 application/templates/login.html:28
-#: application/templates/settings.html:234 application/templates/signup.html:25
+#: application/templates/settings.html:245 application/templates/signup.html:25
 #: application/templates/user_account.html:19
 msgid "Password"
 msgstr "密码"
@@ -218,7 +218,7 @@ msgid "client_secret"
 msgstr "client_secret"
 
 #: application/templates/adv_archive.html:84
-#: application/templates/settings.html:222
+#: application/templates/settings.html:233
 msgid "Host"
 msgstr "主机"
 
@@ -228,7 +228,7 @@ msgstr "主机"
 #: application/templates/book_audiolator.html:113
 #: application/templates/book_summarizer.html:88
 #: application/templates/book_translator.html:80
-#: application/templates/settings.html:258
+#: application/templates/settings.html:269
 msgid "Save settings"
 msgstr "保存设置"
 
@@ -384,6 +384,7 @@ msgstr "为了使能入站邮件功能，还需要配置白名单列表。"
 #: application/templates/adv_uploadcover.html:15
 #: application/templates/book_summarizer.html:19
 #: application/templates/book_translator.html:22
+#: application/templates/settings.html:143
 msgid "Disable"
 msgstr "禁止"
 
@@ -405,7 +406,7 @@ msgstr "邮件保留期"
 
 #: application/templates/adv_inboundmail.html:25
 #: application/templates/settings.html:52
-#: application/templates/settings.html:164
+#: application/templates/settings.html:175
 msgid "1 Day"
 msgstr "一天"
 
@@ -416,7 +417,7 @@ msgstr "三十天"
 
 #: application/templates/adv_inboundmail.html:28
 #: application/templates/settings.html:51
-#: application/templates/settings.html:163
+#: application/templates/settings.html:174
 msgid "No limit"
 msgstr "不限制"
 
@@ -580,7 +581,7 @@ msgstr "类别"
 #: application/templates/base.html:39
 #: application/templates/book_audiolator.html:58
 #: application/templates/book_summarizer.html:43
-#: application/templates/settings.html:148
+#: application/templates/settings.html:159
 msgid "Language"
 msgstr "语言"
 
@@ -867,7 +868,7 @@ msgstr "配置校验正确。"
 #: application/templates/logs.html:72 application/templates/my.html:17
 #: application/templates/settings.html:117
 #: application/templates/settings.html:118
-#: application/templates/settings.html:144
+#: application/templates/settings.html:155
 msgid "Title"
 msgstr "书籍标题"
 
@@ -1323,7 +1324,7 @@ msgstr "状态"
 msgid "Logs of other users"
 msgstr "其他用户的日志"
 
-#: application/templates/my.html:12 application/templates/settings.html:142
+#: application/templates/my.html:12 application/templates/settings.html:153
 msgid "Custom RSS"
 msgstr "自定义RSS"
 
@@ -1516,27 +1517,27 @@ msgid "Web shelf"
 msgstr "网络书架"
 
 #: application/templates/settings.html:53
-#: application/templates/settings.html:165
+#: application/templates/settings.html:176
 msgid "2 Days"
 msgstr "两天"
 
 #: application/templates/settings.html:54
-#: application/templates/settings.html:166
+#: application/templates/settings.html:177
 msgid "3 Days"
 msgstr "三天"
 
 #: application/templates/settings.html:55
-#: application/templates/settings.html:167
+#: application/templates/settings.html:178
 msgid "4 Days"
 msgstr "四天"
 
 #: application/templates/settings.html:56
-#: application/templates/settings.html:168
+#: application/templates/settings.html:179
 msgid "5 Days"
 msgstr "五天"
 
 #: application/templates/settings.html:57
-#: application/templates/settings.html:169
+#: application/templates/settings.html:180
 msgid "6 Days"
 msgstr "六天"
 
@@ -1588,47 +1589,67 @@ msgstr "移除文本上的链接"
 msgid "Remove all hyperlinks"
 msgstr "移除所有链接"
 
-#: application/templates/settings.html:148
+#: application/templates/settings.html:140
+msgid "Navbar"
+msgstr "导航条"
+
+#: application/templates/settings.html:144
+msgid "Top Center"
+msgstr "顶部中间"
+
+#: application/templates/settings.html:145
+msgid "Top Left"
+msgstr "顶部靠左"
+
+#: application/templates/settings.html:146
+msgid "Bottom Center"
+msgstr "底部中间"
+
+#: application/templates/settings.html:147
+msgid "Bottom Left"
+msgstr "底部靠左"
+
+#: application/templates/settings.html:159
 msgid "Sets the lookup dictionary"
 msgstr "设置查词时使用的词典"
 
-#: application/templates/settings.html:160
+#: application/templates/settings.html:171
 msgid "Oldest article"
 msgstr "最旧文章"
 
-#: application/templates/settings.html:174
+#: application/templates/settings.html:185
 msgid "Time format"
 msgstr "时间格式"
 
-#: application/templates/settings.html:187
+#: application/templates/settings.html:198
 msgid "Author format"
 msgstr "标题样式"
 
-#: application/templates/settings.html:204
+#: application/templates/settings.html:215
 msgid "Send Mail Service"
 msgstr "发送邮件服务"
 
-#: application/templates/settings.html:206
+#: application/templates/settings.html:217
 msgid "Service"
 msgstr "服务"
 
-#: application/templates/settings.html:214
+#: application/templates/settings.html:225
 msgid "ApiKey"
 msgstr "ApiKey"
 
-#: application/templates/settings.html:218
+#: application/templates/settings.html:229
 msgid "SecretKey"
 msgstr "SecretKey"
 
-#: application/templates/settings.html:226
+#: application/templates/settings.html:237
 msgid "Port"
 msgstr "端口"
 
-#: application/templates/settings.html:238
+#: application/templates/settings.html:249
 msgid "Save path"
 msgstr "保存路径"
 
-#: application/templates/settings.html:246
+#: application/templates/settings.html:257
 #, python-format
 msgid ""
 "Important: Please activate your kindle firstly, then goto %(personal)s "
@@ -1637,18 +1658,18 @@ msgstr ""
 "注意：必须首先注册您的Kindle设备，同时请到亚马逊账户中心 %(personal)s 页面，将 %(sender)s 添加到 "
 "'已认可的发件人电子邮箱列表'。"
 
-#: application/templates/settings.html:246
+#: application/templates/settings.html:257
 msgid "Personal Document Settings"
 msgstr "个人文档设置"
 
-#: application/templates/settings.html:252
+#: application/templates/settings.html:263
 #, python-format
 msgid ""
 "You have not yet set up your email address. Please go to the %(admin)s "
 "page to add your email address firstly."
 msgstr "您尚未设置您的email地址，请先到 %(admin)s 页面添加您的email地址。"
 
-#: application/templates/settings.html:260
+#: application/templates/settings.html:271
 msgid "Send Test Email"
 msgstr "发送测试邮件"
 
@@ -1693,9 +1714,9 @@ msgid "Word"
 msgstr "单词"
 
 #: application/view/admin.py:48 application/view/adv.py:437
-#: application/view/adv.py:510 application/view/settings.py:66
-#: application/view/translator.py:87 application/view/translator.py:171
-#: application/view/translator.py:253
+#: application/view/adv.py:528 application/view/settings.py:67
+#: application/view/translator.py:88 application/view/translator.py:172
+#: application/view/translator.py:254
 msgid "Settings Saved!"
 msgstr "设置已保存!"
 
@@ -1812,29 +1833,29 @@ msgstr "在每篇文章后附加文章链接的二维码"
 msgid "Unknown command: {}"
 msgstr "未知命令：{}"
 
-#: application/view/adv.py:439 application/view/adv.py:512
+#: application/view/adv.py:439 application/view/adv.py:530
 msgid "The format is invalid."
 msgstr "格式非法。"
 
-#: application/view/adv.py:544
+#: application/view/adv.py:562
 msgid "Authorization Error!<br/>{}"
 msgstr "申请授权过程失败！<br/>{}"
 
-#: application/view/adv.py:565
+#: application/view/adv.py:583
 msgid "Success authorized by Pocket!"
 msgstr "已经成功获得Pocket的授权！"
 
-#: application/view/adv.py:571
+#: application/view/adv.py:589
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr "申请Pocket授权失败!<hr/>错误信息参考如下：<br/><br/>{}"
 
-#: application/view/adv.py:592
+#: application/view/adv.py:610
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr "Instapaper服务器异常，请稍候再试。"
 
-#: application/view/adv.py:605
+#: application/view/adv.py:623
 msgid "Request type [{}] unsupported"
 msgstr "不支持你请求的命令类型 [{}]"
 
@@ -1939,8 +1960,8 @@ msgstr "你可以点击下面的链接来重置你的KindleEar密码。"
 msgid "The article is missing?"
 msgstr "文章丢失了？"
 
-#: application/view/reader.py:190 application/view/translator.py:120
-#: application/view/translator.py:204 application/view/translator.py:286
+#: application/view/reader.py:190 application/view/translator.py:121
+#: application/view/translator.py:205 application/view/translator.py:287
 msgid "The text is empty."
 msgstr "文本为空。"
 
@@ -1960,237 +1981,237 @@ msgstr "推送失败: {}"
 msgid "Failed to create ebook."
 msgstr "创建电子书失败。"
 
-#: application/view/settings.py:130
+#: application/view/settings.py:131
 msgid ""
 "You have not yet set up your email address. Please go to the 'Account' "
 "page to add your email address firstly."
 msgstr "您尚未设置您的email地址，请先到“账号管理”页面添加您的email地址。"
 
-#: application/view/settings.py:214
+#: application/view/settings.py:215
 msgid "English"
 msgstr "英语"
 
-#: application/view/settings.py:215
+#: application/view/settings.py:216
 msgid "Simplified Chinese"
 msgstr "简体中文"
 
-#: application/view/settings.py:216
+#: application/view/settings.py:217
 msgid "Traditional Chinese"
 msgstr "繁体中文"
 
-#: application/view/settings.py:217
+#: application/view/settings.py:218
 msgid "French"
 msgstr "法语"
 
-#: application/view/settings.py:218
+#: application/view/settings.py:219
 msgid "Spanish"
 msgstr "西班牙语"
 
-#: application/view/settings.py:219
+#: application/view/settings.py:220
 msgid "Portuguese"
 msgstr "葡萄牙语"
 
-#: application/view/settings.py:220
+#: application/view/settings.py:221
 msgid "German"
 msgstr "德语"
 
-#: application/view/settings.py:221
+#: application/view/settings.py:222
 msgid "Italian"
 msgstr "意大利语"
 
-#: application/view/settings.py:222
+#: application/view/settings.py:223
 msgid "Japanese"
 msgstr "日语"
 
-#: application/view/settings.py:223
+#: application/view/settings.py:224
 msgid "Russian"
 msgstr "俄语"
 
-#: application/view/settings.py:224
+#: application/view/settings.py:225
 msgid "Turkish"
 msgstr "土耳其语"
 
-#: application/view/settings.py:225
+#: application/view/settings.py:226
 msgid "Korean"
 msgstr "韩语"
 
-#: application/view/settings.py:226
+#: application/view/settings.py:227
 msgid "Arabic"
 msgstr "阿拉伯语"
 
-#: application/view/settings.py:227
+#: application/view/settings.py:228
 msgid "Czech"
 msgstr "捷克语"
 
-#: application/view/settings.py:228
+#: application/view/settings.py:229
 msgid "Dutch"
 msgstr "荷兰语"
 
-#: application/view/settings.py:229
+#: application/view/settings.py:230
 msgid "Greek"
 msgstr "希腊语"
 
-#: application/view/settings.py:230
+#: application/view/settings.py:231
 msgid "Hindi"
 msgstr "印地语"
 
-#: application/view/settings.py:231
+#: application/view/settings.py:232
 msgid "Malaysian"
 msgstr "马来西亚语"
 
-#: application/view/settings.py:232
+#: application/view/settings.py:233
 msgid "Bengali"
 msgstr "孟加拉语"
 
-#: application/view/settings.py:233
+#: application/view/settings.py:234
 msgid "Persian"
 msgstr "波斯语"
 
-#: application/view/settings.py:234
+#: application/view/settings.py:235
 msgid "Urdu"
 msgstr "乌尔都语"
 
-#: application/view/settings.py:235
+#: application/view/settings.py:236
 msgid "Swahili"
 msgstr "斯瓦希里语"
 
-#: application/view/settings.py:236
+#: application/view/settings.py:237
 msgid "Vietnamese"
 msgstr "越南语"
 
-#: application/view/settings.py:237
+#: application/view/settings.py:238
 msgid "Punjabi"
 msgstr "旁遮普语"
 
-#: application/view/settings.py:238
+#: application/view/settings.py:239
 msgid "Javanese"
 msgstr "爪哇语"
 
-#: application/view/settings.py:239
+#: application/view/settings.py:240
 msgid "Tagalog"
 msgstr "他加禄语"
 
-#: application/view/settings.py:240
+#: application/view/settings.py:241
 msgid "Hausa"
 msgstr "豪萨语"
 
-#: application/view/settings.py:241
+#: application/view/settings.py:242
 msgid "Thai"
 msgstr "泰语"
 
-#: application/view/settings.py:242
+#: application/view/settings.py:243
 msgid "Polish"
 msgstr "波兰语"
 
-#: application/view/settings.py:243
+#: application/view/settings.py:244
 msgid "Romanian"
 msgstr "罗马尼亚语"
 
-#: application/view/settings.py:244
+#: application/view/settings.py:245
 msgid "Hungarian"
 msgstr "匈牙利语"
 
-#: application/view/settings.py:245
+#: application/view/settings.py:246
 msgid "Swedish"
 msgstr "瑞典语"
 
-#: application/view/settings.py:246
+#: application/view/settings.py:247
 msgid "Hebrew"
 msgstr "希伯来语"
 
-#: application/view/settings.py:247
+#: application/view/settings.py:248
 msgid "Norwegian"
 msgstr "挪威语"
 
-#: application/view/settings.py:248
+#: application/view/settings.py:249
 msgid "Finnish"
 msgstr "芬兰语"
 
-#: application/view/settings.py:249
+#: application/view/settings.py:250
 msgid "Danish"
 msgstr "丹麦语"
 
-#: application/view/settings.py:250
+#: application/view/settings.py:251
 msgid "Ukrainian"
 msgstr "乌克兰语"
 
-#: application/view/settings.py:251
+#: application/view/settings.py:252
 msgid "Tamil"
 msgstr "泰米尔语"
 
-#: application/view/settings.py:252
+#: application/view/settings.py:253
 msgid "Marathi"
 msgstr "马拉地语"
 
-#: application/view/settings.py:253
+#: application/view/settings.py:254
 msgid "Burmese"
 msgstr "缅甸语"
 
-#: application/view/settings.py:254
+#: application/view/settings.py:255
 msgid "Amharic"
 msgstr "阿姆哈拉语"
 
-#: application/view/settings.py:255
+#: application/view/settings.py:256
 msgid "Azerbaijani"
 msgstr "阿塞拜疆语"
 
-#: application/view/settings.py:256
+#: application/view/settings.py:257
 msgid "Kazakh"
 msgstr "哈萨克语"
 
-#: application/view/settings.py:257
+#: application/view/settings.py:258
 msgid "Serbian"
 msgstr "塞尔维亚语"
 
-#: application/view/settings.py:258
+#: application/view/settings.py:259
 msgid "Croatian"
 msgstr "克罗地亚语"
 
-#: application/view/settings.py:259
+#: application/view/settings.py:260
 msgid "Slovak"
 msgstr "斯洛伐克语"
 
-#: application/view/settings.py:260
+#: application/view/settings.py:261
 msgid "Bulgarian"
 msgstr "保加利亚语"
 
-#: application/view/settings.py:261
+#: application/view/settings.py:262
 msgid "Icelandic"
 msgstr "冰岛语"
 
-#: application/view/settings.py:262
+#: application/view/settings.py:263
 msgid "Lithuanian"
 msgstr "立陶宛语"
 
-#: application/view/settings.py:263
+#: application/view/settings.py:264
 msgid "Latvian"
 msgstr "拉脱维亚语"
 
-#: application/view/settings.py:264
+#: application/view/settings.py:265
 msgid "Estonian"
 msgstr "爱沙尼亚语"
 
-#: application/view/settings.py:265
+#: application/view/settings.py:266
 msgid "Macedonian"
 msgstr "马其顿语"
 
-#: application/view/settings.py:266
+#: application/view/settings.py:267
 msgid "Albanian"
 msgstr "阿尔巴尼亚语"
 
-#: application/view/settings.py:267
+#: application/view/settings.py:268
 msgid "Galician"
 msgstr "加利西亚语"
 
-#: application/view/settings.py:268
+#: application/view/settings.py:269
 msgid "Welsh"
 msgstr "威尔士语"
 
-#: application/view/settings.py:269
+#: application/view/settings.py:270
 msgid "Basque"
 msgstr "巴斯克语"
 
-#: application/view/settings.py:270
+#: application/view/settings.py:271
 msgid "Nepali"
 msgstr "尼泊尔语"
 
@@ -2254,10 +2275,10 @@ msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "此Recipe已经被订阅，请先取消订阅然后再删除。"
 
 #: application/view/subscribe.py:304 application/view/translator.py:51
-#: application/view/translator.py:103 application/view/translator.py:116
-#: application/view/translator.py:139 application/view/translator.py:187
-#: application/view/translator.py:200 application/view/translator.py:229
-#: application/view/translator.py:269 application/view/translator.py:282
+#: application/view/translator.py:104 application/view/translator.py:117
+#: application/view/translator.py:140 application/view/translator.py:188
+#: application/view/translator.py:201 application/view/translator.py:230
+#: application/view/translator.py:270 application/view/translator.py:283
 msgid "This recipe has not been subscribed to yet."
 msgstr "此Recipe尚未被订阅。"
 
@@ -2287,6 +2308,7 @@ msgstr "此Recipe的网站登录信息已经被删除。"
 msgid "The login information for this recipe has been saved."
 msgstr "此Recipe的网站登录信息已经保存。"
 
-#: application/view/translator.py:81 application/view/translator.py:164
+#: application/view/translator.py:81 application/view/translator.py:165
 msgid "The api key is required."
 msgstr "需要填写api key."
+
