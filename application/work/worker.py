@@ -102,8 +102,10 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
 
         #多个书籍：使用用户全局设置
         #单一书籍：如果书籍没有设置封面，则使用用户全局设置
-        if ((len(srcDict) > 1) or 
-            ((coverEnable == False) and (rc.cover_url is None) and ('get_cover_url' not in rc.__dict__))):
+        if len(srcDict) > 1:
+            rc.cover_url = coverEnable
+            rc.get_cover_url = lambda self: coverEnable
+        elif (coverEnable == False) and (rc.cover_url is None) and ('get_cover_url' not in rc.__dict__):
             rc.cover_url = coverEnable
             rc.get_cover_url = lambda self: getattr(self, 'cover_url', None)
         
