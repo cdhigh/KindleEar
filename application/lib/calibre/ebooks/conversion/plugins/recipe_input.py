@@ -397,7 +397,9 @@ class RecipeInput(InputFormatPlugin):
 
     #获取封面和报头路径，如果没有，使用默认图像
     def get_cover_masthead(self, dir_, recipe1, onlyRecipe, user, fs):
+        mPath = getattr(recipe1, 'masthead_path', None)
         if not onlyRecipe: #多个recipe
+            mPath = None
             if user.covers.get('enable', ''):
                 cPath = os.path.join(dir_, 'cover.jpg')
                 cover_data = user.get_cover_data()
@@ -416,11 +418,10 @@ class RecipeInput(InputFormatPlugin):
         else:
             cPath = None
             cover_data = None
-
-        mPath = getattr(recipe1, 'masthead_path', None)
+            
         if not mPath:
-            mh_data = BasicNewsRecipe.default_masthead_image()
             mPath = os.path.join(dir_, DEFAULT_MASTHEAD_IMAGE)
+            mh_data = BasicNewsRecipe.default_masthead_image()
             fs.write(mPath, mh_data, 'wb')
         return cover_data, cPath, mPath
 
