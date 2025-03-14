@@ -99,7 +99,7 @@ class RecipeInput(InputFormatPlugin):
                 #log.debug(traceback.format_exc())
                 continue
 
-            if indexFile and ro.feed_objects:
+            if indexFile and ro.feed_objects and (len(ro.feed_objects) > 0):
                 feed_index_start += len(ro.feed_objects)
                 feeds.extend(ro.feed_objects)
                 aborted_articles.extend(ro.aborted_articles)
@@ -274,7 +274,7 @@ class RecipeInput(InputFormatPlugin):
             articleNum = len(feed)
             for idx, article in enumerate(feed):
                 fileName = os.path.join(dir_, f'feed_{feedIdx}/article_{idx}/index.html')
-                if not getattr(article, 'downloaded', False) or not fs.isfile(fileName):
+                if not article.downloaded or not fs.isfile(fileName):
                     continue
 
                 src = fs.read(fileName).decode('utf-8')
@@ -303,32 +303,37 @@ class RecipeInput(InputFormatPlugin):
                     div.append(soup.new_tag('hr'))
                 add_separator(soup, div)
 
-                #下一篇文章的链接
-                if (idx + 1) < articleNum:
-                    nextLink = f'../article_{idx + 1}/index.html'
-                elif (feedIdx + 1) < feedNum:
-                    nextLink = f'../../feed_{feedIdx + 1}/article_0/index.html'
-                else: #
-                    nextLink = None
-                if nextLink:
-                    add_navitem(soup, div, 'Next', nextLink)
-                    add_separator(soup, div)
-
-                add_navitem(soup, div, 'Section menu', '../index.html')
-                add_separator(soup, div)
-                add_navitem(soup, div, 'Main menu', '../../index.html')
-                add_separator(soup, div)
-
                 #前一篇文章的链接
-                if idx > 0:
-                    PrevLink = f'../article_{idx - 1}/index.html'
-                elif feedIdx > 0:
-                    prevArticleNum = len(self.feeds[feedIdx - 1])
-                    PrevLink = f'../../feed_{feedIdx - 1}/article_{prevArticleNum - 1}/index.html'
-                else: #
-                    PrevLink = None
-                if PrevLink:
+                fId = feedIdx
+                prevIdx = next((i for i in range(idx - 1, -1, -1) if feed.articles[i].downloaded), -1)
+                if prevIdx < 0:
+                    for fId in range(feedIdx - 1, -1, -1): #跳过没有文章的Feed或没有下载的文章
+                        lst = self.feeds[fId]
+                        prevIdx = next((i for i in range(len(lst) - 1, -1, -1) if lst.articles[i].downloaded), -1)
+                        if prevIdx >= 0:
+                            break
+                if prevIdx >= 0:
+                    PrevLink = f'../../feed_{fId}/article_{prevIdx}/index.html'
                     add_navitem(soup, div, 'Previous', PrevLink)
+                    add_separator(soup, div)
+                
+                add_navitem(soup, div, 'Section menu', f'../index.html#article_{idx}')
+                add_separator(soup, div)
+                add_navitem(soup, div, 'Main menu', f'../../index.html#feed_{feedIdx}')
+                add_separator(soup, div)
+
+                #下一篇文章的链接
+                fId = feedIdx
+                nextIdx = next((i for i in range(idx + 1, articleNum) if feed.articles[i].downloaded), -1)
+                if nextIdx < 0:
+                    for fId in range(feedIdx + 1, feedNum): #跳过没有文章的Feed或没有下载的文章
+                        lst = self.feeds[fId]
+                        nextIdx = next((i for i in range(len(lst)) if lst.articles[i].downloaded), -1)
+                        if nextIdx >= 0:
+                            break
+                if nextIdx >= 0:
+                    nextLink = f'../../feed_{fId}/article_{nextIdx}/index.html'
+                    add_navitem(soup, div, 'Next', nextLink)
                     add_separator(soup, div)
 
                 if pos == 'bottom':
