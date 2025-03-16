@@ -9,6 +9,7 @@ import os, io, uuid, traceback
 from bs4 import BeautifulSoup
 from calibre.customize.conversion import InputFormatPlugin, OptionRecommendation
 from calibre import strftime, force_unicode
+from calibre.web.feeds import templates
 from calibre.web.feeds.news import BasicNewsRecipe, DEFAULT_MASTHEAD_IMAGE
 from calibre.utils.localization import canonicalize_lang
 from calibre.ebooks.metadata import MetaInformation
@@ -120,56 +121,29 @@ class RecipeInput(InputFormatPlugin):
         self.index_htmls = index_htmls
         self.recipe_objects = recipe_objects
 
-        #self.build_top_index(output_dir, fs)
+        self.build_top_index(output_dir, fs, self.user)
         self.create_opf(output_dir, fs, self.user)
-        self.create_nav_bar(output_dir, fs, self.user)
+        self.create_feed_navbar(output_dir, fs, self.user)
+        self.create_article_navbar(output_dir, fs, self.user)
 
         opts.no_inline_navbars = orig_no_inline_navbars
         
         fs.find_opf_path()
         return fs
 
-    #将几个顶层的index.html合并
-    def build_top_index(self, output_dir, fs):
-        if len(self.index_htmls) > 1:
-            firstName = os.path.join(output_dir, 'index.html')
-            soup1 = BeautifulSoup(fs.read(firstName), 'lxml')
-            title_tag = soup1.find('title')
-            title1 = title_tag.string if title_tag else 'KindleEar'
+    #将所有Feed标题合并，覆盖原先的index.html
+    def build_top_index(self, dir_, fs, user):
+        if len(self.recipe_objects) <= 1:
+            return
 
-            #ul里面的li提取出来，外面套ul作为原先ul的一个li
-            ul1 = soup1.find('ul', class_='calibre_feed_list')
-            if ul1:
-                li_list = ul1.find_all("li")
-                if len(li_list) > 1:
-                    new_ul = soup1.new_tag("ul", attrs={'class': ['calibre_feed_list']})
-                    for li in li_list:
-                        li.extract()
-                        new_ul.append(li)
-
-                    new_li = soup1.new_tag("li", attrs={'class': ['calibre5']})
-                    new_li.append(soup1.new_string(title1))
-                    new_li.append(new_ul)
-                    ul1.append(new_li)
-            
-            for title, name in self.index_htmls[1:]:
-                fileName = os.path.join(output_dir, name)
-                soup = BeautifulSoup(fs.read(fileName), 'lxml')
-                ul = soup.find('ul', attrs={'class': ['calibre_feed_list']})
-                if ul:
-                    li_list = ul.find_all("li")
-                    if len(li_list) > 1:
-                        new_li = soup1.new_tag("li", attrs={'class': ['calibre5']})
-                        new_li.append(soup1.new_string(title))
-                        new_li.append(ul)
-                        ul1.append(new_li)
-                    elif li_list:
-                        ul1.append(li_list[0])
-                fs.delete(fileName) #删掉不要了
-
-            if title_tag:
-                title_tag.string = 'KindleEar'
-            fs.write(firstName, str(soup1).encode('utf-8'))
+        recipe1 = self.recipe_objects[0]
+        lang = user.book_cfg('language', 'en')
+        templ = templates.IndexTemplate(lang=lang)
+        css = recipe1.template_css + '\n\n' + user.get_extra_css()
+        timefmt = recipe1.timefmt
+        src = templ.generate('KindleEar', DEFAULT_MASTHEAD_IMAGE, timefmt, self.feeds, extra_css=css).render(doctype='xhtml')
+        fileName = os.path.join(dir_, 'index.html')
+        fs.write(fileName, src, 'wb')
 
     #通过Feed对象列表构建一个opf文件，将这个函数从 BasicNewsRecipe 里面移出来，方便一次处理多个Recipe
     def create_opf(self, dir_, fs, user):
@@ -218,7 +192,7 @@ class RecipeInput(InputFormatPlugin):
     
     #创建多级TOC和书脊
     def create_toc_spine(self, opf, dir_):
-        entries = []
+        entries = ['index.html']
         toc = TOC(base_path=dir_)
         self.play_order = 0
         for feedIdx, feed in enumerate(self.feeds):
@@ -259,8 +233,72 @@ class RecipeInput(InputFormatPlugin):
                     self.play_order += 1
                     artiTocEntry.add_item(artiFile, entry['anchor'], entry['title'] or _('Unknown section'), play_order=self.play_order)
 
+    #创建Feed的导航条，不受user配置影响，直接创建
+    def create_feed_navbar(self, dir_, fs, user):
+        #内嵌函数
+        feedFileName = lambda dir_, idx: os.path.join(dir_, f'feed_{idx}/index.html')
+        feedNum = len(self.feeds)
+
+        for idx, feed in enumerate(self.feeds):
+            fileName = feedFileName(dir_, idx)
+            if not fs.isfile(fileName):
+                continue
+
+            src = fs.read(fileName).decode('utf-8')
+            if not src:
+                continue
+            soup = BeautifulSoup(src, 'lxml')
+            body = soup.find('body')
+            if body is None:
+                continue
+
+            #内嵌函数
+            def add_separator(soup, div):
+                span = soup.new_tag('span')
+                span.string = ' | '
+                div.append(span)
+
+            #内嵌函数
+            def add_navitem(soup, div, text, link):
+                a = soup.new_tag('a', href=link)
+                a.string = text
+                div.append(a)
+
+            div = soup.new_tag('div', attrs={'class': 'calibre_navbar', 
+                'style': f'text-align:center', 'data-calibre-rescale': '70'})
+            add_separator(soup, div)
+
+            #前一个Feed的链接
+            prevIdx = next((i for i in range(idx - 1, -1, -1) if fs.isfile(feedFileName(dir_, i))), -1)
+            if prevIdx >= 0:
+                PrevLink = f'../feed_{prevIdx}/index.html'
+                add_navitem(soup, div, 'Previous section', PrevLink)
+                add_separator(soup, div)
+            
+            add_navitem(soup, div, 'Main menu', f'../index.html#feed_{idx}')
+            add_separator(soup, div)
+
+            #下一个Feed的链接
+            nextIdx = next((i for i in range(idx + 1, feedNum) if fs.isfile(feedFileName(dir_, i))), -1)
+            if nextIdx >= 0:
+                nextLink = f'../feed_{nextIdx}/index.html'
+                add_navitem(soup, div, 'Next section', nextLink)
+                add_separator(soup, div)
+
+            bottomDiv = BeautifulSoup(str(div), 'lxml').find('div') #复制一个tag用于插入末尾
+            div.append(soup.new_tag('hr'))
+            body.insert(0, div)
+            bottomDiv.insert(0, soup.new_tag('hr'))
+            bottomDiv.append(soup.new_tag('br'))
+            body.append(bottomDiv)
+            
+            try:
+                fs.write(fileName, str(soup).encode('utf-8'))
+            except:
+                pass
+
     #需要时创建文章内的导航条
-    def create_nav_bar(self, dir_, fs, user):
+    def create_article_navbar(self, dir_, fs, user):
         navbarSetting = user.book_cfg('navbar') or ''
         if not navbarSetting:
             return
