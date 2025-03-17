@@ -253,7 +253,12 @@ class RecipeInput(InputFormatPlugin):
                 continue
 
             #内嵌函数
+            sepAdded = False
             def add_separator(soup, div):
+                nonlocal sepAdded
+                if not sepAdded:
+                    sepAdded = True
+                    return
                 span = soup.new_tag('span')
                 span.string = ' | '
                 div.append(span)
@@ -266,25 +271,24 @@ class RecipeInput(InputFormatPlugin):
 
             div = soup.new_tag('div', attrs={'class': 'calibre_navbar', 
                 'style': f'text-align:center', 'data-calibre-rescale': '70'})
-            add_separator(soup, div)
-
+            
             #前一个Feed的链接
             prevIdx = next((i for i in range(idx - 1, -1, -1) if fs.isfile(feedFileName(dir_, i))), -1)
             if prevIdx >= 0:
                 PrevLink = f'../feed_{prevIdx}/index.html'
-                add_navitem(soup, div, 'Previous section', PrevLink)
                 add_separator(soup, div)
+                add_navitem(soup, div, 'Previous', PrevLink)
             
+            add_separator(soup, div)    
             add_navitem(soup, div, 'Main menu', f'../index.html#feed_{idx}')
-            add_separator(soup, div)
-
+            
             #下一个Feed的链接
             nextIdx = next((i for i in range(idx + 1, feedNum) if fs.isfile(feedFileName(dir_, i))), -1)
             if nextIdx >= 0:
                 nextLink = f'../feed_{nextIdx}/index.html'
-                add_navitem(soup, div, 'Next section', nextLink)
                 add_separator(soup, div)
-
+                add_navitem(soup, div, 'Next', nextLink)
+                
             bottomDiv = BeautifulSoup(str(div), 'lxml').find('div') #复制一个tag用于插入末尾
             div.append(soup.new_tag('hr'))
             body.insert(0, div)
@@ -306,7 +310,9 @@ class RecipeInput(InputFormatPlugin):
         align = 'left' if 'left' in navbarSetting else 'center'
         pos = 'bottom' if 'bottom' in navbarSetting else 'top'
 
+        feedFileName = lambda dir_, idx: os.path.join(dir_, f'feed_{idx}/index.html')
         feedNum = len(self.feeds)
+
         for feedIdx, feed in enumerate(self.feeds):
             feedIndexFile = f'feed_{feedIdx}/index.html'
             articleNum = len(feed)
@@ -324,7 +330,12 @@ class RecipeInput(InputFormatPlugin):
                     continue
 
                 #内嵌函数
+                sepAdded = False
                 def add_separator(soup, div):
+                    nonlocal sepAdded
+                    if not sepAdded:
+                        sepAdded = True
+                        return
                     span = soup.new_tag('span')
                     span.string = ' | '
                     div.append(span)
@@ -339,7 +350,13 @@ class RecipeInput(InputFormatPlugin):
                     'style': f'text-align:{align}', 'data-calibre-rescale': '70'})
                 if pos == 'bottom':
                     div.append(soup.new_tag('hr'))
-                add_separator(soup, div)
+                
+                #前一个Feed的链接
+                prevIdx = next((i for i in range(feedIdx - 1, -1, -1) if fs.isfile(feedFileName(dir_, i))), -1)
+                if prevIdx >= 0:
+                    PrevLink = f'../../feed_{prevIdx}/index.html'
+                    add_separator(soup, div)
+                    add_navitem(soup, div, '<<', PrevLink)
 
                 #前一篇文章的链接
                 fId = feedIdx
@@ -352,13 +369,13 @@ class RecipeInput(InputFormatPlugin):
                             break
                 if prevIdx >= 0:
                     PrevLink = f'../../feed_{fId}/article_{prevIdx}/index.html'
-                    add_navitem(soup, div, 'Previous', PrevLink)
                     add_separator(soup, div)
+                    add_navitem(soup, div, 'Prev', PrevLink)
                 
-                add_navitem(soup, div, 'Section menu', f'../index.html#article_{idx}')
                 add_separator(soup, div)
-                add_navitem(soup, div, 'Main menu', f'../../index.html#feed_{feedIdx}')
+                add_navitem(soup, div, 'Sec', f'../index.html#article_{idx}')
                 add_separator(soup, div)
+                add_navitem(soup, div, 'Main', f'../../index.html#feed_{feedIdx}')
 
                 #下一篇文章的链接
                 fId = feedIdx
@@ -371,9 +388,16 @@ class RecipeInput(InputFormatPlugin):
                             break
                 if nextIdx >= 0:
                     nextLink = f'../../feed_{fId}/article_{nextIdx}/index.html'
-                    add_navitem(soup, div, 'Next', nextLink)
                     add_separator(soup, div)
+                    add_navitem(soup, div, 'Next', nextLink)
 
+                #后一个Feed的链接
+                nextIdx = next((i for i in range(feedIdx + 1, feedNum) if fs.isfile(feedFileName(dir_, i))), -1)
+                if nextIdx >= 0:
+                    nextLink = f'../../feed_{nextIdx}/index.html'
+                    add_separator(soup, div)
+                    add_navitem(soup, div, '>>', nextLink)
+                
                 if pos == 'bottom':
                     div.append(soup.new_tag('br'))
                     body.append(div)
