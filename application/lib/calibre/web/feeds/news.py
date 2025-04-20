@@ -34,7 +34,7 @@ from urlopener import UrlOpener
 from requests_file import LocalFileAdapter
 from filesystem_dict import FsDictStub
 from application.back_end.db_models import LastDelivered
-from application.ke_utils import loc_exc_pos
+from application.ke_utils import loc_exc_pos, extractHyperLink
 
 MASTHEAD_SIZE = (600, 60)
 DEFAULT_MASTHEAD_IMAGE = 'mastheadImage.gif'
@@ -2280,7 +2280,7 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
             return []
 
         soup = BeautifulSoup(resp.text, 'lxml')
-        
+            
         articles = []
         for rules in self.url_extract_rules:
             for item in get_tags_from_rules(soup, rules):
@@ -2289,7 +2289,9 @@ class WebPageUrlNewsRecipe(BasicNewsRecipe):
                 for tag in item:
                     title = ' '.join(tag.stripped_strings) or main_title
                     url = tag.attrs.get('href', None)
-                    if not url.startswith('http'):
+                    if url.startswith('javascript:'): #如果是javascript
+                        url = extractHyperLink(url)
+                    elif not url.lower().startswith('http'):
                         url = urljoin(main_url, url)
                     if title and url:
                         articles.append((title, url))

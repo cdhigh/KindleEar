@@ -235,7 +235,7 @@
       </div>
       <div class="pure-control-group" id="sm_port">
         <label>{{_("Port")}}</label>
-        <input type="text" name="sm_port" value="{{sm_srv.get('port', '587')}}" class="pure-u-1 pure-u-sm-1-2" />
+        <input type="text" name="sm_port" value="{{sm_srv.get('port', '')}}" class="pure-u-1 pure-u-sm-1-2" />
       </div>
       <div class="pure-control-group" id="sm_username">
         <label>{{_("Username")}}</label>
@@ -247,7 +247,7 @@
       </div>
       <div class="pure-control-group" id="sm_save_path">
         <label>{{_("Save path")}}</label>
-        <input type="text" name="sm_save_path" value="{{sm_srv.get('save_path', 'tests/debug_mail')}}" class="pure-u-1 pure-u-sm-1-2" />
+        <input type="text" name="sm_save_path" value="{{sm_srv.get('save_path', 'KindleEar')}}" class="pure-u-1 pure-u-sm-1-2" />
       </div>
     </fieldset>
     {% endif -%}

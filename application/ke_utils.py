@@ -45,7 +45,7 @@ def loc_exc_pos(msg: str):
         b2F = os.path.basename(bottom2.filename)
         b2Ln = bottom2.lineno
         typeName = klass.__name__ if klass else ''
-        return f'{msg}: {typeName} {e} [{tF}:{tLn}->...->{b2F}:{b2Ln}->{b1F}:{b1Ln}]'
+        return f'{msg}: [{typeName}] {e} [{tF}:{tLn}->...->{b2F}:{b2Ln}->{b1F}:{b1Ln}]'
     else:
         return msg
 
@@ -216,6 +216,12 @@ def compare_version(currVer: str, newVer: str):
         return 1
     else:
         return -1
+
+#在一个字符串中提取有效的超链接
+def extractHyperLink(txt):
+    expr = r"""(?i)\b(https?://[^\s()<>]+(?:\([\w\d]+\)|[^\s`!()\[\]{};:'".,<>?“”‘’]))"""
+    match = re.search(expr, txt)
+    return match.group(0) if match else None
 
 #-----------以下为安全相关的工具函数--------------------
 

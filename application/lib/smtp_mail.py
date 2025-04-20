@@ -15,6 +15,8 @@ def smtp_send_mail(sender, to, subject, body, host, username, password, port=Non
         port = int(port)
     elif not port:
         port = 587 #587-TLS, 465-SSL, 25-Nocrpt
+    else:
+        port = int(port)
     
     to = [to] if isinstance(to, str) else to
     message = MIMEMultipart('alternative') if html else MIMEMultipart()

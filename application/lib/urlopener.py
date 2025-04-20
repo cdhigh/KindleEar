@@ -111,20 +111,19 @@ class UrlOpener:
     def open_remote_url(self, url, data, headers, timeout, method, **kwargs):
         timeout = timeout if timeout else self.timeout
         headers = self.get_headers(url, headers)
-        if not method:
-            method = 'POST' if (data or kwargs.get('json', None)) else 'GET'
-        url = self.build_url(url, data, method)
-        if method == 'GET':
-            req_func = self.session.get #type:ignore
-            data = None
+        if method:
+            method = method.upper()
+        elif data or kwargs.get('json', None):
+            method = 'POST'
         else:
-            req_func = self.session.post #type:ignore
+            method = 'GET'
+        url = self.build_url(url, data, method)
         
         throwException = kwargs.pop('throw_exception', None)
         kwargs.setdefault('proxies', self._proxies)
         
         try:
-            resp = req_func(url, data=data, headers=headers, timeout=timeout, allow_redirects=True, 
+            resp = self.session.request(method, url, data=data, headers=headers, timeout=timeout, allow_redirects=True, 
                 verify=False, **kwargs)
         except Exception as e:
             if throwException:
@@ -160,6 +159,7 @@ class UrlOpener:
         return resp
 
     #构建最终要使用的url
+    #如果是GET，则将data字典拼接为查询字符串
     def build_url(self, url, data, method):
         if url.startswith("//"):
             url = f'https:{url}'
@@ -174,7 +174,7 @@ class UrlOpener:
                 url = urljoin(resp.url, url) if resp else url
 
         parts = urlparse(url)._replace(fragment='')
-        if method.upper() == 'GET' and data:
+        if method == 'GET' and data:
             query = parse_qs(parts.query)
             query.update(data)
             query = urlencode(query, doseq=True)

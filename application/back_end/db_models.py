@@ -125,23 +125,20 @@ class KeUser(MyBaseModel): # kindleEar User
     #根据设置，获取发送邮件的配置数据
     def get_send_mail_service(self):
         adminName = os.environ.get('ADMIN_NAME')
-        srv = self.send_mail_service
-        if (self.name != adminName) and (srv.get('service') == 'admin'):
+        srv = self.send_mail_service.copy()
+        if (self.name != adminName) and (srv.get('service') == 'admin'): #使用管理员的配置
             dbItem = KeUser.get_or_none(KeUser.name == adminName)
-            srv = dbItem.send_mail_service if dbItem else {}
-            if srv.get('service') == 'smtp':
-                srv = srv.copy()
-                srv['password'] = dbItem.decrypt(srv.get('password'))
-        elif srv.get('service') == 'smtp':
-            srv = srv.copy()
+            srv = dbItem.send_mail_service.copy() if dbItem else {}
+            srv['password'] = dbItem.decrypt(srv.get('password'))
+        else:
             srv['password'] = self.decrypt(srv.get('password'))
         return srv
 
     #使用自身的密钥加密和解密字符串
     def encrypt(self, txt) -> str:
-        return ke_encrypt((txt or ''), self.cfg('secret_key')) #type:ignore
+        return ke_encrypt(txt, self.cfg('secret_key')) if txt else '' #type:ignore
     def decrypt(self, txt) -> str:
-        return ke_decrypt((txt or ''), self.cfg('secret_key')) #type:ignore
+        return ke_decrypt(txt, self.cfg('secret_key')) if txt else '' #type:ignore
     def hash_text(self, txt) -> str:
         return PasswordManager(self.cfg('secret_key')).create_hash(txt)
     def verify_password(self, password) -> bool:

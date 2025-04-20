@@ -1719,6 +1719,14 @@ function SetSmOptiosVisualbility() {
     $('#sm_username').show();
     $('#sm_password').show();
     $('#sm_save_path').hide();
+  } else if (svr == 'webdav') {
+    $('#sm_apikey').hide();
+    $('#sm_secret_key').hide();
+    $('#sm_host').show();
+    $('#sm_port').show();
+    $('#sm_username').show();
+    $('#sm_password').show();
+    $('#sm_save_path').show();
   } else if (svr == 'local') {
     $('#sm_apikey').hide();
     $('#sm_secret_key').hide();

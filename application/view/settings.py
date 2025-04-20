@@ -84,14 +84,15 @@ def BuildSmSrvDict(user: KeUser, form) -> dict:
         srv['apikey'] = form.get('sm_apikey', '')
         srv['secret_key'] = form.get('sm_secret_key', '')
         srv['host'] = form.get('sm_host', '')
-        srv['port'] = str_to_int(form.get('sm_port', '587'))
+        srv['port'] = form.get('sm_port', '')
         srv['username'] = form.get('sm_username', '')
         srv['password'] = user.encrypt(form.get('sm_password', ''))
         srv['save_path'] = form.get('sm_save_path', '')
         validations = { #根据选择的发送邮件服务类型进行简单校验
             'sendgrid': lambda srv: srv['apikey'],
             'mailjet': lambda srv: srv['apikey'] and srv['secret_key'],
-            'smtp': lambda srv: all((srv['host'], srv['port'], srv['password'])), #部分smtp不需要账号名
+            'smtp': lambda srv: srv['host'] and srv['password'], 
+            'webdav': lambda srv: srv['host'] and srv['save_path'],
             'local': lambda srv: srv['save_path']
         }
         if not validations.get(srvType, lambda _: True)(srv):
