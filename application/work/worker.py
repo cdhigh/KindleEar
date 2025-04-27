@@ -92,6 +92,8 @@ def WorkerImpl(userName: str, recipeId: Union[list,str,None]=None, reason='cron'
 
         if (len(srcDict) > 1) or (rc.language in (None, '', 'und')):
             rc.language = user.book_cfg('language')
+        elif rc.language:
+            rc.language = rc.language.replace('_', '-')
             
         rc.delivery_reason = reason
         #合并自定义css
