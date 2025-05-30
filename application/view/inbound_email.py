@@ -186,7 +186,7 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
     language = ''
     match = re.search(r'!lang=([^ ]+)', subject) # !lang=en
     if match:
-        language = match.group(1)
+        language = match.group(1).replace('_', '-').lower()
         subject = subject.replace(match.group(0), '').strip()
     
     soup = CreateMailSoup(subject, txtBodies, htmlBodies)

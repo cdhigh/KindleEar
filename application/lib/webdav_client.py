@@ -26,7 +26,7 @@ class WebdavError(Exception):
 class SimpleWebdavClient:
     def __init__(self, host, port=None, username=None, password=None):
         if port:
-            parsed = urlparse(url)
+            parsed = urlparse(host)
             port = parsed.port or port #还是优先使用host里面的port(如果存在的话)
             netloc = f'{parsed.hostname}:{port}'
             host = urlunparse((parsed.scheme, netloc, parsed.path, parsed.params, parsed.query, parsed.fragment))

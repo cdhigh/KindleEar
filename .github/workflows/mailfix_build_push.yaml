@@ -1,4 +1,5 @@
 name: Mailfix Docker Build and Push
+permissions: read-all
 
 on:
   workflow_dispatch:
