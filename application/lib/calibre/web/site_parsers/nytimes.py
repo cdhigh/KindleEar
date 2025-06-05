@@ -9,7 +9,7 @@ from xml.sax.saxutils import escape, quoteattr
 
 from calibre.utils.iso8601 import parse_iso8601
 
-module_version = 11  # needed for live updates
+module_version = 12  # needed for live updates
 pprint
 
 
@@ -195,8 +195,19 @@ def article_parse(data):
     yield '</body></html>'
 
 
+def clean_js_json(text):
+    text = re.sub(r'\bundefined\b', 'null', text)
+    text = re.sub(
+        r',?\s*"[^"]+"\s*:\s*function\s*\([^)]*\)\s*\{.*?\}',
+        '',
+        text,
+        flags=re.DOTALL
+    )
+    return text
+
+
 def json_to_html(raw):
-    data = json.loads(raw.replace(':undefined', ':null'))
+    data = json.loads(clean_js_json(raw))
     # open('/t/raw.json', 'w').write(json.dumps(data, indent=2))
     try:
         data = data['initialData']['data']
@@ -243,9 +254,9 @@ def add_live_item(item, item_type, lines):
             for section in b['sections']:
                 add_live_item({'value': section['section']}, 'section', lines)
             return
-        raise Exception('Unknown item: %s' % b)
+        raise Exception(f'Unknown item: {b}')
     else:
-        raise Exception('Unknown item: %s' % b)
+        raise Exception(f'Unknown item: {b}')
 
 
 def live_json_to_html(data):
@@ -270,8 +281,8 @@ def extract_html(soup, url):
     if '/interactive/' in url:
         return (
             '<html><body><p><em>'
-            + 'This is an interactive article, which is supposed to be read in a browser.'
-            + '</p></em></body></html>'
+            'This is an interactive article, which is supposed to be read in a browser.'
+            '</p></em></body></html>'
         )
     script = soup.findAll('script', text=lambda x: x and 'window.__preloadedData' in x)[0]
     script = str(script)
