@@ -12,9 +12,7 @@ from calibre.constants import (__version__, __appname__, filesystem_encoding,
 
 def cleanup(path):
     try:
-        import os as oss
-        if oss.path.exists(path):
-            oss.remove(path)
+        os.remove(path)
     except:
         pass
 
