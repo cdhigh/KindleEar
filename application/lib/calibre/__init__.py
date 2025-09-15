@@ -395,5 +395,5 @@ def random_user_agent(choose=None, allow_ie=True):
     
 def browser(honor_time=True, max_time=2, user_agent=None, verify_ssl_certificates=True, handle_refresh=True, **kw):
     from urlopener import UrlOpener
-    return UrlOpener(**kw)
+    return UrlOpener(user_agent=user_agent, **kw)
     

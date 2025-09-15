@@ -28,24 +28,21 @@ def safe_eval(txt, gbl=None, local=None):
 
 #获取发生异常时的文件名和行号，添加到自定义错误信息后面
 #此函数必须要在异常后调用才有意义，否则只是简单的返回传入的参数
-def loc_exc_pos(msg: str):
+def loc_exc_pos(msg: str, traceAll=False):
     klass, e, excTb = sys.exc_info()
     if excTb:
         stacks = traceback.extract_tb(excTb) #StackSummary instance, a list
         if len(stacks) == 0:
             return msg
 
-        top = stacks[0]
-        bottom2 = stacks[-2] if len(stacks) > 1 else stacks[-1]
-        bottom1 = stacks[-1]
-        tF = os.path.basename(top.filename)
-        tLn = top.lineno
-        b1F = os.path.basename(bottom1.filename)
-        b1Ln = bottom1.lineno
-        b2F = os.path.basename(bottom2.filename)
-        b2Ln = bottom2.lineno
+        stackInfo = [f"{os.path.basename(stack.filename)}:{stack.lineno}" for stack in stacks]
+        
+        if traceAll or (len(stacks) <= 2):
+            stackTrace = "->".join(stackInfo)
+        else:
+            stackTrace = f"{stackInfo[0]}->...->{stackInfo[-2]}->{stackInfo[-1]}"
         typeName = klass.__name__ if klass else ''
-        return f'{msg}: [{typeName}] {e} [{tF}:{tLn}->...->{b2F}:{b2Ln}->{b1F}:{b1Ln}]'
+        return f'{msg}: [{typeName}] {e} [{stackTrace}]'
     else:
         return msg
 

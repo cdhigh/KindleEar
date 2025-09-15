@@ -13,7 +13,7 @@ def new_secret_key(length=12):
     return ''.join([secrets.choice(allchars) for i in range(length)])
 
 REQ_COMM = [
-    ('requests', '~=2.32.5'),
+    ('requests', '~=2.32.4'),
     ('PySocks', '~=1.7.1'),
     ('chardet', '~=5.2.0'),
     ('pillow', '~=10.4.0'),
@@ -28,7 +28,7 @@ REQ_COMM = [
     ('html5lib', '~=1.1'),
     ('#html5-parser', '~=0.4.0'),
     ('gunicorn', '~=23.0.0'),
-    ('Flask', '~=3.1.0'),
+    ('Flask', '~=3.0.3'),
     ('flask-babel', '~=4.0.0'),
     ('six', '~=1.16.0'),
     ('feedparser', '~=6.0.11'),

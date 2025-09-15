@@ -9,7 +9,7 @@ from xml.sax.saxutils import escape, quoteattr
 
 from calibre.utils.iso8601 import parse_iso8601
 
-module_version = 12  # needed for live updates
+module_version = 17  # needed for live updates
 pprint
 
 
@@ -52,9 +52,15 @@ def parse_vid(v):
             yield f'<div class="cap">{v["promotionalSummary"]}</div>'
 
 
+def get_data_wrapper(html: str):
+    m = re.search(r'datawrapper.dwcdn.net/(.{5})', html or '')
+    if m is not None:
+        return m.group(1)
+    return ''
+
+
 def parse_emb(e):
-    if e.get('html') and 'datawrapper.dwcdn.net' in e.get('html', ''):
-        dw = re.search(r'datawrapper.dwcdn.net/(.{5})', e['html']).group(1)
+    if dw := get_data_wrapper(e.get('html')):
         yield f'<div><img src="https://datawrapper.dwcdn.net/{dw}/full.png"></div>'
     elif e.get('promotionalMedia'):
         if e.get('headline'):
@@ -198,8 +204,8 @@ def article_parse(data):
 def clean_js_json(text):
     text = re.sub(r'\bundefined\b', 'null', text)
     text = re.sub(
-        r',?\s*"[^"]+"\s*:\s*function\s*\([^)]*\)\s*\{.*?\}',
-        '',
+        r'{\"checkGate\":.*',
+        'null}}',
         text,
         flags=re.DOTALL
     )
@@ -207,7 +213,8 @@ def clean_js_json(text):
 
 
 def json_to_html(raw):
-    data = json.loads(clean_js_json(raw))
+    cleaned = clean_js_json(raw)
+    data = json.JSONDecoder(strict=False).raw_decode(cleaned)[0]
     # open('/t/raw.json', 'w').write(json.dumps(data, indent=2))
     try:
         data = data['initialData']['data']
@@ -284,7 +291,12 @@ def extract_html(soup, url):
             'This is an interactive article, which is supposed to be read in a browser.'
             '</p></em></body></html>'
         )
-    script = soup.findAll('script', text=lambda x: x and 'window.__preloadedData' in x)[0]
+    candidates = soup.find_all('script', string=lambda x: x and 'window.__preloadedData' in x)
+    if not candidates:
+        if soup.find('script', src='https://ct.captcha-delivery.com/c.js'):
+            raise ValueError('NYTimes returned a CAPTCHA page from captcha-delivery.com')
+        raise ValueError('NYTimes returned HTML without preloaded data')
+    script = candidates[0]
     script = str(script)
     raw = script[script.find('{') : script.rfind(';')].strip().rstrip(';')
     return json_to_html(raw)
@@ -322,6 +334,6 @@ if __name__ == '__main__':
         from calibre.ebooks.BeautifulSoup import BeautifulSoup
 
         soup = BeautifulSoup(raw)
-        print(extract_html(soup))
+        print(extract_html(soup, 'moose'))
     else:
         print(json_to_html(raw))
