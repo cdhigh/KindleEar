@@ -5,6 +5,7 @@ import os
 from flask import Blueprint, render_template, send_from_directory, current_app
 from .view import (login, admin, adv, deliver, library, library_offical, logs, settings, share, 
     subscribe, inbound_email, translator, extension, reader)
+from .view import opds
 from .work import worker, url2book
 
 bpHome = Blueprint('bpHome', __name__)
@@ -47,6 +48,7 @@ def register_routes(app):
         app.register_blueprint(translator.bpTranslator)
         app.register_blueprint(extension.bpExtension)
         app.register_blueprint(reader.bpReader)
+        app.register_blueprint(opds.bpOpds)
         app.register_blueprint(worker.bpWorker)
         app.register_blueprint(url2book.bpUrl2Book)
         app.register_blueprint(library_offical.bpLibraryOffical)
