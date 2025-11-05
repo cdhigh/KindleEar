@@ -155,9 +155,14 @@ def ReaderSettingsPost(user: KeUser, userDir: str):
     topleftDict = 1 if str_to_bool(form.get('topleftDict', 'true')) else 0
     darkMode = 1 if str_to_bool(form.get('darkMode', 'true')) else 0
     inkMode = 1 if str_to_bool(form.get('inkMode', 'true')) else 0
+    hoverTranslate = 1 if str_to_bool(form.get('hoverTranslate', 'true')) else 0
+    hoverDelay = str_to_int(form.get('hoverDelay', '500'), 500)
+    navbarWidth = str_to_int(form.get('navbarWidth', '400'), 400)
+    navbarCollapsed = 1 if str_to_bool(form.get('navbarCollapsed', 'false')) else 0
     params = user.cfg('reader_params')
     params.update({'fontSize': fontSize, 'allowLinks': allowLinks, 'inkMode': inkMode, 
-        'topleftDict': topleftDict, 'darkMode': darkMode})
+        'topleftDict': topleftDict, 'darkMode': darkMode, 'hoverTranslate': hoverTranslate,
+        'hoverDelay': hoverDelay, 'navbarWidth': navbarWidth, 'navbarCollapsed': navbarCollapsed})
     user.set_cfg('reader_params', params)
     user.save()
     return {'status': 'ok'}
