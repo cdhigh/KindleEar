@@ -29,6 +29,7 @@ body::-webkit-scrollbar-thumb {
   height: 100%;
   width: 100%;
   box-sizing: border-box;
+  transition: margin-left 0.3s ease;
 }
 .content {
   margin: 0px;
@@ -94,6 +95,47 @@ body::-webkit-scrollbar-thumb {
   border: 1px solid #ccc;
   box-shadow: 1px 0px 3px #ccc;
   cursor: pointer;
+}
+
+/* 拖拽调整宽度的分隔条 */
+.navbar-resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 5px;
+  height: 100%;
+  cursor: ew-resize;
+  background-color: transparent;
+  z-index: 10;
+}
+.navbar-resizer:hover {
+  background-color: #4a9eff;
+}
+
+/* 显示目录按钮 */
+.show-nav-btn {
+  position: fixed;
+  left: 10px;
+  top: 10px;
+  width: 40px;
+  height: 40px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  cursor: pointer;
+  z-index: 1000;
+  display: none;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+}
+.show-nav-btn:hover {
+  background-color: #f0f0f0;
+}
+.show-nav-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
 /* small screen */

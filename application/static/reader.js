@@ -7,6 +7,13 @@ var g_iframeScrollHeight = 500; //在 iframeLoadEvent 里更新
 var g_currentArticle = {}; //{title:,src:,}
 var g_dictMode = false; //当前是否处于查词模式
 const g_trTextContainerHeight = 350; //350px在reader.css定义tr-text-container和tr-result-text
+var g_hoverTranslate = true; //是否启用悬停翻译
+var g_hoverTimer = null; //悬停定时器
+var g_hoverDelay = 500; //悬停延迟时间(ms)，默认500ms
+var g_lastHoverWord = null; //上次悬停的单词
+var g_navbarCollapsed = false; //目录是否折叠
+var g_navbarWidth = 400; //目录宽度，默认400px
+var g_isResizing = false; //是否正在调整大小
 
 //对古董浏览器兼容性最好的判断一个变量是否为空的语法
 //支持基本类型/数组/对象
@@ -142,6 +149,8 @@ function updateNavIndicator() {
 }
 
 //获取最靠近点击位置的一个单词（以空格分隔的单词）
+//返回对象 {word: string, isOnWord: boolean}
+//isOnWord 表示鼠标是否真的在单词上（而不是空白区域）
 function getWordAtClick(event, iframe) {
   iframe = iframe || document.getElementById('iframe');
   var doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -154,25 +163,36 @@ function getWordAtClick(event, iframe) {
       var leftText = textContent.slice(0, offset);
       var rightText = textContent.slice(offset);
       var clickedChar = textContent.charAt(offset);
+      
+      //检查点击位置的字符是否是空白字符
+      var isWhitespace = /[\s\u3000]/.test(clickedChar);
+      
       var isCJK = /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/.test(clickedChar);
       var isCJKPunctuation = /[\u3000-\u303F\uFF00-\uFFEF]/.test(clickedChar);
       if (isCJK || isCJKPunctuation) {
-        return clickedChar;
+        return {word: clickedChar, isOnWord: !isWhitespace && (isCJK || !isCJKPunctuation)};
       }
 
       //var leftMatch = leftText.match(/\p{L}+$/u); //kindle不支持 "\p{L}"
       //var rightMatch = rightText.match(/^\p{L}+/u);
+      //支持字母、数字和连字符，用于组合词如 vice-president
       var unicodeLetters = "\u0041-\u005A\u0061-\u007A\u00AA\u00B5\u00BA\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u01BF\u01CD-\u01FF\u0620-\u064A";
-      var patLeft = new RegExp("[" + unicodeLetters + "]+$");
-      var patRight = new RegExp("^[" + unicodeLetters + "]+");
+      var patLeft = new RegExp("[" + unicodeLetters + "\\-]+$");
+      var patRight = new RegExp("^[" + unicodeLetters + "\\-]+");
       var leftMatch = leftText.match(patLeft);
       var rightMatch = rightText.match(patRight);
       if (leftMatch || rightMatch) {
-        return (leftMatch ? leftMatch[0] : '') + (rightMatch ? rightMatch[0] : '');
+        var word = (leftMatch ? leftMatch[0] : '') + (rightMatch ? rightMatch[0] : '');
+        //去除首尾的连字符
+        word = word.replace(/^-+|-+$/g, '');
+        //判断鼠标是否真的在字母或连字符上
+        var unicodeLetterPat = new RegExp("^[" + unicodeLetters + "\\-]$");
+        var isOnWord = !isWhitespace && unicodeLetterPat.test(clickedChar);
+        return {word: word, isOnWord: isOnWord};
       }
     }
   }
-  return '';
+  return {word: '', isOnWord: false};
 }
 
 //连接服务器查询一个单词的释义然后显示出来
@@ -656,6 +676,8 @@ function toggleNavPopMenu() {
   allowIcon.innerHTML = g_allowLinks ? '✔' : '☐';
   var actIcon = document.getElementById('topleft-activate-dict').querySelector('.check-icon');
   actIcon.innerHTML = g_topleftDict ? '✔' : '☐';
+  var hoverIcon = document.getElementById('hover-translate').querySelector('.check-icon');
+  hoverIcon.innerHTML = g_hoverTranslate ? '✔' : '☐';
   var darkIcon = document.getElementById('dark-mode').querySelector('.check-icon');
   darkIcon.innerHTML = g_darkMode ? '✔' : '☐';
   menu.style.display = (menu.style.display == 'block') ? 'none' : 'block';
@@ -684,7 +706,8 @@ function decreaseFontSize() {
 //将目前的配置保存到服务器
 function saveSettings() {
   ajax_post('/reader/settings', {fontSize: g_fontSize, allowLinks: g_allowLinks, inkMode: g_inkMode,
-    darkMode: g_darkMode, topleftDict: g_topleftDict});
+    darkMode: g_darkMode, topleftDict: g_topleftDict, hoverTranslate: g_hoverTranslate, 
+    hoverDelay: g_hoverDelay, navbarWidth: g_navbarWidth, navbarCollapsed: g_navbarCollapsed});
 }
 
 //显示触摸区域图示
@@ -768,6 +791,144 @@ function toggleDictMode() {
   document.getElementById('tr-result').style.display = 'none';
   document.getElementById('corner-dict-hint').style.display = g_dictMode ? 'block' : 'none';
   hideNavbar();
+}
+
+//切换悬停翻译模式
+function toggleHoverTranslate() {
+  g_hoverTranslate = !g_hoverTranslate;
+  var hoverIcon = document.getElementById('hover-translate').querySelector('.check-icon');
+  hoverIcon.innerHTML = g_hoverTranslate ? '✔' : '☐';
+  saveSettings();
+}
+
+//改变悬停延迟时间
+function changeHoverDelay(delay) {
+  g_hoverDelay = parseInt(delay, 10);
+  saveSettings();
+}
+
+//切换目录折叠状态（完全隐藏/显示）
+function toggleNavbarCollapse() {
+  var navbar = document.getElementById('navbar');
+  var container = document.getElementById('container');
+  var showBtn = document.getElementById('showNavBtn');
+  g_navbarCollapsed = !g_navbarCollapsed;
+  
+  if (g_navbarCollapsed) {
+    navbar.style.display = 'none';
+    if (showBtn) {
+      showBtn.style.display = 'block';
+    }
+    if (!isMobile()) {
+      container.style.marginLeft = '0px';
+    }
+  } else {
+    navbar.style.display = 'block';
+    if (showBtn) {
+      showBtn.style.display = 'none';
+    }
+    if (!isMobile()) {
+      navbar.style.width = g_navbarWidth + 'px';
+      container.style.marginLeft = (g_navbarWidth + 10) + 'px';
+    }
+  }
+  saveSettings();
+}
+
+//初始化目录拖拽调整宽度功能
+function initNavbarResize() {
+  if (isMobile()) {
+    return;
+  }
+  
+  var navbar = document.getElementById('navbar');
+  var resizer = document.getElementById('navbar-resizer');
+  var container = document.getElementById('container');
+  
+  if (!resizer || !navbar || !container) {
+    return;
+  }
+  
+  var isActive = false;
+  var startX = 0;
+  var startWidth = 0;
+  var lastMoveTime = 0;
+  var timeoutId = null;
+  
+  function forceStop() {
+    if (!isActive) return;
+    isActive = false;
+    g_isResizing = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+    saveSettings();
+  }
+  
+  var moveHandler = function(e) {
+    if (!isActive) return;
+    
+    // 检查鼠标是否离开了调整区域（允许向右拖拽）
+    var navbarRect = navbar.getBoundingClientRect();
+    var mouseX = e.clientX;
+    var mouseY = e.clientY;
+    
+    // 允许的区域：navbar左侧-20px到右侧+250px（向右拖拽时鼠标可能在右侧）
+    // 上下方向允许±30px容差
+    var isInResizeArea = mouseX >= navbarRect.left - 20 && 
+                         mouseX <= navbarRect.right + 250 &&
+                         mouseY >= navbarRect.top - 30 &&
+                         mouseY <= navbarRect.bottom + 30;
+    
+    // 如果鼠标离开了调整区域，立即停止
+    // 注意：只在鼠标明显离开时才停止，不给太严格的限制
+    if (!isInResizeArea) {
+      forceStop();
+      return;
+    }
+    
+    var newWidth = startWidth + (e.clientX - startX);
+    if (newWidth >= 150 && newWidth <= 800) {
+      navbar.style.width = newWidth + 'px';
+      container.style.marginLeft = (newWidth + 10) + 'px';
+      g_navbarWidth = newWidth;
+    }
+    
+    e.stopPropagation();
+    e.preventDefault();
+  };
+  
+  var upHandler = function(e) {
+    if (isActive) {
+      forceStop();
+    }
+  };
+  
+  resizer.onmousedown = function(e) {
+    isActive = true;
+    g_isResizing = true;
+    startX = e.clientX;
+    startWidth = navbar.offsetWidth;
+    
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+    
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
+  // 在多个层级绑定mouseup确保能捕获
+  document.addEventListener('mouseup', upHandler, true);
+  document.addEventListener('mouseup', upHandler, false);
+  window.addEventListener('mouseup', upHandler, true);
+  window.addEventListener('mouseup', upHandler, false);
+  document.body.addEventListener('mouseup', upHandler, true);
+  
+  // mousemove只在document上
+  document.addEventListener('mousemove', moveHandler, true);
 }
 
 //根据是否使能墨水屏模式，设置相应的元素属性
@@ -1052,6 +1213,62 @@ function iframeLoadEvent(evt) {
     });
   }
 
+  //鼠标悬停翻译
+  doc.addEventListener('mousemove', function(event) {
+    if (!g_hoverTranslate) {
+      return;
+    }
+    
+    //如果翻译窗口已经打开，检查鼠标是否移动到其他位置
+    var dictDialog = document.getElementById('tr-result');
+    if (dictDialog && dictDialog.style.display == 'block') {
+      var wordInfo = getWordAtClick(event, iframe);
+      //如果鼠标移动到其他单词或空白区域，关闭翻译窗口
+      if (!wordInfo || !wordInfo.isOnWord || wordInfo.word !== g_lastHoverWord) {
+        closeDictDialog();
+        g_lastHoverWord = null;
+      }
+    }
+    
+    //清除之前的定时器
+    if (g_hoverTimer) {
+      clearTimeout(g_hoverTimer);
+      g_hoverTimer = null;
+    }
+    
+    //设置新的定时器，使用配置的延迟时间后触发翻译
+    var currentEvent = {clientX: event.clientX, clientY: event.clientY};
+    g_hoverTimer = setTimeout(function() {
+      try {
+        var wordInfo = getWordAtClick(currentEvent, iframe);
+        //只有鼠标真的在单词上才翻译，并且单词有效
+        if (wordInfo && wordInfo.isOnWord && wordInfo.word && wordInfo.word.length > 0) {
+          //过滤掉纯连字符的情况
+          if (wordInfo.word.replace(/-/g, '').length > 0) {
+            g_lastHoverWord = wordInfo.word;
+            translateWord(wordInfo.word, null);
+          }
+        }
+      } catch(e) {
+        //忽略异常
+      }
+    }, g_hoverDelay);
+  });
+
+  //鼠标离开时清除定时器和关闭窗口
+  doc.addEventListener('mouseout', function(event) {
+    if (g_hoverTimer) {
+      clearTimeout(g_hoverTimer);
+      g_hoverTimer = null;
+    }
+    //鼠标离开iframe区域时关闭翻译窗口
+    var dictDialog = document.getElementById('tr-result');
+    if (dictDialog && dictDialog.style.display == 'block') {
+      closeDictDialog();
+      g_lastHoverWord = null;
+    }
+  });
+
   doc.addEventListener('click', function(event) {
     //处理链接的点击事件
     var target = event.target || event.srcElement;
@@ -1070,13 +1287,17 @@ function iframeLoadEvent(evt) {
     var text = selection.toString();
     var dictDialog = document.getElementById('tr-result');
     if (g_dictMode) {
-      text = text || getWordAtClick(event, iframe);
+      if (!text) {
+        var wordInfo = getWordAtClick(event, iframe);
+        text = wordInfo ? wordInfo.word : '';
+      }
       if (text) {
         translateWord(text, selection);
       }
       g_dictMode = false;
       document.getElementById('corner-dict-hint').style.display = 'none';
-    } else if (dictDialog && dictDialog.style.display == 'block') { //关闭查词窗口
+    } else if (dictDialog && dictDialog.style.display == 'block') {
+      //点击时只关闭窗口，不干扰悬停功能
       closeDictDialog();
     } else if (!text) { //没有选择文本才翻页
       clickEvent(event);
@@ -1222,4 +1443,17 @@ document.addEventListener('DOMContentLoaded', function() {
   iframe.style.display = "none"; //加载完成后再显示
   iframe.src = iframe.src; //强制刷新一次，避免偶尔出现不能点击的情况
   setDarkModeStyle();
+  initNavbarResize(); //初始化目录拖拽调整功能
+  
+  //恢复保存的目录宽度和折叠状态
+  if (!isMobile() && g_navbarWidth) {
+    var navbar = document.getElementById('navbar');
+    var container = document.getElementById('container');
+    navbar.style.width = g_navbarWidth + 'px';
+    container.style.marginLeft = (g_navbarWidth + 10) + 'px';
+  }
+  if (g_navbarCollapsed) {
+    toggleNavbarCollapse(); //应用折叠状态
+  }
 });
+
