@@ -462,35 +462,43 @@ class RecipeInput(InputFormatPlugin):
         mi.identifier = str(uuid.uuid4())
         return mi
 
+    #生成并写入默认的用户封面, 返回封面二进制数据和封面文件路径
+    def _generate_default_cover(self, dir_, user, fs):
+        cPath = os.path.join(dir_, 'cover.jpg')
+        cData = user.get_cover_data()
+        fs.write(cPath, cData)
+        return cData, cPath
+
+    #获取单recipe模式的封面
+    def _get_recipe_cover(self, dir_, recipe, user, fs):
+        cData = cPath = None
+        try:
+            #False-不使用封面, None-使用默认封面, 其他值-自定义封面
+            if recipe.get_cover_url() != False:
+                cPath = getattr(recipe, 'cover_path', None) #之前已经下载了
+                if cPath and fs.exists(cPath):
+                    cData = fs.read(cPath, 'rb')
+                else:
+                    cData, cPath = self._generate_default_cover(dir_, user, fs)
+        except Exception:
+            pass
+            
+        return cData, cPath
+
     #获取封面和报头路径，如果没有，使用默认图像
     def get_cover_masthead(self, dir_, recipe1, onlyRecipe, user, fs):
-        mPath = getattr(recipe1, 'masthead_path', None)
-        if not onlyRecipe: #多个recipe
-            mPath = None
-            if user.covers.get('enable', ''):
-                cPath = os.path.join(dir_, 'cover.jpg')
-                cover_data = user.get_cover_data()
-                fs.write(cPath, cover_data)
-            else:
-                cPath = None
-                cover_data = None
-        elif recipe1.get_cover_url() != False:
-            cPath = getattr(recipe1, 'cover_path', None)
-            if cPath and fs.exists(cPath):
-                cover_data = fs.read(cPath, 'rb')
-            else:
-                cPath = os.path.join(dir_, 'cover.jpg')
-                cover_data = user.get_cover_data()
-                fs.write(cPath, cover_data)
-        else:
-            cPath = None
-            cover_data = None
+        mPath = cData = cPath = None
+        if onlyRecipe:
+            mPath = getattr(recipe1, 'masthead_path', None)
+            cData, cPath = self._get_recipe_cover(dir_, recipe1, user, fs)
+        elif user.covers.get('enable', ''):
+            cData, cPath = self._generate_default_cover(dir_, user, fs)
             
-        if not mPath:
+        if not mPath: #默认报头
             mPath = os.path.join(dir_, DEFAULT_MASTHEAD_IMAGE)
-            mh_data = BasicNewsRecipe.default_masthead_image()
-            fs.write(mPath, mh_data, 'wb')
-        return cover_data, cPath, mPath
+            mhData = BasicNewsRecipe.default_masthead_image()
+            fs.write(mPath, mhData, 'wb')
+        return cData, cPath, mPath
 
     def postprocess_book(self, oeb, opts, log):
         for ro in self.recipe_objects:

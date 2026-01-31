@@ -181,16 +181,26 @@ class FsDictStub(object):
     mkdir = makedirs
 
     def exists(self, path):
+        if not path:
+            return False
         path = os.path.join(self.path, path)
         return self.fs_dict.exists(path) if self.fs_dict else os.path.exists(path)
+
     def isfile(self, path):
+        if not path:
+            return False
         path = os.path.join(self.path, path)
         return self.fs_dict.isfile(path) if self.fs_dict else os.path.isfile(path)
+
     def isdir(self, path):
+        if not path:
+            return False
         path = os.path.join(self.path, path)
         return self.fs_dict.isdir(path) if self.fs_dict else os.path.isdir(path)
+
     def __str__(self):
         return self.path
+        
     def clear(self):
         if self.fs_dict:
             self.fs_dict.clear()
