@@ -1206,10 +1206,18 @@ var AjaxFileUpload = {
             return xhr;
           },
           success: function (data, textStatus, xhr) {
-            self.onSuccess(xhr.responseText);
+            var resp = xhr.responseText;
+            if (resp === undefined) {
+              resp = typeof data === 'object' ? JSON.stringify(data) : data;
+            }
+            self.onSuccess(resp);
           },
           error: function (xhr, textStatus, errorThrown) {
-            self.onFailure(xhr.status, xhr.responseText);
+            var resp = xhr.responseText;
+            if (resp === undefined) {
+              resp = errorThrown || "Network Error or Request Aborted";
+            }
+            self.onFailure(xhr.status, resp);
           }
         });
       }
@@ -1237,7 +1245,11 @@ var AjaxFileUpload = {
         }
       },
       error: function(xhr, status, error) {
-        alert(status + '\n' + error);
+        var errText = xhr.responseText;
+        if (errText === undefined) {
+          errText = error || "Network Error";
+        }
+        alert(status + '\n' + errText);
       }
     });
   },

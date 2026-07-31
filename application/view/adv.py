@@ -31,8 +31,8 @@ def adv_render_template(tpl, advCurr, **kwargs):
     return render_template(tpl, advCurr=advCurr, **kwargs)
 
 #现在推送
-@bpAdv.route("/adv", endpoint='AdvDeliverNowEntry')
-@bpAdv.route("/adv/delivernow", endpoint='AdvDeliverNow')
+@bpAdv.route("/advanced", endpoint='AdvDeliverNowEntry')
+@bpAdv.route("/advanced/delivernow", endpoint='AdvDeliverNow')
 @login_required()
 def AdvDeliverNow(user: KeUser):
     recipes = user.get_booked_recipe()
@@ -47,7 +47,7 @@ def AdvDeliverNow(user: KeUser):
         deliveryKey=deliveryKey)
 
 #设置入站邮件设置，包括邮件白名单和收件箱功能
-@bpAdv.route("/adv/inboundmail", endpoint='AdvInboundMail')
+@bpAdv.route("/advanced/inboundmail", endpoint='AdvInboundMail')
 @login_required()
 def AdvInboundMail(user: KeUser):
     if app.config['DATABASE_URL'] == 'datastore':
@@ -61,7 +61,7 @@ def AdvInboundMail(user: KeUser):
     return adv_render_template('adv_inboundmail.html', 'inboundMail', user=user, mailHost=mailHost, 
         inbound_email=inbound_email, keep_in_email_days=keep_in_email_days)
     
-@bpAdv.post("/adv/inboundmail", endpoint='AdvInboundMailPost')
+@bpAdv.post("/advanced/inboundmail", endpoint='AdvInboundMailPost')
 @login_required()
 def AdvInboundMailPost(user: KeUser):
     wlist = request.form.get('wlist')
@@ -84,7 +84,7 @@ def AdvInboundMailPost(user: KeUser):
         return redirect(url_for('bpAdv.AdvInboundMail'))
     
 #删除白名单项目
-@bpAdv.route("/advdel", endpoint='AdvDel')
+@bpAdv.route("/advanceddel", endpoint='AdvDel')
 @login_required()
 def AdvDel(user: KeUser):
     wlist_id = request.args.get('wlist_id')
@@ -96,7 +96,7 @@ def AdvDel(user: KeUser):
     return redirect(url_for("bpAdmin.Admin"))
 
 #设置归档和分享配置项
-@bpAdv.route("/adv/archive", endpoint='AdvArchive')
+@bpAdv.route("/advanced/archive", endpoint='AdvArchive')
 @login_required()
 def AdvArchive(user: KeUser):
     #jinja自动转义非常麻烦，在代码中先把翻译写好再传过去吧
@@ -118,7 +118,7 @@ def AdvArchive(user: KeUser):
     return adv_render_template('adv_archive.html', 'archive', user=user, appendStrs=appendStrs,
         shareLinks=shareLinks, ke_decrypt=ke_decrypt)
 
-@bpAdv.post("/adv/archive", endpoint='AdvArchivePost')
+@bpAdv.post("/advanced/archive", endpoint='AdvArchivePost')
 @login_required()
 def AdvArchivePost(user: KeUser):
     form = request.form
@@ -178,12 +178,12 @@ def AdvArchivePost(user: KeUser):
     return redirect(url_for("bpAdv.AdvArchive"))
 
 #导入自定义rss订阅列表，当前支持Opml格式
-@bpAdv.route("/adv/import", endpoint='AdvImport')
+@bpAdv.route("/advanced/import", endpoint='AdvImport')
 @login_required()
 def AdvImport(user: KeUser):
     return adv_render_template('adv_import.html', 'import', user=user, tips='')
 
-@bpAdv.post("/adv/import", endpoint='AdvImportPost')
+@bpAdv.post("/advanced/import", endpoint='AdvImportPost')
 @login_required()
 def AdvImportPost(user: KeUser):
     import opml
@@ -240,7 +240,7 @@ def walkOpmlOutline(outline):
         yield obj
 
 #生成自定义rss订阅列表的Opml格式文件，让用户下载保存
-@bpAdv.route("/adv/export", endpoint='AdvExport')
+@bpAdv.route("/advanced/export", endpoint='AdvExport')
 @login_required()
 def AdvExport(user: KeUser):
     #为了简单起见，就不用其他库生成xml，而直接使用字符串格式化生成
@@ -271,7 +271,7 @@ def AdvExport(user: KeUser):
     return send_file(io.BytesIO(opmlFile), mimetype="text/xml", as_attachment=True, download_name="KindleEar_subscription.xml")
     
 #在本地选择一个图片上传做为自定义RSS书籍的封面
-@bpAdv.route("/adv/cover")
+@bpAdv.route("/advanced/cover")
 @login_required()
 def AdvUploadCoverImage(user: KeUser):
     covers = {}
@@ -287,7 +287,7 @@ def AdvUploadCoverImage(user: KeUser):
         uploadUrl=url_for("bpAdv.AdvUploadCoverAjaxPost"), covers=covers, jsonCovers=jsonCovers)
 
 #AJAX接口的上传封面图片处理函数
-@bpAdv.post("/adv/cover", endpoint='AdvUploadCoverAjaxPost')
+@bpAdv.post("/advanced/cover", endpoint='AdvUploadCoverAjaxPost')
 @login_required(forAjax=True)
 def AdvUploadCoverAjaxPost(user: KeUser):
     MAX_WIDTH = 832
@@ -340,7 +340,7 @@ def AdvUploadCoverAjaxPost(user: KeUser):
     return ret
 
 #在本地选择一个样式文件上传做为所有书籍的样式
-@bpAdv.route("/adv/css", endpoint='AdvUploadCss')
+@bpAdv.route("/advanced/css", endpoint='AdvUploadCss')
 @login_required()
 def AdvUploadCss(user: KeUser):
     extra_css = user.get_extra_css() if user else ''
@@ -349,7 +349,7 @@ def AdvUploadCss(user: KeUser):
         deleteUrl=url_for("bpAdv.AdvDeleteCssAjaxPost"), tips='')
 
 #AJAX接口的上传CSS处理函数
-@bpAdv.post("/adv/css", endpoint='AdvUploadCssAjaxPost')
+@bpAdv.post("/advanced/css", endpoint='AdvUploadCssAjaxPost')
 @login_required(forAjax=True)
 def AdvUploadCssAjaxPost(user: KeUser):
     ret = {'status': 'ok'}
@@ -370,7 +370,7 @@ def AdvUploadCssAjaxPost(user: KeUser):
     return ret
 
 #删除上传的CSS
-@bpAdv.post("/adv/css/delete", endpoint='AdvDeleteCssAjaxPost')
+@bpAdv.post("/advanced/css/delete", endpoint='AdvDeleteCssAjaxPost')
 @login_required(forAjax=True)
 def AdvDeleteCssAjaxPost(user: KeUser):
     ret = {'status': 'ok'}
@@ -382,7 +382,7 @@ def AdvDeleteCssAjaxPost(user: KeUser):
     return ret
 
 #设置在线阅读器的字典
-@bpAdv.route("/adv/dict", endpoint='AdvDict')
+@bpAdv.route("/advanced/dict", endpoint='AdvDict')
 @login_required()
 def AdvDict(user: KeUser):
     from dictionary import all_dict_engines
@@ -402,7 +402,7 @@ def AdvDict(user: KeUser):
     return adv_render_template('adv_dict.html', 'dictionary', user=user, engines=engines, 
         dictParams=dictParams, tips='', langMap=LangMap())
     
-@bpAdv.post("/adv/dict", endpoint='AdvDictPost')
+@bpAdv.post("/advanced/dict", endpoint='AdvDictPost')
 @login_required()
 def AdvDictPost(user: KeUser):
     form = request.form
@@ -420,14 +420,14 @@ def AdvDictPost(user: KeUser):
     return redirect(url_for('bpAdv.AdvDict'))
 
 #打开代理设置页面
-@bpAdv.route("/adv/proxy", endpoint='AdvProxy')
+@bpAdv.route("/advanced/proxy", endpoint='AdvProxy')
 @login_required()
 def AdvProxy(user: KeUser):
     proxy = user.cfg('proxy')
     return adv_render_template('adv_proxy.html', 'proxy', proxy=proxy, user=user, tips='')
 
 #设置代理地址
-@bpAdv.post("/adv/proxy", endpoint='AdvProxyPost')
+@bpAdv.post("/advanced/proxy", endpoint='AdvProxyPost')
 @login_required()
 def AdvProxyPost(user: KeUser):
     proxy = request.form.get('proxy', '').lower()
@@ -500,7 +500,7 @@ def AdvFwdRoute():
         return f"Unexpected error: {str(e)}", 500
     
 #设置calibre的参数
-@bpAdv.route("/adv/calibre", endpoint='AdvCalibreOptions')
+@bpAdv.route("/advanced/calibre", endpoint='AdvCalibreOptions')
 @login_required()
 def AdvCalibreOptions(user: KeUser):
     calibreOptions = user.custom.get('calibre_options', {})
@@ -508,7 +508,7 @@ def AdvCalibreOptions(user: KeUser):
     return adv_render_template('adv_calibre_options.html', 'calibreOptions', options=options, user=user)
 
 #设置calibre的参数
-@bpAdv.post("/adv/calibre", endpoint='AdvCalibreOptionsPost')
+@bpAdv.post("/advanced/calibre", endpoint='AdvCalibreOptionsPost')
 @login_required()
 def AdvCalibreOptionsPost(user: KeUser):
     tips = ''
