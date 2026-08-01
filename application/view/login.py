@@ -16,6 +16,17 @@ bpLogin = Blueprint('bpLogin', __name__)
 #账号名不允许的特殊字符
 specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}', ',', ';', '|', ' ']
 
+#判断目标路径是否是同域的合法url
+def is_same_host(hostUrl, target):
+    if not target or target.strip().startswith("//") or ('\n' in target) or ('\r' in target):
+        return False
+
+    target = target.strip()
+    resolved = urljoin(hostUrl, target)
+    ref = urlparse(hostUrl)
+    test = urlparse(resolved)
+    return (test.scheme in ("http", "https")) and (ref.netloc == test.netloc)
+
 @bpLogin.route("/login")
 def Login():
     # 第一次登陆时如果没有管理员帐号，
@@ -45,6 +56,11 @@ def LoginPost():
 
     if tips:
         return render_template('login.html', tips=tips, next=nextUrl, demoMode=demoMode)
+
+    #避免跨域攻击
+    hostUrl = getattr(request, "host_url", "") or getattr(request, "url_root", "")
+    if not is_same_host(request.hostUrl, nextUrl):
+        nextUrl = ""
     
     adminName = app.config['ADMIN_NAME']
     isFirstTime = CreateAccountIfNotExist(adminName) #确认管理员账号是否存在
