@@ -23,7 +23,11 @@ fi
 
 echo -e "\nDownloading the latest recipe collection..."
 rm -rf ${KE_DIR}/calibre
-git clone --depth 1 https://github.com/kovidgoyal/calibre ${KE_DIR}/calibre
+git clone --depth 1 --filter=blob:none --no-checkout https://github.com/kovidgoyal/calibre ${KE_DIR}/calibre
+git -C ${KE_DIR}/calibre config core.sparseCheckout true
+echo 'recipes/*' > ${KE_DIR}/calibre/.git/info/sparse-checkout
+echo '!recipes/*/' >> ${KE_DIR}/calibre/.git/info/sparse-checkout
+git -C ${KE_DIR}/calibre checkout
 rm -f ${KE_DIR}/application/recipes/builtin_recipes.*
 mv -f ${KE_DIR}/calibre/recipes/*.recipe ${KE_DIR}/application/recipes/
 rm -rf ${KE_DIR}/calibre
