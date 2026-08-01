@@ -59,7 +59,7 @@ def LoginPost():
 
     #避免跨域攻击
     hostUrl = getattr(request, "host_url", "") or getattr(request, "url_root", "")
-    if not is_same_host(request.hostUrl, nextUrl):
+    if not is_same_host(hostUrl, nextUrl):
         nextUrl = ""
     
     adminName = app.config['ADMIN_NAME']
