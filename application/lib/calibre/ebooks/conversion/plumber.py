@@ -4,7 +4,6 @@ __license__ = 'GPL 3'
 __copyright__ = '2009, Kovid Goyal <kovid@kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
-from PIL.Image import isImageType
 import os, re, sys, shutil, pprint, json, io, css_parser, logging, traceback, copy
 from itertools import chain
 from functools import partial
