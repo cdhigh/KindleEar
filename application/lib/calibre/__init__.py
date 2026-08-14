@@ -383,6 +383,9 @@ def human_readable(size, sep=' '):
         size = size[:-2]
     return size + sep + suffix
 
+def is_mobile_ua(ua):
+    return 'Mobile/' in ua or 'Mobile ' in ua
+    
 def random_user_agent(choose=None, allow_ie=True):
     from calibre.utils.random_ua import common_user_agents, choose_randomly_by_popularity
     ua_list = common_user_agents()
