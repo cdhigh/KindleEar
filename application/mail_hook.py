@@ -129,13 +129,22 @@ def compile_mail_hook(src, filename='hook.py'):
     exec(code, namespace) #type:ignore #nosec B102 #NOSONAR
 
     hooks = {}
-    for name, argCount in ((HOOK_FULL_FUNC_NAME, 6), (HOOK_SOUP_FUNC_NAME, 4)):
-        func = namespace.get(name)
-        if callable(func):
-            if not _signature_match(func, argCount):
-                args = ', '.join(['sender', 'to', 'subject', 'txtBodies', 'htmlBodies', 'attachments'][:argCount])
-                raise Exception(_('The signature of {}() is invalid, it should be: def {}({})').format(name, name, args))
-            hooks[name] = func
+    func = namespace.get(HOOK_FULL_FUNC_NAME)
+    if callable(func):
+        if not _signature_match(func, 6):
+            args = 'sender, to, subject, txtBodies, htmlBodies, attachments'
+            raise Exception(_('The signature of {}() is invalid, it should be: def {}({})').format(
+                HOOK_FULL_FUNC_NAME, HOOK_FULL_FUNC_NAME, args))
+        hooks[HOOK_FULL_FUNC_NAME] = func
+
+    func = namespace.get(HOOK_SOUP_FUNC_NAME)
+    if callable(func):
+        if not _signature_match(func, 4):
+            args = 'sender, to, soup, attachments'
+            raise Exception(_('The signature of {}() is invalid, it should be: def {}({})').format(
+                HOOK_SOUP_FUNC_NAME, HOOK_SOUP_FUNC_NAME, args))
+        hooks[HOOK_SOUP_FUNC_NAME] = func
+        
     if not hooks:
         raise Exception(_('Cannot find the function {} or {} in the hook file.').format(
             HOOK_FULL_FUNC_NAME, HOOK_SOUP_FUNC_NAME))
