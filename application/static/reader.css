@@ -95,6 +95,9 @@ body::-webkit-scrollbar-thumb {
   box-shadow: 1px 0px 3px #ccc;
   cursor: pointer;
 }
+.nav-resizer {
+  display: none;
+}
 
 /* small screen */
 @media (max-width: 599px) {
@@ -171,10 +174,36 @@ body::-webkit-scrollbar-thumb {
     display: block;
     width: 400px;
     height: 100%;
+    box-sizing: border-box;
   }
   .container {
     width: auto;
-    margin-left: 410px; /* width of .navbar */
+    margin-left: 406px; /* width of .navbar (400px) + width of .nav-resizer (6px) */
+  }
+
+  .nav-resizer {
+    display: block;
+    position: fixed;
+    top: 0px;
+    bottom: 0px;
+    left: 400px;
+    width: 6px;
+    cursor: col-resize;
+    z-index: 100;
+    background-color: #f0f0f0;
+    border-right: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+  .nav-resizer::after {
+    content: "";
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: -2px;
+    right: -2px;
+  }
+  .nav-resizer:hover, .nav-resizer.resizing {
+    background-color: #888;
   }
 
   .pos-indicator, .nav-indicator, button#closeNavBtn {

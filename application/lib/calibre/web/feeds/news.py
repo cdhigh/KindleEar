@@ -1071,9 +1071,12 @@ class BasicNewsRecipe(Recipe):
         #    for x in soup.find_all(attrs={attr: True}):
         #        del x[attr]
 
-        for bad_tag in list(soup.find_all(['base', 'iframe', 'canvas', 'embed', 'source',
-            'command', 'datalist', 'video', 'audio', 'noscript', 'link', 'meta', 'button'])):
-            bad_tag.extract()
+        for bad_tag in soup.find_all(['base', 'iframe', 'canvas', 'embed', 'source',
+            'command', 'datalist', 'video', 'audio', 'noscript', 'link', 'meta', 'button']):
+            bad_tag.decompose()
+
+        for bad_tag in soup.find_all(lambda t: '-' in t.name):   # 自定义标签，如 vj-horizontal-scroll
+            bad_tag.unwrap()
         
         #如果需要，去掉正文中的超链接(使用斜体下划线标识)，以避免误触
         remove_hyperlinks = self.user.book_cfg('rm_links')

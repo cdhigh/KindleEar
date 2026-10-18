@@ -7,6 +7,8 @@ var g_iframeScrollHeight = 500; //在 iframeLoadEvent 里更新
 var g_currentArticle = {}; //{title:,src:,}
 var g_dictMode = false; //当前是否处于查词模式
 const g_trTextContainerHeight = 350; //350px在reader.css定义tr-text-container和tr-result-text
+var g_navWidth = 400; //PC端左侧导航栏宽度
+var g_lastNavWidth = 400; //用于双击恢复展开的宽度
 
 //对古董浏览器兼容性最好的判断一个变量是否为空的语法
 //支持基本类型/数组/对象
@@ -476,18 +478,193 @@ function toggleNavBook(nav) {
 //Kindle浏览器有诸多限制，需要使用这个函数来调整一些元素的高度
 function adjustContentHeight() {
   var content = document.getElementById('content');
+  var container = document.getElementById('container');
   var navbar = document.getElementById('navbar');
   var navContent = document.getElementById('nav-content');
   var footer = document.getElementById('nav-footer');
+  var resizer = document.getElementById('nav-resizer');
   setInkMode(g_inkMode);
-  if (navbar.offsetHeight && footer.offsetHeight) {
+  if (isMobile()) {
+    if (resizer) {
+      resizer.style.display = 'none';
+    }
+    if (navbar) {
+      navbar.style.width = '';
+    }
+    if (container) {
+      container.style.marginLeft = '';
+    }
+  } else {
+    if (resizer) {
+      resizer.style.display = 'block';
+    }
+    if (g_navWidth <= 0) {
+      if (navbar) {
+        navbar.style.display = 'none';
+        navbar.style.width = '0px';
+      }
+      if (resizer) {
+        resizer.style.left = '0px';
+      }
+      if (container) {
+        container.style.marginLeft = (resizer ? resizer.offsetWidth || 6 : 6) + 'px';
+      }
+    } else {
+      if (navbar) {
+        navbar.style.display = 'block';
+        navbar.style.width = g_navWidth + 'px';
+      }
+      if (resizer) {
+        resizer.style.left = g_navWidth + 'px';
+      }
+      if (container) {
+        container.style.marginLeft = (g_navWidth + (resizer ? resizer.offsetWidth || 6 : 6)) + 'px';
+      }
+    }
+  }
+  if (navbar && navbar.offsetHeight && footer && footer.offsetHeight) {
     navContent.style.height = (navbar.offsetHeight - footer.offsetHeight) + 'px';
   }
-  if (!isMobile()) {
-    navbar.style.display = "block";
+  if (container) {
+    container.style.height = getViewportHeight() + 'px';
   }
-  container.style.height = getViewportHeight() + 'px';
-  content.style.height = getViewportHeight() + 'px';
+  if (content) {
+    content.style.height = getViewportHeight() + 'px';
+  }
+}
+
+//设置PC端导航栏宽度及分隔条位置
+function setNavWidth(width) {
+  if (isMobile()) {
+    return;
+  }
+  var navbar = document.getElementById('navbar');
+  var container = document.getElementById('container');
+  var resizer = document.getElementById('nav-resizer');
+  if (!navbar || !container || !resizer) {
+    return;
+  }
+
+  var resizerWidth = resizer.offsetWidth || 6;
+  var winWidth = window.innerWidth || document.documentElement.clientWidth || 1200;
+  var maxAllowed = winWidth - 100;
+  if (width < 40) {
+    width = 0;
+  } else if (width > maxAllowed) {
+    width = maxAllowed;
+  }
+
+  g_navWidth = width;
+  if (width >= 40) {
+    g_lastNavWidth = width;
+  }
+
+  if (width <= 0) {
+    navbar.style.display = 'none';
+    navbar.style.width = '0px';
+    resizer.style.left = '0px';
+    container.style.marginLeft = resizerWidth + 'px';
+  } else {
+    navbar.style.display = 'block';
+    navbar.style.width = width + 'px';
+    resizer.style.left = width + 'px';
+    container.style.marginLeft = (width + resizerWidth) + 'px';
+    var navContent = document.getElementById('nav-content');
+    var footer = document.getElementById('nav-footer');
+    if (navbar.offsetHeight && footer && footer.offsetHeight) {
+      navContent.style.height = (navbar.offsetHeight - footer.offsetHeight) + 'px';
+    }
+  }
+
+  try {
+    localStorage.setItem('ke_nav_width', width);
+  } catch (e) {}
+}
+
+//初始化PC端导航栏与内容区分隔条拖拽功能
+function initNavResizer() {
+  var resizer = document.getElementById('nav-resizer');
+  var navbar = document.getElementById('navbar');
+  var container = document.getElementById('container');
+  var iframe = document.getElementById('iframe');
+  if (!navbar || !container) {
+    return;
+  }
+  if (!resizer) {
+    resizer = document.createElement('div');
+    resizer.id = 'nav-resizer';
+    resizer.className = 'nav-resizer';
+    document.body.appendChild(resizer);
+  }
+
+  var isDragging = false;
+
+  resizer.addEventListener('mousedown', function(e) {
+    if (isMobile() || (e.button !== 0)) {
+      return;
+    }
+    isDragging = true;
+    resizer.className = 'nav-resizer resizing';
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    document.body.style.webkitUserSelect = 'none';
+    if (iframe) {
+      iframe.style.pointerEvents = 'none';
+    }
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!isDragging || isMobile()) {
+      return;
+    }
+    setNavWidth(e.clientX);
+  });
+
+  function stopDrag() {
+    if (isDragging) {
+      isDragging = false;
+      resizer.className = 'nav-resizer';
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      document.body.style.webkitUserSelect = '';
+      if (iframe) {
+        iframe.style.pointerEvents = 'auto';
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (doc && doc.body) {
+          iframe.style.height = 'auto';
+          recalculateHeight(iframe, doc);
+        }
+      }
+    }
+  }
+
+  document.addEventListener('mouseup', stopDrag);
+  window.addEventListener('blur', stopDrag);
+
+  resizer.addEventListener('dblclick', function(e) {
+    if (isMobile()) {
+      return;
+    }
+    if (g_navWidth <= 0) {
+      setNavWidth(g_lastNavWidth > 50 ? g_lastNavWidth : 400);
+    } else {
+      g_lastNavWidth = g_navWidth;
+      setNavWidth(0);
+    }
+  });
+
+  if (!isMobile()) {
+    try {
+      var saved = localStorage.getItem('ke_nav_width');
+      if (saved !== null) {
+        var w = parseInt(saved, 10);
+        if (!isNaN(w) && w >= 0) {
+          setNavWidth(w);
+        }
+      }
+    } catch (e) {}
+  }
 }
 
 //导航栏往上翻页
@@ -1210,6 +1387,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var navContent = document.getElementById('nav-content');
   var iframe = document.getElementById('iframe');
   adjustContentHeight();
+  initNavResizer();
   window.addEventListener('resize', adjustContentHeight);
   document.addEventListener('keydown', documentKeyDownEvent);
   //window.addEventListener('message', iFrameEvent);
