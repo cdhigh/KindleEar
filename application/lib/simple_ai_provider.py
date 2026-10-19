@@ -69,6 +69,12 @@ AI_LIST = {
         {'name': 'qwen-plus', 'rpm': 60, 'context': 128000},
         {'name': 'qwen-long', 'rpm': 60, 'context': 128000},
         {'name': 'qwen-max', 'rpm': 60, 'context': 32000},],},
+    'atlascloud': {'host': 'https://api.atlascloud.ai', 'models': [
+        {'name': 'deepseek-ai/deepseek-v4-flash', 'rpm': 60, 'context': 1000000},
+        {'name': 'qwen/qwen3.5-flash', 'rpm': 60, 'context': 1000000},
+        {'name': 'moonshotai/kimi-k3', 'rpm': 60, 'context': 1000000},
+        {'name': 'zai-org/glm-5.2', 'rpm': 60, 'context': 1000000},
+        {'name': 'openai/gpt-5.4-mini', 'rpm': 60, 'context': 400000},],},
 }
 
 class SimpleAiProvider:
@@ -142,12 +148,14 @@ class SimpleAiProvider:
             ret = self._perplexity_chat(message)
         elif name == "alibaba":
             return self._alibaba_chat(message)
+        elif name == "atlascloud":
+            return self._atlascloud_chat(message)
         else:
             raise ValueError(f"Unsupported provider: {name}")
 
     #返回当前服务提供商支持的models列表
     def models(self, prebuild=True):
-        if self.name in ('openai', 'xai'):
+        if self.name in ('openai', 'xai', 'atlascloud'):
             return self._openai_models()
         elif self.name == 'google':
             return self._google_models()
@@ -255,6 +263,10 @@ class SimpleAiProvider:
     #通义千问
     def _alibaba_chat(self, message):
         return self._openai_chat(message, path='compatible-mode/v1/chat/completions')
+
+    #Atlas Cloud (OpenAI兼容网关)
+    def _atlascloud_chat(self, message):
+        return self._openai_chat(message, path='v1/chat/completions')
         
 if __name__ == '__main__':
     client = SimpleAiProvider("gemini", apiKey="xxx")
