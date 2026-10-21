@@ -55,7 +55,7 @@ URL 中 `:` 转义为 `__`（如 `/tts/custom__12`）。
 
 ## 4. AI 摘要（lib/ebook_summarizer/ + lib/simple_ai_provider.py）
 
-- `simple_ai_provider.py` 是统一 AI Chat 适配：google(Gemini)、openai、anthropic(Claude)、xai(Grok)、mistral、groq、perplexity、alibaba(通义/dashscope)、atlascloud。含模型列表、RPM、上下文长度、多 apiHost。openai/xai/atlascloud 走 OpenAI 协议，gemini/anthropic 内部转换 payload。
+- `simple_ai_provider.py` 是统一 AI Chat 适配：google(Gemini)、openai、anthropic(Claude)、xai(Grok)、mistral、groq、perplexity、alibaba(通义/dashscope)、atlascloud、cheaperinference。含模型列表、RPM、上下文长度、多 apiHost。openai/xai/atlascloud/cheaperinference 走 OpenAI 协议，gemini/anthropic 内部转换 payload。
 - `HtmlSummarizer` 按 token 预算分段摘要；引擎缺省回退 gemini。
 - 配置入口 `/summarizer/<recipeId>`（v3.2+ 加入，注意 dbSchemaVersion 迁移）。
 
