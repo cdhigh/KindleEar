@@ -75,6 +75,13 @@ AI_LIST = {
         {'name': 'moonshotai/kimi-k3', 'rpm': 60, 'context': 1000000},
         {'name': 'zai-org/glm-5.2', 'rpm': 60, 'context': 1000000},
         {'name': 'openai/gpt-5.4-mini', 'rpm': 60, 'context': 400000},],},
+    'cheaperinference': {'host': 'https://api.cheaperinference.com', 'models': [
+        {'name': 'gpt-5.4-mini', 'rpm': 60, 'context': 400000},
+        {'name': 'gpt-5.4', 'rpm': 60, 'context': 1000000},
+        {'name': 'claude-sonnet-5', 'rpm': 60, 'context': 1000000},
+        {'name': 'gemini-3.1-pro', 'rpm': 60, 'context': 1048576},
+        {'name': 'deepseek-v4-flash', 'rpm': 60, 'context': 1000000},
+        {'name': 'glm-5.3', 'rpm': 60, 'context': 1000000},],},
 }
 
 class SimpleAiProvider:
@@ -150,12 +157,14 @@ class SimpleAiProvider:
             return self._alibaba_chat(message)
         elif name == "atlascloud":
             return self._atlascloud_chat(message)
+        elif name == "cheaperinference":
+            return self._cheaperinference_chat(message)
         else:
             raise ValueError(f"Unsupported provider: {name}")
 
     #返回当前服务提供商支持的models列表
     def models(self, prebuild=True):
-        if self.name in ('openai', 'xai', 'atlascloud'):
+        if self.name in ('openai', 'xai', 'atlascloud', 'cheaperinference'):
             return self._openai_models()
         elif self.name == 'google':
             return self._google_models()
@@ -267,7 +276,11 @@ class SimpleAiProvider:
     #Atlas Cloud (OpenAI兼容网关)
     def _atlascloud_chat(self, message):
         return self._openai_chat(message, path='v1/chat/completions')
-        
+
+    #Cheaper Inference (OpenAI兼容网关)
+    def _cheaperinference_chat(self, message):
+        return self._openai_chat(message, path='v1/chat/completions')
+
 if __name__ == '__main__':
     client = SimpleAiProvider("gemini", apiKey="xxx")
     resp = client.chat("你好，请讲一个笑话")
