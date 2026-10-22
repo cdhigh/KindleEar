@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 #实现接收到邮件后抓取URL然后制作成电子书
 #Author: cdhigh <https://github.com/cdhigh>
+import base64
 from urllib.parse import urljoin
 from flask import Blueprint, request, current_app as app
 from bs4 import BeautifulSoup
@@ -26,7 +27,8 @@ def Url2BookRoute():
     key = params.get('key', '')
     action = params.get('action', '')
     text = params.get('text', '')
-    return Url2BookImpl(userName, urls, title, key, action, text)
+    language = params.get('language', '')
+    return Url2BookImpl(userName, urls, title, key, action, text, language=language)
     
 
 #实现Url2book的具体功能
@@ -53,7 +55,7 @@ def Url2BookImpl(userName, urls, title, key, action='', text='', language=''):
     elif action == 'debug': #调试目的，将链接直接下载，发送到管理员邮箱
         return u2lDebugFetch(user, urls, title, text)
     else:
-        return u2lFetchUrl2(user, urls, title, text, language)
+        return u2lFetchUrl2(user, urls, title, text, language=language, action=action)
         
 #直接下载urls指定的书籍，而不是转换
 def u2lDownloadFile(user, urls, title):
@@ -111,17 +113,20 @@ def u2lDebugFetch(user, urls, title, text):
         return 'debug fetch failed'
 
 #抓取url，制作成电子书
-def u2lFetchUrl2(user, urls, title, text, language=''):
-    if not urls:
+def u2lFetchUrl2(user, urls, title, text, language='', action=''):
+    if not urls and not text:
         return "No URLs provided."
 
-    if text:
+    if action == 'merge' and text and urls:
+        target = 'merged book'
+        book = u2lFetchMergedBook(user, urls, title, text, language=language)
+    elif text:
         target = 'selected text'
-        book = u2lCreateEbookFromText(user, urls[0], title, text, language=language)
+        book = u2lCreateEbookFromText(user, urls[0] if urls else '', title, text, language=language)
     else:
         target = 'urls'
         processedUrls = u2lPreprocessUrl(urls)
-        book = urls_to_book(urls, title, user, language=language)
+        book = urls_to_book(processedUrls, title, user, language=language)
         
     if book:
         send_to_kindle(user, title, book, fileWithTime=False)
@@ -132,6 +137,19 @@ def u2lFetchUrl2(user, urls, title, text, language=''):
         save_delivery_log(user, title, 0, status='fetch failed')
         rs = "Fetch url failed:<br/>{}".format('<br/>'.join(urls))
     return rs
+
+
+#合并邮件正文和urls外链为一本电子书推送
+def u2lFetchMergedBook(user, urls, title, text, language=''):
+    b64 = base64.b64encode(text.encode('utf-8')).decode('ascii')
+    mail_data_url = f"data:text/html;charset=utf-8;base64,{b64}"
+    all_urls = [mail_data_url] + u2lPreprocessUrl(urls)
+    book = urls_to_book(all_urls, title, user, language=language)
+    #如果合并抓取失败，回退尝试单独使用邮件正文生成电子书，避免丢失邮件内容
+    if not book and text:
+        default_log.warning(f'Fetch merged urls failed for "{title}", fallback to text only.')
+        book = u2lCreateEbookFromText(user, urls[0] if urls else '', title, text, language=language)
+    return book
 
 #下载text里面的图像文件，和文本一起做成电子书投递
 def u2lCreateEbookFromText(user, url, title, text, language=''):

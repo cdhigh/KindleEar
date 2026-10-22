@@ -93,7 +93,7 @@ def hook_email_soup(sender, to, soup, attachments):
     tag = soup.new_tag('p')
     tag.string = 'appended by hook'
     soup.body.append(tag)
-    return soup, attachments  #或返回 None
+    return soup, attachments  #或返回 None，或返回 (soup, attachments, urls) 追加外链抓取任务
 ```
 
 钩子里可直接使用 `default_log` 记录日志，也可 import bs4 等运行环境已有的库。

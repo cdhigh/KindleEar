@@ -165,10 +165,9 @@ def hook_email(sender, to, subject, txtBodies, htmlBodies, attachments):
 
 # soup: BeautifulSoup instance containing the integrated HTML content
 #       after the email has been processed
-# Return: You can modify soup/attachments in place and return None,
-#         or return (soup, attachments)
+# Return: You can modify soup/attachments in place or return any one of the three formats, with urls being a list of links to fetch additionally.
 def hook_email_soup(sender, to, soup, attachments):
-    # return None or (soup, attachments)
+    # return None or (soup, attachments) or (soup, attachments, urls)
 ```
 
 

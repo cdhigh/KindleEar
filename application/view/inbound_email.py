@@ -200,39 +200,71 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
     soup = CreateMailSoup(subject, txtBodies, htmlBodies)
     if not soup:
         return "There is no html body neither text body."
-
-    #如果发件人匹配了用户上传的钩子文件，调用钩子函数处理邮件正文和附件
-    soup, attachments = run_mail_content_hook(user, sender, to, soup, attachments)
-
-    #提取文章的超链接
-    links = [] if forceArticle else CollectSoupLinks(soup, forceLinks)
-    title = subject[:SUBJECT_WORDCNT] or f'KindleEar_{user.local_time("%Y-%m-%d_%H-%M")}'
-
-    if links:
-        #判断是下载文件还是要转发邮件内容
-        isBook = ((dest in ('book', 'file', 'download')) or
-            links[0].lower().endswith(('.mobi', '.epub', '.docx', '.pdf', '.txt', '.doc', '.rtf')))
-
-        if dest == 'debug':
-            action = 'debug'
-        elif isBook:
-            action = 'download'
-        else:
-            action = ''
         
+    title = subject[:SUBJECT_WORDCNT] or f'KindleEar_{user.local_time("%Y-%m-%d_%H-%M")}'
+    
+    #如果发件人匹配了用户上传的钩子文件，调用钩子函数处理邮件正文和附件
+    soup, attachments, hook_urls = run_mail_content_hook(user, sender, to, soup, attachments)
+
+    #确定外链任务：hook显式返回优先，否则尝试从正文提取超链接
+    if hook_urls:
+        urls = [hook_urls] if isinstance(hook_urls, str) else [str(u).strip() for u in hook_urls if str(u).strip()]
+        book_title = title
+    elif soup and not forceArticle:
+        urls = CollectSoupLinks(soup, forceLinks)
+        book_title = title
+    else:
+        urls = []
+        book_title = title
+
+    #只处理图像附件，判断邮件是否包含图片
+    imgs = [(f, c) for f, c in (attachments or []) if (guess_type(f)[0] or '').startswith('image/')]
+
+    #判断链接是否为电子书直链
+    isBook = bool(urls and ((dest in ('book', 'file', 'download')) or
+        urls[0].lower().endswith(('.mobi', '.epub', '.docx', '.pdf', '.txt', '.doc', '.rtf'))))
+
+    #判定是否能够合并为单文档推送：
+    #1. 既有外链又有邮件正文
+    #2. 邮件正文没有内嵌图片（有图片时通过任务队列传递不可靠，转为分开推送）
+    #3. 外链不是下载外部电子书文件，不是 debug
+    can_merge = bool(urls and soup and not imgs and not isBook and dest != 'debug')
+
+    mail_text = ''
+    if can_merge:
+        action = 'merge'
+        mail_text = str(soup)
+        #边界条件1：控制传递大小，避免超出任务队列payload限制（如GAE的100KB限制）
+        MAX_MERGE_TEXT_SIZE = 70 * 1024  # 70KB
+        if len(mail_text) > MAX_MERGE_TEXT_SIZE:
+            cut_idx = mail_text[:MAX_MERGE_TEXT_SIZE].rfind('<')
+            if cut_idx > 0:
+                mail_text = mail_text[:cut_idx]
+            mail_text += '<p><i>[Content truncated due to size limit]</i></p></body></html>'
+    elif dest == 'debug':
+        action = 'debug'
+    elif isBook:
+        action = 'download'
+    else:
+        action = ''
+
+    if urls:
+        #若不能合并且soup有效，为外链电子书标题追加后缀以防混淆
+        if not can_merge and soup:
+            book_title = f"{title} - Articles"
+
         params = {'userName': userName,
-                 'urls': '|'.join(links),
+                 'urls': '|'.join(urls),
                  'action': action,
+                 'text': mail_text,
                  'key': user.share_links.get('key', ''),
-                 'title': title,
+                 'title': book_title,
                  'language': language}
         create_url2book_task(params)
-    else: #直接转发邮件正文
-        #只处理图像，忽略其他类型的附件
-        #guess_type返回元祖 (type, encoding)
-        imgs = [(f, c) for f, c in (attachments or []) if (guess_type(f)[0] or '').startswith('image/')]
-        
-        #有图像的话，生成MOBI或EPUB，没有图像则直接推送HTML文件
+
+    #推送邮件正文：
+    #若不能合并推送（如无外链，或因含有图片/下载等原因分流），且soup有效时，作为独立邮件正文推送
+    if soup and not can_merge and (hook_urls or not urls or imgs or isBook):
         if imgs:
             book = html_to_book(str(soup), title, user, imgs)
         else:

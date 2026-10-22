@@ -9,7 +9,7 @@
 #    返回None或(subject, txtBodies, htmlBodies, attachments)
 #def hook_email_soup(sender, to, soup, attachments):
 #    soup为BeautifulSoup实例，在邮件正文转换为soup之后调用，
-#    返回None或(soup, attachments)
+#    返回None或(soup, attachments)或(soup, attachments, urls)
 #sender/to为字符串，subject为字符串，txtBodies/htmlBodies为字符串列表，
 #attachments为[(fileName, bytes),...]，soup为BeautifulSoup实例
 import json, inspect, ast
@@ -191,14 +191,18 @@ def run_mail_hook(user, sender, to, subject, txtBodies, htmlBodies, attachments)
         default_log.warning(f'The mail hook {HOOK_FULL_FUNC_NAME} failed: {e}')
     return subject, txtBodies, htmlBodies, attachments
 
-#调用内容签名钩子函数处理邮件正文soup和附件，返回 (soup, attachments)
+#调用内容签名钩子函数处理邮件正文soup和附件，返回 (soup, attachments, urls)
 def run_mail_content_hook(user, sender, to, soup, attachments):
+    urls = []
     try:
         func = _load_hook_func(user, sender, HOOK_SOUP_FUNC_NAME)
         if func:
             ret = func(sender, to, soup, attachments)
-            if isinstance(ret, (tuple, list)) and (len(ret) == 2):
-                soup, attachments = ret
+            if isinstance(ret, (tuple, list)):
+                if len(ret) == 2:
+                    soup, attachments = ret
+                elif len(ret) == 3:
+                    soup, attachments, urls = ret
     except Exception as e:
         default_log.warning(f'The mail hook {HOOK_SOUP_FUNC_NAME} failed: {e}')
-    return soup, attachments
+    return soup, attachments, urls

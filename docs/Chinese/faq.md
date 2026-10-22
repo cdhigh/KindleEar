@@ -152,9 +152,9 @@ def hook_email(sender, to, subject, txtBodies, htmlBodies, attachments):
     #return None or (subject, txtBodies, htmlBodies, attachments)
 
 #soup: 邮件经过处理整合后的HTML的BeautifulSoup实例对象
-#返回: 可以直接修改soup/attachments并且返回None, 或返回 (soup, attachments) 
+#返回: 可以直接修改soup/attachments或返回三种形式中任意一种,  urls为需要额外抓取的链接列表
 def hook_email_soup(sender, to, soup, attachments):
-    #return None or (soup, attachments)   
+    #return None or (soup, attachments) or (soup, attachments, urls)  
 ```
 
 ## 我还有更多问题，到哪里去问？

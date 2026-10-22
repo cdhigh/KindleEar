@@ -242,8 +242,15 @@ class MailHookTestCase(BaseTestCase):
 
         #soup钩子原地修改或者返回修改
         soup = BeautifulSoup('<html><body><p>test</p></body></html>', 'lxml')
-        soup, attachments = run_mail_content_hook(user, 'someone@anywhere.com', 'k@x.com', soup, [])
+        soup, attachments, urls = run_mail_content_hook(user, 'someone@anywhere.com', 'k@x.com', soup, [])
         self.assertIn('content-hook-marker', str(soup))
+        self.assertEqual(urls, [])
+
+        #soup钩子返回3元组包含urls
+        hook3Src = "def hook_email_soup(sender, to, soup, attachments):\n    return soup, attachments, ['http://example.com/art1', 'http://example.com/art2']\n"
+        save_mail_hook(user, 'urls@test.com', hook3Src, 'hook3.py')
+        soup, attachments, urls = run_mail_content_hook(user, 'urls@test.com', 'k@x.com', soup, [])
+        self.assertEqual(urls, ['http://example.com/art1', 'http://example.com/art2'])
 
         #精确地址优先于通配符
         exactSrc = HOOK_SRC_BOTH.replace("'[hooked] '", "'[exact] '")
@@ -290,4 +297,63 @@ class MailHookTestCase(BaseTestCase):
         self.assertEqual(resp.status_code, 302)
         dbItem = UserBlob.get_or_none((UserBlob.user == 'admin') & (UserBlob.name == hook_blob_name('me@home.com')))
         self.assertIsNone(dbItem)
-        
+
+    #测试有外链且无图片时的 merge 模式
+    @mock.patch('application.view.inbound_email.create_url2book_task')
+    def test_hook_merge_mode(self, mock_task):
+        WhiteList.create(mail='*', user='admin')
+        user = KeUser.get_or_none(KeUser.name == 'admin')
+        from application.mail_hook import save_mail_hook
+        hook_merge = """def hook_email_soup(sender, to, soup, attachments):
+    return soup, attachments, ['http://example.com/art1', 'http://example.com/art2']
+"""
+        save_mail_hook(user, '*', hook_merge, 'hook_merge.py')
+        data = {'sender': 'news@example.com', 'to': 'dl@kindleear.appspotmail.com', 'subject': 'Newsletter', 'text': 'Hello newsletter'}
+        resp = self.client.post('/mail', data=build_mail_message(**data).encode('utf-8'),
+            content_type='multipart/alternative')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(mock_task.called)
+        payload = mock_task.call_args[0][0]
+        self.assertEqual(payload['action'], 'merge')
+        self.assertIn('Hello newsletter', payload['text'])
+        self.assertEqual(payload['urls'], 'http://example.com/art1|http://example.com/art2')
+
+    #测试有图片附件时降级为分开推送（action不为merge）
+    @mock.patch('application.view.inbound_email.send_to_kindle')
+    @mock.patch('application.view.inbound_email.create_url2book_task')
+    def test_hook_with_images_fallback(self, mock_task, mock_send):
+        WhiteList.create(mail='*', user='admin')
+        user = KeUser.get_or_none(KeUser.name == 'admin')
+        from application.mail_hook import save_mail_hook
+        hook_img = """def hook_email_soup(sender, to, soup, attachments):
+    return soup, [('test.png', b'fakeimage')], ['http://example.com/art1']
+"""
+        save_mail_hook(user, '*', hook_img, 'hook_img.py')
+        data = {'sender': 'news@example.com', 'to': 'dl@kindleear.appspotmail.com', 'subject': 'Newsletter Img', 'text': 'Hello newsletter with image'}
+        resp = self.client.post('/mail', data=build_mail_message(**data).encode('utf-8'),
+            content_type='multipart/alternative')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(mock_task.called)
+        payload = mock_task.call_args[0][0]
+        self.assertEqual(payload['action'], '')  #不使用 merge
+        self.assertEqual(payload['text'], '')
+        self.assertTrue(mock_send.called)  #独立推送了正文图片邮件
+
+    #测试soup为None时只推urls，不使用merge
+    @mock.patch('application.view.inbound_email.create_url2book_task')
+    def test_hook_none_soup_no_merge(self, mock_task):
+        WhiteList.create(mail='*', user='admin')
+        user = KeUser.get_or_none(KeUser.name == 'admin')
+        from application.mail_hook import save_mail_hook
+        hook_none = """def hook_email_soup(sender, to, soup, attachments):
+    return None, [], ['http://example.com/art1']
+"""
+        save_mail_hook(user, '*', hook_none, 'hook_none.py')
+        data = {'sender': 'news@example.com', 'to': 'dl@kindleear.appspotmail.com', 'subject': 'Links Only', 'text': 'Ignored text'}
+        resp = self.client.post('/mail', data=build_mail_message(**data).encode('utf-8'),
+            content_type='multipart/alternative')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(mock_task.called)
+        payload = mock_task.call_args[0][0]
+        self.assertEqual(payload['action'], '')
+        self.assertEqual(payload['text'], '')
