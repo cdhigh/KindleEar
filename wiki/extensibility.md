@@ -55,7 +55,8 @@ URL 中 `:` 转义为 `__`（如 `/tts/custom__12`）。
 
 ## 4. AI 摘要（lib/ebook_summarizer/ + lib/simple_ai_provider.py）
 
-- `simple_ai_provider.py` 是统一 AI Chat 适配：google(Gemini)、openai、anthropic(Claude)、xai(Grok)、mistral、groq、perplexity、alibaba(通义/dashscope)、atlascloud、cheaperinference、opper。含模型列表、RPM、上下文长度、多 apiHost。openai/xai/atlascloud/cheaperinference/opper 走 OpenAI 协议，gemini/anthropic 内部转换 payload。
+- `simple_ai_provider.py` 是统一 AI Chat 适配：google(Gemini)、openai、anthropic(Claude)、xai(Grok)、mistral、groq、perplexity、alibaba(通义/dashscope)、atlascloud、cheaperinference、api-route、opper。含模型列表、RPM、上下文长度、多 apiHost。openai/xai/atlascloud/cheaperinference/api-route/opper 走 OpenAI 协议，gemini/anthropic 内部转换 payload。
+- API Route：在 AI 摘要设置选择 `api-route`，填入自己的 API Key，默认模型 `gpt-6.1-sol`；可通过模型发现选择账户可用模型。默认 16000 token 分段预算和 2 RPM 是保守的客户端设置，并非服务商模型上限或账户配额。接入说明：https://www.api-route.com/en/docs/quickstart 。
 - `HtmlSummarizer` 按 token 预算分段摘要；引擎缺省回退 gemini。
 - 配置入口 `/summarizer/<recipeId>`（v3.2+ 加入，注意 dbSchemaVersion 迁移）。
 
