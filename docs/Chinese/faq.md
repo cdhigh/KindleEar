@@ -137,25 +137,29 @@ KindleEar提供了一个通过网页上传recipe文件的功能，在calibre的r
 4. 删除recipe文件。    
 **注：** 可以直接使用calibre的 builtin_recipes.zip/builtin_recipes.xml。   
 
-## 入站邮件的Hook(钩子函数)如何实现？   
-KindleEar的入站邮件提供两个钩子函数, 可以在接收到邮件后转发给Kindle之前进行一些预处理或后处理, 比如重新排版/去除广告等.
-钩子函数的签名如下,你的钩子函数python文件需要包含一个或两个函数:
-```
-#sender: 发件人邮件地址
-#to: 收件人邮件地址
-#subject: 邮件主题
-#txtBodies: 字符串列表, 邮件的纯文本块内容, 不一定存在
-#htmlBodies: HTML字符串列表, 邮件的HTML内容, 不一定存在
-#attachments: 邮件附件列表, 格式为 [(fileName, content),...]
-#返回: 可以在列表上直接修改并且返回None, 或者返回修改后的元祖
-def hook_email(sender, to, subject, txtBodies, htmlBodies, attachments):
-    #return None or (subject, txtBodies, htmlBodies, attachments)
+## 入站邮件的Hook(钩子类)如何实现？   
+KindleEar支持上传继承自 `MailNewsRecipe` 的钩子类。除按需重写邮件预处理与外链提取外，还可直接利用 Calibre Recipe 的反反爬（`get_browser`）、标签清洗（`keep_only_tags`）等能力：
 
-#soup: 邮件经过处理整合后的HTML的BeautifulSoup实例对象
-#返回: 可以直接修改soup/attachments或返回三种形式中任意一种,  urls为需要额外抓取的链接列表
-def hook_email_soup(sender, to, soup, attachments):
-    #return None or (soup, attachments) or (soup, attachments, urls)  
+```python
+from calibre.web.feeds.news import MailNewsRecipe
+
+class MyMailHook(MailNewsRecipe):
+    merge_mail = True # True - 邮件内容作为摘要, False - 邮件内容单独推送
+    #用于修改标题（书籍名称）、过滤/修改原始正文或附件。
+    #返回: (subject, txtBodies, htmlBodies, attachments) 或 None (表示不修改)
+    def preprocess_email(self, subject, txtBodies, htmlBodies, attachments):
+        return None
+
+    #用于对邮件正文 DOM 进行清洗（去广告、删退订按钮等）
+    #返回: None 或 (soup, attachments) 或 (soup, attachments, urls)
+    def preprocess_soup(self, soup, attachments):
+        return None
+
+    # 提取需要抓取的外链文章
+    def extract_urls(self, soup):
+        return [...]
 ```
+> `preprocess_email()/preprocess_soup()/extract_urls()`都是可选的
 
 ## 我还有更多问题，到哪里去问？
 如果你碰到更多问题，可以到 [https://github.com/cdhigh/KindleEar/issues](https://github.com/cdhigh/KindleEar/issues) 去提交一个issue，然后等待答复，不过在提交问题之前，还是建议先搜索一下别人先前提交的issues，说不定已经有人重复提过了相关问题呢？   

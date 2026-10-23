@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-03 04:37-0300\n"
+"POT-Creation-Date: 2026-10-22 22:34-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -18,30 +18,28 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: application/mail_hook.py:107 application/mail_hook.py:110
+#: application/mail_hook.py:110 application/mail_hook.py:113
 #, python-brace-format
 msgid "Forbidden module import in mail hook: {}"
 msgstr "禁止在邮件钩子中导入模块：{}"
 
-#: application/mail_hook.py:113
+#: application/mail_hook.py:116
 #, python-brace-format
 msgid "Forbidden attribute access in mail hook: {}"
 msgstr "禁止在邮件钩子中访问属性：{}"
 
-#: application/mail_hook.py:116
+#: application/mail_hook.py:119
 #, python-brace-format
 msgid "Forbidden function call in mail hook: {}()"
 msgstr "禁止在邮件钩子中调用函数：{}()"
 
-#: application/mail_hook.py:133
-#, python-brace-format
-msgid "The signature of {}() is invalid, it should be: def {}({})"
-msgstr "钩子函数 {}() 的签名无效，正确的形式应为：def {}({})"
+#: application/mail_hook.py:142
+msgid "Cannot find any subclass of MailNewsRecipe in the hook file."
+msgstr "无法找到MailNewsRecipe的任何子类。"
 
-#: application/mail_hook.py:136
-#, python-brace-format
-msgid "Cannot find the function {} or {} in the hook file."
-msgstr "在钩子文件中找不到函数 {} 或 {}。"
+#: application/mail_hook.py:145
+msgid "The signature of {0} is invalid, it should be: def {0}({1})"
+msgstr "函数 {0} 的签名无效，正确的形式应为：def {0}({1})"
 
 #: application/templates/admin.html:3 application/templates/base.html:53
 #: application/templates/base.html:192 application/templates/settings.html:263
@@ -58,15 +56,18 @@ msgstr "注册设置"
 msgid "Save"
 msgstr "保存"
 
-#: application/templates/admin.html:21 application/templates/user_account.html:31
+#: application/templates/admin.html:21
+#: application/templates/user_account.html:31
 msgid "Email service"
 msgstr "发送邮件服务"
 
-#: application/templates/admin.html:23 application/templates/user_account.html:34
+#: application/templates/admin.html:23
+#: application/templates/user_account.html:34
 msgid "Same as admin"
 msgstr "和管理员一致"
 
-#: application/templates/admin.html:24 application/templates/user_account.html:35
+#: application/templates/admin.html:24
+#: application/templates/user_account.html:35
 msgid "Independent"
 msgstr "独立设置"
 
@@ -99,15 +100,16 @@ msgid "Accounts"
 msgstr "用户账号列表"
 
 #: application/templates/admin.html:43
-#: application/templates/adv_inboundmail.html:64 application/templates/my.html:34
-#: application/view/admin.py:57 application/view/admin.py:64
-#: application/view/admin.py:91
+#: application/templates/adv_inboundmail.html:64
+#: application/templates/my.html:34 application/view/admin.py:57
+#: application/view/admin.py:64 application/view/admin.py:91
 msgid "Add"
 msgstr "添加"
 
-#: application/templates/admin.html:54 application/templates/adv_archive.html:69
-#: application/templates/home.html:19 application/templates/login.html:24
-#: application/templates/logs.html:70 application/templates/reset_password.html:19
+#: application/templates/admin.html:54
+#: application/templates/adv_archive.html:69 application/templates/home.html:19
+#: application/templates/login.html:24 application/templates/logs.html:70
+#: application/templates/reset_password.html:19
 #: application/templates/reset_password.html:20
 #: application/templates/settings.html:241 application/templates/signup.html:21
 #: application/templates/user_account.html:15
@@ -121,11 +123,13 @@ msgstr "使能发送"
 #: application/templates/admin.html:56
 #: application/templates/change_password.html:27
 #: application/templates/reset_password.html:26
-#: application/templates/signup.html:33 application/templates/user_account.html:27
+#: application/templates/signup.html:33
+#: application/templates/user_account.html:27
 msgid "Email"
 msgstr "Email"
 
-#: application/templates/admin.html:57 application/templates/user_account.html:39
+#: application/templates/admin.html:57
+#: application/templates/user_account.html:39
 msgid "Expiration"
 msgstr "有效期"
 
@@ -147,28 +151,34 @@ msgstr "永不过期"
 
 #: application/templates/admin.html:70
 #: application/templates/adv_inboundmail.html:26
-#: application/templates/settings.html:58 application/templates/settings.html:181
+#: application/templates/settings.html:58
+#: application/templates/settings.html:181
 #: application/templates/user_account.html:43
 msgid "7 Days"
 msgstr "一星期"
 
-#: application/templates/admin.html:72 application/templates/user_account.html:44
+#: application/templates/admin.html:72
+#: application/templates/user_account.html:44
 msgid "1 Month"
 msgstr "1个月"
 
-#: application/templates/admin.html:74 application/templates/user_account.html:45
+#: application/templates/admin.html:74
+#: application/templates/user_account.html:45
 msgid "3 Months"
 msgstr "3个月"
 
-#: application/templates/admin.html:76 application/templates/user_account.html:46
+#: application/templates/admin.html:76
+#: application/templates/user_account.html:46
 msgid "6 Months"
 msgstr "6个月"
 
-#: application/templates/admin.html:78 application/templates/user_account.html:47
+#: application/templates/admin.html:78
+#: application/templates/user_account.html:47
 msgid "1 Year"
 msgstr "1年"
 
-#: application/templates/admin.html:80 application/templates/user_account.html:48
+#: application/templates/admin.html:80
+#: application/templates/user_account.html:48
 msgid "2 Years"
 msgstr "2年"
 
@@ -181,14 +191,15 @@ msgstr "编辑账号"
 
 #: application/templates/admin.html:89
 #: application/templates/adv_inboundmail.html:57
-#: application/templates/adv_uploadcss.html:31 application/templates/base.html:25
-#: application/templates/webmail.html:22
+#: application/templates/adv_uploadcss.html:31
+#: application/templates/base.html:25 application/templates/webmail.html:22
 msgid "Delete"
 msgstr "删除"
 
 #: application/templates/adv_archive.html:3
 #: application/templates/adv_archive.html:14
-#: application/templates/adv_base.html:57 application/templates/adv_base.html:61
+#: application/templates/adv_base.html:57
+#: application/templates/adv_base.html:61
 msgid "Archive"
 msgstr "归档"
 
@@ -244,44 +255,52 @@ msgstr "主机"
 msgid "Save settings"
 msgstr "保存设置"
 
-#: application/templates/adv_base.html:39 application/templates/adv_base.html:43
+#: application/templates/adv_base.html:39
+#: application/templates/adv_base.html:43
 #: application/templates/adv_delivernow.html:8
 msgid "Deliver Now"
 msgstr "现在投递"
 
-#: application/templates/adv_base.html:48 application/templates/adv_base.html:52
+#: application/templates/adv_base.html:48
+#: application/templates/adv_base.html:52
 #: application/templates/adv_inboundmail.html:3
 #: application/templates/adv_inboundmail.html:9
 #: application/templates/adv_inboundmail.html:14
 msgid "Inbound Mail"
 msgstr "入站邮件"
 
-#: application/templates/adv_base.html:66 application/templates/adv_base.html:70
-#: application/templates/adv_dict.html:3 application/templates/adv_dict.html:13
-#: application/templates/reader.html:134
+#: application/templates/adv_base.html:66
+#: application/templates/adv_base.html:70 application/templates/adv_dict.html:3
+#: application/templates/adv_dict.html:13 application/templates/reader.html:134
 msgid "Dictionary"
 msgstr "词典"
 
-#: application/templates/adv_base.html:75 application/templates/adv_base.html:83
-#: application/templates/adv_proxy.html:3 application/templates/adv_proxy.html:12
+#: application/templates/adv_base.html:75
+#: application/templates/adv_base.html:83
+#: application/templates/adv_proxy.html:3
+#: application/templates/adv_proxy.html:12
 msgid "Proxy"
 msgstr "代理服务器"
 
-#: application/templates/adv_base.html:92 application/templates/adv_base.html:96
+#: application/templates/adv_base.html:92
+#: application/templates/adv_base.html:96
 #: application/templates/adv_import.html:8
 msgid "Import Feeds"
 msgstr "导入订阅列表"
 
-#: application/templates/adv_base.html:101 application/templates/adv_base.html:105
+#: application/templates/adv_base.html:101
+#: application/templates/adv_base.html:105
 msgid "Cover Image"
 msgstr "封面图像"
 
-#: application/templates/adv_base.html:110 application/templates/adv_base.html:114
+#: application/templates/adv_base.html:110
+#: application/templates/adv_base.html:114
 #: application/templates/adv_uploadcss.html:3
 msgid "Stylesheet"
 msgstr "样式表"
 
-#: application/templates/adv_base.html:119 application/templates/adv_base.html:123
+#: application/templates/adv_base.html:119
+#: application/templates/adv_base.html:123
 #: application/templates/adv_calibre_options.html:3
 #: application/templates/adv_calibre_options.html:12
 msgid "Calibre Options"
@@ -324,12 +343,14 @@ msgstr "推送"
 msgid "Set up dictionaries for online reading."
 msgstr "设置在线阅读时使用的词典。"
 
-#: application/templates/adv_dict.html:18 application/templates/adv_dict.html:40
+#: application/templates/adv_dict.html:18
+#: application/templates/adv_dict.html:40
 #: application/templates/adv_dict.html:62
 msgid "Book language"
 msgstr "书本语言"
 
-#: application/templates/adv_dict.html:27 application/templates/adv_dict.html:49
+#: application/templates/adv_dict.html:27
+#: application/templates/adv_dict.html:49
 #: application/templates/adv_dict.html:66
 #: application/templates/book_summarizer.html:23
 #: application/templates/book_translator.html:26
@@ -337,7 +358,8 @@ msgstr "书本语言"
 msgid "Engine"
 msgstr "引擎"
 
-#: application/templates/adv_dict.html:33 application/templates/adv_dict.html:55
+#: application/templates/adv_dict.html:33
+#: application/templates/adv_dict.html:55
 #: application/templates/adv_dict.html:72
 #: application/templates/word_lookup.html:65
 msgid "Database"
@@ -347,7 +369,8 @@ msgstr "数据库"
 msgid "Other languages"
 msgstr "其他语言"
 
-#: application/templates/adv_dict.html:81 application/templates/word_lookup.html:3
+#: application/templates/adv_dict.html:81
+#: application/templates/word_lookup.html:3
 #: application/templates/word_lookup.html:79
 msgid "Word lookup"
 msgstr "单词查询"
@@ -405,7 +428,8 @@ msgid "Email Retention"
 msgstr "邮件保留期"
 
 #: application/templates/adv_inboundmail.html:25
-#: application/templates/settings.html:52 application/templates/settings.html:175
+#: application/templates/settings.html:52
+#: application/templates/settings.html:175
 msgid "1 Day"
 msgstr "一天"
 
@@ -415,7 +439,8 @@ msgid "30 Days"
 msgstr "三十天"
 
 #: application/templates/adv_inboundmail.html:28
-#: application/templates/settings.html:51 application/templates/settings.html:174
+#: application/templates/settings.html:51
+#: application/templates/settings.html:174
 msgid "No limit"
 msgstr "不限制"
 
@@ -471,16 +496,15 @@ msgstr "请选择一个文件。"
 #: application/templates/adv_inboundmail.html:82
 #, python-brace-format
 msgid ""
-"A hook file ({0}) already exists for this address, you can replace or delete"
-" it."
+"A hook file ({0}) already exists for this address, you can replace or "
+"delete it."
 msgstr "此地址已存在钩子文件（{0}），您可以重新上传替换或删除它。"
 
 #: application/templates/adv_inboundmail.html:83
 msgid ""
-"The hook is a normal python file used to preprocess the mail from this "
-"sender before delivery. Define one or both of the following functions in the"
-" file:"
-msgstr "钩子是一个普通的python文件，用于在此发件人的邮件投递之前对其进行预处理。请在文件中定义以下一个或两个函数："
+"The hook is a Python file defining a subclass of MailNewsRecipe to "
+"preprocess mail or extract/scrape linked articles:"
+msgstr "钩子是一个Python文件，定义MailNewsRecipe子类，用于预处理邮件或提取文章链接:"
 
 #: application/templates/adv_inboundmail.html:84
 msgid "The hook file have been saved successfully."
@@ -494,7 +518,8 @@ msgstr "钩子文件已删除。"
 msgid "Supports"
 msgstr "支持"
 
-#: application/templates/adv_proxy.html:24 application/templates/adv_proxy.html:29
+#: application/templates/adv_proxy.html:24
+#: application/templates/adv_proxy.html:29
 #: application/templates/book_audiolator.html:132
 #: application/templates/book_summarizer.html:105
 #: application/templates/book_translator.html:97
@@ -510,7 +535,9 @@ msgid "Upload cover image"
 msgstr "上传封面图像"
 
 #: application/templates/adv_uploadcover.html:10
-msgid "Upload cover images from local with an aspect ratio of approximately 0.625."
+msgid ""
+"Upload cover images from local with an aspect ratio of approximately "
+"0.625."
 msgstr "从本机上传封面图像，建议宽高比为0.625左右。"
 
 #: application/templates/adv_uploadcover.html:13
@@ -556,11 +583,12 @@ msgstr "直接返回"
 msgid "Auto back to previous page after 5 seconds"
 msgstr "5秒钟后自动返回上一页"
 
-#: application/templates/autoback.html:29 application/templates/tipsback.html:15
+#: application/templates/autoback.html:29
+#: application/templates/tipsback.html:15
 msgid "Click to back"
 msgstr "点击直接返回"
 
-#: application/templates/base.html:24 application/templates/reader.html:189
+#: application/templates/base.html:24 application/templates/reader.html:190
 msgid "Confirm Deletion"
 msgstr "确认删除"
 
@@ -596,7 +624,7 @@ msgstr "全文RSS"
 msgid "Share"
 msgstr "分享"
 
-#: application/templates/base.html:34 application/templates/reader.html:190
+#: application/templates/base.html:34 application/templates/reader.html:191
 msgid "Are you sure to delete?"
 msgstr "您确认要删除吗？"
 
@@ -624,7 +652,9 @@ msgid "Language"
 msgstr "语言"
 
 #: application/templates/base.html:40
-msgid "Please write a category in text field if the one you wish is not in the list."
+msgid ""
+"Please write a category in text field if the one you wish is not in the "
+"list."
 msgstr "如果您需要的类别不在列表中，可以在文本框中直接输入。"
 
 #: application/templates/base.html:41
@@ -700,8 +730,9 @@ msgstr "谢谢"
 
 #: application/templates/base.html:61
 msgid ""
-"Your recipe has been uploaded, and it can be found in the Library section. "
-"If you dont see it, please make sure to switch to the correct language."
+"Your recipe has been uploaded, and it can be found in the Library "
+"section. If you dont see it, please make sure to switch to the correct "
+"language."
 msgstr "您的Recipe已经上传，可以在本页面的 [新闻源] 区段找到。如果没有，请确认您已经切换到正确的语种。"
 
 #: application/templates/base.html:62
@@ -846,16 +877,18 @@ msgstr "上传封面图像成功。"
 
 #: application/templates/base.html:97
 msgid ""
-"Total size of the files you selected exceeds 16MB. Please reduce the image "
-"resolution or upload in batches."
+"Total size of the files you selected exceeds 16MB. Please reduce the "
+"image resolution or upload in batches."
 msgstr "您选择的文件总和超过16MB，请减小图像分辨率或分批上传。"
 
-#: application/templates/base.html:98 application/templates/book_translator.html:3
+#: application/templates/base.html:98
+#: application/templates/book_translator.html:3
 #: application/templates/book_translator.html:17
 msgid "Bilingual Translator"
 msgstr "双语翻译器"
 
-#: application/templates/base.html:99 application/templates/book_summarizer.html:3
+#: application/templates/base.html:99
+#: application/templates/book_summarizer.html:3
 #: application/templates/book_summarizer.html:14
 msgid "AI Summarizer"
 msgstr "AI生成摘要"
@@ -886,9 +919,9 @@ msgstr "Ai"
 
 #: application/templates/base.html:107
 msgid ""
-"The test email has been successfully sent to the following addresses. Please"
-" check your inbox or spam folder to confirm its delivery. Depending on your "
-"email server, there may be a slight delay."
+"The test email has been successfully sent to the following addresses. "
+"Please check your inbox or spam folder to confirm its delivery. Depending"
+" on your email server, there may be a slight delay."
 msgstr "测试邮件已经成功发送到以下地址， 请打开收件箱或垃圾箱确认是否到达，根据服务器不同，可能稍有延迟。"
 
 #: application/templates/base.html:108
@@ -901,7 +934,8 @@ msgstr "配置校验正确。"
 
 #: application/templates/base.html:110 application/templates/logs.html:23
 #: application/templates/logs.html:72 application/templates/my.html:17
-#: application/templates/settings.html:117 application/templates/settings.html:118
+#: application/templates/settings.html:117
+#: application/templates/settings.html:118
 #: application/templates/settings.html:155
 msgid "Title"
 msgstr "书籍标题"
@@ -936,16 +970,16 @@ msgstr "这里什么都没有。"
 msgid "Please select a single item."
 msgstr "请选择单独一项。"
 
-#: application/templates/base.html:118 application/templates/reader.html:191
+#: application/templates/base.html:118 application/templates/reader.html:192
 msgid "Please select at least one item."
 msgstr "请选择至少一项。"
 
 #: application/templates/base.html:119 application/view/admin.py:77
 #: application/view/admin.py:152 application/view/admin.py:189
 #: application/view/adv.py:527 application/view/extension.py:34
-#: application/view/extension.py:63 application/view/inbound_email.py:481
-#: application/view/inbound_email.py:489 application/view/inbound_email.py:504
-#: application/view/inbound_email.py:525 application/view/login.py:232
+#: application/view/extension.py:63 application/view/inbound_email.py:515
+#: application/view/inbound_email.py:523 application/view/inbound_email.py:538
+#: application/view/inbound_email.py:559 application/view/login.py:232
 #: application/view/login.py:261 application/view/reader.py:109
 #: application/view/reader.py:126 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
@@ -970,7 +1004,8 @@ msgstr "主题"
 
 #: application/templates/base.html:124 application/templates/logs.html:22
 #: application/templates/logs.html:71 application/templates/settings.html:117
-#: application/templates/settings.html:118 application/templates/webmail.html:32
+#: application/templates/settings.html:118
+#: application/templates/webmail.html:32
 msgid "Time"
 msgstr "时间"
 
@@ -1281,7 +1316,8 @@ msgstr "新密码"
 #: application/templates/change_password.html:23
 #: application/templates/reset_password.html:35
 #: application/templates/reset_password.html:36
-#: application/templates/signup.html:29 application/templates/user_account.html:23
+#: application/templates/signup.html:29
+#: application/templates/user_account.html:23
 msgid "Confirm password"
 msgstr "确认密码"
 
@@ -1317,8 +1353,8 @@ msgstr "源自Calibre"
 #, python-format
 msgid ""
 "Empowered by %(calibre)s, you can easily create e-books on a Python-"
-"supported online platform and seamlessly transfer them to your e-reader or "
-"other reading devices."
+"supported online platform and seamlessly transfer them to your e-reader "
+"or other reading devices."
 msgstr "借助 %(calibre)s 的强大引擎，现在您可以在各种 Python 托管平台上轻松创建电子书，并直接推送至您的 Kindle 和其他阅读器。"
 
 #: application/templates/home.html:42
@@ -1329,8 +1365,8 @@ msgstr "分享智慧"
 #, python-format
 msgid ""
 "With the open-source %(kindleear)s application, you can set up your own "
-"server to deliver daily news feeds to your e-reader and effortlessly share "
-"the service with friends."
+"server to deliver daily news feeds to your e-reader and effortlessly "
+"share the service with friends."
 msgstr "使用开源 %(kindleear)s 应用，您可以部署您自己的网站，每天自动抓取全球新闻热点，并支持多账号，可以提供给多位好友同时使用。"
 
 #: application/templates/library.html:50 application/templates/my.html:61
@@ -1456,7 +1492,8 @@ msgstr "显示触摸区域图示"
 msgid "Help"
 msgstr "帮助"
 
-#: application/templates/reader.html:125 application/templates/reader_404.html:135
+#: application/templates/reader.html:125
+#: application/templates/reader_404.html:135
 msgid "Menu"
 msgstr "菜单"
 
@@ -1468,19 +1505,21 @@ msgstr "折叠所有"
 msgid "Expand all"
 msgstr "展开所有"
 
-#: application/templates/reader.html:149 application/templates/reader_404.html:140
+#: application/templates/reader.html:149
+#: application/templates/reader_404.html:140
 msgid "Prev"
 msgstr "前一页"
 
-#: application/templates/reader.html:154 application/templates/reader_404.html:143
+#: application/templates/reader.html:154
+#: application/templates/reader_404.html:143
 msgid "Next page"
 msgstr "下一页"
 
-#: application/templates/reader.html:192
+#: application/templates/reader.html:193
 msgid "Pushed successfully."
 msgstr "推送成功。"
 
-#: application/templates/reader.html:193
+#: application/templates/reader.html:194
 msgid "There are currently no books or articles being read."
 msgstr "当前没有正在阅读的书籍或文章。"
 
@@ -1546,23 +1585,28 @@ msgstr "在线阅读书籍的保留天数"
 msgid "Web shelf"
 msgstr "网络书架"
 
-#: application/templates/settings.html:53 application/templates/settings.html:176
+#: application/templates/settings.html:53
+#: application/templates/settings.html:176
 msgid "2 Days"
 msgstr "两天"
 
-#: application/templates/settings.html:54 application/templates/settings.html:177
+#: application/templates/settings.html:54
+#: application/templates/settings.html:177
 msgid "3 Days"
 msgstr "三天"
 
-#: application/templates/settings.html:55 application/templates/settings.html:178
+#: application/templates/settings.html:55
+#: application/templates/settings.html:178
 msgid "4 Days"
 msgstr "四天"
 
-#: application/templates/settings.html:56 application/templates/settings.html:179
+#: application/templates/settings.html:56
+#: application/templates/settings.html:179
 msgid "5 Days"
 msgstr "五天"
 
-#: application/templates/settings.html:57 application/templates/settings.html:180
+#: application/templates/settings.html:57
+#: application/templates/settings.html:180
 msgid "6 Days"
 msgstr "六天"
 
@@ -1677,8 +1721,8 @@ msgstr "保存路径"
 #: application/templates/settings.html:257
 #, python-format
 msgid ""
-"Important: Please activate your kindle firstly, then goto %(personal)s Page "
-"and add %(sender)s to 'Approved Personal Document E-mail List'."
+"Important: Please activate your kindle firstly, then goto %(personal)s "
+"Page and add %(sender)s to 'Approved Personal Document E-mail List'."
 msgstr ""
 "注意：必须首先注册您的Kindle设备，同时请到亚马逊账户中心 %(personal)s 页面，将 %(sender)s 添加到 "
 "'已认可的发件人电子邮箱列表'。"
@@ -1690,8 +1734,8 @@ msgstr "个人文档设置"
 #: application/templates/settings.html:263
 #, python-format
 msgid ""
-"You have not yet set up your email address. Please go to the %(admin)s page "
-"to add your email address firstly."
+"You have not yet set up your email address. Please go to the %(admin)s "
+"page to add your email address firstly."
 msgstr "您尚未设置您的email地址，请先到 %(admin)s 页面添加您的email地址。"
 
 #: application/templates/settings.html:271
@@ -1809,8 +1853,8 @@ msgstr "钩子文件太大。"
 
 #: application/view/adv.py:118
 msgid ""
-"Failed to decode the file. Please ensure that your file is saved in utf-8 "
-"encoding."
+"Failed to decode the file. Please ensure that your file is saved in utf-8"
+" encoding."
 msgstr "解码文件失败，请确保文件以utf-8编码保存。"
 
 #: application/view/adv.py:123
@@ -1904,7 +1948,9 @@ msgstr "已经成功获得Pocket的授权！"
 
 #: application/view/adv.py:657
 #, python-brace-format
-msgid "Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>{}"
+msgid ""
+"Failed to request authorization of Pocket!<hr/>See details "
+"below:<br/><br/>{}"
 msgstr "申请Pocket授权失败!<hr/>错误信息参考如下：<br/><br/>{}"
 
 #: application/view/adv.py:678
@@ -1995,7 +2041,9 @@ msgid "The invitation code is invalid."
 msgstr "邀请码无效。"
 
 #: application/view/login.py:242
-msgid "Failed to create an account. Please contact the administrator for assistance."
+msgid ""
+"Failed to create an account. Please contact the administrator for "
+"assistance."
 msgstr "创建账号失败，请联系管理员请求协助。"
 
 #: application/view/login.py:252
@@ -2043,8 +2091,8 @@ msgstr "创建电子书失败。"
 
 #: application/view/settings.py:132
 msgid ""
-"You have not yet set up your email address. Please go to the 'Account' page "
-"to add your email address firstly."
+"You have not yet set up your email address. Please go to the 'Account' "
+"page to add your email address firstly."
 msgstr "您尚未设置您的email地址，请先到“账号管理”页面添加您的email地址。"
 
 #: application/view/settings.py:216
@@ -2376,10 +2424,3 @@ msgstr "此Recipe的网站登录信息已经保存。"
 #: application/view/translator.py:81 application/view/translator.py:165
 msgid "The api key is required."
 msgstr "需要填写api key."
-
-#~ msgid "Src"
-#~ msgstr "源码"
-
-#~ msgid "Delete hook"
-#~ msgstr "删除钩子"
-

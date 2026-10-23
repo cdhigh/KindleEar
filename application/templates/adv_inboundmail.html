@@ -80,14 +80,18 @@ Object.assign(i18n, {
   view: "{{_('View')|safe}}",
   selectFile: "{{_('Please select a file.')|safe}}",
   hookExisted: "{{_('A hook file ({0}) already exists for this address, you can replace or delete it.')|safe}}",
-  hookTips: "{{_('The hook is a normal python file used to preprocess the mail from this sender before delivery. Define one or both of the following functions in the file:')|safe}}",
+  hookTips: "{{_('The hook is a Python file defining a subclass of MailNewsRecipe to preprocess mail or extract/scrape linked articles:')|safe}}",
   hookUploaded: "{{_('The hook file have been saved successfully.')|safe}}",
   hookDeleted: "{{_('The hook file have been deleted.')|safe}}",
-  hookFuncSign: `def hook_email(sender, to, subject, txtBodies, htmlBodies, attachments):
-    #return None or (subject, txtBodies, htmlBodies, attachments)
-
-def hook_email_soup(sender, to, soup, attachments):
-    #return None or (soup, attachments, urls)`
+  hookFuncSign: `#Template code:
+from calibre.web.feeds.news import MailNewsRecipe
+class MyMailHook(MailNewsRecipe):
+    def preprocess_email(self, subject, txtBodies, htmlBodies, attachments):
+        return None
+    def preprocess_soup(self, soup, attachments):
+        return None
+    def extract_urls(self, soup):
+        return []`
 });
 
 //点击某个白名单条目的钩子按钮，打开上传/删除钩子文件对话框

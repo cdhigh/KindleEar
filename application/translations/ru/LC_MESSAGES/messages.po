@@ -7,41 +7,40 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-03 04:37-0300\n"
+"POT-Creation-Date: 2026-10-22 22:34-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: ru\n"
 "Language-Team: KindleEar <LL@li.org>\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: application/mail_hook.py:107 application/mail_hook.py:110
+#: application/mail_hook.py:110 application/mail_hook.py:113
 #, python-brace-format
 msgid "Forbidden module import in mail hook: {}"
 msgstr "Запрещённый импорт модуля в почтовом хуке: {}"
 
-#: application/mail_hook.py:113
+#: application/mail_hook.py:116
 #, python-brace-format
 msgid "Forbidden attribute access in mail hook: {}"
 msgstr "Запрещённый доступ к атрибуту в почтовом хуке: {}"
 
-#: application/mail_hook.py:116
+#: application/mail_hook.py:119
 #, python-brace-format
 msgid "Forbidden function call in mail hook: {}()"
 msgstr "Запрещённый вызов функции в почтовом хуке: {}()"
 
-#: application/mail_hook.py:133
-#, python-brace-format
-msgid "The signature of {}() is invalid, it should be: def {}({})"
-msgstr "Сигнатура {}() недействительна, она должна быть: def {}({})"
+#: application/mail_hook.py:142
+msgid "Cannot find any subclass of MailNewsRecipe in the hook file."
+msgstr "В файле хука не найдено ни одного подкласса MailNewsRecipe."
 
-#: application/mail_hook.py:136
+#: application/mail_hook.py:145
 #, python-brace-format
-msgid "Cannot find the function {} or {} in the hook file."
-msgstr "Не удалось найти функцию {} или {} в файле хука."
+msgid "The signature of {0} is invalid, it should be: def {0}({1})"
+msgstr "Сигнатура {0} недействительна, должно быть: def {0}({1})"
 
 #: application/templates/admin.html:3 application/templates/base.html:53
 #: application/templates/base.html:192 application/templates/settings.html:263
@@ -58,15 +57,18 @@ msgstr "Настройки регистрации"
 msgid "Save"
 msgstr "Сохранить"
 
-#: application/templates/admin.html:21 application/templates/user_account.html:31
+#: application/templates/admin.html:21
+#: application/templates/user_account.html:31
 msgid "Email service"
 msgstr "Служба электронной почты"
 
-#: application/templates/admin.html:23 application/templates/user_account.html:34
+#: application/templates/admin.html:23
+#: application/templates/user_account.html:34
 msgid "Same as admin"
 msgstr "То же, что и у администратора"
 
-#: application/templates/admin.html:24 application/templates/user_account.html:35
+#: application/templates/admin.html:24
+#: application/templates/user_account.html:35
 msgid "Independent"
 msgstr "Независимый"
 
@@ -99,17 +101,20 @@ msgid "Accounts"
 msgstr "Аккаунты"
 
 #: application/templates/admin.html:43
-#: application/templates/adv_inboundmail.html:64 application/templates/my.html:34
-#: application/view/admin.py:57 application/view/admin.py:64
-#: application/view/admin.py:91
+#: application/templates/adv_inboundmail.html:64
+#: application/templates/my.html:34 application/view/admin.py:57
+#: application/view/admin.py:64 application/view/admin.py:91
 msgid "Add"
 msgstr "Добавить"
 
-#: application/templates/admin.html:54 application/templates/adv_archive.html:69
+#: application/templates/admin.html:54
+#: application/templates/adv_archive.html:69
 #: application/templates/home.html:19 application/templates/login.html:24
-#: application/templates/logs.html:70 application/templates/reset_password.html:19
+#: application/templates/logs.html:70
+#: application/templates/reset_password.html:19
 #: application/templates/reset_password.html:20
-#: application/templates/settings.html:241 application/templates/signup.html:21
+#: application/templates/settings.html:241
+#: application/templates/signup.html:21
 #: application/templates/user_account.html:15
 msgid "Username"
 msgstr "Имя пользователя"
@@ -121,11 +126,13 @@ msgstr "Автопередача"
 #: application/templates/admin.html:56
 #: application/templates/change_password.html:27
 #: application/templates/reset_password.html:26
-#: application/templates/signup.html:33 application/templates/user_account.html:27
+#: application/templates/signup.html:33
+#: application/templates/user_account.html:27
 msgid "Email"
 msgstr "Email"
 
-#: application/templates/admin.html:57 application/templates/user_account.html:39
+#: application/templates/admin.html:57
+#: application/templates/user_account.html:39
 msgid "Expiration"
 msgstr "Срок действия"
 
@@ -147,28 +154,34 @@ msgstr "Никогда"
 
 #: application/templates/admin.html:70
 #: application/templates/adv_inboundmail.html:26
-#: application/templates/settings.html:58 application/templates/settings.html:181
+#: application/templates/settings.html:58
+#: application/templates/settings.html:181
 #: application/templates/user_account.html:43
 msgid "7 Days"
 msgstr "7 дней"
 
-#: application/templates/admin.html:72 application/templates/user_account.html:44
+#: application/templates/admin.html:72
+#: application/templates/user_account.html:44
 msgid "1 Month"
 msgstr "1 месяц"
 
-#: application/templates/admin.html:74 application/templates/user_account.html:45
+#: application/templates/admin.html:74
+#: application/templates/user_account.html:45
 msgid "3 Months"
 msgstr "3 месяца"
 
-#: application/templates/admin.html:76 application/templates/user_account.html:46
+#: application/templates/admin.html:76
+#: application/templates/user_account.html:46
 msgid "6 Months"
 msgstr "6 месяцев"
 
-#: application/templates/admin.html:78 application/templates/user_account.html:47
+#: application/templates/admin.html:78
+#: application/templates/user_account.html:47
 msgid "1 Year"
 msgstr "1 год"
 
-#: application/templates/admin.html:80 application/templates/user_account.html:48
+#: application/templates/admin.html:80
+#: application/templates/user_account.html:48
 msgid "2 Years"
 msgstr "2 года"
 
@@ -181,14 +194,15 @@ msgstr "Редактировать аккаунт"
 
 #: application/templates/admin.html:89
 #: application/templates/adv_inboundmail.html:57
-#: application/templates/adv_uploadcss.html:31 application/templates/base.html:25
-#: application/templates/webmail.html:22
+#: application/templates/adv_uploadcss.html:31
+#: application/templates/base.html:25 application/templates/webmail.html:22
 msgid "Delete"
 msgstr "Удалить"
 
 #: application/templates/adv_archive.html:3
 #: application/templates/adv_archive.html:14
-#: application/templates/adv_base.html:57 application/templates/adv_base.html:61
+#: application/templates/adv_base.html:57
+#: application/templates/adv_base.html:61
 msgid "Archive"
 msgstr "Архив"
 
@@ -209,15 +223,17 @@ msgid "Email or Username"
 msgstr "Электронная почта или имя пользователя"
 
 #: application/templates/adv_archive.html:56
-#: application/templates/adv_archive.html:72 application/templates/base.html:54
-#: application/templates/home.html:20 application/templates/login.html:28
-#: application/templates/settings.html:245 application/templates/signup.html:25
+#: application/templates/adv_archive.html:72
+#: application/templates/base.html:54 application/templates/home.html:20
+#: application/templates/login.html:28 application/templates/settings.html:245
+#: application/templates/signup.html:25
 #: application/templates/user_account.html:19
 msgid "Password"
 msgstr "Пароль"
 
 #: application/templates/adv_archive.html:59
-#: application/templates/adv_archive.html:75 application/templates/base.html:64
+#: application/templates/adv_archive.html:75
+#: application/templates/base.html:64
 msgid "Verify"
 msgstr "Проверить"
 
@@ -244,44 +260,54 @@ msgstr "Хост"
 msgid "Save settings"
 msgstr "Сохранить настройки"
 
-#: application/templates/adv_base.html:39 application/templates/adv_base.html:43
+#: application/templates/adv_base.html:39
+#: application/templates/adv_base.html:43
 #: application/templates/adv_delivernow.html:8
 msgid "Deliver Now"
 msgstr "Отправить сейчас"
 
-#: application/templates/adv_base.html:48 application/templates/adv_base.html:52
+#: application/templates/adv_base.html:48
+#: application/templates/adv_base.html:52
 #: application/templates/adv_inboundmail.html:3
 #: application/templates/adv_inboundmail.html:9
 #: application/templates/adv_inboundmail.html:14
 msgid "Inbound Mail"
 msgstr "Входящая почта"
 
-#: application/templates/adv_base.html:66 application/templates/adv_base.html:70
-#: application/templates/adv_dict.html:3 application/templates/adv_dict.html:13
+#: application/templates/adv_base.html:66
+#: application/templates/adv_base.html:70
+#: application/templates/adv_dict.html:3
+#: application/templates/adv_dict.html:13
 #: application/templates/reader.html:134
 msgid "Dictionary"
 msgstr "Словарь"
 
-#: application/templates/adv_base.html:75 application/templates/adv_base.html:83
-#: application/templates/adv_proxy.html:3 application/templates/adv_proxy.html:12
+#: application/templates/adv_base.html:75
+#: application/templates/adv_base.html:83
+#: application/templates/adv_proxy.html:3
+#: application/templates/adv_proxy.html:12
 msgid "Proxy"
 msgstr "Прокси"
 
-#: application/templates/adv_base.html:92 application/templates/adv_base.html:96
+#: application/templates/adv_base.html:92
+#: application/templates/adv_base.html:96
 #: application/templates/adv_import.html:8
 msgid "Import Feeds"
 msgstr "Импортировать ленты"
 
-#: application/templates/adv_base.html:101 application/templates/adv_base.html:105
+#: application/templates/adv_base.html:101
+#: application/templates/adv_base.html:105
 msgid "Cover Image"
 msgstr "Обложка"
 
-#: application/templates/adv_base.html:110 application/templates/adv_base.html:114
+#: application/templates/adv_base.html:110
+#: application/templates/adv_base.html:114
 #: application/templates/adv_uploadcss.html:3
 msgid "Stylesheet"
 msgstr "Стиль"
 
-#: application/templates/adv_base.html:119 application/templates/adv_base.html:123
+#: application/templates/adv_base.html:119
+#: application/templates/adv_base.html:123
 #: application/templates/adv_calibre_options.html:3
 #: application/templates/adv_calibre_options.html:12
 msgid "Calibre Options"
@@ -324,12 +350,14 @@ msgstr "Отправить"
 msgid "Set up dictionaries for online reading."
 msgstr "Настройте словари для онлайн-чтения."
 
-#: application/templates/adv_dict.html:18 application/templates/adv_dict.html:40
+#: application/templates/adv_dict.html:18
+#: application/templates/adv_dict.html:40
 #: application/templates/adv_dict.html:62
 msgid "Book language"
 msgstr "Язык книги"
 
-#: application/templates/adv_dict.html:27 application/templates/adv_dict.html:49
+#: application/templates/adv_dict.html:27
+#: application/templates/adv_dict.html:49
 #: application/templates/adv_dict.html:66
 #: application/templates/book_summarizer.html:23
 #: application/templates/book_translator.html:26
@@ -337,7 +365,8 @@ msgstr "Язык книги"
 msgid "Engine"
 msgstr "Движок"
 
-#: application/templates/adv_dict.html:33 application/templates/adv_dict.html:55
+#: application/templates/adv_dict.html:33
+#: application/templates/adv_dict.html:55
 #: application/templates/adv_dict.html:72
 #: application/templates/word_lookup.html:65
 msgid "Database"
@@ -347,7 +376,8 @@ msgstr "База данных"
 msgid "Other languages"
 msgstr "Другие языки"
 
-#: application/templates/adv_dict.html:81 application/templates/word_lookup.html:3
+#: application/templates/adv_dict.html:81
+#: application/templates/word_lookup.html:3
 #: application/templates/word_lookup.html:79
 msgid "Word lookup"
 msgstr "Поиск слов"
@@ -378,7 +408,8 @@ msgstr "Скачать"
 msgid ""
 "To enable the inbound email feature, you also need to configure the "
 "whitelist."
-msgstr "Чтобы включить функцию входящей почты, необходимо настроить белый список."
+msgstr ""
+"Чтобы включить функцию входящей почты, необходимо настроить белый список."
 
 #: application/templates/adv_inboundmail.html:16
 #: application/templates/adv_uploadcover.html:15
@@ -405,7 +436,8 @@ msgid "Email Retention"
 msgstr "Сохранение электронной почты"
 
 #: application/templates/adv_inboundmail.html:25
-#: application/templates/settings.html:52 application/templates/settings.html:175
+#: application/templates/settings.html:52
+#: application/templates/settings.html:175
 msgid "1 Day"
 msgstr "1 день"
 
@@ -415,7 +447,8 @@ msgid "30 Days"
 msgstr "30 дней"
 
 #: application/templates/adv_inboundmail.html:28
-#: application/templates/settings.html:51 application/templates/settings.html:174
+#: application/templates/settings.html:51
+#: application/templates/settings.html:174
 msgid "No limit"
 msgstr "Без ограничений"
 
@@ -481,13 +514,11 @@ msgstr ""
 
 #: application/templates/adv_inboundmail.html:83
 msgid ""
-"The hook is a normal python file used to preprocess the mail from this "
-"sender before delivery. Define one or both of the following functions in the"
-" file:"
+"The hook is a Python file defining a subclass of MailNewsRecipe to "
+"preprocess mail or extract/scrape linked articles:"
 msgstr ""
-"Хук — это обычный файл python, используемый для предварительной обработки "
-"почты от этого отправителя перед доставкой. Определите в файле одну или обе "
-"следующие функции:"
+"Хук — это файл Python, определяющий подкласс MailNewsRecipe для "
+"предобработки почты или извлечения связанных статей:"
 
 #: application/templates/adv_inboundmail.html:84
 msgid "The hook file have been saved successfully."
@@ -501,7 +532,8 @@ msgstr "Файл хука был удалён."
 msgid "Supports"
 msgstr "Поддерживает"
 
-#: application/templates/adv_proxy.html:24 application/templates/adv_proxy.html:29
+#: application/templates/adv_proxy.html:24
+#: application/templates/adv_proxy.html:29
 #: application/templates/book_audiolator.html:132
 #: application/templates/book_summarizer.html:105
 #: application/templates/book_translator.html:97
@@ -517,7 +549,8 @@ msgid "Upload cover image"
 msgstr "Загрузить изображение обложки"
 
 #: application/templates/adv_uploadcover.html:10
-msgid "Upload cover images from local with an aspect ratio of approximately 0.625."
+msgid ""
+"Upload cover images from local with an aspect ratio of approximately 0.625."
 msgstr "Загрузите изображения обложек с соотношением сторон примерно 0,625."
 
 #: application/templates/adv_uploadcover.html:13
@@ -563,11 +596,12 @@ msgstr "Автоматический возврат"
 msgid "Auto back to previous page after 5 seconds"
 msgstr "Автоматический возврат на предыдущую страницу через 5 секунд"
 
-#: application/templates/autoback.html:29 application/templates/tipsback.html:15
+#: application/templates/autoback.html:29
+#: application/templates/tipsback.html:15
 msgid "Click to back"
 msgstr "Нажмите для возврата"
 
-#: application/templates/base.html:24 application/templates/reader.html:189
+#: application/templates/base.html:24 application/templates/reader.html:190
 msgid "Confirm Deletion"
 msgstr "Подтвердить удаление"
 
@@ -603,7 +637,7 @@ msgstr "Полный текст"
 msgid "Share"
 msgstr "Поделиться"
 
-#: application/templates/base.html:34 application/templates/reader.html:190
+#: application/templates/base.html:34 application/templates/reader.html:191
 msgid "Are you sure to delete?"
 msgstr "Вы уверены, что хотите удалить?"
 
@@ -631,8 +665,11 @@ msgid "Language"
 msgstr "Язык"
 
 #: application/templates/base.html:40
-msgid "Please write a category in text field if the one you wish is not in the list."
-msgstr "Пожалуйста, напишите категорию в текстовом поле, если нужной нет в списке."
+msgid ""
+"Please write a category in text field if the one you wish is not in the "
+"list."
+msgstr ""
+"Пожалуйста, напишите категорию в текстовом поле, если нужной нет в списке."
 
 #: application/templates/base.html:41
 msgid "Ok"
@@ -822,7 +859,8 @@ msgid "Delivery times"
 msgstr "Время доставки"
 
 #: application/templates/base.html:89
-msgid "The customized delivery time for the recipe has been successfully saved."
+msgid ""
+"The customized delivery time for the recipe has been successfully saved."
 msgstr "Настроенное время доставки для рецепта успешно сохранено."
 
 #: application/templates/base.html:90
@@ -863,12 +901,14 @@ msgstr ""
 "Общий размер выбранных вами файлов превышает 16 МБ. Пожалуйста, уменьшите "
 "разрешение изображения или загрузите файлы партиями."
 
-#: application/templates/base.html:98 application/templates/book_translator.html:3
+#: application/templates/base.html:98
+#: application/templates/book_translator.html:3
 #: application/templates/book_translator.html:17
 msgid "Bilingual Translator"
 msgstr "Двуязычный переводчик"
 
-#: application/templates/base.html:99 application/templates/book_summarizer.html:3
+#: application/templates/base.html:99
+#: application/templates/book_summarizer.html:3
 #: application/templates/book_summarizer.html:14
 msgid "AI Summarizer"
 msgstr "Искусственный интеллект для резюмирования"
@@ -917,7 +957,8 @@ msgstr "Проверка конфигурации завершена успеш�
 
 #: application/templates/base.html:110 application/templates/logs.html:23
 #: application/templates/logs.html:72 application/templates/my.html:17
-#: application/templates/settings.html:117 application/templates/settings.html:118
+#: application/templates/settings.html:117
+#: application/templates/settings.html:118
 #: application/templates/settings.html:155
 msgid "Title"
 msgstr "Заголовок"
@@ -952,16 +993,16 @@ msgstr "Здесь ничего нет."
 msgid "Please select a single item."
 msgstr "Пожалуйста, выберите один элемент."
 
-#: application/templates/base.html:118 application/templates/reader.html:191
+#: application/templates/base.html:118 application/templates/reader.html:192
 msgid "Please select at least one item."
 msgstr "Пожалуйста, выберите хотя бы один элемент."
 
 #: application/templates/base.html:119 application/view/admin.py:77
 #: application/view/admin.py:152 application/view/admin.py:189
 #: application/view/adv.py:527 application/view/extension.py:34
-#: application/view/extension.py:63 application/view/inbound_email.py:481
-#: application/view/inbound_email.py:489 application/view/inbound_email.py:504
-#: application/view/inbound_email.py:525 application/view/login.py:232
+#: application/view/extension.py:63 application/view/inbound_email.py:515
+#: application/view/inbound_email.py:523 application/view/inbound_email.py:538
+#: application/view/inbound_email.py:559 application/view/login.py:232
 #: application/view/login.py:261 application/view/reader.py:109
 #: application/view/reader.py:126 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
@@ -986,7 +1027,8 @@ msgstr "Тема"
 
 #: application/templates/base.html:124 application/templates/logs.html:22
 #: application/templates/logs.html:71 application/templates/settings.html:117
-#: application/templates/settings.html:118 application/templates/webmail.html:32
+#: application/templates/settings.html:118
+#: application/templates/webmail.html:32
 msgid "Time"
 msgstr "Время"
 
@@ -1299,7 +1341,8 @@ msgstr "Новый пароль"
 #: application/templates/change_password.html:23
 #: application/templates/reset_password.html:35
 #: application/templates/reset_password.html:36
-#: application/templates/signup.html:29 application/templates/user_account.html:23
+#: application/templates/signup.html:29
+#: application/templates/user_account.html:23
 msgid "Confirm password"
 msgstr "Подтвердите пароль"
 
@@ -1338,9 +1381,9 @@ msgid ""
 "supported online platform and seamlessly transfer them to your e-reader or "
 "other reading devices."
 msgstr ""
-"С помощью %(calibre)s вы можете легко создавать электронные книги на "
-"онлайн-платформе с поддержкой Python и без труда переносить их на ваш ридер "
-"или другие устройства для чтения."
+"С помощью %(calibre)s вы можете легко создавать электронные книги на онлайн-"
+"платформе с поддержкой Python и без труда переносить их на ваш ридер или "
+"другие устройства для чтения."
 
 #: application/templates/home.html:42
 msgid "Share Your Ideas"
@@ -1366,7 +1409,8 @@ msgstr "Поиск"
 msgid ""
 "The website does not allow registration. You can ask the owner for an "
 "account."
-msgstr "Вебсайт не позволяет регистрацию. Вы можете запросить аккаунт у владельца."
+msgstr ""
+"Вебсайт не позволяет регистрацию. Вы можете запросить аккаунт у владельца."
 
 #: application/templates/logs.html:11
 msgid "Only display last 20 logs"
@@ -1480,7 +1524,8 @@ msgstr "Визуализировать области касания"
 msgid "Help"
 msgstr "Помощь"
 
-#: application/templates/reader.html:125 application/templates/reader_404.html:135
+#: application/templates/reader.html:125
+#: application/templates/reader_404.html:135
 msgid "Menu"
 msgstr "Меню"
 
@@ -1492,19 +1537,21 @@ msgstr "Свернуть все"
 msgid "Expand all"
 msgstr "Развернуть все"
 
-#: application/templates/reader.html:149 application/templates/reader_404.html:140
+#: application/templates/reader.html:149
+#: application/templates/reader_404.html:140
 msgid "Prev"
 msgstr "Предыдущая"
 
-#: application/templates/reader.html:154 application/templates/reader_404.html:143
+#: application/templates/reader.html:154
+#: application/templates/reader_404.html:143
 msgid "Next page"
 msgstr "Следующая страница"
 
-#: application/templates/reader.html:192
+#: application/templates/reader.html:193
 msgid "Pushed successfully."
 msgstr "Успешно отправлено."
 
-#: application/templates/reader.html:193
+#: application/templates/reader.html:194
 msgid "There are currently no books or articles being read."
 msgstr "В настоящее время нет читаемых книг или статей."
 
@@ -1515,7 +1562,8 @@ msgstr "Сбросить пароль"
 
 #: application/templates/settings.html:14
 #, python-brace-format
-msgid "Your account will pause after {0}, please log in again before it expires."
+msgid ""
+"Your account will pause after {0}, please log in again before it expires."
 msgstr ""
 "Ваш аккаунт будет приостановлен после {0}, пожалуйста, войдите снова до "
 "истечения срока."
@@ -1572,23 +1620,28 @@ msgstr "Количество дней хранения онлайн-книг"
 msgid "Web shelf"
 msgstr "Веб-полка"
 
-#: application/templates/settings.html:53 application/templates/settings.html:176
+#: application/templates/settings.html:53
+#: application/templates/settings.html:176
 msgid "2 Days"
 msgstr "2 дня"
 
-#: application/templates/settings.html:54 application/templates/settings.html:177
+#: application/templates/settings.html:54
+#: application/templates/settings.html:177
 msgid "3 Days"
 msgstr "3 дня"
 
-#: application/templates/settings.html:55 application/templates/settings.html:178
+#: application/templates/settings.html:55
+#: application/templates/settings.html:178
 msgid "4 Days"
 msgstr "4 дня"
 
-#: application/templates/settings.html:56 application/templates/settings.html:179
+#: application/templates/settings.html:56
+#: application/templates/settings.html:179
 msgid "5 Days"
 msgstr "5 дней"
 
-#: application/templates/settings.html:57 application/templates/settings.html:180
+#: application/templates/settings.html:57
+#: application/templates/settings.html:180
 msgid "6 Days"
 msgstr "6 дней"
 
@@ -1840,7 +1893,9 @@ msgstr "Файл хука слишком большой."
 msgid ""
 "Failed to decode the file. Please ensure that your file is saved in utf-8 "
 "encoding."
-msgstr "Не удалось декодировать файл. Убедитесь, что файл сохранён в кодировке utf-8."
+msgstr ""
+"Не удалось декодировать файл. Убедитесь, что файл сохранён в кодировке "
+"utf-8."
 
 #: application/view/adv.py:123
 msgid "Failed to save the hook. Error:"
@@ -1933,14 +1988,17 @@ msgstr "Авторизация успешна через Pocket!"
 
 #: application/view/adv.py:657
 #, python-brace-format
-msgid "Failed to request authorization of Pocket!<hr/>See details below:<br/><br/>{}"
+msgid ""
+"Failed to request authorization of Pocket!<hr/>See details "
+"below:<br/><br/>{}"
 msgstr ""
 "Не удалось запросить авторизацию через Pocket!<hr/>См. подробности "
 "ниже:<br/><br/>{}"
 
 #: application/view/adv.py:678
 msgid "The Instapaper service encountered an error. Please try again later."
-msgstr "Служба Instapaper столкнулась с ошибкой. Пожалуйста, попробуйте позже."
+msgstr ""
+"Служба Instapaper столкнулась с ошибкой. Пожалуйста, попробуйте позже."
 
 #: application/view/adv.py:691
 #, python-brace-format
@@ -1998,7 +2056,8 @@ msgstr "Токен неверен или истек."
 
 #: application/view/login.py:167
 msgid "Please input the correct username and email to reset password."
-msgstr "Пожалуйста, введите правильное имя пользователя и email для сброса пароля."
+msgstr ""
+"Пожалуйста, введите правильное имя пользователя и email для сброса пароля."
 
 #: application/view/login.py:169
 #, python-brace-format
@@ -2028,7 +2087,9 @@ msgid "The invitation code is invalid."
 msgstr "Пригласительный код недействителен."
 
 #: application/view/login.py:242
-msgid "Failed to create an account. Please contact the administrator for assistance."
+msgid ""
+"Failed to create an account. Please contact the administrator for "
+"assistance."
 msgstr ""
 "Не удалось создать аккаунт. Пожалуйста, свяжитесь с администратором для "
 "получения помощи."
@@ -2415,10 +2476,3 @@ msgstr "Информация для входа в этот рецепт сохр
 #: application/view/translator.py:81 application/view/translator.py:165
 msgid "The api key is required."
 msgstr "Необходим ключ api."
-
-#~ msgid "Src"
-#~ msgstr "Код"
-
-#~ msgid "Delete hook"
-#~ msgstr "Удалить хук"
-

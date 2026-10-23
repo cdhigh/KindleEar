@@ -3,10 +3,10 @@
 #自动翻译和更新po文件
 #Author: cdhigh <https://github.com/cdhigh>
 import os, sys, datetime, shutil, polib
-sys.path.insert(0, 'D:/Programer/Project/autopo')
+sys.path.insert(0, 'E:/Programer/Project/autopo')
 from autopo import createAiAgent, translateFile
 
-cfgFile = 'D:/Programer/Project/autopo/google.json'
+cfgFile = 'E:/Programer/Project/autopo/google.json'
 
 thisDir = os.path.dirname(os.path.abspath(__file__))
 appDir = os.path.normpath(os.path.join(thisDir, '..'))

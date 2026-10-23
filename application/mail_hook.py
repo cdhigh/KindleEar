@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-#入站邮件的预处理钩子：用户针对白名单条目上传python钩子文件（类似recipe），
-#收到邮件时根据发件人地址匹配钩子并调用，用于预处理邮件内容或附件
+#入站邮件的预处理钩子：用户针对白名单条目上传 MailNewsRecipe 派生类钩子文件，
+#收到邮件时根据发件人地址匹配钩子并调用，用于预处理邮件内容、外链提取及反反爬抓取
 #Author: cdhigh <https://github.com/cdhigh>
-#钩子文件为普通python文件，至少定义下面两个钩子函数之一，函数可以原地修改参数：
-#def hook_email(sender, to, subject, txtBodies, htmlBodies, attachments):
-#    参数与ReceiveMailImpl()一致，在解析邮件之前调用，
-#    返回None或(subject, txtBodies, htmlBodies, attachments)
-#def hook_email_soup(sender, to, soup, attachments):
-#    soup为BeautifulSoup实例，在邮件正文转换为soup之后调用，
-#    返回None或(soup, attachments)或(soup, attachments, urls)
-#sender/to为字符串，subject为字符串，txtBodies/htmlBodies为字符串列表，
-#attachments为[(fileName, bytes),...]，soup为BeautifulSoup实例
+#钩子文件为普通python文件，定义继承自 MailNewsRecipe 的类：
+#class MyMailRecipe(MailNewsRecipe):
+#    def preprocess_email(self, subject, txtBodies, htmlBodies, attachments):
+#        return subject, txtBodies, htmlBodies, attachments
+#    def preprocess_soup(self, soup, attachments):
+#        return soup, attachments
+#    def extract_urls(self, soup):
+#        return ['https://...']
 import json, inspect, ast
 from flask_babel import gettext as _
 from .ke_utils import utcnow
 from .back_end.db_models import UserBlob
-
-#钩子文件支持的钩子函数名
-HOOK_FULL_FUNC_NAME = 'hook_email'
-HOOK_SOUP_FUNC_NAME = 'hook_email_soup'
+from calibre.web.feeds.news import BasicNewsRecipe, MailNewsRecipe
+from flask_babel import gettext as _
+from .ke_utils import utcnow
+from .back_end.db_models import UserBlob
 
 #钩子源码保存在UserBlob表，name字段为此前缀 + 白名单地址（小写）
 HOOK_NAME_PREFIX = 'hook:'
@@ -119,47 +118,55 @@ def check_hook_ast_safety(src: str):
             if isinstance(node.func, ast.Name) and (node.func.id in BLOCKED_HOOK_CALLS):
                 raise ValueError(_("Forbidden function call in mail hook: {}()").format(node.func.id))
 
-#编译并简单执行钩子源码以检查错误，返回一个 {钩子函数名: 函数} 字典
-#源码有语法错误、模块级代码有运行错误、没有定义任何钩子函数或函数签名不匹配则抛出异常
+#编译并检查钩子源码，返回 MailNewsRecipe 的子类
+#源码有语法错误、高危操作或未定义 MailNewsRecipe 子类则抛出异常
 def compile_mail_hook(src, filename='hook.py'):
     check_hook_ast_safety(src)
     code = compile(src, filename, 'exec')
-    namespace = {'__name__': 'mail_hook', '__file__': filename}
-    #namespace未包含__builtins__时，exec会自动注入内置模块，钩子代码可以正常import任何库
+    namespace = {
+        '__name__': 'mail_hook',
+        '__file__': filename,
+        'BasicNewsRecipe': BasicNewsRecipe,
+        'MailNewsRecipe': MailNewsRecipe,
+    }
     exec(code, namespace) #type:ignore #nosec B102 #NOSONAR
 
-    hooks = {}
-    func = namespace.get(HOOK_FULL_FUNC_NAME)
-    if callable(func):
-        if not _signature_match(func, 6):
-            args = 'sender, to, subject, txtBodies, htmlBodies, attachments'
-            raise Exception(_('The signature of {}() is invalid, it should be: def {}({})').format(
-                HOOK_FULL_FUNC_NAME, HOOK_FULL_FUNC_NAME, args))
-        hooks[HOOK_FULL_FUNC_NAME] = func
+    hook_cls = None
+    for obj in namespace.values():
+        if (inspect.isclass(obj) and issubclass(obj, MailNewsRecipe)
+            and obj is not MailNewsRecipe):
+            hook_cls = obj
+            break
 
-    func = namespace.get(HOOK_SOUP_FUNC_NAME)
-    if callable(func):
-        if not _signature_match(func, 4):
-            args = 'sender, to, soup, attachments'
-            raise Exception(_('The signature of {}() is invalid, it should be: def {}({})').format(
-                HOOK_SOUP_FUNC_NAME, HOOK_SOUP_FUNC_NAME, args))
-        hooks[HOOK_SOUP_FUNC_NAME] = func
-        
-    if not hooks:
-        raise Exception(_('Cannot find the function {} or {} in the hook file.').format(
-            HOOK_FULL_FUNC_NAME, HOOK_SOUP_FUNC_NAME))
-    return hooks
+    if not hook_cls:
+        raise Exception(_('Cannot find any subclass of MailNewsRecipe in the hook file.'))
+
+    # 检查方法签名
+    sigError = _('The signature of {0} is invalid, it should be: def {0}({1})')
+    if not _signature_match(hook_cls.preprocess_email, 5): # self + 4 args
+        args = 'self, subject, txtBodies, htmlBodies, attachments'
+        raise Exception(sigError.format('preprocess_email', args))
+
+    if not _signature_match(hook_cls.preprocess_soup, 3): # self + 2 args
+        args = 'self, soup, attachments'
+        raise Exception(sigError.format('preprocess_soup', args))
+
+    if not _signature_match(hook_cls.extract_urls, 2): # self + 1 arg
+        args = 'self, soup'
+        raise Exception(sigError.format('extract_urls', args))
+
+    return hook_cls
 
 #检查函数签名是否可以接收argCount个位置参数
 def _signature_match(func, argCount):
     try:
         inspect.signature(func).bind(*([object()] * argCount))
         return True
-    except (TypeError, ValueError): #ValueError: 无法解析的签名，比如某些内置函数，放行
+    except (TypeError, ValueError):
         return False
 
-#加载并执行钩子源码，返回指定名称的钩子函数，没有匹配的钩子或执行失败则返回None
-def _load_hook_func(user, sender, name):
+#加载发件人匹配的钩子类，没有匹配的钩子或编译失败则返回None
+def load_mail_hook(user, sender):
     dbItem = match_mail_hook(user, sender)
     if not dbItem:
         return None
@@ -169,40 +176,65 @@ def _load_hook_func(user, sender, name):
         return None
 
     try:
-        check_hook_ast_safety(src)
-        namespace = {'__name__': 'mail_hook'}
-        #namespace未包含__builtins__时，exec会自动注入内置模块，钩子代码可以正常import任何库
-        exec(compile(src, hook_blob_name(sender), 'exec'), namespace) #type:ignore #nosec B102 #NOSONAR
-        return namespace.get(name) if callable(namespace.get(name)) else None
+        return compile_mail_hook(src, hook_blob_name(sender))
     except Exception as e:
-        default_log.warning(f'Failed to run the mail hook [{sender}]: {e}')
+        default_log.warning(f'Failed to load mail hook [{sender}]: {e}')
         return None
 
-#调用完整签名钩子函数预处理邮件，返回 (subject, txtBodies, htmlBodies, attachments)
-#钩子函数可以原地修改参数，也可以返回一个修改后的元组，出现错误则记录日志并不影响邮件处理流程
-def run_mail_hook(user, sender, to, subject, txtBodies, htmlBodies, attachments):
+#调用钩子预处理原始邮件，返回 (subject, txtBodies, htmlBodies, attachments)
+def run_mail_preprocess_email(user, sender, to, subject, txtBodies, htmlBodies, attachments):
+    hook_cls = load_mail_hook(user, sender)
+    if not hook_cls:
+        return subject, txtBodies, htmlBodies, attachments
+
     try:
-        func = _load_hook_func(user, sender, HOOK_FULL_FUNC_NAME)
-        if func:
-            ret = func(sender, to, subject, txtBodies, htmlBodies, attachments)
-            if isinstance(ret, (tuple, list)) and (len(ret) == 4):
-                subject, txtBodies, htmlBodies, attachments = ret
+        hook = hook_cls()
+        hook.sender = sender
+        hook.to = to
+        ret = hook.preprocess_email(subject, txtBodies, htmlBodies, attachments)
+        if isinstance(ret, (tuple, list)) and len(ret) == 4:
+            subject, txtBodies, htmlBodies, attachments = ret
     except Exception as e:
-        default_log.warning(f'The mail hook {HOOK_FULL_FUNC_NAME} failed: {e}')
+        default_log.warning(f'Mail hook preprocess_email failed [{sender}]: {e}')
+
     return subject, txtBodies, htmlBodies, attachments
 
-#调用内容签名钩子函数处理邮件正文soup和附件，返回 (soup, attachments, urls)
-def run_mail_content_hook(user, sender, to, soup, attachments):
+#调用钩子预处理邮件正文soup和提取外链，返回 (soup, attachments, urls)
+def run_mail_preprocess_soup(user, sender, to, soup, attachments):
     urls = []
+    hook_cls = load_mail_hook(user, sender)
+    if not hook_cls:
+        return soup, attachments, urls
+
     try:
-        func = _load_hook_func(user, sender, HOOK_SOUP_FUNC_NAME)
-        if func:
-            ret = func(sender, to, soup, attachments)
+        hook = hook_cls()
+        hook.sender = sender
+        hook.to = to
+
+        # 1. preprocess_soup
+        ret = hook.preprocess_soup(soup, attachments)
+        if ret is not None:
             if isinstance(ret, (tuple, list)):
                 if len(ret) == 2:
                     soup, attachments = ret
                 elif len(ret) == 3:
                     soup, attachments, urls = ret
+                elif len(ret) == 1:
+                    soup = ret[0]
+            else:
+                soup = ret
+
+        # 2. extract_urls（如果 preprocess_soup 没通过 3 元组直接返回 urls）
+        if not urls and callable(getattr(hook, 'extract_urls', None)):
+            ret_urls = hook.extract_urls(soup)
+            if isinstance(ret_urls, (list, tuple)):
+                urls = list(ret_urls)
+
+        # 3. 检查 hook.urls 属性（如果用户在方法内直接设置了 self.urls）
+        if not urls and getattr(hook, 'urls', None):
+            urls = list(hook.urls)
     except Exception as e:
-        default_log.warning(f'The mail hook {HOOK_SOUP_FUNC_NAME} failed: {e}')
+        default_log.warning(f'Mail hook preprocess_soup failed [{sender}]: {e}')
+
     return soup, attachments, urls
+

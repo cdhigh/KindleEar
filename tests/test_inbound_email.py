@@ -99,15 +99,18 @@ class InboundEmailTestCase(BaseTestCase):
 
 
 HOOK_SRC_BOTH = '''
-def hook_email(sender, to, subject, txtBodies, htmlBodies, attachments):
-    subject = '[hooked] ' + subject
-    return subject, txtBodies, htmlBodies, attachments
+from calibre.web.feeds.news import MailNewsRecipe
 
-def hook_email_soup(sender, to, soup, attachments):
-    tag = soup.new_tag('p')
-    tag.string = 'content-hook-marker'
-    soup.body.append(tag)
-    return soup, attachments
+class MyMailHook(MailNewsRecipe):
+    def preprocess_email(self, subject, txtBodies, htmlBodies, attachments):
+        subject = '[hooked] ' + subject
+        return subject, txtBodies, htmlBodies, attachments
+
+    def preprocess_soup(self, soup, attachments):
+        tag = soup.new_tag('p')
+        tag.string = 'content-hook-marker'
+        soup.body.append(tag)
+        return soup, attachments
 '''
 
 class MailHookTestCase(BaseTestCase):
@@ -125,43 +128,67 @@ class MailHookTestCase(BaseTestCase):
 
     #钩子源码的编译检查
     def test_compile_mail_hook(self):
-        from application.mail_hook import compile_mail_hook, HOOK_FULL_FUNC_NAME, HOOK_SOUP_FUNC_NAME
+        from application.mail_hook import compile_mail_hook
+        from calibre.web.feeds.news import MailNewsRecipe
 
-        hooks = compile_mail_hook(HOOK_SRC_BOTH)
-        self.assertIn(HOOK_FULL_FUNC_NAME, hooks)
-        self.assertIn(HOOK_SOUP_FUNC_NAME, hooks)
+        hook_cls = compile_mail_hook(HOOK_SRC_BOTH)
+        self.assertTrue(issubclass(hook_cls, MailNewsRecipe))
 
-        #只有一个钩子函数也可以
-        src = 'def hook_email_soup(sender, to, soup, attachments):\n    return None\n'
-        hooks = compile_mail_hook(src)
-        self.assertEqual(list(hooks.keys()), [HOOK_SOUP_FUNC_NAME])
+        #只重写 extract_urls 也可以
+        src = '''from calibre.web.feeds.news import MailNewsRecipe
+class SimpleHook(MailNewsRecipe):
+    def extract_urls(self, soup):
+        return ['http://example.com/art1']
+'''
+        hook_cls = compile_mail_hook(src)
+        self.assertTrue(issubclass(hook_cls, MailNewsRecipe))
 
-        #没有定义任何钩子函数
+        #没有定义 MailNewsRecipe 子类
         with self.assertRaises(Exception):
             compile_mail_hook('a = 1\n')
 
         #语法错误
         with self.assertRaises(Exception):
-            compile_mail_hook('def hook_email(:\n')
+            compile_mail_hook('class BadHook(:\n')
 
-        #钩子函数签名不匹配
+        #方法签名不匹配
         with self.assertRaises(Exception):
-            compile_mail_hook('def hook_email_soup(sender, to):\n    return None\n')
+            compile_mail_hook('''from calibre.web.feeds.news import MailNewsRecipe
+class BadSigHook(MailNewsRecipe):
+    def preprocess_email(self, a, b):
+        return None
+''')
 
         #高危模块导入被拦截
         with self.assertRaises(ValueError):
-            compile_mail_hook('import os\ndef hook_email(sender, to, subject, txtBodies, htmlBodies, attachments):\n    return None\n')
+            compile_mail_hook('''import os
+from calibre.web.feeds.news import MailNewsRecipe
+class SafeHook(MailNewsRecipe):
+    pass
+''')
 
         with self.assertRaises(ValueError):
-            compile_mail_hook('from subprocess import Popen\ndef hook_email(sender, to, subject, txtBodies, htmlBodies, attachments):\n    return None\n')
+            compile_mail_hook('''from subprocess import Popen
+from calibre.web.feeds.news import MailNewsRecipe
+class SafeHook(MailNewsRecipe):
+    pass
+''')
 
         #高危函数调用被拦截
         with self.assertRaises(ValueError):
-            compile_mail_hook('open("test.txt")\ndef hook_email(sender, to, subject, txtBodies, htmlBodies, attachments):\n    return None\n')
+            compile_mail_hook('''open("test.txt")
+from calibre.web.feeds.news import MailNewsRecipe
+class SafeHook(MailNewsRecipe):
+    pass
+''')
 
         #沙箱逃逸属性访问被拦截
         with self.assertRaises(ValueError):
-            compile_mail_hook('().__class__.__bases__[0].__subclasses__()\ndef hook_email(sender, to, subject, txtBodies, htmlBodies, attachments):\n    return None\n')
+            compile_mail_hook('''().__class__.__bases__[0].__subclasses__()
+from calibre.web.feeds.news import MailNewsRecipe
+class SafeHook(MailNewsRecipe):
+    pass
+''')
 
     #上传钩子文件的AJAX接口
     def test_upload_hook_api(self):
@@ -187,19 +214,19 @@ class MailHookTestCase(BaseTestCase):
 
         #上传有语法错误的文件
         resp = self.client.post('/advanced/inboundmail/hook',
-            data={'mail': '*', 'hook_file': (io.BytesIO(b'def hook_email(:\n'), 'hook.py')},
+            data={'mail': '*', 'hook_file': (io.BytesIO(b'class BadHook(:\n'), 'hook.py')},
             content_type='multipart/form-data')
         self.assertEqual(resp.status_code, 200)
         self.assertNotEqual(resp.json['status'], 'ok')
 
-        #上传没有钩子函数的文件
+        #上传没有钩子类继承的文件
         resp = self.client.post('/advanced/inboundmail/hook',
             data={'mail': '*', 'hook_file': (io.BytesIO(b'a = 1\n'), 'hook.py')},
             content_type='multipart/form-data')
         self.assertEqual(resp.status_code, 200)
         self.assertNotEqual(resp.json['status'], 'ok')
 
-        #页面显示Hooked状态，查看源码入口在点击Hooked后的对话框中
+        #页面显示Hooked状态
         resp = self.client.get('/advanced/inboundmail')
         self.assertEqual(resp.status_code, 200)
         self.assertIn('hookEnabled', resp.text)
@@ -209,7 +236,7 @@ class MailHookTestCase(BaseTestCase):
         #查看钩子源码页面
         resp = self.client.get('/advanced/inboundmail/hook/view/*')
         self.assertEqual(resp.status_code, 200)
-        self.assertIn('hook_email', resp.text)
+        self.assertIn('preprocess_email', resp.text)
         self.assertIn('prism.js', resp.text)
 
         #删除钩子的AJAX接口
@@ -218,7 +245,7 @@ class MailHookTestCase(BaseTestCase):
         dbItem = UserBlob.get_or_none((UserBlob.user == 'admin') & (UserBlob.name == hook_blob_name('*')))
         self.assertIsNone(dbItem)
 
-        #删除钩子后，按钮恢复为Hook，源码页面显示不存在
+        #删除钩子后，按钮恢复为Hook
         resp = self.client.get('/advanced/inboundmail')
         self.assertIn('>Hook</a>', resp.text)
         self.assertNotIn('Hooked', resp.text)
@@ -230,42 +257,46 @@ class MailHookTestCase(BaseTestCase):
 
     #钩子的匹配优先级和调用
     def test_run_mail_hook(self):
-        from application.mail_hook import save_mail_hook, run_mail_hook, run_mail_content_hook
+        from application.mail_hook import save_mail_hook, run_mail_preprocess_email, run_mail_preprocess_soup
 
         user = KeUser.get_or_none(KeUser.name == 'admin')
         save_mail_hook(user, '*', HOOK_SRC_BOTH, 'hook.py')
 
-        #通配符匹配
-        subject, txtBodies, htmlBodies, attachments = run_mail_hook(user, 'someone@anywhere.com', 'dl__k@x.com',
+        #通配符匹配 preprocess_email
+        subject, txtBodies, htmlBodies, attachments = run_mail_preprocess_email(user, 'someone@anywhere.com', 'dl__k@x.com',
             'hello', ['world'], [], [('a.txt', b'data')])
         self.assertEqual(subject, '[hooked] hello')
 
-        #soup钩子原地修改或者返回修改
+        #soup钩子修改
         soup = BeautifulSoup('<html><body><p>test</p></body></html>', 'lxml')
-        soup, attachments, urls = run_mail_content_hook(user, 'someone@anywhere.com', 'k@x.com', soup, [])
+        soup, attachments, urls = run_mail_preprocess_soup(user, 'someone@anywhere.com', 'k@x.com', soup, [])
         self.assertIn('content-hook-marker', str(soup))
         self.assertEqual(urls, [])
 
-        #soup钩子返回3元组包含urls
-        hook3Src = "def hook_email_soup(sender, to, soup, attachments):\n    return soup, attachments, ['http://example.com/art1', 'http://example.com/art2']\n"
+        #extract_urls 提取外链
+        hook3Src = '''from calibre.web.feeds.news import MailNewsRecipe
+class ExtUrlsHook(MailNewsRecipe):
+    def extract_urls(self, soup):
+        return ['http://example.com/art1', 'http://example.com/art2']
+'''
         save_mail_hook(user, 'urls@test.com', hook3Src, 'hook3.py')
-        soup, attachments, urls = run_mail_content_hook(user, 'urls@test.com', 'k@x.com', soup, [])
+        soup, attachments, urls = run_mail_preprocess_soup(user, 'urls@test.com', 'k@x.com', soup, [])
         self.assertEqual(urls, ['http://example.com/art1', 'http://example.com/art2'])
 
         #精确地址优先于通配符
         exactSrc = HOOK_SRC_BOTH.replace("'[hooked] '", "'[exact] '")
         save_mail_hook(user, 'me@home.com', exactSrc, 'exact.py')
-        subject, _, _, _ = run_mail_hook(user, 'me@home.com', 'dl__k@x.com', 'hello', ['world'], [], [])
+        subject, _, _, _ = run_mail_preprocess_email(user, 'me@home.com', 'dl__k@x.com', 'hello', ['world'], [], [])
         self.assertEqual(subject, '[exact] hello')
 
         #域名匹配优先于通配符
         domainSrc = HOOK_SRC_BOTH.replace("'[hooked] '", "'[domain] '")
         save_mail_hook(user, '@home.com', domainSrc, 'domain.py')
-        subject, _, _, _ = run_mail_hook(user, 'other@home.com', 'dl__k@x.com', 'hello', ['world'], [], [])
+        subject, _, _, _ = run_mail_preprocess_email(user, 'other@home.com', 'dl__k@x.com', 'hello', ['world'], [], [])
         self.assertEqual(subject, '[domain] hello')
 
         #不匹配精确地址和域名的发件人只命中通配符钩子
-        subject, _, _, _ = run_mail_hook(user, 'other@other.com', 'dl__k@x.com', 'hello', ['world'], [], [])
+        subject, _, _, _ = run_mail_preprocess_email(user, 'other@other.com', 'dl__k@x.com', 'hello', ['world'], [], [])
         self.assertEqual(subject, '[hooked] hello')
 
     #整条链路：收到邮件 -> 钩子处理 -> 暂存内容为处理后的内容
@@ -304,9 +335,11 @@ class MailHookTestCase(BaseTestCase):
         WhiteList.create(mail='*', user='admin')
         user = KeUser.get_or_none(KeUser.name == 'admin')
         from application.mail_hook import save_mail_hook
-        hook_merge = """def hook_email_soup(sender, to, soup, attachments):
-    return soup, attachments, ['http://example.com/art1', 'http://example.com/art2']
-"""
+        hook_merge = '''from calibre.web.feeds.news import MailNewsRecipe
+class MergeHook(MailNewsRecipe):
+    def extract_urls(self, soup):
+        return ['http://example.com/art1', 'http://example.com/art2']
+'''
         save_mail_hook(user, '*', hook_merge, 'hook_merge.py')
         data = {'sender': 'news@example.com', 'to': 'dl@kindleear.appspotmail.com', 'subject': 'Newsletter', 'text': 'Hello newsletter'}
         resp = self.client.post('/mail', data=build_mail_message(**data).encode('utf-8'),
@@ -317,6 +350,7 @@ class MailHookTestCase(BaseTestCase):
         self.assertEqual(payload['action'], 'merge')
         self.assertIn('Hello newsletter', payload['text'])
         self.assertEqual(payload['urls'], 'http://example.com/art1|http://example.com/art2')
+        self.assertEqual(payload['sender'], 'news@example.com')
 
     #测试有图片附件时降级为分开推送（action不为merge）
     @mock.patch('application.view.inbound_email.send_to_kindle')
@@ -325,9 +359,13 @@ class MailHookTestCase(BaseTestCase):
         WhiteList.create(mail='*', user='admin')
         user = KeUser.get_or_none(KeUser.name == 'admin')
         from application.mail_hook import save_mail_hook
-        hook_img = """def hook_email_soup(sender, to, soup, attachments):
-    return soup, [('test.png', b'fakeimage')], ['http://example.com/art1']
-"""
+        hook_img = '''from calibre.web.feeds.news import MailNewsRecipe
+class ImgHook(MailNewsRecipe):
+    def preprocess_soup(self, soup, attachments):
+        return soup, [('test.png', b'fakeimage')]
+    def extract_urls(self, soup):
+        return ['http://example.com/art1']
+'''
         save_mail_hook(user, '*', hook_img, 'hook_img.py')
         data = {'sender': 'news@example.com', 'to': 'dl@kindleear.appspotmail.com', 'subject': 'Newsletter Img', 'text': 'Hello newsletter with image'}
         resp = self.client.post('/mail', data=build_mail_message(**data).encode('utf-8'),
@@ -345,9 +383,13 @@ class MailHookTestCase(BaseTestCase):
         WhiteList.create(mail='*', user='admin')
         user = KeUser.get_or_none(KeUser.name == 'admin')
         from application.mail_hook import save_mail_hook
-        hook_none = """def hook_email_soup(sender, to, soup, attachments):
-    return None, [], ['http://example.com/art1']
-"""
+        hook_none = '''from calibre.web.feeds.news import MailNewsRecipe
+class NoneSoupHook(MailNewsRecipe):
+    def preprocess_soup(self, soup, attachments):
+        return None, []
+    def extract_urls(self, soup):
+        return ['http://example.com/art1']
+'''
         save_mail_hook(user, '*', hook_none, 'hook_none.py')
         data = {'sender': 'news@example.com', 'to': 'dl@kindleear.appspotmail.com', 'subject': 'Links Only', 'text': 'Ignored text'}
         resp = self.client.post('/mail', data=build_mail_message(**data).encode('utf-8'),
@@ -357,3 +399,28 @@ class MailHookTestCase(BaseTestCase):
         payload = mock_task.call_args[0][0]
         self.assertEqual(payload['action'], '')
         self.assertEqual(payload['text'], '')
+
+    #测试自定义 MailNewsRecipe 的完整生成与执行
+    def test_mail_news_recipe_execution(self):
+        from application.mail_hook import save_mail_hook
+        from build_ebook import urls_to_book
+        WhiteList.create(mail='custom@recipe.com', user='admin')
+        user = KeUser.get_or_none(KeUser.name == 'admin')
+
+        hook_src = '''from calibre.web.feeds.news import MailNewsRecipe
+class MyCustomNews(MailNewsRecipe):
+    merge_mail = True
+    def extract_urls(self, soup):
+        return []
+    def preprocess_html(self, soup):
+        p = soup.new_tag('p')
+        p.string = 'preprocessed-content'
+        if soup.body:
+            soup.body.append(p)
+        return soup
+'''
+        save_mail_hook(user, 'custom@recipe.com', hook_src, 'hook_custom.py')
+        book = urls_to_book([], 'Test Book', user, sender='custom@recipe.com',
+                            mail_html='<html><body><p>Mail chapter</p></body></html>', merge_mail=True)
+        self.assertTrue(book)
+        self.assertTrue(len(book) > 100)

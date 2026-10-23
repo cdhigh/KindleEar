@@ -146,29 +146,29 @@ However, if you wish to merge recipe files into the built-in library:
 **Note:** You can directly use calibre's `builtin_recipes.zip` and `builtin_recipes.xml`.   
 
 
-## How to Implement Hooks for Incoming Emails?
-
-KindleEar provides two hooks for incoming emails. They allow you to perform some preprocessing or postprocessing after receiving an email but before forwarding it to the Kindle, such as reformatting the content or removing advertisements.
-
-The hooks have the following signatures. Your Python file for hooking can contain either one or both of these functions:
+## How to Implement Hooks for Incoming Emails?   
+KindleEar supports uploading a hook class inheriting from `MailNewsRecipe`. In addition to rewriting email preprocessing and external URL extraction as needed, you can also leverage Calibre Recipe features directly, such as anti-scraping (`get_browser`) and tag cleaning (`keep_only_tags`):
 
 ```python
-# sender: sender's email address
-# to: recipient's email address
-# subject: email subject
-# txtBodies: list of strings containing the plain-text blocks of the email; may be empty
-# htmlBodies: list of HTML strings containing the HTML content of the email; may be empty
-# attachments: list of email attachments in the form [(fileName, content), ...]
-# Return: You can modify the lists in place and return None, or return a modified tuple.
-def hook_email(sender, to, subject, txtBodies, htmlBodies, attachments):
-    # return None or (subject, txtBodies, htmlBodies, attachments)
+from calibre.web.feeds.news import MailNewsRecipe
 
-# soup: BeautifulSoup instance containing the integrated HTML content
-#       after the email has been processed
-# Return: You can modify soup/attachments in place or return any one of the three formats, with urls being a list of links to fetch additionally.
-def hook_email_soup(sender, to, soup, attachments):
-    # return None or (soup, attachments) or (soup, attachments, urls)
+class MyMailHook(MailNewsRecipe):
+    merge_mail = True # True - email content as summary, False - email content pushed separately
+    # Modify title (book title), filter/modify original body or attachments.
+    # Return: (subject, txtBodies, htmlBodies, attachments) or None (no modification)
+    def preprocess_email(self, subject, txtBodies, htmlBodies, attachments):
+        return None
+
+    # Clean the email body DOM (remove ads, unsubscribe buttons, etc.)
+    # Return: None or (soup, attachments) or (soup, attachments, urls)
+    def preprocess_soup(self, soup, attachments):
+        return None
+
+    # Extract external article URLs to scrape
+    def extract_urls(self, soup):
+        return [...]
 ```
+> `preprocess_email()`, `preprocess_soup()`, and `extract_urls()` are all optional.
 
 
 ## I have more questions, where can I ask?

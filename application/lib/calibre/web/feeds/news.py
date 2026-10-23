@@ -7,8 +7,7 @@ Defines various abstract base classes that can be subclassed to create powerful 
 '''
 __docformat__ = "restructuredtext en"
 
-
-import io, os, re, sys, time, datetime, traceback, base64
+import io, os, re, sys, time, datetime, traceback, base64, builtins
 from collections import defaultdict, namedtuple
 from urllib.parse import urlparse, urlsplit, quote, urljoin
 from urllib.error import HTTPError, URLError
@@ -2200,6 +2199,89 @@ class UrlNewsRecipe(BasicNewsRecipe):
         feed.id_counter = id_counter
 
         return [feed]
+
+
+class _DefaultOutputProfile:
+    short_name = 'default'
+    screen_size = (600, 800)
+    touchscreen = False
+    touchscreen_news_css = ''
+
+class _DefaultRecipeOptions:
+    user = None
+    verbose = 0
+    test = None
+    lrf = False
+    keep_images = True
+    keep_svg = True
+    output_profile = _DefaultOutputProfile
+
+#处理邮件投递/Newsletter，支持邮件正文与外链抓取合订
+class MailNewsRecipe(BasicNewsRecipe):
+    auto_cleanup = True
+    merge_mail = True
+    mail_html = ''
+    sender = ''
+    to = ''
+
+    def __init__(self, options=None, log=None, output_dir=None, fs=None, feed_index_start=0):
+        options = options or _DefaultRecipeOptions()
+        log = log or getattr(builtins, 'default_log', None)
+        if output_dir is None:
+            import tempfile
+            output_dir = os.path.abspath(tempfile.gettempdir())
+        fs = fs or FsDictStub()
+        super().__init__(options, log, output_dir, fs, feed_index_start=feed_index_start)
+
+    #在 MIME 解析后、生成 Soup 前调用。
+    #用于修改标题（书籍名称）、过滤/修改原始正文或附件。
+    #返回: (subject, txtBodies, htmlBodies, attachments) 或 None (表示不修改)
+    def preprocess_email(self, subject, txtBodies, htmlBodies, attachments):
+        return None
+
+    #在 CreateMailSoup 之后调用。
+    #用于对邮件正文 DOM 进行清洗（去广告、删退订按钮等）。
+    #返回: None 或 (soup, attachments) 或 (soup, attachments, urls)
+    def preprocess_soup(self, soup, attachments):
+        return None
+
+    #从邮件中提取需要抓取的外链。
+    #返回: ['https://...', ...] 或 [('文章标题', 'https://...'), ...]
+    def extract_urls(self, soup):
+        return []
+
+    def parse_feeds(self):
+        import base64
+        urls = self.get_feeds() or getattr(self, 'urls', []) or []
+        if not urls and not self.mail_html:
+            self.log.warning(f'There are no urls or mail content in "{self.title}"')
+            return []
+
+        feed = Feed()
+        feed.title = self.title
+        feed.description = ''
+        feed.image_url = None
+        feed.oldest_article = self.oldest_article
+        feed.articles = []
+        id_counter = 0
+        now = time.gmtime()
+
+        # 1. 邮件正文（合订模式下作为 Chapter 1，或者当没有外链时作为唯一章节）
+        if self.mail_html and (self.merge_mail or not urls):
+            id_counter += 1
+            b64 = base64.b64encode(self.mail_html.encode('utf-8')).decode('ascii')
+            mail_url = f"data:text/html;charset=utf-8;base64,{b64}"
+            feed.articles.append(Article(f'internal id#{id_counter}', self.title, mail_url, 'KindleEar', '', now, ''))
+
+        # 2. 外部抓取链接
+        if urls:
+            for obj in urls:
+                title, url = (self.title, obj) if isinstance(obj, str) else obj
+                id_counter += 1
+                feed.articles.append(Article(f'internal id#{id_counter}', title, url, 'KindleEar', '', now, ''))
+
+        feed.id_counter = id_counter
+        return [feed] if feed.articles else []
 
 
 #保存的url为网页url，给定一个规则，从网页url里面提取链接，每个链接一篇文章

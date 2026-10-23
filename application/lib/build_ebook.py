@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 #从recipe生成对应的输出格式
 #Author: cdhigh <https://github.com/cdhigh>
-import io, os, re
+import io, os, re, time
 import clogging
 from calibre.ptempfile import PersistentTemporaryFile
 from calibre.ebooks.conversion.plumber import Plumber
@@ -37,7 +37,8 @@ def convert_book(input_, input_fmt, user, options=None, output_fmt=''):
 #user: KeUser对象
 #output_fmt: 如果指定，则生成特定格式的书籍，否则使用 user.book_cfg('type')
 #options: 额外的一些参数，为一个字典
-def urls_to_book(urls: list, title: str, user, options=None, output_fmt='', language=''):
+def urls_to_book(urls: list, title: str, user, options=None, output_fmt='', language='',
+                 sender='', mail_html='', merge_mail=False):
     #提前下载html，获取其title
     sysTmpDir = os.environ.get('KE_TEMP_DIR')
     prevDownloads = []
@@ -54,7 +55,7 @@ def urls_to_book(urls: list, title: str, user, options=None, output_fmt='', lang
     #这一步主要是能让每篇文章都使用真实的标题
     for idx, url in enumerate(titleUrls):
         #如果没有使用临时目录则无法提取下载
-        if not sysTmpDir or not isinstance(url, str):
+        if not sysTmpDir or not isinstance(url, str) or url.startswith(('data:', 'file:')):
             titleUrls[idx] = (title, url) if isinstance(url, str) else url
             continue
 
@@ -74,6 +75,33 @@ def urls_to_book(urls: list, title: str, user, options=None, output_fmt='', lang
                 match = re.search(r'<title[^>]*>(.*?)</title>', resp.text, re.I|re.M|re.S)
                 uTitle = match.group(1).strip() if match else title
                 titleUrls[idx] = (uTitle, 'file://' + pt.name)
+
+    hook_cls = None
+    if sender:
+        try:
+            from application.mail_hook import load_mail_hook
+            hook_cls = load_mail_hook(user, sender)
+        except Exception as e:
+            default_log.warning(f'Failed to load mail hook for [{sender}]: {e}')
+
+    if hook_cls or mail_html:
+        from calibre.web.feeds.news import MailNewsRecipe
+        base_cls = hook_cls or MailNewsRecipe
+        recipe_cls = type(f'MailRecipeRunner{int(time.time())}', (base_cls,), {
+            'title': title,
+            'language': language or user.book_cfg('language', 'en'),
+            'mail_html': mail_html,
+            'merge_mail': merge_mail,
+            'feeds': titleUrls,
+            'oldest_article': user.book_cfg('oldest_article', 7),
+        })
+        userCss = user.get_extra_css()
+        if userCss:
+            recipe_cls.extra_css = f'{recipe_cls.extra_css}\n\n{userCss}' if recipe_cls.extra_css else userCss
+
+        book = convert_book(recipe_cls, 'recipe', user, options, output_fmt)
+        clearPrevDownloads()
+        return book
 
     src = GenerateRecipeSource(title, titleUrls, user, base='UrlNewsRecipe', max_articles=100, 
         cover_url=False, language=language)

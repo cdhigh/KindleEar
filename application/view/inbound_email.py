@@ -13,7 +13,7 @@ from calibre import guess_type
 from ..back_end.task_queue_adpt import create_delivery_task, create_url2book_task
 from ..back_end.db_models import KeUser
 from ..back_end.send_mail_adpt import send_to_kindle, send_html_mail
-from ..mail_hook import run_mail_hook, run_mail_content_hook
+from ..mail_hook import run_mail_preprocess_email, run_mail_preprocess_soup
 from ..base_handler import *
 from build_ebook import html_to_book, convert_book
 from urlopener import UrlOpener
@@ -150,7 +150,7 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
     UrlOpener.set_proxy(user.cfg('proxy'))
 
     #如果发件人匹配了用户上传的钩子文件，先调用钩子函数预处理邮件内容
-    subject, txtBodies, htmlBodies, attachments = run_mail_hook(user, sender, to, subject,
+    subject, txtBodies, htmlBodies, attachments = run_mail_preprocess_email(user, sender, to, subject,
         txtBodies, htmlBodies, attachments)
 
     #如果需要暂存邮件
@@ -204,7 +204,7 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
     title = subject[:SUBJECT_WORDCNT] or f'KindleEar_{user.local_time("%Y-%m-%d_%H-%M")}'
     
     #如果发件人匹配了用户上传的钩子文件，调用钩子函数处理邮件正文和附件
-    soup, attachments, hook_urls = run_mail_content_hook(user, sender, to, soup, attachments)
+    soup, attachments, hook_urls = run_mail_preprocess_soup(user, sender, to, soup, attachments)
 
     #确定外链任务：hook显式返回优先，否则尝试从正文提取超链接
     if hook_urls:
@@ -259,7 +259,8 @@ def ReceiveMailImpl(sender: str, to: Union[list,str], subject: str, txtBodies: l
                  'text': mail_text,
                  'key': user.share_links.get('key', ''),
                  'title': book_title,
-                 'language': language}
+                 'language': language,
+                 'sender': sender}
         create_url2book_task(params)
 
     #推送邮件正文：

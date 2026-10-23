@@ -264,7 +264,9 @@ class RecursiveFetcher:
         # representable in the filesystem_encoding work.
         if is_data_url:
             payload = url.partition(',')[2]
-            return standard_b64decode(payload)
+            ans = response(standard_b64decode(payload))
+            ans.newurl = url
+            return ans
         is_local = 0
         if url.startswith('file://'):
             is_local = 7
