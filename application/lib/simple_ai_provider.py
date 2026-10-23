@@ -82,6 +82,14 @@ AI_LIST = {
         {'name': 'gemini-3.1-pro', 'rpm': 60, 'context': 1048576},
         {'name': 'deepseek-v4-flash', 'rpm': 60, 'context': 1000000},
         {'name': 'glm-5.3', 'rpm': 60, 'context': 1000000},],},
+    'opper': {'host': 'https://api.opper.ai', 'models': [
+        {'name': 'claude-sonnet-4-6', 'rpm': 60, 'context': 1000000},
+        {'name': 'gpt-5.4-mini', 'rpm': 60, 'context': 400000},
+        {'name': 'gpt-5.5', 'rpm': 60, 'context': 1050000},
+        {'name': 'gemini-3.8-flash', 'rpm': 60, 'context': 1048576},
+        {'name': 'deepseek-v4-pro', 'rpm': 60, 'context': 1000000},
+        {'name': 'kimi-k3', 'rpm': 60, 'context': 1048576},
+        {'name': 'mistral-large-2512', 'rpm': 60, 'context': 256000},],},
 }
 
 class SimpleAiProvider:
@@ -159,6 +167,8 @@ class SimpleAiProvider:
             return self._atlascloud_chat(message)
         elif name == "cheaperinference":
             return self._cheaperinference_chat(message)
+        elif name == "opper":
+            return self._opper_chat(message)
         else:
             raise ValueError(f"Unsupported provider: {name}")
 
@@ -280,6 +290,10 @@ class SimpleAiProvider:
     #Cheaper Inference (OpenAI兼容网关)
     def _cheaperinference_chat(self, message):
         return self._openai_chat(message, path='v1/chat/completions')
+
+    #Opper (OpenAI兼容网关)
+    def _opper_chat(self, message):
+        return self._openai_chat(message, path='v3/compat/chat/completions')
 
 if __name__ == '__main__':
     client = SimpleAiProvider("gemini", apiKey="xxx")
