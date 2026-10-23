@@ -2218,6 +2218,7 @@ class _DefaultRecipeOptions:
 
 #处理邮件投递/Newsletter，支持邮件正文与外链抓取合订
 class MailNewsRecipe(BasicNewsRecipe):
+    cover_url = False
     auto_cleanup = True
     merge_mail = True
     mail_html = ''

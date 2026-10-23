@@ -3,8 +3,11 @@
 #stardict词典支持，基于 <https://github.com/lig/pystardict> 修改
 import os, re, logging
 from struct import unpack
-import indexed_gzip
-import marisa_trie
+
+try:
+    import indexed_gzip, marisa_trie
+except ImportError:
+    indexed_gzip = marisa_trie = None
 
 #外部接口
 class PyStarDict:
@@ -36,7 +39,7 @@ class PyStarDict:
         self.idx = _StarDictIdx(dict_prefix=filename_prefix, container=self)
         self.dict = _StarDictDict(dict_prefix=filename_prefix, container=self)
         self.syn = _StarDictSyn(dict_prefix=filename_prefix, container=self)
-
+    
     def __contains__(self, k):
         return k in self.idx
 
