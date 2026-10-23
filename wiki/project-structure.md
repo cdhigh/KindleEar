@@ -75,7 +75,7 @@
 | `urlopener.py` | 核心 HTTP 封装：requests + 超时/重试/表单，模拟 mechanize 浏览器接口（recipe 兼容基石）。 |
 | `mechanize.py` | mechanize 兼容垫片（Browser=UrlOpener），老 recipe 零修改运行。 |
 | `smtp_mail.py` | 纯 Python SMTP 发信。 |
-| `simple_ai_provider.py` | 统一 AI Chat 接口：google/openai/anthropic/xai/mistral/groq/perplexity/alibaba/atlascloud/cheaperinference（含模型列表、RPM、上下文长度）。 |
+| `simple_ai_provider.py` | 统一 AI Chat 接口：google/openai/anthropic/xai/mistral/groq/perplexity/alibaba/atlascloud/cheaperinference/opper（含模型列表、RPM、上下文长度）。 |
 | `simpleextract.py` | readability 失效时的兜底正文提取。 |
 | `html_json_extract.py` | 从页面 script JSON 启发式提取正文（JS 渲染站点）。 |
 | `html5_parser.py` | 桩模块：用 html5lib 替代无二进制的 html5-parser。 |
