@@ -4,6 +4,9 @@ sort: 7
 
 # Changelog
 
+## Unreleased
+- AI 摘要新增可选 API Route 服务商。
+
 ## 3.0.0
 1. 支持Python 3
 2. 重新设计的软件架构

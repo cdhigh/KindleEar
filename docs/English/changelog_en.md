@@ -3,6 +3,9 @@ sort: 7
 ---
 # Changelog
 
+## Unreleased
+- Added API Route as an optional AI summarization provider.
+
 ## 3.0.0
 1. Supports Python 3
 2. Redesigned software framework

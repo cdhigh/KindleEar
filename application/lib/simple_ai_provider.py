@@ -82,6 +82,9 @@ AI_LIST = {
         {'name': 'gemini-3.1-pro', 'rpm': 60, 'context': 1048576},
         {'name': 'deepseek-v4-flash', 'rpm': 60, 'context': 1000000},
         {'name': 'glm-5.3', 'rpm': 60, 'context': 1000000},],},
+    # 保守的摘要分段预算和请求频率，不代表服务商公布的模型上限或账户配额。
+    'api-route': {'host': 'https://global.api-route.com', 'models': [
+        {'name': 'gpt-6.1-sol', 'rpm': 2, 'context': 16000},],},
     'opper': {'host': 'https://api.opper.ai', 'models': [
         {'name': 'claude-sonnet-4-6', 'rpm': 60, 'context': 1000000},
         {'name': 'gpt-5.4-mini', 'rpm': 60, 'context': 400000},
@@ -167,6 +170,8 @@ class SimpleAiProvider:
             return self._atlascloud_chat(message)
         elif name == "cheaperinference":
             return self._cheaperinference_chat(message)
+        elif name == "api-route":
+            return self._openai_chat(message)
         elif name == "opper":
             return self._opper_chat(message)
         else:
@@ -174,7 +179,7 @@ class SimpleAiProvider:
 
     #返回当前服务提供商支持的models列表
     def models(self, prebuild=True):
-        if self.name in ('openai', 'xai', 'atlascloud', 'cheaperinference'):
+        if self.name in ('openai', 'xai', 'atlascloud', 'cheaperinference', 'api-route'):
             return self._openai_models()
         elif self.name == 'google':
             return self._google_models()
