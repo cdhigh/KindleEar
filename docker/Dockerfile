@@ -1,5 +1,5 @@
 #step 1
-FROM --platform=$TARGETPLATFORM python:3.9.19-alpine AS builder
+FROM --platform=$TARGETPLATFORM python:3.14-alpine AS builder
 ARG TARGETPLATFORM
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -30,7 +30,7 @@ RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
     fi
 
 #step 2
-FROM --platform=$TARGETPLATFORM python:3.9.19-alpine
+FROM --platform=$TARGETPLATFORM python:3.14-alpine
 ARG TARGETPLATFORM
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1

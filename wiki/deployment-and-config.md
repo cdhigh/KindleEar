@@ -41,7 +41,7 @@
 
 ## 3. GAE 五个 yaml 速览
 
-- `app.yaml`：service default，python310，`gunicorn -w 2 main:app`，F1（max 2 实例），`app_engine_apis: true`，inbound mail/mail_bounce，env `KE_TEMP_DIR=/tmp`、`DATABASE_URL=datastore`，静态目录 /static /images /recipes，全站 HTTPS。
+- `app.yaml`：service default，python312（或 python314），`gunicorn -w 2 main:app`，F1（max 2 实例），`app_engine_apis: true`，inbound mail/mail_bounce，env `KE_TEMP_DIR=/tmp`、`DATABASE_URL=datastore`，静态目录 /static /images /recipes，全站 HTTPS。
 - `worker.yaml`：service worker，B2 basic_scaling（max 1 实例、idle 20m），`gunicorn --workers 1 --threads 2 --timeout 1200`。
 - `dispatch.yaml`：`*/worker*`、`*/url2book*` → worker 服务。
 - `cron.yaml`：每小时 `/deliver`；每日 `/removelogs`。
@@ -51,7 +51,7 @@ worker.yaml 的实例参数可由 `update_req.py gae[B2,1,t2,20m]` 定制。
 
 ## 4. Docker 部署细节
 
-- `Dockerfile` 两阶段：构建阶段拉 calibre 官方 recipes 打包、按 TARGETPLATFORM 选 mp3cat；运行阶段 python:3.9.19-alpine + 依赖 + 应用，EXPOSE 8000。
+- `Dockerfile` 两阶段：构建阶段拉 calibre 官方 recipes 打包、按 TARGETPLATFORM 选 mp3cat；运行阶段 python:3.14-alpine + 依赖 + 应用，EXPOSE 8000。
 - `docker-compose.yml`（Caddy）：kindleear(:8000, volume `./data:/data`) + caddy(80/443) + mailfix(:25)。env：APP_DOMAIN（带 http/https 前缀）、USE_DOCKER_LOGS、TZ。
 - `docker-compose-nginx.yml`：同上但 nginx（client_max_body_size 32M，http→https 301）。
 - mailfix（docker/postfix/）：alpine+postfix，master.cf 加 myhook 管道把收到的邮件 `curl --data-binary @-` POST 到 `$URL`（默认 http://kindleear:8000/mail）；message_size_limit≈30MB。**它的存在意义 = 替代 GAE inbound mail**。

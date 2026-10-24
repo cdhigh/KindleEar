@@ -11,5 +11,5 @@ set EBOOK_SAVE_DIR=E:/webshelf
 set DICTIONARY_DIR=E:/webshelf
 set LOG_LEVEL=info
 set HIDE_MAIL_TO_LOCAL=no
-python -m flask run --host=0.0.0.0 --debug
+c:\python314\python -m flask run --host=0.0.0.0 --debug
 pause

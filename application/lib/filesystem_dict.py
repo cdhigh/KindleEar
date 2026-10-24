@@ -67,7 +67,7 @@ class FileSystemDict(dict):
     def dump(self, path: str):
         assert(os.path.isabs(path))
         for key, content in self.items():
-            file = key[1:] if key.startswith('/') else key
+            file = os.path.splitdrive(key)[1].lstrip('/\\')
             file_path = os.path.join(path, file)
             file_dir = os.path.dirname(file_path)
             if not os.path.isdir(file_dir):
@@ -107,7 +107,7 @@ class FsDictStub(object):
             self.path = path
             self.fs_dict = None
         else:
-            self.path = '/'
+            self.path = os.path.abspath(os.sep) if os.name == 'nt' else '/'
             self.fs_dict = FileSystemDict()
         self.log = log if log else default_log
         self.opfname = None

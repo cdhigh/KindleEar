@@ -596,6 +596,7 @@ class OPF:  # {{{
     manifest_ppath  = XPath('descendant::*[re:match(name(), "manifest", "i")]')
     spine_path      = XPath('descendant::*[re:match(name(), "spine", "i")]/*[re:match(name(), "itemref", "i")]')
     guide_path      = XPath('descendant::*[re:match(name(), "guide", "i")]/*[re:match(name(), "reference", "i")]')
+    XPath           = staticmethod(XPath)
 
     publisher       = MetadataField('publisher')
     comments        = MetadataField('description')

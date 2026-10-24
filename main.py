@@ -5,7 +5,7 @@
 # Author: cdhigh <https://github.com/cdhigh>
 
 __Version__ = '3.5.3'
-__BuildDate__ = '20261022'
+__BuildDate__ = '20261024'
 
 import os, sys, builtins, logging
 from application.lib import clogging

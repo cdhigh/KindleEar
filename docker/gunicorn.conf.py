@@ -1,6 +1,6 @@
 # gunicorn.conf.py
-import os
-pythonpath = "/usr/local/lib/python3.9/site-packages"
+import os, sys
+pythonpath = f"/usr/local/lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages"
 bind = "0.0.0.0:8000"
 workers = 1
 threads = 3
