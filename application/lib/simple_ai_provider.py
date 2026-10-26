@@ -54,6 +54,7 @@ AI_LIST = {
         {'name': 'pixtral-12b-2409', 'rpm': 60, 'context': 128000},
         {'name': 'codestral-2501', 'rpm': 60, 'context': 256000},],},
     'groq': {'host': 'https://api.groq.com', 'models': [
+        {'name': 'openai/gpt-oss-20b', 'rpm': 30, 'context': 8000},
         {'name': 'gemma2-9b-it', 'rpm': 30, 'context': 8000},
         {'name': 'gemma-7b-it', 'rpm': 30, 'context': 8000},
         {'name': 'llama-guard-3-8b', 'rpm': 30, 'context': 8000},
