@@ -5,6 +5,8 @@ sort: 7
 
 ## Unreleased
 - Added API Route as an optional AI summarization provider.
+- Online reader: on PC the article iframe now scrolls natively inside itself, which completely fixes the Chrome issue that the tail of long articles was not displayed (issue #698).
+- Online reader: fixed the half-displayed toolbar buttons of the popped-up navbar on Kindle (a fixed 40px bottom margin is reserved on touch/e-ink devices to avoid the browser's own UI covering the bottom of the page). Note: the permanent scrollbar on the right side of some Kindle browsers is the browser's own UI and cannot be removed by the web page.
 
 ## 3.0.0
 1. Supports Python 3

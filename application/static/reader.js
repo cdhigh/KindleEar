@@ -1,6 +1,15 @@
 //The Kindle browser, especially on older versions of Kindle, supports only limited features.
 //If you need to make some changes,
 //Please use legacy JavaScript syntax only, avoid using any modern syntax and feature.
+//
+//此文件有两套滚动方案，每次iframe加载时决定(见iframeLoadEvent)：
+//  外层滚动方案(旧方案)：iframe撑开为内容全高，由外层#content滚动翻页，需要测量内容高度。
+//    使用者：窄屏/触屏(isMobile())、墨水屏/嵌入式浏览器(isEinkBrowser())、
+//    以及运行时探测到不支持iframe内部滚动的浏览器(整个会话自动回退)。
+//    注意不能仅按宽度判断：Kindle可横屏，还有大屏墨水屏阅读器/平板等。
+//  iframe内部滚动方案(新方案)：iframe固定为视口高度，由iframe文档原生滚动，
+//    滚动范围由浏览器自己维护，不测量内容高度，
+//    彻底规避Chrome计算iframe内容高度不准导致内容截断的问题(issue #698)。
 
 var g_iframeScrollHeight = 500; //在 iframeLoadEvent 里更新
 //var g_iframeClientHeight = 500;
@@ -9,6 +18,14 @@ var g_dictMode = false; //当前是否处于查词模式
 const g_trTextContainerHeight = 350; //350px在reader.css定义tr-text-container和tr-result-text
 var g_navWidth = 400; //PC端左侧导航栏宽度
 var g_lastNavWidth = 400; //用于双击恢复展开的宽度
+var g_legacyScroll = isMobile() || isEinkBrowser(); //当前文章是否使用外层滚动方案(旧方案)，每次iframe加载时重算
+var g_innerScrollBroken = false; //探测到浏览器不支持iframe内部滚动后置位，整个会话不再尝试新方案
+var g_innerScrollVerified = false; //探测确认浏览器支持iframe内部滚动后置位，避免重复探测打扰阅读位置
+var g_pageHeight = 0; //校准后的页面可视高度，0表示未校准(见calibratePageHeight)
+var g_heightCalibrated = false; //本次窗口尺寸下是否已完成校准
+var g_lastMobileState = null; //上次adjustContentHeight时是否为移动宽度，用于检测宽度跨越1072边沿
+var g_bottomMargin = 40; //触屏/墨水屏设备底部预留像素：部分设备(如Kindle)浏览器自带界面
+                          //遮挡页面底部且遮挡量无法编程测量，固定预留40px保证底部元素完整可见
 
 //对古董浏览器兼容性最好的判断一个变量是否为空的语法
 //支持基本类型/数组/对象
@@ -108,14 +125,137 @@ function ajax_post(url, data, success, dataType) {
 }
 
 
+//获取当前文章iframe的文档对象，失败返回null
+function getIframeDoc() {
+  var iframe = document.getElementById('iframe');
+  if (!iframe) {
+    return null;
+  }
+  try {
+    return iframe.contentDocument || iframe.contentWindow.document;
+  } catch (e) {
+    return null;
+  }
+}
+
+//将焦点交还给文章iframe
+//部分Chrome版本在点击/拖拽父页面元素(导航栏/分隔条等)后，不再把滚轮事件路由给iframe，
+//表现为文章无法滚动，必须点击一下内容区才恢复，这里在相关交互后显式聚焦规避
+//仅iframe内部滚动方案需要，外层滚动方案(旧方案)的滚轮始终作用于父页面，保持原行为
+function focusIframe() {
+  if (g_legacyScroll) {
+    return;
+  }
+  try {
+    var ifr = document.getElementById('iframe');
+    if (ifr && ifr.contentWindow) {
+      ifr.contentWindow.focus();
+    }
+  } catch (e) {}
+}
+
+//读取iframe文档当前的滚动位置，兼容标准模式和quirks模式
+function iframeScrollTop(doc) {
+  if (!doc || !doc.documentElement) {
+    return 0;
+  }
+  return doc.documentElement.scrollTop || (doc.body ? doc.body.scrollTop : 0) || 0;
+}
+
+//设置iframe文档的滚动位置
+function iframeScrollTo(doc, top) {
+  if (!doc || !doc.documentElement) {
+    return;
+  }
+  doc.documentElement.scrollTop = top;
+  if (doc.body) {
+    doc.body.scrollTop = top;
+  }
+}
+
+//返回iframe文档内容的总高度
+function iframeScrollHeight(doc) {
+  if (!doc || !doc.documentElement) {
+    return 0;
+  }
+  return Math.max(doc.documentElement.scrollHeight, doc.body ? doc.body.scrollHeight : 0);
+}
+
+//返回iframe文档可视区域的高度
+//注意不能使用documentElement.clientHeight作为首选：
+//webshelf里的文章由lxml序列化，没有DOCTYPE声明，浏览器以quirks模式渲染，
+//此时documentElement.clientHeight返回整个文档高度而非视口高度，
+//会导致pageDown误判已在页末而直接跳到下一篇文章
+//contentWindow.innerHeight是嵌套视口的精确高度，与渲染模式无关
+function iframeClientHeight(doc) {
+  if (!doc || !doc.documentElement) {
+    return 0;
+  }
+  var win = doc.defaultView;
+  if (win && win.innerHeight) {
+    return win.innerHeight;
+  }
+  var ifr = document.getElementById('iframe');
+  if (ifr && ifr.clientHeight) {
+    return ifr.clientHeight;
+  }
+  return doc.body ? (doc.body.clientHeight || doc.documentElement.clientHeight) : doc.documentElement.clientHeight;
+}
+
+//探测iframe文档是否真的可以内部滚动
+//尝试设置scrollTop后读回非零值即认为支持，仅对内容超出视口的文档有意义
+function innerScrollWorks(doc) {
+  try {
+    //避免smooth滚动导致读回旧值(quirks模式下滚动元素是body，两处都设置)
+    doc.documentElement.style.scrollBehavior = 'auto';
+    doc.body.style.scrollBehavior = 'auto';
+    doc.documentElement.scrollTop = 30;
+    doc.body.scrollTop = 30;
+    var ok = (doc.documentElement.scrollTop > 0) || (doc.body.scrollTop > 0);
+    doc.documentElement.scrollTop = 0;
+    doc.body.scrollTop = 0;
+    return ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+//获取当前滚动信息，统一封装两种滚动方案
+//外层滚动方案(旧方案)滚动#content，iframe内部滚动方案(新方案)滚动iframe文档
+//返回null表示iframe文档尚不可用
+function getScrollInfo() {
+  if (g_legacyScroll) {
+    var content = document.getElementById('content');
+    return {
+      scrollTop: content.scrollTop,
+      scrollHeight: content.scrollHeight,
+      clientHeight: content.clientHeight,
+      scrollTo: function (top) { content.scrollTop = top; }
+    };
+  }
+
+  var doc = getIframeDoc();
+  if (!doc) {
+    return null;
+  }
+  return {
+    scrollTop: iframeScrollTop(doc),
+    scrollHeight: iframeScrollHeight(doc),
+    clientHeight: iframeClientHeight(doc),
+    scrollTo: function (top) { iframeScrollTo(doc, top); }
+  };
+}
+
 //更新页面位置指示器
 function updatePosIndicator() {
-  var content = document.getElementById('content');
   var indicator = document.getElementById('pos-indicator');
-  var height = content.clientHeight;
-  var scrollTop = content.scrollTop;
-  var scrollHeight = content.scrollHeight - height;
-  var ratio = scrollHeight ? scrollTop / scrollHeight : 0;
+  var info = getScrollInfo();
+  if (!info) {
+    return;
+  }
+  var height = info.clientHeight;
+  var scrollable = info.scrollHeight - height;
+  var ratio = scrollable > 0 ? info.scrollTop / scrollable : 0;
   var indiHeight = 50;
   var pos = ratio * (height - indiHeight);
   pos = Math.min(pos, height - indiHeight - 5); //5是稍离开屏幕下沿
@@ -360,11 +500,13 @@ function pageUp(content, navbar) {
   if (isMobile() && (navbar.style.display == "block")) {
     navbar.style.display = 'none';
   } else if (g_inkMode) {
-    var scrollTop = content.scrollTop;
-    if (scrollTop <= 1) {
+    var info = getScrollInfo();
+    if (!info) {
+      openPrevArticle();
+    } else if (info.scrollTop <= 1) {
       openPrevArticle();
     } else {
-      content.scrollTop = Math.max(0, scrollTop - content.clientHeight + 40);
+      info.scrollTo(Math.max(0, info.scrollTop - info.clientHeight + 40));
     }
   }
 }
@@ -382,26 +524,45 @@ function pageDown(content, navbar, ctrlKey) {
   if (isMobile() && (navbar.style.display == "block")) {
     navbar.style.display = 'none';
   } else if (g_inkMode) {
-    var iframe = document.getElementById('iframe');
-    var iframeHeight = parseInt(iframe.style.height);
-    var scrollTop = content.scrollTop;
-    var scrollHeight = g_iframeScrollHeight || content.scrollHeight;
-    
-    //已经到页末, -2是考虑浮点误差，其实-1就可以
-    if (scrollTop >= scrollHeight - content.clientHeight - 2) {
-      //规避chrome的iframe高度计算不准的bug，使用Ctrl+Click手动扩展iframe高度
-      if (ctrlKey && iframeHeight) {
-        var newHeight = iframeHeight + 200; //每次增长200px
-        iframe.style.height = newHeight + 'px';
-        g_iframeScrollHeight = newHeight;
-        content.scrollTop = newHeight;
-      } else {
-        openNextArticle();
+    if (g_legacyScroll) {
+      //外层滚动方案(旧方案，保持原有行为)
+      var iframe = document.getElementById('iframe');
+      var iframeHeight = parseInt(iframe.style.height);
+      var scrollTop = content.scrollTop;
+      var scrollHeight = g_iframeScrollHeight || content.scrollHeight;
+
+      //已经到页末, -2是考虑浮点误差，其实-1就可以
+      if (scrollTop >= scrollHeight - content.clientHeight - 2) {
+        //规避chrome的iframe高度计算不准的bug，使用Ctrl+Click手动扩展iframe高度
+        if (ctrlKey && iframeHeight) {
+          var newHeight = iframeHeight + 200; //每次增长200px
+          iframe.style.height = newHeight + 'px';
+          g_iframeScrollHeight = newHeight;
+          content.scrollTop = newHeight;
+        } else {
+          openNextArticle();
+        }
+      } else if (ctrlKey) { //跳到页末
+        content.scrollTop = scrollHeight;
+      } else { //翻页
+        content.scrollTop = Math.min(scrollTop + content.clientHeight - 40, scrollHeight);
       }
-    } else if (ctrlKey) { //跳到页末
-      content.scrollTop = scrollHeight;
-    } else { //翻页
-      content.scrollTop = Math.min(scrollTop + content.clientHeight - 40, scrollHeight);
+    } else {
+      //iframe内部滚动方案(新方案)，滚动范围由浏览器原生维护，内容不会被截断
+      var info = getScrollInfo();
+      if (!info) {
+        openNextArticle();
+        return;
+      }
+
+      //已经到页末, -2是考虑浮点误差，其实-1就可以
+      if (info.scrollTop >= info.scrollHeight - info.clientHeight - 2) {
+        openNextArticle();
+      } else if (ctrlKey) { //跳到页末
+        info.scrollTo(info.scrollHeight);
+      } else { //翻页
+        info.scrollTo(Math.min(info.scrollTop + info.clientHeight - 40, info.scrollHeight));
+      }
     }
   }
 }
@@ -449,9 +610,29 @@ function isMobile() {
   return width <= 1072;
 }
 
-//返回屏幕高度
+//判断是否为墨水屏设备或老旧的嵌入式浏览器
+//这类设备一律使用外层滚动方案(旧方案)，即使横屏或大屏导致isMobile()为false也一样
+//注意不能只靠宽度判断：Kindle可以横屏，还有大屏墨水屏阅读器、平板、越狱后安装的其他浏览器等
+function isEinkBrowser() {
+  var ua = navigator.userAgent || '';
+  return /kindle|silk|kobo|boox|onyx|pocketbook|remarkable|netfront|eink/i.test(ua);
+}
+
+//决定当前是否使用外层滚动方案(旧方案)
+function shouldUseLegacyScroll() {
+  return isMobile() || isEinkBrowser() || g_innerScrollBroken;
+}
+
+//返回页面可视区域高度
+//墨水屏浏览器上此值经过校准(见calibratePageHeight)，因为innerHeight/clientHeight
+//可能比实际可视区域大；触屏/墨水屏设备再扣除底部预留g_bottomMargin，
+//避免浏览器自带界面遮挡页面底部(如Kindle导航栏底部按钮被截断)
 function getViewportHeight() {
-  return Math.min(document.documentElement.clientHeight, window.innerHeight || 0);
+  var h = (g_pageHeight > 0) ? g_pageHeight : Math.min(document.documentElement.clientHeight, window.innerHeight || 0);
+  if (isMobile() || isEinkBrowser()) {
+    h -= g_bottomMargin;
+  }
+  return Math.max(200, h);
 }
 
 //点击日期行，打开或折叠此日期内的书本
@@ -477,6 +658,22 @@ function toggleNavBook(nav) {
 
 //Kindle浏览器有诸多限制，需要使用这个函数来调整一些元素的高度
 function adjustContentHeight() {
+  var mobileNow = isMobile();
+  if (g_lastMobileState === false && mobileNow) {
+    //从PC宽度缩到移动宽度：清除导航栏的内联display(优先级高于CSS媒体查询)，
+    //让媒体查询自动隐藏左侧导航栏；手机上仅地址栏伸缩触发的resize不会走到这里
+    var nb = document.getElementById('navbar');
+    if (nb) {
+      nb.style.display = '';
+    }
+  }
+  g_lastMobileState = mobileNow;
+
+  if (g_pageHeight <= 0) {
+    //先按原始viewport值布置一次，给校准探测提供一个可参照的布局
+    g_pageHeight = Math.min(document.documentElement.clientHeight, window.innerHeight || 0);
+  }
+
   var content = document.getElementById('content');
   var container = document.getElementById('container');
   var navbar = document.getElementById('navbar');
@@ -490,11 +687,17 @@ function adjustContentHeight() {
     }
     if (navbar) {
       navbar.style.width = '';
+      //显式设置高度：部分浏览器把fixed元素bottom:0解析到虚报的视口底部，
+      //导致导航栏弹出后底部工具栏按钮只显示一半
+      navbar.style.height = getViewportHeight() + 'px';
     }
     if (container) {
       container.style.marginLeft = '';
     }
   } else {
+    if (navbar) {
+      navbar.style.height = '';
+    }
     if (resizer) {
       resizer.style.display = 'block';
     }
@@ -528,8 +731,163 @@ function adjustContentHeight() {
   if (container) {
     container.style.height = getViewportHeight() + 'px';
   }
+  if (isMobile() || isEinkBrowser()) {
+    //文档盒高度显式设为校准值(小于虚报视口)：
+    //部分内核在文档高度等于视口时也渲染滚动条槽，小于后彻底不画
+    document.documentElement.style.height = getViewportHeight() + 'px';
+    document.body.style.height = getViewportHeight() + 'px';
+  } else {
+    document.documentElement.style.height = '';
+    document.body.style.height = '';
+  }
   if (content) {
     content.style.height = getViewportHeight() + 'px';
+    //新方案由iframe内部滚动，外层不再滚动，避免出现双层滚动条
+    content.style.overflowY = g_legacyScroll ? 'auto' : 'hidden';
+  }
+  if (!g_legacyScroll) {
+    var ifr = document.getElementById('iframe');
+    if (ifr) {
+      ifr.style.height = (getViewportHeight() + 40) + 'px';
+    }
+  }
+
+  if (g_legacyScroll && (isMobile() || isEinkBrowser())) {
+    //老内核(如Kindle的WebKit534)不支持::-webkit-scrollbar隐藏滚动条，
+    //且可能无视scrolling="no"和内层overflow:hidden，给iframe自身画滚动条。
+    //把#content和iframe都加宽20px，让两者的滚动条都落到container(overflow:hidden)
+    //之外被裁掉；内层body右边距相应加大(见adjustIFrameStyle)，保证文字不进入被裁区域
+    if (container && content) {
+      container.style.overflow = 'hidden';
+      content.style.width = (container.clientWidth + 20) + 'px';
+      var ifr2 = document.getElementById('iframe');
+      if (ifr2) {
+        ifr2.style.width = (container.clientWidth + 20) + 'px';
+      }
+    }
+  } else {
+    if (container) {
+      container.style.overflow = '';
+    }
+    if (content) {
+      content.style.width = '';
+    }
+    var ifr3 = document.getElementById('iframe');
+    if (ifr3) {
+      ifr3.style.width = '';
+    }
+  }
+
+  if (!g_heightCalibrated) {
+    g_heightCalibrated = true;
+    calibratePageHeight(); //探测真实可视高度，若与当前值不同会更新后重新应用
+  }
+}
+
+//测量页面最大可滚动距离(兼容各种老引擎的滚动接口)
+//先window.scrollTo，读不回值再用scrollTop直接赋值兜底
+function measureMaxScroll(html, body) {
+  var oldY = window.pageYOffset || 0;
+  var oldHtml = html.scrollTop || 0;
+  var oldBody = body ? (body.scrollTop || 0) : 0;
+  var scrolled = 0;
+
+  window.scrollTo(0, 1000000);
+  scrolled = window.pageYOffset || window.scrollY || html.scrollTop || (body ? body.scrollTop : 0) || 0;
+
+  if (scrolled <= 0) {
+    html.scrollTop = 1000000;
+    if (body) {
+      body.scrollTop = 1000000;
+    }
+    scrolled = html.scrollTop || (body ? body.scrollTop : 0) || 0;
+  }
+
+  //还原滚动位置
+  window.scrollTo(0, oldY);
+  html.scrollTop = oldHtml;
+  if (body) {
+    body.scrollTop = oldBody;
+  }
+  return scrolled;
+}
+
+//测量页面真实可视高度(不依赖编程式滚动，老内核可能不支持window.scrollTo)
+//部分浏览器viewport参数虚报(如Kindle报告1268但底部被浏览器自带界面遮挡)
+//方法1: fixed探针——bottom:0的fixed元素相对真实视口定位，其rect.top即真实可视高度
+//方法2: elementFromPoint二分——视口之外的点返回null，找出最大可见y
+function measureRealViewport() {
+  var vh = g_pageHeight;
+
+  //方法1: fixed探针
+  try {
+    var probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;bottom:0px;left:0px;width:1px;height:1px;visibility:hidden;';
+    document.body.appendChild(probe);
+    var top = probe.getBoundingClientRect().top;
+    document.body.removeChild(probe);
+    if ((top > 200) && ((top + 1) < vh - 4)) {
+      return top + 1;
+    }
+  } catch (e) {}
+
+  //方法2: elementFromPoint二分
+  try {
+    if (document.elementFromPoint) {
+      var container = document.getElementById('container');
+      if (!container) {
+        return 0;
+      }
+      var oldH = container.style.height;
+      container.style.height = '999999px'; //确保探测点下方有内容
+      var lo = 300;
+      var hi = Math.min(vh + 600, 5000); //真实高度不会大于虚报值太多
+      var found = 0;
+      if (!document.elementFromPoint(5, hi - 1)) { //hi处应不可见，否则视为无需校准
+        while (hi - lo > 2) {
+          var mid = Math.floor((lo + hi) / 2);
+          if (document.elementFromPoint(5, mid)) {
+            lo = mid;
+          } else {
+            hi = mid;
+          }
+        }
+        found = lo;
+      }
+      container.style.height = oldH;
+      if ((found > 200) && (found < vh - 4)) {
+        return found;
+      }
+    }
+  } catch (e) {}
+
+  return 0;
+}
+
+//校准页面真实可视高度
+//部分墨水屏浏览器(Kindle等)的innerHeight/clientHeight比实际可视区域大
+//(包含了浏览器自身界面)，导致设置的高度超出真实屏幕：
+//导航栏底部工具栏按钮被截断一半等问题。
+//解决办法是利用浏览器自身的滚动机制测量真实可视高度，不受viewport参数虚报影响
+function calibratePageHeight() {
+  var html = document.documentElement;
+  var body = document.body;
+  var vh = g_pageHeight;
+  var scrollHeight = Math.max(html.scrollHeight, body.scrollHeight);
+
+  if (isMobile() || isEinkBrowser()) {
+    var real = measureRealViewport();
+    if ((real > 200) && (real < vh)) {
+      vh = real;
+    }
+  } else if (scrollHeight > html.clientHeight + 1) {
+    //普通浏览器clientHeight可信，直接按文档溢出量缩减
+    vh = Math.max(200, vh - (scrollHeight - html.clientHeight) - 1);
+  }
+
+  if (Math.abs(vh - g_pageHeight) > 1) {
+    g_pageHeight = vh;
+    adjustContentHeight(); //g_heightCalibrated已置位，不会递归校准
   }
 }
 
@@ -630,10 +988,14 @@ function initNavResizer() {
       document.body.style.webkitUserSelect = '';
       if (iframe) {
         iframe.style.pointerEvents = 'auto';
-        var doc = iframe.contentDocument || iframe.contentWindow.document;
-        if (doc && doc.body) {
-          iframe.style.height = 'auto';
-          recalculateHeight(iframe, doc);
+        if (g_legacyScroll) { //仅外层滚动方案需要重新测量高度，新方案iframe内部自动重排
+          var doc = iframe.contentDocument || iframe.contentWindow.document;
+          if (doc && doc.body) {
+            iframe.style.height = 'auto';
+            recalculateHeight(iframe, doc);
+          }
+        } else {
+          focusIframe(); //拖完分隔条把焦点还给文章，保证滚轮可用
         }
       }
     }
@@ -836,6 +1198,9 @@ function toggleNavPopMenu() {
   var darkIcon = document.getElementById('dark-mode').querySelector('.check-icon');
   darkIcon.innerHTML = g_darkMode ? '✔' : '☐';
   menu.style.display = (menu.style.display == 'block') ? 'none' : 'block';
+  if (menu.style.display == 'none') {
+    focusIframe(); //关闭菜单后把焦点还给文章
+  }
 }
 
 //增加iframe的字号
@@ -879,6 +1244,7 @@ function showTouchHint() {
 //隐藏弹出的设置菜单
 function hidePopMenu() {
   document.getElementById('nav-popmenu').style.display = 'none';
+  focusIframe(); //菜单操作完把焦点还给文章，保证滚轮可用
 }
 
 //隐藏左侧导航栏
@@ -1005,7 +1371,7 @@ function populateBooks(expandLevel) {
       ostr.push(
         '<div class="nav-book">' +
           '<div class="nav-book-title">' +
-            '<input type="checkbox" class="nav-book-chk" onclick="javascript:event.stopPropagation()" value="' + book.bookDir + '"/>');
+            '<input type="checkbox" class="nav-book-chk" onclick="javascript:event.stopPropagation();focusIframe()" value="' + book.bookDir + '"/>');
       ostr.push('<span>' + book.title + '</span>');
       ostr.push(
           '</div>');
@@ -1079,6 +1445,8 @@ function navClickEvent(event) {
     toggleNavBook(navBook);
   } else if (navDate) {
     toggleNavDate(navDate);
+  } else {
+    focusIframe(); //点击导航栏空白处也把焦点还给文章
   }
 }
 
@@ -1213,20 +1581,49 @@ function findNextArticle(art) {
 //iframe每次加载一个新的文档后会调用此函数，注册一些事件并更新一些变量
 function iframeLoadEvent(evt) {
   var iframe = document.getElementById('iframe');
-  adjustIFrameStyle(iframe);
   var doc = iframe.contentDocument || iframe.contentWindow.document;
-  // 监听内容变化
-  if (window.MutationObserver) {
-    var observer = new MutationObserver(function(mutations) {
-      recalculateHeight(iframe, doc);
-    });
-    
-    observer.observe(doc.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      characterData: true
-    });
+
+  //决定滚动方案：窄屏/触屏/墨水屏设备/此前探测失败者使用旧方案
+  g_legacyScroll = shouldUseLegacyScroll();
+  if (!g_legacyScroll) {
+    //先按新方案布局(fix高度后文档才有滚动范围)，再做一次滚动能力探测，
+    //不支持iframe内部滚动的浏览器整个会话回退旧方案，避免翻页失效
+    iframe.style.display = "block";
+    iframe.style.height = (getViewportHeight() + 40) + 'px';
+    if (!g_innerScrollVerified && (iframeScrollHeight(doc) > iframeClientHeight(doc) + 4)) {
+      if (innerScrollWorks(doc)) {
+        g_innerScrollVerified = true;
+      } else {
+        g_innerScrollBroken = true;
+        g_legacyScroll = true;
+      }
+    }
+  }
+
+  adjustIFrameStyle(iframe);
+
+  //方案可能中途改变(如探测失败回退)，同步外层容器的滚动属性和iframe高度
+  adjustContentHeight();
+
+  if (g_legacyScroll) {
+    //外层滚动方案需要持续测量内容高度，监听内容变化
+    if (window.MutationObserver) {
+      var observer = new MutationObserver(function(mutations) {
+        recalculateHeight(iframe, doc);
+      });
+
+      observer.observe(doc.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        characterData: true
+      });
+    }
+  } else {
+    //iframe内部滚动方案，进度指示器跟随内层滚动更新
+    doc.addEventListener('scroll', updatePosIndicator);
+    updatePosIndicator();
+    focusIframe(); //确保文章加载后滚轮/键盘直接作用于文章
   }
 
   doc.addEventListener('click', function(event) {
@@ -1272,22 +1669,53 @@ function adjustIFrameStyle(iframe) {
   var doc = iframe.contentWindow.document || iframe.contentDocument;
   var body = doc.body;
   iframe.style.display = "block";
-  //添加一个元素规避chrome对iframe高度计算不准确的问题
-  if (!isMobile()) {
+  if (g_legacyScroll) {
+    //外层滚动方案(旧方案)：iframe高度等于内容高度，必须测量，
+    //保留spacer规避chrome对iframe高度计算不准确的问题
     iframe.style.height = '999999px';
-    var spacer = doc.createElement('div');
-    spacer.id = 'ke-height-spacer';
-    spacer.innerHTML = '<div style="clear:both;"></div><br/><p>■ END</p><br/><br/>';
-    body.appendChild(spacer);
+    if (!doc.getElementById('ke-height-spacer')) {
+      var spacer = doc.createElement('div');
+      spacer.id = 'ke-height-spacer';
+      spacer.innerHTML = '<div style="clear:both;"></div><br/><p>■ END</p><br/><br/>';
+      body.appendChild(spacer);
+    }
     body.offsetHeight; //强制重排
+    iframe.style.height = 'auto';
+    //禁止iframe文档内部滚动(等效于原来的scrolling="no"，
+    //iframe高度含冗余量时避免出现内部滚动条，与旧行为一致。
+    //webshelf文章无DOCTYPE以quirks模式渲染，滚动元素是body，两处都设置)
+    doc.documentElement.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    //个别内核对scrolling=auto的iframe恒画滚动条槽，旧方案恢复为no
+    iframe.setAttribute('scrolling', 'no');
+  } else {
+    //iframe内部滚动方案(新方案)：高度固定为视口高度加40px冗余(与旧方案一致)，
+    //短页面(如404提示页)不会因注入的边距恰好溢出几像素而显示滚动条；
+    //多出的40px被#content(overflow:hidden)裁掉不可见，
+    //长文章的滚动条即阅读滚动条，翻页步长=iframe视口高-40=页面可视高度
+    iframe.style.height = (getViewportHeight() + 40) + 'px';
+    doc.documentElement.style.scrollBehavior = 'auto'; //翻页瞬时跳转，旧浏览器会忽略此属性
+    iframe.setAttribute('scrolling', 'auto');
   }
-  iframe.style.height = 'auto';
 
   body.style.textAlign = 'justify';
   body.style.wordWrap = 'break-word';
   body.style.hyphens = 'auto';
-  body.style.margin = '10px 20px 10px 20px';
-  body.style.paddingBottom = '20px';
+  //404提示页是随视口伸缩的全屏布局(html,body{height:100%})，注入边距会使文档
+  //恰好超出视口几像素而在新方案下显示滚动条，该页自带完整样式，跳过边距注入
+  var isNotFoundPage = (doc.location.pathname.indexOf('/reader/404') === 0);
+  if (isNotFoundPage && !g_legacyScroll) {
+    body.style.margin = '0px';
+    body.style.paddingBottom = '0px';
+  } else {
+    body.style.margin = '10px 20px 10px 20px';
+    body.style.paddingBottom = '20px';
+    //外层滚动方案下iframe被加宽20px并裁剪(见adjustContentHeight)，
+    //加大右边距避免文字流进被裁剪的右侧20px区域
+    if (g_legacyScroll && (isMobile() || isEinkBrowser())) {
+      body.style.marginRight = '40px';
+    }
+  }
   body.style.fontSize = g_fontSize.toFixed(1) + 'em';
   body.style.cursor = 'pointer';
   body.style.webkitTapHighlightColor = 'transparent';
@@ -1315,18 +1743,20 @@ function adjustIFrameStyle(iframe) {
     var img = images[i];
     img.style.maxWidth = '100%';
     img.style.height = 'auto';
-    // 添加图片加载完成后重新计算高度
-    if (!img.complete) {
+    // 图片加载完成后重新计算高度，仅外层滚动方案需要
+    if (g_legacyScroll && !img.complete) {
       img.addEventListener('load', function() {
         recalculateHeight(iframe, doc);
       });
     }
   }
 
-  recalculateHeight(iframe, doc);
+  if (g_legacyScroll) {
+    recalculateHeight(iframe, doc);
+  }
 }
 
-//计算iframe最终高度
+//计算iframe最终高度(仅外层滚动方案使用，新方案iframe高度固定不需要测量)
 function recalculateHeight(iframe, doc) {
   var body = doc.body;
   var html = doc.documentElement;
@@ -1388,7 +1818,11 @@ document.addEventListener('DOMContentLoaded', function() {
   var iframe = document.getElementById('iframe');
   adjustContentHeight();
   initNavResizer();
-  window.addEventListener('resize', adjustContentHeight);
+  window.addEventListener('resize', function () {
+    g_pageHeight = 0; //窗口尺寸变化后重新校准
+    g_heightCalibrated = false;
+    adjustContentHeight();
+  });
   document.addEventListener('keydown', documentKeyDownEvent);
   //window.addEventListener('message', iFrameEvent);
   content.addEventListener('click', clickEvent);
@@ -1398,6 +1832,8 @@ document.addEventListener('DOMContentLoaded', function() {
   iframe.addEventListener('load', iframeLoadEvent);
   populateBooks(1);
   iframe.style.display = "none"; //加载完成后再显示
+  //个别内核对scrolling=auto的iframe恒画滚动条槽，旧方案在重载前恢复为no使其生效
+  iframe.setAttribute('scrolling', g_legacyScroll ? 'no' : 'auto');
   iframe.src = iframe.src; //强制刷新一次，避免偶尔出现不能点击的情况
   setDarkModeStyle();
 });

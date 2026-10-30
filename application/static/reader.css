@@ -8,6 +8,7 @@ html, body {
   padding: 0px;
   margin: 0px;
   height: 100%;
+  overflow: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }

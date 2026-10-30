@@ -7,11 +7,11 @@ from functools import wraps
 from operator import itemgetter
 from lxml import etree #type:ignore
 from bs4 import BeautifulSoup
-from flask import Blueprint, render_template, session, request, send_from_directory, current_app as app
+from flask import Blueprint, render_template, session, request, send_from_directory, current_app as app, make_response
 from flask_babel import gettext as _
 from build_ebook import html_to_book
 from ..base_handler import *
-from ..ke_utils import xml_escape, xml_unescape, str_to_int, str_to_float, str_to_bool
+from ..ke_utils import xml_escape, xml_unescape, str_to_float, str_to_bool
 from ..back_end.db_models import *
 from ..back_end.send_mail_adpt import send_to_kindle
 from .settings import get_locale, LangMap
@@ -73,8 +73,10 @@ def ReaderRoute():
     shareKey = user.share_links.get('key')
     docLang = 'Chinese' if get_locale().startswith('zh') else 'English'
     helpPage = f'https://cdhigh.github.io/KindleEar/{docLang}/reader.html'
-    return render_template('reader.html', oebBooks=oebBooks, initArticle=initArticle, params=params,
-        shareKey=shareKey, comicTitle=comicTitle, helpPage=helpPage)
+    resp = make_response(render_template('reader.html', oebBooks=oebBooks, initArticle=initArticle, params=params,
+        shareKey=shareKey, comicTitle=comicTitle, helpPage=helpPage))
+    resp.headers['Cache-Control'] = 'no-cache, must-revalidate'
+    return resp
 
 #在线阅读器的404页面
 @bpReader.route("/reader/404", endpoint='ReaderArticleNoFoundRoute')
@@ -156,7 +158,7 @@ def ReaderSettingsPost(user: KeUser, userDir: str):
     darkMode = 1 if str_to_bool(form.get('darkMode', 'true')) else 0
     inkMode = 1 if str_to_bool(form.get('inkMode', 'true')) else 0
     params = user.cfg('reader_params')
-    params.update({'fontSize': fontSize, 'allowLinks': allowLinks, 'inkMode': inkMode, 
+    params.update({'fontSize': fontSize, 'allowLinks': allowLinks, 'inkMode': inkMode,
         'topleftDict': topleftDict, 'darkMode': darkMode})
     user.set_cfg('reader_params', params)
     user.save()

@@ -9,7 +9,7 @@
 <body>
   <div class="container" id="container">
     <div class="content" id="content">
-      <iframe src="{{initArticle|safe}}" id="iframe" class="embedded-iframe" sandbox="allow-same-origin allow-scripts" scrolling="no" frameborder="0">Browser not compatible.</iframe>
+      <iframe src="{{initArticle|safe}}" id="iframe" class="embedded-iframe" sandbox="allow-same-origin allow-scripts" scrolling="auto" frameborder="0">Browser not compatible.</iframe>
     </div>
     <div class="pos-indicator" id="pos-indicator"></div>
     <!-- 左上角的三角形查词模式显示 -->
@@ -194,7 +194,7 @@
       noReading: "{{_('There are currently no books or articles being read.')|safe}}"
     };
   </script>
-  <script src="/static/reader.js"></script>
+  <script src="/static/reader.js?v=12"></script>
   {% endautoescape -%}
 </body>
 </html>
