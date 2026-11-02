@@ -130,3 +130,36 @@ class MyMailHook(MailNewsRecipe):
 | 队列后端 | back_end/task_queue_*.py | 实现 3 个 create_xxx_task + init_task_queue_service |
 | 正文提取器 | lib/readability（主力）→ lib/justext_extract（改造版 jusText）→ lib/simpleextract（兜底） | 依次回退 |
 | calibre 定制参数 | 用户 custom.calibre_options（JSON） | 经 build_ebook.ke_opts 合并 |
+| **MCP 工具/资源/提示词** | `application/lib/mcp_tools.py::TOOL_REGISTRY / MCP_RESOURCES / MCP_PROMPTS` | 新增工具 = 加一个 handler 函数 + 注册表条目（name/title/description/inputSchema/handler/readonly），无需改协议层 |
+
+## 8. MCP 服务器（Unreleased）
+
+供支持 MCP 协议的 AI 客户端（Claude、Cursor、Cline 等）以"工具调用"方式操作 KindleEar。典型用法：让 AI 给新闻网站自动编写并反复调试 calibre recipe / 邮件钩子。
+
+### 链路与文件
+- 端点 `POST /mcp`（`view/mcp.py`）：`Authorization: Bearer <token>` 鉴权（遍历 `KeUser.custom['mcp_token']` 匹配，token 由设置页"生成 / 重置令牌"按钮管理，存 `user.custom`，**无 schema 迁移**）→ 用户级启用开关 `user.custom['mcp_enabled']`（**默认停用**，在 `/advanced/mcp` 页打勾开启；停用时令牌保留但端点一律 401，替代单独的吊销功能）→ `lib/mcp_protocol.py` 做 JSON-RPC 2.0 分发 → `lib/mcp_tools.py` 执行工具。
+- 传输为 Streamable HTTP 的**无状态 JSON 子集**：只实现 POST + application/json 应答，无 SSE/会话/服务端主动请求，零新增依赖（官方 mcp SDK 基于 ASGI，不引入）。
+- 只读模式：`user.custom['mcp_readonly']`（设置页勾选）开启后，注册表中 `readonly=False` 的写工具被拒。
+- 审计：每次 tools/call 写 `default_log.info('[MCP] user=x calls tool=y')`。
+
+### 能力清单（34 工具 + 4 资源 + 4 提示词）
+- 投递/推送：`push_url_to_kindle`（入队）、`push_text_to_kindle`（同步）、`deliver_now`、`list_delivery_logs`、`get_task_status`、`test_delivery`
+- 订阅：`list_subscriptions`、`search_builtin_recipes`（1700 内置索引）、`add_custom_rss`、`remove_subscription`、`update_subscription_schedule`、`import_opml`
+- 书架（EBOOK_SAVE_DIR 文件系统）：`list_shelf`、`list_articles`、`read_article`、`search_articles`、`delete_book`
+- AI 增强：`summarize_article`（复用 ebook_summarizer）、`lookup_word`（复用 dictionary）
+- 邮件：`list_inbox`、`read_mail`、`get_sample_email`、`manage_whitelist`
+- 系统：`get_service_status`、`get_account_info`
+- Recipe 工作台：`fetch_page`（raw/skeleton/text 三格式，skeleton 去文本留 DOM 结构省 token）、`extract_article_preview`（readability→justext→simpleextract 三级对照）、`validate_recipe`、`test_recipe`、`save_recipe`、`get_recipe_source`
+- Hook 工作台：`validate_mail_hook`、`test_mail_hook`、`save_mail_hook`
+- 资源：`kindlear://subscriptions|shelf|logs/recent|account`；提示词：`create_news_recipe`、`create_mail_hook`、`morning_digest`、`subscription_review`
+
+### recipe/hook 测试执行器（work/recipe_tester.py）
+- `run_recipe_test()`：`compile_recipe` → 直接实例化 recipe 类（opts 需 user/verbose/test=(feeds,articles)/lrf/output_profile对象/keep_images，profile 用 `calibre.customize.ui.output_profiles` 按 short_name 解析）→ 实例上设 `delivery_reason='manual'` 绕过 LastDelivered 去重 → daemon 线程执行 + `join(timeout)`（默认 90s、硬上限 300s，`MCP_TOOL_TIMEOUT` 调默认值，结果带 `effective_timeout_seconds`）→ 逐篇读 `feed_N/article_N/index.html`（**不经 fs.read**，fs 路径约定依赖 os.path.join 的绝对路径吞并行为，直接用普通文件路径最稳）→ 汇集 `failed_downloads/aborted_articles` + 捕获 handler 日志。注意 CalibreLogger 在 `_log` 前已把多参数拼成单条 msg，标准 handler 可直接 getMessage()。v2 增强：`max_articles=0` 走 index_only（只 `parse_index`/`parse_feeds` 不下载正文，秒级验证链接筛选）；`include_content=False` 默认只回 `content_chars` 预览（默认 800，控制总输出 ≤32KB）；`download_images` 开关（默认关，`keep_images=False` 会剥除 img 标签，`image_count` 仅在开启时有意义）；失败/中止的文章没有 `orig_url` 属性（仅下载成功回调赋值），读取用 `getattr`；`download()` 中途抛错时 feed_objects/failed_downloads 已赋值，尽量收集部分结果。
+- `run_hook_test()`：**绕开会吞异常的 `run_mail_preprocess_*`**，直接 `compile_mail_hook` 拿类后手动实例化执行各阶段；样本取 InBox（body JSON 只存 txtBodies/htmlBodies/附件名，附件内容不可复现，测试时传空表）；`build_book=True` 按 build_ebook 的动态子类模式 + `convert_book(options={'dont_save_webshelf': True})` 干跑（`urls_to_book` 本身只返回字节不发送，天然无推送）。
+
+### 客户端接入
+高级设置 → "MCP Server" 页（`/advanced/mcp`）复制端点地址与令牌（页面还提供可直接粘贴的客户端配置示例），在 MCP 客户端配置：
+```json
+{"mcpServers": {"kindleear": {"url": "http://your-host/mcp",
+  "headers": {"Authorization": "Bearer <你的token>"}}}}
+```

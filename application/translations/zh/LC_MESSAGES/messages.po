@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-22 22:34-0300\n"
+"POT-Creation-Date: 2026-10-30 18:55-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: zh\n"
 "Language-Team: zh <LL@li.org>\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: zh\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "Generated-By: Babel 2.17.0\n"
 
 #: application/mail_hook.py:110 application/mail_hook.py:113
@@ -38,6 +38,7 @@ msgid "Cannot find any subclass of MailNewsRecipe in the hook file."
 msgstr "无法找到MailNewsRecipe的任何子类。"
 
 #: application/mail_hook.py:145
+#, python-brace-format
 msgid "The signature of {0} is invalid, it should be: def {0}({1})"
 msgstr "函数 {0} 的签名无效，正确的形式应为：def {0}({1})"
 
@@ -52,6 +53,7 @@ msgstr "注册设置"
 
 #: application/templates/admin.html:19
 #: application/templates/adv_calibre_options.html:18
+#: application/templates/adv_mcp.html:100
 #: application/templates/adv_proxy.html:18
 msgid "Save"
 msgstr "保存"
@@ -107,11 +109,13 @@ msgid "Add"
 msgstr "添加"
 
 #: application/templates/admin.html:54
-#: application/templates/adv_archive.html:69 application/templates/home.html:19
-#: application/templates/login.html:24 application/templates/logs.html:70
+#: application/templates/adv_archive.html:69
+#: application/templates/home.html:19 application/templates/login.html:24
+#: application/templates/logs.html:70
 #: application/templates/reset_password.html:19
 #: application/templates/reset_password.html:20
-#: application/templates/settings.html:241 application/templates/signup.html:21
+#: application/templates/settings.html:241
+#: application/templates/signup.html:21
 #: application/templates/user_account.html:15
 msgid "Username"
 msgstr "用户名"
@@ -220,15 +224,17 @@ msgid "Email or Username"
 msgstr "邮箱或用户名"
 
 #: application/templates/adv_archive.html:56
-#: application/templates/adv_archive.html:72 application/templates/base.html:54
-#: application/templates/home.html:20 application/templates/login.html:28
-#: application/templates/settings.html:245 application/templates/signup.html:25
+#: application/templates/adv_archive.html:72
+#: application/templates/base.html:54 application/templates/home.html:20
+#: application/templates/login.html:28 application/templates/settings.html:245
+#: application/templates/signup.html:25
 #: application/templates/user_account.html:19
 msgid "Password"
 msgstr "密码"
 
 #: application/templates/adv_archive.html:59
-#: application/templates/adv_archive.html:75 application/templates/base.html:64
+#: application/templates/adv_archive.html:75
+#: application/templates/base.html:64
 msgid "Verify"
 msgstr "校验"
 
@@ -270,8 +276,10 @@ msgid "Inbound Mail"
 msgstr "入站邮件"
 
 #: application/templates/adv_base.html:66
-#: application/templates/adv_base.html:70 application/templates/adv_dict.html:3
-#: application/templates/adv_dict.html:13 application/templates/reader.html:134
+#: application/templates/adv_base.html:70
+#: application/templates/adv_dict.html:3
+#: application/templates/adv_dict.html:13
+#: application/templates/reader.html:134
 msgid "Dictionary"
 msgstr "词典"
 
@@ -305,6 +313,12 @@ msgstr "样式表"
 #: application/templates/adv_calibre_options.html:12
 msgid "Calibre Options"
 msgstr "Calibre配置"
+
+#: application/templates/adv_base.html:128
+#: application/templates/adv_base.html:132
+#: application/templates/adv_mcp.html:3
+msgid "MCP Server"
+msgstr "MCP 服务器"
 
 #: application/templates/adv_calibre_options.html:13
 msgid "Set the parameters for Calibre, in JSON dictionary format."
@@ -376,7 +390,7 @@ msgid "Word lookup"
 msgstr "单词查询"
 
 #: application/templates/adv_dict.html:86 application/view/reader.py:29
-#: application/view/reader.py:86
+#: application/view/reader.py:88
 msgid "Online reading feature has not been activated yet."
 msgstr "在线阅读功能尚未被激活。"
 
@@ -496,8 +510,8 @@ msgstr "请选择一个文件。"
 #: application/templates/adv_inboundmail.html:82
 #, python-brace-format
 msgid ""
-"A hook file ({0}) already exists for this address, you can replace or "
-"delete it."
+"A hook file ({0}) already exists for this address, you can replace or delete"
+" it."
 msgstr "此地址已存在钩子文件（{0}），您可以重新上传替换或删除它。"
 
 #: application/templates/adv_inboundmail.html:83
@@ -513,6 +527,75 @@ msgstr "钩子文件已成功保存。"
 #: application/templates/adv_inboundmail.html:85
 msgid "The hook file have been deleted."
 msgstr "钩子文件已删除。"
+
+#: application/templates/adv_mcp.html:55
+msgid ""
+"Let AI clients that support the Model Context Protocol (Claude, Cursor, "
+"Cline, etc.) operate your KindleEar account: subscriptions, pushing, the "
+"reading shelf, the inbox, and the recipe / mail-hook authoring workbench."
+msgstr ""
+"让支持MCP协议的AI客户端（Claude、Cursor、Cline等）操作你的KindleEar账号：订阅、推送、书架、收件箱，以及AI辅助的Recipe/邮件钩子工作台。"
+
+#: application/templates/adv_mcp.html:60
+msgid "Enable MCP server"
+msgstr "启用 MCP 服务器"
+
+#: application/templates/adv_mcp.html:62
+msgid ""
+"When disabled, MCP clients cannot connect; the token is kept and takes "
+"effect again after re-enabling."
+msgstr "停用后所有MCP客户端将无法连接；令牌会保留，重新启用后立即恢复生效。"
+
+#: application/templates/adv_mcp.html:66
+msgid "Endpoint"
+msgstr "端点地址"
+
+#: application/templates/adv_mcp.html:67 application/templates/adv_mcp.html:74
+#: application/templates/adv_mcp.html:93
+msgid "Copy"
+msgstr "复制"
+
+#: application/templates/adv_mcp.html:73
+msgid "MCP Token"
+msgstr "MCP 访问令牌"
+
+#: application/templates/adv_mcp.html:76
+msgid "Not generated"
+msgstr "尚未生成"
+
+#: application/templates/adv_mcp.html:77
+msgid ""
+"Treat the token like a password, any MCP client with it can operate your "
+"account"
+msgstr "请像保管密码一样保管此令牌，任何持有它的MCP客户端都能操作你的账号"
+
+#: application/templates/adv_mcp.html:79
+msgid "Generate / Reset token"
+msgstr "生成 / 重置令牌"
+
+#: application/templates/adv_mcp.html:86
+msgid "Read-only mode"
+msgstr "只读模式"
+
+#: application/templates/adv_mcp.html:88
+msgid "Reject all write operations from MCP clients"
+msgstr "拒绝来自MCP客户端的所有写操作"
+
+#: application/templates/adv_mcp.html:92
+msgid "Client configuration example"
+msgstr "客户端配置示例"
+
+#: application/templates/adv_mcp.html:96
+msgid "Copy it into the configuration file of your MCP client"
+msgstr "复制到你的MCP客户端配置文件中"
+
+#: application/templates/adv_mcp.html:107
+msgid "Token generated"
+msgstr "令牌已生成"
+
+#: application/templates/adv_mcp.html:107
+msgid "Operation failed"
+msgstr "操作失败"
 
 #: application/templates/adv_proxy.html:13
 msgid "Supports"
@@ -536,8 +619,7 @@ msgstr "上传封面图像"
 
 #: application/templates/adv_uploadcover.html:10
 msgid ""
-"Upload cover images from local with an aspect ratio of approximately "
-"0.625."
+"Upload cover images from local with an aspect ratio of approximately 0.625."
 msgstr "从本机上传封面图像，建议宽高比为0.625左右。"
 
 #: application/templates/adv_uploadcover.html:13
@@ -730,9 +812,8 @@ msgstr "谢谢"
 
 #: application/templates/base.html:61
 msgid ""
-"Your recipe has been uploaded, and it can be found in the Library "
-"section. If you dont see it, please make sure to switch to the correct "
-"language."
+"Your recipe has been uploaded, and it can be found in the Library section. "
+"If you dont see it, please make sure to switch to the correct language."
 msgstr "您的Recipe已经上传，可以在本页面的 [新闻源] 区段找到。如果没有，请确认您已经切换到正确的语种。"
 
 #: application/templates/base.html:62
@@ -842,7 +923,8 @@ msgid "Delivery times"
 msgstr "推送时间"
 
 #: application/templates/base.html:89
-msgid "The customized delivery time for the recipe has been successfully saved."
+msgid ""
+"The customized delivery time for the recipe has been successfully saved."
 msgstr "这个Recipe的自定义推送时间已经设定成功。"
 
 #: application/templates/base.html:90
@@ -877,8 +959,8 @@ msgstr "上传封面图像成功。"
 
 #: application/templates/base.html:97
 msgid ""
-"Total size of the files you selected exceeds 16MB. Please reduce the "
-"image resolution or upload in batches."
+"Total size of the files you selected exceeds 16MB. Please reduce the image "
+"resolution or upload in batches."
 msgstr "您选择的文件总和超过16MB，请减小图像分辨率或分批上传。"
 
 #: application/templates/base.html:98
@@ -919,9 +1001,9 @@ msgstr "Ai"
 
 #: application/templates/base.html:107
 msgid ""
-"The test email has been successfully sent to the following addresses. "
-"Please check your inbox or spam folder to confirm its delivery. Depending"
-" on your email server, there may be a slight delay."
+"The test email has been successfully sent to the following addresses. Please"
+" check your inbox or spam folder to confirm its delivery. Depending on your "
+"email server, there may be a slight delay."
 msgstr "测试邮件已经成功发送到以下地址， 请打开收件箱或垃圾箱确认是否到达，根据服务器不同，可能稍有延迟。"
 
 #: application/templates/base.html:108
@@ -980,8 +1062,8 @@ msgstr "请选择至少一项。"
 #: application/view/extension.py:63 application/view/inbound_email.py:515
 #: application/view/inbound_email.py:523 application/view/inbound_email.py:538
 #: application/view/inbound_email.py:559 application/view/login.py:232
-#: application/view/login.py:261 application/view/reader.py:109
-#: application/view/reader.py:126 application/view/share.py:37
+#: application/view/login.py:261 application/view/reader.py:111
+#: application/view/reader.py:128 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr "一些参数为空或错误。"
 
@@ -1353,9 +1435,10 @@ msgstr "源自Calibre"
 #, python-format
 msgid ""
 "Empowered by %(calibre)s, you can easily create e-books on a Python-"
-"supported online platform and seamlessly transfer them to your e-reader "
-"or other reading devices."
-msgstr "借助 %(calibre)s 的强大引擎，现在您可以在各种 Python 托管平台上轻松创建电子书，并直接推送至您的 Kindle 和其他阅读器。"
+"supported online platform and seamlessly transfer them to your e-reader or "
+"other reading devices."
+msgstr ""
+"借助 %(calibre)s 的强大引擎，现在您可以在各种 Python 托管平台上轻松创建电子书，并直接推送至您的 Kindle 和其他阅读器。"
 
 #: application/templates/home.html:42
 msgid "Share Your Ideas"
@@ -1365,8 +1448,8 @@ msgstr "分享智慧"
 #, python-format
 msgid ""
 "With the open-source %(kindleear)s application, you can set up your own "
-"server to deliver daily news feeds to your e-reader and effortlessly "
-"share the service with friends."
+"server to deliver daily news feeds to your e-reader and effortlessly share "
+"the service with friends."
 msgstr "使用开源 %(kindleear)s 应用，您可以部署您自己的网站，每天自动抓取全球新闻热点，并支持多账号，可以提供给多位好友同时使用。"
 
 #: application/templates/library.html:50 application/templates/my.html:61
@@ -1530,7 +1613,8 @@ msgstr "重置密码"
 
 #: application/templates/settings.html:14
 #, python-brace-format
-msgid "Your account will pause after {0}, please log in again before it expires."
+msgid ""
+"Your account will pause after {0}, please log in again before it expires."
 msgstr "你的投递将于 {0} 自动停止，每次登录后自动延期。"
 
 #: application/templates/settings.html:23
@@ -1721,8 +1805,8 @@ msgstr "保存路径"
 #: application/templates/settings.html:257
 #, python-format
 msgid ""
-"Important: Please activate your kindle firstly, then goto %(personal)s "
-"Page and add %(sender)s to 'Approved Personal Document E-mail List'."
+"Important: Please activate your kindle firstly, then goto %(personal)s Page "
+"and add %(sender)s to 'Approved Personal Document E-mail List'."
 msgstr ""
 "注意：必须首先注册您的Kindle设备，同时请到亚马逊账户中心 %(personal)s 页面，将 %(sender)s 添加到 "
 "'已认可的发件人电子邮箱列表'。"
@@ -1734,8 +1818,8 @@ msgstr "个人文档设置"
 #: application/templates/settings.html:263
 #, python-format
 msgid ""
-"You have not yet set up your email address. Please go to the %(admin)s "
-"page to add your email address firstly."
+"You have not yet set up your email address. Please go to the %(admin)s page "
+"to add your email address firstly."
 msgstr "您尚未设置您的email地址，请先到 %(admin)s 页面添加您的email地址。"
 
 #: application/templates/settings.html:271
@@ -1783,9 +1867,9 @@ msgid "Word"
 msgstr "单词"
 
 #: application/view/admin.py:48 application/view/adv.py:505
-#: application/view/adv.py:596 application/view/settings.py:67
-#: application/view/translator.py:88 application/view/translator.py:172
-#: application/view/translator.py:254
+#: application/view/adv.py:596 application/view/mcp.py:76
+#: application/view/settings.py:67 application/view/translator.py:88
+#: application/view/translator.py:172 application/view/translator.py:254
 msgid "Settings Saved!"
 msgstr "设置已保存!"
 
@@ -1853,8 +1937,8 @@ msgstr "钩子文件太大。"
 
 #: application/view/adv.py:118
 msgid ""
-"Failed to decode the file. Please ensure that your file is saved in utf-8"
-" encoding."
+"Failed to decode the file. Please ensure that your file is saved in utf-8 "
+"encoding."
 msgstr "解码文件失败，请确保文件以utf-8编码保存。"
 
 #: application/view/adv.py:123
@@ -2062,37 +2146,37 @@ msgstr "这个是自动发送的邮件，请勿直接回复。"
 msgid "You can click the following link to reset your KindleEar password."
 msgstr "你可以点击下面的链接来重置你的KindleEar密码。"
 
-#: application/view/reader.py:88
+#: application/view/reader.py:90
 msgid "The article is missing?"
 msgstr "文章丢失了？"
 
-#: application/view/reader.py:190 application/view/translator.py:121
+#: application/view/reader.py:192 application/view/translator.py:121
 #: application/view/translator.py:205 application/view/translator.py:287
 msgid "The text is empty."
 msgstr "文本为空。"
 
-#: application/view/reader.py:239
+#: application/view/reader.py:241
 #, python-brace-format
 msgid "No definitions found for '{}'."
 msgstr "未找到“{}”的定义。"
 
-#: application/view/reader.py:240
+#: application/view/reader.py:242
 msgid "Did you mean?"
 msgstr "您是指？"
 
-#: application/view/reader.py:324 application/view/reader.py:331
+#: application/view/reader.py:326 application/view/reader.py:333
 #, python-brace-format
 msgid "Failed to push: {}"
 msgstr "推送失败: {}"
 
-#: application/view/reader.py:379
+#: application/view/reader.py:381
 msgid "Failed to create ebook."
 msgstr "创建电子书失败。"
 
 #: application/view/settings.py:132
 msgid ""
-"You have not yet set up your email address. Please go to the 'Account' "
-"page to add your email address firstly."
+"You have not yet set up your email address. Please go to the 'Account' page "
+"to add your email address firstly."
 msgstr "您尚未设置您的email地址，请先到“账号管理”页面添加您的email地址。"
 
 #: application/view/settings.py:216

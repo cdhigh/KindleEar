@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-22 22:34-0300\n"
+"POT-Creation-Date: 2026-10-30 18:55-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: KindleEar <LL@li.org>\n"
@@ -53,6 +53,7 @@ msgstr "가입 설정"
 
 #: application/templates/admin.html:19
 #: application/templates/adv_calibre_options.html:18
+#: application/templates/adv_mcp.html:100
 #: application/templates/adv_proxy.html:18
 msgid "Save"
 msgstr "저장"
@@ -313,6 +314,12 @@ msgstr "스타일 시트"
 msgid "Calibre Options"
 msgstr "칼리버 옵션"
 
+#: application/templates/adv_base.html:128
+#: application/templates/adv_base.html:132
+#: application/templates/adv_mcp.html:3
+msgid "MCP Server"
+msgstr "MCP 서버"
+
 #: application/templates/adv_calibre_options.html:13
 msgid "Set the parameters for Calibre, in JSON dictionary format."
 msgstr "칼리버 매개변수를 설정합니다. JSON 딕셔너리 형식으로."
@@ -383,7 +390,7 @@ msgid "Word lookup"
 msgstr "단어 조회"
 
 #: application/templates/adv_dict.html:86 application/view/reader.py:29
-#: application/view/reader.py:86
+#: application/view/reader.py:88
 msgid "Online reading feature has not been activated yet."
 msgstr "온라인 읽기 기능이 아직 활성화되지 않았습니다."
 
@@ -521,6 +528,76 @@ msgstr "훅 파일이 성공적으로 저장되었습니다."
 #: application/templates/adv_inboundmail.html:85
 msgid "The hook file have been deleted."
 msgstr "훅 파일이 삭제되었습니다."
+
+#: application/templates/adv_mcp.html:55
+msgid ""
+"Let AI clients that support the Model Context Protocol (Claude, Cursor, "
+"Cline, etc.) operate your KindleEar account: subscriptions, pushing, the "
+"reading shelf, the inbox, and the recipe / mail-hook authoring workbench."
+msgstr ""
+"Model Context Protocol(MCP)을 지원하는 AI 클라이언트(Claude, Cursor, Cline 등)가 "
+"KindleEar 계정을 조작할 수 있습니다: 구독, 푸시, 독서 서재, 받은 편지함, 그리고 레시피/메일 훅 제작 워크벤치."
+
+#: application/templates/adv_mcp.html:60
+msgid "Enable MCP server"
+msgstr "MCP 서버 사용"
+
+#: application/templates/adv_mcp.html:62
+msgid ""
+"When disabled, MCP clients cannot connect; the token is kept and takes "
+"effect again after re-enabling."
+msgstr "비활성화 중에는 MCP 클라이언트가 연결할 수 없습니다. 토큰은 유지되며 다시 활성화하면 즉시 복원됩니다."
+
+#: application/templates/adv_mcp.html:66
+msgid "Endpoint"
+msgstr "엔드포인트"
+
+#: application/templates/adv_mcp.html:67 application/templates/adv_mcp.html:74
+#: application/templates/adv_mcp.html:93
+msgid "Copy"
+msgstr "복사"
+
+#: application/templates/adv_mcp.html:73
+msgid "MCP Token"
+msgstr "MCP 토큰"
+
+#: application/templates/adv_mcp.html:76
+msgid "Not generated"
+msgstr "생성되지 않음"
+
+#: application/templates/adv_mcp.html:77
+msgid ""
+"Treat the token like a password, any MCP client with it can operate your "
+"account"
+msgstr "토큰은 비밀번호처럼 취급하세요. 토큰을 가진 MCP 클라이언트는 누구나 계정을 조작할 수 있습니다"
+
+#: application/templates/adv_mcp.html:79
+msgid "Generate / Reset token"
+msgstr "토큰 생성 / 재설정"
+
+#: application/templates/adv_mcp.html:86
+msgid "Read-only mode"
+msgstr "읽기 전용 모드"
+
+#: application/templates/adv_mcp.html:88
+msgid "Reject all write operations from MCP clients"
+msgstr "MCP 클라이언트의 모든 쓰기 작업 거부"
+
+#: application/templates/adv_mcp.html:92
+msgid "Client configuration example"
+msgstr "클라이언트 설정 예시"
+
+#: application/templates/adv_mcp.html:96
+msgid "Copy it into the configuration file of your MCP client"
+msgstr "MCP 클라이언트의 설정 파일에 복사하세요"
+
+#: application/templates/adv_mcp.html:107
+msgid "Token generated"
+msgstr "토큰이 생성되었습니다"
+
+#: application/templates/adv_mcp.html:107
+msgid "Operation failed"
+msgstr "작업 실패"
 
 #: application/templates/adv_proxy.html:13
 msgid "Supports"
@@ -990,8 +1067,8 @@ msgstr "최소 하나의 항목을 선택하십시오."
 #: application/view/extension.py:63 application/view/inbound_email.py:515
 #: application/view/inbound_email.py:523 application/view/inbound_email.py:538
 #: application/view/inbound_email.py:559 application/view/login.py:232
-#: application/view/login.py:261 application/view/reader.py:109
-#: application/view/reader.py:126 application/view/share.py:37
+#: application/view/login.py:261 application/view/reader.py:111
+#: application/view/reader.py:128 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr "일부 매개변수가 누락되었거나 잘못되었습니다."
 
@@ -1798,9 +1875,9 @@ msgid "Word"
 msgstr "단어"
 
 #: application/view/admin.py:48 application/view/adv.py:505
-#: application/view/adv.py:596 application/view/settings.py:67
-#: application/view/translator.py:88 application/view/translator.py:172
-#: application/view/translator.py:254
+#: application/view/adv.py:596 application/view/mcp.py:76
+#: application/view/settings.py:67 application/view/translator.py:88
+#: application/view/translator.py:172 application/view/translator.py:254
 msgid "Settings Saved!"
 msgstr "설정이 저장되었습니다!"
 
@@ -2077,30 +2154,30 @@ msgstr "이 이메일은 자동 발송된 것입니다. 답장하지 마십시�
 msgid "You can click the following link to reset your KindleEar password."
 msgstr "다음 링크를 클릭하여 KindleEar 비밀번호를 재설정할 수 있습니다."
 
-#: application/view/reader.py:88
+#: application/view/reader.py:90
 msgid "The article is missing?"
 msgstr "글이 누락되었나요?"
 
-#: application/view/reader.py:190 application/view/translator.py:121
+#: application/view/reader.py:192 application/view/translator.py:121
 #: application/view/translator.py:205 application/view/translator.py:287
 msgid "The text is empty."
 msgstr "텍스트가 비어 있습니다."
 
-#: application/view/reader.py:239
+#: application/view/reader.py:241
 #, python-brace-format
 msgid "No definitions found for '{}'."
 msgstr "'{}'에 대한 정의가 없습니다."
 
-#: application/view/reader.py:240
+#: application/view/reader.py:242
 msgid "Did you mean?"
 msgstr "이것을 의미하셨나요?"
 
-#: application/view/reader.py:324 application/view/reader.py:331
+#: application/view/reader.py:326 application/view/reader.py:333
 #, python-brace-format
 msgid "Failed to push: {}"
 msgstr "푸시 실패: {}"
 
-#: application/view/reader.py:379
+#: application/view/reader.py:381
 msgid "Failed to create ebook."
 msgstr "전자책 생성 실패."
 

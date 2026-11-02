@@ -19,6 +19,7 @@ REQ_COMM = [
     ('pillow', '~=13.0.0'),
     ('lxml', '~=6.1.3'),
     ('lxml-html-clean', '~=0.4.5'),
+    ('cssselect', '~=1.2.0'),
     ('sendgrid', '~=6.12.5'),
     ('mailjet-rest', '~=1.9.1'),
     ('python-dateutil', '~=3.0.0'),

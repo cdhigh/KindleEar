@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-22 22:34-0300\n"
+"POT-Creation-Date: 2026-10-30 18:55-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: KindleEar <LL@li.org>\n"
@@ -53,6 +53,7 @@ msgstr "サインアップ設定"
 
 #: application/templates/admin.html:19
 #: application/templates/adv_calibre_options.html:18
+#: application/templates/adv_mcp.html:100
 #: application/templates/adv_proxy.html:18
 msgid "Save"
 msgstr "保存"
@@ -313,6 +314,12 @@ msgstr "スタイルシート"
 msgid "Calibre Options"
 msgstr "Calibreオプション"
 
+#: application/templates/adv_base.html:128
+#: application/templates/adv_base.html:132
+#: application/templates/adv_mcp.html:3
+msgid "MCP Server"
+msgstr "MCPサーバー"
+
 #: application/templates/adv_calibre_options.html:13
 msgid "Set the parameters for Calibre, in JSON dictionary format."
 msgstr "CalibreのパラメータをJSON辞書形式で設定します。"
@@ -383,7 +390,7 @@ msgid "Word lookup"
 msgstr "単語検索"
 
 #: application/templates/adv_dict.html:86 application/view/reader.py:29
-#: application/view/reader.py:86
+#: application/view/reader.py:88
 msgid "Online reading feature has not been activated yet."
 msgstr "オンラインリーディング機能はまだ有効化されていません。"
 
@@ -521,6 +528,76 @@ msgstr "フックファイルは正常に保存されました。"
 #: application/templates/adv_inboundmail.html:85
 msgid "The hook file have been deleted."
 msgstr "フックファイルは削除されました。"
+
+#: application/templates/adv_mcp.html:55
+msgid ""
+"Let AI clients that support the Model Context Protocol (Claude, Cursor, "
+"Cline, etc.) operate your KindleEar account: subscriptions, pushing, the "
+"reading shelf, the inbox, and the recipe / mail-hook authoring workbench."
+msgstr ""
+"Model Context "
+"Protocol(MCP)対応のAIクライアント(Claude、Cursor、Clineなど)からKindleEarアカウントを操作できるようにします:購読、プッシュ、読書棚、受信箱、そしてレシピ/メールフック作成ワークベンチ。"
+
+#: application/templates/adv_mcp.html:60
+msgid "Enable MCP server"
+msgstr "MCPサーバーを有効化"
+
+#: application/templates/adv_mcp.html:62
+msgid ""
+"When disabled, MCP clients cannot connect; the token is kept and takes "
+"effect again after re-enabling."
+msgstr "無効の間、MCPクライアントは接続できません。トークンは保持され、再度有効化すると直ちに復元されます。"
+
+#: application/templates/adv_mcp.html:66
+msgid "Endpoint"
+msgstr "エンドポイント"
+
+#: application/templates/adv_mcp.html:67 application/templates/adv_mcp.html:74
+#: application/templates/adv_mcp.html:93
+msgid "Copy"
+msgstr "コピー"
+
+#: application/templates/adv_mcp.html:73
+msgid "MCP Token"
+msgstr "MCPトークン"
+
+#: application/templates/adv_mcp.html:76
+msgid "Not generated"
+msgstr "未生成"
+
+#: application/templates/adv_mcp.html:77
+msgid ""
+"Treat the token like a password, any MCP client with it can operate your "
+"account"
+msgstr "トークンはパスワードと同じように扱ってください。トークンを知っているMCPクライアントは誰でもアカウントを操作できます"
+
+#: application/templates/adv_mcp.html:79
+msgid "Generate / Reset token"
+msgstr "トークンを生成 / リセット"
+
+#: application/templates/adv_mcp.html:86
+msgid "Read-only mode"
+msgstr "読み取り専用モード"
+
+#: application/templates/adv_mcp.html:88
+msgid "Reject all write operations from MCP clients"
+msgstr "MCPクライアントからのすべての書き込み操作を拒否"
+
+#: application/templates/adv_mcp.html:92
+msgid "Client configuration example"
+msgstr "クライアント設定例"
+
+#: application/templates/adv_mcp.html:96
+msgid "Copy it into the configuration file of your MCP client"
+msgstr "MCPクライアントの設定ファイルにコピーしてください"
+
+#: application/templates/adv_mcp.html:107
+msgid "Token generated"
+msgstr "トークンを生成しました"
+
+#: application/templates/adv_mcp.html:107
+msgid "Operation failed"
+msgstr "操作に失敗しました"
 
 #: application/templates/adv_proxy.html:13
 msgid "Supports"
@@ -988,8 +1065,8 @@ msgstr "少なくとも1つの項目を選択してください。"
 #: application/view/extension.py:63 application/view/inbound_email.py:515
 #: application/view/inbound_email.py:523 application/view/inbound_email.py:538
 #: application/view/inbound_email.py:559 application/view/login.py:232
-#: application/view/login.py:261 application/view/reader.py:109
-#: application/view/reader.py:126 application/view/share.py:37
+#: application/view/login.py:261 application/view/reader.py:111
+#: application/view/reader.py:128 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr "いくつかのパラメータが不足しているか、間違っています。"
 
@@ -1794,9 +1871,9 @@ msgid "Word"
 msgstr "単語"
 
 #: application/view/admin.py:48 application/view/adv.py:505
-#: application/view/adv.py:596 application/view/settings.py:67
-#: application/view/translator.py:88 application/view/translator.py:172
-#: application/view/translator.py:254
+#: application/view/adv.py:596 application/view/mcp.py:76
+#: application/view/settings.py:67 application/view/translator.py:88
+#: application/view/translator.py:172 application/view/translator.py:254
 msgid "Settings Saved!"
 msgstr "設定が保存されました！"
 
@@ -2073,30 +2150,30 @@ msgstr "これは自動送信されたメールです。返信しないでくだ
 msgid "You can click the following link to reset your KindleEar password."
 msgstr "以下のリンクをクリックしてKindleEarのパスワードをリセットできます。"
 
-#: application/view/reader.py:88
+#: application/view/reader.py:90
 msgid "The article is missing?"
 msgstr "記事が見つかりませんか？"
 
-#: application/view/reader.py:190 application/view/translator.py:121
+#: application/view/reader.py:192 application/view/translator.py:121
 #: application/view/translator.py:205 application/view/translator.py:287
 msgid "The text is empty."
 msgstr "テキストが空です。"
 
-#: application/view/reader.py:239
+#: application/view/reader.py:241
 #, python-brace-format
 msgid "No definitions found for '{}'."
 msgstr "'{}' の定義が見つかりません。"
 
-#: application/view/reader.py:240
+#: application/view/reader.py:242
 msgid "Did you mean?"
 msgstr "意味しましたか？"
 
-#: application/view/reader.py:324 application/view/reader.py:331
+#: application/view/reader.py:326 application/view/reader.py:333
 #, python-brace-format
 msgid "Failed to push: {}"
 msgstr "プッシュに失敗しました: {}"
 
-#: application/view/reader.py:379
+#: application/view/reader.py:381
 msgid "Failed to create ebook."
 msgstr "電子書籍の作成に失敗しました。"
 

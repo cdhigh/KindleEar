@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-22 22:34-0300\n"
+"POT-Creation-Date: 2026-10-30 18:55-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -52,6 +52,7 @@ msgstr ""
 
 #: application/templates/admin.html:19
 #: application/templates/adv_calibre_options.html:18
+#: application/templates/adv_mcp.html:100
 #: application/templates/adv_proxy.html:18
 msgid "Save"
 msgstr ""
@@ -306,6 +307,11 @@ msgstr ""
 msgid "Calibre Options"
 msgstr ""
 
+#: application/templates/adv_base.html:128
+#: application/templates/adv_base.html:132 application/templates/adv_mcp.html:3
+msgid "MCP Server"
+msgstr ""
+
 #: application/templates/adv_calibre_options.html:13
 msgid "Set the parameters for Calibre, in JSON dictionary format."
 msgstr ""
@@ -376,7 +382,7 @@ msgid "Word lookup"
 msgstr ""
 
 #: application/templates/adv_dict.html:86 application/view/reader.py:29
-#: application/view/reader.py:86
+#: application/view/reader.py:88
 msgid "Online reading feature has not been activated yet."
 msgstr ""
 
@@ -512,6 +518,74 @@ msgstr ""
 
 #: application/templates/adv_inboundmail.html:85
 msgid "The hook file have been deleted."
+msgstr ""
+
+#: application/templates/adv_mcp.html:55
+msgid ""
+"Let AI clients that support the Model Context Protocol (Claude, Cursor, "
+"Cline, etc.) operate your KindleEar account: subscriptions, pushing, the "
+"reading shelf, the inbox, and the recipe / mail-hook authoring workbench."
+msgstr ""
+
+#: application/templates/adv_mcp.html:60
+msgid "Enable MCP server"
+msgstr ""
+
+#: application/templates/adv_mcp.html:62
+msgid ""
+"When disabled, MCP clients cannot connect; the token is kept and takes "
+"effect again after re-enabling."
+msgstr ""
+
+#: application/templates/adv_mcp.html:66
+msgid "Endpoint"
+msgstr ""
+
+#: application/templates/adv_mcp.html:67 application/templates/adv_mcp.html:74
+#: application/templates/adv_mcp.html:93
+msgid "Copy"
+msgstr ""
+
+#: application/templates/adv_mcp.html:73
+msgid "MCP Token"
+msgstr ""
+
+#: application/templates/adv_mcp.html:76
+msgid "Not generated"
+msgstr ""
+
+#: application/templates/adv_mcp.html:77
+msgid ""
+"Treat the token like a password, any MCP client with it can operate your "
+"account"
+msgstr ""
+
+#: application/templates/adv_mcp.html:79
+msgid "Generate / Reset token"
+msgstr ""
+
+#: application/templates/adv_mcp.html:86
+msgid "Read-only mode"
+msgstr ""
+
+#: application/templates/adv_mcp.html:88
+msgid "Reject all write operations from MCP clients"
+msgstr ""
+
+#: application/templates/adv_mcp.html:92
+msgid "Client configuration example"
+msgstr ""
+
+#: application/templates/adv_mcp.html:96
+msgid "Copy it into the configuration file of your MCP client"
+msgstr ""
+
+#: application/templates/adv_mcp.html:107
+msgid "Token generated"
+msgstr ""
+
+#: application/templates/adv_mcp.html:107
+msgid "Operation failed"
 msgstr ""
 
 #: application/templates/adv_proxy.html:13
@@ -980,8 +1054,8 @@ msgstr ""
 #: application/view/extension.py:63 application/view/inbound_email.py:515
 #: application/view/inbound_email.py:523 application/view/inbound_email.py:538
 #: application/view/inbound_email.py:559 application/view/login.py:232
-#: application/view/login.py:261 application/view/reader.py:109
-#: application/view/reader.py:126 application/view/share.py:37
+#: application/view/login.py:261 application/view/reader.py:111
+#: application/view/reader.py:128 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr ""
 
@@ -1781,9 +1855,9 @@ msgid "Word"
 msgstr ""
 
 #: application/view/admin.py:48 application/view/adv.py:505
-#: application/view/adv.py:596 application/view/settings.py:67
-#: application/view/translator.py:88 application/view/translator.py:172
-#: application/view/translator.py:254
+#: application/view/adv.py:596 application/view/mcp.py:76
+#: application/view/settings.py:67 application/view/translator.py:88
+#: application/view/translator.py:172 application/view/translator.py:254
 msgid "Settings Saved!"
 msgstr ""
 
@@ -2060,30 +2134,30 @@ msgstr ""
 msgid "You can click the following link to reset your KindleEar password."
 msgstr ""
 
-#: application/view/reader.py:88
+#: application/view/reader.py:90
 msgid "The article is missing?"
 msgstr ""
 
-#: application/view/reader.py:190 application/view/translator.py:121
+#: application/view/reader.py:192 application/view/translator.py:121
 #: application/view/translator.py:205 application/view/translator.py:287
 msgid "The text is empty."
 msgstr ""
 
-#: application/view/reader.py:239
+#: application/view/reader.py:241
 #, python-brace-format
 msgid "No definitions found for '{}'."
 msgstr ""
 
-#: application/view/reader.py:240
+#: application/view/reader.py:242
 msgid "Did you mean?"
 msgstr ""
 
-#: application/view/reader.py:324 application/view/reader.py:331
+#: application/view/reader.py:326 application/view/reader.py:333
 #, python-brace-format
 msgid "Failed to push: {}"
 msgstr ""
 
-#: application/view/reader.py:379
+#: application/view/reader.py:381
 msgid "Failed to create ebook."
 msgstr ""
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-22 22:34-0300\n"
+"POT-Creation-Date: 2026-10-30 18:55-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: KindleEar <LL@li.org>\n"
@@ -53,6 +53,7 @@ msgstr "Configuración de registro"
 
 #: application/templates/admin.html:19
 #: application/templates/adv_calibre_options.html:18
+#: application/templates/adv_mcp.html:100
 #: application/templates/adv_proxy.html:18
 msgid "Save"
 msgstr "Guardar"
@@ -313,6 +314,12 @@ msgstr "Hoja de estilo"
 msgid "Calibre Options"
 msgstr "Opciones de Calibre"
 
+#: application/templates/adv_base.html:128
+#: application/templates/adv_base.html:132
+#: application/templates/adv_mcp.html:3
+msgid "MCP Server"
+msgstr "Servidor MCP"
+
 #: application/templates/adv_calibre_options.html:13
 msgid "Set the parameters for Calibre, in JSON dictionary format."
 msgstr ""
@@ -384,7 +391,7 @@ msgid "Word lookup"
 msgstr "Búsqueda de palabras"
 
 #: application/templates/adv_dict.html:86 application/view/reader.py:29
-#: application/view/reader.py:86
+#: application/view/reader.py:88
 msgid "Online reading feature has not been activated yet."
 msgstr "La función de lectura en línea aún no ha sido activada."
 
@@ -529,6 +536,82 @@ msgstr "El archivo hook ha sido guardado exitosamente."
 #: application/templates/adv_inboundmail.html:85
 msgid "The hook file have been deleted."
 msgstr "El archivo hook ha sido eliminado."
+
+#: application/templates/adv_mcp.html:55
+msgid ""
+"Let AI clients that support the Model Context Protocol (Claude, Cursor, "
+"Cline, etc.) operate your KindleEar account: subscriptions, pushing, the "
+"reading shelf, the inbox, and the recipe / mail-hook authoring workbench."
+msgstr ""
+"Permite que los clientes de IA compatibles con el Model Context Protocol "
+"(Claude, Cursor, Cline, etc.) operen tu cuenta de KindleEar: suscripciones, "
+"envíos, la estantería de lectura, la bandeja de entrada y el taller de "
+"creación de recipes y ganchos de correo."
+
+#: application/templates/adv_mcp.html:60
+msgid "Enable MCP server"
+msgstr "Habilitar servidor MCP"
+
+#: application/templates/adv_mcp.html:62
+msgid ""
+"When disabled, MCP clients cannot connect; the token is kept and takes "
+"effect again after re-enabling."
+msgstr ""
+"Cuando está deshabilitado, los clientes MCP no pueden conectarse; el token "
+"se conserva y vuelve a surtir efecto al rehabilitarlo."
+
+#: application/templates/adv_mcp.html:66
+msgid "Endpoint"
+msgstr "Endpoint"
+
+#: application/templates/adv_mcp.html:67 application/templates/adv_mcp.html:74
+#: application/templates/adv_mcp.html:93
+msgid "Copy"
+msgstr "Copiar"
+
+#: application/templates/adv_mcp.html:73
+msgid "MCP Token"
+msgstr "Token de MCP"
+
+#: application/templates/adv_mcp.html:76
+msgid "Not generated"
+msgstr "No generado"
+
+#: application/templates/adv_mcp.html:77
+msgid ""
+"Treat the token like a password, any MCP client with it can operate your "
+"account"
+msgstr ""
+"Trata el token como una contraseña: cualquier cliente MCP que lo tenga puede"
+" operar tu cuenta"
+
+#: application/templates/adv_mcp.html:79
+msgid "Generate / Reset token"
+msgstr "Generar / Restablecer token"
+
+#: application/templates/adv_mcp.html:86
+msgid "Read-only mode"
+msgstr "Modo de solo lectura"
+
+#: application/templates/adv_mcp.html:88
+msgid "Reject all write operations from MCP clients"
+msgstr "Rechazar todas las operaciones de escritura de los clientes MCP"
+
+#: application/templates/adv_mcp.html:92
+msgid "Client configuration example"
+msgstr "Ejemplo de configuración del cliente"
+
+#: application/templates/adv_mcp.html:96
+msgid "Copy it into the configuration file of your MCP client"
+msgstr "Cópialo en el archivo de configuración de tu cliente MCP"
+
+#: application/templates/adv_mcp.html:107
+msgid "Token generated"
+msgstr "Token generado"
+
+#: application/templates/adv_mcp.html:107
+msgid "Operation failed"
+msgstr "La operación falló"
 
 #: application/templates/adv_proxy.html:13
 msgid "Supports"
@@ -1012,8 +1095,8 @@ msgstr "Por favor selecciona al menos un artículo."
 #: application/view/extension.py:63 application/view/inbound_email.py:515
 #: application/view/inbound_email.py:523 application/view/inbound_email.py:538
 #: application/view/inbound_email.py:559 application/view/login.py:232
-#: application/view/login.py:261 application/view/reader.py:109
-#: application/view/reader.py:126 application/view/share.py:37
+#: application/view/login.py:261 application/view/reader.py:111
+#: application/view/reader.py:128 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr "Faltan o son incorrectos algunos parámetros."
 
@@ -1831,9 +1914,9 @@ msgid "Word"
 msgstr "Palabra"
 
 #: application/view/admin.py:48 application/view/adv.py:505
-#: application/view/adv.py:596 application/view/settings.py:67
-#: application/view/translator.py:88 application/view/translator.py:172
-#: application/view/translator.py:254
+#: application/view/adv.py:596 application/view/mcp.py:76
+#: application/view/settings.py:67 application/view/translator.py:88
+#: application/view/translator.py:172 application/view/translator.py:254
 msgid "Settings Saved!"
 msgstr "¡Configuración guardada!"
 
@@ -2125,30 +2208,30 @@ msgstr ""
 "Puede hacer clic en el siguiente enlace para restablecer su contraseña de "
 "KindleEar."
 
-#: application/view/reader.py:88
+#: application/view/reader.py:90
 msgid "The article is missing?"
 msgstr "¿Falta el artículo?"
 
-#: application/view/reader.py:190 application/view/translator.py:121
+#: application/view/reader.py:192 application/view/translator.py:121
 #: application/view/translator.py:205 application/view/translator.py:287
 msgid "The text is empty."
 msgstr "El texto está vacío."
 
-#: application/view/reader.py:239
+#: application/view/reader.py:241
 #, python-brace-format
 msgid "No definitions found for '{}'."
 msgstr "No se encontraron definiciones para '{}'."
 
-#: application/view/reader.py:240
+#: application/view/reader.py:242
 msgid "Did you mean?"
 msgstr "¿Quiso decir?"
 
-#: application/view/reader.py:324 application/view/reader.py:331
+#: application/view/reader.py:326 application/view/reader.py:333
 #, python-brace-format
 msgid "Failed to push: {}"
 msgstr "Error al enviar: {}"
 
-#: application/view/reader.py:379
+#: application/view/reader.py:381
 msgid "Failed to create ebook."
 msgstr "Error al crear el ebook."
 

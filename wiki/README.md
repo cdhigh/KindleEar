@@ -22,7 +22,7 @@ KindleEar：可自托管的 Kindle 个人推送服务（Python/Flask）。聚合
 ## 最小事实集（速记卡）
 
 - **入口**：`main.py` → `init_app()`（`application/__init__.py`）。WSGI 对象 `app`；celery 模式另有 `celery_app`。`python main.py debug` 起 Flask 开发服务器；`python main.py deliver check|now`、`log purge` 是 CLI 子命令（供无队列主机 crontab 用）。
-- **框架**：Flask 3 + Flask-Babel，**17 个 Blueprint** 在 `application/routes.py::register_routes()` 集中注册，无自动路由扫描。
+- **框架**：Flask 3 + Flask-Babel，**18 个 Blueprint** 在 `application/routes.py::register_routes()` 集中注册，无自动路由扫描。
 - **数据库**：`DATABASE_URL` 一项配置切换 8 种后端（datastore/mongodb/redis/pickle 走自写 weedata ODM；sqlite/mysql/postgresql/cockroachdb 走 peewee）。实体类统一定义在 `application/back_end/db_models.py`。
 - **任务队列**：`TASK_QUEUE_SERVICE` 切换 gae(Cloud Tasks)/apscheduler(默认,进程内)/celery/rq/空(同步直调)。适配层在 `application/back_end/task_queue_adpt.py`，对外只有 3 个创建任务函数。
 - **发信**：`application/back_end/send_mail_adpt.py`，6 通道（smtp/webdav/gae/sendgrid/mailjet/local），按每个用户的 `KeUser.send_mail_service` JSON 字段分发（不在 config.py）。

@@ -15,7 +15,7 @@ main.py
  │   ├─ create_database_tables()       ← 仅 SQL 后端执行建表/升级
  │   ├─ 全局钩子：before_request（永久 session/g.version/g.now/connect_database）
  │   │             teardown_request（close_database）
- │   └─ routes.register_routes(app)   ← 集中注册 17 个 Blueprint
+ │   └─ routes.register_routes(app)   ← 集中注册 18 个 Blueprint
  └─ 若 DATABASE_URL == 'datastore'：wrap_wsgi_app 包装 wsgi_app 启用 GAE bundled API
 ```
 
@@ -46,6 +46,7 @@ main.py
 | bpWorker | work/worker.py | `/worker` `/notifynewsubs` | **任务队列回调**：执行投递 |
 | (url2book) | work/url2book.py | `/url2book` | URL/文本转书任务回调（worker 服务/队列） |
 | bpInBoundEmail | inbound_email.py | `/_ah/bounce` `/_ah/mail/<p>` `/mail` `/mailglove` `/webmail/*` | 入站邮件（GAE/postfix/mailglove）+ 网页收件箱 |
+| bpMcp | mcp.py | `/mcp` `/mcp/token` `/advanced/mcp` | MCP（Model Context Protocol）服务器端点 + 设置页：Bearer token 鉴权 + JSON-RPC 分发（协议在 lib/mcp_protocol.py，工具注册表在 lib/mcp_tools.py） |
 
 注意：`/worker`、`/url2book` 在 GAE 上由 dispatch.yaml 路由到独立 **worker 服务**；在 Docker/单机部署中是同进程普通路由。
 

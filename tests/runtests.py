@@ -84,8 +84,8 @@ def start_test(verbosity=1, failfast=0, testonly='', report=''):
             
     return 0
 
-TEST_MODULES = ['test_login', 'test_setting', 'test_admin', 'test_subscribe', 'test_adv', 
-     'test_logs', 'test_inbound_email'] #'test_share',
+TEST_MODULES = ['test_login', 'test_setting', 'test_admin', 'test_subscribe', 'test_adv',
+     'test_logs', 'test_inbound_email', 'test_mcp'] #'test_share',
 
 if __name__ == '__main__':
     verbosity = 1 #Verbosity of output, 0 | 1 | 4

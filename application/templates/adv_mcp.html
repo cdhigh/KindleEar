@@ -1,0 +1,143 @@
+{% extends "adv_base.html" %}
+{% block titleTag -%}
+<title>{{ _("MCP Server") }} - KindleEar</title>
+{% endblock -%}
+
+{% block cssfiles -%}
+<style type="text/css">
+.mcp-box {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: .9em 1.2em 1em;
+    margin-bottom: 1.2em;
+    background-color: #fff;
+    overflow: hidden;
+}
+.mcp-title {
+    font-weight: bold;
+    margin: 0 0 .5em;
+}
+.mcp-title label {
+    font-weight: bold;
+    cursor: pointer;
+}
+.mcp-title .pure-button {
+    float: right;
+    font-size: .8em;
+    padding: .2em .8em;
+    margin-left: .5em;
+}
+.mcp-value {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: monospace;
+    font-size: .95em;
+    color: #333;
+    white-space: pre;
+    overflow: auto;
+}
+.mcp-hint {
+    color: #777;
+    font-size: .85em;
+    margin: .45em 0 0;
+}
+.mcp-btnrow {
+    margin-top: .9em;
+}
+</style>
+{% endblock -%}
+
+{% block advcontent -%}
+<form class="pure-form" action="" method="POST">
+  {% if tips -%}
+  <p style="color:green;font-weight:bold;">{{tips}}</p>
+  {% endif -%}
+  <p class="mcp-hint" style="margin:0 0 1em;">{{_("Let AI clients that support the Model Context Protocol (Claude, Cursor, Cline, etc.) operate your KindleEar account: subscriptions, pushing, the reading shelf, the inbox, and the recipe / mail-hook authoring workbench.")}}</p>
+
+  <div class="mcp-box">
+    <div class="mcp-title" style="margin-bottom:0;">
+      <input type="checkbox" name="mcp_enabled" id="mcp_enabled" {% if user.custom.get('mcp_enabled') %}checked="1"{% endif %} />
+      <label for="mcp_enabled">{{_("Enable MCP server")}}</label>
+    </div>
+    <p class="mcp-hint">{{_("When disabled, MCP clients cannot connect; the token is kept and takes effect again after re-enabling.")}}</p>
+  </div>
+
+  <div class="mcp-box">
+    <div class="mcp-title">{{_("Endpoint")}}
+      <button type="button" class="pure-button pure-input-rounded" onclick="McpCopy('mcp_endpoint');">{{_("Copy")}}</button>
+    </div>
+    <input type="text" id="mcp_endpoint" class="mcp-value" readonly="readonly" value="{{endpointUrl}}" onclick="this.select();" />
+  </div>
+
+  <div class="mcp-box">
+    <div class="mcp-title">{{_("MCP Token")}}
+      <button type="button" class="pure-button pure-input-rounded" onclick="McpCopy('mcp_token');">{{_("Copy")}}</button>
+    </div>
+    <input type="text" id="mcp_token" class="mcp-value" readonly="readonly" value="{{user.custom.get('mcp_token', '')}}" placeholder="{{_('Not generated')}}" onclick="this.select();" />
+    <p class="mcp-hint">{{_("Treat the token like a password, any MCP client with it can operate your account")}}</p>
+    <div class="mcp-btnrow">
+      <button type="button" class="pure-button pure-button-primary pure-input-rounded" onclick="McpTokenAction();">{{_("Generate / Reset token")}}</button>
+    </div>
+  </div>
+
+  <div class="mcp-box">
+    <div class="mcp-title" style="margin-bottom:0;">
+      <input type="checkbox" name="mcp_readonly" id="mcp_readonly" {% if user.custom.get('mcp_readonly') %}checked="1"{% endif %} />
+      <label for="mcp_readonly">{{_("Read-only mode")}}</label>
+    </div>
+    <p class="mcp-hint">{{_("Reject all write operations from MCP clients")}}</p>
+  </div>
+
+  <div class="mcp-box">
+    <div class="mcp-title">{{_("Client configuration example")}}
+      <button type="button" class="pure-button pure-input-rounded" onclick="McpCopy('mcp_config');">{{_("Copy")}}</button>
+    </div>
+    <textarea id="mcp_config" class="mcp-value" readonly="readonly" rows="7">{{clientConfig}}</textarea>
+    <p class="mcp-hint">{{_("Copy it into the configuration file of your MCP client")}}</p>
+  </div>
+
+  <div style="text-align:center;">
+    <input type="submit" value="{{_('Save')}}" class="pure-button pure-button-primary pure-input-rounded" />
+  </div>
+</form>
+{% endblock -%}
+
+{% block js -%}
+<script type="text/javascript">
+var mcpTips = {gen: "{{_('Token generated')}}", err: "{{_('Operation failed')}}"};
+
+function McpCopy(inputId) {
+  var el = document.getElementById(inputId);
+  el.select();
+  var copied = false;
+  try {
+    copied = document.execCommand('copy');
+  } catch (e) {
+    copied = false;
+  }
+  if (!copied && navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      navigator.clipboard.writeText(el.value);
+    } catch (e) {}
+  }
+}
+
+function McpConfigText(token) {
+  var cfg = {mcpServers: {kindleear: {url: document.getElementById('mcp_endpoint').value,
+      headers: {Authorization: 'Bearer ' + (token || '<MCP Token>')}}}};
+  return JSON.stringify(cfg, null, 2);
+}
+
+function McpTokenAction() {
+  $.post('/mcp/token', {}, function(resp) {
+    if (resp.status == 'ok') {
+      $('#mcp_token').val(resp.token || '');
+      $('#mcp_config').text(McpConfigText(resp.token || ''));
+      alert(mcpTips.gen);
+    } else {
+      alert(mcpTips.err);
+    }
+  }, 'json').fail(function() { alert(mcpTips.err); });
+}
+</script>
+{% endblock -%}

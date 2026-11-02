@@ -123,6 +123,15 @@
             <a href="/advanced/calibre" class="pure-menu-link">{{_("Calibre Options")}}</a>
           </li>
           {% endif -%}
+          {% if advCurr=='mcp' -%}
+          <li class="pure-menu-item pure-menu-selected">
+            <span>{{_("MCP Server")}}</span>
+          </li>
+          {% else -%}
+          <li class="pure-menu-item">
+            <a href="/advanced/mcp" class="pure-menu-link">{{_("MCP Server")}}</a>
+          </li>
+          {% endif -%}
         </ul>
       </div>
     </div>

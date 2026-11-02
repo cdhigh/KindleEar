@@ -3,8 +3,8 @@
 #主页和其他路由
 import os
 from flask import Blueprint, render_template, send_from_directory, current_app
-from .view import (login, admin, adv, deliver, library, library_offical, logs, settings, share, 
-    subscribe, inbound_email, translator, extension, reader)
+from .view import (login, admin, adv, deliver, library, library_offical, logs, settings, share,
+    subscribe, inbound_email, translator, extension, reader, mcp)
 from .work import worker, url2book
 
 bpHome = Blueprint('bpHome', __name__)
@@ -51,6 +51,7 @@ def register_routes(app):
         app.register_blueprint(url2book.bpUrl2Book)
         app.register_blueprint(library_offical.bpLibraryOffical)
         app.register_blueprint(inbound_email.bpInBoundEmail)
+        app.register_blueprint(mcp.bpMcp)
 
         #如果部署在GAE平台，启用GAE邮件服务
         if app.config['DATABASE_URL'] == 'datastore':

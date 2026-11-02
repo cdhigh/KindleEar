@@ -24,7 +24,7 @@
 | 文件 | 作用 |
 |---|---|
 | `__init__.py` | Flask app 工厂 `init_app()`：Babel、任务队列、DB 钩子、蓝图注册。 |
-| `routes.py` | 路由注册中心：定义 bpHome，集中注册 17 个蓝图。 |
+| `routes.py` | 路由注册中心：定义 bpHome，集中注册 18 个蓝图。 |
 | `base_handler.py` | `login_required` / `get_login_user` / `save_delivery_log` 公共设施。 |
 | `mail_hook.py` | 入站邮件预处理钩子：用户针对白名单条目上传 python 钩子文件（存 UserBlob，name=`hook:<地址>`），收信时按发件人匹配调用 `hook_email()`（完整签名，暂存收件箱前）/ `hook_email_soup()`（soup 签名，CreateMailSoup 后）。上传时 `compile_mail_hook()` 编译校验（视图层 adv.py 调用）。详见 extensibility.md。 |
 | `ke_utils.py` | 通用工具箱：`safe_eval`（执行用户 recipe 沙箱）、类型转换（str_to_int/float/bool）、时间（tz_now/utcnow/time_str）、脱敏（hide_email/hide_website）、`url_validator`、`sanitize_filename`、`xml_escape/unescape`、`compare_version`、`filesizeformat`、`get_directory_size`、`extractHyperLink`、`PasswordManager`（加盐 sha256×1000，兼容旧 md5 迁移）、`ke_encrypt/ke_decrypt`（RC4 风格可逆加密，SMTP 密码等用）。 |
@@ -54,6 +54,7 @@
 | `library_offical.py` | 共享库服务端（仅官方站点 kindleear.appspot.com / cdhigh.serv00.net 用）。 |
 | `login.py` | 登录/登出/注册/重置密码（token 邮件 24h）；防暴力（失败 sleep 5s）。 |
 | `logs.py` | 投递日志页 + `/removelogs` 每日清理（过期用户停推、清收件箱/书架/临时目录、删 30 天前日志）。 |
+| `mcp.py` | MCP（Model Context Protocol）服务器端点 `POST /mcp`：Bearer token 鉴权（`KeUser.custom['mcp_token']`）→ JSON-RPC 分发（lib/mcp_protocol）；`/advanced/mcp` 设置页（高级设置子页，启用开关 + 令牌生成/重置 + 只读模式 + 客户端配置示例）；`/mcp/token` AJAX。 |
 | `reader.py` | 在线阅读器（书架、`/reader/article/<path>` 静态文章服务、单篇推送、hunspell 查词）。 |
 | `settings.py` | 推送设置（kindle 邮箱、delivery_mode=email/local、webshelf_days、时区、send_time/days、书籍格式/设备/语言）+ `get_locale()` i18n。 |
 | `share.py` | `/share` 一键归档分发器。 |
@@ -65,6 +66,7 @@
 |---|---|
 | `worker.py` | `/worker` 路由 + `WorkerImpl()`：投递总执行器（编译 recipe→分组→构建电子书→TTS 合并→邮件/书架投递）。详见 delivery-pipeline.md。 |
 | `url2book.py` | `/url2book` 路由 + `Url2BookImpl()`：URL 列表/文本/邮件内容转电子书推送（download/debug/fetch 三种 action）。 |
+| `recipe_tester.py` | MCP 工具的限时试运行器：`run_recipe_test()`（test 模式执行 recipe，daemon 线程 + 墙钟限制，返回逐篇预处理后正文 + 抓取日志）、`run_hook_test()`（分阶段执行邮件钩子并暴露异常栈，可选不发送的电子书干跑）。 |
 
 ### lib/（vendored 库 + 自写工具）⚠ 大部分是第三方代码
 **自写/关键粘合层**：
@@ -72,6 +74,8 @@
 |---|---|
 | `build_ebook.py` | calibre Plumber 封装：`convert_book()`（recipe/文件→书）、`urls_to_book()`、`html_to_book()`、`ke_opts()`（用户 calibre_options 合并）。 |
 | `recipe_helper.py` | `GenerateRecipeSource()` 动态生成自定义 RSS 的 recipe 源码；内置 recipe 读写（XML 索引 + ZIP 源码）。 |
+| `mcp_protocol.py` | MCP 协议层（无 Flask 依赖）：JSON-RPC 2.0 解析/分发，Streamable HTTP 无状态 JSON 模式子集，initialize/tools/resources/prompts 方法族 + 只读模式拦截。 |
+| `mcp_tools.py` | MCP 工具注册表：34 个工具（订阅/投递/书架/邮件/白名单/账号 + recipe 与邮件钩子工作台）、4 个资源、4 个提示词模板；`readonly` 标记的写工具在用户只读模式下被拒。 |
 | `urlopener.py` | 核心 HTTP 封装：requests + 超时/重试/表单，模拟 mechanize 浏览器接口（recipe 兼容基石）。 |
 | `mechanize.py` | mechanize 兼容垫片（Browser=UrlOpener），老 recipe 零修改运行。 |
 | `smtp_mail.py` | 纯 Python SMTP 发信。 |
@@ -138,7 +142,7 @@
 ## tests/
 - `runtests.py`：unittest 组织器（模块列表、coverage、failfast；`testonly=''` 默认跑全量，可填模块名单测）。
 - `test_base.py`：BaseTestCase（建 app/表/test_client/自动登录）。
-- `test_login/setting/admin/subscribe/adv/logs/inbound_email/share(排除)/library_offical.py`：对应 view 模块的功能测试。
+- `test_login/setting/admin/subscribe/adv/logs/inbound_email/mcp.py`：对应 view 模块的功能测试。
 - `tools/`：`run_datastore_emulator.bat`、`test_datastore.py`、`test_nosql.py`（datastorm 模拟器验证）、`test_calibre2.py`（本地生成 epub/mobi 样书）。
 - `rss/`：测试 fixture（rss.xml、local_file_rss.recipe 等）。`debug_mail/`：调试样本。`pobackup/`：po 备份。`readme.developer.md`：开发者备忘（电子书生成调用链、i18n 三步、证书、平台额度对比）。
 

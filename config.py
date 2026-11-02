@@ -70,3 +70,6 @@ LOG_LEVEL = "warning"
 
 #if in demo mode
 DEMO_MODE = 'no'
+
+#Wall-clock limit in seconds for the recipe test harness of the MCP tools
+MCP_TOOL_TIMEOUT = "90"
