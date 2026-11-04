@@ -27,12 +27,16 @@
       </div>
       <div class="pure-control-group">
         <label>{{_("Model")}}</label>
-        <select class="pure-u-1 pure-u-sm-1-2" name="model" id="summarizer_model">
+        <select class="pure-u-1 pure-u-sm-1-2" name="model" id="summarizer_model" onchange="SummarizerModelFieldChanged()">
           <!-- 由脚本填充 -->
         </select>
       </div>
+      <div class="pure-control-group" id="summarizer_custom_model_div" style="display:none;">
+        <label>{{_("Custom model")}}</label>
+        <input type="text" name="custom_model" id="summarizer_custom_model" value="{{params.get('model', '')}}" placeholder="{{_('e.g. deepseek-chat')}}" class="pure-u-1 pure-u-sm-1-2" />
+      </div>
       <div class="pure-control-group" id="summarizer_api_host">
-        <label> {{_("Api Host")}}</label>
+        <label class="tooltip" data-msg="{{_('Host or full endpoint URL. Placeholders available: {model}')}}">{{_("Endpoint")}}</label>
         <input type="text" name="api_host" id="api_host_input" value="{{params.get('api_host', '')}}" placeholder="{{_('Leave empty to use default')}}" class="pure-u-1 pure-u-sm-1-2" />
       </div>
       <div class="pure-control-group" id="summarizer_api_key">
@@ -111,10 +115,11 @@
 {% block js -%}
 <script type="text/javascript">
 var g_ai_engines = {{engines|safe}};
+var g_custom_model_text = "{{_('[Custom...]')}}";
 
 $(document).ready(function() {
-  PopulateSummarizerFields("{{params['engine']}}");
-  SummarizerEngineFieldChanged("{{params['model']}}");
+  PopulateSummarizerFields("{{params.get('engine', '')}}");
+  SummarizerEngineFieldChanged("{{params.get('model', '')}}");
 });
 </script>
 {% endblock -%}

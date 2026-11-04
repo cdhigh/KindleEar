@@ -163,3 +163,29 @@ class SubscribeTestCase(BaseTestCase):
         resp = self.client.get('/viewsrc/builtin__am730')
         self.assertEqual(resp.status_code, 200)
         self.assertIn('class AM730(BasicNewsRecipe):', resp.text)
+
+    def test_summarizer_custom_model_and_endpoint(self):
+        from simple_ai_provider import SimpleAiProvider, AI_LIST
+        self.assertIn('deepseek', AI_LIST)
+        self.assertEqual(AI_LIST['deepseek']['models'][0]['name'], 'deepseek-flash')
+        self.assertEqual(SimpleAiProvider.build_api_url('https://api.deepseek.com'), 'https://api.deepseek.com/v1/chat/completions')
+        self.assertEqual(SimpleAiProvider.build_api_url('https://api.siliconflow.cn/v1'), 'https://api.siliconflow.cn/v1/chat/completions')
+        self.assertEqual(SimpleAiProvider.build_api_url('https://api.perplexity.ai/chat/completions'), 'https://api.perplexity.ai/chat/completions')
+        self.assertEqual(SimpleAiProvider.build_api_url('https://xxx.openai.azure.com/openai/deployments/{model}/chat/completions?api-version=2024-02-15', model='gpt-4o'), 'https://xxx.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-02-15')
+
+        user = KeUser.get_or_none(KeUser.name == 'admin')
+        recipe = Recipe.create(user=user, title='TestRecipe', type_='custom', url='https://test.com', is_active=True)
+        resp = self.client.get(f'/summarizer/custom__{recipe.id}')
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('summarizer_custom_model', resp.text)
+        self.assertIn('Endpoint', resp.text)
+
+        post_data = {
+            'enable': '1', 'engine': 'openai', 'model': '__custom__', 'custom_model': 'deepseek-chat',
+            'api_host': 'https://api.deepseek.com', 'api_key': 'sk-test'
+        }
+        resp = self.client.post(f'/summarizer/custom__{recipe.id}', data=post_data)
+        self.assertEqual(resp.status_code, 200)
+        saved_recipe = Recipe.get_by_id(recipe.id)
+        self.assertEqual(saved_recipe.summarizer.get('model'), 'deepseek-chat')
+        self.assertEqual(saved_recipe.summarizer.get('api_host'), 'https://api.deepseek.com')

@@ -246,8 +246,11 @@ def BookSummarizerPost(recipeType, recipe, user, recipeId):
     apiHost = form.get('api_host', '')
     apiHost = f'https://{apiHost}' if apiHost and not apiHost.startswith('http') else apiHost
     style = form.get('summary_style', '').replace('{', '').replace('}', '').replace('\n', '')
+    model = form.get('model', '')
+    if model == '__custom__':
+        model = form.get('custom_model', '').strip()
     params = {'enable': str_to_bool(form.get('enable', '')),  'engine': engineName, 
-        'model': form.get('model', ''), 'api_host': apiHost, 'api_key': form.get('api_key', ''), 
+        'model': model, 'api_host': apiHost, 'api_key': form.get('api_key', ''), 
         'summary_lang': form.get('summary_lang', ''), 'custom_prompt': form.get('custom_prompt', '').strip(),
         'summary_words': str_to_int(form.get('summary_words', ''), 100), 'summary_style': style,}
 

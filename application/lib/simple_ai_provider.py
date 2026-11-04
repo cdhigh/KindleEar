@@ -7,93 +7,54 @@
 #response = provider.chat("你好，请讲一个笑话")
 #response = provider.chat([{"role": "system", "content": "你是一个专业的物理学家。"},{"role": "user", "content": "黑洞是怎么形成的？"}])
 #import requests
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit, urlunsplit
 from urlopener import UrlOpener
 
 #支持的AI服务商列表，models里面的第一项请设置为默认要使用的model
-#rpm(requests per minute)是针对免费用户的，如果是付费用户，一般会高很多，可以自己修改
-#大语言模型发展迅速，估计没多久这些数据会全部过时
+#rpm(requests per minute)与context(上下文分段预算)设置偏向保守，以降低超时和429错误，提高摘要成功率
+#只收录纯文本生成与对话模型
 #{'name': '', 'rpm': , 'context': },
 AI_LIST = {
     'google': {'host': 'https://generativelanguage.googleapis.com', 'models': [
-        {'name': 'gemini-1.5-flash', 'rpm': 15, 'context': 128000}, #其实支持100万
-        {'name': 'gemini-1.5-flash-8b', 'rpm': 15, 'context': 128000}, 
-        {'name': 'gemini-1.5-pro', 'rpm': 2, 'context': 128000},
-        {'name': 'gemini-2.0-flash', 'rpm': 10, 'context': 128000},
-        {'name': 'gemini-2.0-flash-lite', 'rpm': 30, 'context': 128000},
-        {'name': 'gemini-2.0-flash-thinking', 'rpm': 10, 'context': 128000},
-        {'name': 'gemini-2.0-pro', 'rpm': 5, 'context': 128000},],},
+        {'name': 'gemini-3.8-flash', 'rpm': 15, 'context': 64000},
+        {'name': 'gemini-3.5-flash-lite', 'rpm': 30, 'context': 64000},
+        {'name': 'gemini-3.1-pro', 'rpm': 5, 'context': 64000},],},
     'openai': {'host': 'https://api.openai.com', 'models': [
-        {'name': 'gpt-4o-mini', 'rpm': 1000, 'context': 128000},
-        {'name': 'gpt-4o', 'rpm': 500, 'context': 128000},
-        {'name': 'o1', 'rpm': 500, 'context': 200000},
-        {'name': 'o1-mini', 'rpm': 500, 'context': 200000},
-        {'name': 'o1-pro', 'rpm': 500, 'context': 200000},
-        {'name': 'gpt-4.1', 'rpm': 500, 'context': 1000000},
-        {'name': 'o3', 'rpm': 500, 'context': 200000},
-        {'name': 'o3-mini', 'rpm': 1000, 'context': 200000},
-        {'name': 'o4-mini', 'rpm': 1000, 'context': 200000},
-        {'name': 'gpt-4-turbo', 'rpm': 500, 'context': 128000},
-        {'name': 'gpt-3.5-turbo', 'rpm': 3500, 'context': 16000},
-        {'name': 'gpt-3.5-turbo-instruct', 'rpm': 500, 'context': 4000},],},
+        {'name': 'gpt-5.4-mini', 'rpm': 30, 'context': 64000},
+        {'name': 'gpt-5.4', 'rpm': 20, 'context': 64000},
+        {'name': 'gpt-5.5', 'rpm': 15, 'context': 64000},
+        {'name': 'o3-mini', 'rpm': 15, 'context': 64000},],},
+    'deepseek': {'host': 'https://api.deepseek.com', 'models': [
+        {'name': 'deepseek-flash', 'rpm': 30, 'context': 64000},
+        {'name': 'deepseek-v4-pro', 'rpm': 15, 'context': 64000},
+        {'name': 'deepseek-v4', 'rpm': 15, 'context': 64000},],},
     'anthropic': {'host': 'https://api.anthropic.com', 'models': [
-        {'name': 'claude-2', 'rpm': 5, 'context': 100000},
-        {'name': 'claude-3', 'rpm': 5, 'context': 200000},
-        {'name': 'claude-2.1', 'rpm': 5, 'context': 100000},],},
+        {'name': 'claude-haiku-5-5', 'rpm': 30, 'context': 64000},
+        {'name': 'claude-sonnet-5-5', 'rpm': 20, 'context': 64000},
+        {'name': 'claude-opus-5-5', 'rpm': 10, 'context': 64000},],},
     'xai': {'host': 'https://api.x.ai', 'models': [
-        {'name': 'grok-beta', 'rpm': 60, 'context': 128000},
-        {'name': 'grok-2', 'rpm': 60, 'context': 128000},
-        {'name': 'grok-3', 'rpm': 60, 'context': 128000},],},
+        {'name': 'grok-4.7', 'rpm': 20, 'context': 64000},
+        {'name': 'grok-4.3', 'rpm': 30, 'context': 64000},
+        {'name': 'grok-beta', 'rpm': 20, 'context': 64000},],},
     'mistral': {'host': 'https://api.mistral.ai', 'models': [
-        {'name': 'open-mistral-7b', 'rpm': 60, 'context': 32000},
-        {'name': 'mistral-small-latest', 'rpm': 60, 'context': 32000},
-        {'name': 'open-mixtral-8x7b', 'rpm': 60, 'context': 32000},
-        {'name': 'open-mixtral-8x22b', 'rpm': 60, 'context': 64000},
-        {'name': 'mistral-medium-latest', 'rpm': 60, 'context': 32000},
-        {'name': 'mistral-large-latest', 'rpm': 60, 'context': 128000},
-        {'name': 'pixtral-12b-2409', 'rpm': 60, 'context': 128000},
-        {'name': 'codestral-2501', 'rpm': 60, 'context': 256000},],},
+        {'name': 'mistral-small-latest', 'rpm': 30, 'context': 32000},
+        {'name': 'mistral-large-latest', 'rpm': 15, 'context': 64000},
+        {'name': 'codestral-latest', 'rpm': 20, 'context': 64000},
+        {'name': 'ministral-8b-latest', 'rpm': 30, 'context': 32000},],},
     'groq': {'host': 'https://api.groq.com', 'models': [
-        {'name': 'openai/gpt-oss-20b', 'rpm': 30, 'context': 8000},
-        {'name': 'gemma2-9b-it', 'rpm': 30, 'context': 8000},
-        {'name': 'gemma-7b-it', 'rpm': 30, 'context': 8000},
-        {'name': 'llama-guard-3-8b', 'rpm': 30, 'context': 8000},
-        {'name': 'llama3-70b-8192', 'rpm': 30, 'context': 8000},
-        {'name': 'llama3-8b-8192', 'rpm': 30, 'context': 8000},
+        {'name': 'llama-3.3-70b-versatile', 'rpm': 30, 'context': 32000},
+        {'name': 'llama-3.1-8b-instant', 'rpm': 30, 'context': 32000},
+        {'name': 'deepseek-r1-distill-llama-70b', 'rpm': 20, 'context': 32000},
         {'name': 'mixtral-8x7b-32768', 'rpm': 30, 'context': 32000},],},
     'perplexity': {'host': 'https://api.perplexity.ai', 'models': [
-        {'name': 'llama-3.1-sonar-small-128k-online', 'rpm': 60, 'context': 128000},
-        {'name': 'llama-3.1-sonar-large-128k-online', 'rpm': 60, 'context': 128000},
-        {'name': 'llama-3.1-sonar-huge-128k-online', 'rpm': 60, 'context': 128000},],},
+        {'name': 'sonar', 'rpm': 20, 'context': 32000},
+        {'name': 'sonar-pro', 'rpm': 15, 'context': 64000},
+        {'name': 'sonar-reasoning', 'rpm': 15, 'context': 32000},],},
     'alibaba': {'host': 'https://dashscope.aliyuncs.com', 'models': [
-        {'name': 'qwen-turbo', 'rpm': 60, 'context': 128000}, #其实支持100万
-        {'name': 'qwen-plus', 'rpm': 60, 'context': 128000},
-        {'name': 'qwen-long', 'rpm': 60, 'context': 128000},
-        {'name': 'qwen-max', 'rpm': 60, 'context': 32000},],},
-    'atlascloud': {'host': 'https://api.atlascloud.ai', 'models': [
-        {'name': 'deepseek-ai/deepseek-v4-flash', 'rpm': 60, 'context': 1000000},
-        {'name': 'qwen/qwen3.5-flash', 'rpm': 60, 'context': 1000000},
-        {'name': 'moonshotai/kimi-k3', 'rpm': 60, 'context': 1000000},
-        {'name': 'zai-org/glm-5.2', 'rpm': 60, 'context': 1000000},
-        {'name': 'openai/gpt-5.4-mini', 'rpm': 60, 'context': 400000},],},
-    'cheaperinference': {'host': 'https://api.cheaperinference.com', 'models': [
-        {'name': 'gpt-5.4-mini', 'rpm': 60, 'context': 400000},
-        {'name': 'gpt-5.4', 'rpm': 60, 'context': 1000000},
-        {'name': 'claude-sonnet-5', 'rpm': 60, 'context': 1000000},
-        {'name': 'gemini-3.1-pro', 'rpm': 60, 'context': 1048576},
-        {'name': 'deepseek-v4-flash', 'rpm': 60, 'context': 1000000},
-        {'name': 'glm-5.3', 'rpm': 60, 'context': 1000000},],},
-    # 保守的摘要分段预算和请求频率，不代表服务商公布的模型上限或账户配额。
-    'api-route': {'host': 'https://global.api-route.com', 'models': [
-        {'name': 'gpt-6.1-sol', 'rpm': 2, 'context': 16000},],},
-    'opper': {'host': 'https://api.opper.ai', 'models': [
-        {'name': 'claude-sonnet-4-6', 'rpm': 60, 'context': 1000000},
-        {'name': 'gpt-5.4-mini', 'rpm': 60, 'context': 400000},
-        {'name': 'gpt-5.5', 'rpm': 60, 'context': 1050000},
-        {'name': 'gemini-3.8-flash', 'rpm': 60, 'context': 1048576},
-        {'name': 'deepseek-v4-pro', 'rpm': 60, 'context': 1000000},
-        {'name': 'kimi-k3', 'rpm': 60, 'context': 1048576},
-        {'name': 'mistral-large-2512', 'rpm': 60, 'context': 256000},],},
+        {'name': 'qwen3.5-flash', 'rpm': 30, 'context': 64000},
+        {'name': 'qwen-plus', 'rpm': 25, 'context': 64000},
+        {'name': 'qwen-turbo', 'rpm': 30, 'context': 64000},
+        {'name': 'qwen-max', 'rpm': 15, 'context': 32000},],},
 }
 
 class SimpleAiProvider:
@@ -145,13 +106,43 @@ class SimpleAiProvider:
             self.hostIdx = 0
         return self.host
 
+    #智能解析并组装完整 API 请求 URL
+    @classmethod
+    def build_api_url(cls, host: str, default_path: str = 'v1/chat/completions', model: str = '') -> str:
+        if not host:
+            return ''
+        url = host.strip()
+        if not url.startswith(('http://', 'https://')):
+            url = f'https://{url}'
+        if '{model}' in url and model:
+            url = url.replace('{model}', model)
+
+        parsed = urlsplit(url)
+        path = parsed.path.rstrip('/')
+
+        # 1. 已是完整 endpoint 或带 query 参数（如 Azure）
+        if path.endswith(('chat/completions', '/completions', '/chat', ':generateContent')) or parsed.query:
+            return url
+
+        # 2. 常见以 /v1 结尾的 base_url，追加 /chat/completions
+        if path.endswith(('/v1', '/v2', '/v3', '/v4')):
+            new_path = f"{path}/chat/completions"
+        elif not path:
+            # 3. 纯域名，追加默认 path
+            new_path = '/' + default_path.lstrip('/')
+        else:
+            # 4. 自定义子路径网关
+            new_path = f"{path}/chat/completions" if default_path.endswith('chat/completions') else f"{path}/{default_path.lstrip('/')}"
+
+        return urlunsplit((parsed.scheme, parsed.netloc, new_path, parsed.query, parsed.fragment))
+
     #外部调用此函数即可调用简单聊天功能
     #message: 如果是文本，则使用各项默认参数
     #传入 list/dict 可以定制 role 等参数
     #返回 respTxt，如果要获取当前使用的主机，可以使用 host 属性
     def chat(self, message):
         name = self.name
-        if name == "openai":
+        if name in ("openai", "deepseek"):
             return self._openai_chat(message)
         elif name == "anthropic":
             return self._anthropic_chat(message)
@@ -180,7 +171,7 @@ class SimpleAiProvider:
 
     #返回当前服务提供商支持的models列表
     def models(self, prebuild=True):
-        if self.name in ('openai', 'xai', 'atlascloud', 'cheaperinference', 'api-route'):
+        if self.name in ('openai', 'deepseek', 'xai', 'atlascloud', 'cheaperinference', 'api-route'):
             return self._openai_models()
         elif self.name == 'google':
             return self._google_models()
@@ -189,8 +180,8 @@ class SimpleAiProvider:
 
     #openai的chat接口
     def _openai_chat(self, message, path='v1/chat/completions'):
-        url = urljoin(self.apiHost, path)
-        headers = {'Authorization': f'Bearer {self.apiKey}', 'Content-Type': 'application/json'}
+        url = self.build_api_url(self.apiHost, default_path=path, model=self.model)
+        headers = {'Authorization': f'Bearer {self.apiKey}', 'api-key': self.apiKey, 'Content-Type': 'application/json'}
         if isinstance(message, str):
             msg = [{"role": "user", "content": message}]
         elif self.singleTurn and (len(message) > 1): #将多轮对话手动拼接为单一轮对话
@@ -212,14 +203,14 @@ class SimpleAiProvider:
     #openai的models接口
     def _openai_models(self):
         url = urljoin(self.apiHost, 'v1/models')
-        headers = {'Authorization': f'Bearer {self.apiKey}', 'Content-Type': 'application/json'}
+        headers = {'Authorization': f'Bearer {self.apiKey}', 'api-key': self.apiKey, 'Content-Type': 'application/json'}
         resp = self.opener.get(url, headers=headers)
         resp.raise_for_status()
         return [item['id'] for item in resp.json()['data']]
 
     #anthropic的chat接口
     def _anthropic_chat(self, message, path='v1/complete'):
-        url = urljoin(self.apiHost, path)
+        url = self.build_api_url(self.apiHost, default_path=path, model=self.model)
         headers = {'Accept': 'application/json', 'Anthropic-Version': '2023-06-01',
             'Content-Type': 'application/json', 'x-api-key': self.apiKey}
 

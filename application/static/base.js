@@ -1666,14 +1666,38 @@ function PopulateSummarizerFields(currEngineName) {
 function SummarizerEngineFieldChanged(model) {
   let hasSelected = false;
   var engineName = $('#summarizer_engine').val();
-  var models = g_ai_engines[engineName].models || [];
+  var models = (g_ai_engines[engineName] && g_ai_engines[engineName].models) ? g_ai_engines[engineName].models : [];
   
   let modelSel = $('#summarizer_model');
   modelSel.empty();
   for (const item of models) {
     let selected = (item.name == model) ? 'selected="selected"' : '';
+    if (selected) {
+      hasSelected = true;
+    }
     let txt = '<option value="{0}" {1}>{0}</option>'.format(item.name, selected);
     modelSel.append($(txt));
+  }
+
+  let customSelected = (!hasSelected && model) ? 'selected="selected"' : '';
+  let customLabel = (typeof g_custom_model_text !== 'undefined') ? g_custom_model_text : '[Custom...]';
+  modelSel.append($('<option value="__custom__" {0}>{1}</option>'.format(customSelected, customLabel)));
+
+  if (!hasSelected && model) {
+    $('#summarizer_custom_model').val(model);
+    $('#summarizer_custom_model_div').show();
+  } else {
+    $('#summarizer_custom_model_div').hide();
+  }
+}
+
+//选择Model下拉框时的联动
+function SummarizerModelFieldChanged() {
+  if ($('#summarizer_model').val() === '__custom__') {
+    $('#summarizer_custom_model_div').show();
+    $('#summarizer_custom_model').focus();
+  } else {
+    $('#summarizer_custom_model_div').hide();
   }
 }
 
