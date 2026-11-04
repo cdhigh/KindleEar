@@ -94,6 +94,12 @@ AI_LIST = {
         {'name': 'deepseek-v4-pro', 'rpm': 60, 'context': 1000000},
         {'name': 'kimi-k3', 'rpm': 60, 'context': 1048576},
         {'name': 'mistral-large-2512', 'rpm': 60, 'context': 256000},],},
+    'cheapaimodel': {'host': 'https://api.cheapaimodel.ai', 'models': [
+        {'name': 'deepseek-v4-1-flash', 'rpm': 60, 'context': 1000000},
+        {'name': 'glm-5.3', 'rpm': 60, 'context': 1000000},
+        {'name': 'glm-5.3-flash', 'rpm': 60, 'context': 1000000},
+        {'name': 'kimi-k3', 'rpm': 60, 'context': 1000000},
+        {'name': 'grok-4.7', 'rpm': 60, 'context': 500000},],},
 }
 
 class SimpleAiProvider:
@@ -175,12 +181,14 @@ class SimpleAiProvider:
             return self._openai_chat(message)
         elif name == "opper":
             return self._opper_chat(message)
+        elif name == "cheapaimodel":
+            return self._openai_chat(message)
         else:
             raise ValueError(f"Unsupported provider: {name}")
 
     #返回当前服务提供商支持的models列表
     def models(self, prebuild=True):
-        if self.name in ('openai', 'xai', 'atlascloud', 'cheaperinference', 'api-route'):
+        if self.name in ('openai', 'xai', 'atlascloud', 'cheaperinference', 'api-route', 'cheapaimodel'):
             return self._openai_models()
         elif self.name == 'google':
             return self._google_models()

@@ -7,6 +7,7 @@ sort: 7
 ## Unreleased
 - 新增 MCP（Model Context Protocol）服务器：在"高级设置 → MCP Server"页生成访问令牌后，Claude/Cursor/Cline 等 AI 客户端可通过 `POST /mcp` 端点操作订阅、推送、书架、收件箱等全部功能（34 个工具 + 4 个资源 + 4 个提示词模板）；并提供"AI 辅助 Recipe/邮件钩子工作台"——AI 可以抓取网页分析 DOM 结构、试运行 recipe 抓取样章并检查正文与反爬情况、反复迭代直到生成完整可用的 recipe 文件。零新增依赖，支持只读模式（高级设置页的启用开关，不用时随时停用）。
 - AI 摘要新增可选 API Route 服务商。
+- AI 摘要新增可选 cheapaimodel 服务商。
 - 在线阅读器：PC 端改为 iframe 内部原生滚动，彻底解决 Chrome 下长文章末尾内容显示不全的问题（issue #698）。
 - 在线阅读器：修复 Kindle 上导航栏弹出后底部工具栏按钮只显示一半的问题（触屏/墨水屏设备底部固定预留40px，规避浏览器自带界面对页面底部的遮挡）。注：部分 Kindle 浏览器右侧的常驻滚动条是浏览器自身UI，网页无法移除。
 

@@ -6,6 +6,7 @@ sort: 7
 ## Unreleased
 - Added a MCP (Model Context Protocol) server: after generating an access token on the "Advanced -> MCP Server" page, AI clients such as Claude/Cursor/Cline can operate subscriptions, pushing, the reading shelf, the inbox and everything else through the `POST /mcp` endpoint (34 tools + 4 resources + 4 prompt templates); it also provides an "AI-assisted Recipe / mail-hook workbench" - the AI can fetch pages to analyze the DOM structure, test-run a recipe to fetch sample articles and inspect the content and anti-crawl behavior, and iterate until a fully working recipe file is produced. Zero new dependencies, read-only mode supported (enable switch on the settings page, switch it off anytime when not needed).
 - Added API Route as an optional AI summarization provider.
+- Added cheapaimodel as an optional AI summarization provider.
 - Online reader: on PC the article iframe now scrolls natively inside itself, which completely fixes the Chrome issue that the tail of long articles was not displayed (issue #698).
 - Online reader: fixed the half-displayed toolbar buttons of the popped-up navbar on Kindle (a fixed 40px bottom margin is reserved on touch/e-ink devices to avoid the browser's own UI covering the bottom of the page). Note: the permanent scrollbar on the right side of some Kindle browsers is the browser's own UI and cannot be removed by the web page.
 
