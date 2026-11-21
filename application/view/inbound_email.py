@@ -486,7 +486,7 @@ def WebMailListRoute(user: KeUser):
 def WebMailContentRoute(id_: str, user: KeUser):
     dbItem = InBox.get_by_id_or_none(id_)
     content = ''
-    body = dbItem.body if dbItem else ''
+    body = dbItem.body if (dbItem and dbItem.user == user.name) else ''
     try:
         if body and not isinstance(body, dict):
             body = json.loads(body)
@@ -507,7 +507,7 @@ def WebMailStatusPost(user: KeUser):
     id_ = request.form.get('id')
     status = request.form.get('status')
     dbItem = InBox.get_by_id_or_none(id_)
-    if dbItem and status:
+    if dbItem and (dbItem.user == user.name) and status:
         dbItem.status = status
         dbItem.save()
         return {'status': 'ok'}
@@ -524,7 +524,7 @@ def WebMailDeletePost(user: KeUser):
 
     for id_ in ids.split(','):
         dbItem = InBox.get_by_id_or_none(id_)
-        if dbItem: #这里不删除，只是做一个删除标识，一天以后由RemoveLogs()自动清理
+        if dbItem and (dbItem.user == user.name): #这里不删除，只是做一个删除标识，一天以后由RemoveLogs()自动清理
             dbItem.status = 'deleted'
             dbItem.save()
     return {'status': 'ok'}
@@ -539,7 +539,7 @@ def WebMailUnDeletePost(user: KeUser):
 
     for id_ in ids.split(','):
         dbItem = InBox.get_by_id_or_none(id_)
-        if dbItem:
+        if dbItem and (dbItem.user == user.name):
             dbItem.status = 'read'
             dbItem.save()
     return {'status': 'ok'}

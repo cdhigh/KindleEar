@@ -188,7 +188,7 @@ def DeleteCustomRss(user: KeUser, rssId: str):
     else:
         recipeType, rssId = Recipe.type_and_id(rssId)
         rss = Recipe.get_by_id_or_none(rssId)
-        if (recipeType == 'custom') and rss:
+        if (recipeType == 'custom') and rss and (rss.user == user.name):
             rss.delete_instance()
             UpdateBookedCustomRss(user)
         else:
@@ -239,6 +239,8 @@ def RecipeAjaxPost(actType: str, user: KeUser):
     elif actType == 'unsubscribe': #退订
         return UnsubscribeRecipe(user, recipeId, recipe)
     elif actType == 'subscribe': #订阅
+        if recipeType != 'builtin' and recipe.user != user.name:
+            return {'status': _('The recipe does not exist.')}
         separated = str_to_bool(form.get('separated', ''))
         return SubscribeRecipe(user, recipeId, recipe, separated)
     elif actType == 'delete': #删除已经上传的recipe
@@ -276,6 +278,8 @@ def UnsubscribeRecipe(user: KeUser, recipeId: str, recipe: Recipe):
 def DeleteRecipe(user: KeUser, recipeId: str, recipeType: str, recipe: Recipe, force: bool):
     if recipeType == 'builtin':
         return {'status': _('You can only delete the uploaded recipe.')}
+    if recipe.user != user.name:
+        return {'status': _('The recipe does not exist.')}
     
     if force:
         BookedRecipe.delete().where((BookedRecipe.user == user.name) & (BookedRecipe.recipe_id == recipeId)).execute()
@@ -375,7 +379,7 @@ def RecipeLoginInfoPostAjax(user: KeUser):
     id_ = request.form.get('id', '')
     account = request.form.get('account')
     password = request.form.get('password')
-    recipe = BookedRecipe.get_or_none(BookedRecipe.recipe_id == id_)
+    recipe = user.get_booked_recipe(id_)
     if not recipe:
         return {'status': _('The recipe does not exist.')}
 
@@ -403,7 +407,7 @@ def ViewRecipeSourceCode(id_: str, user: KeUser):
     recipeType, dbId = Recipe.type_and_id(recipeId)
     if recipeType == 'upload':
         recipe = Recipe.get_by_id_or_none(dbId)
-        if recipe and recipe.src:
+        if recipe and recipe.src and (recipe.user == user.name or user.name == app.config['ADMIN_NAME']):
             return htmlTpl.format(title=recipe.title, body=xml_escape(recipe.src))
         else:
             return htmlTpl.format(title="Error", body=_('The recipe does not exist.'))

@@ -157,7 +157,7 @@ def AdvDel(user: KeUser):
     wlist_id = request.args.get('wlist_id')
     if wlist_id:
         dbItem = WhiteList.get_by_id_or_none(wlist_id)
-        if dbItem:
+        if dbItem and (dbItem.user == user.name):
             delete_mail_hook(user, dbItem.mail) #同时删除此白名单条目对应的钩子文件
             dbItem.delete_instance()
         return redirect(url_for("bpAdv.AdvInboundMail") + '#whitelist')
@@ -608,7 +608,7 @@ def AdvCalibreOptionsPost(user: KeUser):
 @login_required()
 def DbImage(id_: str, user: KeUser):
     dbItem = UserBlob.get_by_id_or_none(id_)
-    if dbItem and user:
+    if dbItem and (dbItem.user == user.name):
         return send_file(io.BytesIO(dbItem.data), mimetype='image/jpeg')
     else:
         abort(404)

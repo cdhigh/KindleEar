@@ -174,7 +174,7 @@ class SubscribeTestCase(BaseTestCase):
         self.assertEqual(SimpleAiProvider.build_api_url('https://xxx.openai.azure.com/openai/deployments/{model}/chat/completions?api-version=2024-02-15', model='gpt-4o'), 'https://xxx.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-02-15')
 
         user = KeUser.get_or_none(KeUser.name == 'admin')
-        recipe = Recipe.create(user=user, title='TestRecipe', type_='custom', url='https://test.com', is_active=True)
+        recipe = Recipe.create(user=user.name, title='TestRecipe', type_='custom', url='https://test.com', is_active=True)
         resp = self.client.get(f'/summarizer/custom__{recipe.id}')
         self.assertEqual(resp.status_code, 200)
         self.assertIn('summarizer_custom_model', resp.text)
@@ -189,3 +189,60 @@ class SubscribeTestCase(BaseTestCase):
         saved_recipe = Recipe.get_by_id(recipe.id)
         self.assertEqual(saved_recipe.summarizer.get('model'), 'deepseek-chat')
         self.assertEqual(saved_recipe.summarizer.get('api_host'), 'https://api.deepseek.com')
+
+    def test_cross_user_isolation(self):
+        from application.view.login import CreateAccountIfNotExist
+        with self.app.app_context():
+            CreateAccountIfNotExist('alice', 'alice123')
+            CreateAccountIfNotExist('bob', 'bob123')
+        user_alice = KeUser.get_or_none(KeUser.name == 'alice')
+        user_bob = KeUser.get_or_none(KeUser.name == 'bob')
+
+        alice_rss = Recipe.create(user='alice', title='AliceRSS', type_='custom', url='https://alice.com')
+        alice_recipe = Recipe.create(user='alice', title='AliceRecipe', type_='upload', src='ALICE_SECRET_CODE')
+        alice_booked = BookedRecipe.create(user='alice', recipe_id='builtin:economist', title='The Economist', 
+            description='Economic news', account='alice_acc', password='alice_pwd', separated=False)
+
+        # Log in as bob (ordinary user)
+        self.client.post('/login', data={'username': 'bob', 'password': 'bob123'})
+
+        # 1. Bob attempts to view Alice's uploaded recipe source
+        resp = self.client.get(f'/viewsrc/upload__{alice_recipe.id}')
+        self.assertNotIn('ALICE_SECRET_CODE', resp.text)
+        self.assertIn('The recipe does not exist', resp.text)
+
+        # 2. Bob attempts to delete Alice's custom RSS
+        resp = self.client.post('/customrss/delete', data={'id': f'custom:{alice_rss.id}'})
+        self.assertIn('does not exist', resp.json.get('status', ''))
+        self.assertIsNotNone(Recipe.get_by_id_or_none(alice_rss.id))
+
+        # 3. Bob attempts to delete Alice's uploaded recipe
+        resp = self.client.post('/recipe/delete', data={'id': f'upload:{alice_recipe.id}', 'force': '1'})
+        self.assertIn('does not exist', resp.json.get('status', ''))
+        self.assertIsNotNone(Recipe.get_by_id_or_none(alice_recipe.id))
+
+        # 4. Bob attempts to subscribe to Alice's uploaded recipe
+        resp = self.client.post('/recipe/subscribe', data={'id': f'upload:{alice_recipe.id}'})
+        self.assertIn('does not exist', resp.json.get('status', ''))
+
+        # 5. Bob attempts to overwrite Alice's recipe login info
+        resp = self.client.post('/recipelogininfo', data={'id': 'builtin:economist', 'account': 'bob_acc', 'password': 'bob_pwd'})
+        refreshed_alice_booked = BookedRecipe.get_by_id(alice_booked.id)
+        self.assertEqual(refreshed_alice_booked.account, 'alice_acc')
+
+        # 6. Bob attempts to share Alice's recipe to shared library
+        resp = self.client.post('/library', data={'id': f'upload:{alice_recipe.id}', 'category': 'News'})
+        self.assertIn('does not exist', resp.json.get('status', ''))
+
+        # 7. Bob attempts to modify Alice's custom RSS translator settings
+        resp = self.client.post(f'/translator/custom__{alice_rss.id}', data={'engine': 'google'})
+        self.assertIn('The recipe does not exist', resp.text)
+
+        # Clean up
+        alice_rss.delete_instance()
+        alice_recipe.delete_instance()
+        alice_booked.delete_instance()
+        user_alice.delete_instance()
+        user_bob.delete_instance()
+        self.client.post('/login', data={'username': 'admin', 'password': 'admin'})
+

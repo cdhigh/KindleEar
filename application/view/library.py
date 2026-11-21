@@ -44,7 +44,7 @@ def SharedLibraryPost(user: KeUser):
 
     recipeType, dbId = Recipe.type_and_id(recipeId)
     recipe = Recipe.get_by_id_or_none(dbId)
-    if not recipe:
+    if not recipe or (recipe.user != user.name):
         return {'status': _('The recipe does not exist.')}
 
     opener = UrlOpener()

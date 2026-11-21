@@ -89,7 +89,7 @@ def SingleUserDelivery(userName: str, idList: list=None):
             bked = user.get_booked_recipe(id_)
             #如果没有启用自定义RSS推送
             r = Recipe.get_by_id_or_none(dbId) if (not bked and (recipeType == 'custom')) else None
-            if r:
+            if r and (r.user == user.name):
                 toPush.append({'id_': r.recipe_id, 'separated': r.custom.get('separated', False), 
                     'title': r.title})
             elif bked:

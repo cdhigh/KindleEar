@@ -26,6 +26,9 @@ def translator_route_preprocess(forAjax=False, user=None):
             kwargs['recipeId'] = recipeId
             recipeType, dbId = Recipe.type_and_id(recipeId)
             recipe = GetBuiltinRecipeInfo(recipeId) if recipeType == 'builtin' else Recipe.get_by_id_or_none(dbId)
+            currUser = kwargs.get('user')
+            if (recipeType != 'builtin') and recipe and currUser and (recipe.user != currUser.name):
+                recipe = None
             if not recipe:
                 tips = _('The recipe does not exist.')
                 if forAjax:
