@@ -796,10 +796,12 @@ select[id="shared_rss_lang_pick"] {
 .upload-recipe {
     display: flex;
     margin-left: 20px;
-    margin-right: 20px;
     text-align: center;
     align-items: center;
     justify-content: center;
+}
+.search-recipe-box {
+    margin-left: 20px;
 }
 .upload-recipe-btn {
     text-align: center;

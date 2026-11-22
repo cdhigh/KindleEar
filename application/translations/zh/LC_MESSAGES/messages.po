@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-04 19:03-0300\n"
+"POT-Creation-Date: 2026-11-22 06:18-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -18,26 +18,33 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: application/mail_hook.py:110 application/mail_hook.py:113
+#: application/mail_hook.py:45 application/templates/my.html:61
+#: application/view/admin.py:66 application/view/admin.py:107
+#: application/view/admin.py:139 application/view/adv.py:101
+#: application/view/subscribe.py:233 application/view/subscribe.py:353
+msgid "You do not have sufficient privileges."
+msgstr "您没有足够的权限。"
+
+#: application/mail_hook.py:112 application/mail_hook.py:115
 #, python-brace-format
 msgid "Forbidden module import in mail hook: {}"
 msgstr "禁止在邮件钩子中导入模块：{}"
 
-#: application/mail_hook.py:116
+#: application/mail_hook.py:118
 #, python-brace-format
 msgid "Forbidden attribute access in mail hook: {}"
 msgstr "禁止在邮件钩子中访问属性：{}"
 
-#: application/mail_hook.py:119
+#: application/mail_hook.py:121
 #, python-brace-format
 msgid "Forbidden function call in mail hook: {}()"
 msgstr "禁止在邮件钩子中调用函数：{}()"
 
-#: application/mail_hook.py:142
+#: application/mail_hook.py:144
 msgid "Cannot find any subclass of MailNewsRecipe in the hook file."
 msgstr "无法找到MailNewsRecipe的任何子类。"
 
-#: application/mail_hook.py:145
+#: application/mail_hook.py:147
 #, python-brace-format
 msgid "The signature of {0} is invalid, it should be: def {0}({1})"
 msgstr "函数 {0} 的签名无效，正确的形式应为：def {0}({1})"
@@ -90,25 +97,48 @@ msgid "Permanent code"
 msgstr "永久邀请码"
 
 #: application/templates/admin.html:36
+#: application/templates/user_account.html:52
+msgid "Upload recipe"
+msgstr "上传 Recipe"
+
+#: application/templates/admin.html:38
+#: application/templates/adv_inboundmail.html:16
+#: application/templates/adv_uploadcover.html:15
+#: application/templates/book_summarizer.html:19
+#: application/templates/book_translator.html:22
+#: application/templates/settings.html:143
+#: application/templates/user_account.html:55
+msgid "Disable"
+msgstr "禁止"
+
+#: application/templates/admin.html:39
+#: application/templates/adv_uploadcover.html:16
+#: application/templates/book_summarizer.html:18
+#: application/templates/book_translator.html:21
+#: application/templates/user_account.html:56
+msgid "Enable"
+msgstr "启用"
+
+#: application/templates/admin.html:43
 msgid "Invitation codes"
 msgstr "邀请码列表"
 
-#: application/templates/admin.html:37
+#: application/templates/admin.html:44
 msgid "one code per line"
 msgstr "一行一码"
 
-#: application/templates/admin.html:43
+#: application/templates/admin.html:50
 msgid "Accounts"
 msgstr "用户账号列表"
 
-#: application/templates/admin.html:43
-#: application/templates/adv_inboundmail.html:64
-#: application/templates/my.html:34 application/view/admin.py:57
-#: application/view/admin.py:64 application/view/admin.py:91
+#: application/templates/admin.html:50
+#: application/templates/adv_inboundmail.html:69
+#: application/templates/my.html:34 application/view/admin.py:60
+#: application/view/admin.py:67 application/view/admin.py:95
 msgid "Add"
 msgstr "添加"
 
-#: application/templates/admin.html:54
+#: application/templates/admin.html:61
 #: application/templates/adv_archive.html:69 application/templates/home.html:19
 #: application/templates/login.html:24 application/templates/logs.html:70
 #: application/templates/reset_password.html:19
@@ -118,11 +148,11 @@ msgstr "添加"
 msgid "Username"
 msgstr "用户名"
 
-#: application/templates/admin.html:55
+#: application/templates/admin.html:62
 msgid "AutoSend"
 msgstr "使能发送"
 
-#: application/templates/admin.html:56
+#: application/templates/admin.html:63
 #: application/templates/change_password.html:27
 #: application/templates/reset_password.html:26
 #: application/templates/signup.html:33
@@ -130,28 +160,28 @@ msgstr "使能发送"
 msgid "Email"
 msgstr "Email"
 
-#: application/templates/admin.html:57
+#: application/templates/admin.html:64
 #: application/templates/user_account.html:39
 msgid "Expiration"
 msgstr "有效期"
 
-#: application/templates/admin.html:58
+#: application/templates/admin.html:65
 msgid "Operation"
 msgstr "操作"
 
-#: application/templates/admin.html:65
+#: application/templates/admin.html:72
 msgid "Yes"
 msgstr "是"
 
-#: application/templates/admin.html:65
+#: application/templates/admin.html:72
 msgid "No"
 msgstr "否"
 
-#: application/templates/admin.html:68
+#: application/templates/admin.html:75
 msgid "Never"
 msgstr "永不过期"
 
-#: application/templates/admin.html:70
+#: application/templates/admin.html:77
 #: application/templates/adv_inboundmail.html:26
 #: application/templates/settings.html:58
 #: application/templates/settings.html:181
@@ -159,40 +189,40 @@ msgstr "永不过期"
 msgid "7 Days"
 msgstr "一星期"
 
-#: application/templates/admin.html:72
+#: application/templates/admin.html:79
 #: application/templates/user_account.html:44
 msgid "1 Month"
 msgstr "1个月"
 
-#: application/templates/admin.html:74
+#: application/templates/admin.html:81
 #: application/templates/user_account.html:45
 msgid "3 Months"
 msgstr "3个月"
 
-#: application/templates/admin.html:76
+#: application/templates/admin.html:83
 #: application/templates/user_account.html:46
 msgid "6 Months"
 msgstr "6个月"
 
-#: application/templates/admin.html:78
+#: application/templates/admin.html:85
 #: application/templates/user_account.html:47
 msgid "1 Year"
 msgstr "1年"
 
-#: application/templates/admin.html:80
+#: application/templates/admin.html:87
 #: application/templates/user_account.html:48
 msgid "2 Years"
 msgstr "2年"
 
-#: application/templates/admin.html:85
+#: application/templates/admin.html:92
 #: application/templates/change_password.html:3
-#: application/templates/change_password.html:13 application/view/admin.py:129
-#: application/view/admin.py:183
+#: application/templates/change_password.html:13 application/view/admin.py:133
+#: application/view/admin.py:189
 msgid "Edit account"
 msgstr "编辑账号"
 
-#: application/templates/admin.html:89
-#: application/templates/adv_inboundmail.html:57
+#: application/templates/admin.html:96
+#: application/templates/adv_inboundmail.html:62
 #: application/templates/adv_uploadcss.html:31
 #: application/templates/base.html:25 application/templates/webmail.html:22
 msgid "Delete"
@@ -410,14 +440,6 @@ msgid ""
 "whitelist."
 msgstr "为了使能入站邮件功能，还需要配置白名单列表。"
 
-#: application/templates/adv_inboundmail.html:16
-#: application/templates/adv_uploadcover.html:15
-#: application/templates/book_summarizer.html:19
-#: application/templates/book_translator.html:22
-#: application/templates/settings.html:143
-msgid "Disable"
-msgstr "禁止"
-
 #: application/templates/adv_inboundmail.html:17
 msgid "Forward Only"
 msgstr "仅转发"
@@ -470,54 +492,56 @@ msgstr "发送至 %(name)sxxx@%(mailHost)s 的邮件将被转发到您的邮箱�
 msgid "Example"
 msgstr "例子"
 
-#: application/templates/adv_inboundmail.html:56
-#: application/templates/adv_inboundmail.html:78 application/view/adv.py:148
+#: application/templates/adv_inboundmail.html:57
+#: application/templates/adv_inboundmail.html:60
+#: application/templates/adv_inboundmail.html:83 application/view/adv.py:150
 msgid "Mail preprocess hook"
 msgstr "邮件预处理钩子"
 
-#: application/templates/adv_inboundmail.html:56
+#: application/templates/adv_inboundmail.html:57
+#: application/templates/adv_inboundmail.html:60
 msgid "Hooked"
 msgstr "已挂钩"
 
-#: application/templates/adv_inboundmail.html:56
+#: application/templates/adv_inboundmail.html:57
 msgid "Hook"
 msgstr "钩子"
 
-#: application/templates/adv_inboundmail.html:62
+#: application/templates/adv_inboundmail.html:67
 msgid "Please input mail address"
 msgstr "请输入邮件地址"
 
-#: application/templates/adv_inboundmail.html:79
+#: application/templates/adv_inboundmail.html:84
 #: application/templates/adv_uploadcss.html:30
 msgid "Upload"
 msgstr "上传"
 
-#: application/templates/adv_inboundmail.html:80
+#: application/templates/adv_inboundmail.html:85
 msgid "View"
 msgstr "查看"
 
-#: application/templates/adv_inboundmail.html:81
+#: application/templates/adv_inboundmail.html:86
 msgid "Please select a file."
 msgstr "请选择一个文件。"
 
-#: application/templates/adv_inboundmail.html:82
+#: application/templates/adv_inboundmail.html:87
 #, python-brace-format
 msgid ""
 "A hook file ({0}) already exists for this address, you can replace or "
 "delete it."
 msgstr "此地址已存在钩子文件（{0}），您可以重新上传替换或删除它。"
 
-#: application/templates/adv_inboundmail.html:83
+#: application/templates/adv_inboundmail.html:88
 msgid ""
 "The hook is a Python file defining a subclass of MailNewsRecipe to "
 "preprocess mail or extract/scrape linked articles:"
 msgstr "钩子是一个Python文件，定义MailNewsRecipe子类，用于预处理邮件或提取文章链接:"
 
-#: application/templates/adv_inboundmail.html:84
+#: application/templates/adv_inboundmail.html:89
 msgid "The hook file have been saved successfully."
 msgstr "钩子文件已成功保存。"
 
-#: application/templates/adv_inboundmail.html:85
+#: application/templates/adv_inboundmail.html:90
 msgid "The hook file have been deleted."
 msgstr "钩子文件已删除。"
 
@@ -619,12 +643,6 @@ msgstr "从本机上传封面图像，建议宽高比为0.625左右。"
 #: application/templates/adv_uploadcover.html:13
 msgid "Include cover"
 msgstr "推送封面"
-
-#: application/templates/adv_uploadcover.html:16
-#: application/templates/book_summarizer.html:18
-#: application/templates/book_translator.html:21
-msgid "Enable"
-msgstr "启用"
 
 #: application/templates/adv_uploadcover.html:20
 msgid "Rule for cover"
@@ -792,7 +810,7 @@ msgstr "如果任意文本框留空白，则此登录信息将从服务器删除
 msgid "Cannot set the website login information, Error:"
 msgstr "无法设置登录信息，错误描述："
 
-#: application/templates/base.html:58 application/templates/my.html:58
+#: application/templates/base.html:58 application/templates/my.html:59
 msgid "Upload custom recipe"
 msgstr "上传自定义 Recipe"
 
@@ -929,9 +947,9 @@ msgstr "这个账号已经被删除。"
 msgid "The username or password is empty."
 msgstr "用户名或密码为空。"
 
-#: application/templates/base.html:92 application/view/admin.py:81
-#: application/view/admin.py:165 application/view/admin.py:191
-#: application/view/login.py:236 application/view/login.py:289
+#: application/templates/base.html:92 application/view/admin.py:85
+#: application/view/admin.py:170 application/view/admin.py:197
+#: application/view/login.py:244 application/view/login.py:297
 msgid "The two new passwords are dismatch."
 msgstr "两个密码不匹配。"
 
@@ -943,7 +961,7 @@ msgstr "修改密码成功。"
 msgid "Account added successfully."
 msgstr "添加账号成功。"
 
-#: application/templates/base.html:95 application/view/login.py:144
+#: application/templates/base.html:95 application/view/login.py:152
 msgid "login required"
 msgstr "需要登录"
 
@@ -1050,13 +1068,13 @@ msgstr "请选择单独一项。"
 msgid "Please select at least one item."
 msgstr "请选择至少一项。"
 
-#: application/templates/base.html:119 application/view/admin.py:77
-#: application/view/admin.py:152 application/view/admin.py:189
-#: application/view/adv.py:527 application/view/extension.py:34
+#: application/templates/base.html:119 application/view/admin.py:81
+#: application/view/admin.py:156 application/view/admin.py:195
+#: application/view/adv.py:529 application/view/extension.py:34
 #: application/view/extension.py:63 application/view/inbound_email.py:515
 #: application/view/inbound_email.py:523 application/view/inbound_email.py:538
-#: application/view/inbound_email.py:559 application/view/login.py:232
-#: application/view/login.py:261 application/view/reader.py:111
+#: application/view/inbound_email.py:559 application/view/login.py:240
+#: application/view/login.py:269 application/view/reader.py:111
 #: application/view/reader.py:128 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr "一些参数为空或错误。"
@@ -1461,12 +1479,12 @@ msgid ""
 "share the service with friends."
 msgstr "使用开源 %(kindleear)s 应用，您可以部署您自己的网站，每天自动抓取全球新闻热点，并支持多账号，可以提供给多位好友同时使用。"
 
-#: application/templates/library.html:50 application/templates/my.html:61
+#: application/templates/library.html:50 application/templates/my.html:65
 msgid "Search"
 msgstr "搜索"
 
-#: application/templates/login.html:38 application/view/login.py:213
-#: application/view/login.py:220
+#: application/templates/login.html:38 application/view/login.py:221
+#: application/view/login.py:228
 msgid ""
 "The website does not allow registration. You can ask the owner for an "
 "account."
@@ -1508,35 +1526,35 @@ msgstr "新闻源"
 msgid "get more recipes"
 msgstr "获取更多recipe"
 
-#: application/templates/my.html:68
+#: application/templates/my.html:72
 msgid "Subscription to selected recipe successful."
 msgstr "已成功订阅您选择的 Recipe"
 
-#: application/templates/my.html:71
+#: application/templates/my.html:75
 msgid "Bookmarklet"
 msgstr "书签小应用"
 
-#: application/templates/my.html:75
+#: application/templates/my.html:79
 msgid "Send to Kindle"
 msgstr "发送到Kindle"
 
-#: application/templates/my.html:79
+#: application/templates/my.html:83
 msgid "Subscribe with KindleEar"
 msgstr "在KindleEar订阅"
 
-#: application/templates/my.html:82
+#: application/templates/my.html:86
 msgid "Drag and drop this link to your bookmarks"
 msgstr "将链接拖动到书签栏"
 
-#: application/templates/my.html:86
+#: application/templates/my.html:90
 msgid "Chrome extension"
 msgstr "Chrome扩展程序"
 
-#: application/templates/my.html:87
+#: application/templates/my.html:91
 msgid "Edge extension"
 msgstr "Edge扩展程序"
 
-#: application/templates/my.html:89
+#: application/templates/my.html:93
 msgid "Browser extensions also available"
 msgstr "浏览器扩展也有提供"
 
@@ -1874,187 +1892,182 @@ msgstr "作为附件转发"
 msgid "Word"
 msgstr "单词"
 
-#: application/view/admin.py:48 application/view/adv.py:505
-#: application/view/adv.py:596 application/view/mcp.py:76
-#: application/view/settings.py:67 application/view/translator.py:88
-#: application/view/translator.py:172 application/view/translator.py:257
+#: application/view/admin.py:51 application/view/adv.py:507
+#: application/view/adv.py:598 application/view/mcp.py:76
+#: application/view/settings.py:67 application/view/translator.py:91
+#: application/view/translator.py:175 application/view/translator.py:260
 msgid "Settings Saved!"
 msgstr "设置已保存!"
 
-#: application/view/admin.py:57 application/view/admin.py:64
-#: application/view/admin.py:91
+#: application/view/admin.py:60 application/view/admin.py:67
+#: application/view/admin.py:95
 msgid "Add account"
 msgstr "添加账号"
 
-#: application/view/admin.py:63 application/view/admin.py:103
-#: application/view/admin.py:135
-msgid "You do not have sufficient privileges."
-msgstr "您没有足够的权限。"
-
-#: application/view/admin.py:79 application/view/login.py:55
-#: application/view/login.py:238
+#: application/view/admin.py:83 application/view/login.py:55
+#: application/view/login.py:246
 msgid "The username includes unsafe chars."
 msgstr "用户名包含不安全字符。"
 
-#: application/view/admin.py:83 application/view/login.py:240
+#: application/view/admin.py:87 application/view/login.py:248
 msgid "Already exist the username."
 msgstr "此账号已经存在。"
 
-#: application/view/admin.py:88
+#: application/view/admin.py:92
 msgid "The password includes non-ascii chars."
 msgstr "密码包含非ASCII字符。"
 
-#: application/view/admin.py:107 application/view/admin.py:132
-#: application/view/admin.py:163 application/view/extension.py:32
+#: application/view/admin.py:111 application/view/admin.py:136
+#: application/view/admin.py:168 application/view/extension.py:32
 #: application/view/extension.py:61
 #, python-brace-format
 msgid "The username '{}' does not exist."
 msgstr "账号名 '{}' 不存在。"
 
-#: application/view/admin.py:123
+#: application/view/admin.py:127
 msgid "The password will not be changed if the fields are empties."
 msgstr "如果不填写密码，则密码不会被修改。"
 
-#: application/view/admin.py:130 application/view/admin.py:184
+#: application/view/admin.py:134 application/view/admin.py:190
 msgid "Change"
 msgstr "修改"
 
-#: application/view/admin.py:181
+#: application/view/admin.py:187
 msgid "Change success."
 msgstr "修改成功。"
 
-#: application/view/admin.py:194
+#: application/view/admin.py:200
 msgid "The old password is wrong."
 msgstr "原密码错误。"
 
-#: application/view/admin.py:196
+#: application/view/admin.py:202
 msgid "Changes saved successfully."
 msgstr "账号设置已更新。"
 
-#: application/view/adv.py:103
+#: application/view/adv.py:105
 msgid "The mail address is not in the whitelist."
 msgstr "该邮件地址不在白名单中。"
 
-#: application/view/adv.py:108
+#: application/view/adv.py:110
 msgid "Can not read uploaded file."
 msgstr "无法读取上传的文件。"
 
-#: application/view/adv.py:110
+#: application/view/adv.py:112
 msgid "The hook file is too large."
 msgstr "钩子文件太大。"
 
-#: application/view/adv.py:118
+#: application/view/adv.py:120
 msgid ""
 "Failed to decode the file. Please ensure that your file is saved in utf-8"
 " encoding."
 msgstr "解码文件失败，请确保文件以utf-8编码保存。"
 
-#: application/view/adv.py:123
+#: application/view/adv.py:125
 msgid "Failed to save the hook. Error:"
 msgstr "保存钩子文件失败。错误："
 
-#: application/view/adv.py:137 application/view/adv.py:151
+#: application/view/adv.py:139 application/view/adv.py:153
 msgid "The hook does not exist."
 msgstr "钩子文件不存在。"
 
-#: application/view/adv.py:172 application/view/adv.py:173
 #: application/view/adv.py:174 application/view/adv.py:175
 #: application/view/adv.py:176 application/view/adv.py:177
 #: application/view/adv.py:178 application/view/adv.py:179
 #: application/view/adv.py:180 application/view/adv.py:181
+#: application/view/adv.py:182 application/view/adv.py:183
 #, python-brace-format
 msgid "Append hyperlink '{}' to article"
 msgstr "在每篇文章后附加 '{}' 超链接"
 
-#: application/view/adv.py:172 application/view/adv.py:173
 #: application/view/adv.py:174 application/view/adv.py:175
-#: application/view/adv.py:176
+#: application/view/adv.py:176 application/view/adv.py:177
+#: application/view/adv.py:178
 #, python-brace-format
 msgid "Save to {}"
 msgstr "保存到 {}"
 
-#: application/view/adv.py:172
+#: application/view/adv.py:174
 msgid "evernote"
 msgstr "evernote"
 
-#: application/view/adv.py:173
+#: application/view/adv.py:175
 msgid "wiz"
 msgstr "为知笔记"
 
-#: application/view/adv.py:174
+#: application/view/adv.py:176
 msgid "pocket"
 msgstr "pocket"
 
-#: application/view/adv.py:175
+#: application/view/adv.py:177
 msgid "instapaper"
 msgstr "instapaper"
 
-#: application/view/adv.py:176
+#: application/view/adv.py:178
 msgid "wallabag"
 msgstr "wallabag"
 
-#: application/view/adv.py:177 application/view/adv.py:178
 #: application/view/adv.py:179 application/view/adv.py:180
+#: application/view/adv.py:181 application/view/adv.py:182
 #, python-brace-format
 msgid "Share on {}"
 msgstr "分享到 {}"
 
-#: application/view/adv.py:177
+#: application/view/adv.py:179
 msgid "weibo"
 msgstr "微博"
 
-#: application/view/adv.py:178
+#: application/view/adv.py:180
 msgid "facebook"
 msgstr "facebook"
 
-#: application/view/adv.py:180
+#: application/view/adv.py:182
 msgid "tumblr"
 msgstr "tumblr"
 
-#: application/view/adv.py:181
+#: application/view/adv.py:183
 msgid "Open in browser"
 msgstr "在浏览器打开"
 
-#: application/view/adv.py:182
+#: application/view/adv.py:184
 msgid "Append qrcode of url to article"
 msgstr "在每篇文章后附加文章链接的二维码"
 
-#: application/view/adv.py:449 application/view/share.py:54
-#: application/view/subscribe.py:250
+#: application/view/adv.py:451 application/view/share.py:54
+#: application/view/subscribe.py:255
 #, python-brace-format
 msgid "Unknown command: {}"
 msgstr "未知命令：{}"
 
-#: application/view/adv.py:507 application/view/adv.py:598
+#: application/view/adv.py:509 application/view/adv.py:600
 msgid "The format is invalid."
 msgstr "格式非法。"
 
-#: application/view/adv.py:630
+#: application/view/adv.py:632
 #, python-brace-format
 msgid "Authorization Error!<br/>{}"
 msgstr "申请授权过程失败！<br/>{}"
 
-#: application/view/adv.py:651
+#: application/view/adv.py:653
 msgid "Success authorized by Pocket!"
 msgstr "已经成功获得Pocket的授权！"
 
-#: application/view/adv.py:657
+#: application/view/adv.py:659
 #, python-brace-format
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
 "below:<br/><br/>{}"
 msgstr "申请Pocket授权失败!<hr/>错误信息参考如下：<br/><br/>{}"
 
-#: application/view/adv.py:678
+#: application/view/adv.py:680
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr "Instapaper服务器异常，请稍候再试。"
 
-#: application/view/adv.py:691
+#: application/view/adv.py:693
 #, python-brace-format
 msgid "Request type [{}] unsupported"
 msgstr "不支持你请求的命令类型 [{}]"
 
-#: application/view/deliver.py:82 application/view/login.py:185
+#: application/view/deliver.py:82 application/view/login.py:193
 #: application/view/share.py:41
 msgid "The username does not exist or the email is empty."
 msgstr "用户名不存在或email为空。"
@@ -2076,9 +2089,10 @@ msgstr "规则参数非法。"
 msgid "Cannot fetch data from {}, status: {}"
 msgstr "无法从 {} 获取数据，状态： {}"
 
-#: application/view/library.py:48 application/view/subscribe.py:238
-#: application/view/subscribe.py:380 application/view/subscribe.py:409
-#: application/view/subscribe.py:416 application/view/translator.py:30
+#: application/view/library.py:48 application/view/subscribe.py:241
+#: application/view/subscribe.py:246 application/view/subscribe.py:285
+#: application/view/subscribe.py:389 application/view/subscribe.py:418
+#: application/view/subscribe.py:425 application/view/translator.py:33
 msgid "The recipe does not exist."
 msgstr "此Recipe不存在。"
 
@@ -2099,58 +2113,58 @@ msgstr "用户名超过25字符。"
 msgid "Forgot password?"
 msgstr "忘记密码？"
 
-#: application/view/login.py:164 application/view/login.py:291
+#: application/view/login.py:172 application/view/login.py:299
 msgid "The token is wrong or expired."
 msgstr "Token码错误或已经逾期。"
 
-#: application/view/login.py:167
+#: application/view/login.py:175
 msgid "Please input the correct username and email to reset password."
 msgstr "请输入正确的用户名和Email来重置密码。"
 
-#: application/view/login.py:169
+#: application/view/login.py:177
 #, python-brace-format
 msgid "The email of account '{name}' is {email}."
 msgstr "账号 '{name}' 的Email为 {email}"
 
-#: application/view/login.py:190
+#: application/view/login.py:198
 msgid "Reset password success, Please close this page and login again."
 msgstr "修改密码成功，请关闭此页面重新登录。"
 
-#: application/view/login.py:193
+#: application/view/login.py:201
 msgid "The email you input is not associated with this account."
 msgstr "您输入的email不正确。"
 
-#: application/view/login.py:202
+#: application/view/login.py:210
 msgid "The link to reset your password has been sent to your email."
 msgstr "重置密码的邮件已经被发送至你的email。"
 
-#: application/view/login.py:203
+#: application/view/login.py:211
 msgid "Please check your email inbox within 24 hours."
 msgstr "请在24小时内检查你的email收件箱。"
 
-#: application/view/login.py:234
+#: application/view/login.py:242
 msgid "The invitation code is invalid."
 msgstr "邀请码无效。"
 
-#: application/view/login.py:242
+#: application/view/login.py:250
 msgid ""
 "Failed to create an account. Please contact the administrator for "
 "assistance."
 msgstr "创建账号失败，请联系管理员请求协助。"
 
-#: application/view/login.py:252
+#: application/view/login.py:260
 msgid "Successfully created account."
 msgstr "成功创建账号。"
 
-#: application/view/login.py:263
+#: application/view/login.py:271
 msgid "Reset KindleEar password"
 msgstr "重置KindleEar密码"
 
-#: application/view/login.py:264
+#: application/view/login.py:272
 msgid "This is an automated email. Please do not reply to it."
 msgstr "这个是自动发送的邮件，请勿直接回复。"
 
-#: application/view/login.py:265
+#: application/view/login.py:273
 msgid "You can click the following link to reset your KindleEar password."
 msgstr "你可以点击下面的链接来重置你的KindleEar密码。"
 
@@ -2158,8 +2172,8 @@ msgstr "你可以点击下面的链接来重置你的KindleEar密码。"
 msgid "The article is missing?"
 msgstr "文章丢失了？"
 
-#: application/view/reader.py:192 application/view/translator.py:121
-#: application/view/translator.py:205 application/view/translator.py:290
+#: application/view/reader.py:192 application/view/translator.py:124
+#: application/view/translator.py:208 application/view/translator.py:293
 msgid "The text is empty."
 msgstr "文本为空。"
 
@@ -2451,69 +2465,69 @@ msgstr "下面是一些技术细节："
 msgid "Unknown: {}"
 msgstr "未知: {}"
 
-#: application/view/subscribe.py:81 application/view/subscribe.py:167
+#: application/view/subscribe.py:82 application/view/subscribe.py:168
 msgid "Duplicated subscription!"
 msgstr "重复的订阅!"
 
-#: application/view/subscribe.py:126
+#: application/view/subscribe.py:127
 msgid "The Title or Url is empty."
 msgstr "标题或URL为空。"
 
-#: application/view/subscribe.py:139
+#: application/view/subscribe.py:140
 msgid "Failed to fetch the recipe."
 msgstr "抓取Recipe失败。"
 
-#: application/view/subscribe.py:153 application/view/subscribe.py:331
+#: application/view/subscribe.py:154 application/view/subscribe.py:338
 msgid "Failed to save the recipe. Error:"
 msgstr "保存Recipe失败。错误："
 
-#: application/view/subscribe.py:195
+#: application/view/subscribe.py:196
 msgid "The Rss does not exist."
 msgstr "此RSS不存在。"
 
-#: application/view/subscribe.py:278
+#: application/view/subscribe.py:283
 msgid "You can only delete the uploaded recipe."
 msgstr "您只能删除你自己上传的Recipe。"
 
-#: application/view/subscribe.py:283
+#: application/view/subscribe.py:290
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "此Recipe已经被订阅，请先取消订阅然后再删除。"
 
-#: application/view/subscribe.py:304 application/view/translator.py:51
-#: application/view/translator.py:104 application/view/translator.py:117
-#: application/view/translator.py:140 application/view/translator.py:188
-#: application/view/translator.py:201 application/view/translator.py:230
-#: application/view/translator.py:273 application/view/translator.py:286
+#: application/view/subscribe.py:311 application/view/translator.py:54
+#: application/view/translator.py:107 application/view/translator.py:120
+#: application/view/translator.py:143 application/view/translator.py:191
+#: application/view/translator.py:204 application/view/translator.py:233
+#: application/view/translator.py:276 application/view/translator.py:289
 msgid "This recipe has not been subscribed to yet."
 msgstr "此Recipe尚未被订阅。"
 
-#: application/view/subscribe.py:318
+#: application/view/subscribe.py:325
 msgid "Can not read uploaded file, Error:"
 msgstr "无法读取上传的文件，错误："
 
-#: application/view/subscribe.py:326
+#: application/view/subscribe.py:333
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
 msgstr "解码Recipe失败，请确保您的Recipe为utf-8编码。"
 
-#: application/view/subscribe.py:349
+#: application/view/subscribe.py:358
 msgid "Cannot find any subclass of BasicNewsRecipe."
 msgstr "无法找到BasicNewsRecipe的任何子类。"
 
-#: application/view/subscribe.py:354
+#: application/view/subscribe.py:363
 msgid "The recipe is already in the library."
 msgstr "此Recipe已经在新闻源中。"
 
-#: application/view/subscribe.py:387
+#: application/view/subscribe.py:396
 msgid "The login information for this recipe has been cleared."
 msgstr "此Recipe的网站登录信息已经被删除。"
 
-#: application/view/subscribe.py:391
+#: application/view/subscribe.py:400
 msgid "The login information for this recipe has been saved."
 msgstr "此Recipe的网站登录信息已经保存。"
 
-#: application/view/translator.py:81 application/view/translator.py:165
+#: application/view/translator.py:84 application/view/translator.py:168
 msgid "The api key is required."
 msgstr "需要填写api key."
 

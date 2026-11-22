@@ -16,7 +16,7 @@
     <div class="notice-box error">{{tips}}</div>
     {% endif -%}
     <fieldset>
-      <legend>{{_("Signup settings")}} <button type="submit" class="h3button">{{_("Save")}}</a></legend>
+      <legend>{{_("Signup settings")}} <button type="submit" class="h3button">{{_("Save")}}</button></legend>
       <div class="pure-control-group">
         <label for="sm_service">{{_("Email service")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="sm_service">
@@ -25,11 +25,18 @@
         </select>
       </div>
       <div class="pure-control-group">
-        <label for="sm_service">{{_("Signup type")}}</label>
+        <label for="signup_type">{{_("Signup type")}}</label>
         <select class="pure-u-1 pure-u-sm-1-2" name="signup_type" id="signup_type" onchange="SetInviteCodesVisualbility()" >
           <option value="public" {% if signupType == 'public' %} selected="selected" {% endif %}>{{_("Public")}}</option>
           <option value="oneTimeCode" {% if signupType == 'oneTimeCode' %} selected="selected" {% endif %}>{{_("One time code")}}</option>
           <option value="permanentCode" {% if signupType == 'permanentCode' %} selected="selected" {% endif %}>{{_("Permanent code")}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label for="new_user_allow_recipe_upload">{{_("Upload recipe")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="new_user_allow_recipe_upload">
+          <option value="no" {% if newUserAllowRecipeUpload != 'yes' %} selected="selected" {% endif %}>{{_("Disable")}}</option>
+          <option value="yes" {% if newUserAllowRecipeUpload == 'yes' %} selected="selected" {% endif %}>{{_("Enable")}}</option>
         </select>
       </div>
       <div class="pure-control-group" id="invite_codes_group" style="display:none;">

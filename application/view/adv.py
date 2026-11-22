@@ -97,6 +97,8 @@ def AdvInboundMailPost(user: KeUser):
 @bpAdv.post("/advanced/inboundmail/hook", endpoint='AdvInboundMailHookPost')
 @login_required(forAjax=True)
 def AdvInboundMailHookPost(user: KeUser):
+    if not user.can_upload_recipe():
+        return {'status': _('You do not have sufficient privileges.')}
     mail = request.form.get('mail', '').strip()
     wlists = [wl.mail.lower() for wl in user.white_lists()]
     if not mail or (mail.lower() not in wlists):

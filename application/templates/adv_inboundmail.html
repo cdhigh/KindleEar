@@ -51,9 +51,14 @@
       <div class="box">
         {{wl.mail}}
         <div class="cornerControls">
+          {% if user.can_upload_recipe() -%}
           <a href="javascript:void(0);" class="actionButton mailHookBtn{% if wl.mail in hookFiles %} hookEnabled{% endif %}"
             data-mail="{{wl.mail}}" data-file="{{hookFiles.get(wl.mail, '')}}"
             title="{{_('Mail preprocess hook')}}">{{_("Hooked") if wl.mail in hookFiles else _("Hook")}}</a>
+          {% elif wl.mail in hookFiles -%}
+          <a href="/advanced/inboundmail/hook/view/{{wl.mail}}" target="_blank" class="actionButton hookEnabled"
+            title="{{_('Mail preprocess hook')}}">{{_("Hooked")}}</a>
+          {% endif -%}
           <a href="/advanceddel?wlist_id={{wl.id}}" class="actionButton">{{_("Delete")}}</a>
         </div>
       </div>

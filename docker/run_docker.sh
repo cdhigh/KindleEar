@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# Fix ownership of data directory for non-root execution (backward compatible with older versions)
+if [ -d "/data" ]; then
+  chown -R kindleear:kindleear /data
+fi
+
 if [ "$RANDOMIZE_SECRET_KEY" != "no" ]; then
   if command -v hexdump > /dev/null 2>&1; then
     export SECRET_KEY=$(hexdump -n 12 -v -e '/1 "%02x"' /dev/urandom)
@@ -16,4 +21,5 @@ if [ -z "$TZ" ]; then
   export TZ=Etc/GMT+0
 fi
 
-exec /usr/local/bin/gunicorn -c /usr/kindleear/gunicorn.conf.py main:app
+# Drop privileges to non-root user and run Gunicorn
+exec su-exec kindleear:kindleear /usr/local/bin/gunicorn -c /usr/kindleear/gunicorn.conf.py main:app

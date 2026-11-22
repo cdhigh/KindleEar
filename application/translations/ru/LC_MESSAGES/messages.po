@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-04 19:03-0300\n"
+"POT-Creation-Date: 2026-11-22 06:18-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: KindleEar <LL@li.org>\n"
@@ -18,26 +18,33 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: application/mail_hook.py:110 application/mail_hook.py:113
+#: application/mail_hook.py:45 application/templates/my.html:61
+#: application/view/admin.py:66 application/view/admin.py:107
+#: application/view/admin.py:139 application/view/adv.py:101
+#: application/view/subscribe.py:233 application/view/subscribe.py:353
+msgid "You do not have sufficient privileges."
+msgstr "У вас недостаточно прав."
+
+#: application/mail_hook.py:112 application/mail_hook.py:115
 #, python-brace-format
 msgid "Forbidden module import in mail hook: {}"
 msgstr "Запрещённый импорт модуля в почтовом хуке: {}"
 
-#: application/mail_hook.py:116
+#: application/mail_hook.py:118
 #, python-brace-format
 msgid "Forbidden attribute access in mail hook: {}"
 msgstr "Запрещённый доступ к атрибуту в почтовом хуке: {}"
 
-#: application/mail_hook.py:119
+#: application/mail_hook.py:121
 #, python-brace-format
 msgid "Forbidden function call in mail hook: {}()"
 msgstr "Запрещённый вызов функции в почтовом хуке: {}()"
 
-#: application/mail_hook.py:142
+#: application/mail_hook.py:144
 msgid "Cannot find any subclass of MailNewsRecipe in the hook file."
 msgstr "В файле хука не найдено ни одного подкласса MailNewsRecipe."
 
-#: application/mail_hook.py:145
+#: application/mail_hook.py:147
 #, python-brace-format
 msgid "The signature of {0} is invalid, it should be: def {0}({1})"
 msgstr "Сигнатура {0} недействительна, должно быть: def {0}({1})"
@@ -90,25 +97,48 @@ msgid "Permanent code"
 msgstr "Постоянный код"
 
 #: application/templates/admin.html:36
+#: application/templates/user_account.html:52
+msgid "Upload recipe"
+msgstr "Загрузить рецепт"
+
+#: application/templates/admin.html:38
+#: application/templates/adv_inboundmail.html:16
+#: application/templates/adv_uploadcover.html:15
+#: application/templates/book_summarizer.html:19
+#: application/templates/book_translator.html:22
+#: application/templates/settings.html:143
+#: application/templates/user_account.html:55
+msgid "Disable"
+msgstr "Отключить"
+
+#: application/templates/admin.html:39
+#: application/templates/adv_uploadcover.html:16
+#: application/templates/book_summarizer.html:18
+#: application/templates/book_translator.html:21
+#: application/templates/user_account.html:56
+msgid "Enable"
+msgstr "Включить"
+
+#: application/templates/admin.html:43
 msgid "Invitation codes"
 msgstr "Коды приглашений"
 
-#: application/templates/admin.html:37
+#: application/templates/admin.html:44
 msgid "one code per line"
 msgstr "один код на строку"
 
-#: application/templates/admin.html:43
+#: application/templates/admin.html:50
 msgid "Accounts"
 msgstr "Аккаунты"
 
-#: application/templates/admin.html:43
-#: application/templates/adv_inboundmail.html:64
-#: application/templates/my.html:34 application/view/admin.py:57
-#: application/view/admin.py:64 application/view/admin.py:91
+#: application/templates/admin.html:50
+#: application/templates/adv_inboundmail.html:69
+#: application/templates/my.html:34 application/view/admin.py:60
+#: application/view/admin.py:67 application/view/admin.py:95
 msgid "Add"
 msgstr "Добавить"
 
-#: application/templates/admin.html:54
+#: application/templates/admin.html:61
 #: application/templates/adv_archive.html:69
 #: application/templates/home.html:19 application/templates/login.html:24
 #: application/templates/logs.html:70
@@ -120,11 +150,11 @@ msgstr "Добавить"
 msgid "Username"
 msgstr "Имя пользователя"
 
-#: application/templates/admin.html:55
+#: application/templates/admin.html:62
 msgid "AutoSend"
 msgstr "Автопередача"
 
-#: application/templates/admin.html:56
+#: application/templates/admin.html:63
 #: application/templates/change_password.html:27
 #: application/templates/reset_password.html:26
 #: application/templates/signup.html:33
@@ -132,28 +162,28 @@ msgstr "Автопередача"
 msgid "Email"
 msgstr "Email"
 
-#: application/templates/admin.html:57
+#: application/templates/admin.html:64
 #: application/templates/user_account.html:39
 msgid "Expiration"
 msgstr "Срок действия"
 
-#: application/templates/admin.html:58
+#: application/templates/admin.html:65
 msgid "Operation"
 msgstr "Операция"
 
-#: application/templates/admin.html:65
+#: application/templates/admin.html:72
 msgid "Yes"
 msgstr "Да"
 
-#: application/templates/admin.html:65
+#: application/templates/admin.html:72
 msgid "No"
 msgstr "Нет"
 
-#: application/templates/admin.html:68
+#: application/templates/admin.html:75
 msgid "Never"
 msgstr "Никогда"
 
-#: application/templates/admin.html:70
+#: application/templates/admin.html:77
 #: application/templates/adv_inboundmail.html:26
 #: application/templates/settings.html:58
 #: application/templates/settings.html:181
@@ -161,40 +191,40 @@ msgstr "Никогда"
 msgid "7 Days"
 msgstr "7 дней"
 
-#: application/templates/admin.html:72
+#: application/templates/admin.html:79
 #: application/templates/user_account.html:44
 msgid "1 Month"
 msgstr "1 месяц"
 
-#: application/templates/admin.html:74
+#: application/templates/admin.html:81
 #: application/templates/user_account.html:45
 msgid "3 Months"
 msgstr "3 месяца"
 
-#: application/templates/admin.html:76
+#: application/templates/admin.html:83
 #: application/templates/user_account.html:46
 msgid "6 Months"
 msgstr "6 месяцев"
 
-#: application/templates/admin.html:78
+#: application/templates/admin.html:85
 #: application/templates/user_account.html:47
 msgid "1 Year"
 msgstr "1 год"
 
-#: application/templates/admin.html:80
+#: application/templates/admin.html:87
 #: application/templates/user_account.html:48
 msgid "2 Years"
 msgstr "2 года"
 
-#: application/templates/admin.html:85
+#: application/templates/admin.html:92
 #: application/templates/change_password.html:3
-#: application/templates/change_password.html:13 application/view/admin.py:129
-#: application/view/admin.py:183
+#: application/templates/change_password.html:13 application/view/admin.py:133
+#: application/view/admin.py:189
 msgid "Edit account"
 msgstr "Редактировать аккаунт"
 
-#: application/templates/admin.html:89
-#: application/templates/adv_inboundmail.html:57
+#: application/templates/admin.html:96
+#: application/templates/adv_inboundmail.html:62
 #: application/templates/adv_uploadcss.html:31
 #: application/templates/base.html:25 application/templates/webmail.html:22
 msgid "Delete"
@@ -418,14 +448,6 @@ msgid ""
 msgstr ""
 "Чтобы включить функцию входящей почты, необходимо настроить белый список."
 
-#: application/templates/adv_inboundmail.html:16
-#: application/templates/adv_uploadcover.html:15
-#: application/templates/book_summarizer.html:19
-#: application/templates/book_translator.html:22
-#: application/templates/settings.html:143
-msgid "Disable"
-msgstr "Отключить"
-
 #: application/templates/adv_inboundmail.html:17
 msgid "Forward Only"
 msgstr "Только пересылка"
@@ -480,37 +502,39 @@ msgstr ""
 msgid "Example"
 msgstr "Пример"
 
-#: application/templates/adv_inboundmail.html:56
-#: application/templates/adv_inboundmail.html:78 application/view/adv.py:148
+#: application/templates/adv_inboundmail.html:57
+#: application/templates/adv_inboundmail.html:60
+#: application/templates/adv_inboundmail.html:83 application/view/adv.py:150
 msgid "Mail preprocess hook"
 msgstr "Хук предварительной обработки почты"
 
-#: application/templates/adv_inboundmail.html:56
+#: application/templates/adv_inboundmail.html:57
+#: application/templates/adv_inboundmail.html:60
 msgid "Hooked"
 msgstr "Установлен"
 
-#: application/templates/adv_inboundmail.html:56
+#: application/templates/adv_inboundmail.html:57
 msgid "Hook"
 msgstr "Хук"
 
-#: application/templates/adv_inboundmail.html:62
+#: application/templates/adv_inboundmail.html:67
 msgid "Please input mail address"
 msgstr "Введите адрес электронной почты"
 
-#: application/templates/adv_inboundmail.html:79
+#: application/templates/adv_inboundmail.html:84
 #: application/templates/adv_uploadcss.html:30
 msgid "Upload"
 msgstr "Загрузить"
 
-#: application/templates/adv_inboundmail.html:80
+#: application/templates/adv_inboundmail.html:85
 msgid "View"
 msgstr "Просмотр"
 
-#: application/templates/adv_inboundmail.html:81
+#: application/templates/adv_inboundmail.html:86
 msgid "Please select a file."
 msgstr "Пожалуйста, выберите файл."
 
-#: application/templates/adv_inboundmail.html:82
+#: application/templates/adv_inboundmail.html:87
 #, python-brace-format
 msgid ""
 "A hook file ({0}) already exists for this address, you can replace or delete"
@@ -519,7 +543,7 @@ msgstr ""
 "Для этого адреса уже существует файл хука ({0}), вы можете заменить его или "
 "удалить."
 
-#: application/templates/adv_inboundmail.html:83
+#: application/templates/adv_inboundmail.html:88
 msgid ""
 "The hook is a Python file defining a subclass of MailNewsRecipe to "
 "preprocess mail or extract/scrape linked articles:"
@@ -527,11 +551,11 @@ msgstr ""
 "Хук — это файл Python, определяющий подкласс MailNewsRecipe для "
 "предобработки почты или извлечения связанных статей:"
 
-#: application/templates/adv_inboundmail.html:84
+#: application/templates/adv_inboundmail.html:89
 msgid "The hook file have been saved successfully."
 msgstr "Файл хука был успешно сохранён."
 
-#: application/templates/adv_inboundmail.html:85
+#: application/templates/adv_inboundmail.html:90
 msgid "The hook file have been deleted."
 msgstr "Файл хука был удалён."
 
@@ -640,12 +664,6 @@ msgstr "Загрузите изображения обложек с соотно
 #: application/templates/adv_uploadcover.html:13
 msgid "Include cover"
 msgstr "Включить обложку"
-
-#: application/templates/adv_uploadcover.html:16
-#: application/templates/book_summarizer.html:18
-#: application/templates/book_translator.html:21
-msgid "Enable"
-msgstr "Включить"
 
 #: application/templates/adv_uploadcover.html:20
 msgid "Rule for cover"
@@ -816,7 +834,7 @@ msgstr ""
 msgid "Cannot set the website login information, Error:"
 msgstr "Невозможно установить информацию для входа на сайт, ошибка:"
 
-#: application/templates/base.html:58 application/templates/my.html:58
+#: application/templates/base.html:58 application/templates/my.html:59
 msgid "Upload custom recipe"
 msgstr "Загрузить пользовательский рецепт"
 
@@ -955,9 +973,9 @@ msgstr "Аккаунт был удалён."
 msgid "The username or password is empty."
 msgstr "Имя пользователя или пароль пусты."
 
-#: application/templates/base.html:92 application/view/admin.py:81
-#: application/view/admin.py:165 application/view/admin.py:191
-#: application/view/login.py:236 application/view/login.py:289
+#: application/templates/base.html:92 application/view/admin.py:85
+#: application/view/admin.py:170 application/view/admin.py:197
+#: application/view/login.py:244 application/view/login.py:297
 msgid "The two new passwords are dismatch."
 msgstr "Два новых пароля не совпадают."
 
@@ -969,7 +987,7 @@ msgstr "Пароль успешно изменён."
 msgid "Account added successfully."
 msgstr "Аккаунт успешно добавлен."
 
-#: application/templates/base.html:95 application/view/login.py:144
+#: application/templates/base.html:95 application/view/login.py:152
 msgid "login required"
 msgstr "Требуется вход"
 
@@ -1081,13 +1099,13 @@ msgstr "Пожалуйста, выберите один элемент."
 msgid "Please select at least one item."
 msgstr "Пожалуйста, выберите хотя бы один элемент."
 
-#: application/templates/base.html:119 application/view/admin.py:77
-#: application/view/admin.py:152 application/view/admin.py:189
-#: application/view/adv.py:527 application/view/extension.py:34
+#: application/templates/base.html:119 application/view/admin.py:81
+#: application/view/admin.py:156 application/view/admin.py:195
+#: application/view/adv.py:529 application/view/extension.py:34
 #: application/view/extension.py:63 application/view/inbound_email.py:515
 #: application/view/inbound_email.py:523 application/view/inbound_email.py:538
-#: application/view/inbound_email.py:559 application/view/login.py:232
-#: application/view/login.py:261 application/view/reader.py:111
+#: application/view/inbound_email.py:559 application/view/login.py:240
+#: application/view/login.py:269 application/view/reader.py:111
 #: application/view/reader.py:128 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr "Некоторые параметры отсутствуют или неверны."
@@ -1500,12 +1518,12 @@ msgstr ""
 " для доставки ежедневных новостных лент на ваш ридер и легко поделиться этим"
 " сервисом с друзьями."
 
-#: application/templates/library.html:50 application/templates/my.html:61
+#: application/templates/library.html:50 application/templates/my.html:65
 msgid "Search"
 msgstr "Поиск"
 
-#: application/templates/login.html:38 application/view/login.py:213
-#: application/view/login.py:220
+#: application/templates/login.html:38 application/view/login.py:221
+#: application/view/login.py:228
 msgid ""
 "The website does not allow registration. You can ask the owner for an "
 "account."
@@ -1548,35 +1566,35 @@ msgstr "Библиотека"
 msgid "get more recipes"
 msgstr "получить больше рецептов"
 
-#: application/templates/my.html:68
+#: application/templates/my.html:72
 msgid "Subscription to selected recipe successful."
 msgstr "Подписка на выбранный рецепт успешна."
 
-#: application/templates/my.html:71
+#: application/templates/my.html:75
 msgid "Bookmarklet"
 msgstr "Закладка"
 
-#: application/templates/my.html:75
+#: application/templates/my.html:79
 msgid "Send to Kindle"
 msgstr "Отправить в Kindle"
 
-#: application/templates/my.html:79
+#: application/templates/my.html:83
 msgid "Subscribe with KindleEar"
 msgstr "Подписаться через KindleEar"
 
-#: application/templates/my.html:82
+#: application/templates/my.html:86
 msgid "Drag and drop this link to your bookmarks"
 msgstr "Перетащите эту ссылку в закладки"
 
-#: application/templates/my.html:86
+#: application/templates/my.html:90
 msgid "Chrome extension"
 msgstr "Расширение для Chrome"
 
-#: application/templates/my.html:87
+#: application/templates/my.html:91
 msgid "Edge extension"
 msgstr "Расширение для Edge"
 
-#: application/templates/my.html:89
+#: application/templates/my.html:93
 msgid "Browser extensions also available"
 msgstr "Также доступны расширения для браузеров"
 
@@ -1920,76 +1938,71 @@ msgstr "Переслать как вложение"
 msgid "Word"
 msgstr "Слово"
 
-#: application/view/admin.py:48 application/view/adv.py:505
-#: application/view/adv.py:596 application/view/mcp.py:76
-#: application/view/settings.py:67 application/view/translator.py:88
-#: application/view/translator.py:172 application/view/translator.py:257
+#: application/view/admin.py:51 application/view/adv.py:507
+#: application/view/adv.py:598 application/view/mcp.py:76
+#: application/view/settings.py:67 application/view/translator.py:91
+#: application/view/translator.py:175 application/view/translator.py:260
 msgid "Settings Saved!"
 msgstr "Настройки сохранены!"
 
-#: application/view/admin.py:57 application/view/admin.py:64
-#: application/view/admin.py:91
+#: application/view/admin.py:60 application/view/admin.py:67
+#: application/view/admin.py:95
 msgid "Add account"
 msgstr "Добавить учетную запись"
 
-#: application/view/admin.py:63 application/view/admin.py:103
-#: application/view/admin.py:135
-msgid "You do not have sufficient privileges."
-msgstr "У вас недостаточно прав."
-
-#: application/view/admin.py:79 application/view/login.py:55
-#: application/view/login.py:238
+#: application/view/admin.py:83 application/view/login.py:55
+#: application/view/login.py:246
 msgid "The username includes unsafe chars."
 msgstr "Имя пользователя содержит небезопасные символы."
 
-#: application/view/admin.py:83 application/view/login.py:240
+#: application/view/admin.py:87 application/view/login.py:248
 msgid "Already exist the username."
 msgstr "Имя пользователя уже существует."
 
-#: application/view/admin.py:88
+#: application/view/admin.py:92
 msgid "The password includes non-ascii chars."
 msgstr "Пароль содержит не-ASCII символы."
 
-#: application/view/admin.py:107 application/view/admin.py:132
-#: application/view/admin.py:163 application/view/extension.py:32
+#: application/view/admin.py:111 application/view/admin.py:136
+#: application/view/admin.py:168 application/view/extension.py:32
 #: application/view/extension.py:61
 #, python-brace-format
 msgid "The username '{}' does not exist."
 msgstr "Имя пользователя '{}' не существует."
 
-#: application/view/admin.py:123
+#: application/view/admin.py:127
 msgid "The password will not be changed if the fields are empties."
 msgstr "Пароль не будет изменен, если поля пустые."
 
-#: application/view/admin.py:130 application/view/admin.py:184
+#: application/view/admin.py:134 application/view/admin.py:190
 msgid "Change"
 msgstr "Изменить"
 
-#: application/view/admin.py:181
+#: application/view/admin.py:187
 msgid "Change success."
 msgstr "Изменение успешно."
 
-#: application/view/admin.py:194
+#: application/view/admin.py:200
 msgid "The old password is wrong."
 msgstr "Старый пароль неверен."
 
-#: application/view/admin.py:196
+#: application/view/admin.py:202
 msgid "Changes saved successfully."
 msgstr "Изменения успешно сохранены."
 
-#: application/view/adv.py:103
+#: application/view/adv.py:105
 msgid "The mail address is not in the whitelist."
 msgstr "Этот адрес почты отсутствует в белом списке."
 
-#: application/view/adv.py:108
+#: application/view/adv.py:110
 msgid "Can not read uploaded file."
 msgstr "Не удалось прочитать загруженный файл."
 
-#: application/view/adv.py:110
+#: application/view/adv.py:112
 msgid "The hook file is too large."
 msgstr "Файл хука слишком большой."
 
-#: application/view/adv.py:118
+#: application/view/adv.py:120
 msgid ""
 "Failed to decode the file. Please ensure that your file is saved in utf-8 "
 "encoding."
@@ -1997,96 +2010,96 @@ msgstr ""
 "Не удалось декодировать файл. Убедитесь, что файл сохранён в кодировке "
 "utf-8."
 
-#: application/view/adv.py:123
+#: application/view/adv.py:125
 msgid "Failed to save the hook. Error:"
 msgstr "Не удалось сохранить хук. Ошибка:"
 
-#: application/view/adv.py:137 application/view/adv.py:151
+#: application/view/adv.py:139 application/view/adv.py:153
 msgid "The hook does not exist."
 msgstr "Хук не существует."
 
-#: application/view/adv.py:172 application/view/adv.py:173
 #: application/view/adv.py:174 application/view/adv.py:175
 #: application/view/adv.py:176 application/view/adv.py:177
 #: application/view/adv.py:178 application/view/adv.py:179
 #: application/view/adv.py:180 application/view/adv.py:181
+#: application/view/adv.py:182 application/view/adv.py:183
 #, python-brace-format
 msgid "Append hyperlink '{}' to article"
 msgstr "Добавить гиперссылку '{}' к статье"
 
-#: application/view/adv.py:172 application/view/adv.py:173
 #: application/view/adv.py:174 application/view/adv.py:175
-#: application/view/adv.py:176
+#: application/view/adv.py:176 application/view/adv.py:177
+#: application/view/adv.py:178
 #, python-brace-format
 msgid "Save to {}"
 msgstr "Сохранить в {}"
 
-#: application/view/adv.py:172
+#: application/view/adv.py:174
 msgid "evernote"
 msgstr "evernote"
 
-#: application/view/adv.py:173
+#: application/view/adv.py:175
 msgid "wiz"
 msgstr "wiz"
 
-#: application/view/adv.py:174
+#: application/view/adv.py:176
 msgid "pocket"
 msgstr "pocket"
 
-#: application/view/adv.py:175
+#: application/view/adv.py:177
 msgid "instapaper"
 msgstr "instapaper"
 
-#: application/view/adv.py:176
+#: application/view/adv.py:178
 msgid "wallabag"
 msgstr "wallabag"
 
-#: application/view/adv.py:177 application/view/adv.py:178
 #: application/view/adv.py:179 application/view/adv.py:180
+#: application/view/adv.py:181 application/view/adv.py:182
 #, python-brace-format
 msgid "Share on {}"
 msgstr "Поделиться на {}"
 
-#: application/view/adv.py:177
+#: application/view/adv.py:179
 msgid "weibo"
 msgstr "вэйбо"
 
-#: application/view/adv.py:178
+#: application/view/adv.py:180
 msgid "facebook"
 msgstr "facebook"
 
-#: application/view/adv.py:180
+#: application/view/adv.py:182
 msgid "tumblr"
 msgstr "tumblr"
 
-#: application/view/adv.py:181
+#: application/view/adv.py:183
 msgid "Open in browser"
 msgstr "Открыть в браузере"
 
-#: application/view/adv.py:182
+#: application/view/adv.py:184
 msgid "Append qrcode of url to article"
 msgstr "Добавить QR-код URL в статью"
 
-#: application/view/adv.py:449 application/view/share.py:54
-#: application/view/subscribe.py:250
+#: application/view/adv.py:451 application/view/share.py:54
+#: application/view/subscribe.py:255
 #, python-brace-format
 msgid "Unknown command: {}"
 msgstr "Неизвестная команда: {}"
 
-#: application/view/adv.py:507 application/view/adv.py:598
+#: application/view/adv.py:509 application/view/adv.py:600
 msgid "The format is invalid."
 msgstr "Формат неверен."
 
-#: application/view/adv.py:630
+#: application/view/adv.py:632
 #, python-brace-format
 msgid "Authorization Error!<br/>{}"
 msgstr "Ошибка авторизации!<br/>{}"
 
-#: application/view/adv.py:651
+#: application/view/adv.py:653
 msgid "Success authorized by Pocket!"
 msgstr "Авторизация успешна через Pocket!"
 
-#: application/view/adv.py:657
+#: application/view/adv.py:659
 #, python-brace-format
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
@@ -2095,17 +2108,17 @@ msgstr ""
 "Не удалось запросить авторизацию через Pocket!<hr/>См. подробности "
 "ниже:<br/><br/>{}"
 
-#: application/view/adv.py:678
+#: application/view/adv.py:680
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 "Служба Instapaper столкнулась с ошибкой. Пожалуйста, попробуйте позже."
 
-#: application/view/adv.py:691
+#: application/view/adv.py:693
 #, python-brace-format
 msgid "Request type [{}] unsupported"
 msgstr "Тип запроса [{}] не поддерживается"
 
-#: application/view/deliver.py:82 application/view/login.py:185
+#: application/view/deliver.py:82 application/view/login.py:193
 #: application/view/share.py:41
 msgid "The username does not exist or the email is empty."
 msgstr "Имя пользователя не существует или адрес электронной почты пуст."
@@ -2127,9 +2140,10 @@ msgstr "Параметр правил неверен."
 msgid "Cannot fetch data from {}, status: {}"
 msgstr "Не удалось получить данные с {}, статус: {}"
 
-#: application/view/library.py:48 application/view/subscribe.py:238
-#: application/view/subscribe.py:380 application/view/subscribe.py:409
-#: application/view/subscribe.py:416 application/view/translator.py:30
+#: application/view/library.py:48 application/view/subscribe.py:241
+#: application/view/subscribe.py:246 application/view/subscribe.py:285
+#: application/view/subscribe.py:389 application/view/subscribe.py:418
+#: application/view/subscribe.py:425 application/view/translator.py:33
 msgid "The recipe does not exist."
 msgstr "Рецепт не существует."
 
@@ -2150,43 +2164,43 @@ msgstr "Длина имени пользователя достигла пред
 msgid "Forgot password?"
 msgstr "Забыли пароль?"
 
-#: application/view/login.py:164 application/view/login.py:291
+#: application/view/login.py:172 application/view/login.py:299
 msgid "The token is wrong or expired."
 msgstr "Токен неверен или истек."
 
-#: application/view/login.py:167
+#: application/view/login.py:175
 msgid "Please input the correct username and email to reset password."
 msgstr ""
 "Пожалуйста, введите правильное имя пользователя и email для сброса пароля."
 
-#: application/view/login.py:169
+#: application/view/login.py:177
 #, python-brace-format
 msgid "The email of account '{name}' is {email}."
 msgstr "Электронная почта аккаунта '{name}' — {email}."
 
-#: application/view/login.py:190
+#: application/view/login.py:198
 msgid "Reset password success, Please close this page and login again."
 msgstr ""
 "Сброс пароля прошел успешно. Пожалуйста, закройте эту страницу и войдите "
 "снова."
 
-#: application/view/login.py:193
+#: application/view/login.py:201
 msgid "The email you input is not associated with this account."
 msgstr "Введенная вами электронная почта не связана с этим аккаунтом."
 
-#: application/view/login.py:202
+#: application/view/login.py:210
 msgid "The link to reset your password has been sent to your email."
 msgstr "Ссылка для сброса пароля отправлена на вашу электронную почту."
 
-#: application/view/login.py:203
+#: application/view/login.py:211
 msgid "Please check your email inbox within 24 hours."
 msgstr "Пожалуйста, проверьте свою электронную почту в течение 24 часов."
 
-#: application/view/login.py:234
+#: application/view/login.py:242
 msgid "The invitation code is invalid."
 msgstr "Пригласительный код недействителен."
 
-#: application/view/login.py:242
+#: application/view/login.py:250
 msgid ""
 "Failed to create an account. Please contact the administrator for "
 "assistance."
@@ -2194,19 +2208,19 @@ msgstr ""
 "Не удалось создать аккаунт. Пожалуйста, свяжитесь с администратором для "
 "получения помощи."
 
-#: application/view/login.py:252
+#: application/view/login.py:260
 msgid "Successfully created account."
 msgstr "Аккаунт успешно создан."
 
-#: application/view/login.py:263
+#: application/view/login.py:271
 msgid "Reset KindleEar password"
 msgstr "Сбросить пароль KindleEar"
 
-#: application/view/login.py:264
+#: application/view/login.py:272
 msgid "This is an automated email. Please do not reply to it."
 msgstr "Это автоматическое письмо. Пожалуйста, не отвечайте на него."
 
-#: application/view/login.py:265
+#: application/view/login.py:273
 msgid "You can click the following link to reset your KindleEar password."
 msgstr "Вы можете перейти по следующей ссылке для сброса пароля KindleEar."
 
@@ -2214,8 +2228,8 @@ msgstr "Вы можете перейти по следующей ссылке д
 msgid "The article is missing?"
 msgstr "Статья отсутствует?"
 
-#: application/view/reader.py:192 application/view/translator.py:121
-#: application/view/translator.py:205 application/view/translator.py:290
+#: application/view/reader.py:192 application/view/translator.py:124
+#: application/view/translator.py:208 application/view/translator.py:293
 msgid "The text is empty."
 msgstr "Текст пуст."
 
@@ -2509,47 +2523,47 @@ msgstr "Смотрите подробности ниже:"
 msgid "Unknown: {}"
 msgstr "Неизвестно: {}"
 
-#: application/view/subscribe.py:81 application/view/subscribe.py:167
+#: application/view/subscribe.py:82 application/view/subscribe.py:168
 msgid "Duplicated subscription!"
 msgstr "Дублированная подписка!"
 
-#: application/view/subscribe.py:126
+#: application/view/subscribe.py:127
 msgid "The Title or Url is empty."
 msgstr "Заголовок или URL пусты."
 
-#: application/view/subscribe.py:139
+#: application/view/subscribe.py:140
 msgid "Failed to fetch the recipe."
 msgstr "Не удалось получить рецепт."
 
-#: application/view/subscribe.py:153 application/view/subscribe.py:331
+#: application/view/subscribe.py:154 application/view/subscribe.py:338
 msgid "Failed to save the recipe. Error:"
 msgstr "Не удалось сохранить рецепт. Ошибка:"
 
-#: application/view/subscribe.py:195
+#: application/view/subscribe.py:196
 msgid "The Rss does not exist."
 msgstr "Rss не существует."
 
-#: application/view/subscribe.py:278
+#: application/view/subscribe.py:283
 msgid "You can only delete the uploaded recipe."
 msgstr "Вы можете удалить только загруженный рецепт."
 
-#: application/view/subscribe.py:283
+#: application/view/subscribe.py:290
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "Рецепт был подписан, пожалуйста, отмените подписку перед удалением."
 
-#: application/view/subscribe.py:304 application/view/translator.py:51
-#: application/view/translator.py:104 application/view/translator.py:117
-#: application/view/translator.py:140 application/view/translator.py:188
-#: application/view/translator.py:201 application/view/translator.py:230
-#: application/view/translator.py:273 application/view/translator.py:286
+#: application/view/subscribe.py:311 application/view/translator.py:54
+#: application/view/translator.py:107 application/view/translator.py:120
+#: application/view/translator.py:143 application/view/translator.py:191
+#: application/view/translator.py:204 application/view/translator.py:233
+#: application/view/translator.py:276 application/view/translator.py:289
 msgid "This recipe has not been subscribed to yet."
 msgstr "Этот рецепт еще не был подписан."
 
-#: application/view/subscribe.py:318
+#: application/view/subscribe.py:325
 msgid "Can not read uploaded file, Error:"
 msgstr "Не удалось прочитать загруженный файл, ошибка:"
 
-#: application/view/subscribe.py:326
+#: application/view/subscribe.py:333
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
@@ -2557,22 +2571,22 @@ msgstr ""
 "Не удалось декодировать рецепт. Пожалуйста, убедитесь, что ваш рецепт "
 "сохранен в кодировке utf-8."
 
-#: application/view/subscribe.py:349
+#: application/view/subscribe.py:358
 msgid "Cannot find any subclass of BasicNewsRecipe."
 msgstr "Не удается найти ни одного подкласса BasicNewsRecipe."
 
-#: application/view/subscribe.py:354
+#: application/view/subscribe.py:363
 msgid "The recipe is already in the library."
 msgstr "Рецепт уже в библиотеке."
 
-#: application/view/subscribe.py:387
+#: application/view/subscribe.py:396
 msgid "The login information for this recipe has been cleared."
 msgstr "Информация для входа в этот рецепт была очищена."
 
-#: application/view/subscribe.py:391
+#: application/view/subscribe.py:400
 msgid "The login information for this recipe has been saved."
 msgstr "Информация для входа в этот рецепт сохранена."
 
-#: application/view/translator.py:81 application/view/translator.py:165
+#: application/view/translator.py:84 application/view/translator.py:168
 msgid "The api key is required."
 msgstr "Необходим ключ api."

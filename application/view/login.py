@@ -102,7 +102,7 @@ def LoginPost():
 
 #判断账号是否存在
 #如果账号不存在，创建一个，并返回True，否则返回False
-def CreateAccountIfNotExist(name, password=None, email='', sender=None, sm_service=None, expiration=0):
+def CreateAccountIfNotExist(name, password=None, email='', sender=None, sm_service=None, expiration=0, allow_recipe_upload=None):
     if KeUser.get_or_none(KeUser.name == name):
         return False
 
@@ -121,7 +121,15 @@ def CreateAccountIfNotExist(name, password=None, email='', sender=None, sm_servi
                 sender = adUser.cfg('email') if adUser else email
 
     sender = sender or email
-    base_config = {'email': email, 'sender': sender, 'secret_key': secretKey}
+    #新用户默认是否拥有自定义Recipe权限：管理员始终拥有；普通用户根据配置或参数决定
+    if allow_recipe_upload is None:
+        if name == adminName:
+            allow_recipe_upload = True
+        else:
+            allow_recipe_upload = (AppInfo.get_value(AppInfo.newUserAllowRecipeUpload, 'no') == 'yes')
+
+    base_config = {'email': email, 'sender': sender, 'secret_key': secretKey,
+        'allow_recipe_upload': bool(allow_recipe_upload)}
     user = KeUser(name=name, passwd_hash=pwdHash, expires=None, expiration_days=expiration, 
         share_links={'key': shareKey}, base_config=base_config, send_mail_service=sm_service)
     if expiration:

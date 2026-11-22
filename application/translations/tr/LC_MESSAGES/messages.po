@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-04 19:03-0300\n"
+"POT-Creation-Date: 2026-11-22 06:18-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: tr <LL@li.org>\n"
@@ -18,26 +18,33 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: application/mail_hook.py:110 application/mail_hook.py:113
+#: application/mail_hook.py:45 application/templates/my.html:61
+#: application/view/admin.py:66 application/view/admin.py:107
+#: application/view/admin.py:139 application/view/adv.py:101
+#: application/view/subscribe.py:233 application/view/subscribe.py:353
+msgid "You do not have sufficient privileges."
+msgstr "Yeterli yetkiniz yok."
+
+#: application/mail_hook.py:112 application/mail_hook.py:115
 #, python-brace-format
 msgid "Forbidden module import in mail hook: {}"
 msgstr "Mail hookunda yasak modül içe aktarma: {}"
 
-#: application/mail_hook.py:116
+#: application/mail_hook.py:118
 #, python-brace-format
 msgid "Forbidden attribute access in mail hook: {}"
 msgstr "Mail hookunda yasak öznitelik erişimi: {}"
 
-#: application/mail_hook.py:119
+#: application/mail_hook.py:121
 #, python-brace-format
 msgid "Forbidden function call in mail hook: {}()"
 msgstr "Mail hookunda yasak işlev çağrısı: {}()"
 
-#: application/mail_hook.py:142
+#: application/mail_hook.py:144
 msgid "Cannot find any subclass of MailNewsRecipe in the hook file."
 msgstr "Kanca dosyasında herhangi bir MailNewsRecipe alt sınıfı bulunamadı."
 
-#: application/mail_hook.py:145
+#: application/mail_hook.py:147
 #, python-brace-format
 msgid "The signature of {0} is invalid, it should be: def {0}({1})"
 msgstr "{0} imzası geçersiz, şöyle olmalıdır: def {0}({1})"
@@ -90,25 +97,48 @@ msgid "Permanent code"
 msgstr "Kalıcı kod"
 
 #: application/templates/admin.html:36
+#: application/templates/user_account.html:52
+msgid "Upload recipe"
+msgstr "Tarif Yükle"
+
+#: application/templates/admin.html:38
+#: application/templates/adv_inboundmail.html:16
+#: application/templates/adv_uploadcover.html:15
+#: application/templates/book_summarizer.html:19
+#: application/templates/book_translator.html:22
+#: application/templates/settings.html:143
+#: application/templates/user_account.html:55
+msgid "Disable"
+msgstr "Devre dışı bırak"
+
+#: application/templates/admin.html:39
+#: application/templates/adv_uploadcover.html:16
+#: application/templates/book_summarizer.html:18
+#: application/templates/book_translator.html:21
+#: application/templates/user_account.html:56
+msgid "Enable"
+msgstr "Etkinleştir"
+
+#: application/templates/admin.html:43
 msgid "Invitation codes"
 msgstr "Davetiye kodları"
 
-#: application/templates/admin.html:37
+#: application/templates/admin.html:44
 msgid "one code per line"
 msgstr "Her satırda bir kod"
 
-#: application/templates/admin.html:43
+#: application/templates/admin.html:50
 msgid "Accounts"
 msgstr "Hesaplar"
 
-#: application/templates/admin.html:43
-#: application/templates/adv_inboundmail.html:64
-#: application/templates/my.html:34 application/view/admin.py:57
-#: application/view/admin.py:64 application/view/admin.py:91
+#: application/templates/admin.html:50
+#: application/templates/adv_inboundmail.html:69
+#: application/templates/my.html:34 application/view/admin.py:60
+#: application/view/admin.py:67 application/view/admin.py:95
 msgid "Add"
 msgstr "Ekle"
 
-#: application/templates/admin.html:54
+#: application/templates/admin.html:61
 #: application/templates/adv_archive.html:69
 #: application/templates/home.html:19 application/templates/login.html:24
 #: application/templates/logs.html:70
@@ -120,11 +150,11 @@ msgstr "Ekle"
 msgid "Username"
 msgstr "Kullanıcı adı"
 
-#: application/templates/admin.html:55
+#: application/templates/admin.html:62
 msgid "AutoSend"
 msgstr "Aktif"
 
-#: application/templates/admin.html:56
+#: application/templates/admin.html:63
 #: application/templates/change_password.html:27
 #: application/templates/reset_password.html:26
 #: application/templates/signup.html:33
@@ -132,28 +162,28 @@ msgstr "Aktif"
 msgid "Email"
 msgstr "E-posta"
 
-#: application/templates/admin.html:57
+#: application/templates/admin.html:64
 #: application/templates/user_account.html:39
 msgid "Expiration"
 msgstr "Son"
 
-#: application/templates/admin.html:58
+#: application/templates/admin.html:65
 msgid "Operation"
 msgstr "İşlemler"
 
-#: application/templates/admin.html:65
+#: application/templates/admin.html:72
 msgid "Yes"
 msgstr "Evet"
 
-#: application/templates/admin.html:65
+#: application/templates/admin.html:72
 msgid "No"
 msgstr "Hayir"
 
-#: application/templates/admin.html:68
+#: application/templates/admin.html:75
 msgid "Never"
 msgstr "Asla"
 
-#: application/templates/admin.html:70
+#: application/templates/admin.html:77
 #: application/templates/adv_inboundmail.html:26
 #: application/templates/settings.html:58
 #: application/templates/settings.html:181
@@ -161,40 +191,40 @@ msgstr "Asla"
 msgid "7 Days"
 msgstr "7 Günlük"
 
-#: application/templates/admin.html:72
+#: application/templates/admin.html:79
 #: application/templates/user_account.html:44
 msgid "1 Month"
 msgstr "1 ay"
 
-#: application/templates/admin.html:74
+#: application/templates/admin.html:81
 #: application/templates/user_account.html:45
 msgid "3 Months"
 msgstr "3 ay"
 
-#: application/templates/admin.html:76
+#: application/templates/admin.html:83
 #: application/templates/user_account.html:46
 msgid "6 Months"
 msgstr "6 ay"
 
-#: application/templates/admin.html:78
+#: application/templates/admin.html:85
 #: application/templates/user_account.html:47
 msgid "1 Year"
 msgstr "1 yıl"
 
-#: application/templates/admin.html:80
+#: application/templates/admin.html:87
 #: application/templates/user_account.html:48
 msgid "2 Years"
 msgstr "2 yıl"
 
-#: application/templates/admin.html:85
+#: application/templates/admin.html:92
 #: application/templates/change_password.html:3
-#: application/templates/change_password.html:13 application/view/admin.py:129
-#: application/view/admin.py:183
+#: application/templates/change_password.html:13 application/view/admin.py:133
+#: application/view/admin.py:189
 msgid "Edit account"
 msgstr "Hesabı Düzenle"
 
-#: application/templates/admin.html:89
-#: application/templates/adv_inboundmail.html:57
+#: application/templates/admin.html:96
+#: application/templates/adv_inboundmail.html:62
 #: application/templates/adv_uploadcss.html:31
 #: application/templates/base.html:25 application/templates/webmail.html:22
 msgid "Delete"
@@ -419,14 +449,6 @@ msgstr ""
 "Gelen e-posta özelliğini etkinleştirmek için, beyaz liste ayarlarını da "
 "yapılandırmanız gerekmektedir."
 
-#: application/templates/adv_inboundmail.html:16
-#: application/templates/adv_uploadcover.html:15
-#: application/templates/book_summarizer.html:19
-#: application/templates/book_translator.html:22
-#: application/templates/settings.html:143
-msgid "Disable"
-msgstr "Devre dışı bırak"
-
 #: application/templates/adv_inboundmail.html:17
 msgid "Forward Only"
 msgstr "Sadece Yönlendir"
@@ -481,37 +503,39 @@ msgstr ""
 msgid "Example"
 msgstr "Örnek"
 
-#: application/templates/adv_inboundmail.html:56
-#: application/templates/adv_inboundmail.html:78 application/view/adv.py:148
+#: application/templates/adv_inboundmail.html:57
+#: application/templates/adv_inboundmail.html:60
+#: application/templates/adv_inboundmail.html:83 application/view/adv.py:150
 msgid "Mail preprocess hook"
 msgstr "Mail ön işleme Hook'u"
 
-#: application/templates/adv_inboundmail.html:56
+#: application/templates/adv_inboundmail.html:57
+#: application/templates/adv_inboundmail.html:60
 msgid "Hooked"
 msgstr "Hooklandı"
 
-#: application/templates/adv_inboundmail.html:56
+#: application/templates/adv_inboundmail.html:57
 msgid "Hook"
 msgstr "Hook"
 
-#: application/templates/adv_inboundmail.html:62
+#: application/templates/adv_inboundmail.html:67
 msgid "Please input mail address"
 msgstr "Lütfen e-posta adresini giriniz"
 
-#: application/templates/adv_inboundmail.html:79
+#: application/templates/adv_inboundmail.html:84
 #: application/templates/adv_uploadcss.html:30
 msgid "Upload"
 msgstr "Yükleme"
 
-#: application/templates/adv_inboundmail.html:80
+#: application/templates/adv_inboundmail.html:85
 msgid "View"
 msgstr "Görüntüle"
 
-#: application/templates/adv_inboundmail.html:81
+#: application/templates/adv_inboundmail.html:86
 msgid "Please select a file."
 msgstr "Lütfen bir dosya seçin."
 
-#: application/templates/adv_inboundmail.html:82
+#: application/templates/adv_inboundmail.html:87
 #, python-brace-format
 msgid ""
 "A hook file ({0}) already exists for this address, you can replace or delete"
@@ -520,7 +544,7 @@ msgstr ""
 "Bu adres için zaten bir hook dosyası ({0}) var, onu değiştirebilir veya "
 "silebilirsiniz."
 
-#: application/templates/adv_inboundmail.html:83
+#: application/templates/adv_inboundmail.html:88
 msgid ""
 "The hook is a Python file defining a subclass of MailNewsRecipe to "
 "preprocess mail or extract/scrape linked articles:"
@@ -528,11 +552,11 @@ msgstr ""
 "Kanca, e-postaları ön işlemek veya bağlantılı makaleleri ayıklamak/kazımak "
 "üzere bir MailNewsRecipe alt sınıfı tanımlayan bir Python dosyasıdır:"
 
-#: application/templates/adv_inboundmail.html:84
+#: application/templates/adv_inboundmail.html:89
 msgid "The hook file have been saved successfully."
 msgstr "Hook dosyası başarıyla kaydedildi."
 
-#: application/templates/adv_inboundmail.html:85
+#: application/templates/adv_inboundmail.html:90
 msgid "The hook file have been deleted."
 msgstr "Hook dosyası silindi."
 
@@ -641,12 +665,6 @@ msgstr ""
 #: application/templates/adv_uploadcover.html:13
 msgid "Include cover"
 msgstr "Kapak Dahil"
-
-#: application/templates/adv_uploadcover.html:16
-#: application/templates/book_summarizer.html:18
-#: application/templates/book_translator.html:21
-msgid "Enable"
-msgstr "Etkinleştir"
 
 #: application/templates/adv_uploadcover.html:20
 msgid "Rule for cover"
@@ -817,7 +835,7 @@ msgstr ""
 msgid "Cannot set the website login information, Error:"
 msgstr "Abonelik bilgisi ayarlanamıyor, Hata:"
 
-#: application/templates/base.html:58 application/templates/my.html:58
+#: application/templates/base.html:58 application/templates/my.html:59
 msgid "Upload custom recipe"
 msgstr "Özel tarifi yükle"
 
@@ -957,9 +975,9 @@ msgstr "Hesap silindi."
 msgid "The username or password is empty."
 msgstr "Kullanıcı adı veya şifre boş."
 
-#: application/templates/base.html:92 application/view/admin.py:81
-#: application/view/admin.py:165 application/view/admin.py:191
-#: application/view/login.py:236 application/view/login.py:289
+#: application/templates/base.html:92 application/view/admin.py:85
+#: application/view/admin.py:170 application/view/admin.py:197
+#: application/view/login.py:244 application/view/login.py:297
 msgid "The two new passwords are dismatch."
 msgstr "İki yeni şifre uyuşmuyor."
 
@@ -971,7 +989,7 @@ msgstr "Şifre başarıyla değiştirildi."
 msgid "Account added successfully."
 msgstr "Hesap başarıyla eklendi."
 
-#: application/templates/base.html:95 application/view/login.py:144
+#: application/templates/base.html:95 application/view/login.py:152
 msgid "login required"
 msgstr "Giriş yapılması gerekiyor"
 
@@ -1083,13 +1101,13 @@ msgstr "Lütfen tek bir öğe seçin."
 msgid "Please select at least one item."
 msgstr "Lütfen en az bir öğe seçin."
 
-#: application/templates/base.html:119 application/view/admin.py:77
-#: application/view/admin.py:152 application/view/admin.py:189
-#: application/view/adv.py:527 application/view/extension.py:34
+#: application/templates/base.html:119 application/view/admin.py:81
+#: application/view/admin.py:156 application/view/admin.py:195
+#: application/view/adv.py:529 application/view/extension.py:34
 #: application/view/extension.py:63 application/view/inbound_email.py:515
 #: application/view/inbound_email.py:523 application/view/inbound_email.py:538
-#: application/view/inbound_email.py:559 application/view/login.py:232
-#: application/view/login.py:261 application/view/reader.py:111
+#: application/view/inbound_email.py:559 application/view/login.py:240
+#: application/view/login.py:269 application/view/reader.py:111
 #: application/view/reader.py:128 application/view/share.py:37
 msgid "Some parameters are missing or wrong."
 msgstr "Bazı parametreler eksik veya yanlış."
@@ -1503,12 +1521,12 @@ msgstr ""
 "haber akışlarınızı e-okuyucunuza teslim edebilir ve hizmeti dostlarınızla "
 "kolayca paylaşabilirsiniz."
 
-#: application/templates/library.html:50 application/templates/my.html:61
+#: application/templates/library.html:50 application/templates/my.html:65
 msgid "Search"
 msgstr "Ara"
 
-#: application/templates/login.html:38 application/view/login.py:213
-#: application/view/login.py:220
+#: application/templates/login.html:38 application/view/login.py:221
+#: application/view/login.py:228
 msgid ""
 "The website does not allow registration. You can ask the owner for an "
 "account."
@@ -1552,35 +1570,35 @@ msgstr "Kütüphane"
 msgid "get more recipes"
 msgstr "daha fazla tarif alın"
 
-#: application/templates/my.html:68
+#: application/templates/my.html:72
 msgid "Subscription to selected recipe successful."
 msgstr "Seçilen tarife abonelik başarılı."
 
-#: application/templates/my.html:71
+#: application/templates/my.html:75
 msgid "Bookmarklet"
 msgstr "Kitap modu"
 
-#: application/templates/my.html:75
+#: application/templates/my.html:79
 msgid "Send to Kindle"
 msgstr "Kindle'e Gönder"
 
-#: application/templates/my.html:79
+#: application/templates/my.html:83
 msgid "Subscribe with KindleEar"
 msgstr "KindleEar ile Abone Ol"
 
-#: application/templates/my.html:82
+#: application/templates/my.html:86
 msgid "Drag and drop this link to your bookmarks"
 msgstr "Bu bağlantıyı yer imlerinize sürükleyip bırakın"
 
-#: application/templates/my.html:86
+#: application/templates/my.html:90
 msgid "Chrome extension"
 msgstr "Chrome eklentisi"
 
-#: application/templates/my.html:87
+#: application/templates/my.html:91
 msgid "Edge extension"
 msgstr "Edge eklentisi"
 
-#: application/templates/my.html:89
+#: application/templates/my.html:93
 msgid "Browser extensions also available"
 msgstr "Tarayıcı eklentileri de mevcut"
 
@@ -1924,76 +1942,71 @@ msgstr "Ek olarak ilet"
 msgid "Word"
 msgstr "Kelime"
 
-#: application/view/admin.py:48 application/view/adv.py:505
-#: application/view/adv.py:596 application/view/mcp.py:76
-#: application/view/settings.py:67 application/view/translator.py:88
-#: application/view/translator.py:172 application/view/translator.py:257
+#: application/view/admin.py:51 application/view/adv.py:507
+#: application/view/adv.py:598 application/view/mcp.py:76
+#: application/view/settings.py:67 application/view/translator.py:91
+#: application/view/translator.py:175 application/view/translator.py:260
 msgid "Settings Saved!"
 msgstr "Ayarlar Kaydedildi!"
 
-#: application/view/admin.py:57 application/view/admin.py:64
-#: application/view/admin.py:91
+#: application/view/admin.py:60 application/view/admin.py:67
+#: application/view/admin.py:95
 msgid "Add account"
 msgstr "Hesap ekle"
 
-#: application/view/admin.py:63 application/view/admin.py:103
-#: application/view/admin.py:135
-msgid "You do not have sufficient privileges."
-msgstr "Yeterli yetkiniz yok."
-
-#: application/view/admin.py:79 application/view/login.py:55
-#: application/view/login.py:238
+#: application/view/admin.py:83 application/view/login.py:55
+#: application/view/login.py:246
 msgid "The username includes unsafe chars."
 msgstr "Kullanıcı adı güvensiz karakterler içeriyor."
 
-#: application/view/admin.py:83 application/view/login.py:240
+#: application/view/admin.py:87 application/view/login.py:248
 msgid "Already exist the username."
 msgstr "Kullanıcı adı zaten var."
 
-#: application/view/admin.py:88
+#: application/view/admin.py:92
 msgid "The password includes non-ascii chars."
 msgstr "Şifre ascii olmayan karakterler içeriyor."
 
-#: application/view/admin.py:107 application/view/admin.py:132
-#: application/view/admin.py:163 application/view/extension.py:32
+#: application/view/admin.py:111 application/view/admin.py:136
+#: application/view/admin.py:168 application/view/extension.py:32
 #: application/view/extension.py:61
 #, python-brace-format
 msgid "The username '{}' does not exist."
 msgstr "'{}' kullanıcı adı mevcut değil."
 
-#: application/view/admin.py:123
+#: application/view/admin.py:127
 msgid "The password will not be changed if the fields are empties."
 msgstr "Alanlar boş bırakılırsa şifre değiştirilmeyecek."
 
-#: application/view/admin.py:130 application/view/admin.py:184
+#: application/view/admin.py:134 application/view/admin.py:190
 msgid "Change"
 msgstr "Değiştir"
 
-#: application/view/admin.py:181
+#: application/view/admin.py:187
 msgid "Change success."
 msgstr "Değişim başarılı."
 
-#: application/view/admin.py:194
+#: application/view/admin.py:200
 msgid "The old password is wrong."
 msgstr "Eski şifre yanlış."
 
-#: application/view/admin.py:196
+#: application/view/admin.py:202
 msgid "Changes saved successfully."
 msgstr "Değişiklikler başarıyla kaydedildi."
 
-#: application/view/adv.py:103
+#: application/view/adv.py:105
 msgid "The mail address is not in the whitelist."
 msgstr "Mail adresi beyaz listede değil."
 
-#: application/view/adv.py:108
+#: application/view/adv.py:110
 msgid "Can not read uploaded file."
 msgstr "Yüklenen dosya okunamıyor."
 
-#: application/view/adv.py:110
+#: application/view/adv.py:112
 msgid "The hook file is too large."
 msgstr "Hook dosyası çok büyük."
 
-#: application/view/adv.py:118
+#: application/view/adv.py:120
 msgid ""
 "Failed to decode the file. Please ensure that your file is saved in utf-8 "
 "encoding."
@@ -2001,96 +2014,96 @@ msgstr ""
 "Dosyanın kodu çözülemedi. Lütfen dosyanızın utf-8 kodlamasıyla "
 "kaydedildiğinden emin olun."
 
-#: application/view/adv.py:123
+#: application/view/adv.py:125
 msgid "Failed to save the hook. Error:"
 msgstr "Hook kaydedilemedi. Hata:"
 
-#: application/view/adv.py:137 application/view/adv.py:151
+#: application/view/adv.py:139 application/view/adv.py:153
 msgid "The hook does not exist."
 msgstr "Hook mevcut değil."
 
-#: application/view/adv.py:172 application/view/adv.py:173
 #: application/view/adv.py:174 application/view/adv.py:175
 #: application/view/adv.py:176 application/view/adv.py:177
 #: application/view/adv.py:178 application/view/adv.py:179
 #: application/view/adv.py:180 application/view/adv.py:181
+#: application/view/adv.py:182 application/view/adv.py:183
 #, python-brace-format
 msgid "Append hyperlink '{}' to article"
 msgstr "'{}' linkini makaleye ekle"
 
-#: application/view/adv.py:172 application/view/adv.py:173
 #: application/view/adv.py:174 application/view/adv.py:175
-#: application/view/adv.py:176
+#: application/view/adv.py:176 application/view/adv.py:177
+#: application/view/adv.py:178
 #, python-brace-format
 msgid "Save to {}"
 msgstr "{} kaydedildi"
 
-#: application/view/adv.py:172
+#: application/view/adv.py:174
 msgid "evernote"
 msgstr "evernote"
 
-#: application/view/adv.py:173
+#: application/view/adv.py:175
 msgid "wiz"
 msgstr "wiz"
 
-#: application/view/adv.py:174
+#: application/view/adv.py:176
 msgid "pocket"
 msgstr "pocket"
 
-#: application/view/adv.py:175
+#: application/view/adv.py:177
 msgid "instapaper"
 msgstr "instapaper"
 
-#: application/view/adv.py:176
+#: application/view/adv.py:178
 msgid "wallabag"
 msgstr "wallabag"
 
-#: application/view/adv.py:177 application/view/adv.py:178
 #: application/view/adv.py:179 application/view/adv.py:180
+#: application/view/adv.py:181 application/view/adv.py:182
 #, python-brace-format
 msgid "Share on {}"
 msgstr "{} üzerinde paylaş"
 
-#: application/view/adv.py:177
+#: application/view/adv.py:179
 msgid "weibo"
 msgstr "weibo"
 
-#: application/view/adv.py:178
+#: application/view/adv.py:180
 msgid "facebook"
 msgstr "facebook"
 
-#: application/view/adv.py:180
+#: application/view/adv.py:182
 msgid "tumblr"
 msgstr "tumblr"
 
-#: application/view/adv.py:181
+#: application/view/adv.py:183
 msgid "Open in browser"
 msgstr "Tarayıcıda aç"
 
-#: application/view/adv.py:182
+#: application/view/adv.py:184
 msgid "Append qrcode of url to article"
 msgstr "Makaleye URL'nin QR kodunu ekle"
 
-#: application/view/adv.py:449 application/view/share.py:54
-#: application/view/subscribe.py:250
+#: application/view/adv.py:451 application/view/share.py:54
+#: application/view/subscribe.py:255
 #, python-brace-format
 msgid "Unknown command: {}"
 msgstr "Bilinmeyen komut: {}"
 
-#: application/view/adv.py:507 application/view/adv.py:598
+#: application/view/adv.py:509 application/view/adv.py:600
 msgid "The format is invalid."
 msgstr "Format geçersiz."
 
-#: application/view/adv.py:630
+#: application/view/adv.py:632
 #, python-brace-format
 msgid "Authorization Error!<br/>{}"
 msgstr "Yetkilendirme Hatası!<br/>{}"
 
-#: application/view/adv.py:651
+#: application/view/adv.py:653
 msgid "Success authorized by Pocket!"
 msgstr "Pocket tarafından yetkilendirilen başarı!"
 
-#: application/view/adv.py:657
+#: application/view/adv.py:659
 #, python-brace-format
 msgid ""
 "Failed to request authorization of Pocket!<hr/>See details "
@@ -2099,18 +2112,18 @@ msgstr ""
 "Pocket yetkilendirme isteği başarısız oldu!<hr/>Aşağıdaki ayrıntılara "
 "bakın:<br/><br/>{}"
 
-#: application/view/adv.py:678
+#: application/view/adv.py:680
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
 "Instapaper servisi bir hata ile karşılaştı. Lütfen daha sonra tekrar "
 "deneyin."
 
-#: application/view/adv.py:691
+#: application/view/adv.py:693
 #, python-brace-format
 msgid "Request type [{}] unsupported"
 msgstr "İstek türü [{}] desteklenmiyor"
 
-#: application/view/deliver.py:82 application/view/login.py:185
+#: application/view/deliver.py:82 application/view/login.py:193
 #: application/view/share.py:41
 msgid "The username does not exist or the email is empty."
 msgstr "Kullanıcı adı mevcut değil veya e-posta boş."
@@ -2132,9 +2145,10 @@ msgstr "Kurallar parametresi geçersiz."
 msgid "Cannot fetch data from {}, status: {}"
 msgstr "{}, durumundan veri alınamıyor: {}"
 
-#: application/view/library.py:48 application/view/subscribe.py:238
-#: application/view/subscribe.py:380 application/view/subscribe.py:409
-#: application/view/subscribe.py:416 application/view/translator.py:30
+#: application/view/library.py:48 application/view/subscribe.py:241
+#: application/view/subscribe.py:246 application/view/subscribe.py:285
+#: application/view/subscribe.py:389 application/view/subscribe.py:418
+#: application/view/subscribe.py:425 application/view/translator.py:33
 msgid "The recipe does not exist."
 msgstr "Tarif mevcut değil."
 
@@ -2155,63 +2169,63 @@ msgstr "Kullanıcı adının uzunluğu 25 karakter sınırına ulaştı."
 msgid "Forgot password?"
 msgstr "Forgot password?"
 
-#: application/view/login.py:164 application/view/login.py:291
+#: application/view/login.py:172 application/view/login.py:299
 msgid "The token is wrong or expired."
 msgstr "Belirteç yanlış veya süresi dolmuş."
 
-#: application/view/login.py:167
+#: application/view/login.py:175
 msgid "Please input the correct username and email to reset password."
 msgstr ""
 "Şifreyi sıfırlamak için lütfen doğru kullanıcı adı ve e-posta adresini "
 "girin."
 
-#: application/view/login.py:169
+#: application/view/login.py:177
 #, python-brace-format
 msgid "The email of account '{name}' is {email}."
 msgstr "'{name}' hesabının e-postası {email}."
 
-#: application/view/login.py:190
+#: application/view/login.py:198
 msgid "Reset password success, Please close this page and login again."
 msgstr ""
 "Şifre sıfırlama başarılı, Lütfen bu sayfayı kapatın ve yeniden giriş yapın."
 
-#: application/view/login.py:193
+#: application/view/login.py:201
 msgid "The email you input is not associated with this account."
 msgstr "Girdiğiniz e-posta bu hesapla ilişkilendirilmemiştir."
 
-#: application/view/login.py:202
+#: application/view/login.py:210
 msgid "The link to reset your password has been sent to your email."
 msgstr ""
 "Şifrenizi sıfırlamak için gerekli bağlantı e-postanıza gönderilmiştir."
 
-#: application/view/login.py:203
+#: application/view/login.py:211
 msgid "Please check your email inbox within 24 hours."
 msgstr "Lütfen e-posta gelen kutunuzu 24 saat içinde kontrol edin."
 
-#: application/view/login.py:234
+#: application/view/login.py:242
 msgid "The invitation code is invalid."
 msgstr "Davetiye kodu geçersiz."
 
-#: application/view/login.py:242
+#: application/view/login.py:250
 msgid ""
 "Failed to create an account. Please contact the administrator for "
 "assistance."
 msgstr ""
 "Bir hesap oluşturulamadı. Yardım için lütfen yöneticiyle iletişime geçin."
 
-#: application/view/login.py:252
+#: application/view/login.py:260
 msgid "Successfully created account."
 msgstr "Hesap başarıyla oluşturuldu."
 
-#: application/view/login.py:263
+#: application/view/login.py:271
 msgid "Reset KindleEar password"
 msgstr "KindleEar şifrenizi sıfırlama"
 
-#: application/view/login.py:264
+#: application/view/login.py:272
 msgid "This is an automated email. Please do not reply to it."
 msgstr "Bu otomatik bir e-postadır. Lütfen yanıt vermeyin."
 
-#: application/view/login.py:265
+#: application/view/login.py:273
 msgid "You can click the following link to reset your KindleEar password."
 msgstr ""
 "KindleEar şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayabilirsiniz."
@@ -2220,8 +2234,8 @@ msgstr ""
 msgid "The article is missing?"
 msgstr "Makale eksik mi?"
 
-#: application/view/reader.py:192 application/view/translator.py:121
-#: application/view/translator.py:205 application/view/translator.py:290
+#: application/view/reader.py:192 application/view/translator.py:124
+#: application/view/translator.py:208 application/view/translator.py:293
 msgid "The text is empty."
 msgstr "Metin boş."
 
@@ -2515,47 +2529,47 @@ msgstr "Aşağıdaki ayrıntılara bakın:"
 msgid "Unknown: {}"
 msgstr "Bilinmeyen: {}"
 
-#: application/view/subscribe.py:81 application/view/subscribe.py:167
+#: application/view/subscribe.py:82 application/view/subscribe.py:168
 msgid "Duplicated subscription!"
 msgstr "Duplicated subscription!"
 
-#: application/view/subscribe.py:126
+#: application/view/subscribe.py:127
 msgid "The Title or Url is empty."
 msgstr "Başlık veya URL boş."
 
-#: application/view/subscribe.py:139
+#: application/view/subscribe.py:140
 msgid "Failed to fetch the recipe."
 msgstr "Tarif alınamadı."
 
-#: application/view/subscribe.py:153 application/view/subscribe.py:331
+#: application/view/subscribe.py:154 application/view/subscribe.py:338
 msgid "Failed to save the recipe. Error:"
 msgstr "Tarif kaydedilemedi. Hata:"
 
-#: application/view/subscribe.py:195
+#: application/view/subscribe.py:196
 msgid "The Rss does not exist."
 msgstr "Rss mevcut değil."
 
-#: application/view/subscribe.py:278
+#: application/view/subscribe.py:283
 msgid "You can only delete the uploaded recipe."
 msgstr "Yalnızca yüklenen tarifi silebilirsiniz."
 
-#: application/view/subscribe.py:283
+#: application/view/subscribe.py:290
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr "Tarif abone olunmuş, silmeden önce aboneliği iptal edin."
 
-#: application/view/subscribe.py:304 application/view/translator.py:51
-#: application/view/translator.py:104 application/view/translator.py:117
-#: application/view/translator.py:140 application/view/translator.py:188
-#: application/view/translator.py:201 application/view/translator.py:230
-#: application/view/translator.py:273 application/view/translator.py:286
+#: application/view/subscribe.py:311 application/view/translator.py:54
+#: application/view/translator.py:107 application/view/translator.py:120
+#: application/view/translator.py:143 application/view/translator.py:191
+#: application/view/translator.py:204 application/view/translator.py:233
+#: application/view/translator.py:276 application/view/translator.py:289
 msgid "This recipe has not been subscribed to yet."
 msgstr "Bu tarife henüz abone olunmadı."
 
-#: application/view/subscribe.py:318
+#: application/view/subscribe.py:325
 msgid "Can not read uploaded file, Error:"
 msgstr "Yüklenen dosya okunamıyor, Hata:"
 
-#: application/view/subscribe.py:326
+#: application/view/subscribe.py:333
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
@@ -2563,22 +2577,22 @@ msgstr ""
 "Tarif çözümlenemedi. Lütfen tarifinizin utf-8 kodlamasında kaydedildiğinden "
 "emin olun."
 
-#: application/view/subscribe.py:349
+#: application/view/subscribe.py:358
 msgid "Cannot find any subclass of BasicNewsRecipe."
 msgstr "BasicNewsRecipe sınıfının hiçbir alt sınıfı bulunamıyor."
 
-#: application/view/subscribe.py:354
+#: application/view/subscribe.py:363
 msgid "The recipe is already in the library."
 msgstr "Tarif zaten kütüphanede."
 
-#: application/view/subscribe.py:387
+#: application/view/subscribe.py:396
 msgid "The login information for this recipe has been cleared."
 msgstr "Bu tarifin giriş bilgileri temizlendi."
 
-#: application/view/subscribe.py:391
+#: application/view/subscribe.py:400
 msgid "The login information for this recipe has been saved."
 msgstr "Bu tarifin giriş bilgileri kaydedildi."
 
-#: application/view/translator.py:81 application/view/translator.py:165
+#: application/view/translator.py:84 application/view/translator.py:168
 msgid "The api key is required."
 msgstr "API anahtarı gereklidir."

@@ -41,6 +41,8 @@ def get_mail_hook_filename(user, mail):
 
 #保存钩子源码到数据库
 def save_mail_hook(user, mail, src, filename):
+    if not user.can_upload_recipe():
+        raise PermissionError(_("You do not have sufficient privileges."))
     data = json.dumps({'file': filename, 'src': src}, ensure_ascii=False).encode('utf-8')
     dbItem = get_mail_hook(user, mail)
     if dbItem:

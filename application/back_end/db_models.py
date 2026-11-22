@@ -124,7 +124,7 @@ class KeUser(MyBaseModel): # kindleEar User
 
     #根据设置，获取发送邮件的配置数据
     def get_send_mail_service(self):
-        adminName = os.environ.get('ADMIN_NAME')
+        adminName = os.environ.get('ADMIN_NAME', 'admin')
         srv = self.send_mail_service.copy()
         if (self.name != adminName) and (srv.get('service') == 'admin'): #使用管理员的配置
             dbItem = KeUser.get_or_none(KeUser.name == adminName)
@@ -164,6 +164,11 @@ class KeUser(MyBaseModel): # kindleEar User
     def local_time(self, fmt=None):
         tm = datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=self.cfg('timezone'))))
         return tm.strftime(fmt) if fmt else tm
+
+    #判断当前用户是否拥有上传/执行自定义Recipe代码的权限（管理员始终拥有，普通用户根据配置决定）
+    def can_upload_recipe(self) -> bool:
+        adminName = os.environ.get('ADMIN_NAME', 'admin')
+        return (self.name == adminName) or bool(self.cfg('allow_recipe_upload', False))
         
 #用户的一些二进制内容，比如封面之类的
 class UserBlob(MyBaseModel):
@@ -313,6 +318,7 @@ class AppInfo(MyBaseModel):
     deliveryKey = 'deliveryKey'
     lastSharedRssTime = 'lastSharedRssTime'
     newUserMailService = 'newUserMailService'
+    newUserAllowRecipeUpload = 'newUserAllowRecipeUpload'
     signupType = 'signupType'
     inviteCodes = 'inviteCodes'
     sharedRssLibraryUrl = 'sharedRssLibraryUrl'

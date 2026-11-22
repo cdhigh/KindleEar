@@ -651,6 +651,8 @@ def _shelf_note(user):
         'be verified with list_shelf and read_article.')
 
 def tool_validate_recipe(user, args):
+    if not user.can_upload_recipe():
+        raise PermissionError('You do not have permission to validate or run custom recipes.')
     from calibre.web.feeds.recipes import compile_recipe
     src = args.get('src') or ''
     if not src.strip():
@@ -666,6 +668,8 @@ def tool_validate_recipe(user, args):
         'needs_subscription': recipe.needs_subscription}
 
 def tool_test_recipe(user, args):
+    if not user.can_upload_recipe():
+        raise PermissionError('You do not have permission to test custom recipes.')
     from application.work.recipe_tester import run_recipe_test
     src = args.get('src') or ''
     if not src.strip():
@@ -679,6 +683,8 @@ def tool_test_recipe(user, args):
         download_images=bool(args.get('download_images')))
 
 def tool_save_recipe(user, args):
+    if not user.can_upload_recipe():
+        raise PermissionError('You do not have permission to save custom recipes.')
     from calibre.web.feeds.recipes import compile_recipe
     from application.view.subscribe import SaveRecipeIfCorrect, SubscribeRecipe, DeleteRecipe
     src = args.get('src') or ''
@@ -765,6 +771,8 @@ def tool_get_sample_email(user, args):
         'note': 'Attachments are stored by name only, the hook receives an empty attachment list in tests.'}
 
 def tool_validate_mail_hook(user, args):
+    if not user.can_upload_recipe():
+        raise PermissionError('You do not have permission to validate mail hooks.')
     from application.mail_hook import compile_mail_hook
     src = args.get('src') or ''
     if not src.strip():
@@ -778,6 +786,8 @@ def tool_validate_mail_hook(user, args):
             'preprocess_email/preprocess_soup/extract_urls methods.'}
 
 def tool_test_mail_hook(user, args):
+    if not user.can_upload_recipe():
+        raise PermissionError('You do not have permission to test mail hooks.')
     from application.work.recipe_tester import run_hook_test
     src = args.get('src') or ''
     if not src.strip():
@@ -786,6 +796,8 @@ def tool_test_mail_hook(user, args):
         sample=args.get('sample'), build_book=bool(args.get('build_book')))
 
 def tool_save_mail_hook(user, args):
+    if not user.can_upload_recipe():
+        raise PermissionError('You do not have permission to save mail hooks.')
     from application.mail_hook import save_mail_hook, compile_mail_hook, MAX_HOOK_FILE_SIZE
     mail = (args.get('mail') or '').strip().lower()
     src = args.get('src') or ''

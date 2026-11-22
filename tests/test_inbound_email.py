@@ -255,6 +255,33 @@ class SafeHook(MailNewsRecipe):
         resp = self.client.post('/advanced/inboundmail/hook/delete', data={'mail': '*'})
         self.assertNotEqual(resp.json['status'], 'ok')
 
+        # 普通用户未授权时尝试上传 hook，应被权限拦截
+        from application.view.login import CreateAccountIfNotExist
+        KeUser.delete().where(KeUser.name == 'hookuser').execute()
+        with self.app.app_context():
+            CreateAccountIfNotExist('hookuser', 'hookuser123', 'hook@example.com', allow_recipe_upload=False)
+        WhiteList.create(mail='*', user='hookuser')
+        self.client.post('/login', data={'username': 'hookuser', 'password': 'hookuser123'})
+        resp = self.client.post('/advanced/inboundmail/hook',
+            data={'mail': '*', 'hook_file': (io.BytesIO(HOOK_SRC_BOTH.encode('utf-8')), 'hook.py')},
+            content_type='multipart/form-data')
+        self.assertEqual(resp.json.get('status'), 'You do not have sufficient privileges.')
+
+        # 授权后上传成功
+        user_hook = KeUser.get_or_none(KeUser.name == 'hookuser')
+        user_hook.set_cfg('allow_recipe_upload', True)
+        user_hook.save()
+        resp = self.client.post('/advanced/inboundmail/hook',
+            data={'mail': '*', 'hook_file': (io.BytesIO(HOOK_SRC_BOTH.encode('utf-8')), 'hook.py')},
+            content_type='multipart/form-data')
+        self.assertEqual(resp.json.get('status'), 'ok')
+
+        # 清理并切回 admin
+        WhiteList.delete().where(WhiteList.user == 'hookuser').execute()
+        UserBlob.delete().where(UserBlob.user == 'hookuser').execute()
+        user_hook.delete_instance()
+        self.client.post('/login', data={'username': 'admin', 'password': 'admin'})
+
     #钩子的匹配优先级和调用
     def test_run_mail_hook(self):
         from application.mail_hook import save_mail_hook, run_mail_preprocess_email, run_mail_preprocess_soup

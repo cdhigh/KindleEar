@@ -44,12 +44,17 @@ COPY ./docker/run_docker.sh /usr/local/bin/run_docker.sh
 COPY ./docker/gunicorn.conf.py ./
 
 #apk add libstdc++ && \
-RUN pip install --upgrade pip && \
+# Install su-exec for dropping privileges, and create non-root user/group
+RUN apk add --no-cache su-exec && \
+    addgroup -g 1000 kindleear && \
+    adduser -u 1000 -G kindleear -s /bin/sh -D kindleear && \
+    pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     chmod +x /usr/local/bin/mp3cat /usr/local/bin/run_docker.sh
 
 COPY ./application/ ./application/
 COPY --from=builder /usr/kindleear/application/recipes/builtin_recipes.* ./application/recipes/
+RUN chown -R kindleear:kindleear /usr/kindleear
 
 EXPOSE 8000
 

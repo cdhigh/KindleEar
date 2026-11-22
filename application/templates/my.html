@@ -54,10 +54,12 @@
       <select class="pure-input-rounded width100" id="language_pick">
       </select>
     </div>
+    {% if can_upload_recipe -%}
     <div class=" pure-u-1-6 upload-recipe">
-      <button class="upload-recipe-btn" title="{{_('Upload custom recipe')}}"onclick="OpenUploadRecipeDialog()"><i class="iconfont icon-upload"></i></button>
+      <button class="upload-recipe-btn" title="{{_('Upload custom recipe')}}" onclick="OpenUploadRecipeDialog()"><i class="iconfont icon-upload"></i></button>
     </div>
-    <div class="pure-form">
+    {% endif -%}
+    <div class="pure-form search-recipe-box" style="margin-left:20px;">
       <input type="text" name="search" id="search_recipe" class="pure-input-1 pure-input-rounded" placeholder="{{ _('Search')}}" />
     </div>
   </div>

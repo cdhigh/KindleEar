@@ -48,6 +48,14 @@
           <option value="730" {% if exp == 730 %}selected="selected"{% endif %}>{{_("2 Years")}}</option>
         </select>
       </div>
+      <div class="pure-control-group">
+        <label for="allow_recipe_upload">{{_("Upload recipe")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2 bool" name="allow_recipe_upload">
+          {% set allow = user.cfg('allow_recipe_upload') if user else False %}
+          <option value="no" {% if not allow %}selected="selected"{% endif %}>{{_("Disable")}}</option>
+          <option value="yes" {% if allow %}selected="selected"{% endif %}>{{_("Enable")}}</option>
+        </select>
+      </div>
       <div class="pure-control-group" style="text-align:center;">
         <button type="submit" class="pure-button pure-button-primary pure-input-rounded">{{submitTitle}}</button>
       </div>

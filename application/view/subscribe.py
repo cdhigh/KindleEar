@@ -58,6 +58,7 @@ def MySubscription(user: KeUser):
     my_custom_rss = json.dumps(my_custom_rss, separators=(',', ':'))
     my_uploaded_recipes=json.dumps(my_uploaded_recipes, separators=(',', ':'))
     my_booked_recipes = json.dumps(my_booked_recipes, separators=(',', ':'))
+    can_upload_recipe = user.can_upload_recipe() #判断当前用户是否有权上传自定义Recipe
     subscribe_url = urljoin(app.config['APP_DOMAIN'], url_for("bpSubscribe.MySubscription"))
     url2book_url = urljoin(app.config['APP_DOMAIN'], url_for("bpUrl2Book.Url2BookRoute"))
     return render_template("my.html", tab="my", **locals())
@@ -228,6 +229,8 @@ def NotifyNewSubscription(title: str, url: str, recipeId: bool, key: str=''):
 def RecipeAjaxPost(actType: str, user: KeUser):
     form = request.form
     if actType == 'upload': #上传Recipe
+        if not user.can_upload_recipe():
+            return {'status': _('You do not have sufficient privileges.')}
         return SaveUploadedRecipe(user, form.get('action_after_upload'))
 
     recipeId = form.get('id', '')
@@ -346,6 +349,8 @@ def SaveUploadedRecipe(user, actionAfterUpload):
 #尝试编译recipe代码，如果成功并且数据库中不存在，则保存到数据库
 #如果失败则抛出异常，否则返回一个元数据字典
 def SaveRecipeIfCorrect(user: KeUser, src: str):
+    if not user.can_upload_recipe():
+        raise Exception(_('You do not have sufficient privileges.'))
     from calibre.web.feeds.recipes import compile_recipe
 
     recipe = compile_recipe(src)

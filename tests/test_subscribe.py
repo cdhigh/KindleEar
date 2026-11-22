@@ -246,3 +246,40 @@ class SubscribeTestCase(BaseTestCase):
         user_bob.delete_instance()
         self.client.post('/login', data={'username': 'admin', 'password': 'admin'})
 
+    def test_recipe_upload_permission(self):
+        from application.view.login import CreateAccountIfNotExist
+        # 创建普通用户 testuser
+        KeUser.delete().where(KeUser.name == 'testuser').execute()
+        with self.app.app_context():
+            CreateAccountIfNotExist('testuser', 'testuser123', 'test@example.com', allow_recipe_upload=False)
+        user_test = KeUser.get_or_none(KeUser.name == 'testuser')
+        self.assertIsNotNone(user_test)
+        self.assertFalse(user_test.can_upload_recipe())
+
+        # 切换到普通用户登录
+        self.client.post('/login', data={'username': 'testuser', 'password': 'testuser123'})
+
+        # 尝试上传 recipe，应当被权限拦截
+        feeds = ['http://www.g.com']
+        src = GenerateRecipeSource('non_admin_test', feeds, user_test)
+        data = {'recipe_file': (io.BytesIO(src.encode('utf-8')), 'test.recipe')}
+        resp = self.client.post('/recipe/upload', data=data, follow_redirects=True, content_type='multipart/form-data')
+        self.assertEqual(resp.json.get('status'), 'You do not have sufficient privileges.')
+
+        # 管理员为 testuser 开启上传权限
+        user_test.set_cfg('allow_recipe_upload', True)
+        user_test.save()
+
+        # 重新上传，此时应当成功
+        data = {'recipe_file': (io.BytesIO(src.encode('utf-8')), 'test.recipe')}
+        resp = self.client.post('/recipe/upload', data=data, follow_redirects=True, content_type='multipart/form-data')
+        self.assertEqual(resp.json.get('status'), 'ok')
+        upload_id = resp.json.get('id')
+        self.assertIsNotNone(upload_id)
+
+        # 清理
+        Recipe.delete().where(Recipe.user == 'testuser').execute()
+        user_test.delete_instance()
+        self.client.post('/login', data={'username': 'admin', 'password': 'admin'})
+
+

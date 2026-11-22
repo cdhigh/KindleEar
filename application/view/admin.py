@@ -24,8 +24,9 @@ def Admin(user: KeUser):
         mailSrv = AppInfo.get_value(AppInfo.newUserMailService, 'admin')
         signupType = AppInfo.get_value(AppInfo.signupType, 'oneTimeCode')
         inviteCodes = AppInfo.get_value(AppInfo.inviteCodes, '')
+        newUserAllowRecipeUpload = AppInfo.get_value(AppInfo.newUserAllowRecipeUpload, 'no')
         return render_template('admin.html', title='Account', tab='admin', users=users, adminName=adminName,
-            mailSrv=mailSrv, signupType=signupType, inviteCodes=inviteCodes, tips='')
+            mailSrv=mailSrv, signupType=signupType, inviteCodes=inviteCodes, newUserAllowRecipeUpload=newUserAllowRecipeUpload, tips='')
     else:
         return render_template('change_password.html', tips='', tab='admin', user=user, shareKey=user.share_links.get('key'))
 
@@ -40,12 +41,14 @@ def AdminPost(user: KeUser):
     mailSrv = request.form.get('sm_service')
     signupType = request.form.get('signup_type')
     inviteCodes = request.form.get('invite_codes', '')
+    newUserAllowRecipeUpload = request.form.get('new_user_allow_recipe_upload', 'no')
     AppInfo.set_value(AppInfo.newUserMailService, mailSrv)
     AppInfo.set_value(AppInfo.signupType, signupType)
     AppInfo.set_value(AppInfo.inviteCodes, inviteCodes)
+    AppInfo.set_value(AppInfo.newUserAllowRecipeUpload, newUserAllowRecipeUpload)
     users = sorted(KeUser.get_all(), key=attrgetter('created_time'))
     return render_template('admin.html', title='Account', tab='admin', users=users, adminName=adminName,
-            mailSrv=mailSrv, signupType=signupType, inviteCodes=inviteCodes, tips=_("Settings Saved!"))
+            mailSrv=mailSrv, signupType=signupType, inviteCodes=inviteCodes, newUserAllowRecipeUpload=newUserAllowRecipeUpload, tips=_("Settings Saved!"))
 
 #管理员添加一个账号
 @bpAdmin.route("/account/add", endpoint='AdminAddAccount')
@@ -70,6 +73,7 @@ def AdminAddAccountPost(user: KeUser):
     email = form.get('email', '')
     sm_service = form.get('sm_service')
     expiration = str_to_int(form.get('expiration', '0'))
+    allow_recipe = form.get('allow_recipe_upload') == 'yes'
 
     specialChars = ['<', '>', '&', '\\', '/', '%', '*', '.', '{', '}', ',', ';', '|', ' ']
     tips = ''
@@ -84,7 +88,7 @@ def AdminAddAccountPost(user: KeUser):
     else:
         sm_service = {'service': 'admin'} if sm_service == 'admin' else {}
         sender = user.cfg('email') if sm_service else email #和管理员一致则邮件发件地址也一致
-        if not CreateAccountIfNotExist(username, password1, email, sender, sm_service, expiration):
+        if not CreateAccountIfNotExist(username, password1, email, sender, sm_service, expiration, allow_recipe_upload=allow_recipe):
             tips = _("The password includes non-ascii chars.")
 
     if tips:
@@ -157,6 +161,7 @@ def AdminAccountChangePost(name: str, user: KeUser):
         email = form.get('email', '')
         smType = form.get('sm_service')
         expiration = str_to_int(form.get('expiration', '0'))
+        allow_recipe = form.get('allow_recipe_upload') == 'yes'
 
         dbItem = KeUser.get_or_none(KeUser.name == username)
         if not dbItem:
@@ -177,6 +182,7 @@ def AdminAccountChangePost(name: str, user: KeUser):
             elif dbItem.send_mail_service.get('service') == 'admin': #从和管理员一致变更为独立设置
                 dbItem.send_mail_service = {}
             dbItem.set_cfg('email', email)
+            dbItem.set_cfg('allow_recipe_upload', allow_recipe)
             dbItem.save()
             tips = _("Change success.")
     

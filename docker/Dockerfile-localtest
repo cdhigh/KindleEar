@@ -9,12 +9,17 @@ COPY ./tools/update_req.py ./tools/update_req.py
 COPY ./main.py ./config.py ./docker/gunicorn.conf.py ./
 COPY ./tools/mp3cat/mp3cat /usr/local/bin/mp3cat
 COPY ./docker/run_docker.sh /usr/local/bin/run_docker.sh
-RUN python /usr/kindleear/tools/update_req.py docker $TARGETPLATFORM && \
+# Install su-exec for dropping privileges, and create non-root user/group
+RUN apk add --no-cache su-exec && \
+    addgroup -g 1000 kindleear && \
+    adduser -u 1000 -G kindleear -s /bin/sh -D kindleear && \
+    python /usr/kindleear/tools/update_req.py docker $TARGETPLATFORM && \
     pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     chmod +x /usr/local/bin/mp3cat /usr/local/bin/run_docker.sh
 
 COPY ./application/ ./application/
+RUN chown -R kindleear:kindleear /usr/kindleear
 
 EXPOSE 8000
 
