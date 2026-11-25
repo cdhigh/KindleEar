@@ -39,6 +39,8 @@ def init_app(name, cfgMap, set_env, debug=False):
     from .back_end.db_models import create_database_tables, connect_database, close_database
     create_database_tables()
     randomize_keys(app)
+    from .lib.recipe_helper import ClearStaleBuiltinCache
+    ClearStaleBuiltinCache()
 
     @app.before_request
     def BeforeRequest():

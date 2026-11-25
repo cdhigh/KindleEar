@@ -6,7 +6,7 @@
 #without altering the existing contents of the zip/xml file.
 #If there are files with the same name inside the archive, they will be directly overwritten.
 
-import os, sys, re, io, glob, zipfile, tempfile, builtins, shutil
+import os, sys, re, io, glob, zipfile, tempfile, builtins, shutil, datetime
 from xml.sax.saxutils import quoteattr
 
 builtins.__dict__['_'] = lambda x: x
@@ -81,8 +81,9 @@ def serialize_collection(mapping_of_recipe_classes):
 
     items = '\n'.join(collection)
 
+    built_at = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d%H%M%S')
     return f'''<?xml version='1.0' encoding='utf-8'?>
-<recipe_collection xmlns="http://calibre-ebook.com/recipe_collection" count="{len(collection)}">
+<recipe_collection xmlns="http://calibre-ebook.com/recipe_collection" count="{len(collection)}" built_at="{built_at}">
 {items}
 </recipe_collection>'''.encode()
 

@@ -67,6 +67,11 @@ def init_task_queue_service(app):
             'schedule': crontab(minute='0', hour='0', day_of_month='*/1'),
             'args': []
         },
+        'update_recipes': {
+            'task': 'update_recipes', #每天凌晨3点检查已订阅内置recipe更新
+            'schedule': crontab(minute='0', hour='3', day_of_month='*/1'),
+            'args': []
+        },
     }
     app.extensions["celery"] = celery_app
     return celery_app
@@ -80,6 +85,11 @@ def check_deliver():
 def remove_logs():
     from ..view.logs import RemoveLogs
     RemoveLogs()
+
+@shared_task(name="update_recipes", ignore_result=True)
+def update_recipes():
+    from ..lib.recipe_updater import UpdateSubscribedBuiltinRecipes
+    UpdateSubscribedBuiltinRecipes()
 
 @shared_task(ignore_result=True)
 def start_celery_worker_impl(**payload):

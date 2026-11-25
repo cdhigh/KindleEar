@@ -93,6 +93,8 @@ class KeUser(MyBaseModel): # kindleEar User
         BookedRecipe.delete().where(BookedRecipe.user == self.name).execute()
         Recipe.delete().where(Recipe.user == self.name).execute()
         WhiteList.delete().where(WhiteList.user == self.name).execute()
+        from application.lib.recipe_helper import CleanupUnusedBuiltinCache
+        CleanupUnusedBuiltinCache()
         DeliverLog.delete().where(DeliverLog.user == self.name).execute()
         UserBlob.delete().where(UserBlob.user == self.name).execute()
         LastDelivered.delete().where(LastDelivered.user == self.name).execute()
@@ -322,6 +324,10 @@ class AppInfo(MyBaseModel):
     signupType = 'signupType'
     inviteCodes = 'inviteCodes'
     sharedRssLibraryUrl = 'sharedRssLibraryUrl'
+    builtinRecipesBuildId = 'builtinRecipesBuildId'
+    autoUpdateRecipes = 'autoUpdateRecipes'
+    lastRecipesUpdateTime = 'lastRecipesUpdateTime'
+    lastRecipesCommitSha = 'lastRecipesCommitSha'
     
     @classmethod
     def get_value(cls, name, default=''):

@@ -7,21 +7,21 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KindleEar v3.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-22 06:18-0300\n"
+"POT-Creation-Date: 2026-11-25 11:04-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: KindleEar <LL@li.org>\n"
 "Language: de\n"
+"Language-Team: KindleEar <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: application/mail_hook.py:45 application/templates/my.html:61
-#: application/view/admin.py:66 application/view/admin.py:107
-#: application/view/admin.py:139 application/view/adv.py:101
-#: application/view/subscribe.py:233 application/view/subscribe.py:353
+#: application/mail_hook.py:45 application/view/admin.py:68
+#: application/view/admin.py:109 application/view/admin.py:141
+#: application/view/adv.py:101 application/view/subscribe.py:233
+#: application/view/subscribe.py:354
 msgid "You do not have sufficient privileges."
 msgstr "Sie haben nicht genügend Berechtigungen."
 
@@ -58,7 +58,7 @@ msgstr "Konto"
 msgid "Signup settings"
 msgstr "Anmeldeeinstellungen"
 
-#: application/templates/admin.html:19
+#: application/templates/admin.html:19 application/templates/admin.html:55
 #: application/templates/adv_calibre_options.html:18
 #: application/templates/adv_mcp.html:100
 #: application/templates/adv_proxy.html:18
@@ -101,7 +101,7 @@ msgstr "Dauerhafter Code"
 msgid "Upload recipe"
 msgstr "Rezept hochladen"
 
-#: application/templates/admin.html:38
+#: application/templates/admin.html:38 application/templates/admin.html:62
 #: application/templates/adv_inboundmail.html:16
 #: application/templates/adv_uploadcover.html:15
 #: application/templates/book_summarizer.html:19
@@ -127,63 +127,30 @@ msgstr "Einladungscodes"
 msgid "one code per line"
 msgstr "Ein Code pro Zeile"
 
-#: application/templates/admin.html:50
-msgid "Accounts"
-msgstr "Konten"
+#: application/templates/admin.html:54
+msgid "Recipe auto-update"
+msgstr "Rezept-Auto-Update"
 
-#: application/templates/admin.html:50
-#: application/templates/adv_inboundmail.html:69
-#: application/templates/my.html:34 application/view/admin.py:60
-#: application/view/admin.py:67 application/view/admin.py:95
-msgid "Add"
-msgstr "Hinzufügen"
+#: application/templates/admin.html:56
+msgid "Update now"
+msgstr "Jetzt aktualisieren"
 
-#: application/templates/admin.html:61
-#: application/templates/adv_archive.html:69
-#: application/templates/home.html:19 application/templates/login.html:24
-#: application/templates/logs.html:70
-#: application/templates/reset_password.html:19
-#: application/templates/reset_password.html:20
-#: application/templates/settings.html:241
-#: application/templates/signup.html:21
-#: application/templates/user_account.html:15
-msgid "Username"
-msgstr "Benutzername"
+#: application/templates/admin.html:57
+msgid "Clear cache"
+msgstr "Cache leeren"
 
-#: application/templates/admin.html:62
-msgid "AutoSend"
-msgstr "Automatisch senden"
+#: application/templates/admin.html:60
+msgid "Frequency"
+msgstr "Häufigkeit"
 
 #: application/templates/admin.html:63
-#: application/templates/change_password.html:27
-#: application/templates/reset_password.html:26
-#: application/templates/signup.html:33
-#: application/templates/user_account.html:27
-msgid "Email"
-msgstr "Email"
+#: application/templates/adv_inboundmail.html:25
+#: application/templates/settings.html:52
+#: application/templates/settings.html:175
+msgid "1 Day"
+msgstr "1 Tag"
 
-#: application/templates/admin.html:64
-#: application/templates/user_account.html:39
-msgid "Expiration"
-msgstr "Ablauf"
-
-#: application/templates/admin.html:65
-msgid "Operation"
-msgstr "Betrieb"
-
-#: application/templates/admin.html:72
-msgid "Yes"
-msgstr "Ja"
-
-#: application/templates/admin.html:72
-msgid "No"
-msgstr "Nein"
-
-#: application/templates/admin.html:75
-msgid "Never"
-msgstr "Nie"
-
-#: application/templates/admin.html:77
+#: application/templates/admin.html:64 application/templates/admin.html:112
 #: application/templates/adv_inboundmail.html:26
 #: application/templates/settings.html:58
 #: application/templates/settings.html:181
@@ -191,39 +158,105 @@ msgstr "Nie"
 msgid "7 Days"
 msgstr "7 Tage"
 
-#: application/templates/admin.html:79
+#: application/templates/admin.html:68
+msgid "Cached"
+msgstr "Zwischengespeichert"
+
+#: application/templates/admin.html:70
+msgid "Last updated"
+msgstr "Zuletzt aktualisiert"
+
+#: application/templates/admin.html:78
+msgid "Failed"
+msgstr "Fehlgeschlagen"
+
+#: application/templates/admin.html:85
+msgid "Accounts"
+msgstr "Konten"
+
+#: application/templates/admin.html:85
+#: application/templates/adv_inboundmail.html:69
+#: application/templates/my.html:34 application/view/admin.py:62
+#: application/view/admin.py:69 application/view/admin.py:97
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: application/templates/admin.html:96
+#: application/templates/adv_archive.html:69 application/templates/home.html:19
+#: application/templates/login.html:24 application/templates/logs.html:70
+#: application/templates/reset_password.html:19
+#: application/templates/reset_password.html:20
+#: application/templates/settings.html:241 application/templates/signup.html:21
+#: application/templates/user_account.html:15
+msgid "Username"
+msgstr "Benutzername"
+
+#: application/templates/admin.html:97
+msgid "AutoSend"
+msgstr "Automatisch senden"
+
+#: application/templates/admin.html:98
+#: application/templates/change_password.html:27
+#: application/templates/reset_password.html:26
+#: application/templates/signup.html:33
+#: application/templates/user_account.html:27
+msgid "Email"
+msgstr "Email"
+
+#: application/templates/admin.html:99
+#: application/templates/user_account.html:39
+msgid "Expiration"
+msgstr "Ablauf"
+
+#: application/templates/admin.html:100
+msgid "Operation"
+msgstr "Betrieb"
+
+#: application/templates/admin.html:107
+msgid "Yes"
+msgstr "Ja"
+
+#: application/templates/admin.html:107
+msgid "No"
+msgstr "Nein"
+
+#: application/templates/admin.html:110
+msgid "Never"
+msgstr "Nie"
+
+#: application/templates/admin.html:114
 #: application/templates/user_account.html:44
 msgid "1 Month"
 msgstr "1 Monat"
 
-#: application/templates/admin.html:81
+#: application/templates/admin.html:116
 #: application/templates/user_account.html:45
 msgid "3 Months"
 msgstr "3 Monate"
 
-#: application/templates/admin.html:83
+#: application/templates/admin.html:118
 #: application/templates/user_account.html:46
 msgid "6 Months"
 msgstr "6 Monate"
 
-#: application/templates/admin.html:85
+#: application/templates/admin.html:120
 #: application/templates/user_account.html:47
 msgid "1 Year"
 msgstr "1 Jahr"
 
-#: application/templates/admin.html:87
+#: application/templates/admin.html:122
 #: application/templates/user_account.html:48
 msgid "2 Years"
 msgstr "2 Jahre"
 
-#: application/templates/admin.html:92
+#: application/templates/admin.html:127
 #: application/templates/change_password.html:3
-#: application/templates/change_password.html:13 application/view/admin.py:133
-#: application/view/admin.py:189
+#: application/templates/change_password.html:13 application/view/admin.py:135
+#: application/view/admin.py:191
 msgid "Edit account"
 msgstr "Konto bearbeiten"
 
-#: application/templates/admin.html:96
+#: application/templates/admin.html:131
 #: application/templates/adv_inboundmail.html:62
 #: application/templates/adv_uploadcss.html:31
 #: application/templates/base.html:25 application/templates/webmail.html:22
@@ -254,17 +287,15 @@ msgid "Email or Username"
 msgstr "E-Mail oder Benutzername"
 
 #: application/templates/adv_archive.html:56
-#: application/templates/adv_archive.html:72
-#: application/templates/base.html:54 application/templates/home.html:20
-#: application/templates/login.html:28 application/templates/settings.html:245
-#: application/templates/signup.html:25
+#: application/templates/adv_archive.html:72 application/templates/base.html:54
+#: application/templates/home.html:20 application/templates/login.html:28
+#: application/templates/settings.html:245 application/templates/signup.html:25
 #: application/templates/user_account.html:19
 msgid "Password"
 msgstr "Passwort"
 
 #: application/templates/adv_archive.html:59
-#: application/templates/adv_archive.html:75
-#: application/templates/base.html:64
+#: application/templates/adv_archive.html:75 application/templates/base.html:64
 msgid "Verify"
 msgstr "Verifizieren"
 
@@ -306,10 +337,8 @@ msgid "Inbound Mail"
 msgstr "Eingehende E-Mails"
 
 #: application/templates/adv_base.html:66
-#: application/templates/adv_base.html:70
-#: application/templates/adv_dict.html:3
-#: application/templates/adv_dict.html:13
-#: application/templates/reader.html:134
+#: application/templates/adv_base.html:70 application/templates/adv_dict.html:3
+#: application/templates/adv_dict.html:13 application/templates/reader.html:134
 msgid "Dictionary"
 msgstr "Wörterbuch"
 
@@ -345,8 +374,7 @@ msgid "Calibre Options"
 msgstr "Calibre-Optionen"
 
 #: application/templates/adv_base.html:128
-#: application/templates/adv_base.html:132
-#: application/templates/adv_mcp.html:3
+#: application/templates/adv_base.html:132 application/templates/adv_mcp.html:3
 msgid "MCP Server"
 msgstr "MCP-Server"
 
@@ -465,12 +493,6 @@ msgstr "Speichern und weiterleiten"
 msgid "Email Retention"
 msgstr "E-Mail-Aufbewahrung"
 
-#: application/templates/adv_inboundmail.html:25
-#: application/templates/settings.html:52
-#: application/templates/settings.html:175
-msgid "1 Day"
-msgstr "1 Tag"
-
 #: application/templates/adv_inboundmail.html:27
 #: application/templates/settings.html:59
 msgid "30 Days"
@@ -538,11 +560,11 @@ msgstr "Bitte wählen Sie eine Datei aus."
 #: application/templates/adv_inboundmail.html:87
 #, python-brace-format
 msgid ""
-"A hook file ({0}) already exists for this address, you can replace or delete"
-" it."
+"A hook file ({0}) already exists for this address, you can replace or "
+"delete it."
 msgstr ""
-"Für diese Adresse existiert bereits eine Hook-Datei ({0}), Sie können sie "
-"ersetzen oder löschen."
+"Für diese Adresse existiert bereits eine Hook-Datei ({0}), Sie können sie"
+" ersetzen oder löschen."
 
 #: application/templates/adv_inboundmail.html:88
 msgid ""
@@ -567,10 +589,10 @@ msgid ""
 "Cline, etc.) operate your KindleEar account: subscriptions, pushing, the "
 "reading shelf, the inbox, and the recipe / mail-hook authoring workbench."
 msgstr ""
-"Lassen Sie KI-Clients, die das Model Context Protocol unterstützen (Claude, "
-"Cursor, Cline usw.), Ihr KindleEar-Konto bedienen: Abonnements, Zustellung, "
-"das Online-Regal, den Posteingang sowie die Werkstatt zum Erstellen von "
-"Recipes und Mail-Hooks."
+"Lassen Sie KI-Clients, die das Model Context Protocol unterstützen "
+"(Claude, Cursor, Cline usw.), Ihr KindleEar-Konto bedienen: Abonnements, "
+"Zustellung, das Online-Regal, den Posteingang sowie die Werkstatt zum "
+"Erstellen von Recipes und Mail-Hooks."
 
 #: application/templates/adv_mcp.html:60
 msgid "Enable MCP server"
@@ -581,8 +603,9 @@ msgid ""
 "When disabled, MCP clients cannot connect; the token is kept and takes "
 "effect again after re-enabling."
 msgstr ""
-"Bei Deaktivierung können MCP-Clients keine Verbindung herstellen; der Token "
-"bleibt erhalten und wird nach der erneuten Aktivierung wieder wirksam."
+"Bei Deaktivierung können MCP-Clients keine Verbindung herstellen; der "
+"Token bleibt erhalten und wird nach der erneuten Aktivierung wieder "
+"wirksam."
 
 #: application/templates/adv_mcp.html:66
 #: application/templates/book_summarizer.html:39
@@ -660,10 +683,11 @@ msgstr "Coverbild hochladen"
 
 #: application/templates/adv_uploadcover.html:10
 msgid ""
-"Upload cover images from local with an aspect ratio of approximately 0.625."
+"Upload cover images from local with an aspect ratio of approximately "
+"0.625."
 msgstr ""
-"Laden Sie Coverbilder von lokal mit einem Seitenverhältnis von etwa 0,625 "
-"hoch."
+"Laden Sie Coverbilder von lokal mit einem Seitenverhältnis von etwa 0,625"
+" hoch."
 
 #: application/templates/adv_uploadcover.html:13
 msgid "Include cover"
@@ -753,8 +777,7 @@ msgstr "Melden Sie dem Server, dass dieser Feed ungültig ist."
 
 #: application/templates/base.html:36
 msgid "Are you sure to REMOVE ALL CUSTOM RSS?"
-msgstr ""
-"Sind Sie sicher, dass Sie ALLE BENUTZERDEFINIERTEN RSS ENTFERNEN möchten?"
+msgstr "Sind Sie sicher, dass Sie ALLE BENUTZERDEFINIERTEN RSS ENTFERNEN möchten?"
 
 #: application/templates/base.html:37
 msgid "Share links, share happiness"
@@ -854,12 +877,13 @@ msgstr "Danke"
 
 #: application/templates/base.html:61
 msgid ""
-"Your recipe has been uploaded, and it can be found in the Library section. "
-"If you dont see it, please make sure to switch to the correct language."
+"Your recipe has been uploaded, and it can be found in the Library "
+"section. If you dont see it, please make sure to switch to the correct "
+"language."
 msgstr ""
-"Ihr Rezept wurde hochgeladen und ist im Bereich 'Bibliothek' zu finden. Wenn"
-" Sie es nicht sehen, stellen Sie bitte sicher, dass Sie die richtige Sprache"
-" auswählen."
+"Ihr Rezept wurde hochgeladen und ist im Bereich 'Bibliothek' zu finden. "
+"Wenn Sie es nicht sehen, stellen Sie bitte sicher, dass Sie die richtige "
+"Sprache auswählen."
 
 #: application/templates/base.html:62
 msgid "Your recipe have been deleted."
@@ -925,8 +949,7 @@ msgstr "Ungültiger Bericht"
 
 #: application/templates/base.html:78
 msgid "Are you confirming that this link is invalid or off the cloud?"
-msgstr ""
-"Bestätigen Sie, dass dieser Link ungültig oder nicht mehr verfügbar ist?"
+msgstr "Bestätigen Sie, dass dieser Link ungültig oder nicht mehr verfügbar ist?"
 
 #: application/templates/base.html:79
 msgid "Customize delivery time"
@@ -969,10 +992,8 @@ msgid "Delivery times"
 msgstr "Lieferzeiten"
 
 #: application/templates/base.html:89
-msgid ""
-"The customized delivery time for the recipe has been successfully saved."
-msgstr ""
-"Die angepasste Lieferzeit für das Rezept wurde erfolgreich gespeichert."
+msgid "The customized delivery time for the recipe has been successfully saved."
+msgstr "Die angepasste Lieferzeit für das Rezept wurde erfolgreich gespeichert."
 
 #: application/templates/base.html:90
 msgid "The account have been deleted."
@@ -982,8 +1003,8 @@ msgstr "Das Konto wurde gelöscht."
 msgid "The username or password is empty."
 msgstr "Der Benutzername oder das Passwort ist leer."
 
-#: application/templates/base.html:92 application/view/admin.py:85
-#: application/view/admin.py:170 application/view/admin.py:197
+#: application/templates/base.html:92 application/view/admin.py:87
+#: application/view/admin.py:172 application/view/admin.py:199
 #: application/view/login.py:244 application/view/login.py:297
 msgid "The two new passwords are dismatch."
 msgstr "Die beiden neuen Passwörter stimmen nicht überein."
@@ -1006,8 +1027,8 @@ msgstr "Cover-Dateien erfolgreich hochgeladen."
 
 #: application/templates/base.html:97
 msgid ""
-"Total size of the files you selected exceeds 16MB. Please reduce the image "
-"resolution or upload in batches."
+"Total size of the files you selected exceeds 16MB. Please reduce the "
+"image resolution or upload in batches."
 msgstr ""
 "Die Gesamtgröße der ausgewählten Dateien überschreitet 16 MB. Bitte "
 "reduzieren Sie die Bildauflösung oder laden Sie die Dateien in mehreren "
@@ -1051,13 +1072,13 @@ msgstr "Ai"
 
 #: application/templates/base.html:107
 msgid ""
-"The test email has been successfully sent to the following addresses. Please"
-" check your inbox or spam folder to confirm its delivery. Depending on your "
-"email server, there may be a slight delay."
+"The test email has been successfully sent to the following addresses. "
+"Please check your inbox or spam folder to confirm its delivery. Depending"
+" on your email server, there may be a slight delay."
 msgstr ""
-"Die Test-E-Mail wurde erfolgreich an die folgenden Adressen gesendet. Bitte "
-"prüfen Sie Ihren Posteingang oder Spam-Ordner, um die Zustellung zu "
-"bestätigen. Je nach E-Mail-Server kann es zu einer leichten Verzögerung "
+"Die Test-E-Mail wurde erfolgreich an die folgenden Adressen gesendet. "
+"Bitte prüfen Sie Ihren Posteingang oder Spam-Ordner, um die Zustellung zu"
+" bestätigen. Je nach E-Mail-Server kann es zu einer leichten Verzögerung "
 "kommen."
 
 #: application/templates/base.html:108
@@ -1110,8 +1131,8 @@ msgstr "Bitte wählen Sie ein einzelnes Element aus."
 msgid "Please select at least one item."
 msgstr "Bitte wählen Sie mindestens ein Element aus."
 
-#: application/templates/base.html:119 application/view/admin.py:81
-#: application/view/admin.py:156 application/view/admin.py:195
+#: application/templates/base.html:119 application/view/admin.py:83
+#: application/view/admin.py:158 application/view/admin.py:197
 #: application/view/adv.py:529 application/view/extension.py:34
 #: application/view/extension.py:63 application/view/inbound_email.py:515
 #: application/view/inbound_email.py:523 application/view/inbound_email.py:538
@@ -1507,12 +1528,12 @@ msgstr "Von Calibre geerbt"
 #, python-format
 msgid ""
 "Empowered by %(calibre)s, you can easily create e-books on a Python-"
-"supported online platform and seamlessly transfer them to your e-reader or "
-"other reading devices."
+"supported online platform and seamlessly transfer them to your e-reader "
+"or other reading devices."
 msgstr ""
 "Unterstützt durch %(calibre)s können Sie auf einer Python-unterstützten "
-"Online-Plattform problemlos E-Books erstellen und nahtlos auf Ihren E-Reader"
-" oder andere Lesegeräte übertragen."
+"Online-Plattform problemlos E-Books erstellen und nahtlos auf Ihren "
+"E-Reader oder andere Lesegeräte übertragen."
 
 #: application/templates/home.html:42
 msgid "Share Your Ideas"
@@ -1522,14 +1543,14 @@ msgstr "Teilen Sie Ihre Ideen"
 #, python-format
 msgid ""
 "With the open-source %(kindleear)s application, you can set up your own "
-"server to deliver daily news feeds to your e-reader and effortlessly share "
-"the service with friends."
+"server to deliver daily news feeds to your e-reader and effortlessly "
+"share the service with friends."
 msgstr ""
-"Mit der Open-Source-Anwendung %(kindleear)s können Sie Ihren eigenen Server "
-"einrichten, um tägliche Nachrichtenfeeds an Ihren E-Reader zu liefern und "
-"den Dienst mühelos mit Freunden zu teilen."
+"Mit der Open-Source-Anwendung %(kindleear)s können Sie Ihren eigenen "
+"Server einrichten, um tägliche Nachrichtenfeeds an Ihren E-Reader zu "
+"liefern und den Dienst mühelos mit Freunden zu teilen."
 
-#: application/templates/library.html:50 application/templates/my.html:65
+#: application/templates/library.html:50 application/templates/my.html:63
 msgid "Search"
 msgstr "Suche"
 
@@ -1539,8 +1560,8 @@ msgid ""
 "The website does not allow registration. You can ask the owner for an "
 "account."
 msgstr ""
-"Die Website erlaubt keine Registrierung. Sie können den Besitzer nach einem "
-"Konto fragen."
+"Die Website erlaubt keine Registrierung. Sie können den Besitzer nach "
+"einem Konto fragen."
 
 #: application/templates/logs.html:11
 msgid "Only display last 20 logs"
@@ -1578,35 +1599,35 @@ msgstr "Bibliothek"
 msgid "get more recipes"
 msgstr "Mehr Rezepte holen"
 
-#: application/templates/my.html:72
+#: application/templates/my.html:70
 msgid "Subscription to selected recipe successful."
 msgstr "Abonnement des ausgewählten Rezepts erfolgreich."
 
-#: application/templates/my.html:75
+#: application/templates/my.html:73
 msgid "Bookmarklet"
 msgstr "Lesezeichen"
 
-#: application/templates/my.html:79
+#: application/templates/my.html:77
 msgid "Send to Kindle"
 msgstr "An Kindle senden"
 
-#: application/templates/my.html:83
+#: application/templates/my.html:81
 msgid "Subscribe with KindleEar"
 msgstr "Mit KindleEar abonnieren"
 
-#: application/templates/my.html:86
+#: application/templates/my.html:84
 msgid "Drag and drop this link to your bookmarks"
 msgstr "Ziehen Sie diesen Link in Ihre Lesezeichen"
 
-#: application/templates/my.html:90
+#: application/templates/my.html:88
 msgid "Chrome extension"
 msgstr "Chrome-Erweiterung"
 
-#: application/templates/my.html:91
+#: application/templates/my.html:89
 msgid "Edge extension"
 msgstr "Edge-Erweiterung"
 
-#: application/templates/my.html:93
+#: application/templates/my.html:91
 msgid "Browser extensions also available"
 msgstr "Browser-Erweiterungen ebenfalls verfügbar"
 
@@ -1692,11 +1713,10 @@ msgstr "Passwort zurücksetzen"
 
 #: application/templates/settings.html:14
 #, python-brace-format
-msgid ""
-"Your account will pause after {0}, please log in again before it expires."
+msgid "Your account will pause after {0}, please log in again before it expires."
 msgstr ""
-"Ihr Konto wird nach {0} pausiert, bitte melden Sie sich vor Ablauf erneut "
-"an."
+"Ihr Konto wird nach {0} pausiert, bitte melden Sie sich vor Ablauf erneut"
+" an."
 
 #: application/templates/settings.html:23
 msgid "Base"
@@ -1886,8 +1906,8 @@ msgstr "Speicherort"
 #: application/templates/settings.html:257
 #, python-format
 msgid ""
-"Important: Please activate your kindle firstly, then goto %(personal)s Page "
-"and add %(sender)s to 'Approved Personal Document E-mail List'."
+"Important: Please activate your kindle firstly, then goto %(personal)s "
+"Page and add %(sender)s to 'Approved Personal Document E-mail List'."
 msgstr ""
 "Wichtig: Bitte aktivieren Sie zuerst Ihr Kindle, gehen Sie dann auf die "
 "%(personal)s-Seite und fügen Sie %(sender)s zur 'Genehmigten Liste der "
@@ -1900,11 +1920,11 @@ msgstr "Einstellungen für persönliche Dokumente"
 #: application/templates/settings.html:263
 #, python-format
 msgid ""
-"You have not yet set up your email address. Please go to the %(admin)s page "
-"to add your email address firstly."
+"You have not yet set up your email address. Please go to the %(admin)s "
+"page to add your email address firstly."
 msgstr ""
-"Sie haben Ihre E-Mail-Adresse noch nicht eingerichtet. Bitte gehen Sie auf "
-"die %(admin)s-Seite, um Ihre E-Mail-Adresse zuerst hinzuzufügen."
+"Sie haben Ihre E-Mail-Adresse noch nicht eingerichtet. Bitte gehen Sie "
+"auf die %(admin)s-Seite, um Ihre E-Mail-Adresse zuerst hinzuzufügen."
 
 #: application/templates/settings.html:271
 msgid "Send Test Email"
@@ -1950,57 +1970,63 @@ msgstr "Weiterleiten als Anhang"
 msgid "Word"
 msgstr "Wort"
 
-#: application/view/admin.py:51 application/view/adv.py:507
-#: application/view/adv.py:598 application/view/mcp.py:76
-#: application/view/settings.py:67 application/view/translator.py:91
-#: application/view/translator.py:175 application/view/translator.py:260
+#: application/view/admin.py:53 application/view/admin.py:277
+#: application/view/adv.py:507 application/view/adv.py:598
+#: application/view/mcp.py:76 application/view/settings.py:67
+#: application/view/translator.py:91 application/view/translator.py:175
+#: application/view/translator.py:260
 msgid "Settings Saved!"
 msgstr "Einstellungen gespeichert!"
 
-#: application/view/admin.py:60 application/view/admin.py:67
-#: application/view/admin.py:95
+#: application/view/admin.py:62 application/view/admin.py:69
+#: application/view/admin.py:97
 msgid "Add account"
 msgstr "Konto hinzufügen"
 
-#: application/view/admin.py:83 application/view/login.py:55
+#: application/view/admin.py:85 application/view/login.py:55
 #: application/view/login.py:246
 msgid "The username includes unsafe chars."
 msgstr "Der Benutzername enthält unsichere Zeichen."
 
-#: application/view/admin.py:87 application/view/login.py:248
+#: application/view/admin.py:89 application/view/login.py:248
 msgid "Already exist the username."
 msgstr "Der Benutzername existiert bereits."
 
-#: application/view/admin.py:92
+#: application/view/admin.py:94
 msgid "The password includes non-ascii chars."
 msgstr "Das Passwort enthält Nicht-ASCII-Zeichen."
 
-#: application/view/admin.py:111 application/view/admin.py:136
-#: application/view/admin.py:168 application/view/extension.py:32
+#: application/view/admin.py:113 application/view/admin.py:138
+#: application/view/admin.py:170 application/view/extension.py:32
 #: application/view/extension.py:61
 #, python-brace-format
 msgid "The username '{}' does not exist."
 msgstr "Der Benutzername '{}' existiert nicht."
 
-#: application/view/admin.py:127
+#: application/view/admin.py:129
 msgid "The password will not be changed if the fields are empties."
 msgstr "Das Passwort wird nicht geändert, wenn die Felder leer sind."
 
-#: application/view/admin.py:134 application/view/admin.py:190
+#: application/view/admin.py:136 application/view/admin.py:192
 msgid "Change"
 msgstr "Ändern"
 
-#: application/view/admin.py:187
+#: application/view/admin.py:189
 msgid "Change success."
 msgstr "Änderung erfolgreich."
 
-#: application/view/admin.py:200
+#: application/view/admin.py:202
 msgid "The old password is wrong."
 msgstr "Das alte Passwort ist falsch."
 
-#: application/view/admin.py:202
+#: application/view/admin.py:204
 msgid "Changes saved successfully."
 msgstr "Änderungen erfolgreich gespeichert."
+
+#: application/view/admin.py:275
+#, python-brace-format
+msgid "Cleared {} cached recipes."
+msgstr "{} zwischengespeicherte Rezepte gelöscht."
 
 #: application/view/adv.py:105
 msgid "The mail address is not in the whitelist."
@@ -2016,11 +2042,11 @@ msgstr "Die Hook-Datei ist zu groß."
 
 #: application/view/adv.py:120
 msgid ""
-"Failed to decode the file. Please ensure that your file is saved in utf-8 "
-"encoding."
+"Failed to decode the file. Please ensure that your file is saved in utf-8"
+" encoding."
 msgstr ""
-"Die Datei konnte nicht dekodiert werden. Bitte stellen Sie sicher, dass Ihre"
-" Datei in UTF-8-Kodierung gespeichert ist."
+"Die Datei konnte nicht dekodiert werden. Bitte stellen Sie sicher, dass "
+"Ihre Datei in UTF-8-Kodierung gespeichert ist."
 
 #: application/view/adv.py:125
 msgid "Failed to save the hook. Error:"
@@ -2123,8 +2149,8 @@ msgstr ""
 #: application/view/adv.py:680
 msgid "The Instapaper service encountered an error. Please try again later."
 msgstr ""
-"Der Instapaper-Dienst hat einen Fehler festgestellt. Bitte versuchen Sie es "
-"später erneut."
+"Der Instapaper-Dienst hat einen Fehler festgestellt. Bitte versuchen Sie "
+"es später erneut."
 
 #: application/view/adv.py:693
 #, python-brace-format
@@ -2154,9 +2180,9 @@ msgid "Cannot fetch data from {}, status: {}"
 msgstr "Daten von {} können nicht abgerufen werden, Status: {}"
 
 #: application/view/library.py:48 application/view/subscribe.py:241
-#: application/view/subscribe.py:246 application/view/subscribe.py:285
-#: application/view/subscribe.py:389 application/view/subscribe.py:418
-#: application/view/subscribe.py:425 application/view/translator.py:33
+#: application/view/subscribe.py:246 application/view/subscribe.py:286
+#: application/view/subscribe.py:390 application/view/subscribe.py:419
+#: application/view/subscribe.py:428 application/view/translator.py:33
 msgid "The recipe does not exist."
 msgstr "Das Rezept existiert nicht."
 
@@ -2184,8 +2210,8 @@ msgstr "Das Token ist falsch oder abgelaufen."
 #: application/view/login.py:175
 msgid "Please input the correct username and email to reset password."
 msgstr ""
-"Bitte geben Sie den richtigen Benutzernamen und die E-Mail-Adresse ein, um "
-"das Passwort zurückzusetzen."
+"Bitte geben Sie den richtigen Benutzernamen und die E-Mail-Adresse ein, "
+"um das Passwort zurückzusetzen."
 
 #: application/view/login.py:177
 #, python-brace-format
@@ -2195,8 +2221,8 @@ msgstr "Die E-Mail-Adresse des Kontos '{name}' lautet {email}."
 #: application/view/login.py:198
 msgid "Reset password success, Please close this page and login again."
 msgstr ""
-"Passwort zurückgesetzt, bitte schließen Sie diese Seite und melden Sie sich "
-"erneut an."
+"Passwort zurückgesetzt, bitte schließen Sie diese Seite und melden Sie "
+"sich erneut an."
 
 #: application/view/login.py:201
 msgid "The email you input is not associated with this account."
@@ -2221,8 +2247,8 @@ msgid ""
 "Failed to create an account. Please contact the administrator for "
 "assistance."
 msgstr ""
-"Kontoerstellung fehlgeschlagen. Bitte wenden Sie sich an den Administrator "
-"für Unterstützung."
+"Kontoerstellung fehlgeschlagen. Bitte wenden Sie sich an den "
+"Administrator für Unterstützung."
 
 #: application/view/login.py:260
 msgid "Successfully created account."
@@ -2234,8 +2260,7 @@ msgstr "KindleEar-Passwort zurücksetzen"
 
 #: application/view/login.py:272
 msgid "This is an automated email. Please do not reply to it."
-msgstr ""
-"Dies ist eine automatisierte E-Mail. Bitte antworten Sie nicht darauf."
+msgstr "Dies ist eine automatisierte E-Mail. Bitte antworten Sie nicht darauf."
 
 #: application/view/login.py:273
 msgid "You can click the following link to reset your KindleEar password."
@@ -2272,11 +2297,11 @@ msgstr "E-Book-Erstellung fehlgeschlagen."
 
 #: application/view/settings.py:132
 msgid ""
-"You have not yet set up your email address. Please go to the 'Account' page "
-"to add your email address firstly."
+"You have not yet set up your email address. Please go to the 'Account' "
+"page to add your email address firstly."
 msgstr ""
-"Sie haben Ihre E-Mail-Adresse noch nicht eingerichtet. Bitte gehen Sie zur "
-"Seite 'Konto', um Ihre E-Mail-Adresse hinzuzufügen."
+"Sie haben Ihre E-Mail-Adresse noch nicht eingerichtet. Bitte gehen Sie "
+"zur Seite 'Konto', um Ihre E-Mail-Adresse hinzuzufügen."
 
 #: application/view/settings.py:216
 msgid "English"
@@ -2554,7 +2579,7 @@ msgstr "Der Titel oder die URL ist leer."
 msgid "Failed to fetch the recipe."
 msgstr "Fehler beim Abrufen des Rezepts."
 
-#: application/view/subscribe.py:154 application/view/subscribe.py:338
+#: application/view/subscribe.py:154 application/view/subscribe.py:339
 msgid "Failed to save the recipe. Error:"
 msgstr "Fehler beim Speichern des Rezepts. Fehler:"
 
@@ -2562,16 +2587,17 @@ msgstr "Fehler beim Speichern des Rezepts. Fehler:"
 msgid "The Rss does not exist."
 msgstr "Der RSS-Feed existiert nicht."
 
-#: application/view/subscribe.py:283
+#: application/view/subscribe.py:284
 msgid "You can only delete the uploaded recipe."
 msgstr "Sie können nur das hochgeladene Rezept löschen."
 
-#: application/view/subscribe.py:290
+#: application/view/subscribe.py:291
 msgid "The recipe have been subscribed, please unsubscribe it before delete."
 msgstr ""
-"Das Rezept wurde abonniert, bitte kündigen Sie es ab, bevor Sie es löschen."
+"Das Rezept wurde abonniert, bitte kündigen Sie es ab, bevor Sie es "
+"löschen."
 
-#: application/view/subscribe.py:311 application/view/translator.py:54
+#: application/view/subscribe.py:312 application/view/translator.py:54
 #: application/view/translator.py:107 application/view/translator.py:120
 #: application/view/translator.py:143 application/view/translator.py:191
 #: application/view/translator.py:204 application/view/translator.py:233
@@ -2579,34 +2605,35 @@ msgstr ""
 msgid "This recipe has not been subscribed to yet."
 msgstr "Dieses Rezept wurde noch nicht abonniert."
 
-#: application/view/subscribe.py:325
+#: application/view/subscribe.py:326
 msgid "Can not read uploaded file, Error:"
 msgstr "Kann die hochgeladene Datei nicht lesen, Fehler:"
 
-#: application/view/subscribe.py:333
+#: application/view/subscribe.py:334
 msgid ""
 "Failed to decode the recipe. Please ensure that your recipe is saved in "
 "utf-8 encoding."
 msgstr ""
-"Fehler beim Dekodieren des Rezepts. Stellen Sie sicher, dass Ihr Rezept im "
-"UTF-8-Format gespeichert ist."
+"Fehler beim Dekodieren des Rezepts. Stellen Sie sicher, dass Ihr Rezept "
+"im UTF-8-Format gespeichert ist."
 
-#: application/view/subscribe.py:358
+#: application/view/subscribe.py:359
 msgid "Cannot find any subclass of BasicNewsRecipe."
 msgstr "Es konnte keine Unterklasse von BasicNewsRecipe gefunden werden."
 
-#: application/view/subscribe.py:363
+#: application/view/subscribe.py:364
 msgid "The recipe is already in the library."
 msgstr "Das Rezept ist bereits in der Bibliothek."
 
-#: application/view/subscribe.py:396
+#: application/view/subscribe.py:397
 msgid "The login information for this recipe has been cleared."
 msgstr "Die Anmeldeinformationen für dieses Rezept wurden gelöscht."
 
-#: application/view/subscribe.py:400
+#: application/view/subscribe.py:401
 msgid "The login information for this recipe has been saved."
 msgstr "Die Anmeldeinformationen für dieses Rezept wurden gespeichert."
 
 #: application/view/translator.py:84 application/view/translator.py:168
 msgid "The api key is required."
 msgstr "Der API-Schlüssel ist erforderlich."
+

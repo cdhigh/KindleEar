@@ -277,6 +277,24 @@ class UrlOpener:
     #别名函数
     submit_selected = submit
 
+    #兼容新版calibre recipe的submit_form(url, fields, submit=..., wait_for_url=..., timeout=...)
+    def submit_form(self, url=None, fields=None, submit=None, wait_for_url=None, timeout=None, nr=0, **kwargs):
+        if url:
+            resp = self.open(url, timeout=timeout or self.timeout)
+            if resp.status_code >= 400:
+                return resp
+
+        self.form = None
+        if fields:
+            keys = list(fields.keys())
+            self.select_form(predicate=lambda f: all(f.find_control(name=k) is not None for k in keys))
+        if not self.form:
+            self.select_form(nr=nr)
+        if self.form and fields:
+            for k, v in fields.items():
+                self.form[k] = v
+        return self.submit()
+
     #找到一个符合条件的url
     def find_link(self, text=None, text_regex=None, name=None, name_regex=None, url=None, 
         url_regex=None, tag=None, predicate=None, nr=0):
@@ -349,6 +367,22 @@ class UrlOpener:
         
     def set_simple_cookie(self, name, value, domain, path='/'):
         self.session.cookies.set(name, value, domain=domain, path=path) #type:ignore
+
+    #兼容calibre recipe调用br.cookies()获取cookie字典列表
+    def cookies(self):
+        if not self.session:
+            return []
+        return [
+            {
+                'name': c.name,
+                'value': c.value,
+                'domain': c.domain,
+                'path': c.path,
+                'secure': c.secure,
+                'expires': c.expires,
+            }
+            for c in self.session.cookies
+        ]
 
     def close(self):
         if self.session is not None:

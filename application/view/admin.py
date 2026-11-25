@@ -26,7 +26,8 @@ def Admin(user: KeUser):
         inviteCodes = AppInfo.get_value(AppInfo.inviteCodes, '')
         newUserAllowRecipeUpload = AppInfo.get_value(AppInfo.newUserAllowRecipeUpload, 'no')
         return render_template('admin.html', title='Account', tab='admin', users=users, adminName=adminName,
-            mailSrv=mailSrv, signupType=signupType, inviteCodes=inviteCodes, newUserAllowRecipeUpload=newUserAllowRecipeUpload, tips='')
+            mailSrv=mailSrv, signupType=signupType, inviteCodes=inviteCodes, newUserAllowRecipeUpload=newUserAllowRecipeUpload,
+            tips='', **_recipe_admin_ctx())
     else:
         return render_template('change_password.html', tips='', tab='admin', user=user, shareKey=user.share_links.get('key'))
 
@@ -48,7 +49,8 @@ def AdminPost(user: KeUser):
     AppInfo.set_value(AppInfo.newUserAllowRecipeUpload, newUserAllowRecipeUpload)
     users = sorted(KeUser.get_all(), key=attrgetter('created_time'))
     return render_template('admin.html', title='Account', tab='admin', users=users, adminName=adminName,
-            mailSrv=mailSrv, signupType=signupType, inviteCodes=inviteCodes, newUserAllowRecipeUpload=newUserAllowRecipeUpload, tips=_("Settings Saved!"))
+            mailSrv=mailSrv, signupType=signupType, inviteCodes=inviteCodes, newUserAllowRecipeUpload=newUserAllowRecipeUpload,
+            tips=_("Settings Saved!"), **_recipe_admin_ctx())
 
 #管理员添加一个账号
 @bpAdmin.route("/account/add", endpoint='AdminAddAccount')
@@ -225,3 +227,74 @@ def SyncSenderAddress(adminUser):
         if sm_service and sm_service.get('service', 'admin') == 'admin':
             user.set_cfg('sender', adminUser.cfg('email'))
             user.save()
+
+def _recipe_admin_ctx():
+    from ..lib.recipe_helper import BUILTIN_CACHE_TYPE, GetRecipesUpdateReport
+    autoUpdateRecipes = AppInfo.get_value(AppInfo.autoUpdateRecipes, '1')
+    lastRecipesUpdateTime = AppInfo.get_value(AppInfo.lastRecipesUpdateTime, '')
+    cachedRecipes = []
+    for r in sorted(Recipe.select().where(Recipe.type_ == BUILTIN_CACHE_TYPE), key=attrgetter('url')):
+        cachedRecipes.append({
+            'id': r.url,
+            'name': r.url[8:] if r.url.startswith('builtin:') else r.url,
+            'title': r.title or r.url,
+            'time': r.time.strftime('%Y-%m-%d %H:%M') if r.time else '',
+        })
+    return {
+        'autoUpdateRecipes': autoUpdateRecipes,
+        'lastRecipesUpdateTime': lastRecipesUpdateTime,
+        'cachedRecipesCount': len(cachedRecipes),
+        'cachedRecipes': cachedRecipes,
+        'lastRecipesUpdateReport': GetRecipesUpdateReport(),
+    }
+
+#管理员保存内置recipe自动更新设置或立即更新
+@bpAdmin.post("/admin/recipes", endpoint='AdminRecipesPost')
+@login_required()
+def AdminRecipesPost(user: KeUser):
+    adminName = app.config['ADMIN_NAME']
+    if user.name != adminName:
+        return redirect(url_for('bpAdmin.Admin'))
+
+    action = request.form.get('action', 'save')
+    rawFreq = (request.form.get('auto_update_recipes', '1') or '1').strip()
+    autoUpdateRecipes = str(int(rawFreq)) if rawFreq.isdigit() else '1'
+    AppInfo.set_value(AppInfo.autoUpdateRecipes, autoUpdateRecipes)
+
+    if action == 'update_now':
+        from ..lib.recipe_updater import UpdateSubscribedBuiltinRecipes
+        tips = UpdateSubscribedBuiltinRecipes(force=True)
+    elif action == 'clear_cache':
+        from ..lib.recipe_helper import BUILTIN_CACHE_TYPE, SaveRecipesUpdateReport, SyncBookedNeedsSubscription
+        cachedUrls = [r.url for r in Recipe.select().where(Recipe.type_ == BUILTIN_CACHE_TYPE)]
+        Recipe.delete().where(Recipe.type_ == BUILTIN_CACHE_TYPE).execute()
+        AppInfo.set_value(AppInfo.lastRecipesCommitSha, '')
+        AppInfo.set_value(AppInfo.lastRecipesUpdateTime, '')
+        SaveRecipesUpdateReport({})
+        SyncBookedNeedsSubscription(cachedUrls)
+        tips = _("Cleared {} cached recipes.").format(len(cachedUrls))
+    else:
+        tips = _("Settings Saved!")
+
+    users = sorted(KeUser.get_all(), key=attrgetter('created_time'))
+    mailSrv = AppInfo.get_value(AppInfo.newUserMailService, 'admin')
+    signupType = AppInfo.get_value(AppInfo.signupType, 'oneTimeCode')
+    inviteCodes = AppInfo.get_value(AppInfo.inviteCodes, '')
+    newUserAllowRecipeUpload = AppInfo.get_value(AppInfo.newUserAllowRecipeUpload, 'no')
+    return render_template('admin.html', title='Account', tab='admin', users=users, adminName=adminName,
+        mailSrv=mailSrv, signupType=signupType, inviteCodes=inviteCodes, newUserAllowRecipeUpload=newUserAllowRecipeUpload,
+        recipeTips=tips, tips='', **_recipe_admin_ctx())
+
+#定时任务(GAE cron / 外部触发)更新已订阅内置recipe
+@bpAdmin.route("/recipes/update", methods=['GET', 'POST'], endpoint='RecipesUpdate')
+def RecipesUpdateRoute():
+    isCron = request.headers.get('X-Appengine-Cron', '').lower() == 'true'
+    key = request.args.get('key', '') or request.form.get('key', '')
+    validKey = bool(app.config['DELIVERY_KEY'] and key == app.config['DELIVERY_KEY'])
+    loginUser = get_login_user()
+    isAdmin = bool(loginUser and loginUser.name == app.config['ADMIN_NAME'])
+    if not (isCron or validKey or isAdmin):
+        return 'Unauthorized', 403
+    from ..lib.recipe_updater import UpdateSubscribedBuiltinRecipes
+    force = request.args.get('force', '') == '1' or request.form.get('force', '') == '1'
+    return UpdateSubscribedBuiltinRecipes(force=force)

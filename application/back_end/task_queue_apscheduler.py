@@ -49,6 +49,16 @@ def remove_logs():
     from ..view.logs import RemoveLogs
     RemoveLogs()
 
+@scheduler.task('interval', id='update_recipes', days=1, misfire_grace_time=20*60, coalesce=True)
+def update_recipes():
+    from .db_models import connect_database, close_database
+    from ..lib.recipe_updater import UpdateSubscribedBuiltinRecipes
+    connect_database()
+    try:
+        UpdateSubscribedBuiltinRecipes()
+    finally:
+        close_database()
+
 def create_delivery_task(payload: dict):
     from ..work.worker import WorkerImpl
     userName = payload.get('userName', '')

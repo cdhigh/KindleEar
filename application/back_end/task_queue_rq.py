@@ -20,6 +20,7 @@ def init_task_queue_service(app):
     check_deliver.cron('40 */1 * * *', 'check_deliver') #type:ignore
     #每隔24小时执行一次
     remove_logs.cron('0 0 */1 * *', 'remove_logs') #type:ignore
+    update_recipes.cron('0 3 */1 * *', 'update_recipes') #type:ignore
     return rq
 
 @rq.job
@@ -31,6 +32,11 @@ def check_deliver():
 def remove_logs():
     from ..view.logs import RemoveLogs
     RemoveLogs()
+
+@rq.job
+def update_recipes():
+    from ..lib.recipe_updater import UpdateSubscribedBuiltinRecipes
+    UpdateSubscribedBuiltinRecipes()
 
 @rq.job
 def start_rq_worker_impl(**payload):

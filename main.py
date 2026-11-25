@@ -4,8 +4,8 @@
 # Visit <https://github.com/cdhigh/KindleEar> for the latest version
 # Author: cdhigh <https://github.com/cdhigh>
 
-__Version__ = '3.5.4'
-__BuildDate__ = '20261122'
+__Version__ = '3.6.0'
+__BuildDate__ = '20261125'
 
 import os, sys, builtins, logging
 from application.lib import clogging
@@ -71,6 +71,10 @@ def main():
             from application.view.logs import RemoveLogs
             print(RemoveLogs())
             return 0
+        elif (act == 'recipes') and (param == 'update'):
+            from application.lib.recipe_updater import UpdateSubscribedBuiltinRecipes
+            print(UpdateSubscribedBuiltinRecipes(force=True))
+            return 0
 
 
     print(f'\nKindleEar Application {appVer}')
@@ -80,6 +84,7 @@ def main():
     print('  deliver check\t    Start delivery if time set is matched')
     print('  deliver now  \t    Force start delivery task')
     print('  log purge    \t    remove logs older than one month')
+    print('  recipes update\t    Update subscribed builtin recipes')
     print('\n')
 
 if __name__ == "__main__":

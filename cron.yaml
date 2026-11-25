@@ -6,4 +6,8 @@ cron:
 - description: remove old logs
   url: /removelogs
   schedule: every 24 hours
+
+- description: update subscribed builtin recipes
+  url: /recipes/update
+  schedule: every 24 hours
   

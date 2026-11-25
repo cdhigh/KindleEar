@@ -46,6 +46,41 @@
     </fieldset>
   </form>
   {% endif %}
+  <form action="/admin/recipes" method="POST" class="pure-form pure-form-aligned">
+    {% if recipeTips -%}
+    <div class="notice-box error">{{recipeTips}}</div>
+    {% endif -%}
+    <fieldset>
+      <legend>{{_("Recipe auto-update")}}
+        <button type="submit" name="action" value="save" class="h3button" style="margin: 0 6px 0 20px; padding: 2px 16px;">{{_("Save")}}</button>
+        <button type="submit" name="action" value="update_now" class="h3button" style="margin: 0 6px; padding: 2px 16px;">{{_("Update now")}}</button>
+        <button type="submit" name="action" value="clear_cache" class="h3button" style="margin: 0 6px; padding: 2px 16px;">{{_("Clear cache")}}</button>
+      </legend>
+      <div class="pure-control-group">
+        <label for="auto_update_recipes">{{_("Frequency")}}</label>
+        <select class="pure-u-1 pure-u-sm-1-2" name="auto_update_recipes">
+          <option value="0" {% if autoUpdateRecipes == '0' %} selected="selected" {% endif %}>{{_("Disable")}}</option>
+          <option value="1" {% if autoUpdateRecipes == '1' %} selected="selected" {% endif %}>{{_("1 Day")}}</option>
+          <option value="7" {% if autoUpdateRecipes == '7' %} selected="selected" {% endif %}>{{_("7 Days")}}</option>
+        </select>
+      </div>
+      <div class="pure-control-group">
+        <label>{{_("Cached")}}</label>
+        <div class="pure-u-1 pure-u-sm-1-2" style="display:inline-block; vertical-align:top;">
+          <div>{{cachedRecipesCount or 0}}{% if lastRecipesUpdateTime %} ({{_("Last updated")}}: {{lastRecipesUpdateTime}} UTC){% endif %}</div>
+          {% if cachedRecipes -%}
+          <textarea readonly rows="{{ [cachedRecipes|length, 4]|min }}" style="width:100%; margin-top:4px; overflow-y:auto; resize:vertical; font-size:0.9em; line-height:1.4; color:#555;">{% for item in cachedRecipes %}{{item.name}} ({{item.time}}){% if not loop.last %}{{ '\n' }}{% endif %}{% endfor %}</textarea>
+          {% endif -%}
+        </div>
+      </div>
+      {% if lastRecipesUpdateReport and lastRecipesUpdateReport.get('failed') -%}
+      <div class="pure-control-group">
+        <label>{{_("Failed")}}</label>
+        <textarea readonly class="pure-u-1 pure-u-sm-1-2" rows="{{ [lastRecipesUpdateReport.get('failed')|length, 4]|min }}" style="overflow-y:auto; resize:vertical; font-size:0.9em; line-height:1.4; color:#555;">{% for err in lastRecipesUpdateReport.get('failed') %}{{err}}{% if not loop.last %}{{ '\n' }}{% endif %}{% endfor %}</textarea>
+      </div>
+      {% endif -%}
+    </fieldset>
+  </form>
   <div class="pure-form">
     <legend>{{_("Accounts")}} <a href='/account/add' class="h3button">{{_("Add")}}</a></legend>
     <table class="pure-table pure-table-horizontal usrtb" width="100%">

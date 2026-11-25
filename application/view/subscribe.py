@@ -4,14 +4,14 @@
 #管理订阅页面
 import datetime, json, re
 from urllib.parse import urljoin, unquote, quote
-from flask import Blueprint, render_template, request, redirect, url_for, current_app as app
+from flask import Blueprint, render_template, request, redirect, url_for, make_response, current_app as app
 from flask_babel import gettext as _
 from ..base_handler import *
 from ..back_end.db_models import *
 from ..back_end.task_queue_adpt import create_notifynewsubs_task
 from ..ke_utils import str_to_bool, xml_escape, utcnow
 from ..lib.urlopener import UrlOpener
-from ..lib.recipe_helper import GetBuiltinRecipeInfo, GetBuiltinRecipeSource
+from ..lib.recipe_helper import GetBuiltinRecipeInfo, GetBuiltinRecipeSource, CleanupUnusedBuiltinCache
 from .library import LIBRARY_MGR, SUBSCRIBED_FROM_LIBRARY, LIBRARY_GETSRC, buildKeUrl
 
 bpSubscribe = Blueprint('bpSubscribe', __name__)
@@ -273,6 +273,7 @@ def SubscribeRecipe(user: KeUser, recipeId: str, recipe: Recipe, separated: bool
 def UnsubscribeRecipe(user: KeUser, recipeId: str, recipe: Recipe):
     BookedRecipe.delete().where((BookedRecipe.user == user.name) & (BookedRecipe.recipe_id == recipeId)).execute()
     LastDelivered.delete().where((LastDelivered.user == user.name) & (LastDelivered.bookname == recipe.title)).execute()
+    CleanupUnusedBuiltinCache(recipeId)
     return {'status':'ok', 'id': recipeId, 'title': recipe.title, 'desc': recipe.description}
 
 #删除某个Recipe
@@ -420,6 +421,8 @@ def ViewRecipeSourceCode(id_: str, user: KeUser):
         recipe = GetBuiltinRecipeInfo(recipeId)
         src = GetBuiltinRecipeSource(recipeId)
         if recipe and src:
-            return htmlTpl.format(title=recipe.get('title'), body=xml_escape(src))
+            resp = make_response(htmlTpl.format(title=recipe.get('title'), body=xml_escape(src)))
+            resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+            return resp
         else:
             return htmlTpl.format(title="Error", body=_('The recipe does not exist.'))
