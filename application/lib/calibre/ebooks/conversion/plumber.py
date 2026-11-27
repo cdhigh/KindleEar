@@ -489,7 +489,9 @@ class Plumber:
             self.dump_oeb(self.oeb, out_dir)
             self.log.info('Structured HTML written to:{}'.format(out_dir))
 
-        if self.opts.extra_css and os.path.exists(self.opts.extra_css):
+        user = getattr(self.opts, 'user', None)
+        allow_local_css_file = bool(user and hasattr(user, 'is_admin') and user.is_admin())
+        if allow_local_css_file and self.opts.extra_css and os.path.exists(self.opts.extra_css):
             with open(self.opts.extra_css, 'rb') as f:
                 self.opts.extra_css = f.read().decode('utf-8')
 

@@ -7,7 +7,7 @@
 <form class="pure-form" action="" method="POST">
   <fieldset>
     {% if tips -%}
-    <div class="notice-box error">{{tips|safe}}</div>
+    <div class="notice-box error">{{tips}}</div>
     {% endif -%}
     <legend>{{_("Calibre Options")}}</legend>
     <p><small>{{_("Set the parameters for Calibre, in JSON dictionary format.")}}</small></p>

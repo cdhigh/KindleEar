@@ -12,7 +12,8 @@ from flask_babel import gettext as _
 from PIL import Image
 from ..base_handler import *
 from ..back_end.db_models import *
-from ..ke_utils import ke_decrypt, str_to_int, str_to_bool, safe_eval, xml_escape, xml_unescape
+from ..ke_utils import (ke_decrypt, str_to_int, str_to_bool, parse_calibre_options,
+    RESTRICTED_CALIBRE_OPTIONS, xml_escape, xml_unescape)
 from ..mail_hook import (get_mail_hook, get_mail_hook_filename, load_hook_payload, save_mail_hook,
     delete_mail_hook, compile_mail_hook, MAX_HOOK_FILE_SIZE)
 from ..lib.pocket import Pocket
@@ -583,21 +584,19 @@ def AdvCalibreOptions(user: KeUser):
 def AdvCalibreOptionsPost(user: KeUser):
     tips = ''
     txt = request.form.get('options', '').strip()
-    if txt: #兼容json和python的几个常量
-        txt = re.sub(r'\bnull\b', 'None', txt)
-        txt = re.sub(r'\btrue\b', 'True', txt)
-        txt = re.sub(r'\bfalse\b', 'False', txt)
-
     try:
-        options = safe_eval(txt) if txt else {}
-        if isinstance(options, dict):
-            custom = user.custom
-            custom['calibre_options'] = options
-            user.custom = custom
-            user.save()
-            tips = _("Settings Saved!")
-        else:
-            tips = _('The format is invalid.')
+        options = parse_calibre_options(txt)
+        if not user.is_admin():
+            forbidden = sorted(k for k in options if k in RESTRICTED_CALIBRE_OPTIONS)
+            if forbidden:
+                raise ValueError(f"Option not allowed: {', '.join(forbidden)}")
+        custom = user.custom
+        custom['calibre_options'] = options
+        user.custom = custom
+        user.save()
+        tips = _("Settings Saved!")
+    except ValueError as e:
+        tips = _('The format is invalid.') if str(e) == 'The format is invalid.' else str(e)
     except Exception as e:
         tips = str(e)
 

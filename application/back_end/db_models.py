@@ -167,10 +167,14 @@ class KeUser(MyBaseModel): # kindleEar User
         tm = datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=self.cfg('timezone'))))
         return tm.strftime(fmt) if fmt else tm
 
+    #判断当前用户是否为管理员
+    def is_admin(self) -> bool:
+        adminName = os.environ.get('ADMIN_NAME', 'admin')
+        return self.name == adminName
+
     #判断当前用户是否拥有上传/执行自定义Recipe代码的权限（管理员始终拥有，普通用户根据配置决定）
     def can_upload_recipe(self) -> bool:
-        adminName = os.environ.get('ADMIN_NAME', 'admin')
-        return (self.name == adminName) or bool(self.cfg('allow_recipe_upload', False))
+        return self.is_admin() or bool(self.cfg('allow_recipe_upload', False))
         
 #用户的一些二进制内容，比如封面之类的
 class UserBlob(MyBaseModel):

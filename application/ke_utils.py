@@ -2,29 +2,41 @@
 # -*- coding:utf-8 -*-
 #一些常用工具函数
 #Author: cdhigh <https://github.com/cdhigh>
-import os, sys, hashlib, base64, secrets, datetime, re, traceback
+import ast, os, sys, hashlib, base64, secrets, datetime, re, traceback, json
 from urllib.parse import urlparse
 
-#比较安全的eval
-#txt: 需要编译的字符串
-#gbl: 全局字典
-#local: 本地字典
+#非管理员禁止设置的危险Calibre参数（涉及服务器文件系统读写/删除、全局日志或内部对象覆盖）
+RESTRICTED_CALIBRE_OPTIONS = frozenset((
+    'debug_pipeline',
+    'extract_to',
+    'allow_local_files_outside_root',
+    'read_metadata_from_opf',
+    'cover',
+    'log_level',
+    'verbose',
+    'user',
+))
+
+#安全的字面量求值，仅支持Python基本字面量（替代历史eval实现，彻底避免代码注入）
 def safe_eval(txt, gbl=None, local=None):
-    gbl = gbl or {}
-    local = local or {}
-    code = compile(txt, '<user input>', 'eval')
-    reason = None
-    banned = ('eval', 'compile', 'exec', 'getattr', 'hasattr', 'setattr', 'delattr',
-        'classmethod', 'globals', 'help', 'input', 'isinstance', 'issubclass', 'locals',
-        'open', 'print', 'property', 'staticmethod', 'vars', 'os')
-    for name in code.co_names:
-        if re.search(r'^__\S*__$', name):
-            reason = 'dunder attributes not allowed' # pragma: no cover
-        elif name in banned:
-            reason = 'arbitrary code execution not allowed' # pragma: no cover
-        if reason:
-            raise NameError(f'{name} not allowed : {reason}') # pragma: no cover
-    return eval(code, gbl, local)
+    return ast.literal_eval(txt)
+
+#安全解析用户输入的Calibre JSON/字面量字典配置，绝不使用eval
+def parse_calibre_options(txt: str) -> dict:
+    txt = (txt or '').strip()
+    if not txt:
+        return {}
+    try:
+        options = json.loads(txt)
+    except json.JSONDecodeError:
+        options = ast.literal_eval(txt)
+    if not isinstance(options, dict):
+        raise ValueError('The format is invalid.')
+    if not all(isinstance(k, str) for k in options.keys()):
+        raise ValueError('All option keys must be strings.')
+    #校验结果可安全序列化为JSON（排除set/bytes等非JSON类型）
+    json.dumps(options)
+    return options
 
 #获取发生异常时的文件名和行号，添加到自定义错误信息后面
 #此函数必须要在异常后调用才有意义，否则只是简单的返回传入的参数
